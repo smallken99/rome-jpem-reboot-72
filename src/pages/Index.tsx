@@ -47,9 +47,48 @@ const FamilyStatistic: React.FC<FamilyStatisticProps> = ({
   );
 };
 
+// Définition des partis politiques
+const politicalParties = [
+  {
+    name: "Optimates",
+    description: "La Gens Aurelia est une famille traditionaliste et influente dans la faction des Optimates, défendant les intérêts de l'aristocratie romaine et s'opposant aux réformes populaires.",
+    icon: <Landmark className="h-6 w-6" />,
+    iconBgColor: "bg-rome-navy/10",
+    iconColor: "text-rome-navy",
+    active: true
+  },
+  {
+    name: "Populares",
+    description: "Les Populares prônent des réformes en faveur des plébéiens et cherchent à limiter l'influence du Sénat au profit des assemblées populaires.",
+    icon: <Users className="h-6 w-6" />,
+    iconBgColor: "bg-rome-terracotta/10",
+    iconColor: "text-rome-terracotta",
+    active: false
+  },
+  {
+    name: "Modéré",
+    description: "Les Modérés cherchent l'équilibre entre traditions aristocratiques et réformes progressistes, privilégiant le consensus et la stabilité politique.",
+    icon: <Shield className="h-6 w-6" />,
+    iconBgColor: "bg-rome-gold/10",
+    iconColor: "text-rome-gold/90",
+    active: false
+  },
+  {
+    name: "Non Alignés",
+    description: "Sans affiliation politique claire, ils votent selon leurs intérêts personnels ou familiaux plutôt que de suivre une idéologie spécifique.",
+    icon: <Flag className="h-6 w-6" />,
+    iconBgColor: "bg-gray-200",
+    iconColor: "text-gray-600",
+    active: false
+  }
+];
+
 const Index = () => {
   // Get current year from the time system
   const { year } = useTimeStore();
+  
+  // Trouver le parti politique actif
+  const activeParty = politicalParties.find(party => party.active) || politicalParties[0];
   
   return (
     <Layout>
@@ -97,13 +136,28 @@ const Index = () => {
               <h3 className="font-cinzel text-lg text-rome-navy">Parti politique</h3>
             </RomanCard.Header>
             <RomanCard.Content>
-              <FamilyStatistic 
-                icon={<Landmark className="h-6 w-6" />}
-                title="Optimates"
-                description="La Gens Aurelia est une famille traditionaliste et influente dans la faction des Optimates, défendant les intérêts de l'aristocratie romaine et s'opposant aux réformes populaires."
-                iconBgColor="bg-rome-navy/10"
-                iconColor="text-rome-navy"
-              />
+              <div className="space-y-4">
+                {/* Affichage du parti actif */}
+                <FamilyStatistic 
+                  icon={activeParty.icon}
+                  title={activeParty.name}
+                  description={activeParty.description}
+                  iconBgColor={activeParty.iconBgColor}
+                  iconColor={activeParty.iconColor}
+                />
+                
+                {/* Liste des autres partis */}
+                <div className="mt-4">
+                  <div className="text-sm text-muted-foreground mb-2">Autres affiliations politiques:</div>
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
+                    {politicalParties.filter(party => !party.active).map((party, index) => (
+                      <button key={index} className="text-xs py-1 px-2 border border-rome-gold/20 rounded hover:bg-rome-gold/5 transition-all">
+                        {party.name}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              </div>
             </RomanCard.Content>
           </RomanCard>
           
