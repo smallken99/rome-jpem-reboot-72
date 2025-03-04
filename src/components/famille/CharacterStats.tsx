@@ -14,15 +14,17 @@ export const CharacterStats: React.FC<CharacterStatsProps> = ({ stats, className
   return (
     <div className={cn("space-y-1", className)}>
       {stats.map((stat, index) => {
-        // Check if this is martial education stat and character is female
-        const isDisabledMartialStat = isFemale && stat.icon === 'martialEducation';
+        // For females: disable martial education and add piety bonus
+        // For males: no changes
+        const isDisabledStat = isFemale && stat.icon === 'martialEducation';
+        const shouldAddPietyBonus = isFemale && stat.icon === 'piety';
         
         return (
           <StatBar 
             key={index} 
             stat={stat} 
-            disabled={isDisabledMartialStat}
-            pietyBonus={isFemale && stat.icon === 'piety' ? 15 : undefined}
+            disabled={isDisabledStat}
+            pietyBonus={shouldAddPietyBonus ? 15 : undefined}
           />
         );
       })}

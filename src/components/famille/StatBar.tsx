@@ -55,8 +55,8 @@ const StatBar: React.FC<StatBarProps> = ({ stat, disabled = false, pietyBonus })
   
   // Calculate the total value including piety bonus if applicable
   const baseValue = stat.value;
-  const totalValue = pietyBonus ? Math.min(baseValue + pietyBonus, stat.maxValue) : baseValue;
-  const percentage = (totalValue / stat.maxValue) * 100;
+  const totalValue = pietyBonus && !disabled ? Math.min(baseValue + pietyBonus, stat.maxValue) : baseValue;
+  const percentage = disabled ? 0 : (totalValue / stat.maxValue) * 100;
 
   return (
     <div className="mb-3">
@@ -73,7 +73,7 @@ const StatBar: React.FC<StatBarProps> = ({ stat, disabled = false, pietyBonus })
           {disabled ? "N/A" : (
             <>
               {baseValue}
-              {pietyBonus && <span className="text-green-600">+{pietyBonus}</span>}
+              {pietyBonus && !disabled && <span className="text-green-600">+{pietyBonus}</span>}
               /{stat.maxValue}
             </>
           )}
@@ -82,12 +82,12 @@ const StatBar: React.FC<StatBarProps> = ({ stat, disabled = false, pietyBonus })
       <div className="h-2 bg-gray-200 rounded-full overflow-hidden">
         <div 
           className={cn("h-full rounded-full", colorClass)} 
-          style={{ width: disabled ? '0%' : `${percentage}%` }}
+          style={{ width: `${percentage}%` }}
         />
       </div>
       <p className="text-xs text-muted-foreground mt-1">
         {disabled ? "Non disponible pour les femmes romaines" : stat.description}
-        {pietyBonus && <span className="text-green-600 ml-1">(Bonus de piété: +{pietyBonus})</span>}
+        {pietyBonus && !disabled && <span className="text-green-600 ml-1">(Bonus de piété: +{pietyBonus})</span>}
       </p>
     </div>
   );
