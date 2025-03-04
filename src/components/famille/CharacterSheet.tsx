@@ -4,10 +4,11 @@ import { Character } from '@/types/character';
 import { CharacterStats } from './CharacterStats';
 import { RomanCard } from '@/components/ui-custom/RomanCard';
 import { Badge } from '@/components/ui/badge';
-import { Calendar, Crown, ShieldX, Camera, Edit, Check } from 'lucide-react';
+import { Calendar, Crown, ShieldX, Camera, Edit, Check, Scroll } from 'lucide-react';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { EducationSpecialties } from './education/components/EducationSpecialties';
 
 interface CharacterSheetProps {
   character: Character;
@@ -154,6 +155,9 @@ export const CharacterSheet: React.FC<CharacterSheetProps> = ({
                   {character.role}
                 </div>
               )}
+              
+              {/* Add Education Specialties Section */}
+              <EducationSpecialties education={character.education} />
             </div>
           </div>
           

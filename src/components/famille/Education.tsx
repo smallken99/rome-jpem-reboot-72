@@ -21,9 +21,14 @@ const MAX_POPULARITY = 100; // Unlimited in practice, but we set a high cap
 interface EducationProps {
   characters?: Character[];
   onNameChange?: (characterId: string, newName: string) => void;
+  onEducationChange?: (characterId: string, educationType: string, specialties: string[], mentor: string | null) => void;
 }
 
-export const Education: React.FC<EducationProps> = ({ characters = [], onNameChange }) => {
+export const Education: React.FC<EducationProps> = ({ 
+  characters = [], 
+  onNameChange,
+  onEducationChange 
+}) => {
   const [activeTab, setActiveTab] = useState("current");
   const [preceptors, setPreceptors] = useState<PreceptorsByType>({});
 

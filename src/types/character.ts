@@ -15,6 +15,12 @@ export interface CharacterStats {
   martialEducation: CharacterStat;
 }
 
+export interface EducationInfo {
+  type?: string;
+  specialties?: string[];
+  mentor?: string | null;
+}
+
 export interface Character {
   id: string;
   name: string;
@@ -25,4 +31,5 @@ export interface Character {
   role?: string;
   isPlayer?: boolean;
   stats: CharacterStats;
+  education?: EducationInfo;
 }
