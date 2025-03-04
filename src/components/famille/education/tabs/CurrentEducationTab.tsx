@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { TabsContent } from '@/components/ui/tabs';
-import { ChildEducationCard } from '../ChildEducationCard';
+import ChildEducationCard from '../ChildEducationCard';
 import { children } from '../EducationData';
 
 export const CurrentEducationTab: React.FC = () => {

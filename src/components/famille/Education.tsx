@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { EducationIntro } from './education/EducationIntro';
 import { EducationTabs } from './education/EducationTabs';
@@ -11,14 +12,23 @@ import {
   generateStatBonus
 } from './education/preceptorUtils';
 import { Preceptor, PreceptorsByType } from './education/types/educationTypes';
+import { Character } from '@/types/character';
 
 // Constants for the education system
 const MAX_STAT_VALUE_FROM_EDUCATION = 40;
 const MAX_POPULARITY = 100; // Unlimited in practice, but we set a high cap
 
-export const Education: React.FC = () => {
+interface EducationProps {
+  characters?: Character[];
+  onNameChange?: (characterId: string, newName: string) => void;
+}
+
+export const Education: React.FC<EducationProps> = ({ characters = [], onNameChange }) => {
   const [activeTab, setActiveTab] = useState("current");
   const [preceptors, setPreceptors] = useState<PreceptorsByType>({});
+
+  // Filter out only children (characters under 18)
+  const children = characters.filter(char => char.age < 18);
 
   // Generate random preceptors for each education path
   const generatePreceptors = () => {

@@ -2,10 +2,20 @@
 import React from 'react';
 
 interface CardActionsProps {
-  hasEducation: boolean;
+  educationType: string;
+  childId: string;
+  childGender: string;
+  childAge: number;
 }
 
-export const CardActions: React.FC<CardActionsProps> = ({ hasEducation }) => {
+export const CardActions: React.FC<CardActionsProps> = ({ 
+  educationType,
+  childId,
+  childGender,
+  childAge
+}) => {
+  const hasEducation = educationType !== 'none';
+  
   return (
     <div className="mt-4 flex justify-end gap-2">
       {hasEducation && (

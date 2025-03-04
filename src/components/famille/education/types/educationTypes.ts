@@ -24,7 +24,7 @@ export type ChildEducation = {
   statBonus?: number;
 };
 
-export type ChildProps = {
+export type Child = {
   id: string;
   name: string;
   age: number;

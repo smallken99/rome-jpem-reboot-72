@@ -5,27 +5,28 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Edit, Check } from 'lucide-react';
 
-interface ChildProps {
-  id: string;
-  name: string;
-  age: number;
-  gender: string;
-  educationType: string;
-}
-
 interface ChildHeaderProps {
-  child: ChildProps;
-  hasInvalidEducation: boolean;
+  child: {
+    id: string;
+    name: string;
+    age: number;
+    gender: string;
+    currentEducation?: {
+      type: string;
+    };
+  };
+  hasInvalidEducation?: boolean;
   onNameChange?: (childId: string, newName: string) => void;
 }
 
 export const ChildHeader: React.FC<ChildHeaderProps> = ({ 
   child, 
-  hasInvalidEducation,
+  hasInvalidEducation = false,
   onNameChange 
 }) => {
   const [isEditingName, setIsEditingName] = useState(false);
   const [nameValue, setNameValue] = useState(child.name);
+  const educationType = child.currentEducation?.type || 'none';
 
   // Handle name save
   const handleSaveName = () => {
@@ -46,7 +47,7 @@ export const ChildHeader: React.FC<ChildHeaderProps> = ({
   };
 
   return (
-    <div className="flex justify-between items-start">
+    <div className="flex justify-between items-start p-4 border-b border-muted">
       <div>
         {isEditingName ? (
           <div className="flex items-center gap-2">
@@ -68,7 +69,7 @@ export const ChildHeader: React.FC<ChildHeaderProps> = ({
           </div>
         ) : (
           <div className="flex items-center gap-2">
-            <h4 className="font-cinzel">{child.name}</h4>
+            <h4 className="font-cinzel text-lg">{child.name}</h4>
             {onNameChange && (
               <Button 
                 variant="ghost" 
@@ -86,10 +87,10 @@ export const ChildHeader: React.FC<ChildHeaderProps> = ({
         </p>
       </div>
       
-      {child.educationType !== 'none' ? (
+      {educationType !== 'none' ? (
         <div className={`flex items-center gap-1 px-2 py-1 ${hasInvalidEducation ? 'bg-red-100 text-red-700' : 'bg-rome-navy/10'} rounded text-xs`}>
-          {getEducationTypeIcon(child.educationType)}
-          <span>{getEducationTypeName(child.educationType)}</span>
+          {getEducationTypeIcon(educationType)}
+          <span>{getEducationTypeName(educationType)}</span>
           {hasInvalidEducation && <span className="text-xs text-red-600 ml-1">⚠️</span>}
         </div>
       ) : (

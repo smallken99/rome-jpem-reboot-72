@@ -10,11 +10,13 @@ import { Character } from '@/types/character';
 interface FamilySectionsProps {
   characters?: Character[];
   onChildBirth?: (child: Character) => void;
+  onNameChange?: (characterId: string, newName: string) => void;
 }
 
 export const FamilySections: React.FC<FamilySectionsProps> = ({ 
   characters = [], 
-  onChildBirth 
+  onChildBirth,
+  onNameChange
 }) => {
   return (
     <>
@@ -55,7 +57,10 @@ export const FamilySections: React.FC<FamilySectionsProps> = ({
           <h3 className="font-cinzel text-lg text-rome-navy">Éducation des Enfants</h3>
         </RomanCard.Header>
         <RomanCard.Content>
-          <Education />
+          <Education 
+            characters={characters}
+            onNameChange={onNameChange}
+          />
         </RomanCard.Content>
       </RomanCard>
     </>

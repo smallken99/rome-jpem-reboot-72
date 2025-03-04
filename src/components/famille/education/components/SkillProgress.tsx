@@ -3,13 +3,17 @@ import React from 'react';
 import { BookOpen } from 'lucide-react';
 
 interface SkillProgressProps {
-  baseProgress: number;
-  pityBonus: number;
-  hasInvalidEducation: boolean;
+  progress: number;
+  pityBonus?: number;
+  hasInvalidEducation?: boolean;
 }
 
-export const SkillProgress: React.FC<SkillProgressProps> = ({ baseProgress, pityBonus, hasInvalidEducation }) => {
-  const totalProgress = Math.min(baseProgress + pityBonus, 100); // Cap at 100%
+export const SkillProgress: React.FC<SkillProgressProps> = ({ 
+  progress, 
+  pityBonus = 0, 
+  hasInvalidEducation = false 
+}) => {
+  const totalProgress = Math.min(progress + pityBonus, 100); // Cap at 100%
   
   return (
     <div className="mt-3">
@@ -25,7 +29,7 @@ export const SkillProgress: React.FC<SkillProgressProps> = ({ baseProgress, pity
       </div>
       <div className="flex justify-between text-xs mt-1">
         <span>Débutant</span>
-        <span>{baseProgress}%{pityBonus > 0 && <span className="text-green-600"> (+{pityBonus}% piété)</span>}</span>
+        <span>{progress}%{pityBonus > 0 && <span className="text-green-600"> (+{pityBonus}% piété)</span>}</span>
         <span>Maître</span>
       </div>
       {pityBonus > 0 && (

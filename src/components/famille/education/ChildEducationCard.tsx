@@ -9,7 +9,7 @@ import { MentorInfo } from './components/MentorInfo';
 import { CardActions } from './components/CardActions';
 import { EducationWarning } from './components/EducationWarning';
 import { StatBonusInfo } from './components/StatBonusInfo';
-import { Child, ChildEducation } from './types/educationTypes';
+import { Child } from './types/educationTypes';
 
 interface ChildEducationCardProps {
   child: Child;
@@ -20,9 +20,16 @@ const ChildEducationCard: React.FC<ChildEducationCardProps> = ({ child, onChange
   // Determine if the child has an ongoing education
   const hasEducation = child.currentEducation?.type && child.currentEducation.type !== 'none';
   
+  // Check if female with military education (invalid in Roman times)
+  const hasInvalidEducation = child.gender === 'female' && child.currentEducation?.type === 'military';
+  
   return (
     <div className="rounded-lg border bg-card text-card-foreground shadow-sm overflow-hidden">
-      <ChildHeader child={child} onChangeName={onChangeName} />
+      <ChildHeader 
+        child={child} 
+        onNameChange={onChangeName}
+        hasInvalidEducation={hasInvalidEducation}
+      />
       
       <div className="p-4">
         {!hasEducation ? (
@@ -40,7 +47,12 @@ const ChildEducationCard: React.FC<ChildEducationCardProps> = ({ child, onChange
               />
             )}
             
-            <CardActions educationType="none" childId={child.id} childGender={child.gender} childAge={child.age} />
+            <CardActions 
+              educationType="none" 
+              childId={child.id} 
+              childGender={child.gender} 
+              childAge={child.age} 
+            />
           </div>
         ) : (
           <div className="space-y-4">
@@ -66,34 +78,35 @@ const ChildEducationCard: React.FC<ChildEducationCardProps> = ({ child, onChange
             
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <AnnualProgress 
-                  yearsCompleted={child.currentEducation.yearsCompleted} 
-                  totalYears={child.currentEducation.totalYears} 
+                {child.currentEducation.yearsCompleted !== undefined && 
+                 child.currentEducation.totalYears !== undefined && (
+                  <AnnualProgress 
+                    yearsCompleted={child.currentEducation.yearsCompleted} 
+                    totalYears={child.currentEducation.totalYears} 
+                  />
+                )}
+                
+                <MentorInfo 
+                  mentor={child.currentEducation.mentor} 
+                  skills={child.currentEducation.skills}
                 />
-                
-                <MentorInfo mentor={child.currentEducation.mentor} />
-                
-                <div className="mt-4">
-                  <h4 className="text-sm font-medium mb-2">Compétences acquises</h4>
-                  <ul className="space-y-1">
-                    {child.currentEducation.skills.map((skill, index) => (
-                      <li key={index} className="text-xs flex items-center gap-1.5">
-                        <Check className="h-3.5 w-3.5 text-green-500" />
-                        {skill}
-                      </li>
-                    ))}
-                  </ul>
-                </div>
               </div>
               
               <div>
-                <SkillProgress progress={child.currentEducation.progress} />
+                <SkillProgress 
+                  progress={child.currentEducation.progress}
+                  pityBonus={child.currentEducation.pityBonus}
+                  hasInvalidEducation={hasInvalidEducation}
+                />
                 
-                {child.currentEducation.pityBonus > 0 && (
+                {child.currentEducation.pityBonus !== undefined && child.currentEducation.pityBonus > 0 && (
                   <PietyBonus bonus={child.currentEducation.pityBonus} />
                 )}
                 
-                <StatBonusInfo educationType={child.currentEducation.type} />
+                <StatBonusInfo 
+                  educationType={child.currentEducation.type}
+                  statBonus={child.currentEducation.statBonus}
+                />
               </div>
             </div>
           </div>

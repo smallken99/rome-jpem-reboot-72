@@ -4,11 +4,14 @@ import { Award } from 'lucide-react';
 import { getRelatedStatName } from '../utils/educationUtils';
 
 interface StatBonusInfoProps {
-  statBonus: number;
   educationType: string;
+  statBonus?: number;
 }
 
-export const StatBonusInfo: React.FC<StatBonusInfoProps> = ({ statBonus, educationType }) => {
+export const StatBonusInfo: React.FC<StatBonusInfoProps> = ({ 
+  educationType, 
+  statBonus = 0 
+}) => {
   if (statBonus <= 0) return null;
   
   return (

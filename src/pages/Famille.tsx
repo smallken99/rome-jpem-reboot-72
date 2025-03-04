@@ -61,6 +61,13 @@ const Famille = () => {
   // Handler for adding a new child to the family
   const handleChildBirth = (newChild: Character) => {
     setLocalCharacters(prev => [...prev, newChild]);
+    
+    // Show success toast
+    toast({
+      title: "Naissance",
+      description: `${newChild.name} est né(e) dans votre famille!`,
+      duration: 3000,
+    });
   };
 
   // Handler for character name changes
@@ -121,6 +128,7 @@ const Famille = () => {
       <FamilySections 
         characters={localCharacters}
         onChildBirth={handleChildBirth}
+        onNameChange={handleNameChange}
       />
     </Layout>
   );
