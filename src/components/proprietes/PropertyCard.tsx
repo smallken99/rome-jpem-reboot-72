@@ -8,7 +8,9 @@ import {
   MapPin
 } from 'lucide-react';
 
-type PropertyType = 'villa' | 'insulae' | 'terres';
+// Update the PropertyType to include all used types in the application
+type PropertyType = 'villa' | 'insulae' | 'terres' | 'Résidence principale' | 'Immeuble de rapport' | 
+  'Résidence secondaire' | 'Commerces' | 'Villa agricole' | 'Exploitation viticole' | 'Exploitation oléicole';
 
 interface PropertyCardProps {
   name: string;
@@ -16,7 +18,8 @@ interface PropertyCardProps {
   value: string;
   type: PropertyType;
   status: string;
-  image: string;
+  image?: string;
+  imageUrl?: string; // Added to support current usage
 }
 
 export const PropertyCard: React.FC<PropertyCardProps> = ({ 
@@ -25,15 +28,26 @@ export const PropertyCard: React.FC<PropertyCardProps> = ({
   value, 
   type, 
   status,
-  image
+  image,
+  imageUrl
 }) => {
+  // Use imageUrl as fallback if image is not provided
+  const displayImage = image || imageUrl || '/placeholder.svg';
+
   const getIcon = () => {
-    switch (type) {
+    switch (type.toLowerCase()) {
       case 'villa':
+      case 'résidence principale':
+      case 'résidence secondaire':
+      case 'villa agricole':
         return <Home className="h-5 w-5" />;
       case 'insulae':
+      case 'immeuble de rapport':
+      case 'commerces':
         return <Building className="h-5 w-5" />;
       case 'terres':
+      case 'exploitation viticole':
+      case 'exploitation oléicole':
         return <LandPlot className="h-5 w-5" />;
       default:
         return <Building className="h-5 w-5" />;
@@ -42,12 +56,17 @@ export const PropertyCard: React.FC<PropertyCardProps> = ({
 
   const getStatusColor = () => {
     switch (status.toLowerCase()) {
+      case 'excellent':
       case 'excellente':
         return 'text-green-600';
+      case 'bon':
       case 'bonne':
+      case 'très bon':
         return 'text-green-500';
+      case 'moyen':
       case 'moyenne':
         return 'text-yellow-500';
+      case 'mauvais':
       case 'mauvaise':
         return 'text-red-500';
       default:
@@ -59,7 +78,7 @@ export const PropertyCard: React.FC<PropertyCardProps> = ({
     <div className="rounded-md overflow-hidden border border-rome-gold/30 hover:border-rome-gold transition-all bg-white/90">
       <div className="relative h-40 bg-gray-200">
         <img 
-          src={image} 
+          src={displayImage} 
           alt={name} 
           className="w-full h-full object-cover"
         />
