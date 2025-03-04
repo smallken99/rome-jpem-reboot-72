@@ -1,6 +1,7 @@
 
 import { Character } from '@/types/character';
 import { romanNamePrefixes, romanNameSuffixes } from '@/components/famille/education/EducationData';
+import { Season } from '@/utils/timeSystem';
 
 // Constants for birth system
 const BIRTH_CHANCE_PER_YEAR = 0.2; // 20% chance per year for a birth
@@ -12,10 +13,18 @@ const MAX_PATERNAL_AGE = 60;
 // Gender distribution (slightly more males due to Roman preference)
 const MALE_CHANCE = 0.55;
 
+// Seasonal birth rate modifiers
+const SEASONAL_BIRTH_MODIFIERS: Record<Season, number> = {
+  'Ver': 0.05,      // Spring: +5% birth chance (fertility season)
+  'Aestas': 0.02,   // Summer: +2% birth chance
+  'Autumnus': -0.02, // Autumn: -2% birth chance
+  'Hiems': -0.05    // Winter: -5% birth chance (harsh conditions)
+};
+
 /**
  * Determines if a birth occurs for a married couple
  */
-export const checkForBirth = (wife: Character): boolean => {
+export const checkForBirth = (wife: Character, season: Season): boolean => {
   if (wife.age < MIN_MATERNAL_AGE || wife.age > MAX_MATERNAL_AGE) {
     return false;
   }
@@ -27,6 +36,12 @@ export const checkForBirth = (wife: Character): boolean => {
   } else if (wife.age > 35) {
     adjustedChance -= 0.1;
   }
+  
+  // Apply seasonal modifier
+  adjustedChance += SEASONAL_BIRTH_MODIFIERS[season];
+  
+  // Ensure chance is within reasonable bounds
+  adjustedChance = Math.max(0.05, Math.min(0.5, adjustedChance));
   
   return Math.random() < adjustedChance;
 };

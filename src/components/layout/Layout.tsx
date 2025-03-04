@@ -4,6 +4,7 @@ import { useLocation, Link } from 'react-router-dom';
 import { Laurels } from '../ui-custom/Laurels';
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Toaster } from "@/components/ui/sonner";
+import { TimePanel } from '@/components/time/TimePanel';
 import { 
   Home, 
   Users, 
@@ -97,6 +98,10 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
       <Navigation />
       
       <main className="flex-1 p-4 md:p-6 pt-24 md:pt-8 max-w-7xl mx-auto w-full">
+        <div className="mb-6">
+          <TimePanel />
+        </div>
+        
         <div className="animate-fade-up">
           {children}
         </div>

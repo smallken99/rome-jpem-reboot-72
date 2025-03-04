@@ -1,10 +1,11 @@
 
 import React, { useState, useEffect } from 'react';
 import { AllianceItem } from '../features/AllianceItem';
-import { Baby, Calendar } from 'lucide-react';
+import { Baby, Calendar, Clock } from 'lucide-react';
 import { useToast } from '@/components/ui/use-toast';
 import { checkForBirth, generateChild } from './utils/birthSystem';
 import { Character } from '@/types/character';
+import { useTimeStore, useTimeEvents } from '@/utils/timeSystem';
 
 // Marriage alliances data that matches the characters data
 const alliances = [
@@ -39,18 +40,17 @@ export const MarriageAlliances: React.FC<MarriageAlliancesProps> = ({
   characters, 
   onChildBirth 
 }) => {
-  const [currentYear, setCurrentYear] = useState<number>(705); // Starting year (AUC - Ab Urbe Condita)
   const [lastBirthYear, setLastBirthYear] = useState<number>(0);
   const { toast } = useToast();
+  
+  // Get current time from the store
+  const { year, season, dayInSeason, formatDate } = useTimeStore();
   
   // Filter alliances to only show active ones
   const activeAlliances = alliances.filter(alliance => alliance.status === 'actif');
   
-  // Function to simulate the passage of time and check for births
-  const advanceYear = () => {
-    // Increment game year
-    setCurrentYear(prev => prev + 1);
-    
+  // Function to check for births
+  const checkForBirths = () => {
     // Check each active alliance for potential births
     activeAlliances.forEach(alliance => {
       // Find the characters in this alliance
@@ -58,8 +58,8 @@ export const MarriageAlliances: React.FC<MarriageAlliancesProps> = ({
       const wife = characters.find(char => char.name === alliance.spouse);
       
       if (husband && wife) {
-        // Check if a birth occurs
-        if (checkForBirth(wife)) {
+        // Check if a birth occurs, passing the current season
+        if (checkForBirth(wife, season)) {
           // Generate a child
           const newChild = generateChild(husband, wife);
           
@@ -69,7 +69,7 @@ export const MarriageAlliances: React.FC<MarriageAlliancesProps> = ({
           }
           
           // Update the last birth year
-          setLastBirthYear(currentYear);
+          setLastBirthYear(year);
           
           // Show a toast notification
           toast({
@@ -82,17 +82,26 @@ export const MarriageAlliances: React.FC<MarriageAlliancesProps> = ({
     });
   };
 
-  // Set up an automatic year advancement - this could be triggered by a game clock
-  // or other in-game events instead of a fixed interval
+  // Set up time event listeners
+  const { advanceTime } = useTimeEvents(
+    undefined, // No special day event
+    undefined, // No special season event
+    () => {
+      // Year change event - check for births
+      checkForBirths();
+    }
+  );
+
+  // Set up automatic time advancement (for demonstration)
   useEffect(() => {
-    // For demo purposes, we're using a timer to advance years automatically
-    // In a real game, this would be tied to the game's time system
-    const yearTimer = setInterval(() => {
-      advanceYear();
-    }, 60000); // Advance a year every 60 seconds (for demonstration)
+    // For demo purposes, we're advancing time every 15 seconds
+    // In a real game, this might be tied to game actions or a play/pause system
+    const timeAdvanceInterval = setInterval(() => {
+      advanceTime();
+    }, 15000); // Advance time every 15 seconds
     
-    return () => clearInterval(yearTimer);
-  }, [characters]);
+    return () => clearInterval(timeAdvanceInterval);
+  }, [advanceTime]);
   
   return (
     <div className="marriage-alliances">
@@ -104,16 +113,22 @@ export const MarriageAlliances: React.FC<MarriageAlliancesProps> = ({
       </div>
       
       <div className="flex justify-between items-center mb-4">
-        <div className="text-sm text-muted-foreground flex items-center gap-2">
-          <Calendar className="h-4 w-4" />
-          <span>Année courante: {currentYear} AUC</span>
+        <div className="text-sm text-muted-foreground flex items-center gap-3">
+          <div className="flex items-center gap-1">
+            <Calendar className="h-4 w-4" />
+            <span>{formatDate()}</span>
+          </div>
+          <div className="flex items-center gap-1">
+            <Clock className="h-4 w-4" />
+            <span>Saison: {season}</span>
+          </div>
         </div>
       </div>
       
       {lastBirthYear > 0 && (
         <div className="p-2 mb-4 bg-blue-50 rounded-md flex items-center gap-2 text-sm text-blue-700">
           <Baby className="h-4 w-4" />
-          <span>Dernière naissance: {currentYear - lastBirthYear} an(s)</span>
+          <span>Dernière naissance: {year - lastBirthYear} an(s)</span>
         </div>
       )}
       
