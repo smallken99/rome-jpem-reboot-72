@@ -1,7 +1,6 @@
 
-import React, { useState } from 'react';
-import { Sword, Building, ScrollText, ShieldQuestion, ChevronDown, ChevronUp, CalendarRange } from 'lucide-react';
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
+import React from 'react';
+import { Sword, Building, ScrollText, ShieldQuestion } from 'lucide-react';
 
 interface AnnualCurriculum {
   year: number;
@@ -26,8 +25,6 @@ interface EducationPathCardProps {
 }
 
 export const EducationPathCard: React.FC<EducationPathCardProps> = ({ path }) => {
-  const [showCurriculum, setShowCurriculum] = useState(false);
-
   const getSuitabilityText = (suitableFor: string) => {
     switch(suitableFor) {
       case 'both':
@@ -89,39 +86,6 @@ export const EducationPathCard: React.FC<EducationPathCardProps> = ({ path }) =>
       <div className="text-xs bg-green-50 p-2 mt-2 rounded text-green-700">
         <span className="font-medium">Bonus après validation:</span> {getStatBonusDescription(path.relatedStat)}
       </div>
-      
-      <Collapsible
-        open={showCurriculum}
-        onOpenChange={setShowCurriculum}
-        className="mt-3 pt-3 border-t border-muted"
-      >
-        <CollapsibleTrigger className="flex w-full items-center justify-between text-sm font-medium">
-          <span className="flex items-center gap-1">
-            <CalendarRange className="h-4 w-4" />
-            Programme Annuel
-          </span>
-          {showCurriculum ? (
-            <ChevronUp className="h-4 w-4" />
-          ) : (
-            <ChevronDown className="h-4 w-4" />
-          )}
-        </CollapsibleTrigger>
-        
-        <CollapsibleContent className="pt-2">
-          {path.annualCurriculum.map((year) => (
-            <div key={year.year} className="mb-3 last:mb-0">
-              <div className="bg-muted rounded p-2">
-                <p className="font-medium text-xs">Année {year.year}: {year.name}</p>
-                <ul className="mt-1 ml-4 list-disc text-xs">
-                  {year.skills.map((skill, idx) => (
-                    <li key={idx}>{skill}</li>
-                  ))}
-                </ul>
-              </div>
-            </div>
-          ))}
-        </CollapsibleContent>
-      </Collapsible>
       
       <div className="mt-4 flex justify-end">
         <button className="roman-btn-outline text-xs">
