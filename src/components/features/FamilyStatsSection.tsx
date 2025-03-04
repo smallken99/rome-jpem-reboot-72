@@ -9,7 +9,7 @@ export const FamilyStatsSection: React.FC = () => {
       <StatBox 
         title="Influence Sénatoriale" 
         value="72/100" 
-        description="Progression mensuelle stable"
+        description="Classement des familles les plus puissantes"
         icon={<Award className="h-5 w-5" />}
         trend="up"
         trendValue="+3"
