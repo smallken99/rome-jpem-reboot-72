@@ -97,9 +97,12 @@ const ChildEducationCard: React.FC<ChildEducationCardProps> = ({ child, onChange
                   progress={child.currentEducation.progress}
                   pityBonus={child.currentEducation.pityBonus}
                   hasInvalidEducation={hasInvalidEducation}
+                  gender={child.gender}
                 />
                 
-                {child.currentEducation.pityBonus !== undefined && child.currentEducation.pityBonus > 0 && (
+                {child.currentEducation.pityBonus !== undefined && 
+                 child.currentEducation.pityBonus > 0 && 
+                 child.gender === 'female' && (
                   <PietyBonus bonus={child.currentEducation.pityBonus} />
                 )}
                 

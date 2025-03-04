@@ -6,14 +6,18 @@ interface SkillProgressProps {
   progress: number;
   pityBonus?: number;
   hasInvalidEducation?: boolean;
+  gender?: string;
 }
 
 export const SkillProgress: React.FC<SkillProgressProps> = ({ 
   progress, 
   pityBonus = 0, 
-  hasInvalidEducation = false 
+  hasInvalidEducation = false,
+  gender = 'male'
 }) => {
-  const totalProgress = Math.min(progress + pityBonus, 100); // Cap at 100%
+  // Only apply piety bonus if the character is female
+  const shouldApplyPietyBonus = gender === 'female' && pityBonus > 0;
+  const totalProgress = Math.min(progress + (shouldApplyPietyBonus ? pityBonus : 0), 100); // Cap at 100%
   
   return (
     <div className="mt-3">
@@ -29,10 +33,10 @@ export const SkillProgress: React.FC<SkillProgressProps> = ({
       </div>
       <div className="flex justify-between text-xs mt-1">
         <span>Débutant</span>
-        <span>{progress}%{pityBonus > 0 && <span className="text-green-600"> (+{pityBonus}% piété)</span>}</span>
+        <span>{progress}%{shouldApplyPietyBonus && <span className="text-green-600"> (+{pityBonus}% piété)</span>}</span>
         <span>Maître</span>
       </div>
-      {pityBonus > 0 && (
+      {shouldApplyPietyBonus && (
         <p className="text-xs text-green-600 mt-1">
           Le bonus de piété accélère l'acquisition des compétences.
         </p>
