@@ -8,6 +8,7 @@ import Index from "./pages/Index";
 import Famille from "./pages/Famille";
 import Proprietes from "./pages/Proprietes";
 import Economie from "./pages/Economie";
+import Clientele from "./pages/Clientele";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -23,7 +24,7 @@ const App = () => (
           <Route path="/famille" element={<Famille />} />
           <Route path="/proprietes" element={<Proprietes />} />
           <Route path="/economie" element={<Economie />} />
-          <Route path="/clientele" element={<NotFound />} />
+          <Route path="/clientele" element={<Clientele />} />
           <Route path="/evenements" element={<NotFound />} />
           <Route path="/messages" element={<NotFound />} />
           <Route path="/rapports" element={<NotFound />} />
