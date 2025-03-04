@@ -6,7 +6,6 @@ import { characters } from '@/data/characters';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/components/ui/use-toast';
 import { RomanCard } from '@/components/ui-custom/RomanCard';
-import { Character } from '@/types/character';
 
 // Function to calculate dowry value based on age and other factors
 const calculateDowryValue = (heir: {
@@ -124,20 +123,23 @@ export const Inheritance: React.FC = () => {
             <h3 className="font-cinzel text-lg">Membres Féminins (non éligibles à l'héritage principal)</h3>
           </div>
           
-          {characters
-            .filter(char => char.gender === 'female' && char.role?.toLowerCase().includes('fille'))
-            .map(female => (
-              <FemaleCard key={female.id} female={female} />
-            ))}
+          {characters.filter(char => char.gender === 'female' && char.role?.toLowerCase().includes('fille')).map(female => (
+            <FemaleCard key={female.id} female={female} />
+          ))}
         </div>
       </div>
     </div>
   );
 };
 
-// Heir card props with explicit types matching Character interface
 interface HeirCardProps {
-  heir: Character;
+  heir: {
+    id: string;
+    name: string;
+    role?: string;
+    gender: 'male' | 'female';
+    age: number;
+  };
   isSelected: boolean;
   onSelect: (heirId: string) => void;
 }
@@ -196,9 +198,15 @@ const HeirCard: React.FC<HeirCardProps> = ({ heir, isSelected, onSelect }) => {
   );
 };
 
-// Female card props with Character interface
+// New component for female family members
 interface FemaleCardProps {
-  female: Character;
+  female: {
+    id: string;
+    name: string;
+    role?: string;
+    gender: 'female';
+    age: number;
+  };
 }
 
 const FemaleCard: React.FC<FemaleCardProps> = ({ female }) => {
