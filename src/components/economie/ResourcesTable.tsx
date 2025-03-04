@@ -14,49 +14,49 @@ export const ResourcesTable: React.FC = () => {
     { 
       name: 'Or', 
       quantity: '12 livres', 
-      value: '30,000 Sesterces',
+      value: '30,000 As',
       location: 'Coffre personnel',
       trend: 'up'
     },
     { 
       name: 'Argent', 
       quantity: '45 livres', 
-      value: '22,500 Sesterces',
+      value: '22,500 As',
       location: 'Coffre personnel',
       trend: 'up'
     },
     { 
       name: 'Blé', 
       quantity: '1,200 modii', 
-      value: '24,000 Sesterces',
+      value: '24,000 As',
       location: 'Greniers de Campanie',
       trend: 'up'
     },
     { 
       name: 'Vin', 
       quantity: '80 amphores', 
-      value: '16,000 Sesterces',
+      value: '16,000 As',
       location: 'Cave de la Villa Aurelia',
       trend: 'neutral'
     },
     { 
       name: 'Huile d\'olive', 
       quantity: '50 amphores', 
-      value: '12,500 Sesterces',
+      value: '12,500 As',
       location: 'Entrepôt d\'Ostie',
       trend: 'up'
     },
     { 
       name: 'Tissu de luxe', 
       quantity: '20 rouleaux', 
-      value: '10,000 Sesterces',
+      value: '10,000 As',
       location: 'Villa Aurelia',
       trend: 'down'
     },
     { 
       name: 'Marbre', 
       quantity: '15 blocs', 
-      value: '30,000 Sesterces',
+      value: '30,000 As',
       location: 'Carrière de Carrare',
       trend: 'neutral'
     },
@@ -125,7 +125,7 @@ export const ResourcesTable: React.FC = () => {
         <tfoot>
           <tr className="bg-rome-gold/20 font-semibold">
             <td colSpan={2} className="p-4 text-right font-cinzel">Valeur totale:</td>
-            <td className="p-4 font-bold">145,000 Sesterces</td>
+            <td className="p-4 font-bold">145,000 As</td>
             <td colSpan={3}></td>
           </tr>
         </tfoot>

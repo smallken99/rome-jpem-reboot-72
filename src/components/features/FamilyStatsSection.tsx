@@ -17,7 +17,7 @@ export const FamilyStatsSection: React.FC = () => {
       />
       <StatBox 
         title="Richesse Apparente" 
-        value="3,450,000 Sesterces" 
+        value="3,450,000 As" 
         description="Aucun changement significatif"
         icon={<Coins className="h-5 w-5" />}
         trend="neutral"

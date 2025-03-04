@@ -9,35 +9,35 @@ export const TaxTable: React.FC = () => {
       name: 'Tributum', 
       description: 'Impôt sur la propriété foncière', 
       rate: '1%', 
-      amount: '42,500 Sesterces',
+      amount: '42,500 As',
       dueDate: 'Calendes de Mars'
     },
     { 
       name: 'Portorium', 
       description: 'Taxes douanières sur le commerce', 
       rate: '2.5%', 
-      amount: '15,000 Sesterces',
+      amount: '15,000 As',
       dueDate: 'Calendes de Juin'
     },
     { 
       name: 'Vicesima libertatis', 
       description: 'Taxe sur l\'affranchissement des esclaves', 
       rate: '5%', 
-      amount: '8,000 Sesterces',
+      amount: '8,000 As',
       dueDate: 'Calendes de Septembre'
     },
     { 
       name: 'Scriptura', 
       description: 'Taxe sur les pâturages publics', 
       rate: '3%', 
-      amount: '12,000 Sesterces',
+      amount: '12,000 As',
       dueDate: 'Calendes de Décembre'
     },
     { 
       name: 'Contributions spéciales', 
       description: 'Financement de la campagne militaire en Hispanie', 
       rate: 'Fixe', 
-      amount: '10,000 Sesterces',
+      amount: '10,000 As',
       dueDate: 'Ides de Juillet'
     },
   ];
@@ -81,7 +81,7 @@ export const TaxTable: React.FC = () => {
         <tfoot>
           <tr className="bg-rome-gold/20 font-semibold">
             <td colSpan={3} className="p-4 text-right font-cinzel">Total:</td>
-            <td className="p-4 font-bold">87,500 Sesterces</td>
+            <td className="p-4 font-bold">87,500 As</td>
             <td colSpan={2}></td>
           </tr>
         </tfoot>

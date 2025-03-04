@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { ScrollText, Home, Coins, User } from 'lucide-react';
 import { Separator } from '@/components/ui/separator';

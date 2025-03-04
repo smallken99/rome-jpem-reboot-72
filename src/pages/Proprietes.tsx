@@ -66,7 +66,7 @@ const Proprietes = () => {
                   name="Domus du Palatin"
                   type="Résidence principale"
                   location="Rome, Colline du Palatin"
-                  value="1,200,000 sesterces"
+                  value="1,200,000 As"
                   status="Excellent"
                   imageUrl="/placeholder.svg"
                 />
@@ -74,7 +74,7 @@ const Proprietes = () => {
                   name="Insula de Subure"
                   type="Immeuble de rapport"
                   location="Rome, Quartier de Subure"
-                  value="600,000 sesterces"
+                  value="600,000 As"
                   status="Bon"
                   imageUrl="/placeholder.svg"
                 />
@@ -82,7 +82,7 @@ const Proprietes = () => {
                   name="Villa d'Ostie"
                   type="Résidence secondaire"
                   location="Ostie"
-                  value="850,000 sesterces"
+                  value="850,000 As"
                   status="Très bon"
                   imageUrl="/placeholder.svg"
                 />
@@ -90,7 +90,7 @@ const Proprietes = () => {
                   name="Boutiques du Forum"
                   type="Commerces"
                   location="Rome, Forum Romain"
-                  value="450,000 sesterces"
+                  value="450,000 As"
                   status="Bon"
                   imageUrl="/placeholder.svg"
                 />
@@ -98,7 +98,7 @@ const Proprietes = () => {
                   name="Insula du Champ de Mars"
                   type="Immeuble de rapport"
                   location="Rome, Champ de Mars"
-                  value="580,000 sesterces"
+                  value="580,000 As"
                   status="Moyen"
                   imageUrl="/placeholder.svg"
                 />
@@ -116,7 +116,7 @@ const Proprietes = () => {
                   name="Domaine de Campanie"
                   type="Villa agricole"
                   location="Campanie"
-                  value="900,000 sesterces"
+                  value="900,000 As"
                   status="Excellent"
                   imageUrl="/placeholder.svg"
                 />
@@ -124,7 +124,7 @@ const Proprietes = () => {
                   name="Vignobles du Latium"
                   type="Exploitation viticole"
                   location="Latium"
-                  value="750,000 sesterces"
+                  value="750,000 As"
                   status="Très bon"
                   imageUrl="/placeholder.svg"
                 />
@@ -132,7 +132,7 @@ const Proprietes = () => {
                   name="Oliveraies d'Étrurie"
                   type="Exploitation oléicole"
                   location="Étrurie"
-                  value="680,000 sesterces"
+                  value="680,000 As"
                   status="Bon"
                   imageUrl="/placeholder.svg"
                 />
@@ -150,35 +150,35 @@ const Proprietes = () => {
                   name="Blé"
                   production="120 modii/mois"
                   location="Domaine de Campanie"
-                  value="24,000 sesterces/an"
+                  value="24,000 As/an"
                   trend="stable"
                 />
                 <ResourceCard
                   name="Vin"
                   production="80 amphores/mois"
                   location="Vignobles du Latium"
-                  value="48,000 sesterces/an"
+                  value="48,000 As/an"
                   trend="hausse"
                 />
                 <ResourceCard
                   name="Huile d'olive"
                   production="60 amphores/mois"
                   location="Oliveraies d'Étrurie"
-                  value="36,000 sesterces/an"
+                  value="36,000 As/an"
                   trend="hausse"
                 />
                 <ResourceCard
                   name="Laine"
                   production="200 kg/mois"
                   location="Domaine d'Apulie"
-                  value="15,000 sesterces/an"
+                  value="15,000 As/an"
                   trend="stable"
                 />
                 <ResourceCard
                   name="Bois"
                   production="30 tonnes/mois"
                   location="Forêts d'Étrurie"
-                  value="18,000 sesterces/an"
+                  value="18,000 As/an"
                   trend="baisse"
                 />
               </div>

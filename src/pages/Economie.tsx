@@ -1,4 +1,3 @@
-
 import React from 'react';
 import Layout from '@/components/layout/Layout';
 import { PageHeader } from '@/components/ui-custom/PageHeader';
@@ -31,7 +30,7 @@ const Economie = () => {
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
         <StatBox 
           title="Revenus mensuels" 
-          value="125,000 sesterces" 
+          value="125,000 As" 
           description="En hausse ce trimestre"
           icon={<TrendingUp className="h-6 w-6" />}
           trend="up"
@@ -39,7 +38,7 @@ const Economie = () => {
         />
         <StatBox 
           title="Dépenses mensuelles" 
-          value="85,000 sesterces" 
+          value="85,000 As" 
           description="En hausse ce trimestre"
           icon={<TrendingDown className="h-6 w-6" />}
           trend="up"
@@ -47,7 +46,7 @@ const Economie = () => {
         />
         <StatBox 
           title="Fortune totale" 
-          value="3,450,000 sesterces" 
+          value="3,450,000 As" 
           description="Stable ce semestre"
           icon={<Wallet className="h-6 w-6" />}
           trend="neutral"
@@ -55,7 +54,7 @@ const Economie = () => {
         />
         <StatBox 
           title="Impôts annuels" 
-          value="45,000 sesterces" 
+          value="45,000 As" 
           description="Réduction fiscale obtenue"
           icon={<Landmark className="h-6 w-6" />}
           trend="up"
@@ -90,31 +89,31 @@ const Economie = () => {
                 <div className="space-y-4">
                   <ExpenseCard 
                     category="Entretien des propriétés" 
-                    amount="22,000 sesterces" 
+                    amount="22,000 As" 
                     percentage={26} 
                     icon={<Building className="h-5 w-5" />} 
                   />
                   <ExpenseCard 
                     category="Patronage politique" 
-                    amount="18,000 sesterces" 
+                    amount="18,000 As" 
                     percentage={21} 
                     icon={<Landmark className="h-5 w-5" />} 
                   />
                   <ExpenseCard 
                     category="Personnel domestique" 
-                    amount="15,000 sesterces" 
+                    amount="15,000 As" 
                     percentage={18} 
                     icon={<Coins className="h-5 w-5" />} 
                   />
                   <ExpenseCard 
                     category="Investissements commerciaux" 
-                    amount="12,000 sesterces" 
+                    amount="12,000 As" 
                     percentage={14} 
                     icon={<Ship className="h-5 w-5" />} 
                   />
                   <ExpenseCard 
                     category="Divertissements et réceptions" 
-                    amount="10,000 sesterces" 
+                    amount="10,000 As" 
                     percentage={12} 
                     icon={<Banknote className="h-5 w-5" />} 
                   />
@@ -149,31 +148,31 @@ const Economie = () => {
             <div className="space-y-4">
               <ExpenseCard 
                 category="Entretien des propriétés" 
-                amount="22,000 sesterces" 
+                amount="22,000 As" 
                 percentage={26} 
                 icon={<Building className="h-5 w-5" />} 
               />
               <ExpenseCard 
                 category="Patronage politique" 
-                amount="18,000 sesterces" 
+                amount="18,000 As" 
                 percentage={21} 
                 icon={<Landmark className="h-5 w-5" />} 
               />
               <ExpenseCard 
                 category="Personnel domestique" 
-                amount="15,000 sesterces" 
+                amount="15,000 As" 
                 percentage={18} 
                 icon={<Coins className="h-5 w-5" />} 
               />
               <ExpenseCard 
                 category="Investissements commerciaux" 
-                amount="12,000 sesterces" 
+                amount="12,000 As" 
                 percentage={14} 
                 icon={<Ship className="h-5 w-5" />} 
               />
               <ExpenseCard 
                 category="Divertissements et réceptions" 
-                amount="10,000 sesterces" 
+                amount="10,000 As" 
                 percentage={12} 
                 icon={<Banknote className="h-5 w-5" />} 
               />
@@ -195,7 +194,7 @@ const Economie = () => {
                   </div>
                   <div>
                     <h4 className="font-medium mb-2">Économies potentielles</h4>
-                    <p className="text-sm">Une optimisation des dépenses pourrait générer des économies d'environ 12,000 sesterces par mois, soit 144,000 sesterces par an.</p>
+                    <p className="text-sm">Une optimisation des dépenses pourrait générer des économies d'environ 12,000 As par mois, soit 144,000 As par an.</p>
                   </div>
                 </div>
               </RomanCard.Content>
