@@ -1,4 +1,3 @@
-
 import { Character } from '@/types/character';
 
 export const characters: Character[] = [
@@ -43,6 +42,11 @@ export const characters: Character[] = [
         description: 'Maîtrise des arts militaires et de la stratégie',
         color: 'red'
       }
+    },
+    education: {
+      type: 'political',
+      specialties: ['Rhétorique avancée', 'Droit romain', 'Tactique politique'],
+      mentor: 'Consul Gaius Flaminius'
     }
   },
   {
@@ -86,6 +90,11 @@ export const characters: Character[] = [
         description: 'Connaissance des stratégies militaires (non disponible)',
         color: 'red'
       }
+    },
+    education: {
+      type: 'religious',
+      specialties: ['Rites et cérémonies', 'Divination', 'Culte de Vesta'],
+      mentor: 'Grande Vestale Claudia'
     }
   },
   {
@@ -129,6 +138,11 @@ export const characters: Character[] = [
         description: 'Entraînement aux armes et à la tactique militaire',
         color: 'red'
       }
+    },
+    education: {
+      type: 'military',
+      specialties: ['Combat à l\'épée', 'Tactique de bataille', 'Commandement de légion'],
+      mentor: 'Centurion Flavius Aquila'
     }
   },
   {
@@ -172,6 +186,11 @@ export const characters: Character[] = [
         description: 'Connaissance des stratégies militaires (non disponible)',
         color: 'red'
       }
+    },
+    education: {
+      type: 'religious',
+      specialties: ['Panthéon romain', 'Offrandes rituelles', 'Calendrier sacré'],
+      mentor: 'Flamine Tullia Domitia'
     }
   }
 ];

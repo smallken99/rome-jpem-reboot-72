@@ -156,7 +156,7 @@ export const CharacterSheet: React.FC<CharacterSheetProps> = ({
                 </div>
               )}
               
-              {/* Add Education Specialties Section */}
+              {/* Education Specialties Section */}
               <EducationSpecialties education={character.education} />
             </div>
           </div>

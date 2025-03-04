@@ -13,7 +13,7 @@ export const EducationSpecialties: React.FC<EducationSpecialtiesProps> = ({ educ
   }
 
   return (
-    <div className="mt-4 p-3 bg-muted/30 rounded-md">
+    <div className="mt-4 p-3 bg-muted/30 rounded-md border border-muted/50">
       <div className="flex items-center gap-2 mb-2">
         <Scroll className="h-4 w-4 text-rome-navy/70" />
         <h4 className="text-sm font-medium">Spécialités Acquises</h4>
@@ -39,7 +39,7 @@ export const EducationSpecialties: React.FC<EducationSpecialtiesProps> = ({ educ
       
       <ul className="list-disc pl-5 text-xs space-y-1">
         {education.specialties.map((specialty, index) => (
-          <li key={index}>{specialty}</li>
+          <li key={index} className="text-sm">{specialty}</li>
         ))}
       </ul>
     </div>
