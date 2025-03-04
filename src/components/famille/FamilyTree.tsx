@@ -1,107 +1,146 @@
+
 import React from 'react';
 import { Separator } from '@/components/ui/separator';
-import { characters } from '@/data/characters';
+import { Character } from '@/types/character';
+import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
+import { CalendarDays, Crown, GitBranch, Heart, Users } from 'lucide-react';
+import { TimePanel } from '@/components/time/TimePanel';
 
-// Create family data based on the characters data
-const getFamilyMembers = () => {
-  return [
-    { 
-      id: '1', 
-      name: 'Marcus Aurelius Cotta', 
-      role: 'Pater Familias', 
-      age: 42, 
-      status: 'alive',
-      spouse: 'Livia Aurelia',
-      image: characters[0].portrait || '/images/placeholder.svg'
-    },
-    { 
-      id: '2', 
-      name: 'Livia Aurelia', 
-      role: 'Mater Familias', 
-      age: 38, 
-      status: 'alive',
-      spouse: 'Marcus Aurelius Cotta',
-      image: characters[1].portrait || '/images/placeholder.svg'
-    },
-    { 
-      id: '3', 
-      name: 'Titus Aurelius', 
-      role: 'Filius', 
-      age: 15, 
-      status: 'alive',
-      spouse: null,
-      image: characters[2].portrait || '/images/placeholder.svg'
-    },
-    { 
-      id: '4', 
-      name: 'Julia Aurelia', 
-      role: 'Filia', 
-      age: 12, 
-      status: 'alive',
-      spouse: 'Quintus Fabius (promis)',
-      image: characters[3].portrait || '/images/placeholder.svg'
-    },
-  ];
-};
+interface FamilyTreeProps {
+  characters?: Character[];
+}
 
-export const FamilyTree: React.FC = () => {
-  const familyMembers = getFamilyMembers();
+export const FamilyTree: React.FC<FamilyTreeProps> = ({ characters = [] }) => {
+  // Filter characters by their roles
+  const getFamilyMembers = () => {
+    const paterFamilias = characters.find(char => 
+      char.isPlayer || 
+      char.role?.toLowerCase().includes('chef') || 
+      char.role?.toLowerCase().includes('pater')
+    );
+    
+    const materFamilias = characters.find(char => 
+      char.gender === 'female' && 
+      (char.role?.toLowerCase().includes('épouse') || 
+       char.role?.toLowerCase().includes('mater'))
+    );
+    
+    const children = characters.filter(char => 
+      (char.age < 18 || char.role?.toLowerCase().includes('fils') || char.role?.toLowerCase().includes('fille')) &&
+      char.id !== paterFamilias?.id &&
+      char.id !== materFamilias?.id
+    );
+    
+    return {
+      paterFamilias,
+      materFamilias,
+      children
+    };
+  };
+  
+  const { paterFamilias, materFamilias, children } = getFamilyMembers();
   
   return (
     <div className="family-tree-container">
-      <div className="p-4 mb-4 bg-rome-parchment/50 rounded-md">
-        <p className="italic text-muted-foreground">
-          L'arbre généalogique représente les liens entre les membres de votre famille. 
-          Cliquez sur un membre pour afficher plus de détails ou interagir avec lui.
-        </p>
-      </div>
-      
-      <div className="family-tree-visualization relative">
-        <div className="flex flex-col items-center">
-          {/* First generation - Pater and Mater */}
-          <div className="flex justify-center gap-4 mb-8">
-            {familyMembers.slice(0, 2).map(member => (
-              <FamilyMember key={member.id} member={member} />
-            ))}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div className="md:col-span-2">
+          <div className="p-4 mb-4 bg-rome-parchment/30 rounded-md">
+            <p className="italic text-muted-foreground text-sm">
+              L'arbre généalogique représente les liens entre les membres de votre famille. 
+              Les relations familiales sont essentielles dans la société romaine et déterminent votre statut social.
+            </p>
           </div>
           
-          {/* Marriage line */}
-          <div className="absolute top-24 left-1/2 transform -translate-x-1/2 w-24 h-px bg-rome-gold/50"></div>
+          <div className="family-tree-visualization relative mt-8">
+            <div className="flex flex-col items-center">
+              {/* First generation - Pater and Mater */}
+              <div className="flex justify-center gap-4 mb-12 relative">
+                {paterFamilias && <FamilyMember member={paterFamilias} role="Pater Familias" />}
+                
+                {/* Marriage connector */}
+                {paterFamilias && materFamilias && (
+                  <div className="absolute -bottom-6 left-1/2 -translate-x-1/2 flex items-center gap-2 text-xs text-muted-foreground">
+                    <div className="w-24 h-px bg-rome-gold/50"></div>
+                    <Heart className="h-4 w-4 text-rome-gold/70" />
+                    <div className="w-24 h-px bg-rome-gold/50"></div>
+                  </div>
+                )}
+                
+                {materFamilias && <FamilyMember member={materFamilias} role="Mater Familias" />}
+              </div>
+              
+              {/* Vertical line to children */}
+              {(paterFamilias || materFamilias) && children.length > 0 && (
+                <div className="flex flex-col items-center mb-4">
+                  <div className="w-px h-6 bg-rome-gold/50"></div>
+                  <GitBranch className="h-5 w-5 text-rome-gold/70 rotate-180 mb-2" />
+                </div>
+              )}
+              
+              {/* Second generation - Children */}
+              {children.length > 0 && (
+                <div className="flex flex-wrap justify-center gap-4">
+                  {children.map((child) => (
+                    <FamilyMember 
+                      key={child.id} 
+                      member={child} 
+                      role={child.gender === 'male' ? 'Filius' : 'Filia'} 
+                    />
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
           
-          {/* Vertical line to children */}
-          <div className="absolute top-24 left-1/2 transform -translate-x-1/2 w-px h-8 bg-rome-gold/50"></div>
-          
-          {/* Second generation - Children */}
-          <div className="flex justify-center gap-4 mt-8">
-            {familyMembers.slice(2).map(member => (
-              <FamilyMember key={member.id} member={member} />
-            ))}
+          <div className="mt-6 p-4 roman-card">
+            <h4 className="font-cinzel text-base mb-2">Légende</h4>
+            <div className="grid grid-cols-2 md:grid-cols-3 gap-4 text-xs">
+              <div className="flex items-center gap-2">
+                <div className="w-3 h-3 rounded-full bg-rome-terracotta"></div>
+                <span>Pater Familias</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <div className="w-3 h-3 rounded-full bg-rome-gold"></div>
+                <span>Mater Familias</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <div className="w-3 h-3 rounded-full bg-rome-navy"></div>
+                <span>Enfants</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <Heart className="h-3 w-3 text-rome-gold" />
+                <span>Mariage</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <GitBranch className="h-3 w-3 text-muted-foreground" />
+                <span>Descendance</span>
+              </div>
+            </div>
           </div>
         </div>
-      </div>
-      
-      <div className="mt-6 p-4 roman-card">
-        <h4 className="font-cinzel text-lg mb-2">Légende</h4>
-        <div className="grid grid-cols-2 md:grid-cols-3 gap-4 text-sm">
-          <div className="flex items-center gap-2">
-            <div className="w-3 h-3 rounded-full bg-rome-terracotta"></div>
-            <span>Pater Familias</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <div className="w-3 h-3 rounded-full bg-rome-gold"></div>
-            <span>Mater Familias</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <div className="w-3 h-3 rounded-full bg-rome-navy"></div>
-            <span>Enfants</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <div className="w-3 h-3 rounded-full bg-muted"></div>
-            <span>Époux/Épouses</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <div className="w-3 h-3 border border-dashed border-muted rounded-full"></div>
-            <span>Décédé</span>
+        
+        <div>
+          <TimePanel />
+          
+          <div className="mt-4 p-4 bg-rome-parchment/20 rounded-md">
+            <h4 className="font-cinzel text-base mb-2 flex items-center gap-2">
+              <Users className="h-4 w-4" />
+              Informations Familiales
+            </h4>
+            <ul className="space-y-2 text-sm">
+              <li className="flex items-center gap-2">
+                <span className="text-muted-foreground">Membres:</span>
+                <span className="font-medium">{characters.length}</span>
+              </li>
+              <li className="flex items-center gap-2">
+                <span className="text-muted-foreground">Génération actuelle:</span>
+                <span className="font-medium">2</span>
+              </li>
+              <li className="flex items-center gap-2">
+                <span className="text-muted-foreground">Alliances matrimoniales:</span>
+                <span className="font-medium">1</span>
+              </li>
+            </ul>
           </div>
         </div>
       </div>
@@ -110,18 +149,11 @@ export const FamilyTree: React.FC = () => {
 };
 
 interface FamilyMemberProps {
-  member: {
-    id: string;
-    name: string;
-    role: string;
-    age: number;
-    status: string;
-    spouse: string | null;
-    image: string;
-  };
+  member: Character;
+  role: string;
 }
 
-const FamilyMember: React.FC<FamilyMemberProps> = ({ member }) => {
+const FamilyMember: React.FC<FamilyMemberProps> = ({ member, role }) => {
   const getRoleColor = (role: string) => {
     switch(role) {
       case 'Pater Familias':
@@ -136,32 +168,46 @@ const FamilyMember: React.FC<FamilyMemberProps> = ({ member }) => {
     }
   };
   
+  // Get initials for avatar fallback
+  const getInitials = (name: string) => {
+    return name
+      .split(' ')
+      .map(part => part[0])
+      .join('')
+      .toUpperCase();
+  };
+  
   return (
-    <div className={`roman-card hover:shadow-md transition-all duration-300 w-48 p-3 relative ${member.status !== 'alive' ? 'opacity-70' : ''}`}>
-      <div className={`absolute top-3 right-3 w-3 h-3 rounded-full ${getRoleColor(member.role)}`}></div>
+    <div className="roman-card hover:shadow-md transition-all duration-300 w-44 p-3 relative">
+      <div className={`absolute top-2 right-2 w-3 h-3 rounded-full ${getRoleColor(role)}`}></div>
       
       <div className="flex flex-col items-center">
-        <div className="w-16 h-16 rounded-full bg-muted mb-2 overflow-hidden">
-          <img 
-            src={member.image} 
-            alt={member.name} 
-            className="w-full h-full object-cover" 
-          />
+        <Avatar className="w-16 h-16 mb-2">
+          {member.portrait ? (
+            <AvatarImage src={member.portrait} alt={member.name} className="object-cover" />
+          ) : (
+            <AvatarFallback className="bg-muted text-xl font-cinzel">
+              {getInitials(member.name)}
+            </AvatarFallback>
+          )}
+        </Avatar>
+        
+        <h3 className="font-cinzel text-center text-sm">{member.name}</h3>
+        <div className="flex items-center gap-1 mt-1">
+          <span className="text-xs text-muted-foreground">{role}</span>
+          <span className="text-xs mx-1">•</span>
+          <span className="text-xs flex items-center gap-1">
+            <CalendarDays className="h-3 w-3 text-muted-foreground" />
+            {member.age}
+          </span>
         </div>
         
-        <h3 className="font-cinzel text-center">{member.name}</h3>
-        <p className="text-sm text-muted-foreground">{member.role} • {member.age} ans</p>
-        
-        {member.spouse && (
-          <div className="mt-2 text-xs">
-            <span className="text-muted-foreground">Marié(e) à </span>
-            <span className="font-medium">{member.spouse}</span>
+        {member.title && (
+          <div className="mt-2 text-xs flex items-center gap-1 bg-muted/30 px-2 py-1 rounded-full">
+            <Crown className="h-3 w-3 text-rome-gold" />
+            <span>{member.title}</span>
           </div>
         )}
-        
-        <button className="mt-3 text-xs text-rome-terracotta hover:underline">
-          Détails
-        </button>
       </div>
     </div>
   );

@@ -1,78 +1,106 @@
+
 import React from 'react';
-import { ChildHeader } from './components/ChildHeader';
-import { StatBonusInfo } from './components/StatBonusInfo';
+import { Check, GraduationCap, Ban } from 'lucide-react';
 import { AnnualProgress } from './components/AnnualProgress';
 import { SkillProgress } from './components/SkillProgress';
+import { ChildHeader } from './components/ChildHeader';
 import { PietyBonus } from './components/PietyBonus';
 import { MentorInfo } from './components/MentorInfo';
-import { EducationWarning } from './components/EducationWarning';
 import { CardActions } from './components/CardActions';
-import { ChildProps } from './types/educationTypes';
+import { EducationWarning } from './components/EducationWarning';
+import { StatBonusInfo } from './components/StatBonusInfo';
+import { Child, ChildEducation } from './types/educationTypes';
 
 interface ChildEducationCardProps {
-  child: ChildProps;
+  child: Child;
+  onChangeName?: (id: string, newName: string) => void;
 }
 
-export const ChildEducationCard: React.FC<ChildEducationCardProps> = ({ child }) => {
-  // Check if there's an invalid education assignment (military for females)
-  const hasInvalidEducation = child.gender === 'female' && child.currentEducation.type === 'military';
-  
-  // Calculate the base progress
-  const baseProgress = child.currentEducation.progress;
-  const pityBonus = child.currentEducation.pityBonus || 0;
-  
-  // Years information
-  const yearsCompleted = child.currentEducation.yearsCompleted || 0;
-  const totalYears = child.currentEducation.totalYears || 0;
-  
-  // Stat bonus that will be applied upon completion
-  const statBonus = child.currentEducation.statBonus || 0;
-  
-  // Check if the child has any education
-  const hasEducation = child.currentEducation.type !== 'none';
+const ChildEducationCard: React.FC<ChildEducationCardProps> = ({ child, onChangeName }) => {
+  // Determine if the child has an ongoing education
+  const hasEducation = child.currentEducation?.type && child.currentEducation.type !== 'none';
   
   return (
-    <div className="roman-card p-4 hover:shadow-md transition-all duration-300">
-      <ChildHeader 
-        child={{
-          name: child.name,
-          age: child.age,
-          gender: child.gender,
-          educationType: child.currentEducation.type
-        }}
-        hasInvalidEducation={hasInvalidEducation}
-      />
+    <div className="rounded-lg border bg-card text-card-foreground shadow-sm overflow-hidden">
+      <ChildHeader child={child} onChangeName={onChangeName} />
       
-      {hasEducation && (
-        <>
-          <EducationWarning hasInvalidEducation={hasInvalidEducation} />
-          
-          <StatBonusInfo 
-            statBonus={statBonus} 
-            educationType={child.currentEducation.type}
-          />
-          
-          <AnnualProgress 
-            yearsCompleted={yearsCompleted} 
-            totalYears={totalYears}
-          />
-          
-          <SkillProgress 
-            baseProgress={baseProgress} 
-            pityBonus={pityBonus} 
-            hasInvalidEducation={hasInvalidEducation}
-          />
-          
-          <PietyBonus pityBonus={pityBonus} />
-          
-          <MentorInfo 
-            mentor={child.currentEducation.mentor} 
-            skills={child.currentEducation.skills}
-          />
-        </>
-      )}
-      
-      <CardActions hasEducation={hasEducation} />
+      <div className="p-4">
+        {!hasEducation ? (
+          <div className="flex flex-col items-center justify-center py-6 text-center">
+            <GraduationCap className="h-10 w-10 text-muted-foreground mb-2" />
+            <h3 className="text-lg font-medium mb-1">Aucune éducation en cours</h3>
+            <p className="text-sm text-muted-foreground max-w-md">
+              Cet enfant n'a actuellement aucune éducation. Choisissez un parcours éducatif pour commencer sa formation.
+            </p>
+            
+            {child.age < 8 && (
+              <EducationWarning
+                icon={<Ban className="h-4 w-4" />}
+                text={`${child.name} est trop jeune pour la plupart des éducations. Il/Elle peut uniquement suivre une éducation religieuse pour le moment.`}
+              />
+            )}
+            
+            <CardActions educationType="none" childId={child.id} childGender={child.gender} childAge={child.age} />
+          </div>
+        ) : (
+          <div className="space-y-4">
+            <div className="flex justify-between items-start">
+              <div>
+                <h3 className="text-lg font-medium flex items-center gap-2">
+                  <Check className="h-5 w-5 text-green-500" />
+                  Éducation en cours
+                </h3>
+                <p className="text-sm text-muted-foreground">
+                  Type: {child.currentEducation.type === 'military' ? 'Militaire' : 
+                        child.currentEducation.type === 'political' ? 'Politique' : 'Religieuse'}
+                </p>
+              </div>
+              
+              <CardActions 
+                educationType={child.currentEducation.type} 
+                childId={child.id} 
+                childGender={child.gender} 
+                childAge={child.age} 
+              />
+            </div>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <AnnualProgress 
+                  yearsCompleted={child.currentEducation.yearsCompleted} 
+                  totalYears={child.currentEducation.totalYears} 
+                />
+                
+                <MentorInfo mentor={child.currentEducation.mentor} />
+                
+                <div className="mt-4">
+                  <h4 className="text-sm font-medium mb-2">Compétences acquises</h4>
+                  <ul className="space-y-1">
+                    {child.currentEducation.skills.map((skill, index) => (
+                      <li key={index} className="text-xs flex items-center gap-1.5">
+                        <Check className="h-3.5 w-3.5 text-green-500" />
+                        {skill}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              </div>
+              
+              <div>
+                <SkillProgress progress={child.currentEducation.progress} />
+                
+                {child.currentEducation.pityBonus > 0 && (
+                  <PietyBonus bonus={child.currentEducation.pityBonus} />
+                )}
+                
+                <StatBonusInfo educationType={child.currentEducation.type} />
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
     </div>
   );
 };
+
+export default ChildEducationCard;
