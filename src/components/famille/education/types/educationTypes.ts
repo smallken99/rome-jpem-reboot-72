@@ -24,6 +24,14 @@ export type ChildEducation = {
   yearsCompleted?: number;
   totalYears?: number;
   statBonus?: number;
+  // Track previous educations
+  educationHistory?: {
+    type: string;
+    mentor: string;
+    speciality?: string;
+    completedAt: number; // Age when completed
+    statBonus: number;
+  }[];
 };
 
 export type Child = {
@@ -39,8 +47,8 @@ export type EducationPath = {
   icon: React.ReactNode;
   title: string;
   description: string;
-  minAge: number;
-  suitableFor: string;
+  minAge: number; // Lowered minimum ages for faster progression
+  suitableFor: string; // "all", "male" or "female"
   duration: number;
   annualCurriculum: {
     year: number;

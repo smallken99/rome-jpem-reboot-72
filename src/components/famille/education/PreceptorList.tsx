@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { ShieldQuestion, TrendingUp, Female, Male } from 'lucide-react';
+import { ShieldQuestion, TrendingUp, User, Users } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { educationPaths } from './EducationData';
 import { PreceptorsByType } from './types/educationTypes';
@@ -63,11 +63,11 @@ export const PreceptorList: React.FC<PreceptorListProps> = ({ preceptors, refres
                         <h4 className="font-medium">{teacher.name}</h4>
                         {teacher.gender === 'female' ? (
                           <Badge variant="outline" className="bg-pink-50 text-pink-700 text-xs py-0 h-5 border-pink-200">
-                            <Female className="h-3 w-3 mr-1" /> F
+                            <User className="h-3 w-3 mr-1" /> F
                           </Badge>
                         ) : (
                           <Badge variant="outline" className="bg-blue-50 text-blue-700 text-xs py-0 h-5 border-blue-200">
-                            <Male className="h-3 w-3 mr-1" /> H
+                            <User className="h-3 w-3 mr-1" /> H
                           </Badge>
                         )}
                       </div>

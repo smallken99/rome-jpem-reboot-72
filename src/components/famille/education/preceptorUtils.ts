@@ -53,7 +53,7 @@ export const generateGender = (type: string) => {
   return 'male';
 };
 
-// Generate a random title based on education type
+// Generate a random title based on education type and gender
 export const generateTitle = (type: string, gender: string) => {
   // Define appropriate titles for each education type
   const maleTitles = {
