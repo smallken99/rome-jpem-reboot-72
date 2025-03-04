@@ -11,22 +11,44 @@ interface CharacterStatsProps {
 }
 
 export const CharacterStats: React.FC<CharacterStatsProps> = ({ stats, className, isFemale = false }) => {
-  // Add information about the education-related stat caps
+  // Define consistent information about stat caps
   const getStatInfo = (statIcon: string) => {
     switch (statIcon) {
       case 'popularity':
-        return { maxFromEducation: 'illimitée', capNote: false };
+        return { 
+          maxFromEducation: 'illimitée', 
+          capNote: true,
+          description: 'La popularité peut dépasser 200 selon les événements'
+        };
       case 'oratory':
+        return { 
+          maxFromEducation: '80', 
+          capNote: true,
+          description: 'L\'éducation peut augmenter l\'éloquence jusqu\'à 80 points'
+        };
       case 'piety':
+        return { 
+          maxFromEducation: '80', 
+          capNote: true,
+          description: 'L\'éducation peut augmenter la piété jusqu\'à 80 points'
+        };
       case 'martialEducation':
-        return { maxFromEducation: '80', capNote: true };
+        return { 
+          maxFromEducation: '80', 
+          capNote: true,
+          description: 'L\'éducation peut augmenter l\'éducation martiale jusqu\'à 80 points'
+        };
       default:
-        return { maxFromEducation: '80', capNote: false };
+        return { 
+          maxFromEducation: '80', 
+          capNote: false,
+          description: ''
+        };
     }
   };
 
   return (
-    <div className={cn("space-y-1", className)}>
+    <div className={cn("space-y-3", className)}>
       {stats.map((stat, index) => {
         // For females: disable martial education and add piety bonus
         // For males: no changes
@@ -35,7 +57,7 @@ export const CharacterStats: React.FC<CharacterStatsProps> = ({ stats, className
         const statInfo = getStatInfo(stat.icon);
         
         return (
-          <div key={index}>
+          <div key={index} className="mb-2">
             <StatBar 
               key={index} 
               stat={stat} 
@@ -44,7 +66,7 @@ export const CharacterStats: React.FC<CharacterStatsProps> = ({ stats, className
             />
             {statInfo.capNote && (
               <p className="text-xs text-muted-foreground mt-1 italic">
-                Valeur maximale par éducation: {statInfo.maxFromEducation}
+                {statInfo.description}
               </p>
             )}
           </div>

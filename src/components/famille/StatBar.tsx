@@ -59,13 +59,11 @@ const StatBar: React.FC<StatBarProps> = ({ stat, disabled = false, pietyBonus })
   const percentage = disabled ? 0 : (totalValue / stat.maxValue) * 100;
 
   return (
-    <div className="mb-3">
+    <div className="mb-1">
       <div className="flex justify-between items-center mb-1">
         <div className="flex items-center gap-2">
           <div className={cn("p-1 rounded-full", disabled ? "bg-gray-200" : `bg-${stat.color}-100`)}>
-            <div className={cn("text-white", disabled ? "text-gray-500" : `text-${stat.color}-800`)}>
-              <IconComponent className="h-4 w-4" />
-            </div>
+            <IconComponent className="h-4 w-4 text-gray-700" />
           </div>
           <span className={cn("text-sm font-medium", disabled && "text-gray-500")}>{stat.name}</span>
         </div>

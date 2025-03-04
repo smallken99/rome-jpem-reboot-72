@@ -34,15 +34,6 @@ export const EducationTabs: React.FC<EducationTabsProps> = ({
   preceptors, 
   refreshPreceptors 
 }) => {
-  // Helper function to explain stat inheritance and education limits
-  const getStatInheritanceInfo = (statName: string) => {
-    const isPopularity = statName === 'popularity';
-    return {
-      inheritanceNote: `Un enfant hérite d'un tiers des caractéristiques combinées de ses parents (divisées par 2).`,
-      maxValue: isPopularity ? 'illimitée' : '40',
-    };
-  };
-
   return (
     <Tabs value={activeTab} onValueChange={setActiveTab} className="mt-6">
       <TabsList className="w-full justify-start bg-white border border-rome-gold/30 mb-6">
@@ -82,10 +73,11 @@ export const EducationTabs: React.FC<EducationTabsProps> = ({
             <p className="font-medium mb-1">Limites d'éducation par caractéristique:</p>
             <ul className="list-disc pl-5 mt-1">
               <li>Popularité: valeur maximale illimitée</li>
-              <li>Éloquence: valeur maximale de 40 par éducation</li>
-              <li>Piété: valeur maximale de 40 par éducation</li>
-              <li>Éducation Martiale: valeur maximale de 40 par éducation</li>
+              <li>Éloquence: valeur maximale de 80 par éducation</li>
+              <li>Piété: valeur maximale de 80 par éducation</li>
+              <li>Éducation Martiale: valeur maximale de 80 par éducation</li>
             </ul>
+            <p className="mt-2 text-xs italic">Les femmes romaines bénéficient d'un bonus de +30 en Piété mais n'ont pas accès à l'Éducation Martiale.</p>
           </div>
         </div>
       </TabsContent>

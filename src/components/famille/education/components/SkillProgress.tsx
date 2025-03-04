@@ -28,6 +28,11 @@ export const SkillProgress: React.FC<SkillProgressProps> = ({ baseProgress, pity
         <span>{baseProgress}%{pityBonus > 0 && <span className="text-green-600"> (+{pityBonus}% piété)</span>}</span>
         <span>Maître</span>
       </div>
+      {pityBonus > 0 && (
+        <p className="text-xs text-green-600 mt-1">
+          Le bonus de piété augmente la vitesse de progression des compétences.
+        </p>
+      )}
     </div>
   );
 };
