@@ -1,4 +1,3 @@
-
 import { romanNamePrefixes, romanNameSuffixes, specialties, titles } from './EducationData';
 
 // Generate a random Roman name
@@ -46,4 +45,18 @@ export const generateFee = (reputation: string) => {
 export const generateTitle = (type: string) => {
   const typeTitles = titles[type as keyof typeof titles] || [];
   return typeTitles[Math.floor(Math.random() * typeTitles.length)];
+};
+
+// Generate a stat bonus based on preceptor reputation
+export const generateStatBonus = (reputation: string) => {
+  switch(reputation) {
+    case 'Excellent':
+      return 15 + Math.floor(Math.random() * 6); // 15-20 points
+    case 'Bon':
+      return 10 + Math.floor(Math.random() * 5); // 10-14 points
+    case 'Moyen':
+      return 5 + Math.floor(Math.random() * 5); // 5-9 points
+    default:
+      return 5; // Fallback
+  }
 };

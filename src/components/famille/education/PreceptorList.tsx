@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { ShieldQuestion } from 'lucide-react';
+import { ShieldQuestion, TrendingUp } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { educationPaths } from './EducationData';
 
@@ -11,6 +11,7 @@ type Preceptor = {
   speciality: string;
   reputation: 'Excellent' | 'Bon' | 'Moyen';
   fee: number;
+  statBonus: number; // Add stat bonus field
 };
 
 type PreceptorsByType = {
@@ -23,6 +24,21 @@ interface PreceptorListProps {
 }
 
 export const PreceptorList: React.FC<PreceptorListProps> = ({ preceptors, refreshPreceptors }) => {
+  // Function to get the related stat name based on education type
+  const getRelatedStatName = (type: string): string => {
+    const path = educationPaths.find(path => path.type === type);
+    switch(path?.relatedStat) {
+      case 'martialEducation':
+        return 'Éducation Martiale';
+      case 'oratory':
+        return 'Éloquence';
+      case 'piety':
+        return 'Piété';
+      default:
+        return 'Caractéristique';
+    }
+  };
+
   return (
     <>
       <div className="flex justify-end mb-4">
@@ -41,6 +57,8 @@ export const PreceptorList: React.FC<PreceptorListProps> = ({ preceptors, refres
           const pathTitle = educationPaths.find(path => path.type === type)?.title || type;
           // Get the education path icon
           const pathIcon = educationPaths.find(path => path.type === type)?.icon || <ShieldQuestion className="h-5 w-5" />;
+          // Get the related stat name
+          const relatedStat = getRelatedStatName(type);
           
           return (
             <div key={type} className="roman-card p-4">
@@ -64,6 +82,12 @@ export const PreceptorList: React.FC<PreceptorListProps> = ({ preceptors, refres
                     </div>
                     
                     <p className="text-sm text-muted-foreground mt-1">Spécialité: {teacher.speciality}</p>
+                    
+                    {/* Add stat bonus information */}
+                    <div className="mt-2 flex items-center gap-1 text-xs bg-green-50 p-2 rounded text-green-700">
+                      <TrendingUp className="h-3 w-3" />
+                      <span>Bonus à {relatedStat}: +{teacher.statBonus} points après validation</span>
+                    </div>
                     
                     <div className="flex justify-between items-center mt-3">
                       <span className="text-sm font-medium">{teacher.fee} denarii/an</span>

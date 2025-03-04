@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { Sword, Building, ScrollText, ShieldQuestion, Heart, BookOpen, CalendarDays } from 'lucide-react';
+import { Sword, Building, ScrollText, ShieldQuestion, Heart, BookOpen, CalendarDays, Award } from 'lucide-react';
 import { Coins } from 'lucide-react';
 import { Separator } from '@/components/ui/separator';
 import { Progress } from '@/components/ui/progress';
@@ -13,6 +13,7 @@ interface ChildEducation {
   pityBonus?: number; // Optional pity bonus field
   yearsCompleted?: number; // Number of years completed in current education
   totalYears?: number; // Total years required for this education path
+  statBonus?: number; // Add stat bonus field that will be applied on completion
 }
 
 interface ChildProps {
@@ -58,6 +59,20 @@ export const ChildEducationCard: React.FC<ChildEducationCardProps> = ({ child })
     }
   };
   
+  // Get the related stat name based on education type
+  const getRelatedStatName = (type: string): string => {
+    switch(type) {
+      case 'military':
+        return 'Éducation Martiale';
+      case 'political':
+        return 'Éloquence';
+      case 'religious':
+        return 'Piété';
+      default:
+        return 'Caractéristique';
+    }
+  };
+  
   // Check if there's an invalid education assignment (military for females)
   const hasInvalidEducation = child.gender === 'female' && child.currentEducation.type === 'military';
   
@@ -70,6 +85,9 @@ export const ChildEducationCard: React.FC<ChildEducationCardProps> = ({ child })
   const yearsCompleted = child.currentEducation.yearsCompleted || 0;
   const totalYears = child.currentEducation.totalYears || 0;
   const yearProgress = totalYears > 0 ? (yearsCompleted / totalYears) * 100 : 0;
+  
+  // Stat bonus that will be applied upon completion
+  const statBonus = child.currentEducation.statBonus || 0;
   
   return (
     <div className="roman-card p-4 hover:shadow-md transition-all duration-300">
@@ -99,6 +117,14 @@ export const ChildEducationCard: React.FC<ChildEducationCardProps> = ({ child })
           {hasInvalidEducation && (
             <div className="mt-2 text-xs text-red-600 bg-red-50 p-2 rounded">
               Les femmes n'ont pas accès à l'éducation militaire dans la Rome antique.
+            </div>
+          )}
+          
+          {/* Add stat bonus information if available */}
+          {statBonus > 0 && !hasInvalidEducation && (
+            <div className="mt-2 flex items-center gap-1 text-xs bg-green-50 p-2 rounded text-green-700">
+              <Award className="h-3 w-3" />
+              <span>À la validation: +{statBonus} en {getRelatedStatName(child.currentEducation.type)}</span>
             </div>
           )}
           

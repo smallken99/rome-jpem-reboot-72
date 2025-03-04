@@ -8,7 +8,8 @@ import {
   generateSpeciality, 
   generateReputation, 
   generateFee, 
-  generateTitle 
+  generateTitle,
+  generateStatBonus
 } from './education/preceptorUtils';
 
 // Type for a preceptor (teacher)
@@ -18,6 +19,7 @@ type Preceptor = {
   speciality: string;
   reputation: 'Excellent' | 'Bon' | 'Moyen';
   fee: number;
+  statBonus: number; // Add stat bonus field
 };
 
 type PreceptorsByType = {
@@ -42,13 +44,15 @@ export const Education: React.FC = () => {
         const speciality = generateSpeciality(path.type);
         const reputation = generateReputation();
         const fee = generateFee(reputation);
+        const statBonus = generateStatBonus(reputation); // Generate stat bonus based on reputation
         
         pathPreceptors.push({
           id: `${path.type}-${i}`,
           name,
           speciality,
           reputation,
-          fee
+          fee,
+          statBonus
         });
       }
       

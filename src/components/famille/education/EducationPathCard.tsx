@@ -1,8 +1,6 @@
 
 import React, { useState } from 'react';
 import { Sword, Building, ScrollText, ShieldQuestion, ChevronDown, ChevronUp, CalendarRange } from 'lucide-react';
-import { Separator } from '@/components/ui/separator';
-import { Coins } from 'lucide-react';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 
 interface AnnualCurriculum {
@@ -22,6 +20,7 @@ interface EducationPath {
   careers: string[];
   duration: number;
   annualCurriculum: AnnualCurriculum[];
+  relatedStat: string; // Add the related stat field
 }
 
 interface EducationPathCardProps {
@@ -46,6 +45,20 @@ export const EducationPathCard: React.FC<EducationPathCardProps> = ({ path }) =>
 
   const isMaleOnly = path.suitableFor === 'male';
   const isFemaleOnly = path.suitableFor === 'female';
+
+  // Get stat bonus description based on education type
+  const getStatBonusDescription = (type: string) => {
+    switch(type) {
+      case 'military':
+        return 'Améliore l\'Éducation Martiale';
+      case 'political':
+        return 'Améliore l\'Éloquence';
+      case 'religious':
+        return 'Améliore la Piété';
+      default:
+        return 'Améliore une caractéristique';
+    }
+  };
 
   return (
     <div className={`roman-card p-4 border-t-4 ${isMaleOnly ? 'border-t-blue-500' : isFemaleOnly ? 'border-t-pink-500' : 'border-t-rome-navy'} hover:shadow-md transition-all duration-300`}>
@@ -73,6 +86,11 @@ export const EducationPathCard: React.FC<EducationPathCardProps> = ({ path }) =>
           L'éducation militaire n'est accessible qu'aux hommes dans la Rome antique.
         </div>
       )}
+
+      {/* Add a section that displays the related stat improvement */}
+      <div className="text-xs bg-green-50 p-2 mt-2 rounded text-green-700">
+        <span className="font-medium">Bonus après validation:</span> {getStatBonusDescription(path.type)}
+      </div>
       
       <Collapsible
         open={showCurriculum}

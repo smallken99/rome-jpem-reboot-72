@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { GraduationCap, Sword, Building, ScrollText, ShieldQuestion, BookOpen } from 'lucide-react';
 
@@ -98,11 +99,12 @@ export const educationPaths = [
     suitableFor: 'male', // Explicitly for males only
     benefits: ['Accès aux légions', 'Réputation militaire', 'Possibilité de triomphe'],
     careers: ['Tribun militaire', 'Légat', 'Général'],
-    duration: 2, // Changed from 5 to 2
+    duration: 2,
     annualCurriculum: [
       { year: 1, name: "Initiation Martiale", skills: ["Maniement du bouclier", "Discipline militaire", "Marche forcée"] },
       { year: 2, name: "Tactiques Avancées", skills: ["Formation en phalange", "Commandement", "Stratégie de bataille"] }
-    ]
+    ],
+    relatedStat: 'martialEducation' // Add related stat
   },
   {
     type: 'political',
@@ -113,11 +115,12 @@ export const educationPaths = [
     suitableFor: 'both',
     benefits: ['Éloquence', 'Réseau politique', 'Prestige au Sénat'],
     careers: ['Questeur', 'Édile', 'Préteur', 'Consul'],
-    duration: 2, // Changed from 4 to 2
+    duration: 2,
     annualCurriculum: [
       { year: 1, name: "Fondations Politiques", skills: ["Histoire romaine", "Poésie grecque", "Élocution"] },
       { year: 2, name: "Art Oratoire Avancé", skills: ["Rhétorique", "Droit romain", "Débat public"] }
-    ]
+    ],
+    relatedStat: 'oratory' // Add related stat
   },
   {
     type: 'religious',
@@ -128,10 +131,11 @@ export const educationPaths = [
     suitableFor: 'both',
     benefits: ['Prestige religieux', 'Influence spirituelle', 'Exemption militaire'],
     careers: ['Pontife', 'Augure', 'Flamine', 'Vestale (femmes uniquement)'],
-    duration: 2, // Changed from 4 to 2
+    duration: 2,
     annualCurriculum: [
       { year: 1, name: "Fondations Religieuses", skills: ["Panthéon romain", "Calendrier sacré", "Offrandes rituelles"] },
       { year: 2, name: "Rituels et Cérémonies Avancés", skills: ["Divination", "Sacrifices", "Direction des cérémonies"] }
-    ]
+    ],
+    relatedStat: 'piety' // Add related stat
   },
 ];
