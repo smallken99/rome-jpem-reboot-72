@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { GraduationCap, Sword, Building, ScrollText, ShieldQuestion, BookOpen } from 'lucide-react';
 
@@ -15,8 +14,8 @@ export const children = [
       progress: 65,
       pityBonus: 10, // Piety bonus from religious activities
       skills: ['Tactique de base', 'Maniement du glaive', 'Discipline militaire'],
-      yearsCompleted: 2,
-      totalYears: 5
+      yearsCompleted: 1,
+      totalYears: 2
     }
   },
   {
@@ -31,7 +30,7 @@ export const children = [
       pityBonus: 5, // Small piety bonus
       skills: ['Rhétorique', 'Histoire romaine', 'Poésie grecque'],
       yearsCompleted: 1,
-      totalYears: 4
+      totalYears: 2
     }
   },
   {
@@ -99,13 +98,10 @@ export const educationPaths = [
     suitableFor: 'male', // Explicitly for males only
     benefits: ['Accès aux légions', 'Réputation militaire', 'Possibilité de triomphe'],
     careers: ['Tribun militaire', 'Légat', 'Général'],
-    duration: 5, // Total years required
+    duration: 2, // Changed from 5 to 2
     annualCurriculum: [
       { year: 1, name: "Initiation Martiale", skills: ["Maniement du bouclier", "Discipline militaire", "Marche forcée"] },
-      { year: 2, name: "Tactiques Basiques", skills: ["Formation en phalange", "Armement légionnaire", "Lecture de terrain"] },
-      { year: 3, name: "Équitation Militaire", skills: ["Combat monté", "Manœuvres de cavalerie", "Soins équestres"] },
-      { year: 4, name: "Commandement", skills: ["Diriger une centurie", "Logistique militaire", "Fortifications"] },
-      { year: 5, name: "Stratégie Avancée", skills: ["Siège", "Campagnes étendues", "Navigation militaire"] }
+      { year: 2, name: "Tactiques Avancées", skills: ["Formation en phalange", "Commandement", "Stratégie de bataille"] }
     ]
   },
   {
@@ -113,16 +109,14 @@ export const educationPaths = [
     icon: <Building className="h-5 w-5" />,
     title: 'Éducation Politique',
     description: 'Éducation en rhétorique, droit et philosophie pour exceller au Sénat.',
-    minAge: 8, // Reduced from 10 to 8
+    minAge: 8,
     suitableFor: 'both',
     benefits: ['Éloquence', 'Réseau politique', 'Prestige au Sénat'],
     careers: ['Questeur', 'Édile', 'Préteur', 'Consul'],
-    duration: 4,
+    duration: 2, // Changed from 4 to 2
     annualCurriculum: [
       { year: 1, name: "Fondations Politiques", skills: ["Histoire romaine", "Poésie grecque", "Élocution"] },
-      { year: 2, name: "Art Oratoire", skills: ["Rhétorique", "Techniques de mémorisation", "Débat public"] },
-      { year: 3, name: "Jurisprudence", skills: ["Droit romain", "Procédures judiciaires", "Plaidoirie"] },
-      { year: 4, name: "Politique Avancée", skills: ["Stratégie électorale", "Administration provinciale", "Diplomatie"] }
+      { year: 2, name: "Art Oratoire Avancé", skills: ["Rhétorique", "Droit romain", "Débat public"] }
     ]
   },
   {
@@ -130,16 +124,14 @@ export const educationPaths = [
     icon: <ScrollText className="h-5 w-5" />,
     title: 'Éducation Religieuse',
     description: 'Étude des rites sacrés, divination et traditions religieuses romaines.',
-    minAge: 6, // Reduced from 12 to 6
+    minAge: 6,
     suitableFor: 'both',
     benefits: ['Prestige religieux', 'Influence spirituelle', 'Exemption militaire'],
     careers: ['Pontife', 'Augure', 'Flamine', 'Vestale (femmes uniquement)'],
-    duration: 4,
+    duration: 2, // Changed from 4 to 2
     annualCurriculum: [
       { year: 1, name: "Fondations Religieuses", skills: ["Panthéon romain", "Calendrier sacré", "Offrandes rituelles"] },
-      { year: 2, name: "Rituels et Cérémonies", skills: ["Procession sacrée", "Sacrifices", "Interprétation des signes"] },
-      { year: 3, name: "Arts Divinatoires", skills: ["Augures", "Haruspices", "Interprétation des prophéties"] },
-      { year: 4, name: "Mystères Sacrés", skills: ["Rites initiatiques", "Conservation des traditions", "Direction des cérémonies"] }
+      { year: 2, name: "Rituels et Cérémonies Avancés", skills: ["Divination", "Sacrifices", "Direction des cérémonies"] }
     ]
   },
 ];
