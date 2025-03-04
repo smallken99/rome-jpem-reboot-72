@@ -11,6 +11,7 @@ import { Education } from '@/components/famille/Education';
 import { Inheritance } from '@/components/famille/Inheritance';
 import { characters } from '@/data/characters';
 import ChildEducationDetail from '@/components/famille/education/ChildEducationDetail';
+import { AllianceManagement } from '@/components/famille/alliances/AllianceManagement';
 
 const FamilleMain = () => {
   const [localCharacters, setLocalCharacters] = React.useState(characters);
@@ -76,6 +77,20 @@ const Alliances = () => {
   );
 };
 
+const AllianceManagementPage = () => {
+  return (
+    <Layout>
+      <PageHeader 
+        title="Gestion d'Alliance Matrimoniale"
+        subtitle="Négociez les termes et la dot pour une alliance bénéfique"
+      />
+      <div className="roman-card">
+        <AllianceManagement />
+      </div>
+    </Layout>
+  );
+};
+
 const EducationPage = () => {
   return (
     <Layout>
@@ -124,6 +139,7 @@ const Famille = () => {
       <Route path="/" element={<FamilleMain />} />
       <Route path="/arbre" element={<ArbreGenealogique />} />
       <Route path="/alliances" element={<Alliances />} />
+      <Route path="/alliances/manage/:femaleId" element={<AllianceManagementPage />} />
       <Route path="/education" element={<EducationPage />} />
       <Route path="/education/child/:childId" element={<ChildEducationDetailPage />} />
       <Route path="/heritage" element={<Heritage />} />

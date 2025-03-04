@@ -24,10 +24,6 @@ interface FemaleCardProps {
 export const FemaleCard: React.FC<FemaleCardProps> = ({ female, dowryAmount = 0, index }) => {
   const navigate = useNavigate();
   
-  const handleManageAlliance = () => {
-    navigate(`/famille/alliances/manage/${female.id}`);
-  };
-  
   return (
     <Card key={female.id} className="mt-4 border-rome-gold/30">
       <CardHeader className="pb-2">
@@ -51,7 +47,7 @@ export const FemaleCard: React.FC<FemaleCardProps> = ({ female, dowryAmount = 0,
               variant="outline" 
               className="w-full roman-btn-outline"
               label="Gérer l'alliance matrimoniale"
-              onClick={handleManageAlliance}
+              to={`/famille/alliances/manage/${female.id}`}
             />
           </div>
         </div>
