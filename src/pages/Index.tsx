@@ -16,9 +16,24 @@ import {
 
 // Données de démonstration
 const mockAlliances = [
-  { name: 'Gens Julia', type: 'politique' as const, status: 'actif' as const },
-  { name: 'Gens Claudia', type: 'matrimoniale' as const, status: 'en négociation' as const },
-  { name: 'Gens Flavia', type: 'politique' as const, status: 'rompu' as const },
+  { 
+    name: 'Gens Julia', 
+    type: 'politique' as const, 
+    status: 'actif' as const,
+    benefits: ['Influence au Sénat +2', 'Protection contre les rivalités politiques', 'Accès aux marchés d\'Asie']
+  },
+  { 
+    name: 'Gens Claudia', 
+    type: 'matrimoniale' as const, 
+    status: 'en négociation' as const,
+    benefits: ['Soutien militaire potentiel', 'Alliance commerciale avec la Gaule', 'Accès aux ports']
+  },
+  { 
+    name: 'Gens Flavia', 
+    type: 'politique' as const, 
+    status: 'rompu' as const,
+    benefits: []
+  },
 ];
 
 interface FamilyStatisticProps {
@@ -134,6 +149,7 @@ const Index = () => {
                   name={alliance.name}
                   type={alliance.type}
                   status={alliance.status}
+                  benefits={alliance.benefits}
                 />
               ))}
             </div>
