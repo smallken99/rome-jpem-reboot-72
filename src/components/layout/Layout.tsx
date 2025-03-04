@@ -60,7 +60,6 @@ const Navigation = () => {
           </Link>
           <div className="flex items-center gap-4">
             <TimePanel minimal />
-            <button className="roman-btn-outline text-sm py-1 hover:bg-rome-terracotta/10 transition-colors">Fin de Tour</button>
             <div className="w-10 h-10 rounded-full bg-gradient-to-br from-rome-terracotta to-rome-terracotta/70 flex items-center justify-center text-white font-cinzel">
               JA
             </div>
