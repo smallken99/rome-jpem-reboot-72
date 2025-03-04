@@ -7,12 +7,12 @@ const alliances = [
   {
     id: '1',
     name: 'Gens Cornelia',
-    member: 'Gaius Aurelius',
-    spouse: 'Cornelia Minor',
+    member: 'Marcus Aurelius Cotta',
+    spouse: 'Livia Aurelia',
     type: 'matrimoniale' as const,
     status: 'actif' as const,
-    benefits: ['Influence au Sénat +4', 'Relations commerciales'],
-    date: '709 AUC'
+    benefits: ['Stabilité familiale', 'Gestion du patrimoine'],
+    date: '705 AUC'
   },
   {
     id: '2',
@@ -23,26 +23,6 @@ const alliances = [
     status: 'en négociation' as const,
     benefits: ['Soutien militaire', 'Accès aux ports'],
     date: '710 AUC (prévu)'
-  },
-  {
-    id: '3',
-    name: 'Gens Claudia',
-    member: 'Marcus Aurelius (Oncle)',
-    spouse: 'Claudia Major',
-    type: 'matrimoniale' as const,
-    status: 'actif' as const,
-    benefits: ['Protection contre les rivalités', 'Accès aux marchés d\'Asie'],
-    date: '702 AUC'
-  },
-  {
-    id: '4',
-    name: 'Gens Junia',
-    member: 'Lucia Aurelia (Cousine)',
-    spouse: 'Decimus Junius',
-    type: 'matrimoniale' as const,
-    status: 'rompu' as const,
-    benefits: ['Ancien accès aux mines d\'argent'],
-    date: '704 AUC'
   }
 ];
 

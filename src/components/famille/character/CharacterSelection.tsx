@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { StatBox } from '@/components/ui-custom/StatBox';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -18,7 +19,7 @@ export const CharacterSelection: React.FC<CharacterSelectionProps> = ({
   onEditPortrait 
 }) => {
   // Count active alliances from MarriageAlliances.tsx
-  const alliancesCount = 2;
+  const alliancesCount = 1; // Only the active alliance between Marcus and Livia
   
   // Count heirs (male children under 18)
   const heirs = localCharacters.filter(char => 
@@ -41,7 +42,7 @@ export const CharacterSelection: React.FC<CharacterSelectionProps> = ({
         <StatBox 
           title="Alliances matrimoniales" 
           value={alliancesCount.toString()} 
-          description="En augmentation ce semestre"
+          description="Plus une en négociation"
           icon={<Heart className="h-6 w-6" />} 
           trend="up"
           trendValue="+1"
