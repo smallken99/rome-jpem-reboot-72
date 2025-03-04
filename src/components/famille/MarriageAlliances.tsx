@@ -48,7 +48,7 @@ export const MarriageAlliances: React.FC = () => {
       <div className="p-4 mb-4 bg-rome-parchment/50 rounded-md">
         <p className="italic text-muted-foreground">
           Les alliances matrimoniales sont essentielles pour étendre l'influence de votre Gens.
-          Créez de nouvelles alliances ou renforcez celles existantes pour assurer la prospérité de votre famille.
+          Elles sont gérées automatiquement par les familles nobles selon les traditions romaines.
         </p>
       </div>
       
@@ -56,12 +56,6 @@ export const MarriageAlliances: React.FC = () => {
         {alliances.map(alliance => (
           <AllianceCard key={alliance.id} alliance={alliance} />
         ))}
-      </div>
-      
-      <div className="mt-4 flex justify-end">
-        <button className="roman-btn-outline text-sm">
-          <span className="mr-2">+</span> Proposer une Alliance
-        </button>
       </div>
     </div>
   );
@@ -143,14 +137,6 @@ const AllianceCard: React.FC<AllianceCardProps> = ({ alliance }) => {
           ))}
         </ul>
       </div>
-      
-      {alliance.status !== 'broken' && (
-        <div className="mt-3 flex justify-end">
-          <button className="text-sm text-rome-terracotta hover:underline">
-            Gérer l'alliance
-          </button>
-        </div>
-      )}
     </div>
   );
 };
