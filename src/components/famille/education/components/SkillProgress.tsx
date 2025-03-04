@@ -15,7 +15,7 @@ export const SkillProgress: React.FC<SkillProgressProps> = ({ baseProgress, pity
     <div className="mt-3">
       <p className="text-xs text-muted-foreground flex items-center gap-1">
         <BookOpen className="h-3 w-3" />
-        Maîtrise des compétences:
+        Progression des compétences:
       </p>
       <div className="mt-1 h-2 bg-muted rounded-full">
         <div 
@@ -30,7 +30,7 @@ export const SkillProgress: React.FC<SkillProgressProps> = ({ baseProgress, pity
       </div>
       {pityBonus > 0 && (
         <p className="text-xs text-green-600 mt-1">
-          Le bonus de piété augmente la vitesse de progression des compétences.
+          Le bonus de piété accélère l'acquisition des compétences.
         </p>
       )}
     </div>

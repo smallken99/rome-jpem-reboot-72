@@ -18,25 +18,25 @@ export const CharacterStats: React.FC<CharacterStatsProps> = ({ stats, className
         return { 
           maxFromEducation: 'illimitée', 
           capNote: true,
-          description: 'La popularité peut dépasser 200 selon les événements'
+          description: 'La popularité peut dépasser 200 selon vos actions politiques'
         };
       case 'oratory':
         return { 
           maxFromEducation: '80', 
           capNote: true,
-          description: 'L\'éducation peut augmenter l\'éloquence jusqu\'à 80 points'
+          description: 'L\'éducation rhétorique peut augmenter l\'éloquence jusqu\'à 80 points'
         };
       case 'piety':
         return { 
           maxFromEducation: '80', 
           capNote: true,
-          description: 'L\'éducation peut augmenter la piété jusqu\'à 80 points'
+          description: 'La formation religieuse peut augmenter la piété jusqu\'à 80 points'
         };
       case 'martialEducation':
         return { 
           maxFromEducation: '80', 
           capNote: true,
-          description: 'L\'éducation peut augmenter l\'éducation martiale jusqu\'à 80 points'
+          description: 'L\'entraînement militaire peut augmenter l\'éducation martiale jusqu\'à 80 points'
         };
       default:
         return { 

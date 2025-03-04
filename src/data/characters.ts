@@ -16,7 +16,7 @@ export const characters: Character[] = [
         value: 144,
         maxValue: 200,
         icon: 'popularity',
-        description: 'Influence auprès du peuple de Rome',
+        description: 'Influence auprès du peuple et des citoyens romains',
         color: 'gold'
       },
       oratory: {
@@ -24,7 +24,7 @@ export const characters: Character[] = [
         value: 170,
         maxValue: 200,
         icon: 'oratory',
-        description: 'Capacité à convaincre et à s\'exprimer',
+        description: 'Art de la persuasion et capacité à s\'exprimer en public',
         color: 'terracotta'
       },
       piety: {
@@ -32,7 +32,7 @@ export const characters: Character[] = [
         value: 120,
         maxValue: 200,
         icon: 'piety',
-        description: 'Dévotion envers les dieux romains',
+        description: 'Respect et dévotion envers les dieux de Rome',
         color: 'navy'
       },
       martialEducation: {
@@ -40,7 +40,7 @@ export const characters: Character[] = [
         value: 136,
         maxValue: 200,
         icon: 'martialEducation',
-        description: 'Formation militaire et stratégique',
+        description: 'Maîtrise des arts militaires et de la stratégie',
         color: 'red'
       }
     }
@@ -59,7 +59,7 @@ export const characters: Character[] = [
         value: 130,
         maxValue: 200,
         icon: 'popularity',
-        description: 'Influence dans la haute société romaine',
+        description: 'Influence dans la haute société et les cercles patriciens',
         color: 'gold'
       },
       oratory: {
@@ -67,7 +67,7 @@ export const characters: Character[] = [
         value: 156,
         maxValue: 200,
         icon: 'oratory',
-        description: 'Art de la conversation et de la persuasion',
+        description: 'Art de la conversation et habileté sociale',
         color: 'terracotta'
       },
       piety: {
@@ -75,7 +75,7 @@ export const characters: Character[] = [
         value: 164,
         maxValue: 200,
         icon: 'piety',
-        description: 'Respect des traditions religieuses (les femmes ont un bonus naturel)',
+        description: 'Dévotion aux cultes et traditions religieuses romaines',
         color: 'navy'
       },
       martialEducation: {
@@ -83,7 +83,7 @@ export const characters: Character[] = [
         value: 0,
         maxValue: 200,
         icon: 'martialEducation',
-        description: 'Connaissance de la stratégie militaire (non disponible pour les femmes)',
+        description: 'Connaissance des stratégies militaires (non disponible)',
         color: 'red'
       }
     }
@@ -102,7 +102,7 @@ export const characters: Character[] = [
         value: 80,
         maxValue: 200,
         icon: 'popularity',
-        description: 'Reconnaissance parmi les jeunes patriciens',
+        description: 'Reconnaissance parmi les jeunes patriciens romains',
         color: 'gold'
       },
       oratory: {
@@ -110,7 +110,7 @@ export const characters: Character[] = [
         value: 110,
         maxValue: 200,
         icon: 'oratory',
-        description: 'Apprentissage de la rhétorique',
+        description: 'Formation à l\'art oratoire et à la rhétorique',
         color: 'terracotta'
       },
       piety: {
@@ -118,7 +118,7 @@ export const characters: Character[] = [
         value: 90,
         maxValue: 200,
         icon: 'piety',
-        description: 'Participation aux rites religieux',
+        description: 'Apprentissage et participation aux rites religieux',
         color: 'navy'
       },
       martialEducation: {
@@ -126,7 +126,7 @@ export const characters: Character[] = [
         value: 120,
         maxValue: 200,
         icon: 'martialEducation',
-        description: 'Formation militaire en cours',
+        description: 'Entraînement aux armes et à la tactique militaire',
         color: 'red'
       }
     }
@@ -145,7 +145,7 @@ export const characters: Character[] = [
         value: 70,
         maxValue: 200,
         icon: 'popularity',
-        description: 'Charme naturel et relations sociales',
+        description: 'Charme naturel et relations sociales naissantes',
         color: 'gold'
       },
       oratory: {
@@ -153,7 +153,7 @@ export const characters: Character[] = [
         value: 84,
         maxValue: 200,
         icon: 'oratory',
-        description: 'Éducation à l\'art de la conversation',
+        description: 'Apprentissage de l\'art de la conversation',
         color: 'terracotta'
       },
       piety: {
@@ -161,7 +161,7 @@ export const characters: Character[] = [
         value: 130,
         maxValue: 200,
         icon: 'piety',
-        description: 'Dévotion aux cultes féminins romains',
+        description: 'Éducation religieuse et participation aux cultes féminins',
         color: 'navy'
       },
       martialEducation: {
@@ -169,7 +169,7 @@ export const characters: Character[] = [
         value: 0,
         maxValue: 200,
         icon: 'martialEducation',
-        description: 'Connaissance de la stratégie militaire (non disponible pour les femmes)',
+        description: 'Connaissance des stratégies militaires (non disponible)',
         color: 'red'
       }
     }
