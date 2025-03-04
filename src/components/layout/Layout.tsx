@@ -5,38 +5,11 @@ import { Laurels } from '../ui-custom/Laurels';
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Toaster } from "@/components/ui/sonner";
 import { TimePanel } from '@/components/time/TimePanel';
-import { 
-  Home, 
-  Users, 
-  Building, 
-  Coins, 
-  MessageSquare,
-  CalendarDays, 
-  ScrollText,
-  BarChart,
-  Menu,
-  X,
-  ChevronRight,
-  BookOpen,
-  Landmark
-} from 'lucide-react';
+import { Menu, X } from 'lucide-react';
+import { SidebarNavigation } from './SidebarNavigation';
 
 const Navigation = () => {
-  const location = useLocation();
   const [isMenuOpen, setIsMenuOpen] = React.useState(false);
-  
-  const navItems = [
-    { path: '/', label: 'Vue Générale', icon: <Home className="h-5 w-5" /> },
-    { path: '/famille', label: 'Famille', icon: <Users className="h-5 w-5" /> },
-    { path: '/patrimoine', label: 'Patrimoine', icon: <Building className="h-5 w-5" /> },
-    { path: '/clientele', label: 'Clientèle', icon: <Users className="h-5 w-5" /> },
-    { path: '/registre', label: 'Registre', icon: <ScrollText className="h-5 w-5" /> },
-    { path: '/religion', label: 'Religion', icon: <Landmark className="h-5 w-5" /> },
-    { path: '/messages', label: 'Messages', icon: <MessageSquare className="h-5 w-5" /> },
-    { path: '/rapports', label: 'Rapports', icon: <BarChart className="h-5 w-5" /> },
-  ];
-  
-  const isActive = (path: string) => location.pathname === path;
   
   const toggleMenu = () => setIsMenuOpen(!isMenuOpen);
   
@@ -69,23 +42,8 @@ const Navigation = () => {
         </div>
         
         <ScrollArea className="h-[calc(100vh-4rem)] md:h-auto">
-          <div className="md:flex md:justify-center md:space-x-1 p-4">
-            {navItems.map((item) => (
-              <Link
-                key={item.path}
-                to={item.path}
-                className={`flex items-center gap-2 p-2 my-1 md:my-0 rounded-md transition-all duration-200 ${
-                  isActive(item.path) 
-                    ? 'bg-gradient-to-r from-rome-terracotta/20 via-rome-terracotta/10 to-transparent text-rome-terracotta' 
-                    : 'hover:bg-rome-gold/10 text-rome-navy hover:text-rome-terracotta'
-                }`}
-                onClick={() => setIsMenuOpen(false)}
-              >
-                {item.icon}
-                <span className="font-cinzel tracking-wide">{item.label}</span>
-                {isActive(item.path) && <ChevronRight className="h-4 w-4 ml-auto" />}
-              </Link>
-            ))}
+          <div className="p-4">
+            <SidebarNavigation />
           </div>
         </ScrollArea>
       </nav>

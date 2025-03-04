@@ -1,136 +1,118 @@
 
-import React, { useState } from 'react';
+import React from 'react';
+import { Routes, Route, Navigate } from 'react-router-dom';
 import Layout from '@/components/layout/Layout';
-import { PageHeader } from '@/components/ui-custom/PageHeader';
-import { CharacterSelection } from '@/components/famille/character/CharacterSelection';
 import { FamilySections } from '@/components/famille/sections/FamilySections';
-import { PortraitDialog } from '@/components/famille/character/PortraitDialog';
+import { CharacterSelection } from '@/components/famille/character/CharacterSelection';
+import { PageHeader } from '@/components/ui-custom/PageHeader';
+import { FamilyTree } from '@/components/famille/FamilyTree';
+import { MarriageAlliances } from '@/components/famille/MarriageAlliances';
+import { Education } from '@/components/famille/Education';
+import { Inheritance } from '@/components/famille/Inheritance';
 import { characters } from '@/data/characters';
-import { useToast } from '@/components/ui/use-toast';
-import { Character } from '@/types/character';
 
-const Famille = () => {
-  const [localCharacters, setLocalCharacters] = useState(characters);
-  const [activeCharacter, setActiveCharacter] = useState(characters[0]);
-  const [selectedCharacterId, setSelectedCharacterId] = useState<string | null>(null);
-  const [portraitUrl, setPortraitUrl] = useState("");
-  const { toast } = useToast();
+const FamilleMain = () => {
+  const [localCharacters, setLocalCharacters] = React.useState(characters);
 
-  // Handler to update character portrait
-  const handlePortraitChange = (characterId: string, newPortraitUrl: string) => {
-    if (!newPortraitUrl.trim()) {
-      toast({
-        title: "URL invalide",
-        description: "Veuillez saisir une URL d'image valide.",
-        variant: "destructive",
-        duration: 3000,
-      });
-      return;
-    }
-    
-    // Update the local characters state
-    const updatedCharacters = localCharacters.map(char => {
-      if (char.id === characterId) {
-        return {
-          ...char,
-          portrait: newPortraitUrl
-        };
-      }
-      return char;
-    });
-    
-    setLocalCharacters(updatedCharacters);
-    
-    // Show success toast
-    toast({
-      title: "Portrait mis à jour",
-      description: "Le portrait du personnage a été changé avec succès.",
-      duration: 3000,
-    });
-    
-    // Close the dialog
-    setSelectedCharacterId(null);
+  const handleChildBirth = (child: any) => {
+    setLocalCharacters(prev => [...prev, child]);
   };
 
-  // Handler to open portrait edit dialog
-  const handleEditPortrait = (characterId: string) => {
-    setSelectedCharacterId(characterId);
-    setPortraitUrl("");
-  };
-
-  // Handler for adding a new child to the family
-  const handleChildBirth = (newChild: Character) => {
-    setLocalCharacters(prev => [...prev, newChild]);
-    
-    // Show success toast
-    toast({
-      title: "Naissance",
-      description: `${newChild.name} est né(e) dans votre famille!`,
-      duration: 3000,
-    });
-  };
-
-  // Handler for character name changes
   const handleNameChange = (characterId: string, newName: string) => {
-    if (!newName.trim()) {
-      toast({
-        title: "Nom invalide",
-        description: "Le nom ne peut pas être vide.",
-        variant: "destructive",
-        duration: 3000,
-      });
-      return;
-    }
-
-    // Update the local characters state
-    const updatedCharacters = localCharacters.map(char => {
-      if (char.id === characterId) {
-        return {
-          ...char,
-          name: newName
-        };
-      }
-      return char;
-    });
-    
-    setLocalCharacters(updatedCharacters);
-    
-    // Show success toast
-    toast({
-      title: "Nom mis à jour",
-      description: "Le nom du personnage a été changé avec succès.",
-      duration: 3000,
-    });
+    setLocalCharacters(prev => 
+      prev.map(char => 
+        char.id === characterId ? { ...char, name: newName } : char
+      )
+    );
   };
 
   return (
     <Layout>
-      <PageHeader
+      <PageHeader 
         title="Famille"
-        subtitle="Gérez votre dynastie et assurez l'avenir de votre Gens"
+        subtitle="Gérez les membres de votre famille, les alliances et l'héritage"
       />
-
+      
       <CharacterSelection 
         localCharacters={localCharacters}
-        activeCharacter={activeCharacter}
-        onEditPortrait={handleEditPortrait}
         onNameChange={handleNameChange}
       />
       
-      <PortraitDialog 
-        selectedCharacterId={selectedCharacterId}
-        portraitUrl={portraitUrl}
-        onClose={() => setSelectedCharacterId(null)}
-        onPortraitChange={handlePortraitChange}
-        onPortraitUrlChange={setPortraitUrl}
-      />
-
       <FamilySections 
         characters={localCharacters}
         onChildBirth={handleChildBirth}
         onNameChange={handleNameChange}
       />
     </Layout>
+  );
+};
+
+const ArbreGenealogique = () => {
+  return (
+    <Layout>
+      <PageHeader 
+        title="Arbre Généalogique"
+        subtitle="Visualisez les liens familiaux et l'histoire de votre lignée"
+      />
+      <div className="roman-card">
+        <FamilyTree characters={characters} />
+      </div>
+    </Layout>
+  );
+};
+
+const Alliances = () => {
+  return (
+    <Layout>
+      <PageHeader 
+        title="Alliances Matrimoniales"
+        subtitle="Gérez les alliances avec d'autres familles"
+      />
+      <div className="roman-card">
+        <MarriageAlliances characters={characters} />
+      </div>
+    </Layout>
+  );
+};
+
+const EducationPage = () => {
+  return (
+    <Layout>
+      <PageHeader 
+        title="Éducation des Enfants"
+        subtitle="Dirigez l'éducation de la prochaine génération"
+      />
+      <div className="roman-card">
+        <Education characters={characters} />
+      </div>
+    </Layout>
+  );
+};
+
+const Heritage = () => {
+  return (
+    <Layout>
+      <PageHeader 
+        title="Héritage et Testaments"
+        subtitle="Gérez la succession et la transmission du patrimoine"
+      />
+      <div className="roman-card">
+        <Inheritance />
+      </div>
+    </Layout>
+  );
+};
+
+const Famille = () => {
+  return (
+    <Routes>
+      <Route path="/" element={<FamilleMain />} />
+      <Route path="/arbre" element={<ArbreGenealogique />} />
+      <Route path="/alliances" element={<Alliances />} />
+      <Route path="/education" element={<EducationPage />} />
+      <Route path="/heritage" element={<Heritage />} />
+      <Route path="*" element={<Navigate to="/famille" replace />} />
+    </Routes>
   );
 };
 

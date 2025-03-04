@@ -1,8 +1,8 @@
 
 import React from 'react';
-import { Button } from '@/components/ui/button';
 import { ChevronRight, Star, MessageSquare } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { ActionButton } from '@/components/ui-custom/ActionButton';
 
 interface CardActionsProps {
   clientId: number;
@@ -30,32 +30,31 @@ export const CardActions: React.FC<CardActionsProps> = ({ clientId }) => {
   return (
     <div className="flex items-center justify-between mt-5 pt-4 border-t border-rome-gold/20">
       <div className="flex gap-1">
-        <Button 
+        <ActionButton 
           variant="outline" 
           size="sm"
           onClick={handleFavor}
-          className="roman-btn-outline text-xs h-8 px-2"
-        >
-          <Star className="h-3.5 w-3.5" />
-        </Button>
-        <Button 
+          icon={<Star className="h-3.5 w-3.5" />}
+          label=""
+          className="text-xs h-8 px-2"
+        />
+        <ActionButton 
           variant="outline" 
           size="sm"
           onClick={handleContact}
-          className="roman-btn-outline text-xs h-8 px-2"
-        >
-          <MessageSquare className="h-3.5 w-3.5" />
-        </Button>
+          icon={<MessageSquare className="h-3.5 w-3.5" />}
+          label=""
+          className="text-xs h-8 px-2"
+        />
       </div>
       
-      <Button 
+      <ActionButton
         variant="outline" 
         onClick={handleViewDetails}
-        className="roman-btn-outline text-xs gap-1 py-1 h-8"
-      >
-        Détails
-        <ChevronRight className="h-3.5 w-3.5" />
-      </Button>
+        label="Détails"
+        icon={<ChevronRight className="ml-1 h-3.5 w-3.5" />}
+        className="text-xs gap-1 py-1 h-8"
+      />
     </div>
   );
 };

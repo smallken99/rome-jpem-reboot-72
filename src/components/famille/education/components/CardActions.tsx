@@ -1,5 +1,6 @@
 
 import React from 'react';
+import { ActionButton } from '@/components/ui-custom/ActionButton';
 
 interface CardActionsProps {
   educationType: string;
@@ -19,13 +20,17 @@ export const CardActions: React.FC<CardActionsProps> = ({
   return (
     <div className="mt-4 flex justify-end gap-2">
       {hasEducation && (
-        <button className="roman-btn-outline text-xs bg-rome-navy/5 hover:bg-rome-navy/10">
-          Changer de précepteur
-        </button>
+        <ActionButton 
+          variant="outline"
+          label="Changer de précepteur"
+          className="text-xs bg-rome-navy/5 hover:bg-rome-navy/10"
+        />
       )}
-      <button className="roman-btn-outline text-xs">
-        {hasEducation ? 'Modifier' : 'Assigner'}
-      </button>
+      <ActionButton 
+        variant="outline"
+        label={hasEducation ? 'Modifier' : 'Assigner'}
+        className="text-xs"
+      />
     </div>
   );
 };
