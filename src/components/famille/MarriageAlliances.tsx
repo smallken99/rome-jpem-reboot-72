@@ -48,6 +48,9 @@ const alliances = [
 ];
 
 export const MarriageAlliances: React.FC = () => {
+  // Filter alliances to only show active ones
+  const activeAlliances = alliances.filter(alliance => alliance.status === 'actif');
+  
   return (
     <div className="marriage-alliances">
       <div className="p-4 mb-4 bg-rome-parchment/50 rounded-md">
@@ -58,7 +61,7 @@ export const MarriageAlliances: React.FC = () => {
       </div>
       
       <div className="space-y-4">
-        {alliances.map(alliance => (
+        {activeAlliances.map(alliance => (
           <div key={alliance.id} className="border rounded-md overflow-hidden">
             <div className="p-3 border-b bg-muted/30">
               <div className="flex items-center gap-2">
@@ -80,6 +83,12 @@ export const MarriageAlliances: React.FC = () => {
           </div>
         ))}
       </div>
+      
+      {activeAlliances.length === 0 && (
+        <div className="text-center p-4 text-muted-foreground italic">
+          Aucune alliance active pour le moment.
+        </div>
+      )}
     </div>
   );
 };
