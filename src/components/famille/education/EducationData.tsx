@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { GraduationCap, Sword, Building, ScrollText, ShieldQuestion, Coins, BookOpen } from 'lucide-react';
+import { GraduationCap, Sword, Building, ScrollText, ShieldQuestion, BookOpen } from 'lucide-react';
 
 // Sample education data with children
 export const children = [
@@ -74,11 +74,6 @@ export const specialties = {
     'Stoïcisme et éthique politique', 'Administration provinciale', 'Diplomatie',
     'Histoire romaine', 'Grec ancien', 'Éloquence', 'Philosophie politique'
   ],
-  commercial: [
-    'Commerce maritime', 'Finance et prêts', 'Commerce avec l\'Orient', 'Collecte d\'impôts',
-    'Gestion des domaines agricoles', 'Commerce du vin', 'Commerce du grain',
-    'Négociation commerciale', 'Comptabilité', 'Logistique commerciale', 'Droit commercial'
-  ],
   religious: [
     'Rites et cérémonies', 'Divination et présages', 'Traditions religieuses', 'Culte de Vesta',
     'Lecture des entrailles', 'Interprétation des augures', 'Rituels funéraires',
@@ -90,7 +85,6 @@ export const specialties = {
 export const titles = {
   military: ['Centurion', 'Tribune', 'Vétéran', 'Légat', 'Instructeur', 'Praetor', 'Optio', 'Aquilifer'],
   political: ['Sénateur', 'Orateur', 'Consul', 'Juriste', 'Philosophe', 'Questeur', 'Édile', 'Magistrat'],
-  commercial: ['Negotiator', 'Argentarius', 'Mercator', 'Publicanus', 'Agricola', 'Navarchus', 'Institor', 'Vilicus'],
   religious: ['Pontifex', 'Augure', 'Flamine', 'Vestale', 'Haruspice', 'Rex Sacrorum', 'Salii', 'Fetiales']
 };
 
@@ -119,7 +113,7 @@ export const educationPaths = [
     icon: <Building className="h-5 w-5" />,
     title: 'Éducation Politique',
     description: 'Éducation en rhétorique, droit et philosophie pour exceller au Sénat.',
-    minAge: 10,
+    minAge: 8, // Reduced from 10 to 8
     suitableFor: 'both',
     benefits: ['Éloquence', 'Réseau politique', 'Prestige au Sénat'],
     careers: ['Questeur', 'Édile', 'Préteur', 'Consul'],
@@ -132,27 +126,11 @@ export const educationPaths = [
     ]
   },
   {
-    type: 'commercial',
-    icon: <Coins className="h-5 w-5" />,
-    title: 'Éducation Commerciale',
-    description: 'Formation à la gestion des finances, commerce maritime et administration des terres.',
-    minAge: 14,
-    suitableFor: 'both',
-    benefits: ['Prospérité économique', 'Réseau commercial', 'Gestion efficace des terres'],
-    careers: ['Negotiator', 'Publicani', 'Argentarii'],
-    duration: 3,
-    annualCurriculum: [
-      { year: 1, name: "Fondamentaux du Commerce", skills: ["Comptabilité", "Évaluation des marchandises", "Gestion d'entrepôt"] },
-      { year: 2, name: "Commerce Maritime", skills: ["Cartographie", "Droit maritime", "Finance d'expédition"] },
-      { year: 3, name: "Négociations Commerciales", skills: ["Commerce international", "Contrats légaux", "Gestion des crises"] }
-    ]
-  },
-  {
     type: 'religious',
     icon: <ScrollText className="h-5 w-5" />,
     title: 'Éducation Religieuse',
     description: 'Étude des rites sacrés, divination et traditions religieuses romaines.',
-    minAge: 12,
+    minAge: 6, // Reduced from 12 to 6
     suitableFor: 'both',
     benefits: ['Prestige religieux', 'Influence spirituelle', 'Exemption militaire'],
     careers: ['Pontife', 'Augure', 'Flamine', 'Vestale (femmes uniquement)'],
