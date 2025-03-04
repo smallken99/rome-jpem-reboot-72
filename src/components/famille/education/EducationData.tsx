@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { GraduationCap, Sword, Building, ScrollText, ShieldQuestion, BookOpen } from 'lucide-react';
 
@@ -11,6 +12,7 @@ export const children = [
     currentEducation: {
       type: 'military',
       mentor: 'Centurion Flavius Aquila',
+      speciality: 'Tactique de bataille',
       progress: 65,
       pityBonus: 10, // Piety bonus from religious activities
       skills: ['Tactique de base', 'Maniement du glaive', 'Discipline militaire'],
@@ -26,6 +28,7 @@ export const children = [
     currentEducation: {
       type: 'political',
       mentor: 'Sénateur Marcus Porcius',
+      speciality: 'Rhétorique avancée',
       progress: 40,
       pityBonus: 5, // Small piety bonus
       skills: ['Rhétorique', 'Histoire romaine', 'Poésie grecque'],

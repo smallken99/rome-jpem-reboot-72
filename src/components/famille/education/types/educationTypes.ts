@@ -18,6 +18,7 @@ export type ChildEducation = {
   mentor: string | null;
   progress: number;
   skills: string[];
+  speciality?: string;
   pityBonus?: number;
   yearsCompleted?: number;
   totalYears?: number;

@@ -88,7 +88,7 @@ const ChildEducationCard: React.FC<ChildEducationCardProps> = ({ child, onChange
                 
                 <MentorInfo 
                   mentor={child.currentEducation.mentor} 
-                  skills={child.currentEducation.skills}
+                  speciality={child.currentEducation.speciality}
                 />
               </div>
               
