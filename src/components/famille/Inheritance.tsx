@@ -1,10 +1,11 @@
+
 import React, { useState } from 'react';
 import { ScrollText, Home, Coins, User, Crown } from 'lucide-react';
 import { Separator } from '@/components/ui/separator';
 import { characters } from '@/data/characters';
 import { Button } from '@/components/ui/button';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useToast } from '@/components/ui/use-toast';
+import { RomanCard } from '@/components/ui-custom/RomanCard';
 
 export const Inheritance: React.FC = () => {
   const eligibleHeirs = characters.filter(char => 
@@ -68,54 +69,27 @@ export const Inheritance: React.FC = () => {
         </div>
       </div>
       
-      <Tabs defaultValue="heirs" className="w-full">
-        <TabsList className="w-full grid grid-cols-2 mb-4">
-          <TabsTrigger value="heirs" className="font-cinzel">Héritiers Potentiels</TabsTrigger>
-          <TabsTrigger value="laws" className="font-cinzel">Lois de Succession</TabsTrigger>
-        </TabsList>
+      <div className="heirs-section space-y-4">
+        <div className="flex items-center gap-2 mb-3">
+          <User className="h-5 w-5 text-rome-terracotta" />
+          <h3 className="font-cinzel text-lg">Héritiers Potentiels</h3>
+        </div>
         
-        <TabsContent value="heirs" className="space-y-4">
-          {eligibleHeirs.length > 0 ? (
-            eligibleHeirs.map(heir => (
-              <HeirCard 
-                key={heir.id} 
-                heir={heir} 
-                isSelected={heir.id === selectedHeirId}
-                onSelect={handleHeirSelection}
-              />
-            ))
-          ) : (
-            <div className="text-center p-4 border border-dashed border-muted rounded-md">
-              <p className="text-muted-foreground">Aucun héritier potentiel n'a été trouvé dans votre famille.</p>
-            </div>
-          )}
-        </TabsContent>
-        
-        <TabsContent value="laws" className="space-y-4">
-          <div className="roman-card p-4">
-            <h4 className="font-cinzel text-base mb-2">Lois de Succession Romaines</h4>
-            <p className="text-sm text-muted-foreground mb-2">
-              Le droit romain favorisait la ligne masculine et l'aînesse, mais le pater familias avait 
-              une grande liberté dans le choix de son héritier principal.
-            </p>
-            
-            <ul className="space-y-2 text-sm">
-              <li className="flex items-start gap-2">
-                <div className="mt-1 h-2 w-2 rounded-full bg-rome-terracotta shrink-0" />
-                <p>L'héritier principal (heres) recevait la majorité des propriétés et du patrimoine familial.</p>
-              </li>
-              <li className="flex items-start gap-2">
-                <div className="mt-1 h-2 w-2 rounded-full bg-rome-terracotta shrink-0" />
-                <p>Les filles pouvaient hériter mais recevaient généralement une dot de mariage plutôt que des terres.</p>
-              </li>
-              <li className="flex items-start gap-2">
-                <div className="mt-1 h-2 w-2 rounded-full bg-rome-terracotta shrink-0" />
-                <p>Un testament devait être validé par le Sénat pour être considéré comme légal.</p>
-              </li>
-            </ul>
+        {eligibleHeirs.length > 0 ? (
+          eligibleHeirs.map(heir => (
+            <HeirCard 
+              key={heir.id} 
+              heir={heir} 
+              isSelected={heir.id === selectedHeirId}
+              onSelect={handleHeirSelection}
+            />
+          ))
+        ) : (
+          <div className="text-center p-4 border border-dashed border-muted rounded-md">
+            <p className="text-muted-foreground">Aucun héritier potentiel n'a été trouvé dans votre famille.</p>
           </div>
-        </TabsContent>
-      </Tabs>
+        )}
+      </div>
     </div>
   );
 };
@@ -136,7 +110,7 @@ const HeirCard: React.FC<HeirCardProps> = ({ heir, isSelected, onSelect }) => {
   const relation = heir.role || (heir.gender === 'male' ? 'Fils' : 'Fille');
   
   return (
-    <div className={`roman-card p-3 transition-all ${isSelected ? 'border-l-4 border-l-rome-gold bg-rome-gold/5' : ''}`}>
+    <RomanCard className={`p-3 transition-all ${isSelected ? 'border-l-4 border-l-rome-gold bg-rome-gold/5' : ''}`}>
       <div className="flex justify-between items-start">
         <div>
           <h4 className="font-cinzel">{heir.name}</h4>
@@ -182,6 +156,6 @@ const HeirCard: React.FC<HeirCardProps> = ({ heir, isSelected, onSelect }) => {
           </p>
         </div>
       )}
-    </div>
+    </RomanCard>
   );
 };
