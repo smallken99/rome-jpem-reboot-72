@@ -18,16 +18,18 @@ export const CharacterSelection: React.FC<CharacterSelectionProps> = ({
   activeCharacter, 
   onEditPortrait 
 }) => {
-  // Count active alliances (2 from MarriageAlliances.tsx)
+  // Count active alliances from MarriageAlliances.tsx
   const alliancesCount = 2;
   
-  // Count heirs (male children - just Titus)
+  // Count heirs (male children under 18)
   const heirs = localCharacters.filter(char => 
-    char.gender === 'male' && char.age < 18 && char.role?.includes('Fils')
+    char.gender === 'male' && char.age < 18
   ).length;
   
-  // Count all family members (including extended family mentioned in alliances)
-  const familyMembersCount = localCharacters.length + 4; // 4 for extended members in alliances
+  // Count all family members including characters and extended family in alliances
+  // 4 additional members: Cornelia Minor, Quintus Fabius, Claudia Major, Decimus Junius
+  const extendedFamilyCount = 4;
+  const familyMembersCount = localCharacters.length + extendedFamilyCount;
   
   return (
     <>
