@@ -5,6 +5,7 @@ import { CharacterStats } from './CharacterStats';
 import { RomanCard } from '@/components/ui-custom/RomanCard';
 import { Badge } from '@/components/ui/badge';
 import { User, Calendar, Crown, ShieldX } from 'lucide-react';
+import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 
 interface CharacterSheetProps {
   character: Character;
@@ -23,6 +24,20 @@ export const CharacterSheet: React.FC<CharacterSheetProps> = ({ character, class
     character.stats.martialEducation
   ];
 
+  // Get initials for avatar fallback
+  const getInitials = (name: string) => {
+    return name
+      .split(' ')
+      .map(part => part[0])
+      .join('')
+      .toUpperCase();
+  };
+
+  // Set fallback background color based on gender
+  const getFallbackColor = () => {
+    return isFemale ? 'bg-rome-terracotta/20' : 'bg-rome-navy/20';
+  };
+
   return (
     <RomanCard className={className}>
       <RomanCard.Header>
@@ -36,18 +51,16 @@ export const CharacterSheet: React.FC<CharacterSheetProps> = ({ character, class
       <RomanCard.Content>
         <div className="flex flex-col md:flex-row gap-4">
           <div className="w-full md:w-1/3">
-            <div className="aspect-square bg-gray-200 rounded-md overflow-hidden mb-4">
-              {character.portrait ? (
-                <img 
-                  src={character.portrait} 
-                  alt={character.name} 
-                  className="w-full h-full object-cover"
-                />
-              ) : (
-                <div className="w-full h-full flex items-center justify-center bg-rome-navy/10">
-                  <User className="h-16 w-16 text-rome-navy/30" />
-                </div>
-              )}
+            <div className="aspect-square rounded-md overflow-hidden mb-4 flex items-center justify-center">
+              <Avatar className="w-full h-full rounded-md">
+                {character.portrait ? (
+                  <AvatarImage src={character.portrait} alt={character.name} className="object-cover" />
+                ) : (
+                  <AvatarFallback className={`${getFallbackColor()} text-4xl font-cinzel w-full h-full`}>
+                    {getInitials(character.name)}
+                  </AvatarFallback>
+                )}
+              </Avatar>
             </div>
             
             <div className="space-y-2">
