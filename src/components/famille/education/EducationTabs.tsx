@@ -14,7 +14,7 @@ type Preceptor = {
   speciality: string;
   reputation: 'Excellent' | 'Bon' | 'Moyen';
   fee: number;
-  statBonus: number; // Include statBonus to match the type in Education.tsx
+  statBonus: number;
 };
 
 type PreceptorsByType = {
@@ -34,6 +34,15 @@ export const EducationTabs: React.FC<EducationTabsProps> = ({
   preceptors, 
   refreshPreceptors 
 }) => {
+  // Helper function to explain stat inheritance and education limits
+  const getStatInheritanceInfo = (statName: string) => {
+    const isPopularity = statName === 'popularity';
+    return {
+      inheritanceNote: `Un enfant hérite d'un tiers des caractéristiques combinées de ses parents (divisées par 2).`,
+      maxValue: isPopularity ? 'illimitée' : '40',
+    };
+  };
+
   return (
     <Tabs value={activeTab} onValueChange={setActiveTab} className="mt-6">
       <TabsList className="w-full justify-start bg-white border border-rome-gold/30 mb-6">
@@ -58,6 +67,12 @@ export const EducationTabs: React.FC<EducationTabsProps> = ({
               <ChildEducationCard key={child.id} child={child} />
             ))}
           </div>
+          
+          <div className="mt-6 p-3 bg-muted rounded text-sm">
+            <p className="font-medium mb-1">Hérédité et éducation:</p>
+            <p>À la naissance, un personnage hérite d'un tiers des caractéristiques combinées de ses parents (divisées par 2).</p>
+            <p className="mt-1">L'éducation permet ensuite d'augmenter ces caractéristiques jusqu'à un maximum de 40 (sauf pour la popularité qui est illimitée).</p>
+          </div>
         </div>
       </TabsContent>
       
@@ -67,6 +82,16 @@ export const EducationTabs: React.FC<EducationTabsProps> = ({
             {educationPaths.map((path, idx) => (
               <EducationPathCard key={idx} path={path} />
             ))}
+          </div>
+          
+          <div className="mt-6 p-3 bg-muted rounded text-sm">
+            <p className="font-medium mb-1">Limites d'éducation par caractéristique:</p>
+            <ul className="list-disc pl-5 mt-1">
+              <li>Popularité: valeur maximale illimitée</li>
+              <li>Éloquence: valeur maximale de 40 par éducation</li>
+              <li>Piété: valeur maximale de 40 par éducation</li>
+              <li>Éducation Martiale: valeur maximale de 40 par éducation</li>
+            </ul>
           </div>
         </div>
       </TabsContent>

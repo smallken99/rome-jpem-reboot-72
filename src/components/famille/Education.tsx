@@ -19,12 +19,16 @@ type Preceptor = {
   speciality: string;
   reputation: 'Excellent' | 'Bon' | 'Moyen';
   fee: number;
-  statBonus: number; // Add stat bonus field
+  statBonus: number;
 };
 
 type PreceptorsByType = {
   [key: string]: Preceptor[];
 };
+
+// Constants for the education system
+const MAX_STAT_VALUE_FROM_EDUCATION = 40;
+const MAX_POPULARITY = 100; // Unlimited in practice, but we set a high cap
 
 export const Education: React.FC = () => {
   const [activeTab, setActiveTab] = useState("current");
@@ -44,7 +48,15 @@ export const Education: React.FC = () => {
         const speciality = generateSpeciality(path.type);
         const reputation = generateReputation();
         const fee = generateFee(reputation);
-        const statBonus = generateStatBonus(reputation); // Generate stat bonus based on reputation
+        
+        // Generate stat bonus based on reputation, respecting the maximum allowed value
+        let statBonus = generateStatBonus(reputation);
+        
+        // Apply maximum stat bonus cap based on path type
+        if (path.type === 'political' || path.type === 'religious' || path.type === 'military') {
+          // Ensure the bonus doesn't exceed the max value from education
+          statBonus = Math.min(statBonus, MAX_STAT_VALUE_FROM_EDUCATION - 30); // Leaving room for growth
+        }
         
         pathPreceptors.push({
           id: `${path.type}-${i}`,
