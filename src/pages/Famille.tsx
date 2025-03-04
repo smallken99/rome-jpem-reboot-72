@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import Layout from '@/components/layout/Layout';
 import { PageHeader } from '@/components/ui-custom/PageHeader';
 import { RomanCard } from '@/components/ui-custom/RomanCard';
@@ -7,11 +7,16 @@ import { FamilyTree } from '@/components/famille/FamilyTree';
 import { MarriageAlliances } from '@/components/famille/MarriageAlliances';
 import { Inheritance } from '@/components/famille/Inheritance';
 import { Education } from '@/components/famille/Education';
+import { CharacterSheet } from '@/components/famille/CharacterSheet';
 import { StatBox } from '@/components/ui-custom/StatBox';
 import { Separator } from '@/components/ui/separator';
-import { Users, Heart, ScrollText, GraduationCap } from 'lucide-react';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Users, Heart, ScrollText, GraduationCap, User } from 'lucide-react';
+import { characters } from '@/data/characters';
 
 const Famille = () => {
+  const [activeCharacter, setActiveCharacter] = useState(characters[0]);
+
   return (
     <Layout>
       <PageHeader
@@ -43,14 +48,39 @@ const Famille = () => {
       </div>
 
       <div className="mb-8">
-        <RomanCard className="mb-8">
-          <RomanCard.Header>
-            <h3 className="font-cinzel text-lg text-rome-navy">Arbre Généalogique</h3>
-          </RomanCard.Header>
-          <RomanCard.Content>
-            <FamilyTree />
-          </RomanCard.Content>
-        </RomanCard>
+        <Tabs defaultValue="characters" className="w-full">
+          <TabsList className="mb-4 bg-white border border-rome-gold/30">
+            <TabsTrigger value="characters" className="data-[state=active]:bg-rome-gold/10">
+              <User className="h-4 w-4 mr-2" /> Personnages
+            </TabsTrigger>
+            <TabsTrigger value="family-tree" className="data-[state=active]:bg-rome-gold/10">
+              <Users className="h-4 w-4 mr-2" /> Arbre Généalogique
+            </TabsTrigger>
+          </TabsList>
+          
+          <TabsContent value="characters" className="space-y-6">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+              {characters.map((character) => (
+                <CharacterSheet 
+                  key={character.id} 
+                  character={character} 
+                  className={activeCharacter.id === character.id ? 'border-rome-gold' : ''}
+                />
+              ))}
+            </div>
+          </TabsContent>
+          
+          <TabsContent value="family-tree">
+            <RomanCard className="mb-8">
+              <RomanCard.Header>
+                <h3 className="font-cinzel text-lg text-rome-navy">Arbre Généalogique</h3>
+              </RomanCard.Header>
+              <RomanCard.Content>
+                <FamilyTree />
+              </RomanCard.Content>
+            </RomanCard>
+          </TabsContent>
+        </Tabs>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
