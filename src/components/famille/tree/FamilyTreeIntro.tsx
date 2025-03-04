@@ -7,6 +7,7 @@ export const FamilyTreeIntro: React.FC = () => {
       <p className="italic text-muted-foreground text-sm">
         L'arbre généalogique représente les liens entre les membres de votre famille. 
         Les relations familiales sont essentielles dans la société romaine et déterminent votre statut social.
+        Pour les Romains, la <span className="font-semibold">pietas</span> (piété) envers ses ancêtres est une vertu fondamentale.
       </p>
     </div>
   );
