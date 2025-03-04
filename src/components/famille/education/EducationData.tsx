@@ -87,7 +87,7 @@ export const educationPaths = [
   {
     type: 'military',
     icon: <Sword className="h-5 w-5" />,
-    title: 'Carrière Militaire',
+    title: 'Éducation Militaire',
     description: 'Formation aux arts de la guerre, stratégie et leadership sur le champ de bataille.',
     minAge: 12,
     suitableFor: 'male', // Explicitly for males only
@@ -105,7 +105,7 @@ export const educationPaths = [
   {
     type: 'political',
     icon: <Building className="h-5 w-5" />,
-    title: 'Carrière Politique',
+    title: 'Éducation Politique',
     description: 'Éducation en rhétorique, droit et philosophie pour exceller au Sénat.',
     minAge: 10,
     suitableFor: 'both',
@@ -122,7 +122,7 @@ export const educationPaths = [
   {
     type: 'commercial',
     icon: <Coins className="h-5 w-5" />,
-    title: 'Commerce et Agriculture',
+    title: 'Éducation Commerciale',
     description: 'Formation à la gestion des finances, commerce maritime et administration des terres.',
     minAge: 14,
     suitableFor: 'both',
@@ -138,7 +138,7 @@ export const educationPaths = [
   {
     type: 'religious',
     icon: <ScrollText className="h-5 w-5" />,
-    title: 'Carrière Religieuse',
+    title: 'Éducation Religieuse',
     description: 'Étude des rites sacrés, divination et traditions religieuses romaines.',
     minAge: 12,
     suitableFor: 'both',
