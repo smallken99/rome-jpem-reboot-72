@@ -1,22 +1,8 @@
-
 import React from 'react';
 import { ShieldQuestion, TrendingUp } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { educationPaths } from './EducationData';
-
-// Type for a preceptor (teacher)
-type Preceptor = {
-  id: string;
-  name: string;
-  speciality: string;
-  reputation: 'Excellent' | 'Bon' | 'Moyen';
-  fee: number;
-  statBonus: number;
-};
-
-type PreceptorsByType = {
-  [key: string]: Preceptor[];
-};
+import { PreceptorsByType } from './types/educationTypes';
 
 interface PreceptorListProps {
   preceptors: PreceptorsByType;

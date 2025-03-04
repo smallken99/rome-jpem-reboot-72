@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { ChildHeader } from './components/ChildHeader';
 import { StatBonusInfo } from './components/StatBonusInfo';
@@ -8,25 +7,7 @@ import { PietyBonus } from './components/PietyBonus';
 import { MentorInfo } from './components/MentorInfo';
 import { EducationWarning } from './components/EducationWarning';
 import { CardActions } from './components/CardActions';
-
-interface ChildEducation {
-  type: string;
-  mentor: string | null;
-  progress: number;
-  skills: string[];
-  pityBonus?: number;
-  yearsCompleted?: number;
-  totalYears?: number;
-  statBonus?: number;
-}
-
-interface ChildProps {
-  id: string;
-  name: string;
-  age: number;
-  gender: string;
-  currentEducation: ChildEducation;
-}
+import { ChildProps } from './types/educationTypes';
 
 interface ChildEducationCardProps {
   child: ChildProps;

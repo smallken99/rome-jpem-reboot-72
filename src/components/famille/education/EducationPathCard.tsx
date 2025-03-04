@@ -1,24 +1,6 @@
-
 import React from 'react';
 import { Sword, Building, ScrollText, ShieldQuestion } from 'lucide-react';
-
-interface AnnualCurriculum {
-  year: number;
-  name: string;
-  skills: string[];
-}
-
-interface EducationPath {
-  type: string;
-  icon: React.ReactNode;
-  title: string;
-  description: string;
-  minAge: number;
-  suitableFor: string;
-  duration: number;
-  annualCurriculum: AnnualCurriculum[];
-  relatedStat: string;
-}
+import { EducationPath } from './types/educationTypes';
 
 interface EducationPathCardProps {
   path: EducationPath;

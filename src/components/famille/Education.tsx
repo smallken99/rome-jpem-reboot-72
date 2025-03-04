@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { EducationIntro } from './education/EducationIntro';
 import { EducationTabs } from './education/EducationTabs';
@@ -11,20 +10,7 @@ import {
   generateTitle,
   generateStatBonus
 } from './education/preceptorUtils';
-
-// Type for a preceptor (teacher)
-type Preceptor = {
-  id: string;
-  name: string;
-  speciality: string;
-  reputation: 'Excellent' | 'Bon' | 'Moyen';
-  fee: number;
-  statBonus: number;
-};
-
-type PreceptorsByType = {
-  [key: string]: Preceptor[];
-};
+import { Preceptor, PreceptorsByType } from './education/types/educationTypes';
 
 // Constants for the education system
 const MAX_STAT_VALUE_FROM_EDUCATION = 40;
