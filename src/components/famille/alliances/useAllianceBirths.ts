@@ -2,32 +2,9 @@
 import { useState, useEffect } from 'react';
 import { useToast } from '@/components/ui/use-toast';
 import { Character } from '@/types/character';
-import { useTimeStore, useTimeEvents } from '@/utils/timeSystem';
+import { useTimeStore, useTimeEvents, Season } from '@/utils/timeSystem';
 import { checkAllianceForBirths } from './birthUtils';
-
-// Alliance data that matches the characters data
-const alliances = [
-  {
-    id: '1',
-    name: 'Gens Cornelia',
-    member: 'Marcus Aurelius Cotta',
-    spouse: 'Livia Aurelia',
-    type: 'matrimoniale' as const,
-    status: 'actif' as const,
-    benefits: ['Stabilité familiale', 'Gestion du patrimoine'],
-    date: '705 AUC'
-  },
-  {
-    id: '2',
-    name: 'Gens Fabia',
-    member: 'Julia Aurelia',
-    spouse: 'Quintus Fabius',
-    type: 'matrimoniale' as const,
-    status: 'en négociation' as const,
-    benefits: ['Soutien militaire', 'Accès aux ports'],
-    date: '710 AUC (prévu)'
-  }
-];
+import { familyAlliances } from '@/data/alliances';
 
 export const useAllianceBirths = (
   characters: Character[],
@@ -40,7 +17,7 @@ export const useAllianceBirths = (
   const { year, season } = useTimeStore();
   
   // Filter alliances to only show active ones
-  const activeAlliances = alliances.filter(alliance => alliance.status === 'actif');
+  const activeAlliances = familyAlliances.filter(alliance => alliance.status === 'actif');
   
   // Function to check for births
   const checkForBirths = () => {
@@ -94,7 +71,7 @@ export const useAllianceBirths = (
   }, [advanceTime]);
 
   return {
-    alliances,
+    alliances: familyAlliances,
     lastBirthYear,
     activeAlliances
   };

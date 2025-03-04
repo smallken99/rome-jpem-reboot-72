@@ -1,4 +1,3 @@
-
 import React from 'react';
 import Layout from '@/components/layout/Layout';
 import { PageHeader } from '@/components/ui-custom/PageHeader';
@@ -6,6 +5,7 @@ import { StatBox } from '@/components/ui-custom/StatBox';
 import { RomanCard } from '@/components/ui-custom/RomanCard';
 import { AllianceItem } from '@/components/features/AllianceItem';
 import { useTimeStore } from '@/utils/timeSystem';
+import { getAllAlliances } from '@/data/alliances';
 import { 
   Coins, 
   Award, 
@@ -15,46 +15,8 @@ import {
   Shield,
 } from 'lucide-react';
 
-// Alliance data that matches the marriage alliances in the Famille page
-const familyAlliances = [
-  {
-    id: '1',
-    name: 'Gens Cornelia',
-    type: 'matrimoniale' as const, 
-    status: 'actif' as const,
-    benefits: ['Stabilité familiale', 'Gestion du patrimoine'],
-    date: '705 AUC'
-  },
-  {
-    id: '2',
-    name: 'Gens Fabia',
-    type: 'matrimoniale' as const, 
-    status: 'en négociation' as const,
-    benefits: ['Soutien militaire', 'Accès aux ports'],
-    date: '710 AUC (prévu)'
-  },
-  { 
-    name: 'Gens Flavia', 
-    type: 'politique' as const, 
-    status: 'rompu' as const,
-    benefits: []
-  },
-];
-
-// Political alliances to show alongside matrimonial ones
-const politicalAlliances = [
-  { 
-    name: 'Gens Julia', 
-    type: 'politique' as const, 
-    status: 'actif' as const,
-    benefits: ['Influence au Sénat +2', 'Protection contre les rivalités politiques', 'Accès aux marchés d\'Asie']
-  }
-];
-
-// Combine all alliances for display
-const allAlliances = [...familyAlliances, ...politicalAlliances.filter(alliance => 
-  !familyAlliances.some(fa => fa.name === alliance.name)
-)];
+// Obtenir toutes les alliances des données partagées
+const allAlliances = getAllAlliances();
 
 interface FamilyStatisticProps {
   icon: React.ReactNode;
@@ -168,7 +130,7 @@ const Index = () => {
             <div className="space-y-2">
               {allAlliances.map((alliance, index) => (
                 <AllianceItem 
-                  key={index}
+                  key={alliance.id || index}
                   name={alliance.name}
                   type={alliance.type}
                   status={alliance.status}

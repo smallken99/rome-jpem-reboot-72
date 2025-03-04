@@ -1,11 +1,12 @@
 
 import { Character } from '@/types/character';
 import { checkForBirth, generateChild } from '../utils/birthSystem';
+import { Season } from '@/utils/timeSystem';
 
 export const checkAllianceForBirths = (
   alliance: { member?: string; spouse?: string },
   characters: Character[],
-  season: string,
+  season: Season,
   year: number,
   onChildBirth?: (child: Character) => void,
   onBirthOccurred?: (year: number) => void
