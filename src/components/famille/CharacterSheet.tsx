@@ -1,24 +1,30 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { Character } from '@/types/character';
 import { CharacterStats } from './CharacterStats';
 import { RomanCard } from '@/components/ui-custom/RomanCard';
 import { Badge } from '@/components/ui/badge';
-import { Calendar, Crown, ShieldX, Camera } from 'lucide-react';
+import { Calendar, Crown, ShieldX, Camera, Edit, Check } from 'lucide-react';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 
 interface CharacterSheetProps {
   character: Character;
   className?: string;
   onEditPortrait?: (characterId: string) => void;
+  onNameChange?: (characterId: string, newName: string) => void;
 }
 
 export const CharacterSheet: React.FC<CharacterSheetProps> = ({ 
   character, 
   className,
-  onEditPortrait 
+  onEditPortrait,
+  onNameChange
 }) => {
+  const [isEditingName, setIsEditingName] = useState(false);
+  const [nameValue, setNameValue] = useState(character.name);
+  
   // Check if character is female (for martial education restrictions)
   const isFemale = character.gender === 'female';
   
@@ -44,11 +50,61 @@ export const CharacterSheet: React.FC<CharacterSheetProps> = ({
     return isFemale ? 'bg-rome-terracotta/20' : 'bg-rome-navy/20';
   };
 
+  // Handle name save
+  const handleSaveName = () => {
+    if (nameValue.trim() && onNameChange) {
+      onNameChange(character.id, nameValue.trim());
+      setIsEditingName(false);
+    }
+  };
+
+  // Handle keydown on name input
+  const handleNameKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter') {
+      handleSaveName();
+    } else if (e.key === 'Escape') {
+      setNameValue(character.name);
+      setIsEditingName(false);
+    }
+  };
+
   return (
     <RomanCard className={className}>
       <RomanCard.Header>
         <div className="flex justify-between items-center">
-          <h3 className="font-cinzel text-lg text-rome-navy">{character.name}</h3>
+          {isEditingName ? (
+            <div className="flex items-center gap-2">
+              <Input
+                value={nameValue}
+                onChange={(e) => setNameValue(e.target.value)}
+                onKeyDown={handleNameKeyDown}
+                className="font-cinzel text-lg text-rome-navy"
+                autoFocus
+              />
+              <Button 
+                variant="ghost" 
+                size="icon" 
+                onClick={handleSaveName}
+                className="h-8 w-8"
+              >
+                <Check className="h-4 w-4" />
+              </Button>
+            </div>
+          ) : (
+            <div className="flex items-center gap-2">
+              <h3 className="font-cinzel text-lg text-rome-navy">{character.name}</h3>
+              {onNameChange && (
+                <Button 
+                  variant="ghost" 
+                  size="icon" 
+                  onClick={() => setIsEditingName(true)}
+                  className="h-6 w-6 opacity-50 hover:opacity-100"
+                >
+                  <Edit className="h-3 w-3" />
+                </Button>
+              )}
+            </div>
+          )}
           {character.isPlayer && (
             <Badge className="bg-rome-gold text-white border-none">Personnage Principal</Badge>
           )}

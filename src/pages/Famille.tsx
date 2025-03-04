@@ -63,6 +63,39 @@ const Famille = () => {
     setLocalCharacters(prev => [...prev, newChild]);
   };
 
+  // Handler for character name changes
+  const handleNameChange = (characterId: string, newName: string) => {
+    if (!newName.trim()) {
+      toast({
+        title: "Nom invalide",
+        description: "Le nom ne peut pas être vide.",
+        variant: "destructive",
+        duration: 3000,
+      });
+      return;
+    }
+
+    // Update the local characters state
+    const updatedCharacters = localCharacters.map(char => {
+      if (char.id === characterId) {
+        return {
+          ...char,
+          name: newName
+        };
+      }
+      return char;
+    });
+    
+    setLocalCharacters(updatedCharacters);
+    
+    // Show success toast
+    toast({
+      title: "Nom mis à jour",
+      description: "Le nom du personnage a été changé avec succès.",
+      duration: 3000,
+    });
+  };
+
   return (
     <Layout>
       <PageHeader
@@ -74,6 +107,7 @@ const Famille = () => {
         localCharacters={localCharacters}
         activeCharacter={activeCharacter}
         onEditPortrait={handleEditPortrait}
+        onNameChange={handleNameChange}
       />
       
       <PortraitDialog 
