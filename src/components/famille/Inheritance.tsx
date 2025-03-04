@@ -3,11 +3,11 @@ import React from 'react';
 import { ScrollText, Home, Coins, User } from 'lucide-react';
 import { Separator } from '@/components/ui/separator';
 
-// Sample inheritance data
+// Sample inheritance data updated for consistency with the Aurelius family
 const heirs = [
   {
     id: '1',
-    name: 'Gaius Tullius',
+    name: 'Titus Aurelius',
     relation: 'Fils Aîné',
     inheritance: {
       lands: 60,
@@ -18,7 +18,7 @@ const heirs = [
   },
   {
     id: '2',
-    name: 'Julia Tullia',
+    name: 'Julia Aurelia',
     relation: 'Fille',
     inheritance: {
       lands: 20,
@@ -29,7 +29,7 @@ const heirs = [
   },
   {
     id: '3',
-    name: 'Titus Tullius',
+    name: 'Lucius Aurelius',
     relation: 'Fils Cadet',
     inheritance: {
       lands: 20,

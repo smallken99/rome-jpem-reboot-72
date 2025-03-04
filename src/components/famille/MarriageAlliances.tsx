@@ -2,12 +2,13 @@
 import React from 'react';
 import { AllianceItem } from '../features/AllianceItem';
 
-// Sample marriage alliances data
+// Sample marriage alliances data with consistent dates in AUC format 
+// (Ab Urbe Condita - counting from the founding of Rome)
 const alliances = [
   {
     id: '1',
     name: 'Gens Cornelia',
-    member: 'Gaius Tullius',
+    member: 'Gaius Aurelius',
     spouse: 'Cornelia Minor',
     type: 'matrimoniale' as const,
     status: 'actif' as const,
@@ -17,7 +18,7 @@ const alliances = [
   {
     id: '2',
     name: 'Gens Fabia',
-    member: 'Julia Tullia',
+    member: 'Julia Aurelia',
     spouse: 'Quintus Fabius',
     type: 'matrimoniale' as const,
     status: 'en négociation' as const,
@@ -27,7 +28,7 @@ const alliances = [
   {
     id: '3',
     name: 'Gens Claudia',
-    member: 'Marcus Tullius (Oncle)',
+    member: 'Marcus Aurelius (Oncle)',
     spouse: 'Claudia Major',
     type: 'matrimoniale' as const,
     status: 'actif' as const,
@@ -37,7 +38,7 @@ const alliances = [
   {
     id: '4',
     name: 'Gens Junia',
-    member: 'Lucia Tullia (Cousine)',
+    member: 'Lucia Aurelia (Cousine)',
     spouse: 'Decimus Junius',
     type: 'matrimoniale' as const,
     status: 'rompu' as const,

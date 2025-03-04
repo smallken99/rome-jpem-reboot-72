@@ -11,7 +11,7 @@ interface PageHeaderProps {
 
 export const PageHeader: React.FC<PageHeaderProps> = ({ title, subtitle, className }) => {
   return (
-    <div className={cn("mb-6", className)}>
+    <div className={cn("mb-8", className)}>
       <h1 className="text-3xl md:text-4xl font-bold text-rome-navy">
         <Laurels>{title}</Laurels>
       </h1>

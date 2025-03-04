@@ -10,7 +10,7 @@ import { Education } from '@/components/famille/Education';
 import { CharacterSheet } from '@/components/famille/CharacterSheet';
 import { StatBox } from '@/components/ui-custom/StatBox';
 import { Button } from '@/components/ui/button';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogDescription } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Users, Heart, ScrollText, User } from 'lucide-react';
@@ -24,7 +24,18 @@ const Famille = () => {
   const [portraitUrl, setPortraitUrl] = useState("");
   const { toast } = useToast();
 
+  // Handler to update character portrait
   const handlePortraitChange = (characterId: string, newPortraitUrl: string) => {
+    if (!newPortraitUrl.trim()) {
+      toast({
+        title: "URL invalide",
+        description: "Veuillez saisir une URL d'image valide.",
+        variant: "destructive",
+        duration: 3000,
+      });
+      return;
+    }
+    
     // Update the local characters state
     const updatedCharacters = localCharacters.map(char => {
       if (char.id === characterId) {
@@ -46,6 +57,7 @@ const Famille = () => {
     });
   };
 
+  // Handler to open portrait edit dialog
   const handleEditPortrait = (characterId: string) => {
     setSelectedCharacterId(characterId);
     setPortraitUrl("");
@@ -58,7 +70,7 @@ const Famille = () => {
         subtitle="Gérez votre dynastie et assurez l'avenir de votre Gens"
       />
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
         <StatBox 
           title="Membres de la famille" 
           value="12" 
@@ -93,15 +105,14 @@ const Famille = () => {
           </TabsList>
           
           <TabsContent value="characters" className="space-y-6">
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {localCharacters.map((character) => (
-                <div key={character.id} className="relative">
-                  <CharacterSheet 
-                    character={character} 
-                    className={activeCharacter.id === character.id ? 'border-rome-gold' : ''}
-                    onEditPortrait={handleEditPortrait}
-                  />
-                </div>
+                <CharacterSheet 
+                  key={character.id}
+                  character={character} 
+                  className={activeCharacter.id === character.id ? 'border-rome-gold' : ''}
+                  onEditPortrait={handleEditPortrait}
+                />
               ))}
             </div>
           </TabsContent>
@@ -142,7 +153,13 @@ const Famille = () => {
                 onChange={(e) => setPortraitUrl(e.target.value)}
               />
             </div>
-            <div className="flex justify-end">
+            <div className="flex justify-end gap-2">
+              <Button 
+                variant="outline" 
+                onClick={() => setSelectedCharacterId(null)}
+              >
+                Annuler
+              </Button>
               <Button 
                 onClick={() => {
                   if (selectedCharacterId) {
@@ -178,7 +195,7 @@ const Famille = () => {
         </RomanCard>
       </div>
 
-      <RomanCard>
+      <RomanCard className="mb-6">
         <RomanCard.Header>
           <h3 className="font-cinzel text-lg text-rome-navy">Éducation des Enfants</h3>
         </RomanCard.Header>

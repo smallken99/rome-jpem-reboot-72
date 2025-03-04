@@ -4,7 +4,7 @@ import { Character } from '@/types/character';
 import { CharacterStats } from './CharacterStats';
 import { RomanCard } from '@/components/ui-custom/RomanCard';
 import { Badge } from '@/components/ui/badge';
-import { User, Calendar, Crown, ShieldX, Camera } from 'lucide-react';
+import { Calendar, Crown, ShieldX, Camera } from 'lucide-react';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 
@@ -22,7 +22,7 @@ export const CharacterSheet: React.FC<CharacterSheetProps> = ({
   // Check if character is female (for martial education restrictions)
   const isFemale = character.gender === 'female';
   
-  // Conversion des statistiques en tableau pour le composant CharacterStats
+  // Convert statistics to array for the CharacterStats component
   const statsArray = [
     character.stats.popularity,
     character.stats.oratory,
@@ -72,7 +72,7 @@ export const CharacterSheet: React.FC<CharacterSheetProps> = ({
                 <Button 
                   variant="outline" 
                   size="icon"
-                  className="absolute bottom-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity bg-white/80 hover:bg-white"
+                  className="absolute bottom-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity bg-white/70 hover:bg-white"
                   onClick={() => onEditPortrait(character.id)}
                 >
                   <Camera className="h-4 w-4" />
@@ -89,12 +89,12 @@ export const CharacterSheet: React.FC<CharacterSheetProps> = ({
               {character.title && (
                 <div className="flex items-center gap-2 text-sm">
                   <Crown className="h-4 w-4 text-rome-gold" />
-                  <span>{character.title}</span>
+                  <span className="font-medium">{character.title}</span>
                 </div>
               )}
               
               {character.role && (
-                <div className="text-sm text-muted-foreground">
+                <div className="text-sm text-muted-foreground mt-1">
                   {character.role}
                 </div>
               )}
