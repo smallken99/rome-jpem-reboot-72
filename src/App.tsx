@@ -6,9 +6,12 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Index from "./pages/Index";
 import Famille from "./pages/Famille";
-import Proprietes from "./pages/Proprietes";
-import Economie from "./pages/Economie";
+import Patrimoine from "./pages/Patrimoine";
 import Clientele from "./pages/Clientele";
+import Registre from "./pages/Registre";
+import Religion from "./pages/Religion";
+import Messages from "./pages/Messages";
+import Rapports from "./pages/Rapports";
 import NotFound from "./pages/NotFound";
 import Welcome from "./pages/Welcome";
 import Login from "./pages/Login";
@@ -32,12 +35,12 @@ const App = () => (
           {/* Pages protégées - normalement nous ajouterions un AuthGuard */}
           <Route path="/" element={<Index />} />
           <Route path="/famille" element={<Famille />} />
-          <Route path="/proprietes" element={<Proprietes />} />
-          <Route path="/economie" element={<Economie />} />
+          <Route path="/patrimoine" element={<Patrimoine />} />
           <Route path="/clientele" element={<Clientele />} />
-          <Route path="/evenements" element={<NotFound />} />
-          <Route path="/messages" element={<NotFound />} />
-          <Route path="/rapports" element={<NotFound />} />
+          <Route path="/registre" element={<Registre />} />
+          <Route path="/religion" element={<Religion />} />
+          <Route path="/messages" element={<Messages />} />
+          <Route path="/rapports" element={<Rapports />} />
           
           {/* Page admin */}
           <Route path="/admin" element={<Admin />} />

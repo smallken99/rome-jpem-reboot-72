@@ -16,7 +16,9 @@ import {
   BarChart,
   Menu,
   X,
-  ChevronRight
+  ChevronRight,
+  BookOpen,
+  Landmark
 } from 'lucide-react';
 
 const Navigation = () => {
@@ -26,10 +28,10 @@ const Navigation = () => {
   const navItems = [
     { path: '/', label: 'Vue Générale', icon: <Home className="h-5 w-5" /> },
     { path: '/famille', label: 'Famille', icon: <Users className="h-5 w-5" /> },
-    { path: '/proprietes', label: 'Propriétés', icon: <Building className="h-5 w-5" /> },
-    { path: '/economie', label: 'Économie', icon: <Coins className="h-5 w-5" /> },
+    { path: '/patrimoine', label: 'Patrimoine', icon: <Building className="h-5 w-5" /> },
     { path: '/clientele', label: 'Clientèle', icon: <Users className="h-5 w-5" /> },
-    { path: '/evenements', label: 'Événements', icon: <CalendarDays className="h-5 w-5" /> },
+    { path: '/registre', label: 'Registre', icon: <ScrollText className="h-5 w-5" /> },
+    { path: '/religion', label: 'Religion', icon: <Landmark className="h-5 w-5" /> },
     { path: '/messages', label: 'Messages', icon: <MessageSquare className="h-5 w-5" /> },
     { path: '/rapports', label: 'Rapports', icon: <BarChart className="h-5 w-5" /> },
   ];
