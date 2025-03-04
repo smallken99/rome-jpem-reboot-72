@@ -1,33 +1,11 @@
 
 import React, { useState } from 'react';
-import { ScrollText, Home, Coins, User, Crown } from 'lucide-react';
+import { ScrollText, User, Crown } from 'lucide-react';
 import { Separator } from '@/components/ui/separator';
 import { characters } from '@/data/characters';
-import { Button } from '@/components/ui/button';
 import { useToast } from '@/components/ui/use-toast';
-import { RomanCard } from '@/components/ui-custom/RomanCard';
-
-// Function to calculate dowry value based on age and other factors
-const calculateDowryValue = (heir: {
-  age: number;
-  gender: 'male' | 'female';
-  role?: string;
-}) => {
-  // Base value for dowry calculation
-  const baseValue = 100000; // 100,000 As as base value
-  
-  // Age factor - younger brides/grooms have higher dowry potential
-  const ageFactor = Math.max(0.5, 1 - (heir.age - 12) * 0.05);
-  
-  // Role bonus - certain roles (like being the first daughter) increase dowry
-  const roleBonus = heir.role?.toLowerCase().includes('aîné') ? 1.5 : 1.2;
-  
-  // Calculate final value
-  const dowryValue = Math.round(baseValue * ageFactor * roleBonus);
-  
-  // Format with Roman numerals for large values
-  return `${(dowryValue / 1000).toFixed(0)}K As`;
-};
+import { HeirCard } from './inheritance/HeirCard';
+import { FemaleCard } from './inheritance/FemaleCard';
 
 export const Inheritance: React.FC = () => {
   // Filter to only male heirs for inheritance eligibility
@@ -129,116 +107,5 @@ export const Inheritance: React.FC = () => {
         </div>
       </div>
     </div>
-  );
-};
-
-interface HeirCardProps {
-  heir: {
-    id: string;
-    name: string;
-    role?: string;
-    gender: 'male' | 'female';
-    age: number;
-  };
-  isSelected: boolean;
-  onSelect: (heirId: string) => void;
-}
-
-const HeirCard: React.FC<HeirCardProps> = ({ heir, isSelected, onSelect }) => {
-  const relation = heir.role || 'Fils';
-  
-  return (
-    <RomanCard className={`p-3 transition-all ${isSelected ? 'border-l-4 border-l-rome-gold bg-rome-gold/5' : ''}`}>
-      <div className="flex justify-between items-start">
-        <div>
-          <h4 className="font-cinzel">{heir.name}</h4>
-          <p className="text-sm text-muted-foreground">{relation} • {heir.age} ans</p>
-        </div>
-        
-        {isSelected ? (
-          <div className="px-2 py-1 text-xs bg-rome-gold/20 text-rome-gold rounded flex items-center gap-1">
-            <Crown className="h-3.5 w-3.5" />
-            Héritier Principal
-          </div>
-        ) : (
-          <Button 
-            variant="outline" 
-            size="sm" 
-            onClick={() => onSelect(heir.id)}
-            className="text-xs border-rome-navy/30 text-rome-navy hover:bg-rome-navy/10"
-          >
-            Désigner Héritier
-          </Button>
-        )}
-      </div>
-      
-      <Separator className="my-2" />
-      
-      <div className="text-sm grid grid-cols-2 gap-2">
-        <div className="flex items-center gap-1">
-          <Home className="h-4 w-4 text-muted-foreground" />
-          <span>Hérite des terres</span>
-        </div>
-        
-        <div className="flex items-center gap-1">
-          <Coins className="h-4 w-4 text-muted-foreground" />
-          <span>{isSelected ? 'Hérite de la fortune' : 'Portion d\'héritage'}</span>
-        </div>
-      </div>
-      
-      {isSelected && (
-        <div className="mt-3 pt-2 border-t border-dashed border-muted">
-          <p className="text-xs text-rome-navy">
-            En tant qu'héritier principal, {heir.name} recevra la majorité des terres et des propriétés, 
-            ainsi que le nom et les titres de la famille.
-          </p>
-        </div>
-      )}
-    </RomanCard>
-  );
-};
-
-// New component for female family members
-interface FemaleCardProps {
-  female: {
-    id: string;
-    name: string;
-    role?: string;
-    gender: 'female';
-    age: number;
-  };
-}
-
-const FemaleCard: React.FC<FemaleCardProps> = ({ female }) => {
-  const relation = female.role || 'Fille';
-  const dowryValue = calculateDowryValue(female);
-  
-  return (
-    <RomanCard className="p-3 transition-all bg-gray-50/50">
-      <div className="flex justify-between items-start">
-        <div>
-          <h4 className="font-cinzel">{female.name}</h4>
-          <p className="text-sm text-muted-foreground">{relation} • {female.age} ans</p>
-        </div>
-        
-        <div className="px-2 py-1 text-xs bg-gray-200 text-gray-600 rounded">
-          Non éligible
-        </div>
-      </div>
-      
-      <Separator className="my-2" />
-      
-      <div className="text-sm grid grid-cols-2 gap-2">
-        <div className="flex items-center gap-1">
-          <Home className="h-4 w-4 text-muted-foreground" />
-          <span>Dot de mariage ({dowryValue})</span>
-        </div>
-        
-        <div className="flex items-center gap-1">
-          <Coins className="h-4 w-4 text-muted-foreground" />
-          <span>Portion d'héritage</span>
-        </div>
-      </div>
-    </RomanCard>
   );
 };

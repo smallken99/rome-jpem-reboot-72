@@ -10,6 +10,10 @@ import Proprietes from "./pages/Proprietes";
 import Economie from "./pages/Economie";
 import Clientele from "./pages/Clientele";
 import NotFound from "./pages/NotFound";
+import Welcome from "./pages/Welcome";
+import Login from "./pages/Login";
+import Register from "./pages/Register";
+import Admin from "./pages/Admin";
 
 const queryClient = new QueryClient();
 
@@ -20,6 +24,12 @@ const App = () => (
       <Sonner />
       <BrowserRouter>
         <Routes>
+          {/* Pages publiques */}
+          <Route path="/welcome" element={<Welcome />} />
+          <Route path="/login" element={<Login />} />
+          <Route path="/register" element={<Register />} />
+          
+          {/* Pages protégées - normalement nous ajouterions un AuthGuard */}
           <Route path="/" element={<Index />} />
           <Route path="/famille" element={<Famille />} />
           <Route path="/proprietes" element={<Proprietes />} />
@@ -28,6 +38,11 @@ const App = () => (
           <Route path="/evenements" element={<NotFound />} />
           <Route path="/messages" element={<NotFound />} />
           <Route path="/rapports" element={<NotFound />} />
+          
+          {/* Page admin */}
+          <Route path="/admin" element={<Admin />} />
+          
+          {/* Route 404 */}
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>
