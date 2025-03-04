@@ -12,7 +12,6 @@ import {
   Users,
   Flag,
   Shield,
-  LucideIcon
 } from 'lucide-react';
 
 // Données de démonstration
@@ -63,76 +62,85 @@ const Index = () => {
         
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <StatBox 
-            label="Influence Sénatoriale" 
+            title="Influence Sénatoriale" 
             value="72/100" 
+            description="Progression mensuelle stable"
             icon={<Award className="h-5 w-5" />}
             trend="up"
+            trendValue="+3"
             className="bg-white/90 backdrop-blur-sm border border-rome-gold/30 hover:border-rome-gold/50 transition-all duration-300"
           />
           <StatBox 
-            label="Richesse Apparente" 
+            title="Richesse Apparente" 
             value="3,450,000 Sesterces" 
+            description="Aucun changement significatif"
             icon={<Coins className="h-5 w-5" />}
             trend="neutral"
+            trendValue="0"
             className="bg-white/90 backdrop-blur-sm border border-rome-gold/30 hover:border-rome-gold/50 transition-all duration-300"
           />
           <StatBox 
-            label="Réputation" 
+            title="Réputation" 
             value="Respectée" 
+            description="En hausse dans l'opinion publique"
             icon={<Flag className="h-5 w-5" />}
             trend="up"
+            trendValue="+5%"
             className="bg-white/90 backdrop-blur-sm border border-rome-gold/30 hover:border-rome-gold/50 transition-all duration-300"
           />
         </div>
         
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <RomanCard 
-            title="Parti politique" 
-            className="bg-white/90 backdrop-blur-sm border border-rome-gold/30 hover:border-rome-gold/50 transition-all duration-300"
-            headerClassName="bg-gradient-to-r from-rome-navy/20 via-rome-navy/10 to-transparent border-b border-rome-gold/30"
-          >
-            <FamilyStatistic 
-              icon={<Landmark className="h-6 w-6" />}
-              title="Optimates"
-              description="La Gens Aurelia est une famille traditionaliste et influente dans la faction des Optimates, défendant les intérêts de l'aristocratie romaine et s'opposant aux réformes populaires."
-              iconBgColor="bg-rome-navy/10"
-              iconColor="text-rome-navy"
-            />
+          <RomanCard className="bg-white/90 backdrop-blur-sm border border-rome-gold/30 hover:border-rome-gold/50 transition-all duration-300">
+            <RomanCard.Header className="bg-gradient-to-r from-rome-navy/20 via-rome-navy/10 to-transparent border-b border-rome-gold/30">
+              <h3 className="font-cinzel text-lg text-rome-navy">Parti politique</h3>
+            </RomanCard.Header>
+            <RomanCard.Content>
+              <FamilyStatistic 
+                icon={<Landmark className="h-6 w-6" />}
+                title="Optimates"
+                description="La Gens Aurelia est une famille traditionaliste et influente dans la faction des Optimates, défendant les intérêts de l'aristocratie romaine et s'opposant aux réformes populaires."
+                iconBgColor="bg-rome-navy/10"
+                iconColor="text-rome-navy"
+              />
+            </RomanCard.Content>
           </RomanCard>
           
-          <RomanCard 
-            title="Magistrature actuelle"
-            className="bg-white/90 backdrop-blur-sm border border-rome-gold/30 hover:border-rome-gold/50 transition-all duration-300"
-            headerClassName="bg-gradient-to-r from-rome-terracotta/20 via-rome-terracotta/10 to-transparent border-b border-rome-gold/30"
-          >
-            <FamilyStatistic 
-              icon={<Shield className="h-6 w-6" />}
-              title="Marcus Aurelius Cotta - Préteur"
-              description="En tant que Préteur, Marcus Aurelius administre la justice civile à Rome et peut commander des légions en l'absence des consuls. Son mandat prend fin en Mars 652 AUC."
-              iconBgColor="bg-rome-terracotta/10"
-              iconColor="text-rome-terracotta"
-            />
+          <RomanCard className="bg-white/90 backdrop-blur-sm border border-rome-gold/30 hover:border-rome-gold/50 transition-all duration-300">
+            <RomanCard.Header className="bg-gradient-to-r from-rome-terracotta/20 via-rome-terracotta/10 to-transparent border-b border-rome-gold/30">
+              <h3 className="font-cinzel text-lg text-rome-navy">Magistrature actuelle</h3>
+            </RomanCard.Header>
+            <RomanCard.Content>
+              <FamilyStatistic 
+                icon={<Shield className="h-6 w-6" />}
+                title="Marcus Aurelius Cotta - Préteur"
+                description="En tant que Préteur, Marcus Aurelius administre la justice civile à Rome et peut commander des légions en l'absence des consuls. Son mandat prend fin en Mars 652 AUC."
+                iconBgColor="bg-rome-terracotta/10"
+                iconColor="text-rome-terracotta"
+              />
+            </RomanCard.Content>
           </RomanCard>
         </div>
         
-        <RomanCard 
-          title="Alliances de la Gens" 
-          className="bg-white/90 backdrop-blur-sm border border-rome-gold/30 hover:border-rome-gold/50 transition-all duration-300"
-          headerClassName="bg-gradient-to-r from-rome-gold/20 via-rome-gold/10 to-transparent border-b border-rome-gold/30"
-        >
-          <div className="space-y-2 p-2">
-            {mockAlliances.map((alliance, index) => (
-              <AllianceItem 
-                key={index}
-                name={alliance.name}
-                type={alliance.type}
-                status={alliance.status}
-              />
-            ))}
-          </div>
-          <div className="mt-6 text-center">
-            <button className="roman-btn-outline text-sm hover:bg-rome-terracotta/10 transition-colors">Gérer les alliances</button>
-          </div>
+        <RomanCard className="bg-white/90 backdrop-blur-sm border border-rome-gold/30 hover:border-rome-gold/50 transition-all duration-300">
+          <RomanCard.Header className="bg-gradient-to-r from-rome-gold/20 via-rome-gold/10 to-transparent border-b border-rome-gold/30">
+            <h3 className="font-cinzel text-lg text-rome-navy">Alliances de la Gens</h3>
+          </RomanCard.Header>
+          <RomanCard.Content>
+            <div className="space-y-2">
+              {mockAlliances.map((alliance, index) => (
+                <AllianceItem 
+                  key={index}
+                  name={alliance.name}
+                  type={alliance.type}
+                  status={alliance.status}
+                />
+              ))}
+            </div>
+            <div className="mt-6 text-center">
+              <button className="roman-btn-outline text-sm hover:bg-rome-terracotta/10 transition-colors">Gérer les alliances</button>
+            </div>
+          </RomanCard.Content>
         </RomanCard>
       </div>
     </Layout>

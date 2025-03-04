@@ -21,41 +21,65 @@ const Famille = () => {
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
         <StatBox 
-          label="Membres de la famille" 
+          title="Membres de la famille" 
           value="12" 
+          description="Membres directs et affiliés"
           icon={<Users className="h-6 w-6" />} 
         />
         <StatBox 
-          label="Alliances matrimoniales" 
+          title="Alliances matrimoniales" 
           value="4" 
+          description="En augmentation ce semestre"
           icon={<Heart className="h-6 w-6" />} 
           trend="up"
+          trendValue="+1"
         />
         <StatBox 
-          label="Héritiers" 
+          title="Héritiers" 
           value="3" 
+          description="Lignée directe masculine"
           icon={<ScrollText className="h-6 w-6" />} 
         />
       </div>
 
       <div className="mb-8">
-        <RomanCard title="Arbre Généalogique" className="mb-8">
-          <FamilyTree />
+        <RomanCard className="mb-8">
+          <RomanCard.Header>
+            <h3 className="font-cinzel text-lg text-rome-navy">Arbre Généalogique</h3>
+          </RomanCard.Header>
+          <RomanCard.Content>
+            <FamilyTree />
+          </RomanCard.Content>
         </RomanCard>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-        <RomanCard title="Mariages et Alliances" className="h-full">
-          <MarriageAlliances />
+        <RomanCard className="h-full">
+          <RomanCard.Header>
+            <h3 className="font-cinzel text-lg text-rome-navy">Mariages et Alliances</h3>
+          </RomanCard.Header>
+          <RomanCard.Content>
+            <MarriageAlliances />
+          </RomanCard.Content>
         </RomanCard>
         
-        <RomanCard title="Héritage et Testaments" className="h-full">
-          <Inheritance />
+        <RomanCard className="h-full">
+          <RomanCard.Header>
+            <h3 className="font-cinzel text-lg text-rome-navy">Héritage et Testaments</h3>
+          </RomanCard.Header>
+          <RomanCard.Content>
+            <Inheritance />
+          </RomanCard.Content>
         </RomanCard>
       </div>
 
-      <RomanCard title="Éducation des Enfants">
-        <Education />
+      <RomanCard>
+        <RomanCard.Header>
+          <h3 className="font-cinzel text-lg text-rome-navy">Éducation des Enfants</h3>
+        </RomanCard.Header>
+        <RomanCard.Content>
+          <Education />
+        </RomanCard.Content>
       </RomanCard>
     </Layout>
   );

@@ -2,224 +2,194 @@
 import React from 'react';
 import Layout from '@/components/layout/Layout';
 import { PageHeader } from '@/components/ui-custom/PageHeader';
-import { RomanCard } from '@/components/ui-custom/RomanCard';
-import { StatBox } from '@/components/ui-custom/StatBox';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { PropertyCard } from '@/components/proprietes/PropertyCard';
-import { ResourceCard } from '@/components/proprietes/ResourceCard';
 import { PropertyMap } from '@/components/proprietes/PropertyMap';
-import { Button } from '@/components/ui/button';
-import { 
-  Building, 
-  Map, 
-  Wheat, 
-  Users, 
-  LandPlot,
-  Home,
-  Building2
-} from 'lucide-react';
+import { ResourceCard } from '@/components/proprietes/ResourceCard';
+import { StatBox } from '@/components/ui-custom/StatBox';
+import { RomanCard } from '@/components/ui-custom/RomanCard';
+import { Home, Building, MapPin, Wheat } from 'lucide-react';
 
 const Proprietes = () => {
   return (
     <Layout>
-      <PageHeader
-        title="Propriétés et Patrimoine"
-        subtitle="Gérez vos terres, villas et autres propriétés à travers la République"
+      <PageHeader 
+        title="Propriétés" 
+        subtitle="Gérez votre patrimoine immobilier et vos domaines agricoles" 
       />
 
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
         <StatBox 
-          label="Valeur totale" 
-          value="5,230,000 Sesterces" 
-          icon={<Building className="h-6 w-6" />} 
+          title="Propriétés totales" 
+          value="12" 
+          description="Valeur totale en hausse"
+          icon={<Building className="h-6 w-6" />}
           trend="up"
+          trendValue="+2"
         />
         <StatBox 
-          label="Nombre de propriétés" 
-          value="8" 
-          icon={<Home className="h-6 w-6" />} 
+          title="Domaines urbains" 
+          value="7" 
+          description="Insulae et domus à Rome"
+          icon={<Home className="h-6 w-6" />}
         />
         <StatBox 
-          label="Terres agricoles" 
-          value="1250 jugères" 
-          icon={<LandPlot className="h-6 w-6" />} 
+          title="Domaines ruraux" 
+          value="5" 
+          description="Nouveaux domaines acquis"
+          icon={<MapPin className="h-6 w-6" />}
           trend="up"
+          trendValue="+2"
         />
         <StatBox 
-          label="Esclaves et ouvriers" 
-          value="87" 
-          icon={<Users className="h-6 w-6" />} 
+          title="Production" 
+          value="Optimale" 
+          description="Rendements agricoles stables"
+          icon={<Wheat className="h-6 w-6" />}
         />
       </div>
 
-      <div className="mb-8">
-        <RomanCard title="Carte des Propriétés" className="mb-8">
-          <PropertyMap />
-        </RomanCard>
-      </div>
-
-      <Tabs defaultValue="villas" className="mb-8">
-        <TabsList className="w-full flex justify-start gap-2 mb-4 border-b border-rome-gold/20 pb-2 overflow-x-auto">
-          <TabsTrigger value="villas" className="data-[state=active]:bg-rome-gold/20 data-[state=active]:text-rome-navy data-[state=active]:font-bold rounded font-cinzel">
-            <Building2 className="mr-2 h-4 w-4" />
-            Villas
-          </TabsTrigger>
-          <TabsTrigger value="insulae" className="data-[state=active]:bg-rome-gold/20 data-[state=active]:text-rome-navy data-[state=active]:font-bold rounded font-cinzel">
-            <Building className="mr-2 h-4 w-4" />
-            Insulae
-          </TabsTrigger>
-          <TabsTrigger value="terres" className="data-[state=active]:bg-rome-gold/20 data-[state=active]:text-rome-navy data-[state=active]:font-bold rounded font-cinzel">
-            <LandPlot className="mr-2 h-4 w-4" />
-            Terres agricoles
-          </TabsTrigger>
+      <Tabs defaultValue="liste" className="mb-8">
+        <TabsList className="border border-rome-gold/30 bg-rome-parchment">
+          <TabsTrigger value="liste" className="data-[state=active]:bg-white">Vue Liste</TabsTrigger>
+          <TabsTrigger value="carte" className="data-[state=active]:bg-white">Vue Carte</TabsTrigger>
         </TabsList>
         
-        <TabsContent value="villas" className="space-y-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            <PropertyCard 
-              name="Villa Aurelia" 
-              location="Baiae, Campanie" 
-              value="1,250,000 Sesterces" 
-              type="villa" 
-              status="Excellente"
-              image="/images/placeholder.svg"
-            />
-            <PropertyCard 
-              name="Villa Rustica" 
-              location="Tusculum, Latium" 
-              value="850,000 Sesterces" 
-              type="villa" 
-              status="Bonne"
-              image="/images/placeholder.svg"
-            />
-            <PropertyCard 
-              name="Villa Marina" 
-              location="Ostie, Latium" 
-              value="950,000 Sesterces" 
-              type="villa" 
-              status="Moyenne"
-              image="/images/placeholder.svg"
-            />
-          </div>
+        <TabsContent value="liste" className="pt-4">
+          <RomanCard className="mb-6">
+            <RomanCard.Header>
+              <h3 className="font-cinzel text-lg text-rome-navy">Propriétés Urbaines</h3>
+            </RomanCard.Header>
+            <RomanCard.Content>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                <PropertyCard
+                  name="Domus du Palatin"
+                  type="Résidence principale"
+                  location="Rome, Colline du Palatin"
+                  value="1,200,000 sesterces"
+                  status="Excellent"
+                  imageUrl="/placeholder.svg"
+                />
+                <PropertyCard
+                  name="Insula de Subure"
+                  type="Immeuble de rapport"
+                  location="Rome, Quartier de Subure"
+                  value="600,000 sesterces"
+                  status="Bon"
+                  imageUrl="/placeholder.svg"
+                />
+                <PropertyCard
+                  name="Villa d'Ostie"
+                  type="Résidence secondaire"
+                  location="Ostie"
+                  value="850,000 sesterces"
+                  status="Très bon"
+                  imageUrl="/placeholder.svg"
+                />
+                <PropertyCard
+                  name="Boutiques du Forum"
+                  type="Commerces"
+                  location="Rome, Forum Romain"
+                  value="450,000 sesterces"
+                  status="Bon"
+                  imageUrl="/placeholder.svg"
+                />
+                <PropertyCard
+                  name="Insula du Champ de Mars"
+                  type="Immeuble de rapport"
+                  location="Rome, Champ de Mars"
+                  value="580,000 sesterces"
+                  status="Moyen"
+                  imageUrl="/placeholder.svg"
+                />
+              </div>
+            </RomanCard.Content>
+          </RomanCard>
+
+          <RomanCard className="mb-6">
+            <RomanCard.Header>
+              <h3 className="font-cinzel text-lg text-rome-navy">Propriétés Rurales</h3>
+            </RomanCard.Header>
+            <RomanCard.Content>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                <PropertyCard
+                  name="Domaine de Campanie"
+                  type="Villa agricole"
+                  location="Campanie"
+                  value="900,000 sesterces"
+                  status="Excellent"
+                  imageUrl="/placeholder.svg"
+                />
+                <PropertyCard
+                  name="Vignobles du Latium"
+                  type="Exploitation viticole"
+                  location="Latium"
+                  value="750,000 sesterces"
+                  status="Très bon"
+                  imageUrl="/placeholder.svg"
+                />
+                <PropertyCard
+                  name="Oliveraies d'Étrurie"
+                  type="Exploitation oléicole"
+                  location="Étrurie"
+                  value="680,000 sesterces"
+                  status="Bon"
+                  imageUrl="/placeholder.svg"
+                />
+              </div>
+            </RomanCard.Content>
+          </RomanCard>
+
+          <RomanCard>
+            <RomanCard.Header>
+              <h3 className="font-cinzel text-lg text-rome-navy">Ressources et Production</h3>
+            </RomanCard.Header>
+            <RomanCard.Content>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                <ResourceCard
+                  name="Blé"
+                  production="120 modii/mois"
+                  location="Domaine de Campanie"
+                  value="24,000 sesterces/an"
+                  trend="stable"
+                />
+                <ResourceCard
+                  name="Vin"
+                  production="80 amphores/mois"
+                  location="Vignobles du Latium"
+                  value="48,000 sesterces/an"
+                  trend="hausse"
+                />
+                <ResourceCard
+                  name="Huile d'olive"
+                  production="60 amphores/mois"
+                  location="Oliveraies d'Étrurie"
+                  value="36,000 sesterces/an"
+                  trend="hausse"
+                />
+                <ResourceCard
+                  name="Laine"
+                  production="200 kg/mois"
+                  location="Domaine d'Apulie"
+                  value="15,000 sesterces/an"
+                  trend="stable"
+                />
+                <ResourceCard
+                  name="Bois"
+                  production="30 tonnes/mois"
+                  location="Forêts d'Étrurie"
+                  value="18,000 sesterces/an"
+                  trend="baisse"
+                />
+              </div>
+            </RomanCard.Content>
+          </RomanCard>
         </TabsContent>
         
-        <TabsContent value="insulae" className="space-y-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            <PropertyCard 
-              name="Insula Palatina" 
-              location="Rome, Région I" 
-              value="600,000 Sesterces" 
-              type="insulae" 
-              status="Bonne"
-              image="/images/placeholder.svg"
-            />
-            <PropertyCard 
-              name="Insula Traiana" 
-              location="Rome, Région IV" 
-              value="450,000 Sesterces" 
-              type="insulae" 
-              status="Moyenne"
-              image="/images/placeholder.svg"
-            />
-          </div>
-        </TabsContent>
-        
-        <TabsContent value="terres" className="space-y-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            <PropertyCard 
-              name="Fundus Aurelius" 
-              location="Campanie" 
-              value="750,000 Sesterces" 
-              type="terres" 
-              status="Excellente"
-              image="/images/placeholder.svg"
-            />
-            <PropertyCard 
-              name="Fundus Caecilius" 
-              location="Sicile" 
-              value="380,000 Sesterces" 
-              type="terres" 
-              status="Bonne"
-              image="/images/placeholder.svg"
-            />
-            <PropertyCard 
-              name="Terra Vinea" 
-              location="Étrurie" 
-              value="420,000 Sesterces" 
-              type="terres" 
-              status="Excellente"
-              image="/images/placeholder.svg"
-            />
-          </div>
+        <TabsContent value="carte" className="pt-4">
+          <PropertyMap />
         </TabsContent>
       </Tabs>
-
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-        <RomanCard title="Ressources Agricoles" className="h-full">
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <ResourceCard 
-              name="Blé" 
-              quantity="1,200 modii" 
-              value="24,000 Sesterces" 
-              trend="up"
-              icon={<Wheat className="h-5 w-5" />}
-            />
-            <ResourceCard 
-              name="Vin" 
-              quantity="80 amphores" 
-              value="16,000 Sesterces" 
-              trend="neutral"
-              icon={<Wheat className="h-5 w-5" />}
-            />
-            <ResourceCard 
-              name="Huile d'olive" 
-              quantity="50 amphores" 
-              value="12,500 Sesterces" 
-              trend="up"
-              icon={<Wheat className="h-5 w-5" />}
-            />
-            <ResourceCard 
-              name="Laine" 
-              quantity="300 livres" 
-              value="9,000 Sesterces" 
-              trend="down"
-              icon={<Wheat className="h-5 w-5" />}
-            />
-          </div>
-        </RomanCard>
-        
-        <RomanCard title="Esclaves et Travailleurs" className="h-full">
-          <div className="space-y-4">
-            <div className="flex justify-between items-center border-b border-rome-gold/20 pb-2">
-              <div>
-                <h4 className="font-cinzel text-lg font-semibold">Esclaves domestiques</h4>
-                <p className="text-muted-foreground text-sm">Pour l'entretien des villas et insulae</p>
-              </div>
-              <span className="font-bold">24</span>
-            </div>
-            
-            <div className="flex justify-between items-center border-b border-rome-gold/20 pb-2">
-              <div>
-                <h4 className="font-cinzel text-lg font-semibold">Esclaves agricoles</h4>
-                <p className="text-muted-foreground text-sm">Pour le travail des terres et la récolte</p>
-              </div>
-              <span className="font-bold">45</span>
-            </div>
-            
-            <div className="flex justify-between items-center border-b border-rome-gold/20 pb-2">
-              <div>
-                <h4 className="font-cinzel text-lg font-semibold">Ouvriers</h4>
-                <p className="text-muted-foreground text-sm">Travail libre rémunéré</p>
-              </div>
-              <span className="font-bold">18</span>
-            </div>
-            
-            <div className="mt-4 text-center">
-              <Button variant="outline" className="roman-btn-outline">Gérer les travailleurs</Button>
-            </div>
-          </div>
-        </RomanCard>
-      </div>
     </Layout>
   );
 };
