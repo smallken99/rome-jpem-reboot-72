@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { Sword, Building, ScrollText, ShieldQuestion } from 'lucide-react';
+import { Sword, Building, ScrollText, ShieldQuestion, Heart } from 'lucide-react';
 import { Coins } from 'lucide-react';
 
 interface ChildEducation {
@@ -8,6 +8,7 @@ interface ChildEducation {
   mentor: string | null;
   progress: number;
   skills: string[];
+  pityBonus?: number; // Optional pity bonus field
 }
 
 interface ChildProps {
@@ -56,6 +57,11 @@ export const ChildEducationCard: React.FC<ChildEducationCardProps> = ({ child })
   // Check if there's an invalid education assignment (military for females)
   const hasInvalidEducation = child.gender === 'female' && child.currentEducation.type === 'military';
   
+  // Calculate the total progress including pity bonus if it exists
+  const baseProgress = child.currentEducation.progress;
+  const pityBonus = child.currentEducation.pityBonus || 0;
+  const totalProgress = Math.min(baseProgress + pityBonus, 100); // Cap at 100%
+  
   return (
     <div className="roman-card p-4 hover:shadow-md transition-all duration-300">
       <div className="flex justify-between items-start">
@@ -91,15 +97,22 @@ export const ChildEducationCard: React.FC<ChildEducationCardProps> = ({ child })
             <div className="mt-1 h-2 bg-muted rounded-full">
               <div 
                 className={`h-full ${hasInvalidEducation ? 'bg-red-400' : 'bg-rome-terracotta'} rounded-full`}
-                style={{ width: `${child.currentEducation.progress}%` }}
+                style={{ width: `${totalProgress}%` }}
               ></div>
             </div>
             <div className="flex justify-between text-xs mt-1">
               <span>Débutant</span>
-              <span>{child.currentEducation.progress}%</span>
+              <span>{baseProgress}%{pityBonus > 0 && <span className="text-green-600"> (+{pityBonus}% piété)</span>}</span>
               <span>Maître</span>
             </div>
           </div>
+          
+          {pityBonus > 0 && (
+            <div className="mt-2 flex items-center gap-1 text-xs text-green-600 bg-green-50 p-2 rounded">
+              <Heart className="h-3 w-3" />
+              <span>Bonus de piété: +{pityBonus}% de progression</span>
+            </div>
+          )}
           
           <div className="mt-3">
             <p className="text-xs text-muted-foreground">Mentor:</p>

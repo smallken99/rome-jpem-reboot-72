@@ -13,6 +13,7 @@ export const children = [
       type: 'military',
       mentor: 'Centurion Flavius Aquila',
       progress: 65,
+      pityBonus: 10, // Piety bonus from religious activities
       skills: ['Tactique de base', 'Maniement du glaive', 'Discipline militaire']
     }
   },
@@ -25,6 +26,7 @@ export const children = [
       type: 'political',
       mentor: 'Sénateur Marcus Porcius',
       progress: 40,
+      pityBonus: 5, // Small piety bonus
       skills: ['Rhétorique', 'Histoire romaine', 'Poésie grecque']
     }
   },
