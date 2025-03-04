@@ -7,6 +7,7 @@ import { RomanCard } from '@/components/ui-custom/RomanCard';
 import { AllianceItem } from '@/components/features/AllianceItem';
 import { useTimeStore } from '@/utils/timeSystem';
 import { familyAlliances } from '@/data/alliances';
+import { currentMagistracy } from '@/data/magistracies';
 import { 
   Coins, 
   Award, 
@@ -167,11 +168,11 @@ const Index = () => {
             </RomanCard.Header>
             <RomanCard.Content>
               <FamilyStatistic 
-                icon={<Shield className="h-6 w-6" />}
-                title="Marcus Aurelius Cotta - Préteur"
-                description={`En tant que Préteur, Marcus Aurelius administre la justice civile à Rome et peut commander des légions en l'absence des consuls. Son mandat prend fin en Mars ${year + 1} AUC.`}
-                iconBgColor="bg-rome-terracotta/10"
-                iconColor="text-rome-terracotta"
+                icon={currentMagistracy.icon}
+                title={`Marcus Aurelius Cotta - ${currentMagistracy.name}`}
+                description={`${currentMagistracy.description} Son mandat prend fin en Mars ${year + 1} AUC.`}
+                iconBgColor={currentMagistracy.iconBgColor}
+                iconColor={currentMagistracy.iconColor}
               />
             </RomanCard.Content>
           </RomanCard>
