@@ -1,3 +1,4 @@
+
 import React from 'react';
 import Layout from '@/components/layout/Layout';
 import { PageHeader } from '@/components/ui-custom/PageHeader';
@@ -5,7 +6,7 @@ import { StatBox } from '@/components/ui-custom/StatBox';
 import { RomanCard } from '@/components/ui-custom/RomanCard';
 import { AllianceItem } from '@/components/features/AllianceItem';
 import { useTimeStore } from '@/utils/timeSystem';
-import { getAllAlliances } from '@/data/alliances';
+import { familyAlliances } from '@/data/alliances';
 import { 
   Coins, 
   Award, 
@@ -15,8 +16,8 @@ import {
   Shield,
 } from 'lucide-react';
 
-// Obtenir toutes les alliances des données partagées
-const allAlliances = getAllAlliances();
+// Obtenir seulement les alliances matrimoniales comme dans la page Famille
+const marriageAlliances = familyAlliances.filter(alliance => alliance.type === 'matrimoniale');
 
 interface FamilyStatisticProps {
   icon: React.ReactNode;
@@ -124,11 +125,11 @@ const Index = () => {
         
         <RomanCard className="bg-white/90 backdrop-blur-sm border border-rome-gold/30 hover:border-rome-gold/50 transition-all duration-300">
           <RomanCard.Header className="bg-gradient-to-r from-rome-gold/20 via-rome-gold/10 to-transparent border-b border-rome-gold/30">
-            <h3 className="font-cinzel text-lg text-rome-navy">Alliances de la Gens</h3>
+            <h3 className="font-cinzel text-lg text-rome-navy">Alliances matrimoniales de la Gens</h3>
           </RomanCard.Header>
           <RomanCard.Content>
             <div className="space-y-2">
-              {allAlliances.map((alliance, index) => (
+              {marriageAlliances.map((alliance, index) => (
                 <AllianceItem 
                   key={alliance.id || index}
                   name={alliance.name}
