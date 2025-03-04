@@ -1,18 +1,56 @@
 
 import { Client, ClientType } from './ClientCard';
 
-// Génération des clients masculins uniquement
+// Génération des clients masculins plébéiens exclusivement
 export const generateClients = (): Client[] => {
-  const clientTypes: ClientType[] = ['artisan', 'politicien', 'religieux', 'proprietaire', 'pegre'];
+  const clientTypes: ClientType[] = ['artisan_commercant', 'politicien', 'religieux', 'proprietaire', 'pegre'];
   const loyaltyLevels = ['Très Haute', 'Haute', 'Moyenne', 'Basse', 'Très Basse'];
-  const locations = ['Forum Romanum', 'Subura', 'Port d\'Ostie', 'Colline Palatine', 'Campanie', 'Via Appia', 'Marché de Trajan'];
   
+  // Quartiers et collines de la Rome républicaine
+  const locations = [
+    'Aventin', 'Palatin', 'Capitole', 'Quirinal', 'Viminal', 
+    'Esquilin', 'Caelius', 'Subura', 'Forum Boarium', 'Forum Romanum', 
+    'Champ de Mars', 'Trastevere', 'Emporium', 'Via Sacra', 'Via Lata',
+    'Regio Transtiberim', 'Velabrum'
+  ];
+  
+  // Métiers plus diversifiés pour chaque type de client
   const subTypes = {
-    artisan: ['Forgeron', 'Potier', 'Tisserand', 'Bijoutier', 'Boulanger', 'Tanneur', 'Sculpteur', 'Charpentier'],
-    politicien: ['Sénateur', 'Tribun', 'Édile', 'Questeur', 'Censeur', 'Préteur', 'Magistrat'],
-    religieux: ['Pontife', 'Augure', 'Flamine', 'Haruspice', 'Prêtre de Jupiter', 'Prêtre de Mars'],
-    proprietaire: ['Propriétaire Terrien', 'Viticulteur', 'Oliviculteur', 'Éleveur', 'Armateur'],
-    pegre: ['Usurier', 'Contrebandier', 'Gladiateur', 'Mercenaire', 'Espion', 'Receleur']
+    artisan_commercant: [
+      'Forgeron', 'Potier', 'Tisserand', 'Bijoutier', 'Boulanger', 'Tanneur', 
+      'Sculpteur', 'Charpentier', 'Marchand d\'huile', 'Marchand de vin', 
+      'Marchand d\'épices', 'Marchand de tissus', 'Cordonnier', 'Verrier', 
+      'Libraire', 'Tonnelier', 'Marchand de céréales', 'Tavernier',
+      'Parfumeur', 'Marchand d\'armes', 'Fabricant de lampes', 'Teinturier',
+      'Meunier', 'Fabricant de mosaïques'
+    ],
+    politicien: [
+      'Tribun de la plèbe', 'Édile', 'Questeur', 'Censeur', 'Préteur', 
+      'Magistrat municipal', 'Scribe public', 'Orateur du Forum', 
+      'Trésorier', 'Collecteur d\'impôts', 'Inspecteur des aqueducs',
+      'Commissaire aux grains', 'Commissaire des marchés', 'Agent électoral',
+      'Assesseur juridique'
+    ],
+    religieux: [
+      'Augure plébéien', 'Haruspice', 'Prêtre de Cérès', 'Prêtre de Bacchus', 
+      'Sacrificateur', 'Gardien de temple', 'Interprète de présages',
+      'Prêtre de Vulcain', 'Prêtre de Mercure', 'Assistant des Vestales',
+      'Gardien des reliques', 'Musicien de culte', 'Vendeur d\'amulettes',
+      'Devin', 'Astrologue', 'Fabricant d\'ex-voto'
+    ],
+    proprietaire: [
+      'Petit propriétaire terrien', 'Viticulteur', 'Oliviculteur', 'Éleveur d\'ovins', 
+      'Éleveur de bovins', 'Exploitant de verger', 'Apiculteur', 'Pisciculteur',
+      'Propriétaire de carrière', 'Loueur d\'entrepôts', 'Propriétaire d\'insulae',
+      'Exploitant de bois', 'Propriétaire de vignobles', 'Propriétaire de pressoir',
+      'Exploitant agricole', 'Producteur de garum'
+    ],
+    pegre: [
+      'Usurier', 'Contrebandier', 'Gladiateur retraité', 'Mercenaire', 'Espion', 
+      'Receleur', 'Chef de gang', 'Faussaire', 'Parieur professionnel',
+      'Proxénète', 'Maître-chanteur', 'Trafiquant d\'esclaves', 'Voleur de tombes',
+      'Pickpocket', 'Faux témoin', 'Saboteur', 'Agent provocateur'
+    ]
   };
   
   // Générer entre 12 et 18 clients aléatoirement
@@ -37,7 +75,7 @@ export const generateClients = (): Client[] => {
       case 'religieux':
         religiousInfluence += 3 + Math.floor(Math.random() * 3);
         break;
-      case 'artisan':
+      case 'artisan_commercant':
       case 'pegre':
         popularInfluence += 3 + Math.floor(Math.random() * 3);
         break;
@@ -57,7 +95,7 @@ export const generateClients = (): Client[] => {
     
     generatedClients.push({
       id: i + 1,
-      name: generateRomanName(),
+      name: generateRomanPlebName(),
       type: clientType,
       subType: subType,
       location: locations[Math.floor(Math.random() * locations.length)],
@@ -73,15 +111,38 @@ export const generateClients = (): Client[] => {
   return generatedClients;
 };
 
-// Génération d'un nom romain masculin uniquement
-export const generateRomanName = (): string => {
-  const praenomina = ['Marcus', 'Lucius', 'Gaius', 'Publius', 'Quintus', 'Titus', 'Servius', 'Gnaeus', 'Decimus', 'Aulus'];
-  const nomina = ['Aurelius', 'Julius', 'Claudius', 'Flavius', 'Cornelius', 'Licinius', 'Valerius', 'Domitius', 'Aemilius', 'Pompeius'];
-  const cognomina = ['Maximus', 'Felix', 'Severus', 'Rufus', 'Niger', 'Paulus', 'Crispus', 'Priscus', 'Cotta', 'Gallus'];
+// Génération d'un nom romain plébéien masculin
+export const generateRomanPlebName = (): string => {
+  // Prénoms plébéiens romains
+  const praenomina = [
+    'Marcus', 'Lucius', 'Gaius', 'Quintus', 'Titus', 'Publius', 'Gnaeus', 
+    'Aulus', 'Sextus', 'Numerius', 'Spurius', 'Servius', 'Manius'
+  ];
+  
+  // Noms de famille plébéiens
+  const nomina = [
+    'Flavius', 'Caecilius', 'Sempronius', 'Plautius', 'Marius', 'Aelius', 
+    'Tullius', 'Fulvius', 'Livius', 'Marcius', 'Octavius', 'Horatius', 
+    'Valerius', 'Hostilius', 'Lucretius', 'Cassius', 'Publilius', 'Menenius',
+    'Aemilius', 'Icilius', 'Verginius', 'Nautius', 'Sicinius', 'Canuleius'
+  ];
+  
+  // Surnoms plébéiens
+  const cognomina = [
+    'Felix', 'Rufus', 'Niger', 'Fuscus', 'Bassus', 'Priscus', 
+    'Longus', 'Cotta', 'Gallus', 'Flaccus', 'Capito', 'Macro', 
+    'Cicero', 'Varro', 'Crispus', 'Balbus', 'Laenas', 'Celsus',
+    'Lentulus', 'Bibulus', 'Piso', 'Scaeva', 'Vetus', 'Calvus'
+  ];
   
   const praenomen = praenomina[Math.floor(Math.random() * praenomina.length)];
   const nomen = nomina[Math.floor(Math.random() * nomina.length)];
-  const cognomen = cognomina[Math.floor(Math.random() * cognomina.length)];
   
-  return `${praenomen} ${nomen} ${cognomen}`;
+  // 75% de chance d'avoir un cognomen
+  if (Math.random() < 0.75) {
+    const cognomen = cognomina[Math.floor(Math.random() * cognomina.length)];
+    return `${praenomen} ${nomen} ${cognomen}`;
+  }
+  
+  return `${praenomen} ${nomen}`;
 };

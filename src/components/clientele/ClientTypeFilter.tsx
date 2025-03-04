@@ -20,12 +20,12 @@ export const ClientTypeFilter: React.FC<ClientTypeFilterProps> = ({ filter, hand
         Tous
       </Button>
       <Button 
-        variant={filter === "artisan" ? "default" : "outline"} 
+        variant={filter === "artisan_commercant" ? "default" : "outline"} 
         size="sm"
         className="text-xs gap-1 roman-btn-outline"
-        onClick={() => handleTypeFilter("artisan")}
+        onClick={() => handleTypeFilter("artisan_commercant")}
       >
-        Artisans
+        Artisans & Commerçants
       </Button>
       <Button 
         variant={filter === "politicien" ? "default" : "outline"} 

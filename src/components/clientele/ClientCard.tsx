@@ -7,7 +7,7 @@ import { ClientInfluences } from './card/ClientInfluences';
 import { CardActions } from './card/CardActions';
 
 // Définir les types de clients et sous-types
-export type ClientType = 'artisan' | 'politicien' | 'religieux' | 'proprietaire' | 'pegre';
+export type ClientType = 'artisan_commercant' | 'politicien' | 'religieux' | 'proprietaire' | 'pegre';
 export type ClientSubType = string;
 
 // Interface pour les influences
