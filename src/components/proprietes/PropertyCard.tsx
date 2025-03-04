@@ -12,7 +12,7 @@ import {
   Wheat,
   TreeDeciduous,
   Utensils,
-  Horse
+  Tractor
 } from 'lucide-react';
 
 // Update the PropertyType to include all property types
@@ -93,7 +93,7 @@ export const PropertyCard: React.FC<PropertyCardProps> = ({
     }
     // Rural - Pasture
     if (type.includes('paturage_')) {
-      return <Horse className="h-5 w-5" />;
+      return <Tractor className="h-5 w-5" />; // Replacing Horse with Tractor
     }
     
     // Default

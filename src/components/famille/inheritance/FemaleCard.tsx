@@ -2,7 +2,7 @@
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { StatBar } from '../StatBar';
+import StatBar from '../StatBar';
 import { Character } from '@/types/character';
 
 // This should contain only necessary properties for female characters
@@ -16,11 +16,11 @@ type FemaleCharacter = {
 
 interface FemaleCardProps {
   female: FemaleCharacter;
-  dowryAmount: number;
-  index: number;
+  dowryAmount?: number;
+  index?: number;
 }
 
-export const FemaleCard: React.FC<FemaleCardProps> = ({ female, dowryAmount, index }) => {
+export const FemaleCard: React.FC<FemaleCardProps> = ({ female, dowryAmount = 0, index }) => {
   return (
     <Card key={female.id} className="mt-4 border-rome-gold/30">
       <CardHeader className="pb-2">
