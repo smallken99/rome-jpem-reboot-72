@@ -74,28 +74,6 @@ export const EducationPathCard: React.FC<EducationPathCardProps> = ({ path }) =>
         </div>
       )}
       
-      <Separator className="my-3" />
-      
-      <div className="grid grid-cols-2 gap-3 text-xs">
-        <div>
-          <p className="font-medium mb-1">Bénéfices:</p>
-          <ul className="ml-4 list-disc">
-            {path.benefits.map((benefit, idx) => (
-              <li key={idx}>{benefit}</li>
-            ))}
-          </ul>
-        </div>
-        
-        <div>
-          <p className="font-medium mb-1">Carrières possibles:</p>
-          <ul className="ml-4 list-disc">
-            {path.careers.map((career, idx) => (
-              <li key={idx}>{career}</li>
-            ))}
-          </ul>
-        </div>
-      </div>
-      
       <Collapsible
         open={showCurriculum}
         onOpenChange={setShowCurriculum}
