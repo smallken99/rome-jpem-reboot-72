@@ -1,3 +1,4 @@
+
 import { romanNamePrefixes, romanNameSuffixes, specialties, titles } from './EducationData';
 
 // Generate a random Roman name
@@ -42,8 +43,16 @@ export const generateFee = (reputation: string) => {
 };
 
 // Generate a random title based on education type
+// Removed high-ranking titles like Consul, Pontifex, Legate, Praetor, etc.
 export const generateTitle = (type: string) => {
-  const typeTitles = titles[type as keyof typeof titles] || [];
+  // Define appropriate titles for each education type without high-ranking positions
+  const preceptorTitles = {
+    military: ['Vétéran', 'Instructeur', 'Optio', 'Aquilifer', 'Decurion', 'Signifer'],
+    political: ['Orateur', 'Juriste', 'Philosophe', 'Rhéteur', 'Scribe', 'Grammairien'],
+    religious: ['Augure', 'Haruspice', 'Salii', 'Fetiales', 'Acolyte', 'Prêtre']
+  };
+  
+  const typeTitles = preceptorTitles[type as keyof typeof preceptorTitles] || [];
   return typeTitles[Math.floor(Math.random() * typeTitles.length)];
 };
 
