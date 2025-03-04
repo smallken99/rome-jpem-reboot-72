@@ -7,6 +7,7 @@ export type Preceptor = {
   reputation: 'Excellent' | 'Bon' | 'Moyen';
   fee: number;
   statBonus: number;
+  gender: 'male' | 'female';
 };
 
 export type PreceptorsByType = {

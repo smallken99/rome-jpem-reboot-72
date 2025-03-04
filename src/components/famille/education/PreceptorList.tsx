@@ -1,8 +1,10 @@
+
 import React from 'react';
-import { ShieldQuestion, TrendingUp } from 'lucide-react';
+import { ShieldQuestion, TrendingUp, Female, Male } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { educationPaths } from './EducationData';
 import { PreceptorsByType } from './types/educationTypes';
+import { Badge } from '@/components/ui/badge';
 
 interface PreceptorListProps {
   preceptors: PreceptorsByType;
@@ -57,7 +59,18 @@ export const PreceptorList: React.FC<PreceptorListProps> = ({ preceptors, refres
                 {teacherList.map(teacher => (
                   <div key={teacher.id} className="border border-muted rounded p-3 hover:border-rome-gold/50 transition-colors">
                     <div className="flex justify-between items-start">
-                      <h4 className="font-medium">{teacher.name}</h4>
+                      <div className="flex items-center gap-1.5">
+                        <h4 className="font-medium">{teacher.name}</h4>
+                        {teacher.gender === 'female' ? (
+                          <Badge variant="outline" className="bg-pink-50 text-pink-700 text-xs py-0 h-5 border-pink-200">
+                            <Female className="h-3 w-3 mr-1" /> F
+                          </Badge>
+                        ) : (
+                          <Badge variant="outline" className="bg-blue-50 text-blue-700 text-xs py-0 h-5 border-blue-200">
+                            <Male className="h-3 w-3 mr-1" /> H
+                          </Badge>
+                        )}
+                      </div>
                       <span className={`text-xs px-2 py-1 rounded ${
                         teacher.reputation === 'Excellent' ? 'bg-green-100 text-green-800' :
                         teacher.reputation === 'Bon' ? 'bg-blue-100 text-blue-800' :

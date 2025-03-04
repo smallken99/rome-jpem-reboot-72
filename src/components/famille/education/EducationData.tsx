@@ -90,14 +90,14 @@ export const titles = {
   religious: ['Pontifex', 'Augure', 'Flamine', 'Vestale', 'Haruspice', 'Rex Sacrorum', 'Salii', 'Fetiales']
 };
 
-// Education paths with annual curriculum and explicitly linked stats
+// Education paths with annual curriculum and explicitly linked stats - âges minimums abaissés
 export const educationPaths = [
   {
     type: 'military',
     icon: <Sword className="h-5 w-5" />,
     title: 'Éducation Militaire',
     description: 'Formation aux arts de la guerre, stratégie et leadership sur le champ de bataille.',
-    minAge: 12,
+    minAge: 10, // Abaissé de 12 à 10 ans
     suitableFor: 'male', // Explicitly for males only
     duration: 2,
     annualCurriculum: [
@@ -111,7 +111,7 @@ export const educationPaths = [
     icon: <Building className="h-5 w-5" />,
     title: 'Éducation Politique',
     description: 'Éducation en rhétorique, droit et philosophie pour exceller au Sénat.',
-    minAge: 8,
+    minAge: 6, // Abaissé de 8 à 6 ans
     suitableFor: 'both',
     duration: 2,
     annualCurriculum: [
@@ -125,7 +125,7 @@ export const educationPaths = [
     icon: <ScrollText className="h-5 w-5" />,
     title: 'Éducation Religieuse',
     description: 'Étude des rites sacrés, divination et traditions religieuses romaines.',
-    minAge: 6,
+    minAge: 5, // Abaissé de 6 à 5 ans
     suitableFor: 'both',
     duration: 2,
     annualCurriculum: [

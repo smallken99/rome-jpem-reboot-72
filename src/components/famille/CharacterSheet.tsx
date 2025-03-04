@@ -10,6 +10,22 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { EducationSpecialties } from './education/components/EducationSpecialties';
 
+// Roman-style portraits for characters
+const romanPortraits = {
+  male: [
+    "https://images.unsplash.com/photo-1610216705422-caa3fcb6d158?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8NXx8cm9tYW4lMjBtYW58ZW58MHwwfDB8fHww&auto=format&fit=crop&w=500&q=60",
+    "https://images.unsplash.com/photo-1620522849897-ff3758435af6?auto=format&fit=crop&w=500&q=60",
+    "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=500&q=60",
+    "https://images.unsplash.com/photo-1513956589380-bad6acb9b9d4?auto=format&fit=crop&w=500&q=60"
+  ],
+  female: [
+    "https://images.unsplash.com/photo-1508214751196-bcfd4ca60f91?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80",
+    "https://images.unsplash.com/photo-1544005313-94ddf0286df2?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mnx8d29tYW4lMjBwb3J0cmFpdHxlbnwwfDB8MHx8fDA%3D&auto=format&fit=crop&w=500&q=60",
+    "https://images.unsplash.com/photo-1531123897727-8f129e1688ce?auto=format&fit=crop&w=500&q=60",
+    "https://images.unsplash.com/photo-1509967419530-da38b4704bc6?auto=format&fit=crop&w=500&q=60"
+  ]
+};
+
 interface CharacterSheetProps {
   character: Character;
   className?: string;
@@ -49,6 +65,16 @@ export const CharacterSheet: React.FC<CharacterSheetProps> = ({
   // Set fallback background color based on gender
   const getFallbackColor = () => {
     return isFemale ? 'bg-rome-terracotta/20' : 'bg-rome-navy/20';
+  };
+
+  // Get a random Roman portrait if no portrait is set
+  const getRandomPortrait = () => {
+    if (character.portrait) return character.portrait;
+    
+    const portraitList = isFemale ? romanPortraits.female : romanPortraits.male;
+    // Use character id to get a consistent portrait
+    const portraitIndex = parseInt(character.id.replace(/[^0-9]/g, '')) % portraitList.length;
+    return portraitList[portraitIndex] || portraitList[0];
   };
 
   // Handle name save
@@ -116,13 +142,10 @@ export const CharacterSheet: React.FC<CharacterSheetProps> = ({
           <div className="w-full md:w-1/3 relative">
             <div className="aspect-square rounded-md overflow-hidden mb-4 flex items-center justify-center relative group">
               <Avatar className="w-full h-full rounded-md">
-                {character.portrait ? (
-                  <AvatarImage src={character.portrait} alt={character.name} className="object-cover" />
-                ) : (
-                  <AvatarFallback className={`${getFallbackColor()} text-4xl font-cinzel w-full h-full`}>
-                    {getInitials(character.name)}
-                  </AvatarFallback>
-                )}
+                <AvatarImage src={getRandomPortrait()} alt={character.name} className="object-cover" />
+                <AvatarFallback className={`${getFallbackColor()} text-4xl font-cinzel w-full h-full`}>
+                  {getInitials(character.name)}
+                </AvatarFallback>
               </Avatar>
               
               {onEditPortrait && (

@@ -42,17 +42,36 @@ export const generateFee = (reputation: string) => {
   return Math.round(baseFee * reputationMultiplier * randomVariation / 100) * 100;
 };
 
+// Generate a random gender based on education type (only females for religious)
+export const generateGender = (type: string) => {
+  if (type === 'religious') {
+    // 30% chance of female for religious education
+    return Math.random() < 0.3 ? 'female' : 'male';
+  }
+  
+  // All other education types only have male preceptors
+  return 'male';
+};
+
 // Generate a random title based on education type
-// Removed high-ranking titles like Consul, Pontifex, Legate, Praetor, etc.
-export const generateTitle = (type: string) => {
-  // Define appropriate titles for each education type without high-ranking positions
-  const preceptorTitles = {
+export const generateTitle = (type: string, gender: string) => {
+  // Define appropriate titles for each education type
+  const maleTitles = {
     military: ['Vétéran', 'Instructeur', 'Optio', 'Aquilifer', 'Decurion', 'Signifer'],
     political: ['Orateur', 'Juriste', 'Philosophe', 'Rhéteur', 'Scribe', 'Grammairien'],
     religious: ['Augure', 'Haruspice', 'Salii', 'Fetiales', 'Acolyte', 'Prêtre']
   };
   
-  const typeTitles = preceptorTitles[type as keyof typeof preceptorTitles] || [];
+  const femaleTitles = {
+    religious: ['Vestale', 'Prêtresse', 'Oracle', 'Gardienne du Temple']
+  };
+  
+  if (gender === 'female' && type === 'religious') {
+    const titles = femaleTitles.religious;
+    return titles[Math.floor(Math.random() * titles.length)];
+  }
+  
+  const typeTitles = maleTitles[type as keyof typeof maleTitles] || [];
   return typeTitles[Math.floor(Math.random() * typeTitles.length)];
 };
 

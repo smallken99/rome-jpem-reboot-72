@@ -9,7 +9,8 @@ import {
   generateReputation, 
   generateFee, 
   generateTitle,
-  generateStatBonus
+  generateStatBonus,
+  generateGender
 } from './education/preceptorUtils';
 import { Preceptor, PreceptorsByType } from './education/types/educationTypes';
 import { Character } from '@/types/character';
@@ -41,10 +42,13 @@ export const Education: React.FC<EducationProps> = ({
     
     educationPaths.forEach(path => {
       const pathPreceptors: Preceptor[] = [];
-      const numPreceptors = 5 + Math.floor(Math.random() * 3); // 5 to 7 preceptors per path
+      // Générer plus de précepteurs (8-12 par type d'éducation)
+      const numPreceptors = 8 + Math.floor(Math.random() * 5);
       
       for (let i = 0; i < numPreceptors; i++) {
-        const title = generateTitle(path.type);
+        // Déterminer le genre selon le type d'éducation
+        const gender = generateGender(path.type);
+        const title = generateTitle(path.type, gender);
         const name = `${title} ${generateRomanName()}`;
         const speciality = generateSpeciality(path.type);
         const reputation = generateReputation();
@@ -65,7 +69,8 @@ export const Education: React.FC<EducationProps> = ({
           speciality,
           reputation,
           fee,
-          statBonus
+          statBonus,
+          gender
         });
       }
       
@@ -89,6 +94,7 @@ export const Education: React.FC<EducationProps> = ({
         <p className="font-medium mb-1">Hérédité des caractéristiques:</p>
         <p>À la naissance, un personnage hérite d'un tiers des caractéristiques combinées de ses parents (divisées par 2).</p>
         <p className="mt-1">L'éducation permet ensuite d'augmenter ces caractéristiques jusqu'à un maximum de 40 (sauf pour la popularité qui est illimitée).</p>
+        <p className="mt-1 italic">Les enfants peuvent maintenant enchaîner plusieurs formations pour améliorer leurs compétences.</p>
       </div>
       
       <EducationTabs 
