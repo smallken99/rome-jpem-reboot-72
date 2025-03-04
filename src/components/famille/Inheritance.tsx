@@ -7,6 +7,28 @@ import { Button } from '@/components/ui/button';
 import { useToast } from '@/components/ui/use-toast';
 import { RomanCard } from '@/components/ui-custom/RomanCard';
 
+// Function to calculate dowry value based on age and other factors
+const calculateDowryValue = (heir: {
+  age: number;
+  gender: 'male' | 'female';
+  role?: string;
+}) => {
+  // Base value for dowry calculation
+  const baseValue = 100000; // 100,000 As as base value
+  
+  // Age factor - younger brides/grooms have higher dowry potential
+  const ageFactor = Math.max(0.5, 1 - (heir.age - 12) * 0.05);
+  
+  // Role bonus - certain roles (like being the first daughter) increase dowry
+  const roleBonus = heir.role?.toLowerCase().includes('aîné') ? 1.5 : 1.2;
+  
+  // Calculate final value
+  const dowryValue = Math.round(baseValue * ageFactor * roleBonus);
+  
+  // Format with Roman numerals for large values
+  return `${(dowryValue / 1000).toFixed(0)}K As`;
+};
+
 export const Inheritance: React.FC = () => {
   const eligibleHeirs = characters.filter(char => 
     char.role?.toLowerCase().includes('fils') || 
@@ -108,6 +130,7 @@ interface HeirCardProps {
 
 const HeirCard: React.FC<HeirCardProps> = ({ heir, isSelected, onSelect }) => {
   const relation = heir.role || (heir.gender === 'male' ? 'Fils' : 'Fille');
+  const dowryValue = calculateDowryValue(heir);
   
   return (
     <RomanCard className={`p-3 transition-all ${isSelected ? 'border-l-4 border-l-rome-gold bg-rome-gold/5' : ''}`}>
@@ -139,12 +162,12 @@ const HeirCard: React.FC<HeirCardProps> = ({ heir, isSelected, onSelect }) => {
       <div className="text-sm grid grid-cols-2 gap-2">
         <div className="flex items-center gap-1">
           <Home className="h-4 w-4 text-muted-foreground" />
-          <span>{heir.gender === 'male' ? 'Hérite des terres' : 'Dot de mariage'}</span>
+          <span>{heir.gender === 'male' ? 'Hérite des terres' : `Dot de mariage (${dowryValue})`}</span>
         </div>
         
         <div className="flex items-center gap-1">
           <Coins className="h-4 w-4 text-muted-foreground" />
-          <span>{isSelected ? 'Hérite de la fortune' : 'Pension annuelle'}</span>
+          <span>{isSelected ? 'Hérite de la fortune' : 'Portion d\'héritage'}</span>
         </div>
       </div>
       
