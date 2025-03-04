@@ -1,7 +1,6 @@
 
 import { Character } from '@/types/character';
 import { romanNamePrefixes, romanNameSuffixes } from '@/components/famille/education/EducationData';
-import { cn } from '@/lib/utils';
 
 // Constants for birth system
 const BIRTH_CHANCE_PER_YEAR = 0.2; // 20% chance per year for a birth

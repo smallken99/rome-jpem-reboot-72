@@ -1,7 +1,6 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { AllianceItem } from '../features/AllianceItem';
-import { Button } from '@/components/ui/button';
 import { Baby, Calendar } from 'lucide-react';
 import { useToast } from '@/components/ui/use-toast';
 import { checkForBirth, generateChild } from './utils/birthSystem';
@@ -40,17 +39,17 @@ export const MarriageAlliances: React.FC<MarriageAlliancesProps> = ({
   characters, 
   onChildBirth 
 }) => {
+  const [currentYear, setCurrentYear] = useState<number>(705); // Starting year (AUC - Ab Urbe Condita)
   const [lastBirthYear, setLastBirthYear] = useState<number>(0);
-  const [yearsPassed, setYearsPassed] = useState<number>(0);
   const { toast } = useToast();
   
   // Filter alliances to only show active ones
   const activeAlliances = alliances.filter(alliance => alliance.status === 'actif');
   
   // Function to simulate the passage of time and check for births
-  const simulateYear = () => {
-    // Increment years passed
-    setYearsPassed(prev => prev + 1);
+  const advanceYear = () => {
+    // Increment game year
+    setCurrentYear(prev => prev + 1);
     
     // Check each active alliance for potential births
     activeAlliances.forEach(alliance => {
@@ -70,7 +69,7 @@ export const MarriageAlliances: React.FC<MarriageAlliancesProps> = ({
           }
           
           // Update the last birth year
-          setLastBirthYear(yearsPassed);
+          setLastBirthYear(currentYear);
           
           // Show a toast notification
           toast({
@@ -82,6 +81,18 @@ export const MarriageAlliances: React.FC<MarriageAlliancesProps> = ({
       }
     });
   };
+
+  // Set up an automatic year advancement - this could be triggered by a game clock
+  // or other in-game events instead of a fixed interval
+  useEffect(() => {
+    // For demo purposes, we're using a timer to advance years automatically
+    // In a real game, this would be tied to the game's time system
+    const yearTimer = setInterval(() => {
+      advanceYear();
+    }, 60000); // Advance a year every 60 seconds (for demonstration)
+    
+    return () => clearInterval(yearTimer);
+  }, [characters]);
   
   return (
     <div className="marriage-alliances">
@@ -95,22 +106,14 @@ export const MarriageAlliances: React.FC<MarriageAlliancesProps> = ({
       <div className="flex justify-between items-center mb-4">
         <div className="text-sm text-muted-foreground flex items-center gap-2">
           <Calendar className="h-4 w-4" />
-          <span>Années simulées: {yearsPassed}</span>
+          <span>Année courante: {currentYear} AUC</span>
         </div>
-        <Button 
-          variant="outline" 
-          size="sm" 
-          onClick={simulateYear}
-          className="text-xs border-rome-navy/30 hover:bg-rome-navy/10"
-        >
-          Simuler un an
-        </Button>
       </div>
       
       {lastBirthYear > 0 && (
         <div className="p-2 mb-4 bg-blue-50 rounded-md flex items-center gap-2 text-sm text-blue-700">
           <Baby className="h-4 w-4" />
-          <span>Dernière naissance: il y a {yearsPassed - lastBirthYear} an(s)</span>
+          <span>Dernière naissance: {currentYear - lastBirthYear} an(s)</span>
         </div>
       )}
       
