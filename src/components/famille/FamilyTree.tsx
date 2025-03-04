@@ -1,66 +1,52 @@
-
 import React from 'react';
 import { Separator } from '@/components/ui/separator';
+import { characters } from '@/data/characters';
 
-// Sample family data
-const familyMembers = [
-  { 
-    id: '1', 
-    name: 'Marcus Tullius', 
-    role: 'Pater Familias', 
-    age: 52, 
-    status: 'alive',
-    spouse: 'Livia Augusta',
-    image: '/images/placeholder.svg'
-  },
-  { 
-    id: '2', 
-    name: 'Livia Augusta', 
-    role: 'Mater Familias', 
-    age: 45, 
-    status: 'alive',
-    spouse: 'Marcus Tullius',
-    image: '/images/placeholder.svg'
-  },
-  { 
-    id: '3', 
-    name: 'Gaius Tullius', 
-    role: 'Filius', 
-    age: 25, 
-    status: 'alive',
-    spouse: 'Cornelia Minor',
-    image: '/images/placeholder.svg'
-  },
-  { 
-    id: '4', 
-    name: 'Cornelia Minor', 
-    role: 'Nurus', 
-    age: 22, 
-    status: 'alive',
-    spouse: 'Gaius Tullius',
-    image: '/images/placeholder.svg'
-  },
-  { 
-    id: '5', 
-    name: 'Julia Tullia', 
-    role: 'Filia', 
-    age: 18, 
-    status: 'alive',
-    spouse: null,
-    image: '/images/placeholder.svg'
-  },
-  { 
-    id: '6', 
-    name: 'Titus Tullius', 
-    role: 'Filius', 
-    age: 15, 
-    status: 'alive',
-    spouse: null,
-    image: '/images/placeholder.svg'
-  },
-];
+// Create family data based on the characters data
+const getFamilyMembers = () => {
+  return [
+    { 
+      id: '1', 
+      name: 'Marcus Aurelius Cotta', 
+      role: 'Pater Familias', 
+      age: 42, 
+      status: 'alive',
+      spouse: 'Livia Aurelia',
+      image: characters[0].portrait || '/images/placeholder.svg'
+    },
+    { 
+      id: '2', 
+      name: 'Livia Aurelia', 
+      role: 'Mater Familias', 
+      age: 38, 
+      status: 'alive',
+      spouse: 'Marcus Aurelius Cotta',
+      image: characters[1].portrait || '/images/placeholder.svg'
+    },
+    { 
+      id: '3', 
+      name: 'Titus Aurelius', 
+      role: 'Filius', 
+      age: 15, 
+      status: 'alive',
+      spouse: null,
+      image: characters[2].portrait || '/images/placeholder.svg'
+    },
+    { 
+      id: '4', 
+      name: 'Julia Aurelia', 
+      role: 'Filia', 
+      age: 12, 
+      status: 'alive',
+      spouse: 'Quintus Fabius (promis)',
+      image: characters[3].portrait || '/images/placeholder.svg'
+    },
+  ];
+};
 
 export const FamilyTree: React.FC = () => {
+  const familyMembers = getFamilyMembers();
+  
   return (
     <div className="family-tree-container">
       <div className="p-4 mb-4 bg-rome-parchment/50 rounded-md">

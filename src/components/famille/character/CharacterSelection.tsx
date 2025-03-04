@@ -18,18 +18,29 @@ export const CharacterSelection: React.FC<CharacterSelectionProps> = ({
   activeCharacter, 
   onEditPortrait 
 }) => {
+  // Count active alliances (2 from MarriageAlliances.tsx)
+  const alliancesCount = 2;
+  
+  // Count heirs (male children - just Titus)
+  const heirs = localCharacters.filter(char => 
+    char.gender === 'male' && char.age < 18 && char.role?.includes('Fils')
+  ).length;
+  
+  // Count all family members (including extended family mentioned in alliances)
+  const familyMembersCount = localCharacters.length + 4; // 4 for extended members in alliances
+  
   return (
     <>
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
         <StatBox 
           title="Membres de la famille" 
-          value="12" 
+          value={familyMembersCount.toString()} 
           description="Membres directs et affiliés"
           icon={<Users className="h-6 w-6" />} 
         />
         <StatBox 
           title="Alliances matrimoniales" 
-          value="4" 
+          value={alliancesCount.toString()} 
           description="En augmentation ce semestre"
           icon={<Heart className="h-6 w-6" />} 
           trend="up"
@@ -37,7 +48,7 @@ export const CharacterSelection: React.FC<CharacterSelectionProps> = ({
         />
         <StatBox 
           title="Héritiers" 
-          value="3" 
+          value={heirs.toString()} 
           description="Lignée directe masculine"
           icon={<ScrollText className="h-6 w-6" />} 
         />

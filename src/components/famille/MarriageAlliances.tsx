@@ -2,8 +2,7 @@
 import React from 'react';
 import { AllianceItem } from '../features/AllianceItem';
 
-// Sample marriage alliances data with consistent dates in AUC format 
-// (Ab Urbe Condita - counting from the founding of Rome)
+// Marriage alliances data that matches the characters data
 const alliances = [
   {
     id: '1',
