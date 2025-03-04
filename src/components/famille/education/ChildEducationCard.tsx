@@ -53,6 +53,9 @@ export const ChildEducationCard: React.FC<ChildEducationCardProps> = ({ child })
     }
   };
   
+  // Check if there's an invalid education assignment (military for females)
+  const hasInvalidEducation = child.gender === 'female' && child.currentEducation.type === 'military';
+  
   return (
     <div className="roman-card p-4 hover:shadow-md transition-all duration-300">
       <div className="flex justify-between items-start">
@@ -64,9 +67,10 @@ export const ChildEducationCard: React.FC<ChildEducationCardProps> = ({ child })
         </div>
         
         {child.currentEducation.type !== 'none' ? (
-          <div className="flex items-center gap-1 px-2 py-1 bg-rome-navy/10 rounded text-xs">
+          <div className={`flex items-center gap-1 px-2 py-1 ${hasInvalidEducation ? 'bg-red-100 text-red-700' : 'bg-rome-navy/10'} rounded text-xs`}>
             {getEducationTypeIcon(child.currentEducation.type)}
             <span>{getEducationTypeName(child.currentEducation.type)}</span>
+            {hasInvalidEducation && <span className="text-xs text-red-600 ml-1">⚠️</span>}
           </div>
         ) : (
           <div className="px-2 py-1 bg-muted rounded text-xs">
@@ -77,11 +81,16 @@ export const ChildEducationCard: React.FC<ChildEducationCardProps> = ({ child })
       
       {child.currentEducation.type !== 'none' && (
         <>
+          {hasInvalidEducation && (
+            <div className="mt-2 text-xs text-red-600 bg-red-50 p-2 rounded">
+              Les femmes n'ont pas accès à l'éducation militaire dans la Rome antique.
+            </div>
+          )}
           <div className="mt-3">
             <p className="text-xs text-muted-foreground">Progression:</p>
             <div className="mt-1 h-2 bg-muted rounded-full">
               <div 
-                className="h-full bg-rome-terracotta rounded-full" 
+                className={`h-full ${hasInvalidEducation ? 'bg-red-400' : 'bg-rome-terracotta'} rounded-full`}
                 style={{ width: `${child.currentEducation.progress}%` }}
               ></div>
             </div>

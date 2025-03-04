@@ -20,8 +20,24 @@ interface EducationPathCardProps {
 }
 
 export const EducationPathCard: React.FC<EducationPathCardProps> = ({ path }) => {
+  const getSuitabilityText = (suitableFor: string) => {
+    switch(suitableFor) {
+      case 'both':
+        return 'Tous';
+      case 'male':
+        return 'Garçons uniquement';
+      case 'female':
+        return 'Filles uniquement';
+      default:
+        return 'Tous';
+    }
+  };
+
+  const isMaleOnly = path.suitableFor === 'male';
+  const isFemaleOnly = path.suitableFor === 'female';
+
   return (
-    <div className="roman-card p-4 border-t-4 border-t-rome-navy hover:shadow-md transition-all duration-300">
+    <div className={`roman-card p-4 border-t-4 ${isMaleOnly ? 'border-t-blue-500' : isFemaleOnly ? 'border-t-pink-500' : 'border-t-rome-navy'} hover:shadow-md transition-all duration-300`}>
       <div className="flex items-center gap-2 mb-2">
         <div className="text-rome-navy">{path.icon}</div>
         <h4 className="font-cinzel">{path.title}</h4>
@@ -34,12 +50,15 @@ export const EducationPathCard: React.FC<EducationPathCardProps> = ({ path }) =>
           <span className="font-medium">Âge minimum:</span> {path.minAge} ans
         </div>
         <div>
-          <span className="font-medium">Convient:</span> {
-            path.suitableFor === 'both' ? 'Tous' : 
-            path.suitableFor === 'male' ? 'Garçons' : 'Filles'
-          }
+          <span className="font-medium">Convient:</span> <span className={isMaleOnly ? 'text-blue-600 font-semibold' : isFemaleOnly ? 'text-pink-600 font-semibold' : ''}>{getSuitabilityText(path.suitableFor)}</span>
         </div>
       </div>
+      
+      {isMaleOnly && (
+        <div className="text-xs text-blue-700 bg-blue-50 p-2 mt-2 rounded">
+          L'éducation militaire n'est accessible qu'aux hommes dans la Rome antique.
+        </div>
+      )}
       
       <Separator className="my-3" />
       

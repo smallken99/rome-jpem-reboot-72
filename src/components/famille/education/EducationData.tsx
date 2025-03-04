@@ -50,7 +50,7 @@ export const educationPaths = [
     title: 'Carrière Militaire',
     description: 'Formation aux arts de la guerre, stratégie et leadership sur le champ de bataille.',
     minAge: 12,
-    suitableFor: 'male',
+    suitableFor: 'male', // Explicitly for males only
     benefits: ['Accès aux légions', 'Réputation militaire', 'Possibilité de triomphe'],
     careers: ['Tribun militaire', 'Légat', 'Général']
   },
