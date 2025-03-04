@@ -5,6 +5,7 @@ import { PageHeader } from '@/components/ui-custom/PageHeader';
 import { StatBox } from '@/components/ui-custom/StatBox';
 import { RomanCard } from '@/components/ui-custom/RomanCard';
 import { AllianceItem } from '@/components/features/AllianceItem';
+import { useTimeStore } from '@/utils/timeSystem';
 import { 
   Coins, 
   Award, 
@@ -65,13 +66,16 @@ const FamilyStatistic: React.FC<FamilyStatisticProps> = ({
 };
 
 const Index = () => {
+  // Get current year from the time system
+  const { year } = useTimeStore();
+  
   return (
     <Layout>
       <div className="space-y-8 max-w-5xl mx-auto">
         <div className="bg-gradient-to-r from-rome-navy/10 to-transparent p-6 rounded-lg border border-rome-gold/20">
           <PageHeader 
             title="Gens Aurelia" 
-            subtitle="Status: Patricien - Ancienneté: 293 AUC" 
+            subtitle={`Status: Patricien - Ancienneté: 293 AUC (depuis ${year-293} AUC)`} 
           />
         </div>
         
@@ -129,7 +133,7 @@ const Index = () => {
               <FamilyStatistic 
                 icon={<Shield className="h-6 w-6" />}
                 title="Marcus Aurelius Cotta - Préteur"
-                description="En tant que Préteur, Marcus Aurelius administre la justice civile à Rome et peut commander des légions en l'absence des consuls. Son mandat prend fin en Mars 652 AUC."
+                description={`En tant que Préteur, Marcus Aurelius administre la justice civile à Rome et peut commander des légions en l'absence des consuls. Son mandat prend fin en Mars ${year + 1} AUC.`}
                 iconBgColor="bg-rome-terracotta/10"
                 iconColor="text-rome-terracotta"
               />
