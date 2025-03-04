@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { educationPaths } from './EducationData';
 import { PreceptorsByType } from './types/educationTypes';
 import { Badge } from '@/components/ui/badge';
+import { getRelatedStatName } from './utils/educationUtils';
 
 interface PreceptorListProps {
   preceptors: PreceptorsByType;
@@ -12,21 +13,6 @@ interface PreceptorListProps {
 }
 
 export const PreceptorList: React.FC<PreceptorListProps> = ({ preceptors, refreshPreceptors }) => {
-  // Function to get the related stat name based on education type
-  const getRelatedStatName = (type: string): string => {
-    const path = educationPaths.find(path => path.type === type);
-    switch(path?.relatedStat) {
-      case 'martialEducation':
-        return 'Éducation Martiale';
-      case 'oratory':
-        return 'Éloquence';
-      case 'piety':
-        return 'Piété';
-      default:
-        return 'Caractéristique';
-    }
-  };
-
   return (
     <>
       <div className="flex justify-end mb-4">

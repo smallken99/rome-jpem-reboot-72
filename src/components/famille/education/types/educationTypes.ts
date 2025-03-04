@@ -14,6 +14,16 @@ export type PreceptorsByType = {
   [key: string]: Preceptor[];
 };
 
+export type EducationHistory = {
+  type: string;
+  mentor: string;
+  speciality?: string;
+  completedAt: number; // Age when completed
+  statBonus: number;
+  skills: string[];
+  duration: number; // How many years it took
+};
+
 export type ChildEducation = {
   type: string;
   mentor: string | null;
@@ -24,14 +34,8 @@ export type ChildEducation = {
   yearsCompleted?: number;
   totalYears?: number;
   statBonus?: number;
-  // Track previous educations
-  educationHistory?: {
-    type: string;
-    mentor: string;
-    speciality?: string;
-    completedAt: number; // Age when completed
-    statBonus: number;
-  }[];
+  // Track previous educations with more details
+  educationHistory?: EducationHistory[];
 };
 
 export type Child = {

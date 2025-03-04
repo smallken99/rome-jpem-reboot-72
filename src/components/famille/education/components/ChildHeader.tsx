@@ -122,7 +122,7 @@ export const ChildHeader: React.FC<ChildHeaderProps> = ({
           <div className="flex flex-wrap gap-1 justify-end max-w-[200px]">
             {educationHistory.map((edu, idx) => (
               <div key={idx} className="bg-green-50 text-green-700 text-xs px-1.5 py-0.5 rounded-full">
-                {getEducationTypeIcon(edu.type, { size: 10 })}
+                {getEducationTypeIcon(edu.type)}
                 <span className="ml-0.5">{getEducationTypeName(edu.type)}</span>
               </div>
             ))}

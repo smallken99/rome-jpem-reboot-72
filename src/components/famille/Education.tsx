@@ -58,7 +58,7 @@ export const Education: React.FC<EducationProps> = ({
         let statBonus = generateStatBonus(reputation);
         
         // Apply maximum stat bonus cap based on path type
-        if (path.type === 'political' || path.type === 'religious' || path.type === 'military') {
+        if (path.type === 'political' || path.type === 'religious' || path.type === 'military' || path.type === 'commercial') {
           // Ensure the bonus doesn't exceed the max value from education
           statBonus = Math.min(statBonus, MAX_STAT_VALUE_FROM_EDUCATION - 30); // Leaving room for growth
         }
@@ -101,7 +101,9 @@ export const Education: React.FC<EducationProps> = ({
         activeTab={activeTab} 
         setActiveTab={setActiveTab} 
         preceptors={preceptors} 
-        refreshPreceptors={generatePreceptors} 
+        refreshPreceptors={generatePreceptors}
+        onNameChange={onNameChange}
+        characters={children}
       />
     </div>
   );

@@ -59,7 +59,8 @@ export const generateTitle = (type: string, gender: string) => {
   const maleTitles = {
     military: ['Vétéran', 'Instructeur', 'Optio', 'Aquilifer', 'Decurion', 'Signifer'],
     political: ['Orateur', 'Juriste', 'Philosophe', 'Rhéteur', 'Scribe', 'Grammairien'],
-    religious: ['Augure', 'Haruspice', 'Salii', 'Fetiales', 'Acolyte', 'Prêtre']
+    religious: ['Augure', 'Haruspice', 'Salii', 'Fetiales', 'Acolyte', 'Prêtre'],
+    commercial: ['Negotiator', 'Mercator', 'Argentarius', 'Nummularius', 'Navarchus']
   };
   
   const femaleTitles = {
