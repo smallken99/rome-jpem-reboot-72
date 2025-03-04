@@ -34,14 +34,14 @@ export const CardActions: React.FC<CardActionsProps> = ({
           variant="outline"
           label="Changer de précepteur"
           className="text-xs bg-rome-navy/5 hover:bg-rome-navy/10"
-          onClick={handleChangePreceptor}
+          to={`/famille/education/preceptors?childId=${childId}`}
         />
       )}
       <ActionButton 
         variant="outline"
         label={hasEducation ? 'Modifier' : 'Assigner'}
         className="text-xs"
-        onClick={handleModify}
+        to={`/famille/education/child/${childId}`}
       />
     </div>
   );

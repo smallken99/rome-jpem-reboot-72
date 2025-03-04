@@ -10,6 +10,7 @@ import { MarriageAlliances } from '@/components/famille/MarriageAlliances';
 import { Education } from '@/components/famille/Education';
 import { Inheritance } from '@/components/famille/Inheritance';
 import { characters } from '@/data/characters';
+import ChildEducationDetail from '@/components/famille/education/ChildEducationDetail';
 
 const FamilleMain = () => {
   const [localCharacters, setLocalCharacters] = React.useState(characters);
@@ -89,6 +90,20 @@ const EducationPage = () => {
   );
 };
 
+const ChildEducationDetailPage = () => {
+  return (
+    <Layout>
+      <PageHeader 
+        title="Détail de l'Éducation"
+        subtitle="Configurer l'éducation d'un enfant"
+      />
+      <div className="roman-card">
+        <ChildEducationDetail />
+      </div>
+    </Layout>
+  );
+};
+
 const Heritage = () => {
   return (
     <Layout>
@@ -110,6 +125,7 @@ const Famille = () => {
       <Route path="/arbre" element={<ArbreGenealogique />} />
       <Route path="/alliances" element={<Alliances />} />
       <Route path="/education" element={<EducationPage />} />
+      <Route path="/education/child/:childId" element={<ChildEducationDetailPage />} />
       <Route path="/heritage" element={<Heritage />} />
       <Route path="*" element={<Navigate to="/famille" replace />} />
     </Routes>
