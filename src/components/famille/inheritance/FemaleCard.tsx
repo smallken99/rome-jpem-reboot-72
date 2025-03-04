@@ -42,12 +42,18 @@ export const FemaleCard: React.FC<FemaleCardProps> = ({ female, dowryAmount = 0,
             <span>Dot actuelle:</span>
             <span className="font-medium">{dowryAmount.toLocaleString()} As</span>
           </div>
-          <div className="mt-4">
+          <div className="mt-4 space-y-2">
             <ActionButton 
               variant="outline" 
               className="w-full roman-btn-outline"
               label="Gérer l'alliance matrimoniale"
               to={`/famille/alliances/manage/${female.id}`}
+            />
+            <ActionButton 
+              variant="outline" 
+              className="w-full roman-btn-outline"
+              label="Gérer la dot"
+              to={`/famille/heritage/dowry/${female.id}`}
             />
           </div>
         </div>

@@ -19,14 +19,6 @@ export const CardActions: React.FC<CardActionsProps> = ({
   const hasEducation = educationType !== 'none';
   const navigate = useNavigate();
   
-  const handleModify = () => {
-    navigate(`/famille/education/child/${childId}`);
-  };
-  
-  const handleChangePreceptor = () => {
-    navigate(`/famille/education/preceptors?childId=${childId}`);
-  };
-  
   return (
     <div className="mt-4 flex justify-end gap-2">
       {hasEducation && (

@@ -12,6 +12,9 @@ import { Inheritance } from '@/components/famille/Inheritance';
 import { characters } from '@/data/characters';
 import ChildEducationDetail from '@/components/famille/education/ChildEducationDetail';
 import { AllianceManagement } from '@/components/famille/alliances/AllianceManagement';
+import { PreceptorDetail } from '@/components/famille/education/PreceptorDetail';
+import { InheritanceDetails } from '@/components/famille/inheritance/InheritanceDetails';
+import { DowryManagement } from '@/components/famille/inheritance/DowryManagement';
 
 const FamilleMain = () => {
   const [localCharacters, setLocalCharacters] = React.useState(characters);
@@ -119,6 +122,20 @@ const ChildEducationDetailPage = () => {
   );
 };
 
+const PreceptorDetailPage = () => {
+  return (
+    <Layout>
+      <PageHeader 
+        title="Détail du Précepteur"
+        subtitle="Informations et embauche d'un précepteur"
+      />
+      <div className="roman-card">
+        <PreceptorDetail />
+      </div>
+    </Layout>
+  );
+};
+
 const Heritage = () => {
   return (
     <Layout>
@@ -133,6 +150,34 @@ const Heritage = () => {
   );
 };
 
+const InheritanceDetailsPage = () => {
+  return (
+    <Layout>
+      <PageHeader 
+        title="Détails du Testament"
+        subtitle="Définir les termes du testament pour un héritier"
+      />
+      <div className="roman-card">
+        <InheritanceDetails />
+      </div>
+    </Layout>
+  );
+};
+
+const DowryManagementPage = () => {
+  return (
+    <Layout>
+      <PageHeader 
+        title="Gestion de la Dot"
+        subtitle="Définir la dot pour un mariage avantageux"
+      />
+      <div className="roman-card">
+        <DowryManagement />
+      </div>
+    </Layout>
+  );
+};
+
 const Famille = () => {
   return (
     <Routes>
@@ -142,7 +187,11 @@ const Famille = () => {
       <Route path="/alliances/manage/:femaleId" element={<AllianceManagementPage />} />
       <Route path="/education" element={<EducationPage />} />
       <Route path="/education/child/:childId" element={<ChildEducationDetailPage />} />
+      <Route path="/education/preceptors" element={<EducationPage />} />
+      <Route path="/education/preceptors/:preceptorId" element={<PreceptorDetailPage />} />
       <Route path="/heritage" element={<Heritage />} />
+      <Route path="/heritage/heir/:heirId" element={<InheritanceDetailsPage />} />
+      <Route path="/heritage/dowry/:femaleId" element={<DowryManagementPage />} />
       <Route path="*" element={<Navigate to="/famille" replace />} />
     </Routes>
   );
