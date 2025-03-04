@@ -2,11 +2,10 @@
 import React from 'react';
 import { Check, GraduationCap, Ban } from 'lucide-react';
 import { AnnualProgress } from './components/AnnualProgress';
-import { SkillProgress } from './components/SkillProgress';
-import { ChildHeader } from './components/ChildHeader';
-import { PietyBonus } from './components/PietyBonus';
 import { MentorInfo } from './components/MentorInfo';
 import { CardActions } from './components/CardActions';
+import { ChildHeader } from './components/ChildHeader';
+import { PietyBonus } from './components/PietyBonus';
 import { EducationWarning } from './components/EducationWarning';
 import { StatBonusInfo } from './components/StatBonusInfo';
 import { Child } from './types/educationTypes';
@@ -93,13 +92,6 @@ const ChildEducationCard: React.FC<ChildEducationCardProps> = ({ child, onChange
               </div>
               
               <div>
-                <SkillProgress 
-                  progress={child.currentEducation.progress}
-                  pityBonus={child.currentEducation.pityBonus}
-                  hasInvalidEducation={hasInvalidEducation}
-                  gender={child.gender}
-                />
-                
                 {child.currentEducation.pityBonus !== undefined && 
                  child.currentEducation.pityBonus > 0 && 
                  child.gender === 'female' && (
