@@ -1,6 +1,7 @@
 
 import React from 'react';
 import { ActionButton } from '@/components/ui-custom/ActionButton';
+import { useNavigate } from 'react-router-dom';
 
 interface CardActionsProps {
   educationType: string;
@@ -16,6 +17,15 @@ export const CardActions: React.FC<CardActionsProps> = ({
   childAge
 }) => {
   const hasEducation = educationType !== 'none';
+  const navigate = useNavigate();
+  
+  const handleModify = () => {
+    navigate(`/famille/education/child/${childId}`);
+  };
+  
+  const handleChangePreceptor = () => {
+    navigate(`/famille/education/preceptors?childId=${childId}`);
+  };
   
   return (
     <div className="mt-4 flex justify-end gap-2">
@@ -24,12 +34,14 @@ export const CardActions: React.FC<CardActionsProps> = ({
           variant="outline"
           label="Changer de précepteur"
           className="text-xs bg-rome-navy/5 hover:bg-rome-navy/10"
+          onClick={handleChangePreceptor}
         />
       )}
       <ActionButton 
         variant="outline"
         label={hasEducation ? 'Modifier' : 'Assigner'}
         className="text-xs"
+        onClick={handleModify}
       />
     </div>
   );

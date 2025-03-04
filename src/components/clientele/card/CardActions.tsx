@@ -11,10 +11,6 @@ interface CardActionsProps {
 export const CardActions: React.FC<CardActionsProps> = ({ clientId }) => {
   const navigate = useNavigate();
   
-  const handleViewDetails = () => {
-    navigate(`/clientele/client/${clientId}`);
-  };
-  
   const handleFavor = (e: React.MouseEvent) => {
     e.stopPropagation(); // Empêche la navigation vers les détails
     console.log('Accorder une faveur au client', clientId);
@@ -50,7 +46,7 @@ export const CardActions: React.FC<CardActionsProps> = ({ clientId }) => {
       
       <ActionButton
         variant="outline" 
-        onClick={handleViewDetails}
+        to={`/clientele/client/${clientId}`}
         label="Détails"
         icon={<ChevronRight className="ml-1 h-3.5 w-3.5" />}
         className="text-xs gap-1 py-1 h-8"

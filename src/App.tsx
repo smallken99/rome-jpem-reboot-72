@@ -37,7 +37,16 @@ const App = () => (
           
           {/* Routes avec sous-sections */}
           <Route path="/famille/*" element={<Famille />} />
+          <Route path="/famille/education/child/:childId" element={<Famille />} />
+          <Route path="/famille/education/current" element={<Famille />} />
+          <Route path="/famille/education/paths" element={<Famille />} />
+          <Route path="/famille/education/preceptors" element={<Famille />} />
+          <Route path="/famille/alliances/manage/:femaleId" element={<Famille />} />
+          
           <Route path="/patrimoine/*" element={<Patrimoine />} />
+          <Route path="/patrimoine/proprietes/nouvelle-construction" element={<Patrimoine />} />
+          <Route path="/patrimoine/proprietes/acheter" element={<Patrimoine />} />
+          
           <Route path="/clientele/*" element={<Clientele />} />
           <Route path="/registre/*" element={<Registre />} />
           <Route path="/religion/*" element={<Religion />} />

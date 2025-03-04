@@ -2,7 +2,7 @@
 import React from 'react';
 import { Home, Coins, Crown } from 'lucide-react';
 import { Separator } from '@/components/ui/separator';
-import { Button } from '@/components/ui/button';
+import { ActionButton } from '@/components/ui-custom/ActionButton';
 import { RomanCard } from '@/components/ui-custom/RomanCard';
 
 interface HeirCardProps {
@@ -34,14 +34,13 @@ export const HeirCard: React.FC<HeirCardProps> = ({ heir, isSelected, onSelect }
             Héritier Principal
           </div>
         ) : (
-          <Button 
+          <ActionButton 
             variant="outline" 
             size="sm" 
             onClick={() => onSelect(heir.id)}
             className="text-xs border-rome-navy/30 text-rome-navy hover:bg-rome-navy/10"
-          >
-            Désigner Héritier
-          </Button>
+            label="Désigner Héritier"
+          />
         )}
       </div>
       
