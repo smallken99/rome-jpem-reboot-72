@@ -16,11 +16,9 @@ interface EducationPath {
   description: string;
   minAge: number;
   suitableFor: string;
-  benefits: string[];
-  careers: string[];
   duration: number;
   annualCurriculum: AnnualCurriculum[];
-  relatedStat: string; // Add the related stat field
+  relatedStat: string;
 }
 
 interface EducationPathCardProps {
@@ -46,14 +44,14 @@ export const EducationPathCard: React.FC<EducationPathCardProps> = ({ path }) =>
   const isMaleOnly = path.suitableFor === 'male';
   const isFemaleOnly = path.suitableFor === 'female';
 
-  // Get stat bonus description based on education type
-  const getStatBonusDescription = (type: string) => {
-    switch(type) {
-      case 'military':
+  // Get stat bonus description based on related stat
+  const getStatBonusDescription = (relatedStat: string) => {
+    switch(relatedStat) {
+      case 'martialEducation':
         return 'Améliore l\'Éducation Martiale';
-      case 'political':
+      case 'oratory':
         return 'Améliore l\'Éloquence';
-      case 'religious':
+      case 'piety':
         return 'Améliore la Piété';
       default:
         return 'Améliore une caractéristique';
@@ -89,7 +87,7 @@ export const EducationPathCard: React.FC<EducationPathCardProps> = ({ path }) =>
 
       {/* Add a section that displays the related stat improvement */}
       <div className="text-xs bg-green-50 p-2 mt-2 rounded text-green-700">
-        <span className="font-medium">Bonus après validation:</span> {getStatBonusDescription(path.type)}
+        <span className="font-medium">Bonus après validation:</span> {getStatBonusDescription(path.relatedStat)}
       </div>
       
       <Collapsible

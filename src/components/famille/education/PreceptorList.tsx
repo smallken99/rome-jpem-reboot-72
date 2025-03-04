@@ -11,7 +11,7 @@ type Preceptor = {
   speciality: string;
   reputation: 'Excellent' | 'Bon' | 'Moyen';
   fee: number;
-  statBonus: number; // Add stat bonus field
+  statBonus: number;
 };
 
 type PreceptorsByType = {
@@ -83,7 +83,7 @@ export const PreceptorList: React.FC<PreceptorListProps> = ({ preceptors, refres
                     
                     <p className="text-sm text-muted-foreground mt-1">Spécialité: {teacher.speciality}</p>
                     
-                    {/* Add stat bonus information */}
+                    {/* Display stat bonus information */}
                     <div className="mt-2 flex items-center gap-1 text-xs bg-green-50 p-2 rounded text-green-700">
                       <TrendingUp className="h-3 w-3" />
                       <span>Bonus à {relatedStat}: +{teacher.statBonus} points après validation</span>

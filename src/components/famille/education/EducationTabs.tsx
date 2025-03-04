@@ -7,13 +7,14 @@ import { EducationPathCard } from './EducationPathCard';
 import { PreceptorList } from './PreceptorList';
 import { children, educationPaths } from './EducationData';
 
-// Type for a preceptor (teacher)
+// Type for a preceptor (teacher) - matching the type in Education.tsx
 type Preceptor = {
   id: string;
   name: string;
   speciality: string;
   reputation: 'Excellent' | 'Bon' | 'Moyen';
   fee: number;
+  statBonus: number; // Include statBonus to match the type in Education.tsx
 };
 
 type PreceptorsByType = {

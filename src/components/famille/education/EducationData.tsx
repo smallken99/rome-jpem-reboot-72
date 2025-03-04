@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { GraduationCap, Sword, Building, ScrollText, ShieldQuestion, BookOpen } from 'lucide-react';
 
@@ -88,7 +87,7 @@ export const titles = {
   religious: ['Pontifex', 'Augure', 'Flamine', 'Vestale', 'Haruspice', 'Rex Sacrorum', 'Salii', 'Fetiales']
 };
 
-// Education paths with annual curriculum
+// Education paths with annual curriculum and explicitly linked stats
 export const educationPaths = [
   {
     type: 'military',
@@ -97,14 +96,12 @@ export const educationPaths = [
     description: 'Formation aux arts de la guerre, stratégie et leadership sur le champ de bataille.',
     minAge: 12,
     suitableFor: 'male', // Explicitly for males only
-    benefits: ['Accès aux légions', 'Réputation militaire', 'Possibilité de triomphe'],
-    careers: ['Tribun militaire', 'Légat', 'Général'],
     duration: 2,
     annualCurriculum: [
       { year: 1, name: "Initiation Martiale", skills: ["Maniement du bouclier", "Discipline militaire", "Marche forcée"] },
       { year: 2, name: "Tactiques Avancées", skills: ["Formation en phalange", "Commandement", "Stratégie de bataille"] }
     ],
-    relatedStat: 'martialEducation' // Add related stat
+    relatedStat: 'martialEducation' // Explicitly links to martialEducation stat
   },
   {
     type: 'political',
@@ -113,14 +110,12 @@ export const educationPaths = [
     description: 'Éducation en rhétorique, droit et philosophie pour exceller au Sénat.',
     minAge: 8,
     suitableFor: 'both',
-    benefits: ['Éloquence', 'Réseau politique', 'Prestige au Sénat'],
-    careers: ['Questeur', 'Édile', 'Préteur', 'Consul'],
     duration: 2,
     annualCurriculum: [
       { year: 1, name: "Fondations Politiques", skills: ["Histoire romaine", "Poésie grecque", "Élocution"] },
       { year: 2, name: "Art Oratoire Avancé", skills: ["Rhétorique", "Droit romain", "Débat public"] }
     ],
-    relatedStat: 'oratory' // Add related stat
+    relatedStat: 'oratory' // Explicitly links to oratory stat
   },
   {
     type: 'religious',
@@ -129,13 +124,11 @@ export const educationPaths = [
     description: 'Étude des rites sacrés, divination et traditions religieuses romaines.',
     minAge: 6,
     suitableFor: 'both',
-    benefits: ['Prestige religieux', 'Influence spirituelle', 'Exemption militaire'],
-    careers: ['Pontife', 'Augure', 'Flamine', 'Vestale (femmes uniquement)'],
     duration: 2,
     annualCurriculum: [
       { year: 1, name: "Fondations Religieuses", skills: ["Panthéon romain", "Calendrier sacré", "Offrandes rituelles"] },
       { year: 2, name: "Rituels et Cérémonies Avancés", skills: ["Divination", "Sacrifices", "Direction des cérémonies"] }
     ],
-    relatedStat: 'piety' // Add related stat
+    relatedStat: 'piety' // Explicitly links to piety stat
   },
 ];
