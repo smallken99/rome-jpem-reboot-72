@@ -4,7 +4,7 @@ import { FamilyHeader } from '@/components/features/FamilyHeader';
 import { FamilyStatsSection } from '@/components/features/FamilyStatsSection';
 import { PoliticalPartyCard } from '@/components/features/PoliticalPartyCard';
 import { MagistrateCard } from '@/components/features/MagistrateCard';
-import { AlliancesCard } from '@/components/features/AlliancesCard';
+import { FamilyHeadCard } from '@/components/features/FamilyHeadCard';
 
 export const DashboardLayout: React.FC = () => {
   return (
@@ -17,7 +17,7 @@ export const DashboardLayout: React.FC = () => {
         <MagistrateCard />
       </div>
       
-      <AlliancesCard />
+      <FamilyHeadCard />
     </div>
   );
 };
