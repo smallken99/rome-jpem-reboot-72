@@ -10,11 +10,10 @@ import { Education } from '@/components/famille/Education';
 import { CharacterSheet } from '@/components/famille/CharacterSheet';
 import { StatBox } from '@/components/ui-custom/StatBox';
 import { Button } from '@/components/ui/button';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogDescription } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
-import { Separator } from '@/components/ui/separator';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Users, Heart, ScrollText, GraduationCap, User, Camera } from 'lucide-react';
+import { Users, Heart, ScrollText, User } from 'lucide-react';
 import { characters } from '@/data/characters';
 import { useToast } from '@/components/ui/use-toast';
 
@@ -45,6 +44,11 @@ const Famille = () => {
       description: "Le portrait du personnage a été changé avec succès.",
       duration: 3000,
     });
+  };
+
+  const handleEditPortrait = (characterId: string) => {
+    setSelectedCharacterId(characterId);
+    setPortraitUrl("");
   };
 
   return (
@@ -91,51 +95,12 @@ const Famille = () => {
           <TabsContent value="characters" className="space-y-6">
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
               {localCharacters.map((character) => (
-                <div key={character.id} className="relative group">
+                <div key={character.id} className="relative">
                   <CharacterSheet 
                     character={character} 
                     className={activeCharacter.id === character.id ? 'border-rome-gold' : ''}
+                    onEditPortrait={handleEditPortrait}
                   />
-                  <Dialog>
-                    <DialogTrigger asChild>
-                      <Button 
-                        variant="outline" 
-                        size="icon"
-                        className="absolute top-2 right-10 opacity-0 group-hover:opacity-100 transition-opacity"
-                        onClick={() => setSelectedCharacterId(character.id)}
-                      >
-                        <Camera className="h-4 w-4" />
-                      </Button>
-                    </DialogTrigger>
-                    <DialogContent>
-                      <DialogHeader>
-                        <DialogTitle>Changer le portrait</DialogTitle>
-                      </DialogHeader>
-                      <div className="space-y-4 py-4">
-                        <div className="flex flex-col space-y-2">
-                          <label htmlFor="portrait-url" className="text-sm">URL de l'image</label>
-                          <Input 
-                            id="portrait-url" 
-                            placeholder="https://exemple.com/image.jpg" 
-                            value={portraitUrl}
-                            onChange={(e) => setPortraitUrl(e.target.value)}
-                          />
-                        </div>
-                        <div className="flex justify-end">
-                          <Button 
-                            onClick={() => {
-                              if (selectedCharacterId) {
-                                handlePortraitChange(selectedCharacterId, portraitUrl);
-                                setPortraitUrl("");
-                              }
-                            }}
-                          >
-                            Enregistrer
-                          </Button>
-                        </div>
-                      </div>
-                    </DialogContent>
-                  </Dialog>
                 </div>
               ))}
             </div>
@@ -153,6 +118,45 @@ const Famille = () => {
           </TabsContent>
         </Tabs>
       </div>
+
+      <Dialog 
+        open={!!selectedCharacterId} 
+        onOpenChange={(open) => {
+          if (!open) setSelectedCharacterId(null);
+        }}
+      >
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Changer le portrait</DialogTitle>
+            <DialogDescription>
+              Entrez l'URL d'une image pour modifier le portrait du personnage.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="flex flex-col space-y-2">
+              <label htmlFor="portrait-url" className="text-sm">URL de l'image</label>
+              <Input 
+                id="portrait-url" 
+                placeholder="https://exemple.com/image.jpg" 
+                value={portraitUrl}
+                onChange={(e) => setPortraitUrl(e.target.value)}
+              />
+            </div>
+            <div className="flex justify-end">
+              <Button 
+                onClick={() => {
+                  if (selectedCharacterId) {
+                    handlePortraitChange(selectedCharacterId, portraitUrl);
+                    setSelectedCharacterId(null);
+                  }
+                }}
+              >
+                Enregistrer
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
         <RomanCard className="h-full">

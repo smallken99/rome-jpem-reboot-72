@@ -4,15 +4,21 @@ import { Character } from '@/types/character';
 import { CharacterStats } from './CharacterStats';
 import { RomanCard } from '@/components/ui-custom/RomanCard';
 import { Badge } from '@/components/ui/badge';
-import { User, Calendar, Crown, ShieldX } from 'lucide-react';
+import { User, Calendar, Crown, ShieldX, Camera } from 'lucide-react';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
+import { Button } from '@/components/ui/button';
 
 interface CharacterSheetProps {
   character: Character;
   className?: string;
+  onEditPortrait?: (characterId: string) => void;
 }
 
-export const CharacterSheet: React.FC<CharacterSheetProps> = ({ character, className }) => {
+export const CharacterSheet: React.FC<CharacterSheetProps> = ({ 
+  character, 
+  className,
+  onEditPortrait 
+}) => {
   // Check if character is female (for martial education restrictions)
   const isFemale = character.gender === 'female';
   
@@ -50,8 +56,8 @@ export const CharacterSheet: React.FC<CharacterSheetProps> = ({ character, class
       </RomanCard.Header>
       <RomanCard.Content>
         <div className="flex flex-col md:flex-row gap-4">
-          <div className="w-full md:w-1/3">
-            <div className="aspect-square rounded-md overflow-hidden mb-4 flex items-center justify-center">
+          <div className="w-full md:w-1/3 relative">
+            <div className="aspect-square rounded-md overflow-hidden mb-4 flex items-center justify-center relative group">
               <Avatar className="w-full h-full rounded-md">
                 {character.portrait ? (
                   <AvatarImage src={character.portrait} alt={character.name} className="object-cover" />
@@ -61,6 +67,17 @@ export const CharacterSheet: React.FC<CharacterSheetProps> = ({ character, class
                   </AvatarFallback>
                 )}
               </Avatar>
+              
+              {onEditPortrait && (
+                <Button 
+                  variant="outline" 
+                  size="icon"
+                  className="absolute bottom-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity bg-white/80 hover:bg-white"
+                  onClick={() => onEditPortrait(character.id)}
+                >
+                  <Camera className="h-4 w-4" />
+                </Button>
+              )}
             </div>
             
             <div className="space-y-2">
