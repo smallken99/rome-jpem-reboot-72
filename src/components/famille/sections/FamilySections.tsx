@@ -4,8 +4,17 @@ import { RomanCard } from '@/components/ui-custom/RomanCard';
 import { MarriageAlliances } from '@/components/famille/MarriageAlliances';
 import { Inheritance } from '@/components/famille/Inheritance';
 import { Education } from '@/components/famille/Education';
+import { Character } from '@/types/character';
 
-export const FamilySections: React.FC = () => {
+interface FamilySectionsProps {
+  characters?: Character[];
+  onChildBirth?: (child: Character) => void;
+}
+
+export const FamilySections: React.FC<FamilySectionsProps> = ({ 
+  characters = [], 
+  onChildBirth 
+}) => {
   return (
     <>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
@@ -14,7 +23,10 @@ export const FamilySections: React.FC = () => {
             <h3 className="font-cinzel text-lg text-rome-navy">Mariages et Alliances</h3>
           </RomanCard.Header>
           <RomanCard.Content>
-            <MarriageAlliances />
+            <MarriageAlliances 
+              characters={characters}
+              onChildBirth={onChildBirth}
+            />
           </RomanCard.Content>
         </RomanCard>
         

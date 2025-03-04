@@ -7,6 +7,7 @@ import { FamilySections } from '@/components/famille/sections/FamilySections';
 import { PortraitDialog } from '@/components/famille/character/PortraitDialog';
 import { characters } from '@/data/characters';
 import { useToast } from '@/components/ui/use-toast';
+import { Character } from '@/types/character';
 
 const Famille = () => {
   const [localCharacters, setLocalCharacters] = useState(characters);
@@ -57,6 +58,11 @@ const Famille = () => {
     setPortraitUrl("");
   };
 
+  // Handler for adding a new child to the family
+  const handleChildBirth = (newChild: Character) => {
+    setLocalCharacters(prev => [...prev, newChild]);
+  };
+
   return (
     <Layout>
       <PageHeader
@@ -78,7 +84,10 @@ const Famille = () => {
         onPortraitUrlChange={setPortraitUrl}
       />
 
-      <FamilySections />
+      <FamilySections 
+        characters={localCharacters}
+        onChildBirth={handleChildBirth}
+      />
     </Layout>
   );
 };
