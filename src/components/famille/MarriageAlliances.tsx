@@ -44,7 +44,7 @@ export const MarriageAlliances: React.FC<MarriageAlliancesProps> = ({
   const { toast } = useToast();
   
   // Get current time from the store
-  const { year, season, dayInSeason, formatDate } = useTimeStore();
+  const { year, season } = useTimeStore();
   
   // Filter alliances to only show active ones
   const activeAlliances = alliances.filter(alliance => alliance.status === 'actif');
@@ -110,19 +110,6 @@ export const MarriageAlliances: React.FC<MarriageAlliancesProps> = ({
           Les alliances matrimoniales sont essentielles pour étendre l'influence de votre Gens.
           Elles sont gérées automatiquement par les familles nobles selon les traditions romaines.
         </p>
-      </div>
-      
-      <div className="flex justify-between items-center mb-4">
-        <div className="text-sm text-muted-foreground flex items-center gap-3">
-          <div className="flex items-center gap-1">
-            <Calendar className="h-4 w-4" />
-            <span>{formatDate()}</span>
-          </div>
-          <div className="flex items-center gap-1">
-            <Clock className="h-4 w-4" />
-            <span>Saison: {season}</span>
-          </div>
-        </div>
       </div>
       
       {lastBirthYear > 0 && (

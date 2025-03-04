@@ -44,9 +44,12 @@ const Navigation = () => {
         <Link to="/" className="font-cinzel text-xl text-rome-navy flex items-center gap-2">
           <span className="text-rome-terracotta">ROME</span> JPEM
         </Link>
-        <button onClick={toggleMenu} className="p-2 text-rome-navy hover:text-rome-terracotta transition-colors">
-          {isMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
-        </button>
+        <div className="flex items-center gap-2">
+          <TimePanel minimal />
+          <button onClick={toggleMenu} className="p-2 text-rome-navy hover:text-rome-terracotta transition-colors">
+            {isMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
+          </button>
+        </div>
       </div>
       
       <nav className={`fixed md:sticky top-0 left-0 h-screen md:h-auto md:w-full bg-gradient-to-b from-rome-parchment to-white/80 backdrop-blur-sm border-r md:border-r-0 border-b border-rome-gold/30 z-40 md:z-20 transition-all duration-300 ${isMenuOpen ? 'w-64 translate-x-0' : 'w-0 -translate-x-full md:translate-x-0 md:w-full'} overflow-hidden`}>
@@ -56,6 +59,7 @@ const Navigation = () => {
             <span className="text-rome-navy">JPEM</span>
           </Link>
           <div className="flex items-center gap-4">
+            <TimePanel minimal />
             <button className="roman-btn-outline text-sm py-1 hover:bg-rome-terracotta/10 transition-colors">Fin de Tour</button>
             <div className="w-10 h-10 rounded-full bg-gradient-to-br from-rome-terracotta to-rome-terracotta/70 flex items-center justify-center text-white font-cinzel">
               JA
@@ -97,11 +101,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
     <div className="min-h-screen flex flex-col bg-roman-pattern">
       <Navigation />
       
-      <main className="flex-1 p-4 md:p-6 pt-24 md:pt-8 max-w-7xl mx-auto w-full">
-        <div className="mb-6">
-          <TimePanel />
-        </div>
-        
+      <main className="flex-1 p-4 md:p-6 pt-8 max-w-7xl mx-auto w-full">
         <div className="animate-fade-up">
           {children}
         </div>

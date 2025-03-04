@@ -3,7 +3,11 @@ import React, { useEffect, useState } from 'react';
 import { Calendar, Clock, SunDim, Hourglass } from 'lucide-react';
 import { useTimeStore, useTimeEvents } from '@/utils/timeSystem';
 
-export const TimePanel: React.FC = () => {
+interface TimePanelProps {
+  minimal?: boolean;
+}
+
+export const TimePanel: React.FC<TimePanelProps> = ({ minimal = false }) => {
   const { year, season, dayInSeason, formatDate } = useTimeStore();
   const [timeMessage, setTimeMessage] = useState<string | null>(null);
   
@@ -31,19 +35,31 @@ export const TimePanel: React.FC = () => {
   const getSeasonInfo = () => {
     switch (season) {
       case 'Ver':
-        return { icon: <SunDim className="h-5 w-5 text-green-500" />, color: 'bg-green-100 text-green-800' };
+        return { icon: <SunDim className={`${minimal ? 'h-4 w-4' : 'h-5 w-5'} text-green-500`} />, color: 'bg-green-100 text-green-800' };
       case 'Aestas':
-        return { icon: <SunDim className="h-5 w-5 text-amber-500" />, color: 'bg-amber-100 text-amber-800' };
+        return { icon: <SunDim className={`${minimal ? 'h-4 w-4' : 'h-5 w-5'} text-amber-500`} />, color: 'bg-amber-100 text-amber-800' };
       case 'Autumnus':
-        return { icon: <SunDim className="h-5 w-5 text-orange-500" />, color: 'bg-orange-100 text-orange-800' };
+        return { icon: <SunDim className={`${minimal ? 'h-4 w-4' : 'h-5 w-5'} text-orange-500`} />, color: 'bg-orange-100 text-orange-800' };
       case 'Hiems':
-        return { icon: <SunDim className="h-5 w-5 text-blue-500" />, color: 'bg-blue-100 text-blue-800' };
+        return { icon: <SunDim className={`${minimal ? 'h-4 w-4' : 'h-5 w-5'} text-blue-500`} />, color: 'bg-blue-100 text-blue-800' };
       default:
-        return { icon: <SunDim className="h-5 w-5" />, color: 'bg-gray-100 text-gray-800' };
+        return { icon: <SunDim className={`${minimal ? 'h-4 w-4' : 'h-5 w-5'}`} />, color: 'bg-gray-100 text-gray-800' };
     }
   };
   
   const { icon, color } = getSeasonInfo();
+  
+  if (minimal) {
+    return (
+      <div className="flex items-center space-x-2 text-sm">
+        <div className={`px-1.5 py-0.5 rounded-md flex items-center gap-1 ${color}`}>
+          {icon}
+          <span className="text-xs font-medium">{season}</span>
+        </div>
+        <span className="text-xs text-muted-foreground">{year} AUC</span>
+      </div>
+    );
+  }
   
   return (
     <div className="rounded-md border p-3 bg-white shadow-sm">
