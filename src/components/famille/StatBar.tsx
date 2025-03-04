@@ -40,6 +40,18 @@ const COLOR_CLASSES: Record<string, string> = {
   default: 'bg-gray-500'
 };
 
+// Map of standardized descriptions for each stat type
+const STAT_DESCRIPTIONS: Record<string, string> = {
+  popularity: "Influence auprès du peuple et des citoyens romains",
+  oratory: "Art de la persuasion et capacité à s'exprimer en public",
+  piety: "Respect et dévotion envers les dieux de Rome",
+  martialEducation: "Maîtrise des arts militaires et de la stratégie",
+  intelligence: "Capacité d'analyse et de résolution de problèmes",
+  influence: "Pouvoir et connexions au sein de la société romaine",
+  leadership: "Capacité à diriger et inspirer les autres",
+  default: "Caractéristique d'importance pour le personnage"
+};
+
 interface StatBarProps {
   stat: CharacterStat;
   disabled?: boolean;
@@ -52,6 +64,9 @@ const StatBar: React.FC<StatBarProps> = ({ stat, disabled = false, pietyBonus })
   
   // Get the appropriate color class
   const colorClass = disabled ? 'bg-gray-400' : (COLOR_CLASSES[stat.color] || COLOR_CLASSES.default);
+  
+  // Get standardized description (overriding the one provided in the stat object)
+  const standardDescription = STAT_DESCRIPTIONS[stat.icon] || STAT_DESCRIPTIONS.default;
   
   // Calculate the total value including piety bonus if applicable
   const baseValue = stat.value;
@@ -84,7 +99,7 @@ const StatBar: React.FC<StatBarProps> = ({ stat, disabled = false, pietyBonus })
         />
       </div>
       <p className="text-xs text-muted-foreground mt-1">
-        {disabled ? "Non disponible pour les femmes romaines" : stat.description}
+        {disabled ? "Non disponible pour les femmes romaines" : standardDescription}
         {pietyBonus && !disabled && <span className="text-green-600 ml-1">(Bonus de piété: +{pietyBonus})</span>}
       </p>
     </div>
