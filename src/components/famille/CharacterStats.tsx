@@ -19,9 +19,9 @@ export const CharacterStats: React.FC<CharacterStatsProps> = ({ stats, className
       case 'oratory':
       case 'piety':
       case 'martialEducation':
-        return { maxFromEducation: '40', capNote: true };
+        return { maxFromEducation: '80', capNote: true };
       default:
-        return { maxFromEducation: '40', capNote: false };
+        return { maxFromEducation: '80', capNote: false };
     }
   };
 
@@ -40,7 +40,7 @@ export const CharacterStats: React.FC<CharacterStatsProps> = ({ stats, className
               key={index} 
               stat={stat} 
               disabled={isDisabledStat}
-              pietyBonus={shouldAddPietyBonus ? 15 : undefined}
+              pietyBonus={shouldAddPietyBonus ? 30 : undefined}
             />
             {statInfo.capNote && (
               <p className="text-xs text-muted-foreground mt-1 italic">

@@ -12,7 +12,7 @@ const alliances = [
     spouse: 'Cornelia Minor',
     type: 'matrimoniale' as const,
     status: 'actif' as const,
-    benefits: ['Influence au Sénat +2', 'Relations commerciales'],
+    benefits: ['Influence au Sénat +4', 'Relations commerciales'],
     date: '709 AUC'
   },
   {
