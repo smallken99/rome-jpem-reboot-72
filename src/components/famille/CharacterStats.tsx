@@ -50,12 +50,6 @@ export const CharacterStats: React.FC<CharacterStatsProps> = ({ stats, className
           </div>
         );
       })}
-      
-      <div className="mt-4 text-xs bg-muted p-2 rounded">
-        <p className="font-medium mb-1">Hérédité des caractéristiques:</p>
-        <p>À la naissance, un personnage hérite d'un tiers des caractéristiques combinées de ses parents (divisées par 2).</p>
-        <p className="mt-1">L'éducation permet ensuite d'augmenter ces caractéristiques jusqu'à un maximum de 40 (sauf pour la popularité qui est illimitée).</p>
-      </div>
     </div>
   );
 };

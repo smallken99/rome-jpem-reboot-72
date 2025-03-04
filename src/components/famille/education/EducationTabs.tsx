@@ -67,12 +67,6 @@ export const EducationTabs: React.FC<EducationTabsProps> = ({
               <ChildEducationCard key={child.id} child={child} />
             ))}
           </div>
-          
-          <div className="mt-6 p-3 bg-muted rounded text-sm">
-            <p className="font-medium mb-1">Hérédité et éducation:</p>
-            <p>À la naissance, un personnage hérite d'un tiers des caractéristiques combinées de ses parents (divisées par 2).</p>
-            <p className="mt-1">L'éducation permet ensuite d'augmenter ces caractéristiques jusqu'à un maximum de 40 (sauf pour la popularité qui est illimitée).</p>
-          </div>
         </div>
       </TabsContent>
       
