@@ -12,7 +12,7 @@ const Clientele = () => {
     <Layout>
       <PageHeader 
         title="Clientèle" 
-        subtitle="Gérez vos relations, patronages et influences auprès de vos clients"
+        subtitle="Gérez vos relations et influences auprès de vos clients"
       />
       
       <Tabs defaultValue="liste" className="w-full">

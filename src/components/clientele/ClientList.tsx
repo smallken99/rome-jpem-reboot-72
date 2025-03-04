@@ -2,14 +2,14 @@
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { ClientCard, ClientType } from './ClientCard';
+import { ClientCard, ClientType, Client } from './ClientCard';
 import { 
   Search, 
   Filter, 
   SortAsc
 } from 'lucide-react';
 
-// Génération des clients
+// Génération des clients masculins uniquement
 const generateClients = () => {
   const clientTypes: ClientType[] = ['artisan', 'politicien', 'religieux', 'proprietaire', 'pegre'];
   const loyaltyLevels = ['Très Haute', 'Haute', 'Moyenne', 'Basse', 'Très Basse'];
@@ -25,7 +25,7 @@ const generateClients = () => {
   
   // Générer entre 12 et 18 clients aléatoirement
   const numClients = 12 + Math.floor(Math.random() * 7);
-  const generatedClients = [];
+  const generatedClients: Client[] = [];
   
   for (let i = 0; i < numClients; i++) {
     const clientType = clientTypes[Math.floor(Math.random() * clientTypes.length)];
@@ -74,15 +74,14 @@ const generateClients = () => {
         political: politicalInfluence,
         popular: popularInfluence,
         religious: religiousInfluence
-      },
-      lastInteraction: `${1 + Math.floor(Math.random() * 30)} jours`
+      }
     });
   }
   
   return generatedClients;
 };
 
-// Génération d'un nom romain
+// Génération d'un nom romain masculin uniquement
 const generateRomanName = () => {
   const praenomina = ['Marcus', 'Lucius', 'Gaius', 'Publius', 'Quintus', 'Titus', 'Servius', 'Gnaeus', 'Decimus', 'Aulus'];
   const nomina = ['Aurelius', 'Julius', 'Claudius', 'Flavius', 'Cornelius', 'Licinius', 'Valerius', 'Domitius', 'Aemilius', 'Pompeius'];
@@ -207,3 +206,4 @@ export const ClientList: React.FC = () => {
     </div>
   );
 };
+

@@ -27,17 +27,18 @@ interface ClientInfluence {
   religious: number;
 }
 
+export interface Client {
+  id: number;
+  name: string;
+  type: ClientType;
+  subType: ClientSubType;
+  location: string;
+  loyalty: string;
+  influences: ClientInfluence;
+}
+
 interface ClientCardProps {
-  client: {
-    id: number;
-    name: string;
-    type: ClientType;
-    subType: ClientSubType;
-    location: string;
-    loyalty: string;
-    influences: ClientInfluence;
-    lastInteraction: string;
-  };
+  client: Client;
 }
 
 export const ClientCard: React.FC<ClientCardProps> = ({ client }) => {
@@ -107,11 +108,6 @@ export const ClientCard: React.FC<ClientCardProps> = ({ client }) => {
             <span>{client.location}</span>
           </div>
           
-          <div className="flex items-center text-sm text-muted-foreground">
-            <span className="mr-2">Dernière interaction:</span>
-            <span>{client.lastInteraction}</span>
-          </div>
-          
           {/* Afficher les influences */}
           <div className="space-y-1 mt-2 bg-gray-50 p-2 rounded">
             <h4 className="text-sm font-medium mb-1">Influences:</h4>
@@ -155,3 +151,4 @@ export const ClientCard: React.FC<ClientCardProps> = ({ client }) => {
     </div>
   );
 };
+
