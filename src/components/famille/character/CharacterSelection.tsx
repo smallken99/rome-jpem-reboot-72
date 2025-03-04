@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { StatBox } from '@/components/ui-custom/StatBox';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -26,10 +25,9 @@ export const CharacterSelection: React.FC<CharacterSelectionProps> = ({
     char.gender === 'male' && char.age < 18
   ).length;
   
-  // Count all family members including characters and extended family in alliances
-  // 4 additional members: Cornelia Minor, Quintus Fabius, Claudia Major, Decimus Junius
-  const extendedFamilyCount = 4;
-  const familyMembersCount = localCharacters.length + extendedFamilyCount;
+  // Count family members based on what's shown in the family tree
+  // The family tree only shows the 4 main family members
+  const familyMembersCount = localCharacters.length;
   
   return (
     <>
@@ -37,7 +35,7 @@ export const CharacterSelection: React.FC<CharacterSelectionProps> = ({
         <StatBox 
           title="Membres de la famille" 
           value={familyMembersCount.toString()} 
-          description="Membres directs et affiliés"
+          description="Membres directs de la famille"
           icon={<Users className="h-6 w-6" />} 
         />
         <StatBox 
