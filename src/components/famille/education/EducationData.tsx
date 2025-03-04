@@ -55,22 +55,30 @@ export const preceptors = {
   military: [
     { id: 'm1', name: 'Centurion Flavius Aquila', speciality: 'Combat à l\'épée', reputation: 'Excellent', fee: 1500 },
     { id: 'm2', name: 'Tribune Gaius Marius', speciality: 'Tactique de bataille', reputation: 'Bon', fee: 1200 },
-    { id: 'm3', name: 'Vétéran Lucius Cassius', speciality: 'Survivre en campagne', reputation: 'Moyen', fee: 800 }
+    { id: 'm3', name: 'Vétéran Lucius Cassius', speciality: 'Survivre en campagne', reputation: 'Moyen', fee: 800 },
+    { id: 'm4', name: 'Instructeur Quintus Sertorius', speciality: 'Guerilla et embuscades', reputation: 'Excellent', fee: 1700 },
+    { id: 'm5', name: 'Légat Marcus Calpurnius', speciality: 'Commandement de légion', reputation: 'Bon', fee: 1400 }
   ],
   political: [
     { id: 'p1', name: 'Sénateur Marcus Porcius', speciality: 'Rhétorique avancée', reputation: 'Excellent', fee: 2000 },
     { id: 'p2', name: 'Orateur Quintus Hortensius', speciality: 'Débat public', reputation: 'Bon', fee: 1600 },
-    { id: 'p3', name: 'Consul Antonius', speciality: 'Politique et législation', reputation: 'Excellent', fee: 2200 }
+    { id: 'p3', name: 'Consul Antonius', speciality: 'Politique et législation', reputation: 'Excellent', fee: 2200 },
+    { id: 'p4', name: 'Juriste Servius Sulpicius', speciality: 'Droit romain', reputation: 'Excellent', fee: 1900 },
+    { id: 'p5', name: 'Philosophe Cato Minor', speciality: 'Stoïcisme et éthique politique', reputation: 'Bon', fee: 1500 }
   ],
   commercial: [
     { id: 'c1', name: 'Negotiator Lucius Caecilius', speciality: 'Commerce maritime', reputation: 'Excellent', fee: 1800 },
     { id: 'c2', name: 'Argentarius Cassius', speciality: 'Finance et prêts', reputation: 'Bon', fee: 1500 },
-    { id: 'c3', name: 'Mercator Marcus Crassus', speciality: 'Commerce avec l\'Orient', reputation: 'Excellent', fee: 2000 }
+    { id: 'c3', name: 'Mercator Marcus Crassus', speciality: 'Commerce avec l\'Orient', reputation: 'Excellent', fee: 2000 },
+    { id: 'c4', name: 'Publicanus Titus Aufidius', speciality: 'Collecte d\'impôts et contrats publics', reputation: 'Bon', fee: 1700 },
+    { id: 'c5', name: 'Agricola Lucius Quinctius', speciality: 'Gestion des domaines agricoles', reputation: 'Moyen', fee: 1200 }
   ],
   religious: [
     { id: 'r1', name: 'Pontifex Aemilius', speciality: 'Rites et cérémonies', reputation: 'Excellent', fee: 1800 },
     { id: 'r2', name: 'Augure Claudius', speciality: 'Divination et présages', reputation: 'Bon', fee: 1500 },
-    { id: 'r3', name: 'Flamine Valerius', speciality: 'Traditions religieuses', reputation: 'Moyen', fee: 1000 }
+    { id: 'r3', name: 'Flamine Valerius', speciality: 'Traditions religieuses', reputation: 'Moyen', fee: 1000 },
+    { id: 'r4', name: 'Vestale Claudia', speciality: 'Culte de Vesta et feu sacré', reputation: 'Excellent', fee: 1900 },
+    { id: 'r5', name: 'Haruspice Titus Veturius', speciality: 'Lecture des entrailles', reputation: 'Bon', fee: 1400 }
   ]
 };
 

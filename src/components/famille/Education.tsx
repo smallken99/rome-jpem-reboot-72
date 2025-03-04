@@ -64,7 +64,7 @@ export const Education: React.FC = () => {
                   <div key={type} className="roman-card p-4">
                     <div className="flex items-center gap-2 mb-3">
                       {pathIcon}
-                      <h3 className="font-cinzel">Précepteurs en {pathTitle}</h3>
+                      <h3 className="font-cinzel">Précepteurs en {pathTitle.replace('Carrière ', '')}</h3>
                     </div>
                     
                     <div className="space-y-4">
