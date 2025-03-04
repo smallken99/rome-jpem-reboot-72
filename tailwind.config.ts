@@ -1,3 +1,4 @@
+
 import type { Config } from "tailwindcss";
 
 export default {
@@ -61,7 +62,22 @@ export default {
 					'accent-foreground': 'hsl(var(--sidebar-accent-foreground))',
 					border: 'hsl(var(--sidebar-border))',
 					ring: 'hsl(var(--sidebar-ring))'
+				},
+				rome: {
+					'terracotta': '#CF5C36',
+					'gold': '#EEA243',
+					'marble': '#F4F1DE',
+					'navy': '#1F487E',
+					'cream': '#F8F4E3',
+					'leaf': '#7A9E7E',
+					'red': '#9E2B25',
+					'parchment': '#F2E9D8',
 				}
+			},
+			fontFamily: {
+				'trajan': ['Trajan Pro', 'serif'],
+				'cinzel': ['Cinzel', 'serif'],
+				'sans': ['Inter', 'sans-serif'],
 			},
 			borderRadius: {
 				lg: 'var(--radius)',
@@ -84,11 +100,31 @@ export default {
 					to: {
 						height: '0'
 					}
+				},
+				'fade-in': {
+					'0%': { opacity: '0' },
+					'100%': { opacity: '1' }
+				},
+				'fade-up': {
+					'0%': { opacity: '0', transform: 'translateY(20px)' },
+					'100%': { opacity: '1', transform: 'translateY(0)' }
+				},
+				'reveal-right': {
+					'0%': { transform: 'translateX(-100%)' },
+					'100%': { transform: 'translateX(0)' }
 				}
 			},
 			animation: {
 				'accordion-down': 'accordion-down 0.2s ease-out',
-				'accordion-up': 'accordion-up 0.2s ease-out'
+				'accordion-up': 'accordion-up 0.2s ease-out',
+				'fade-in': 'fade-in 0.5s ease-out',
+				'fade-up': 'fade-up 0.5s ease-out',
+				'reveal-right': 'reveal-right 0.5s ease-out'
+			},
+			backgroundImage: {
+				'marble-pattern': "url('/images/marble-texture.jpg')",
+				'roman-pattern': "linear-gradient(rgba(244, 241, 222, 0.95), rgba(244, 241, 222, 0.95)), url('/images/roman-pattern.svg')",
+				'column-divider': "url('/images/column-divider.svg')",
 			}
 		}
 	},
