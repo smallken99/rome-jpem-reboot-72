@@ -5,21 +5,46 @@ import {
   Building, 
   Home, 
   LandPlot,
-  MapPin
+  MapPin,
+  Church,
+  Landmark,
+  Castle,
+  Wheat,
+  TreeDeciduous,
+  Utensils,
+  Horse
 } from 'lucide-react';
 
-// Update the PropertyType to include all used types in the application
-type PropertyType = 'villa' | 'insulae' | 'terres' | 'Résidence principale' | 'Immeuble de rapport' | 
-  'Résidence secondaire' | 'Commerces' | 'Villa agricole' | 'Exploitation viticole' | 'Exploitation oléicole';
+// Update the PropertyType to include all property types
+type PropertyType = 
+  // Urban Properties
+  'villa' | 'domus' | 'insulae' | 
+  // Public Buildings
+  'statue' | 'thermes' | 'maison_indigents' |
+  // Religious Buildings
+  'statuaire' | 'autel' | 'temple' |
+  // Rural Properties
+  'domaine_cereales' | 'domaine_vignoble' | 'domaine_oliviers' |
+  'paturage_equides' | 'paturage_bovins' | 'paturage_moutons' |
+  // Legacy types (for compatibility)
+  'Résidence principale' | 'Immeuble de rapport' | 'Résidence secondaire' | 
+  'Commerces' | 'Villa agricole' | 'Exploitation viticole' | 'Exploitation oléicole';
+
+// Property size types
+type PropertySize = 'petit' | 'moyen' | 'grand' | null;
 
 interface PropertyCardProps {
   name: string;
   location: string;
   value: string;
   type: PropertyType;
+  size?: PropertySize;
   status: string;
+  revenue?: string;
+  maintenance?: string;
+  benefits?: string[];
   image?: string;
-  imageUrl?: string; // Added to support current usage
+  imageUrl?: string; // For backward compatibility
 }
 
 export const PropertyCard: React.FC<PropertyCardProps> = ({ 
@@ -27,7 +52,11 @@ export const PropertyCard: React.FC<PropertyCardProps> = ({
   location, 
   value, 
   type, 
+  size = null,
   status,
+  revenue,
+  maintenance,
+  benefits,
   image,
   imageUrl
 }) => {
@@ -35,23 +64,40 @@ export const PropertyCard: React.FC<PropertyCardProps> = ({
   const displayImage = image || imageUrl || '/placeholder.svg';
 
   const getIcon = () => {
-    switch (type.toLowerCase()) {
-      case 'villa':
-      case 'résidence principale':
-      case 'résidence secondaire':
-      case 'villa agricole':
-        return <Home className="h-5 w-5" />;
-      case 'insulae':
-      case 'immeuble de rapport':
-      case 'commerces':
-        return <Building className="h-5 w-5" />;
-      case 'terres':
-      case 'exploitation viticole':
-      case 'exploitation oléicole':
-        return <LandPlot className="h-5 w-5" />;
-      default:
-        return <Building className="h-5 w-5" />;
+    // Urban - Residential
+    if (type.includes('villa') || type === 'Résidence principale' || type === 'Résidence secondaire' || type === 'Villa agricole') {
+      return <Home className="h-5 w-5" />;
     }
+    // Urban - Residential/Commercial
+    if (type.includes('insulae') || type === 'Immeuble de rapport' || type === 'Commerces') {
+      return <Building className="h-5 w-5" />;
+    }
+    // Urban - Residential
+    if (type.includes('domus')) {
+      return <Castle className="h-5 w-5" />;
+    }
+    // Urban - Religious
+    if (type.includes('temple') || type.includes('autel') || type.includes('statuaire')) {
+      return <Church className="h-5 w-5" />;
+    }
+    // Urban - Public
+    if (type.includes('thermes') || type.includes('statue') || type.includes('maison_indigents')) {
+      return <Landmark className="h-5 w-5" />;
+    }
+    // Rural - Agricultural
+    if (type.includes('domaine_') || type === 'Exploitation viticole' || type === 'Exploitation oléicole') {
+      if (type.includes('cereales')) return <Wheat className="h-5 w-5" />;
+      if (type.includes('vignoble')) return <Utensils className="h-5 w-5" />; // Using Utensils for vineyard
+      if (type.includes('oliviers')) return <TreeDeciduous className="h-5 w-5" />;
+      return <TreeDeciduous className="h-5 w-5" />; // Default rural icon
+    }
+    // Rural - Pasture
+    if (type.includes('paturage_')) {
+      return <Horse className="h-5 w-5" />;
+    }
+    
+    // Default
+    return <Building className="h-5 w-5" />;
   };
 
   const getStatusColor = () => {
@@ -74,6 +120,11 @@ export const PropertyCard: React.FC<PropertyCardProps> = ({
     }
   };
 
+  const getSizeLabel = () => {
+    if (!size) return '';
+    return `(${size.charAt(0).toUpperCase() + size.slice(1)})`;
+  };
+
   return (
     <div className="rounded-md overflow-hidden border border-rome-gold/30 hover:border-rome-gold transition-all bg-white/90">
       <div className="relative h-40 bg-gray-200">
@@ -88,7 +139,9 @@ export const PropertyCard: React.FC<PropertyCardProps> = ({
       </div>
       
       <div className="p-4">
-        <h3 className="font-cinzel text-lg font-semibold text-rome-navy">{name}</h3>
+        <h3 className="font-cinzel text-lg font-semibold text-rome-navy">
+          {name} {getSizeLabel()}
+        </h3>
         <div className="flex items-center text-sm text-muted-foreground mb-2">
           <MapPin className="h-3 w-3 mr-1" /> 
           {location}
@@ -99,11 +152,37 @@ export const PropertyCard: React.FC<PropertyCardProps> = ({
             <span>Valeur:</span>
             <span className="font-bold">{value}</span>
           </div>
+          {maintenance && (
+            <div className="flex justify-between text-sm">
+              <span>Entretien:</span>
+              <span className="font-medium text-red-600">{maintenance}</span>
+            </div>
+          )}
+          {revenue && (
+            <div className="flex justify-between text-sm">
+              <span>Revenu:</span>
+              <span className="font-medium text-green-600">{revenue}</span>
+            </div>
+          )}
           <div className="flex justify-between text-sm">
             <span>État:</span>
             <span className={`font-bold ${getStatusColor()}`}>{status}</span>
           </div>
         </div>
+        
+        {benefits && benefits.length > 0 && (
+          <div className="mt-3 pt-2 border-t border-rome-gold/20">
+            <p className="text-xs text-muted-foreground mb-1">Avantages:</p>
+            <ul className="text-xs space-y-1">
+              {benefits.map((benefit, index) => (
+                <li key={index} className="flex items-start">
+                  <span className="mr-1 text-rome-gold">•</span>
+                  {benefit}
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
         
         <div className="mt-4 flex justify-between gap-2">
           <Button variant="outline" className="roman-btn-outline text-xs flex-1">Gérer</Button>

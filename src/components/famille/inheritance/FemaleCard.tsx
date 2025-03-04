@@ -1,50 +1,51 @@
 
 import React from 'react';
-import { Home, Coins } from 'lucide-react';
-import { Separator } from '@/components/ui/separator';
-import { RomanCard } from '@/components/ui-custom/RomanCard';
-import { calculateDowryValue } from './dowryUtils';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { StatBar } from '../StatBar';
+import { Character } from '@/types/character';
+
+// This should contain only necessary properties for female characters
+type FemaleCharacter = {
+  id: string;
+  name: string;
+  role?: string;
+  gender: "female"; // This ensures we only have female characters
+  age: number;
+};
 
 interface FemaleCardProps {
-  female: {
-    id: string;
-    name: string;
-    role?: string;
-    gender: 'female';
-    age: number;
-  };
+  female: FemaleCharacter;
+  dowryAmount: number;
+  index: number;
 }
 
-export const FemaleCard: React.FC<FemaleCardProps> = ({ female }) => {
-  const relation = female.role || 'Fille';
-  const dowryValue = calculateDowryValue(female);
-  
+export const FemaleCard: React.FC<FemaleCardProps> = ({ female, dowryAmount, index }) => {
   return (
-    <RomanCard className="p-3 transition-all bg-gray-50/50">
-      <div className="flex justify-between items-start">
-        <div>
-          <h4 className="font-cinzel">{female.name}</h4>
-          <p className="text-sm text-muted-foreground">{relation} • {female.age} ans</p>
+    <Card key={female.id} className="mt-4 border-rome-gold/30">
+      <CardHeader className="pb-2">
+        <CardTitle className="text-base font-cinzel flex justify-between items-center">
+          <span>{female.name}</span>
+          <span className="text-sm font-normal">{female.age} ans</span>
+        </CardTitle>
+      </CardHeader>
+      <CardContent>
+        <div className="space-y-2">
+          <div className="flex justify-between items-center text-sm">
+            <span>Rôle familial:</span>
+            <span className="font-medium">{female.role || "Fille"}</span>
+          </div>
+          <div className="flex justify-between items-center text-sm">
+            <span>Dot actuelle:</span>
+            <span className="font-medium">{dowryAmount.toLocaleString()} As</span>
+          </div>
+          <div className="mt-4">
+            <Button variant="outline" className="w-full roman-btn-outline">
+              Gérer l'alliance matrimoniale
+            </Button>
+          </div>
         </div>
-        
-        <div className="px-2 py-1 text-xs bg-gray-200 text-gray-600 rounded">
-          Non éligible
-        </div>
-      </div>
-      
-      <Separator className="my-2" />
-      
-      <div className="text-sm grid grid-cols-2 gap-2">
-        <div className="flex items-center gap-1">
-          <Home className="h-4 w-4 text-muted-foreground" />
-          <span>Dot de mariage ({dowryValue})</span>
-        </div>
-        
-        <div className="flex items-center gap-1">
-          <Coins className="h-4 w-4 text-muted-foreground" />
-          <span>Portion d'héritage</span>
-        </div>
-      </div>
-    </RomanCard>
+      </CardContent>
+    </Card>
   );
 };
