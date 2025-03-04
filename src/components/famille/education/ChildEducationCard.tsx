@@ -1,7 +1,9 @@
 
 import React from 'react';
-import { Sword, Building, ScrollText, ShieldQuestion, Heart } from 'lucide-react';
+import { Sword, Building, ScrollText, ShieldQuestion, Heart, BookOpen, CalendarDays } from 'lucide-react';
 import { Coins } from 'lucide-react';
+import { Separator } from '@/components/ui/separator';
+import { Progress } from '@/components/ui/progress';
 
 interface ChildEducation {
   type: string;
@@ -9,6 +11,8 @@ interface ChildEducation {
   progress: number;
   skills: string[];
   pityBonus?: number; // Optional pity bonus field
+  yearsCompleted?: number; // Number of years completed in current education
+  totalYears?: number; // Total years required for this education path
 }
 
 interface ChildProps {
@@ -62,6 +66,11 @@ export const ChildEducationCard: React.FC<ChildEducationCardProps> = ({ child })
   const pityBonus = child.currentEducation.pityBonus || 0;
   const totalProgress = Math.min(baseProgress + pityBonus, 100); // Cap at 100%
   
+  // Years information
+  const yearsCompleted = child.currentEducation.yearsCompleted || 0;
+  const totalYears = child.currentEducation.totalYears || 0;
+  const yearProgress = totalYears > 0 ? (yearsCompleted / totalYears) * 100 : 0;
+  
   return (
     <div className="roman-card p-4 hover:shadow-md transition-all duration-300">
       <div className="flex justify-between items-start">
@@ -92,8 +101,27 @@ export const ChildEducationCard: React.FC<ChildEducationCardProps> = ({ child })
               Les femmes n'ont pas accès à l'éducation militaire dans la Rome antique.
             </div>
           )}
+          
+          {/* Annual progress */}
           <div className="mt-3">
-            <p className="text-xs text-muted-foreground">Progression:</p>
+            <div className="flex justify-between items-center">
+              <p className="text-xs text-muted-foreground flex items-center gap-1">
+                <CalendarDays className="h-3 w-3" />
+                Progression annuelle:
+              </p>
+              <p className="text-xs font-medium">
+                {yearsCompleted} / {totalYears} années
+              </p>
+            </div>
+            <Progress value={yearProgress} className="h-2 mt-1" />
+          </div>
+          
+          {/* Skill progression */}
+          <div className="mt-3">
+            <p className="text-xs text-muted-foreground flex items-center gap-1">
+              <BookOpen className="h-3 w-3" />
+              Maîtrise des compétences:
+            </p>
             <div className="mt-1 h-2 bg-muted rounded-full">
               <div 
                 className={`h-full ${hasInvalidEducation ? 'bg-red-400' : 'bg-rome-terracotta'} rounded-full`}
@@ -114,9 +142,11 @@ export const ChildEducationCard: React.FC<ChildEducationCardProps> = ({ child })
             </div>
           )}
           
-          <div className="mt-3">
-            <p className="text-xs text-muted-foreground">Mentor:</p>
-            <p className="text-sm">{child.currentEducation.mentor}</p>
+          <Separator className="my-3" />
+          
+          <div className="mt-2">
+            <p className="text-xs text-muted-foreground">Précepteur:</p>
+            <p className="text-sm font-medium">{child.currentEducation.mentor}</p>
           </div>
           
           <div className="mt-3">
@@ -130,7 +160,12 @@ export const ChildEducationCard: React.FC<ChildEducationCardProps> = ({ child })
         </>
       )}
       
-      <div className="mt-4 flex justify-end">
+      <div className="mt-4 flex justify-end gap-2">
+        {child.currentEducation.type !== 'none' && (
+          <button className="roman-btn-outline text-xs bg-rome-navy/5 hover:bg-rome-navy/10">
+            Changer de précepteur
+          </button>
+        )}
         <button className="roman-btn-outline text-xs">
           {child.currentEducation.type !== 'none' ? 'Modifier' : 'Assigner'}
         </button>
