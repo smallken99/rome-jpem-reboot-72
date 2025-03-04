@@ -45,10 +45,6 @@ export const politicalAlliances: Alliance[] = [
 
 // Combine toutes les alliances pour l'affichage
 export const getAllAlliances = (): Alliance[] => {
-  return [
-    ...familyAlliances,
-    ...politicalAlliances.filter(alliance => 
-      !familyAlliances.some(fa => fa.name === alliance.name)
-    )
-  ];
+  // Retourne simplement toutes les alliances sans filtre pour être cohérent
+  return [...familyAlliances, ...politicalAlliances];
 };

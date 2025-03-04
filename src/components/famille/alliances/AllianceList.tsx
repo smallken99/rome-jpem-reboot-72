@@ -16,14 +16,20 @@ export interface Alliance {
 
 interface AllianceListProps {
   alliances: Alliance[];
+  showOnlyActive?: boolean;
 }
 
-export const AllianceList: React.FC<AllianceListProps> = ({ alliances }) => {
-  const activeAlliances = alliances.filter(alliance => alliance.status === 'actif');
+export const AllianceList: React.FC<AllianceListProps> = ({ 
+  alliances, 
+  showOnlyActive = true 
+}) => {
+  const filteredAlliances = showOnlyActive 
+    ? alliances.filter(alliance => alliance.status === 'actif')
+    : alliances;
   
   return (
     <div className="space-y-4">
-      {activeAlliances.map((alliance, index) => (
+      {filteredAlliances.map((alliance, index) => (
         <div key={alliance.id || index} className="border rounded-md overflow-hidden">
           {(alliance.member && alliance.spouse) && (
             <div className="p-3 border-b bg-muted/30">
@@ -49,7 +55,7 @@ export const AllianceList: React.FC<AllianceListProps> = ({ alliances }) => {
         </div>
       ))}
       
-      {activeAlliances.length === 0 && (
+      {filteredAlliances.length === 0 && (
         <div className="text-center p-4 text-muted-foreground italic">
           Aucune alliance active pour le moment.
         </div>

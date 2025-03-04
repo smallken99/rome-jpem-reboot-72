@@ -6,6 +6,7 @@ import { AllianceIntro } from './alliances/AllianceIntro';
 import { BirthIndicator } from './alliances/BirthIndicator';
 import { AllianceList } from './alliances/AllianceList';
 import { useAllianceBirths } from './alliances/useAllianceBirths';
+import { familyAlliances } from '@/data/alliances';
 
 interface MarriageAlliancesProps {
   characters: Character[];
@@ -17,7 +18,7 @@ export const MarriageAlliances: React.FC<MarriageAlliancesProps> = ({
   onChildBirth 
 }) => {
   const { year } = useTimeStore();
-  const { alliances, lastBirthYear, activeAlliances } = useAllianceBirths(characters, onChildBirth);
+  const { lastBirthYear, activeAlliances } = useAllianceBirths(characters, onChildBirth);
   
   return (
     <div className="marriage-alliances">
@@ -25,7 +26,10 @@ export const MarriageAlliances: React.FC<MarriageAlliancesProps> = ({
       
       <BirthIndicator lastBirthYear={lastBirthYear} currentYear={year} />
       
-      <AllianceList alliances={alliances} />
+      <AllianceList 
+        alliances={familyAlliances} 
+        showOnlyActive={true}
+      />
     </div>
   );
 };
