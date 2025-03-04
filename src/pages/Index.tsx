@@ -15,19 +15,23 @@ import {
   Shield,
 } from 'lucide-react';
 
-// Données de démonstration
-const mockAlliances = [
-  { 
-    name: 'Gens Julia', 
-    type: 'politique' as const, 
+// Alliance data that matches the marriage alliances in the Famille page
+const familyAlliances = [
+  {
+    id: '1',
+    name: 'Gens Cornelia',
+    type: 'matrimoniale' as const, 
     status: 'actif' as const,
-    benefits: ['Influence au Sénat +2', 'Protection contre les rivalités politiques', 'Accès aux marchés d\'Asie']
+    benefits: ['Stabilité familiale', 'Gestion du patrimoine'],
+    date: '705 AUC'
   },
-  { 
-    name: 'Gens Claudia', 
+  {
+    id: '2',
+    name: 'Gens Fabia',
     type: 'matrimoniale' as const, 
     status: 'en négociation' as const,
-    benefits: ['Soutien militaire potentiel', 'Alliance commerciale avec la Gaule', 'Accès aux ports']
+    benefits: ['Soutien militaire', 'Accès aux ports'],
+    date: '710 AUC (prévu)'
   },
   { 
     name: 'Gens Flavia', 
@@ -36,6 +40,21 @@ const mockAlliances = [
     benefits: []
   },
 ];
+
+// Political alliances to show alongside matrimonial ones
+const politicalAlliances = [
+  { 
+    name: 'Gens Julia', 
+    type: 'politique' as const, 
+    status: 'actif' as const,
+    benefits: ['Influence au Sénat +2', 'Protection contre les rivalités politiques', 'Accès aux marchés d\'Asie']
+  }
+];
+
+// Combine all alliances for display
+const allAlliances = [...familyAlliances, ...politicalAlliances.filter(alliance => 
+  !familyAlliances.some(fa => fa.name === alliance.name)
+)];
 
 interface FamilyStatisticProps {
   icon: React.ReactNode;
@@ -147,7 +166,7 @@ const Index = () => {
           </RomanCard.Header>
           <RomanCard.Content>
             <div className="space-y-2">
-              {mockAlliances.map((alliance, index) => (
+              {allAlliances.map((alliance, index) => (
                 <AllianceItem 
                   key={index}
                   name={alliance.name}
