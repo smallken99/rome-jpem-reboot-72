@@ -10,6 +10,7 @@ import {
   GraduationCap,
   Shield,
   Award,
+  ShieldOff,
   type LucideIcon
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
@@ -41,37 +42,53 @@ const COLOR_CLASSES: Record<string, string> = {
 
 interface StatBarProps {
   stat: CharacterStat;
+  disabled?: boolean;
+  pietyBonus?: number;
 }
 
-const StatBar: React.FC<StatBarProps> = ({ stat }) => {
+const StatBar: React.FC<StatBarProps> = ({ stat, disabled = false, pietyBonus }) => {
   // Get the appropriate icon component
-  const IconComponent = STAT_ICONS[stat.icon] || STAT_ICONS.default;
+  const IconComponent = disabled ? ShieldOff : (STAT_ICONS[stat.icon] || STAT_ICONS.default);
   
   // Get the appropriate color class
-  const colorClass = COLOR_CLASSES[stat.color] || COLOR_CLASSES.default;
+  const colorClass = disabled ? 'bg-gray-400' : (COLOR_CLASSES[stat.color] || COLOR_CLASSES.default);
   
-  const percentage = (stat.value / stat.maxValue) * 100;
+  // Calculate the total value including piety bonus if applicable
+  const baseValue = stat.value;
+  const totalValue = pietyBonus ? Math.min(baseValue + pietyBonus, stat.maxValue) : baseValue;
+  const percentage = (totalValue / stat.maxValue) * 100;
 
   return (
     <div className="mb-3">
       <div className="flex justify-between items-center mb-1">
         <div className="flex items-center gap-2">
-          <div className={cn("p-1 rounded-full", `bg-${stat.color}-100`)}>
-            <div className={cn("text-white", `text-${stat.color}-800`)}>
+          <div className={cn("p-1 rounded-full", disabled ? "bg-gray-200" : `bg-${stat.color}-100`)}>
+            <div className={cn("text-white", disabled ? "text-gray-500" : `text-${stat.color}-800`)}>
               <IconComponent className="h-4 w-4" />
             </div>
           </div>
-          <span className="text-sm font-medium">{stat.name}</span>
+          <span className={cn("text-sm font-medium", disabled && "text-gray-500")}>{stat.name}</span>
         </div>
-        <span className="text-sm font-medium">{stat.value}/{stat.maxValue}</span>
+        <span className="text-sm font-medium">
+          {disabled ? "N/A" : (
+            <>
+              {baseValue}
+              {pietyBonus && <span className="text-green-600">+{pietyBonus}</span>}
+              /{stat.maxValue}
+            </>
+          )}
+        </span>
       </div>
       <div className="h-2 bg-gray-200 rounded-full overflow-hidden">
         <div 
           className={cn("h-full rounded-full", colorClass)} 
-          style={{ width: `${percentage}%` }}
+          style={{ width: disabled ? '0%' : `${percentage}%` }}
         />
       </div>
-      <p className="text-xs text-muted-foreground mt-1">{stat.description}</p>
+      <p className="text-xs text-muted-foreground mt-1">
+        {disabled ? "Non disponible pour les femmes romaines" : stat.description}
+        {pietyBonus && <span className="text-green-600 ml-1">(Bonus de piété: +{pietyBonus})</span>}
+      </p>
     </div>
   );
 };

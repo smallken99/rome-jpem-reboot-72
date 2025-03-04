@@ -1,4 +1,3 @@
-
 import { Character } from '@/types/character';
 
 export const characters: Character[] = [
@@ -74,15 +73,15 @@ export const characters: Character[] = [
         value: 82,
         maxValue: 100,
         icon: 'piety',
-        description: 'Respect des traditions religieuses',
+        description: 'Respect des traditions religieuses (les femmes ont un bonus naturel)',
         color: 'navy'
       },
       martialEducation: {
         name: 'Éducation Martiale',
-        value: 30,
+        value: 0,
         maxValue: 100,
         icon: 'martialEducation',
-        description: 'Connaissance de la stratégie militaire',
+        description: 'Connaissance de la stratégie militaire (non disponible pour les femmes)',
         color: 'red'
       }
     }

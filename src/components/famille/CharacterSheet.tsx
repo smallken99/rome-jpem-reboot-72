@@ -4,7 +4,7 @@ import { Character } from '@/types/character';
 import { CharacterStats } from './CharacterStats';
 import { RomanCard } from '@/components/ui-custom/RomanCard';
 import { Badge } from '@/components/ui/badge';
-import { User, Calendar, Crown } from 'lucide-react';
+import { User, Calendar, Crown, ShieldX } from 'lucide-react';
 
 interface CharacterSheetProps {
   character: Character;
@@ -12,6 +12,9 @@ interface CharacterSheetProps {
 }
 
 export const CharacterSheet: React.FC<CharacterSheetProps> = ({ character, className }) => {
+  // Check if character is female (for martial education restrictions)
+  const isFemale = character.gender === 'female';
+  
   // Conversion des statistiques en tableau pour le composant CharacterStats
   const statsArray = [
     character.stats.popularity,
@@ -70,7 +73,15 @@ export const CharacterSheet: React.FC<CharacterSheetProps> = ({ character, class
           
           <div className="w-full md:w-2/3">
             <h4 className="font-cinzel text-base mb-3">Caractéristiques</h4>
-            <CharacterStats stats={statsArray} />
+            
+            {isFemale && (
+              <div className="mb-3 text-xs bg-red-50 p-2 rounded text-red-700 flex items-center gap-1">
+                <ShieldX className="h-3 w-3" />
+                <span>Les femmes romaines n'ont pas accès à l'éducation militaire, mais bénéficient d'un bonus de piété.</span>
+              </div>
+            )}
+            
+            <CharacterStats stats={statsArray} isFemale={isFemale} />
           </div>
         </div>
       </RomanCard.Content>
