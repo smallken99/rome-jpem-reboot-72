@@ -91,6 +91,10 @@ const Index = () => {
   // Trouver le parti politique actif
   const activeParty = politicalParties.find(party => party.active) || politicalParties[0];
   
+  // Create icon element from the currentMagistracy.icon component
+  const MagistrateIcon = currentMagistracy.icon;
+  const magistrateIconElement = <MagistrateIcon className="h-6 w-6" />;
+  
   return (
     <Layout>
       <div className="space-y-8 max-w-5xl mx-auto">
@@ -168,7 +172,7 @@ const Index = () => {
             </RomanCard.Header>
             <RomanCard.Content>
               <FamilyStatistic 
-                icon={currentMagistracy.icon}
+                icon={magistrateIconElement}
                 title={`Marcus Aurelius Cotta - ${currentMagistracy.name}`}
                 description={`${currentMagistracy.description} Son mandat prend fin en Mars ${year + 1} AUC.`}
                 iconBgColor={currentMagistracy.iconBgColor}
