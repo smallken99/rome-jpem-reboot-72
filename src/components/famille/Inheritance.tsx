@@ -30,9 +30,13 @@ const calculateDowryValue = (heir: {
 };
 
 export const Inheritance: React.FC = () => {
+  // Filter to only male heirs for inheritance eligibility
   const eligibleHeirs = characters.filter(char => 
-    char.role?.toLowerCase().includes('fils') || 
-    char.role?.toLowerCase().includes('fille')
+    char.gender === 'male' && (
+      char.role?.toLowerCase().includes('fils') || 
+      char.role?.toLowerCase().includes('neveu') ||
+      char.role?.toLowerCase().includes('frère')
+    )
   );
   
   const defaultHeir = eligibleHeirs.find(heir => 
@@ -108,9 +112,21 @@ export const Inheritance: React.FC = () => {
           ))
         ) : (
           <div className="text-center p-4 border border-dashed border-muted rounded-md">
-            <p className="text-muted-foreground">Aucun héritier potentiel n'a été trouvé dans votre famille.</p>
+            <p className="text-muted-foreground">Aucun héritier potentiel masculin n'a été trouvé dans votre famille.</p>
           </div>
         )}
+        
+        {/* Display female family members separately as non-eligible */}
+        <div className="mt-8">
+          <div className="flex items-center gap-2 mb-3">
+            <User className="h-5 w-5 text-rome-terracotta" />
+            <h3 className="font-cinzel text-lg">Membres Féminins (non éligibles à l'héritage principal)</h3>
+          </div>
+          
+          {characters.filter(char => char.gender === 'female' && char.role?.toLowerCase().includes('fille')).map(female => (
+            <FemaleCard key={female.id} female={female} />
+          ))}
+        </div>
       </div>
     </div>
   );
@@ -129,8 +145,7 @@ interface HeirCardProps {
 }
 
 const HeirCard: React.FC<HeirCardProps> = ({ heir, isSelected, onSelect }) => {
-  const relation = heir.role || (heir.gender === 'male' ? 'Fils' : 'Fille');
-  const dowryValue = calculateDowryValue(heir);
+  const relation = heir.role || 'Fils';
   
   return (
     <RomanCard className={`p-3 transition-all ${isSelected ? 'border-l-4 border-l-rome-gold bg-rome-gold/5' : ''}`}>
@@ -162,7 +177,7 @@ const HeirCard: React.FC<HeirCardProps> = ({ heir, isSelected, onSelect }) => {
       <div className="text-sm grid grid-cols-2 gap-2">
         <div className="flex items-center gap-1">
           <Home className="h-4 w-4 text-muted-foreground" />
-          <span>{heir.gender === 'male' ? 'Hérite des terres' : `Dot de mariage (${dowryValue})`}</span>
+          <span>Hérite des terres</span>
         </div>
         
         <div className="flex items-center gap-1">
@@ -179,6 +194,51 @@ const HeirCard: React.FC<HeirCardProps> = ({ heir, isSelected, onSelect }) => {
           </p>
         </div>
       )}
+    </RomanCard>
+  );
+};
+
+// New component for female family members
+interface FemaleCardProps {
+  female: {
+    id: string;
+    name: string;
+    role?: string;
+    gender: 'female';
+    age: number;
+  };
+}
+
+const FemaleCard: React.FC<FemaleCardProps> = ({ female }) => {
+  const relation = female.role || 'Fille';
+  const dowryValue = calculateDowryValue(female);
+  
+  return (
+    <RomanCard className="p-3 transition-all bg-gray-50/50">
+      <div className="flex justify-between items-start">
+        <div>
+          <h4 className="font-cinzel">{female.name}</h4>
+          <p className="text-sm text-muted-foreground">{relation} • {female.age} ans</p>
+        </div>
+        
+        <div className="px-2 py-1 text-xs bg-gray-200 text-gray-600 rounded">
+          Non éligible
+        </div>
+      </div>
+      
+      <Separator className="my-2" />
+      
+      <div className="text-sm grid grid-cols-2 gap-2">
+        <div className="flex items-center gap-1">
+          <Home className="h-4 w-4 text-muted-foreground" />
+          <span>Dot de mariage ({dowryValue})</span>
+        </div>
+        
+        <div className="flex items-center gap-1">
+          <Coins className="h-4 w-4 text-muted-foreground" />
+          <span>Portion d'héritage</span>
+        </div>
+      </div>
     </RomanCard>
   );
 };
