@@ -3,30 +3,54 @@ import React from 'react';
 import { cn } from '@/lib/utils';
 
 interface RomanCardProps {
-  title?: string;
   children: React.ReactNode;
   className?: string;
-  headerClassName?: string;
-  contentClassName?: string;
 }
 
-export const RomanCard: React.FC<RomanCardProps> = ({ 
-  title, 
+interface RomanCardHeaderProps {
+  children: React.ReactNode;
+  className?: string;
+}
+
+interface RomanCardContentProps {
+  children: React.ReactNode;
+  className?: string;
+}
+
+const RomanCardHeader: React.FC<RomanCardHeaderProps> = ({ 
   children, 
-  className,
-  headerClassName,
-  contentClassName 
+  className 
 }) => {
   return (
-    <div className={cn("roman-card", className)}>
-      {title && (
-        <div className={cn("roman-card-header", headerClassName)}>
-          <h3 className="font-cinzel text-lg text-rome-navy">{title}</h3>
-        </div>
-      )}
-      <div className={cn("p-4", contentClassName)}>
-        {children}
-      </div>
+    <div className={cn("border-b border-rome-gold/20 p-4 font-medium", className)}>
+      {children}
     </div>
   );
 };
+
+const RomanCardContent: React.FC<RomanCardContentProps> = ({ 
+  children, 
+  className 
+}) => {
+  return (
+    <div className={cn("p-4", className)}>
+      {children}
+    </div>
+  );
+};
+
+const RomanCard = ({ 
+  children, 
+  className,
+}: RomanCardProps) => {
+  return (
+    <div className={cn("bg-white rounded-md border border-rome-gold/30 shadow-sm overflow-hidden", className)}>
+      {children}
+    </div>
+  );
+};
+
+RomanCard.Header = RomanCardHeader;
+RomanCard.Content = RomanCardContent;
+
+export { RomanCard };
