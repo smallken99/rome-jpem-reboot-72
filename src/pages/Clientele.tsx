@@ -1,12 +1,23 @@
 
 import React from 'react';
+import { Routes, Route } from 'react-router-dom';
 import Layout from '@/components/layout/Layout';
 import { PageHeader } from '@/components/ui-custom/PageHeader';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ClientList } from '@/components/clientele/ClientList';
 import { ClientStats } from '@/components/clientele/ClientStats';
+import ClientDetail from '@/components/clientele/ClientDetail';
+import ClientCreate from '@/components/clientele/ClientCreate';
 
-const Clientele = () => {
+const ClienteleRoutes = () => (
+  <Routes>
+    <Route path="/" element={<ClienteleMain />} />
+    <Route path="/client/:id" element={<ClientDetail />} />
+    <Route path="/nouveau" element={<ClientCreate />} />
+  </Routes>
+);
+
+const ClienteleMain = () => {
   return (
     <Layout>
       <PageHeader 
@@ -30,6 +41,10 @@ const Clientele = () => {
       </Tabs>
     </Layout>
   );
+};
+
+const Clientele = () => {
+  return <ClienteleRoutes />;
 };
 
 export default Clientele;

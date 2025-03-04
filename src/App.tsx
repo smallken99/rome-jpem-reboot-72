@@ -34,16 +34,16 @@ const App = () => (
           
           {/* Pages protégées - normalement nous ajouterions un AuthGuard */}
           <Route path="/" element={<Index />} />
-          <Route path="/famille" element={<Famille />} />
-          <Route path="/patrimoine" element={<Patrimoine />} />
-          <Route path="/clientele" element={<Clientele />} />
-          <Route path="/registre" element={<Registre />} />
-          <Route path="/religion" element={<Religion />} />
-          <Route path="/messages" element={<Messages />} />
-          <Route path="/rapports" element={<Rapports />} />
+          <Route path="/famille/*" element={<Famille />} />
+          <Route path="/patrimoine/*" element={<Patrimoine />} />
+          <Route path="/clientele/*" element={<Clientele />} />
+          <Route path="/registre/*" element={<Registre />} />
+          <Route path="/religion/*" element={<Religion />} />
+          <Route path="/messages/*" element={<Messages />} />
+          <Route path="/rapports/*" element={<Rapports />} />
           
           {/* Page admin */}
-          <Route path="/admin" element={<Admin />} />
+          <Route path="/admin/*" element={<Admin />} />
           
           {/* Route 404 */}
           <Route path="*" element={<NotFound />} />

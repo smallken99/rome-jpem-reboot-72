@@ -5,6 +5,7 @@ import { LoyaltyBadge } from './card/LoyaltyBadge';
 import { ClientDetails } from './card/ClientDetails';
 import { ClientInfluences } from './card/ClientInfluences';
 import { CardActions } from './card/CardActions';
+import { useNavigate } from 'react-router-dom';
 
 // Définir les types de clients et sous-types
 export type ClientType = 'artisan_commercant' | 'politicien' | 'religieux' | 'proprietaire' | 'pegre';
@@ -32,8 +33,17 @@ interface ClientCardProps {
 }
 
 export const ClientCard: React.FC<ClientCardProps> = ({ client }) => {
+  const navigate = useNavigate();
+  
+  const handleCardClick = () => {
+    navigate(`/clientele/client/${client.id}`);
+  };
+  
   return (
-    <div className="roman-card hover:border-rome-gold transition-all duration-300">
+    <div 
+      className="roman-card hover:border-rome-gold transition-all duration-300 cursor-pointer"
+      onClick={handleCardClick}
+    >
       <div className="p-5">
         <div className="flex justify-between items-start mb-3">
           <div className="flex items-center gap-2">
@@ -47,7 +57,7 @@ export const ClientCard: React.FC<ClientCardProps> = ({ client }) => {
         
         <ClientInfluences influences={client.influences} />
         
-        <CardActions />
+        <CardActions clientId={client.id} />
       </div>
     </div>
   );

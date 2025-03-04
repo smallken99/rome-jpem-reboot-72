@@ -1,5 +1,8 @@
 
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { Button } from '@/components/ui/button';
+import { UserPlus } from 'lucide-react';
 import { ClientType, Client } from './ClientCard';
 import { SearchBar } from './SearchBar';
 import { ClientTypeFilter } from './ClientTypeFilter';
@@ -10,9 +13,15 @@ import { generateClients } from './ClientUtils';
 const clients = generateClients();
 
 export const ClientList: React.FC = () => {
+  const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState('');
   const [filteredClients, setFilteredClients] = useState(clients);
   const [filter, setFilter] = useState<string | null>(null);
+  
+  // Naviguer vers la page de création de client
+  const handleAddClient = () => {
+    navigate('/clientele/nouveau');
+  };
   
   // Filtrer par recherche et type
   const applyFilters = () => {
@@ -42,10 +51,20 @@ export const ClientList: React.FC = () => {
   return (
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row gap-4 justify-between items-start sm:items-center">
-        <SearchBar 
-          searchTerm={searchTerm} 
-          setSearchTerm={setSearchTerm} 
-        />
+        <div className="flex gap-4 items-center w-full sm:w-auto">
+          <SearchBar 
+            searchTerm={searchTerm} 
+            setSearchTerm={setSearchTerm} 
+          />
+          
+          <Button 
+            onClick={handleAddClient}
+            className="roman-btn gap-1 whitespace-nowrap"
+          >
+            <UserPlus className="h-4 w-4" />
+            Nouveau Client
+          </Button>
+        </div>
         
         <ClientTypeFilter 
           filter={filter} 
