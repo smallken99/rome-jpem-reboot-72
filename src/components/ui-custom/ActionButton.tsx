@@ -8,8 +8,9 @@ interface ActionButtonProps extends ButtonProps {
   label: string;
   variant?: 'default' | 'outline' | 'destructive';
   size?: 'default' | 'sm' | 'lg' | 'icon';
-  to?: string; // Ajout d'une propriété pour la redirection
+  to?: string; // Propriété pour la redirection
   onClick?: (e: React.MouseEvent) => void;
+  className?: string;
 }
 
 export const ActionButton: React.FC<ActionButtonProps> = ({ 
@@ -39,7 +40,7 @@ export const ActionButton: React.FC<ActionButtonProps> = ({
         asChild
         {...props}
       >
-        <Link to={to}>
+        <Link to={to} className="flex items-center gap-1">
           {icon && icon}
           {label}
         </Link>
