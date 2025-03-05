@@ -1,5 +1,4 @@
-
-import { romanNamePrefixes, romanNameSuffixes, specialties, titles } from './EducationData';
+import { romanNamePrefixes, romanNameSuffixes, specialties, titles } from './data';
 
 // Generate a random Roman name
 export const generateRomanName = () => {

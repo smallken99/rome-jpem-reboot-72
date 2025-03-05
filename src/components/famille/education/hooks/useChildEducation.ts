@@ -1,7 +1,7 @@
 
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { children, educationPaths } from '../EducationData';
+import { children, educationPaths } from '../data';
 import { Child, EducationPath } from '../types/educationTypes';
 
 export const useChildEducation = (childId: string | undefined) => {

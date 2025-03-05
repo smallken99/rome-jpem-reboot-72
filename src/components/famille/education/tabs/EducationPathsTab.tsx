@@ -1,8 +1,7 @@
-
 import React from 'react';
 import { TabsContent } from '@/components/ui/tabs';
 import { EducationPathCard } from '../EducationPathCard';
-import { educationPaths } from '../EducationData';
+import { educationPaths } from '../data';
 
 export const EducationPathsTab: React.FC = () => {
   return (

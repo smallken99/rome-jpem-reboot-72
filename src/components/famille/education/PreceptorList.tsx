@@ -2,7 +2,7 @@
 import React from 'react';
 import { ShieldQuestion, TrendingUp, User, Users } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { educationPaths } from './EducationData';
+import { educationPaths } from './data';
 import { PreceptorsByType } from './types/educationTypes';
 import { Badge } from '@/components/ui/badge';
 import { getRelatedStatName } from './utils/educationUtils';

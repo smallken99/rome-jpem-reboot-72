@@ -1,9 +1,8 @@
-
 import React from 'react';
 import { Scroll } from 'lucide-react';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Label } from '@/components/ui/label';
-import { specialties } from '../EducationData';
+import { specialties } from '../data';
 
 interface EducationSpecialtySelectorProps {
   educationType: string;

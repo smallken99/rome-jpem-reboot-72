@@ -1,6 +1,6 @@
 
 import { useState, useEffect } from 'react';
-import { educationPaths } from '../EducationData';
+import { educationPaths } from '../data';
 import { PreceptorsByType } from '../types/educationTypes';
 import { Character } from '@/types/character';
 import { 
