@@ -36,14 +36,7 @@ export const Inheritance: React.FC = () => {
   
   // Find female characters and prepare them with the correct type
   const femaleCharacters = characters
-    .filter(char => char.gender === 'female' && char.role?.toLowerCase().includes('fille'))
-    .map(female => ({
-      id: female.id,
-      name: female.name,
-      role: female.role,
-      gender: "female" as const,
-      age: female.age
-    }));
+    .filter(char => char.gender === 'female' && char.role?.toLowerCase().includes('fille'));
   
   return (
     <div className="inheritance">
@@ -112,10 +105,10 @@ export const Inheritance: React.FC = () => {
             <h3 className="font-cinzel text-lg">Membres Féminins (non éligibles à l'héritage principal)</h3>
           </div>
           
-          {femaleCharacters.map((female, index) => (
+          {femaleCharacters.map((character, index) => (
             <FemaleCard 
-              key={female.id} 
-              female={female} 
+              key={character.id} 
+              character={character} 
               dowryAmount={10000 + (index * 5000)} 
               index={index}
             />
