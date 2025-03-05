@@ -1,72 +1,48 @@
-
 import React from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { ActionButton } from '@/components/ui-custom/ActionButton';
-import { User, Coins, Ring } from 'lucide-react';
-import StatBar from '../StatBar';
 import { Character } from '@/types/character';
-import { useNavigate } from 'react-router-dom';
-
-// This should contain only necessary properties for female characters
-type FemaleCharacter = {
-  id: string;
-  name: string;
-  role?: string;
-  gender: "female"; // This ensures we only have female characters
-  age: number;
-};
+import { formatDowry } from './dowryUtils';
+import { HeartHandshake } from 'lucide-react';
+import { CardActions } from '../education/components/CardActions';
 
 interface FemaleCardProps {
-  female: FemaleCharacter;
-  dowryAmount?: number;
-  index?: number;
+  character: Character;
+  canEdit?: boolean;
 }
 
-export const FemaleCard: React.FC<FemaleCardProps> = ({ female, dowryAmount = 0, index }) => {
-  const navigate = useNavigate();
+export const FemaleCard: React.FC<FemaleCardProps> = ({ 
+  character, 
+  canEdit = true 
+}) => {
+  const hasDowry = character.marriage && character.marriage.dowry;
   
   return (
-    <Card key={female.id} className="mt-4 border-rome-gold/30">
-      <CardHeader className="pb-2">
-        <CardTitle className="text-base font-cinzel flex justify-between items-center">
-          <div className="flex items-center gap-2">
-            <User className="h-4 w-4 text-rome-navy/70" />
-            <span>{female.name}</span>
-          </div>
-          <span className="text-sm font-normal">{female.age} ans</span>
-        </CardTitle>
-      </CardHeader>
-      <CardContent>
-        <div className="space-y-3">
-          <div className="flex justify-between items-center text-sm">
-            <span>Rôle familial:</span>
-            <span className="font-medium">{female.role || "Fille"}</span>
-          </div>
-          <div className="flex justify-between items-center text-sm">
-            <div className="flex items-center gap-1">
-              <Coins className="h-4 w-4 text-rome-gold" />
-              <span>Dot actuelle:</span>
-            </div>
-            <span className="font-medium">{dowryAmount.toLocaleString()} As</span>
-          </div>
-          <div className="mt-4 space-y-2">
-            <ActionButton 
-              variant="outline" 
-              className="w-full roman-btn-outline"
-              label="Gérer l'alliance matrimoniale"
-              to={`/famille/alliances/manage/${female.id}`}
-              icon={<Ring className="h-4 w-4" />}
-            />
-            <ActionButton 
-              variant="outline" 
-              className="w-full roman-btn-outline"
-              label="Gérer la dot"
-              to={`/famille/heritage/dowry/${female.id}`}
-              icon={<Coins className="h-4 w-4" />}
-            />
-          </div>
+    <div className="bg-rome-parchment/70 rounded-md p-4 shadow-md border border-rome-gold/20">
+      <h3 className="text-lg font-semibold font-cinzel mb-2">{character.name}</h3>
+      
+      <div className="mb-3">
+        <p className="text-sm text-muted-foreground">
+          Âge: <span className="font-medium">{character.age} ans</span>
+        </p>
+        <p className="text-sm text-muted-foreground">
+          Genre: <span className="font-medium">{character.gender}</span>
+        </p>
+      </div>
+      
+      {hasDowry && (
+        <div className="flex items-center gap-2 text-sm text-green-600 bg-green-50 p-2 rounded mb-3">
+          <HeartHandshake className="h-4 w-4" />
+          <span>Dot: {formatDowry(character.marriage.dowry)}</span>
         </div>
-      </CardContent>
-    </Card>
+      )}
+      
+      {canEdit && (
+        <CardActions 
+          educationType={character.currentEducation.type}
+          childId={character.id}
+          childGender={character.gender}
+          childAge={character.age}
+        />
+      )}
+    </div>
   );
 };
