@@ -3,9 +3,9 @@ import { useState, useEffect } from 'react';
 import { 
   urbanResidentialBuildings, 
   religiousBuildings, 
-  publicBuildings,
-  BuildingDescription
-} from '../../data/buildingDescriptions';
+  publicBuildings
+} from '../../data/buildings';
+import { BuildingDescription } from '../../data/types/buildingTypes';
 
 export const useUrbanPropertyCalculator = (
   propertyCategory: string,

@@ -3,7 +3,7 @@ import React from 'react';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
 import { Coins, Wrench, Crop, Award } from 'lucide-react';
-import { BuildingDescription } from '../../data/buildingDescriptions';
+import { BuildingDescription } from '../../data/types/buildingTypes';
 
 interface RuralPropertyDetailsProps {
   propertyDetails: BuildingDescription | null;

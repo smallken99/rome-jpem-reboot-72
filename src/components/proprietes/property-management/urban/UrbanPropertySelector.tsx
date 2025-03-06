@@ -5,7 +5,7 @@ import {
   urbanResidentialBuildings, 
   religiousBuildings, 
   publicBuildings
-} from '../../data/buildingDescriptions';
+} from '../../data/buildings';
 
 interface UrbanPropertySelectorProps {
   propertyCategory: string;

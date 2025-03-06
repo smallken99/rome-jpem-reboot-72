@@ -1,6 +1,7 @@
 
 import { useState, useEffect } from 'react';
-import { ruralProperties, BuildingDescription } from '../../data/buildingDescriptions';
+import { ruralProperties } from '../../data/buildings';
+import { BuildingDescription } from '../../data/types/buildingTypes';
 
 export const useRuralPropertyCalculator = (
   selectedProperty: string,
