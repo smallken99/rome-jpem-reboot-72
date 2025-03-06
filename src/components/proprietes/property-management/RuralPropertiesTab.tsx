@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
@@ -11,90 +10,37 @@ export const RuralPropertiesTab: React.FC = () => {
   const [propertyLocation, setPropertyLocation] = useState<string>('latium');
   const [propertyDetails, setPropertyDetails] = useState<BuildingDescription | null>(null);
   
-  // Effet pour mettre à jour les détails de la propriété rurale lorsque la sélection change
   useEffect(() => {
     const property = ruralProperties[selectedProperty];
     
     if (property) {
-      // Ajuster les coûts en fonction de la taille
-      let costMultiplier = 1;
-      switch (propertySize) {
-        case 'petit':
-          costMultiplier = 0.7;
-          break;
-        case 'moyen':
-          costMultiplier = 1;
-          break;
-        case 'grand':
-          costMultiplier = 1.5;
-          break;
-      }
-      
-      // Ajuster les coûts en fonction de la région
-      let locationMultiplier = 1;
-      switch (propertyLocation) {
-        case 'latium':
-          locationMultiplier = 1.2;
-          break;
-        case 'campanie':
-          locationMultiplier = 1.1;
-          break;
-        case 'etrurie':
-          locationMultiplier = 0.9;
-          break;
-        case 'apulie':
-          locationMultiplier = 0.8;
-          break;
-        case 'sicile':
-          locationMultiplier = 0.7;
-          break;
-      }
-      
-      // Calculer les détails de production en fonction du type
-      let productionDetails = "";
-      switch (selectedProperty) {
-        case 'domaine_cereales':
-          const cerealAmount = Math.round(200 * costMultiplier);
-          productionDetails = `${cerealAmount} modii de blé par an`;
-          break;
-        case 'domaine_vignoble':
-          const wineAmount = Math.round(120 * costMultiplier);
-          productionDetails = `${wineAmount} amphores de vin par an`;
-          break;
-        case 'domaine_oliviers':
-          const oilAmount = Math.round(150 * costMultiplier);
-          productionDetails = `${oilAmount} amphores d'huile par an`;
-          break;
-        case 'paturage_equides':
-          const horsesAmount = Math.round(15 * costMultiplier);
-          productionDetails = `${horsesAmount} chevaux par an`;
-          break;
-        case 'paturage_bovins':
-          const cattleAmount = Math.round(25 * costMultiplier);
-          productionDetails = `${cattleAmount} bovins par an`;
-          break;
-        case 'paturage_moutons':
-          const woolAmount = Math.round(50 * costMultiplier);
-          productionDetails = `${woolAmount} ballots de laine par an`;
-          break;
-      }
-      
-      setPropertyDetails({
+      let costMultiplier = propertySize === 'petit' ? 0.7 : propertySize === 'grand' ? 1.5 : 1;
+      let locationMultiplier = {
+        'latium': 1.2,
+        'campanie': 1.1,
+        'etrurie': 0.9,
+        'apulie': 0.8,
+        'sicile': 0.7
+      }[propertyLocation] || 1;
+
+      // Calcul des coûts ajustés
+      const adjustedProperty = {
         ...property,
         initialCost: Math.round(property.initialCost * costMultiplier * locationMultiplier),
         maintenanceCost: Math.round(property.maintenanceCost * costMultiplier),
         income: property.income ? Math.round(property.income * costMultiplier * locationMultiplier) : 0,
-        additionalInfo: {
-          production: productionDetails,
-          value: Math.round(property.income * costMultiplier * locationMultiplier),
-          capacity: productionDetails.split(' ')[0] + ' ' + productionDetails.split(' ')[1]
-        }
-      });
+        production: property.production ? {
+          ...property.production,
+          amount: Math.round(property.production.amount * costMultiplier)
+        } : undefined
+      };
+      
+      setPropertyDetails(adjustedProperty);
     } else {
       setPropertyDetails(null);
     }
   }, [selectedProperty, propertySize, propertyLocation]);
-  
+
   return (
     <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
       <div className="col-span-1 space-y-4">
@@ -193,11 +139,12 @@ export const RuralPropertiesTab: React.FC = () => {
             
             <div className="mb-4">
               <h4 className="font-cinzel text-base text-rome-navy mb-2">Production</h4>
-              <ul className="list-disc pl-5 space-y-1">
-                <li>{propertyDetails.additionalInfo?.production}</li>
-                <li>Valeur estimée: {propertyDetails.additionalInfo?.value.toLocaleString()} As</li>
-                <li>Capacité de stockage nécessaire: {propertyDetails.additionalInfo?.capacity}</li>
-              </ul>
+              {propertyDetails.production && (
+                <ul className="list-disc pl-5 space-y-1">
+                  <li>Type: {propertyDetails.production.type}</li>
+                  <li>Quantité: {propertyDetails.production.amount} {propertyDetails.production.unit}</li>
+                </ul>
+              )}
             </div>
             
             <div className="mb-4">
