@@ -57,7 +57,7 @@ const Sidebar = () => {
         
         {/* Time */}
         <div className="border-t border-rome-gold/30 p-3 flex justify-center">
-          <TimePanel minimal className="text-white" />
+          <TimePanel minimal />
         </div>
       </div>
     </div>
