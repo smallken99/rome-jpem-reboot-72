@@ -14,7 +14,11 @@ import {
   User
 } from 'lucide-react';
 
-export const SidebarNavigation: React.FC = () => {
+interface SidebarNavigationProps {
+  isExpanded: boolean;
+}
+
+export const SidebarNavigation: React.FC<SidebarNavigationProps> = ({ isExpanded }) => {
   const location = useLocation();
   
   const mainNavItems = [
@@ -58,29 +62,35 @@ export const SidebarNavigation: React.FC = () => {
   const isPathGroup = (path: string) => location.pathname.startsWith(path) && path !== '/';
   
   return (
-    <div className="py-2">
+    <div className="py-2 space-y-1">
       {mainNavItems.map((item) => {
         const isActive = isPathActive(item.path);
         const isGroup = isPathGroup(item.path);
         const hasChildren = subNavItems[item.path as keyof typeof subNavItems];
         
         return (
-          <div key={item.path} className="mb-1">
+          <div key={item.path}>
             <Link
               to={item.path}
-              className={`flex items-center gap-2 p-2 rounded-md transition-all duration-200 ${
+              className={`flex items-center gap-3 p-2 rounded-md transition-all duration-200 ${
                 isActive || isGroup
-                  ? 'bg-gradient-to-r from-rome-terracotta/20 via-rome-terracotta/10 to-transparent text-rome-terracotta' 
-                  : 'hover:bg-rome-gold/10 text-rome-navy hover:text-rome-terracotta'
+                  ? 'bg-white/20 text-white' 
+                  : 'hover:bg-white/10 text-white/70 hover:text-white'
               }`}
             >
-              {item.icon}
-              <span className="font-cinzel tracking-wide">{item.label}</span>
-              {(isActive || isGroup) && <ChevronRight className="h-4 w-4 ml-auto" />}
+              <span className="flex-shrink-0">{item.icon}</span>
+              {isExpanded && (
+                <>
+                  <span className="font-cinzel tracking-wide truncate">{item.label}</span>
+                  {hasChildren && (isActive || isGroup) && (
+                    <ChevronRight className="h-4 w-4 ml-auto" />
+                  )}
+                </>
+              )}
             </Link>
             
-            {hasChildren && isGroup && (
-              <div className="ml-4 pl-4 border-l border-rome-gold/20 mt-1 space-y-1">
+            {hasChildren && isGroup && isExpanded && (
+              <div className="ml-4 pl-4 border-l border-white/20 mt-1 space-y-1">
                 {subNavItems[item.path as keyof typeof subNavItems].map((subItem) => (
                   <Link
                     key={subItem.path}
@@ -88,7 +98,7 @@ export const SidebarNavigation: React.FC = () => {
                     className={`block p-1.5 text-sm transition-colors ${
                       isPathActive(subItem.path)
                         ? 'text-rome-terracotta font-medium' 
-                        : 'text-rome-navy hover:text-rome-terracotta'
+                        : 'text-white/70 hover:text-white'
                     }`}
                   >
                     {subItem.label}

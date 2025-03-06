@@ -1,6 +1,6 @@
 
 import { Character } from '@/types/character';
-import { romanNamePrefixes, romanNameSuffixes } from '@/components/famille/education/EducationData';
+import { romanNamePrefixes, romanNameSuffixes } from '@/components/famille/education/data';
 import { Season } from '@/utils/timeSystem';
 
 // Constants for birth system
