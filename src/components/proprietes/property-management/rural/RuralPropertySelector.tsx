@@ -1,14 +1,22 @@
+
 import React from 'react';
-import { Label } from '@/components/ui/label';
-import { ruralProperties } from '../../data/buildings';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card';
+import { Tractor } from 'lucide-react';
+import { allBuildingTypes } from '../../data/buildings';
 
 export interface RuralPropertySelectorProps {
   selectedId: string;
   onSelect: (id: string) => void;
   propertySize: string;
-  setPropertySize: (value: string) => void;
+  setPropertySize: (size: string) => void;
   propertyLocation: string;
-  setPropertyLocation: (value: string) => void;
+  setPropertyLocation: (location: string) => void;
 }
 
 export const RuralPropertySelector: React.FC<RuralPropertySelectorProps> = ({
@@ -17,59 +25,37 @@ export const RuralPropertySelector: React.FC<RuralPropertySelectorProps> = ({
   propertySize,
   setPropertySize,
   propertyLocation,
-  setPropertyLocation,
+  setPropertyLocation
 }) => {
+  const buildings = allBuildingTypes.rural as {
+    [key: string]: {
+      name: string;
+      description: string;
+    };
+  };
+
   return (
-    <div className="space-y-4">
-      <div className="space-y-2">
-        <Label htmlFor="ruralType">Type de propriété</Label>
-        <select 
-          id="ruralType" 
-          className="w-full rounded-md border border-rome-gold/30 p-2"
-          value={selectedId}
-          onChange={(e) => onSelect(e.target.value)}
-        >
-          <optgroup label="Domaines (production agricole)">
-            {['domaine_cereales', 'domaine_vignoble', 'domaine_oliviers'].map((key) => (
-              <option key={key} value={key}>{ruralProperties[key].name}</option>
-            ))}
-          </optgroup>
-          <optgroup label="Pâturages (production animale)">
-            {['paturage_equides', 'paturage_bovins', 'paturage_moutons'].map((key) => (
-              <option key={key} value={key}>{ruralProperties[key].name}</option>
-            ))}
-          </optgroup>
-        </select>
-      </div>
-      
-      <div className="space-y-2">
-        <Label htmlFor="ruralSize">Taille</Label>
-        <select 
-          id="ruralSize" 
-          className="w-full rounded-md border border-rome-gold/30 p-2"
-          value={propertySize}
-          onChange={(e) => setPropertySize(e.target.value)}
-        >
-          <option value="petit">Petit</option>
-          <option value="moyen">Moyen</option>
-          <option value="grand">Grand</option>
-        </select>
-      </div>
-      
-      <div className="space-y-2">
-        <Label htmlFor="ruralLocation">Région</Label>
-        <select 
-          id="ruralLocation" 
-          className="w-full rounded-md border border-rome-gold/30 p-2"
-          value={propertyLocation}
-          onChange={(e) => setPropertyLocation(e.target.value)}
-        >
-          <option value="latium">Latium</option>
-          <option value="campanie">Campanie</option>
-          <option value="etrurie">Étrurie</option>
-          <option value="apulie">Apulie</option>
-          <option value="sicile">Sicile</option>
-        </select>
+    <div>
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        {Object.entries(buildings).map(([id, building]) => (
+          <Card
+            key={id}
+            className={`cursor-pointer hover:bg-accent hover:text-accent-foreground ${
+              selectedId === id ? 'bg-accent text-accent-foreground' : ''
+            }`}
+            onClick={() => onSelect(id)}
+          >
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Tractor className="h-4 w-4" />
+                {building.name}
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <CardDescription>{building.description}</CardDescription>
+            </CardContent>
+          </Card>
+        ))}
       </div>
     </div>
   );
