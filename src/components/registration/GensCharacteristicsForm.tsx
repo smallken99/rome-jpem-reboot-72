@@ -3,7 +3,7 @@ import React from 'react';
 import { Label } from '@/components/ui/label';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { useRegistration } from '@/context/RegistrationContext';
-import { GensOrigin, FamilyPhilosophy } from '@/context/RegistrationContext';
+import { GensOrigin, FamilyPhilosophy } from '@/types/registration';
 import { Coins, Flag, Award } from 'lucide-react';
 
 export const GensCharacteristicsForm: React.FC = () => {

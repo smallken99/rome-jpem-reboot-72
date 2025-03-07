@@ -5,7 +5,7 @@ import { Label } from '@/components/ui/label';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Slider } from '@/components/ui/slider';
 import { useRegistration } from '@/context/RegistrationContext';
-import { FamilyHeadEducation } from '@/context/RegistrationContext';
+import { FamilyHeadEducation } from '@/types/registration';
 import { User, GraduationCap, BookOpen, ShieldCheck } from 'lucide-react';
 
 export const FamilyHeadCreationForm: React.FC = () => {
