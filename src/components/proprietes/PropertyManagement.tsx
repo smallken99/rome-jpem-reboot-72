@@ -8,6 +8,7 @@ import { RuralPropertiesTab } from './property-management/RuralPropertiesTab';
 import { MaintenanceTab } from './property-management/MaintenanceTab';
 import { ProfitabilityTab } from './property-management/ProfitabilityTab';
 import { SlaveManagementTab } from './property-management/SlaveManagementTab';
+import { MonetaryManagementTab } from './property-management/MonetaryManagementTab';
 
 export const PropertyManagement: React.FC = () => {
   return (
@@ -19,6 +20,7 @@ export const PropertyManagement: React.FC = () => {
             <TabsTrigger value="urbaines" className="data-[state=active]:bg-white">Urbaines</TabsTrigger>
             <TabsTrigger value="rurales" className="data-[state=active]:bg-white">Rurales</TabsTrigger>
             <TabsTrigger value="esclaves" className="data-[state=active]:bg-white">Esclaves</TabsTrigger>
+            <TabsTrigger value="monetaire" className="data-[state=active]:bg-white">Finances</TabsTrigger>
             <TabsTrigger value="entretien" className="data-[state=active]:bg-white">Entretien</TabsTrigger>
             <TabsTrigger value="revenus" className="data-[state=active]:bg-white">Rentabilité</TabsTrigger>
           </TabsList>
@@ -33,6 +35,10 @@ export const PropertyManagement: React.FC = () => {
           
           <TabsContent value="esclaves" className="pt-4">
             <SlaveManagementTab />
+          </TabsContent>
+          
+          <TabsContent value="monetaire" className="pt-4">
+            <MonetaryManagementTab />
           </TabsContent>
           
           <TabsContent value="entretien" className="pt-4">

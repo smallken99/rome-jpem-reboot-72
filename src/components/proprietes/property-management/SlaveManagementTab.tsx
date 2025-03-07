@@ -54,8 +54,8 @@ export const SlaveManagementTab: React.FC = () => {
   const getStatusColor = (status: string) => {
     switch (status) {
       case "insuffisant": return "destructive";
-      case "adéquat": return "warning";
-      case "optimal": return "success";
+      case "adéquat": return "secondary";
+      case "optimal": return "default";
       default: return "secondary";
     }
   };
