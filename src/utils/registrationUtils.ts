@@ -113,7 +113,7 @@ export const getDefaultRegistrationData = (): RegistrationData => {
           value: 20,
           maxValue: 100,
           icon: 'shield',
-          description: 'Votre connaissance de l'art de la guerre',
+          description: "Votre connaissance de l'art de la guerre",
           color: 'bg-red-500'
         }
       }
