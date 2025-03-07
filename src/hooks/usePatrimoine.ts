@@ -1,103 +1,180 @@
 
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
 
-/**
- * Hook personnalisé pour la gestion des fonctionnalités du patrimoine
- */
-export const usePatrimoine = () => {
-  const navigate = useNavigate();
-  const [isLoading, setIsLoading] = useState(false);
-  
-  // Fonction pour acheter une propriété
-  const buyProperty = (propertyType: string, cost: number) => {
-    setIsLoading(true);
+export type Resource = {
+  id: string;
+  name: string;
+  amount: number;
+  unit: string;
+  value: number; // Valeur par unité en As
+};
+
+export type ResourceTransaction = {
+  id: number;
+  resourceId: string;
+  amount: number;
+  date: Date;
+  type: 'achat' | 'vente' | 'production';
+  price: number; // Prix total de la transaction
+};
+
+export function usePatrimoine() {
+  const [balance, setBalance] = useState<number>(500000);
+  const [resources, setResources] = useState<Resource[]>([
+    { id: 'vin', name: 'Vin', amount: 200, unit: 'amphores', value: 50 },
+    { id: 'huile_olive', name: "Huile d'olive", amount: 300, unit: 'amphores', value: 40 },
+    { id: 'cereales', name: 'Céréales', amount: 500, unit: 'modii', value: 10 },
+    { id: 'laine', name: 'Laine', amount: 100, unit: 'balles', value: 30 }
+  ]);
+  const [resourceTransactions, setResourceTransactions] = useState<ResourceTransaction[]>([]);
+
+  // Modifier le solde (positif pour ajouter, négatif pour soustraire)
+  const updateBalance = (amount: number) => {
+    setBalance(prev => {
+      const newBalance = prev + amount;
+      if (newBalance < 0) {
+        toast.error("Attention: Votre trésorerie est négative!");
+        return newBalance;
+      }
+      return newBalance;
+    });
+    return true;
+  };
+
+  // Ajouter une ressource (production des domaines ruraux)
+  const addResource = (resourceId: string, amount: number) => {
+    const resourceExists = resources.find(r => r.id === resourceId);
     
-    // Simulation d'un achat
-    setTimeout(() => {
-      setIsLoading(false);
-      toast.success(`Propriété de type ${propertyType} achetée pour ${cost} As`);
-    }, 1500);
+    if (resourceExists) {
+      // Mettre à jour une ressource existante
+      setResources(prev => 
+        prev.map(resource => 
+          resource.id === resourceId 
+            ? { ...resource, amount: resource.amount + amount }
+            : resource
+        )
+      );
+    } else {
+      // Créer une nouvelle ressource
+      toast.error("Ressource inconnue");
+      return false;
+    }
+    
+    // Ajouter la transaction
+    const resource = resources.find(r => r.id === resourceId);
+    if (resource) {
+      const transaction: ResourceTransaction = {
+        id: Math.floor(Math.random() * 10000),
+        resourceId,
+        amount,
+        date: new Date(),
+        type: 'production',
+        price: amount * resource.value
+      };
+      
+      setResourceTransactions(prev => [...prev, transaction]);
+      toast.success(`Production de ${amount} ${resource.unit} de ${resource.name}`);
+    }
+    
+    return true;
   };
   
-  // Fonction pour construire une nouvelle propriété
-  const buildProperty = (propertyType: string, cost: number) => {
-    setIsLoading(true);
+  // Vendre une ressource
+  const sellResource = (resourceId: string, amount: number, pricePerUnit: number) => {
+    const resource = resources.find(r => r.id === resourceId);
     
-    // Simulation d'une construction
-    setTimeout(() => {
-      setIsLoading(false);
-      toast.success(`Construction de ${propertyType} lancée pour ${cost} As`);
-    }, 1500);
+    if (!resource) {
+      toast.error("Ressource inconnue");
+      return false;
+    }
+    
+    if (resource.amount < amount) {
+      toast.error(`Stock insuffisant (${resource.amount} ${resource.unit} disponibles)`);
+      return false;
+    }
+    
+    // Mettre à jour le stock
+    setResources(prev => 
+      prev.map(r => 
+        r.id === resourceId 
+          ? { ...r, amount: r.amount - amount }
+          : r
+      )
+    );
+    
+    // Ajouter la transaction
+    const totalPrice = amount * pricePerUnit;
+    const transaction: ResourceTransaction = {
+      id: Math.floor(Math.random() * 10000),
+      resourceId,
+      amount: -amount, // Négatif car c'est une vente
+      date: new Date(),
+      type: 'vente',
+      price: totalPrice
+    };
+    
+    setResourceTransactions(prev => [...prev, transaction]);
+    
+    // Mettre à jour le solde
+    updateBalance(totalPrice);
+    
+    toast.success(`Vente de ${amount} ${resource.unit} de ${resource.name} pour ${totalPrice.toLocaleString()} As`);
+    return true;
   };
   
-  // Fonction pour entretenir une propriété
-  const maintainProperty = (propertyId: string, cost: number) => {
-    setIsLoading(true);
+  // Acheter une ressource
+  const buyResource = (resourceId: string, amount: number, pricePerUnit: number) => {
+    const totalPrice = amount * pricePerUnit;
     
-    // Simulation d'un entretien
-    setTimeout(() => {
-      setIsLoading(false);
-      toast.success(`Entretien effectué sur la propriété #${propertyId} pour ${cost} As`);
-    }, 1500);
-  };
-  
-  // Fonction pour vendre une propriété
-  const sellProperty = (propertyId: string, value: number) => {
-    setIsLoading(true);
+    // Vérifier si le solde est suffisant
+    if (balance < totalPrice) {
+      toast.error("Fonds insuffisants pour cet achat");
+      return false;
+    }
     
-    // Simulation d'une vente
-    setTimeout(() => {
-      setIsLoading(false);
-      toast.success(`Propriété #${propertyId} vendue pour ${value} As`);
-    }, 1500);
-  };
-  
-  // Fonction pour gérer les dépenses
-  const handleExpense = (category: string, amount: number, description: string) => {
-    setIsLoading(true);
+    const resource = resources.find(r => r.id === resourceId);
     
-    // Simulation d'une dépense
-    setTimeout(() => {
-      setIsLoading(false);
-      toast.success(`Dépense de ${amount} As enregistrée pour: ${description}`);
-      navigate('/patrimoine/depenses');
-    }, 1000);
-  };
-  
-  // Fonction pour gérer les revenus
-  const handleIncome = (source: string, amount: number, description: string) => {
-    setIsLoading(true);
+    if (!resource) {
+      toast.error("Ressource inconnue");
+      return false;
+    }
     
-    // Simulation d'un revenu
-    setTimeout(() => {
-      setIsLoading(false);
-      toast.success(`Revenu de ${amount} As enregistré depuis: ${source}`);
-      navigate('/patrimoine/revenus');
-    }, 1000);
-  };
-  
-  // Fonction pour payer des impôts
-  const payTaxes = (taxType: string, amount: number) => {
-    setIsLoading(true);
+    // Mettre à jour le stock
+    setResources(prev => 
+      prev.map(r => 
+        r.id === resourceId 
+          ? { ...r, amount: r.amount + amount }
+          : r
+      )
+    );
     
-    // Simulation d'un paiement d'impôts
-    setTimeout(() => {
-      setIsLoading(false);
-      toast.success(`Paiement de ${amount} As pour l'impôt: ${taxType}`);
-      navigate('/patrimoine/impots');
-    }, 1000);
+    // Ajouter la transaction
+    const transaction: ResourceTransaction = {
+      id: Math.floor(Math.random() * 10000),
+      resourceId,
+      amount,
+      date: new Date(),
+      type: 'achat',
+      price: -totalPrice // Négatif car c'est une dépense
+    };
+    
+    setResourceTransactions(prev => [...prev, transaction]);
+    
+    // Mettre à jour le solde
+    updateBalance(-totalPrice);
+    
+    toast.success(`Achat de ${amount} ${resource.unit} de ${resource.name} pour ${totalPrice.toLocaleString()} As`);
+    return true;
   };
   
   return {
-    isLoading,
-    buyProperty,
-    buildProperty,
-    maintainProperty,
-    sellProperty,
-    handleExpense,
-    handleIncome,
-    payTaxes
+    balance,
+    updateBalance,
+    resources,
+    resourceTransactions,
+    addResource,
+    sellResource,
+    buyResource
   };
-};
+}
