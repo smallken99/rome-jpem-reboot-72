@@ -1,4 +1,3 @@
-
 import React, { createContext, useContext, useState } from 'react';
 import { Character, CharacterStats } from '@/types/character';
 
@@ -94,8 +93,8 @@ const defaultRegistrationData: RegistrationData = {
         icon: 'shield',
         description: 'Votre connaissance de l'art de la guerre',
         color: 'bg-red-500'
-      },
-    },
+      }
+    }
   }
 };
 
