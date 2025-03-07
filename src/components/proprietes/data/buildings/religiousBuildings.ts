@@ -14,7 +14,12 @@ export const religiousBuildings: Record<string, BuildingDescription> = {
     initialCost: 5000,
     maintenanceCost: 500,
     prestige: 5,
-    piete: 10
+    piete: 10,
+    slaves: {
+      required: 1,
+      optimal: 2,
+      maxProfit: 0 // Pas de profit direct
+    }
   },
   statuaire: {
     name: "Statuaire",
@@ -27,7 +32,12 @@ export const religiousBuildings: Record<string, BuildingDescription> = {
     initialCost: 15000,
     maintenanceCost: 800,
     prestige: 10,
-    piete: 20
+    piete: 20,
+    slaves: {
+      required: 2,
+      optimal: 3,
+      maxProfit: 0 // Pas de profit direct
+    }
   },
   temple: {
     name: "Temple",
@@ -40,6 +50,11 @@ export const religiousBuildings: Record<string, BuildingDescription> = {
     initialCost: 80000,
     maintenanceCost: 4000,
     prestige: 25,
-    piete: 40
+    piete: 40,
+    slaves: {
+      required: 5,
+      optimal: 8,
+      maxProfit: 0 // Pas de profit direct
+    }
   }
 };

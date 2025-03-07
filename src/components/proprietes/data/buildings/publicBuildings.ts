@@ -14,7 +14,12 @@ export const publicBuildings: Record<string, BuildingDescription> = {
     initialCost: 10000,
     maintenanceCost: 500,
     prestige: 8,
-    reputation: 15
+    reputation: 15,
+    slaves: {
+      required: 0,
+      optimal: 1,
+      maxProfit: 0 // Pas de profit direct
+    }
   },
   maison_indigents: {
     name: "Maison des Indigents",
@@ -27,7 +32,12 @@ export const publicBuildings: Record<string, BuildingDescription> = {
     initialCost: 30000,
     maintenanceCost: 3000,
     prestige: 15,
-    reputation: 25
+    reputation: 25,
+    slaves: {
+      required: 3,
+      optimal: 6,
+      maxProfit: 0 // Pas de profit direct
+    }
   },
   thermes: {
     name: "Thermes",
@@ -40,6 +50,11 @@ export const publicBuildings: Record<string, BuildingDescription> = {
     initialCost: 100000,
     maintenanceCost: 8000,
     prestige: 35,
-    reputation: 50
+    reputation: 50,
+    slaves: {
+      required: 10,
+      optimal: 15,
+      maxProfit: 0 // Pas de profit direct
+    }
   }
 };

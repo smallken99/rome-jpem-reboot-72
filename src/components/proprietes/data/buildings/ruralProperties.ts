@@ -19,6 +19,11 @@ export const ruralProperties: Record<string, BuildingDescription> = {
       type: "céréales",
       amount: 1000,
       unit: "modii"
+    },
+    slaves: {
+      required: 15,
+      optimal: 25,
+      maxProfit: 10000
     }
   },
   domaine_vignoble: {
@@ -37,6 +42,11 @@ export const ruralProperties: Record<string, BuildingDescription> = {
       type: "vin",
       amount: 500,
       unit: "amphores"
+    },
+    slaves: {
+      required: 20,
+      optimal: 30,
+      maxProfit: 15000
     }
   },
   domaine_oliviers: {
@@ -50,7 +60,17 @@ export const ruralProperties: Record<string, BuildingDescription> = {
     initialCost: 85000,
     maintenanceCost: 4500,
     prestige: 0,
-    income: 10000
+    income: 10000,
+    production: {
+      type: "huile d'olive",
+      amount: 800,
+      unit: "amphores"
+    },
+    slaves: {
+      required: 18,
+      optimal: 25,
+      maxProfit: 12000
+    }
   },
   paturage_equides: {
     name: "Élevage d'équidés",
@@ -63,7 +83,17 @@ export const ruralProperties: Record<string, BuildingDescription> = {
     initialCost: 100000,
     maintenanceCost: 8000,
     prestige: 0,
-    income: 15000
+    income: 15000,
+    production: {
+      type: "chevaux",
+      amount: 50,
+      unit: "têtes"
+    },
+    slaves: {
+      required: 12,
+      optimal: 20,
+      maxProfit: 18000
+    }
   },
   paturage_bovins: {
     name: "Élevage de bovins",
@@ -76,7 +106,17 @@ export const ruralProperties: Record<string, BuildingDescription> = {
     initialCost: 80000,
     maintenanceCost: 6000,
     prestige: 0,
-    income: 9000
+    income: 9000,
+    production: {
+      type: "bovins",
+      amount: 100,
+      unit: "têtes"
+    },
+    slaves: {
+      required: 10,
+      optimal: 18,
+      maxProfit: 11000
+    }
   },
   paturage_moutons: {
     name: "Élevage de moutons",
@@ -89,6 +129,16 @@ export const ruralProperties: Record<string, BuildingDescription> = {
     initialCost: 70000,
     maintenanceCost: 4000,
     prestige: 0,
-    income: 8500
+    income: 8500,
+    production: {
+      type: "laine",
+      amount: 500,
+      unit: "balles"
+    },
+    slaves: {
+      required: 8,
+      optimal: 15,
+      maxProfit: 10000
+    }
   }
 };

@@ -16,4 +16,9 @@ export interface BuildingDescription {
     amount: number;
     unit: string;
   };
+  slaves?: {
+    required: number;
+    optimal: number;
+    maxProfit: number;
+  };
 }
