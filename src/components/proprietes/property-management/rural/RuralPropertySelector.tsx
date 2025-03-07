@@ -1,11 +1,10 @@
-
 import React from 'react';
 import { Label } from '@/components/ui/label';
 import { ruralProperties } from '../../data/buildings';
 
-interface RuralPropertySelectorProps {
-  selectedProperty: string;
-  setSelectedProperty: (value: string) => void;
+export interface RuralPropertySelectorProps {
+  selectedId: string;
+  onSelect: (id: string) => void;
   propertySize: string;
   setPropertySize: (value: string) => void;
   propertyLocation: string;
@@ -13,8 +12,8 @@ interface RuralPropertySelectorProps {
 }
 
 export const RuralPropertySelector: React.FC<RuralPropertySelectorProps> = ({
-  selectedProperty,
-  setSelectedProperty,
+  selectedId,
+  onSelect,
   propertySize,
   setPropertySize,
   propertyLocation,
@@ -27,8 +26,8 @@ export const RuralPropertySelector: React.FC<RuralPropertySelectorProps> = ({
         <select 
           id="ruralType" 
           className="w-full rounded-md border border-rome-gold/30 p-2"
-          value={selectedProperty}
-          onChange={(e) => setSelectedProperty(e.target.value)}
+          value={selectedId}
+          onChange={(e) => onSelect(e.target.value)}
         >
           <optgroup label="Domaines (production agricole)">
             {['domaine_cereales', 'domaine_vignoble', 'domaine_oliviers'].map((key) => (
