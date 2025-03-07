@@ -11,7 +11,8 @@ import {
   BarChart,
   ChevronRight,
   Landmark,
-  User
+  User,
+  Gavel
 } from 'lucide-react';
 
 interface SidebarNavigationProps {
@@ -26,6 +27,7 @@ export const SidebarNavigation: React.FC<SidebarNavigationProps> = ({ isExpanded
     { path: '/famille', label: 'Famille', icon: <Users className="h-5 w-5" /> },
     { path: '/patrimoine', label: 'Patrimoine', icon: <Building className="h-5 w-5" /> },
     { path: '/clientele', label: 'Clientèle', icon: <User className="h-5 w-5" /> },
+    { path: '/republique', label: 'République', icon: <Gavel className="h-5 w-5" /> },
     { path: '/registre', label: 'Registre', icon: <ScrollText className="h-5 w-5" /> },
     { path: '/religion', label: 'Religion', icon: <Landmark className="h-5 w-5" /> },
     { path: '/messages', label: 'Messages', icon: <MessageSquare className="h-5 w-5" /> },
@@ -49,6 +51,13 @@ export const SidebarNavigation: React.FC<SidebarNavigationProps> = ({ isExpanded
       { path: '/clientele/liste', label: 'Liste' },
       { path: '/clientele/nouveau', label: 'Ajouter un client' },
       { path: '/clientele/statistiques', label: 'Statistiques' },
+    ],
+    '/republique': [
+      { path: '/republique/tresor', label: 'Trésor Public' },
+      { path: '/republique/justice', label: 'Justice' },
+      { path: '/republique/domaines', label: 'Terres Publiques' },
+      { path: '/republique/batiments', label: 'Bâtiments Publics' },
+      { path: '/republique/lois', label: 'Lois' },
     ],
     '/rapports': [
       { path: '/rapports/influence', label: 'Influence' },

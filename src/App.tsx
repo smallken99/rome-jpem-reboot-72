@@ -12,6 +12,7 @@ import Registre from "./pages/Registre";
 import Religion from "./pages/Religion";
 import Messages from "./pages/Messages";
 import Rapports from "./pages/Rapports";
+import Republique from "./pages/Republique";
 import NotFound from "./pages/NotFound";
 import Welcome from "./pages/Welcome";
 import Login from "./pages/Login";
@@ -45,6 +46,7 @@ const App = () => (
           <Route path="/religion/*" element={<Religion />} />
           <Route path="/messages/*" element={<Messages />} />
           <Route path="/rapports/*" element={<Rapports />} />
+          <Route path="/republique/*" element={<Republique />} />
           
           {/* Page admin */}
           <Route path="/admin/*" element={<Admin />} />

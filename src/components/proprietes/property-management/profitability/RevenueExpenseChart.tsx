@@ -4,6 +4,11 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { ResponsiveBar } from '@nivo/bar';
 import { RevenueExpenseChartProps } from '../types/profitabilityTypes';
 
+// Ajout de l'interface pour résoudre l'erreur TS2322
+interface BarDatum {
+  [key: string]: string | number;
+}
+
 export const RevenueExpenseChart: React.FC<RevenueExpenseChartProps> = ({ data, activeView }) => {
   return (
     <Card className="border-rome-gold/30">
@@ -15,7 +20,7 @@ export const RevenueExpenseChart: React.FC<RevenueExpenseChartProps> = ({ data, 
       <CardContent>
         <div className="h-[300px]">
           <ResponsiveBar
-            data={data}
+            data={data as unknown as BarDatum[]}
             keys={['revenus', 'dépenses', 'profit']}
             indexBy="name"
             margin={{ top: 10, right: 15, bottom: 50, left: 60 }}
@@ -31,7 +36,7 @@ export const RevenueExpenseChart: React.FC<RevenueExpenseChartProps> = ({ data, 
               tickRotation: 0,
               legend: activeView === 'yearly' ? 'Année' : 'Mois',
               legendPosition: 'middle',
-              legendOffset: 40,
+              legendOffset: 40
             }}
             axisLeft={{
               tickSize: 5,
@@ -39,7 +44,7 @@ export const RevenueExpenseChart: React.FC<RevenueExpenseChartProps> = ({ data, 
               tickRotation: 0,
               legend: 'Montant (As)',
               legendPosition: 'middle',
-              legendOffset: -50,
+              legendOffset: -50
             }}
             labelSkipWidth={12}
             labelSkipHeight={12}
@@ -63,15 +68,15 @@ export const RevenueExpenseChart: React.FC<RevenueExpenseChartProps> = ({ data, 
                   {
                     on: 'hover',
                     style: {
-                      itemOpacity: 1,
-                    },
-                  },
-                ],
-              },
+                      itemOpacity: 1
+                    }
+                  }
+                ]
+              }
             ]}
             role="application"
             ariaLabel="Revenus et dépenses"
-            barAriaLabel={function (e) {
+            barAriaLabel={function(e) {
               return e.id + ': ' + e.formattedValue + ' As en ' + e.indexValue;
             }}
           />
