@@ -1,16 +1,14 @@
 
-import React, { useState } from 'react';
+import React from 'react';
 import { useMonetaryManagement } from './hooks/useMonetaryManagement';
 import { TransactionList } from './monetary/TransactionList';
 import { PaymentForm } from './monetary/PaymentForm';
 import { FinancialSummary } from './monetary/FinancialSummary';
-import { Button } from '@/components/ui/button';
 import { Wallet, Receipt, ArrowRightLeft } from 'lucide-react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
 export const MonetaryManagementTab: React.FC = () => {
-  const [activeTab, setActiveTab] = useState<'summary' | 'payments' | 'transactions'>('summary');
   const { 
     balance, 
     transactions, 
@@ -33,7 +31,7 @@ export const MonetaryManagementTab: React.FC = () => {
       </div>
       
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <Card className="bg-white border-rome-gold/30">
+        <Card className="bg-white border-rome-gold/30 shadow-sm">
           <CardContent className="p-4 flex items-center">
             <Wallet className="h-8 w-8 mr-3 text-rome-navy" />
             <div>
@@ -43,7 +41,7 @@ export const MonetaryManagementTab: React.FC = () => {
           </CardContent>
         </Card>
         
-        <Card className="bg-white border-rome-gold/30">
+        <Card className="bg-white border-rome-gold/30 shadow-sm">
           <CardContent className="p-4 flex items-center">
             <Receipt className="h-8 w-8 mr-3 text-green-600" />
             <div>
@@ -53,7 +51,7 @@ export const MonetaryManagementTab: React.FC = () => {
           </CardContent>
         </Card>
         
-        <Card className="bg-white border-rome-gold/30">
+        <Card className="bg-white border-rome-gold/30 shadow-sm">
           <CardContent className="p-4 flex items-center">
             <ArrowRightLeft className="h-8 w-8 mr-3 text-rome-terracotta" />
             <div>
@@ -66,34 +64,22 @@ export const MonetaryManagementTab: React.FC = () => {
       
       <Tabs defaultValue="summary" className="space-y-4">
         <TabsList className="border border-rome-gold/30 bg-rome-parchment">
-          <TabsTrigger 
-            value="summary" 
-            className="data-[state=active]:bg-white"
-            onClick={() => setActiveTab('summary')}
-          >
+          <TabsTrigger value="summary" className="data-[state=active]:bg-white">
             Synthèse
           </TabsTrigger>
-          <TabsTrigger 
-            value="payments" 
-            className="data-[state=active]:bg-white"
-            onClick={() => setActiveTab('payments')}
-          >
+          <TabsTrigger value="payments" className="data-[state=active]:bg-white">
             Effectuer un paiement
           </TabsTrigger>
-          <TabsTrigger 
-            value="transactions" 
-            className="data-[state=active]:bg-white"
-            onClick={() => setActiveTab('transactions')}
-          >
+          <TabsTrigger value="transactions" className="data-[state=active]:bg-white">
             Transactions
           </TabsTrigger>
         </TabsList>
         
-        <TabsContent value="summary" className="p-4 border border-rome-gold/30 rounded-md bg-white">
+        <TabsContent value="summary" className="p-4 border border-rome-gold/30 rounded-md bg-white shadow-sm">
           <FinancialSummary incomeStats={incomeStats} expenseStats={expenseStats} />
         </TabsContent>
         
-        <TabsContent value="payments" className="p-4 border border-rome-gold/30 rounded-md bg-white">
+        <TabsContent value="payments" className="p-4 border border-rome-gold/30 rounded-md bg-white shadow-sm">
           <PaymentForm 
             makePayment={makePayment}
             recipients={recipients}
@@ -101,7 +87,7 @@ export const MonetaryManagementTab: React.FC = () => {
           />
         </TabsContent>
         
-        <TabsContent value="transactions" className="p-4 border border-rome-gold/30 rounded-md bg-white">
+        <TabsContent value="transactions" className="p-4 border border-rome-gold/30 rounded-md bg-white shadow-sm">
           <TransactionList transactions={transactions} />
         </TabsContent>
       </Tabs>

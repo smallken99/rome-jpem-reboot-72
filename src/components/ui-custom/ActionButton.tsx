@@ -2,15 +2,17 @@
 import React from 'react';
 import { Button, ButtonProps } from '@/components/ui/button';
 import { Link } from 'react-router-dom';
+import { cn } from '@/lib/utils';
 
 interface ActionButtonProps extends ButtonProps {
   icon?: React.ReactNode;
   label: string;
-  variant?: 'default' | 'outline' | 'destructive';
+  variant?: 'default' | 'outline' | 'destructive' | 'secondary' | 'ghost' | 'link';
   size?: 'default' | 'sm' | 'lg' | 'icon';
-  to?: string; // Propriété pour la redirection
+  to?: string; // Property for routing
   onClick?: (e: React.MouseEvent) => void;
   className?: string;
+  title?: string; // For tooltip
 }
 
 export const ActionButton: React.FC<ActionButtonProps> = ({ 
@@ -21,28 +23,46 @@ export const ActionButton: React.FC<ActionButtonProps> = ({
   className = '',
   to,
   onClick,
+  title,
   ...props 
 }) => {
-  // Détermine la classe à utiliser en fonction du variant
-  const buttonClass = variant === 'default' 
-    ? 'roman-btn' 
-    : variant === 'destructive' 
-      ? '' 
-      : 'roman-btn-outline';
+  // Determine class to use based on variant
+  const getButtonClass = () => {
+    switch (variant) {
+      case 'default':
+        return 'roman-btn';
+      case 'destructive':
+        return '';
+      case 'secondary':
+        return 'roman-btn-secondary';
+      case 'outline':
+        return 'roman-btn-outline';
+      default:
+        return '';
+    }
+  };
   
-  // Si un chemin de redirection est fourni, utilisons Link
+  const buttonClass = getButtonClass();
+  const buttonContent = (
+    <>
+      {icon && <span className="mr-1">{icon}</span>}
+      {label && <span>{label}</span>}
+    </>
+  );
+  
+  // If a redirect path is provided, use Link
   if (to) {
     return (
       <Button 
         variant={variant} 
         size={size} 
-        className={`${buttonClass} flex items-center gap-1 ${className}`}
+        className={cn(buttonClass, "flex items-center gap-1", className)}
+        title={title}
         asChild
         {...props}
       >
-        <Link to={to} className="flex items-center gap-1">
-          {icon && icon}
-          {label}
+        <Link to={to}>
+          {buttonContent}
         </Link>
       </Button>
     );
@@ -53,12 +73,12 @@ export const ActionButton: React.FC<ActionButtonProps> = ({
     <Button 
       variant={variant} 
       size={size} 
-      className={`${buttonClass} flex items-center gap-1 ${className}`}
+      className={cn(buttonClass, "flex items-center gap-1", className)}
       onClick={onClick}
+      title={title}
       {...props}
     >
-      {icon && icon}
-      {label}
+      {buttonContent}
     </Button>
   );
 };

@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { RomanCard } from '@/components/ui-custom/RomanCard';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { PropertyManagementHeader } from './property-management/PropertyManagementHeader';
@@ -9,14 +9,29 @@ import { MaintenanceTab } from './property-management/MaintenanceTab';
 import { ProfitabilityTab } from './property-management/ProfitabilityTab';
 import { SlaveManagementTab } from './property-management/SlaveManagementTab';
 import { MonetaryManagementTab } from './property-management/MonetaryManagementTab';
+import { useLocation, useNavigate } from 'react-router-dom';
 
 export const PropertyManagement: React.FC = () => {
+  const location = useLocation();
+  const navigate = useNavigate();
+  const [activeTab, setActiveTab] = useState<string>(() => {
+    // Get tab from URL hash or default to 'urbaines'
+    const hash = location.hash.replace('#', '');
+    return hash || 'urbaines';
+  });
+
+  // Update URL hash when tab changes
+  const handleTabChange = (value: string) => {
+    setActiveTab(value);
+    navigate(`${location.pathname}#${value}`, { replace: true });
+  };
+
   return (
     <RomanCard className="mb-6">
       <PropertyManagementHeader />
       <RomanCard.Content>
-        <Tabs defaultValue="urbaines" className="mb-6">
-          <TabsList className="w-full justify-start border border-rome-gold/30 bg-rome-parchment">
+        <Tabs value={activeTab} onValueChange={handleTabChange} className="mb-6">
+          <TabsList className="w-full justify-start border border-rome-gold/30 bg-rome-parchment overflow-x-auto">
             <TabsTrigger value="urbaines" className="data-[state=active]:bg-white">Urbaines</TabsTrigger>
             <TabsTrigger value="rurales" className="data-[state=active]:bg-white">Rurales</TabsTrigger>
             <TabsTrigger value="esclaves" className="data-[state=active]:bg-white">Esclaves</TabsTrigger>

@@ -17,6 +17,11 @@ interface RomanCardContentProps {
   className?: string;
 }
 
+interface RomanCardFooterProps {
+  children: React.ReactNode;
+  className?: string;
+}
+
 const RomanCardHeader: React.FC<RomanCardHeaderProps> = ({ 
   children, 
   className 
@@ -39,6 +44,17 @@ const RomanCardContent: React.FC<RomanCardContentProps> = ({
   );
 };
 
+const RomanCardFooter: React.FC<RomanCardFooterProps> = ({
+  children,
+  className
+}) => {
+  return (
+    <div className={cn("border-t border-rome-gold/20 p-4 mt-auto", className)}>
+      {children}
+    </div>
+  );
+};
+
 const RomanCard = ({ 
   children, 
   className,
@@ -52,5 +68,6 @@ const RomanCard = ({
 
 RomanCard.Header = RomanCardHeader;
 RomanCard.Content = RomanCardContent;
+RomanCard.Footer = RomanCardFooter;
 
 export { RomanCard };
