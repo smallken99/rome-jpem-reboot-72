@@ -1,47 +1,111 @@
 
 import React from 'react';
-import { RomanCard } from '@/components/ui-custom/RomanCard';
+import Layout from '@/components/layout/Layout';
 import { PageHeader } from '@/components/ui-custom/PageHeader';
+import { RomanCard } from '@/components/ui-custom/RomanCard';
 import { JudiciaryStats } from '@/components/republique/justice/JudiciaryStats';
 import { ProcesTable } from '@/components/republique/justice/ProcesTable';
-import { Separator } from '@/components/ui/separator';
+
+// Interface pour les données de procès
+interface ProcesData {
+  id: string;
+  titre: string;
+  demandeur: string;
+  accusé: string;
+  type: string;
+  statut: string;
+  date: string;
+}
+
+// Interface pour les props de ProcesTable
+interface ProcesTableProps {
+  proces: ProcesData[];
+  status: string;
+}
 
 export const JusticePage: React.FC = () => {
+  // Mockup de données pour les procès
+  const procesCourants: ProcesData[] = [
+    {
+      id: "1",
+      titre: "Dispute territoriale",
+      demandeur: "Marcus Livius",
+      accusé: "Gaius Marius",
+      type: "Civil",
+      statut: "En cours",
+      date: "15 Mai 45 av. J.-C."
+    },
+    {
+      id: "2",
+      titre: "Accusation de corruption",
+      demandeur: "Senat Romain",
+      accusé: "Lucius Cornelius",
+      type: "Criminel",
+      statut: "En attente",
+      date: "3 Juin 45 av. J.-C."
+    },
+    {
+      id: "3",
+      titre: "Vol de bétail",
+      demandeur: "Publius Scribonius",
+      accusé: "Quintus Fabius",
+      type: "Civil",
+      statut: "Jugement rendu",
+      date: "27 Avril 45 av. J.-C."
+    }
+  ];
+
+  const procesPassés: ProcesData[] = [
+    {
+      id: "4",
+      titre: "Diffamation publique",
+      demandeur: "Gnaeus Pompeius",
+      accusé: "Marcus Crassus",
+      type: "Civil",
+      statut: "Condamnation",
+      date: "10 Mars 45 av. J.-C."
+    },
+    {
+      id: "5",
+      titre: "Trahison envers Rome",
+      demandeur: "Consul Cicero",
+      accusé: "Lucius Catilina",
+      type: "Criminel",
+      statut: "Exil",
+      date: "5 Février 45 av. J.-C."
+    }
+  ];
+
   return (
-    <div className="space-y-6">
+    <Layout>
       <PageHeader 
-        title="Justice & Tribunaux" 
+        title="Justice" 
+        subtitle="Administration des lois et des tribunaux de Rome" 
       />
       
-      <JudiciaryStats />
+      <div className="mb-6">
+        <JudiciaryStats />
+      </div>
       
-      <RomanCard>
-        <RomanCard.Header>
-          <h2 className="font-cinzel text-lg">Procès en Cours</h2>
-        </RomanCard.Header>
-        <RomanCard.Content>
-          <ProcesTable />
-        </RomanCard.Content>
-      </RomanCard>
-      
-      <RomanCard>
-        <RomanCard.Header>
-          <h2 className="font-cinzel text-lg">Administration de la Justice</h2>
-        </RomanCard.Header>
-        <RomanCard.Content>
-          <div className="space-y-4">
-            <p>
-              En tant que Préteur, vous êtes responsable de l'administration de la justice à Rome.
-              Supervisez les tribunaux et assurez-vous que la loi est appliquée équitablement.
-            </p>
-            <Separator className="my-4 border-rome-gold/30" />
-            <p className="text-sm text-muted-foreground">
-              Le respect de la justice est fondamental pour maintenir l'ordre social et la confiance 
-              des citoyens dans les institutions de la République.
-            </p>
-          </div>
-        </RomanCard.Content>
-      </RomanCard>
-    </div>
+      <div className="space-y-6">
+        <RomanCard>
+          <RomanCard.Header>
+            <h2 className="font-cinzel text-lg">Procès en Cours</h2>
+          </RomanCard.Header>
+          <RomanCard.Content>
+            <ProcesTable proces={procesCourants} status="current" />
+          </RomanCard.Content>
+        </RomanCard>
+        
+        <RomanCard>
+          <RomanCard.Header>
+            <h2 className="font-cinzel text-lg">Procès Passés</h2>
+          </RomanCard.Header>
+          <RomanCard.Content>
+            <ProcesTable proces={procesPassés} status="past" />
+          </RomanCard.Content>
+        </RomanCard>
+      </div>
+    </Layout>
   );
 };
