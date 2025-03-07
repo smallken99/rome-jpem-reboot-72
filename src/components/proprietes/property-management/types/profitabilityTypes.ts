@@ -1,11 +1,4 @@
 
-// Types for profitability data
-export interface RevenueData {
-  name: string;
-  value: number;
-  color?: string;
-}
-
 export interface PropertyProfitData {
   id: number;
   name: string;
@@ -13,14 +6,45 @@ export interface PropertyProfitData {
   revenue: number;
   expenses: number;
   profit: number;
-  roi: number;
+  profitMargin: number;
 }
 
 export interface OptimizationRecommendation {
   id: number;
-  title: string;
+  propertyId: number;
+  propertyName: string;
+  action: string;
+  potentialSavings: number;
   description: string;
-  impact: 'high' | 'medium' | 'low';
-  estimatedSavings?: number;
-  estimatedRevenue?: number;
+}
+
+export interface RevenueExpenseChartData {
+  name: string;
+  revenus: number;
+  dépenses: number;
+  profit: number;
+}
+
+export interface RevenueSourceData {
+  name: string;
+  value: number;
+}
+
+export type ChartViewType = "yearly" | "monthly";
+
+// For RevenueExpenseChart
+export interface RevenueExpenseChartProps {
+  data: RevenueExpenseChartData[];
+  activeView: ChartViewType;
+}
+
+// For ProfitablePropertiesTable
+export interface ProfitablePropertiesTableProps {
+  properties: PropertyProfitData[];
+  activeView: ChartViewType;
+}
+
+// For OptimizationRecommendations
+export interface OptimizationRecommendationsProps {
+  recommendations: OptimizationRecommendation[];
 }
