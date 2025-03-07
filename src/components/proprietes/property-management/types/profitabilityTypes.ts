@@ -1,28 +1,26 @@
 
-// Types pour le module de rentabilité
-export interface BuildingData {
-  name: string;
-  revenus: number;
-  depenses: number;
-  icon: React.ReactNode;
-}
-
-export interface RevenueSource {
+// Types for profitability data
+export interface RevenueData {
   name: string;
   value: number;
-  color: string;
+  color?: string;
 }
 
-export interface ProfitableProperty {
+export interface PropertyProfitData {
+  id: number;
   name: string;
   type: string;
   revenue: number;
   expenses: number;
+  profit: number;
   roi: number;
-  trend: 'up' | 'down' | 'neutral';
 }
 
-export interface ProfitabilityState {
-  activeView: 'yearly' | 'monthly';
-  setActiveView: (view: 'yearly' | 'monthly') => void;
+export interface OptimizationRecommendation {
+  id: number;
+  title: string;
+  description: string;
+  impact: 'high' | 'medium' | 'low';
+  estimatedSavings?: number;
+  estimatedRevenue?: number;
 }

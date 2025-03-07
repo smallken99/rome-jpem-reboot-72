@@ -1,82 +1,101 @@
 
-import { useState, useEffect } from 'react';
-import { useBuildingManagement } from '../../hooks/useBuildingManagement';
+import { useState } from 'react';
 import { RevenueData, PropertyProfitData, OptimizationRecommendation } from '../types/profitabilityTypes';
 
 export const useProfitabilityData = () => {
-  const { ownedBuildings } = useBuildingManagement();
+  const [activeView, setActiveView] = useState<'overview' | 'detail'>('overview');
   
-  // Données de revenus et dépenses pour le graphique
-  const [revenueData, setRevenueData] = useState<RevenueData[]>([
-    { name: 'Jan', revenue: 12000, expenses: 8000 },
-    { name: 'Fév', revenue: 15000, expenses: 8500 },
-    { name: 'Mar', revenue: 14000, expenses: 9000 },
-    { name: 'Avr', revenue: 16500, expenses: 9500 },
-    { name: 'Mai', revenue: 18000, expenses: 10000 },
-    { name: 'Juin', revenue: 19500, expenses: 10500 },
-  ]);
+  // Revenue and expense data for charts
+  const revenueData: RevenueData[] = [
+    { name: 'Janvier', value: 12000 },
+    { name: 'Février', value: 13500 },
+    { name: 'Mars', value: 14000 },
+    { name: 'Avril', value: 15200 },
+    { name: 'Mai', value: 16000 },
+    { name: 'Juin', value: 14800 },
+  ];
   
-  // Sources de revenus pour le graphique camembert
-  const [revenueSources, setRevenueSources] = useState<{ name: string, value: number }[]>([
-    { name: 'Propriétés urbaines', value: 45 },
-    { name: 'Domaines ruraux', value: 30 },
-    { name: 'Investissements', value: 15 },
-    { name: 'Autres sources', value: 10 },
-  ]);
+  const expenseData: RevenueData[] = [
+    { name: 'Janvier', value: 8000 },
+    { name: 'Février', value: 8200 },
+    { name: 'Mars', value: 8500 },
+    { name: 'Avril', value: 9000 },
+    { name: 'Mai', value: 9500 },
+    { name: 'Juin', value: 9200 },
+  ];
   
-  // Données de propriétés les plus rentables
-  const [profitableProperties, setProfitableProperties] = useState<PropertyProfitData[]>([
-    { id: 1, name: 'Villa du Palatin', type: 'Urbaine', income: 12000, expenses: 4000, profit: 8000, roi: 18.2 },
-    { id: 2, name: 'Vignoble de Campanie', type: 'Rurale', income: 15000, expenses: 6000, profit: 9000, roi: 15.0 },
-    { id: 3, name: 'Insula du Forum', type: 'Urbaine', income: 8000, expenses: 2000, profit: 6000, roi: 12.0 },
-    { id: 4, name: 'Oliveraie de Toscane', type: 'Rurale', income: 10000, expenses: 4500, profit: 5500, roi: 9.2 },
-    { id: 5, name: 'Boutiques du Tibre', type: 'Urbaine', income: 6000, expenses: 1500, profit: 4500, roi: 7.5 },
-  ]);
+  const revenueExpenseData = revenueData.map((item, index) => ({
+    name: item.name,
+    revenus: item.value,
+    dépenses: expenseData[index].value,
+    profit: item.value - expenseData[index].value
+  }));
   
-  // Recommandations d'optimisation
-  const [recommendations, setRecommendations] = useState<OptimizationRecommendation[]>([
-    {
-      id: 1,
-      title: 'Optimiser l\'entretien',
-      description: 'Réduire les coûts d\'entretien des propriétés urbaines de 15% en planifiant les travaux en basse saison',
-      potentialSavings: 3000,
-      difficulty: 'Facile'
+  // Revenue sources data for pie chart
+  const revenueSourcesData = [
+    { name: 'Propriétés Rurales', value: 45000, color: '#8884d8' },
+    { name: 'Propriétés Urbaines', value: 30000, color: '#82ca9d' },
+    { name: 'Bâtiments Publics', value: 15000, color: '#ffc658' },
+    { name: 'Temples', value: 10000, color: '#ff8042' },
+  ];
+  
+  // Properties profit data
+  const topProperties: PropertyProfitData[] = [
+    { id: 1, name: 'Domaine viticole de Campanie', type: 'Rural', revenue: 25000, expenses: 10000, profit: 15000, roi: 60 },
+    { id: 2, name: 'Villa Urbana du Palatin', type: 'Urbain', revenue: 15000, expenses: 5000, profit: 10000, roi: 66.67 },
+    { id: 3, name: 'Insula de la Via Sacra', type: 'Urbain', revenue: 8000, expenses: 3000, profit: 5000, roi: 62.5 },
+    { id: 4, name: 'Domaine agricole de Latium', type: 'Rural', revenue: 12000, expenses: 7000, profit: 5000, roi: 41.67 },
+    { id: 5, name: 'Temple de Minerve', type: 'Religieux', revenue: 6000, expenses: 2000, profit: 4000, roi: 66.67 },
+  ];
+  
+  // Optimization recommendations
+  const recommendations: OptimizationRecommendation[] = [
+    { 
+      id: 1, 
+      title: 'Optimisation des esclaves sur le domaine viticole', 
+      description: 'Augmenter le nombre d\'esclaves de 25 à 35 pourrait améliorer la production de 20%.',
+      impact: 'high',
+      estimatedRevenue: 5000
     },
-    {
-      id: 2,
-      title: 'Augmenter la production viticole',
-      description: 'Investir 5000 As dans l\'amélioration du domaine viticole pour augmenter la production de 20%',
-      potentialGain: 6000,
-      initialInvestment: 5000,
-      difficulty: 'Moyenne'
+    { 
+      id: 2, 
+      title: 'Réduction des coûts d\'entretien de la Villa Urbana', 
+      description: 'Une restauration complète réduirait les coûts annuels d\'entretien de 15%.',
+      impact: 'medium',
+      estimatedSavings: 750
     },
-    {
-      id: 3,
-      title: 'Convertir les espaces inutilisés',
-      description: 'Transformer les espaces inutilisés de l\'insula en boutiques à louer',
-      potentialGain: 4500,
-      initialInvestment: 8000,
-      difficulty: 'Difficile'
-    }
-  ]);
+    { 
+      id: 3, 
+      title: 'Conversion partielle du domaine agricole', 
+      description: 'Convertir 30% des terres en oliveraies pour diversifier les revenus.',
+      impact: 'medium',
+      estimatedRevenue: 2000
+    },
+  ];
   
-  // Calculer les statistiques globales
-  const totalRevenue = revenueData.reduce((acc, curr) => acc + curr.revenue, 0);
-  const totalExpenses = revenueData.reduce((acc, curr) => acc + curr.expenses, 0);
-  const totalProfit = totalRevenue - totalExpenses;
-  const overallRoi = totalRevenue > 0 ? (totalProfit / totalRevenue) * 100 : 0;
+  // Calculate overall financial metrics
+  const totalRevenue = {
+    name: 'Total des revenus',
+    value: revenueSourcesData.reduce((sum, item) => sum + item.value, 0)
+  };
   
-  // Actualiser les données en fonction des propriétés
-  useEffect(() => {
-    // Ici, on pourrait ajouter une logique pour calculer les revenus, dépenses et rentabilité
-    // à partir des propriétés réelles détenues par le joueur
-    // Cela reste simulé pour le moment
-  }, [ownedBuildings]);
+  const totalExpenses = {
+    name: 'Total des dépenses',
+    value: expenseData.reduce((sum, item) => sum + item.value, 0)
+  };
+  
+  const totalProfit = totalRevenue.value - totalExpenses.value;
+  const overallRoi = (totalProfit / totalExpenses.value) * 100;
   
   return {
+    activeView,
+    setActiveView,
+    revenueExpenseData,
+    revenueSourcesData,
+    topProperties,
     revenueData,
-    revenueSources,
-    profitableProperties,
+    revenueSources: revenueSourcesData,
+    profitableProperties: topProperties,
     recommendations,
     totalRevenue,
     totalExpenses,

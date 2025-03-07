@@ -6,7 +6,7 @@ import { PropertyManagementHeader } from './property-management/PropertyManageme
 import { UrbanPropertiesTab } from './property-management/UrbanPropertiesTab';
 import { RuralPropertiesTab } from './property-management/RuralPropertiesTab';
 import { MaintenanceTab } from './property-management/MaintenanceTab';
-import { ProfitabilityTab } from './property-management/ProfitabilityTab';
+import { ProfitabilityTab } from './property-management/profitability/ProfitabilityTab';
 import { SlaveManagementTab } from './property-management/SlaveManagementTab';
 import { MonetaryManagementTab } from './property-management/MonetaryManagementTab';
 import { useLocation, useNavigate } from 'react-router-dom';
