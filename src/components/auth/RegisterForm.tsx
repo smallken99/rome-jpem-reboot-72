@@ -1,58 +1,29 @@
 
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Checkbox } from '@/components/ui/checkbox';
-import { UserPlus, Eye, EyeOff } from 'lucide-react';
-import { useToast } from '@/hooks/use-toast';
+import { UserPlus } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import AlertMessage from '@/components/ui-custom/AlertMessage';
+import PasswordField from '@/components/auth/PasswordField';
+import { useRegisterForm } from '@/hooks/useRegisterForm';
 
 const RegisterForm = () => {
-  const [name, setName] = useState('');
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [confirmPassword, setConfirmPassword] = useState('');
-  const [showPassword, setShowPassword] = useState(false);
-  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-  const [acceptTerms, setAcceptTerms] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
-  const [validationError, setValidationError] = useState<string | null>(null);
-  const { toast } = useToast();
-  const navigate = useNavigate();
-
-  const handleRegister = (e: React.FormEvent) => {
-    e.preventDefault();
-    setValidationError(null);
-    
-    if (password !== confirmPassword) {
-      setValidationError("Les mots de passe ne correspondent pas");
-      return;
-    }
-    
-    if (!acceptTerms) {
-      setValidationError("Vous devez accepter les conditions d'utilisation");
-      return;
-    }
-    
-    setIsLoading(true);
-    
-    // Simulation d'inscription (à remplacer par une vraie API)
-    setTimeout(() => {
-      setIsLoading(false);
-      toast({
-        title: "Inscription réussie",
-        description: "Bienvenue dans la République Romaine",
-        duration: 3000,
-      });
-      // Rediriger vers la création de la Gens
-      navigate('/create-gens');
-    }, 1500);
-  };
+  const {
+    formData,
+    showPassword,
+    showConfirmPassword,
+    isLoading,
+    validationError,
+    updateFormField,
+    togglePasswordVisibility,
+    handleSubmit,
+    setValidationError
+  } = useRegisterForm();
 
   return (
-    <form onSubmit={handleRegister} className="space-y-4">
+    <form onSubmit={handleSubmit} className="space-y-4">
       {validationError && (
         <AlertMessage 
           type="error" 
@@ -69,8 +40,8 @@ const RegisterForm = () => {
         <Input
           id="name"
           type="text"
-          value={name}
-          onChange={(e) => setName(e.target.value)}
+          value={formData.name}
+          onChange={(e) => updateFormField('name', e.target.value)}
           placeholder="Votre nom d'utilisateur"
           required
           className="w-full"
@@ -84,8 +55,8 @@ const RegisterForm = () => {
         <Input
           id="email"
           type="email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
+          value={formData.email}
+          onChange={(e) => updateFormField('email', e.target.value)}
           placeholder="votre@email.com"
           required
           className="w-full"
@@ -95,26 +66,26 @@ const RegisterForm = () => {
       <PasswordField 
         id="password"
         label="Mot de passe"
-        value={password}
-        onChange={setPassword}
+        value={formData.password}
+        onChange={(value) => updateFormField('password', value)}
         showPassword={showPassword}
-        setShowPassword={setShowPassword}
+        toggleVisibility={() => togglePasswordVisibility('password')}
       />
       
       <PasswordField 
         id="confirmPassword"
         label="Confirmer le mot de passe"
-        value={confirmPassword}
-        onChange={setConfirmPassword}
+        value={formData.confirmPassword}
+        onChange={(value) => updateFormField('confirmPassword', value)}
         showPassword={showConfirmPassword}
-        setShowPassword={setShowConfirmPassword}
+        toggleVisibility={() => togglePasswordVisibility('confirmPassword')}
       />
       
       <div className="flex items-start space-x-2 pt-2">
         <Checkbox 
           id="terms" 
-          checked={acceptTerms} 
-          onCheckedChange={(checked) => setAcceptTerms(checked as boolean)} 
+          checked={formData.acceptTerms} 
+          onCheckedChange={(checked) => updateFormField('acceptTerms', checked as boolean)} 
         />
         <label htmlFor="terms" className="text-sm text-muted-foreground">
           J'accepte les{' '}
@@ -158,55 +129,6 @@ const RegisterForm = () => {
         </p>
       </div>
     </form>
-  );
-};
-
-// Password field component
-interface PasswordFieldProps {
-  id: string;
-  label: string;
-  value: string;
-  onChange: (value: string) => void;
-  showPassword: boolean;
-  setShowPassword: (show: boolean) => void;
-}
-
-export const PasswordField: React.FC<PasswordFieldProps> = ({ 
-  id, 
-  label, 
-  value, 
-  onChange, 
-  showPassword, 
-  setShowPassword 
-}) => {
-  return (
-    <div className="space-y-2">
-      <label htmlFor={id} className="block text-sm font-medium text-rome-navy">
-        {label}
-      </label>
-      <div className="relative">
-        <Input
-          id={id}
-          type={showPassword ? "text" : "password"}
-          value={value}
-          onChange={(e) => onChange(e.target.value)}
-          placeholder="••••••••"
-          required
-          className="w-full pr-10"
-        />
-        <button
-          type="button"
-          onClick={() => setShowPassword(!showPassword)}
-          className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
-        >
-          {showPassword ? (
-            <EyeOff className="h-4 w-4" />
-          ) : (
-            <Eye className="h-4 w-4" />
-          )}
-        </button>
-      </div>
-    </div>
   );
 };
 
