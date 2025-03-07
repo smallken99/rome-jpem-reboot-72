@@ -6,6 +6,7 @@ import { ActionButton } from '@/components/ui-custom/ActionButton';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter, DialogClose } from '@/components/ui/dialog';
+import { toast } from 'sonner';
 
 export const PropertyManagementHeader: React.FC = () => {
   const navigate = useNavigate();
@@ -25,11 +26,26 @@ export const PropertyManagementHeader: React.FC = () => {
   const redirectToPropertyTab = (tab: string) => {
     navigate('/patrimoine/proprietes');
     // On utilisera cette fonction pour rediriger vers un onglet spécifique
-    // Simulation pour l'instant, dans une application complète cela serait géré par un état global
     setTimeout(() => {
       const tabsElement = document.querySelector(`[value="${tab}"]`) as HTMLElement;
       if (tabsElement) tabsElement.click();
     }, 200);
+  };
+  
+  const handleStartConstruction = (type: string) => {
+    setIsNewConstructionDialogOpen(false);
+    
+    // En fonction du type, redirige vers l'onglet approprié
+    if (type === 'urbaine') {
+      redirectToPropertyTab('urbaines');
+      toast.success("Préparation de votre nouvelle construction urbaine");
+    } else if (type === 'rurale') {
+      redirectToPropertyTab('rurales');
+      toast.success("Préparation de votre nouveau domaine rural");
+    } else if (type === 'publique') {
+      redirectToPropertyTab('urbaines');
+      toast.success("Préparation de votre nouvel édifice public");
+    }
   };
   
   return (
@@ -50,7 +66,7 @@ export const PropertyManagementHeader: React.FC = () => {
             variant="ghost" 
             size="sm" 
             className="rounded-full h-7 w-7 p-0" 
-            onClick={() => window.alert("La gestion des propriétés vous permet d'acquérir et de gérer vos biens immobiliers à Rome et dans ses provinces, augmentant votre prestige et vos revenus.")}
+            onClick={() => toast.info("La gestion des propriétés vous permet d'acquérir et de gérer vos biens immobiliers à Rome et dans ses provinces, augmentant votre prestige et vos revenus.")}
           >
             <Info className="h-4 w-4" />
           </Button>
@@ -84,10 +100,7 @@ export const PropertyManagementHeader: React.FC = () => {
             <Button 
               variant="outline" 
               className="justify-start text-left p-4 h-auto flex flex-col items-start roman-btn-outline"
-              onClick={() => {
-                setIsNewConstructionDialogOpen(false);
-                redirectToPropertyTab('urbaines');
-              }}
+              onClick={() => handleStartConstruction('urbaine')}
             >
               <span className="font-cinzel text-rome-navy">Propriété Urbaine</span>
               <span className="text-sm text-muted-foreground mt-1">
@@ -98,10 +111,7 @@ export const PropertyManagementHeader: React.FC = () => {
             <Button 
               variant="outline" 
               className="justify-start text-left p-4 h-auto flex flex-col items-start roman-btn-outline"
-              onClick={() => {
-                setIsNewConstructionDialogOpen(false);
-                redirectToPropertyTab('rurales');
-              }}
+              onClick={() => handleStartConstruction('rurale')}
             >
               <span className="font-cinzel text-rome-navy">Domaine Rural</span>
               <span className="text-sm text-muted-foreground mt-1">
@@ -112,10 +122,7 @@ export const PropertyManagementHeader: React.FC = () => {
             <Button 
               variant="outline" 
               className="justify-start text-left p-4 h-auto flex flex-col items-start roman-btn-outline"
-              onClick={() => {
-                setIsNewConstructionDialogOpen(false);
-                redirectToPropertyTab('urbaines');
-              }}
+              onClick={() => handleStartConstruction('publique')}
             >
               <span className="font-cinzel text-rome-navy">Édifice Public</span>
               <span className="text-sm text-muted-foreground mt-1">
@@ -162,7 +169,7 @@ export const PropertyManagementHeader: React.FC = () => {
           
           <DialogFooter>
             <DialogClose asChild>
-              <Button className="roman-btn">Compris</Button>
+              <Button className="roman-btn" onClick={() => toast.info("Vous serez notifié lorsque le marché immobilier sera disponible.")}>Compris</Button>
             </DialogClose>
           </DialogFooter>
         </DialogContent>

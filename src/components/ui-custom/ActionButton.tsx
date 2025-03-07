@@ -13,6 +13,7 @@ interface ActionButtonProps extends ButtonProps {
   onClick?: (e: React.MouseEvent) => void;
   className?: string;
   title?: string; // For tooltip
+  disabled?: boolean;
 }
 
 export const ActionButton: React.FC<ActionButtonProps> = ({ 
@@ -24,6 +25,7 @@ export const ActionButton: React.FC<ActionButtonProps> = ({
   to,
   onClick,
   title,
+  disabled = false,
   ...props 
 }) => {
   // Determine class to use based on variant
@@ -50,7 +52,7 @@ export const ActionButton: React.FC<ActionButtonProps> = ({
     </>
   );
   
-  // If a redirect path is provided, use Link
+  // Si un chemin de redirection est fourni, utiliser Link
   if (to) {
     return (
       <Button 
@@ -58,6 +60,7 @@ export const ActionButton: React.FC<ActionButtonProps> = ({
         size={size} 
         className={cn(buttonClass, "flex items-center gap-1", className)}
         title={title}
+        disabled={disabled}
         asChild
         {...props}
       >
@@ -76,6 +79,7 @@ export const ActionButton: React.FC<ActionButtonProps> = ({
       className={cn(buttonClass, "flex items-center gap-1", className)}
       onClick={onClick}
       title={title}
+      disabled={disabled}
       {...props}
     >
       {buttonContent}

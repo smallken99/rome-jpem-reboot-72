@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { RomanCard } from '@/components/ui-custom/RomanCard';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { PropertyManagementHeader } from './property-management/PropertyManagementHeader';
@@ -10,6 +10,7 @@ import { ProfitabilityTab } from './property-management/ProfitabilityTab';
 import { SlaveManagementTab } from './property-management/SlaveManagementTab';
 import { MonetaryManagementTab } from './property-management/MonetaryManagementTab';
 import { useLocation, useNavigate } from 'react-router-dom';
+import { toast } from 'sonner';
 
 export const PropertyManagement: React.FC = () => {
   const location = useLocation();
@@ -24,6 +25,28 @@ export const PropertyManagement: React.FC = () => {
   const handleTabChange = (value: string) => {
     setActiveTab(value);
     navigate(`${location.pathname}#${value}`, { replace: true });
+    toast.info(`Section ${getTabLabel(value)} sélectionnée`);
+  };
+
+  // Met à jour l'onglet actif si l'URL change
+  useEffect(() => {
+    const hash = location.hash.replace('#', '');
+    if (hash && hash !== activeTab) {
+      setActiveTab(hash);
+    }
+  }, [location.hash]);
+  
+  // Récupère le label de l'onglet pour le message toast
+  const getTabLabel = (tabValue: string): string => {
+    switch (tabValue) {
+      case 'urbaines': return 'Propriétés urbaines';
+      case 'rurales': return 'Propriétés rurales'; 
+      case 'esclaves': return 'Gestion des esclaves';
+      case 'monetaire': return 'Finances';
+      case 'entretien': return 'Entretien';
+      case 'revenus': return 'Rentabilité';
+      default: return 'Propriétés';
+    }
   };
 
   return (
