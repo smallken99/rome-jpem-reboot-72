@@ -1,60 +1,13 @@
 
-import React, { createContext, useContext, useState } from 'react';
-import { RegistrationData, RegistrationContextType } from '@/types/registration';
-import { getDefaultRegistrationData, calculateBonusMalus } from '@/utils/registrationUtils';
+import { RegistrationProvider, useRegistration } from './RegistrationProvider';
+import type { GensOrigin, FamilyHeadEducation, FamilyPhilosophy, GensData, RegistrationData } from '@/types/registration';
 
-const RegistrationContext = createContext<RegistrationContextType | undefined>(undefined);
-
-export const RegistrationProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [registrationData, setRegistrationData] = useState<RegistrationData>(getDefaultRegistrationData());
-  const [currentStep, setCurrentStep] = useState(1);
-
-  const updateRegistrationData = (data: Partial<RegistrationData>) => {
-    setRegistrationData(prev => ({ ...prev, ...data }));
-  };
-
-  const nextStep = () => {
-    setCurrentStep(prev => Math.min(prev + 1, 4));
-  };
-
-  const prevStep = () => {
-    setCurrentStep(prev => Math.max(prev - 1, 1));
-  };
-
-  const goToStep = (step: number) => {
-    setCurrentStep(step);
-  };
-
-  // Calculate bonuses/maluses based on choices
-  const handleCalculateBonusMalus = () => {
-    const updatedData = calculateBonusMalus(registrationData);
-    setRegistrationData(updatedData);
-  };
-
-  return (
-    <RegistrationContext.Provider
-      value={{
-        registrationData,
-        currentStep,
-        updateRegistrationData,
-        nextStep,
-        prevStep,
-        goToStep,
-        calculateBonusMalus: handleCalculateBonusMalus
-      }}
-    >
-      {children}
-    </RegistrationContext.Provider>
-  );
+export { 
+  RegistrationProvider, 
+  useRegistration,
+  type GensOrigin,
+  type FamilyHeadEducation, 
+  type FamilyPhilosophy, 
+  type GensData, 
+  type RegistrationData 
 };
-
-export const useRegistration = () => {
-  const context = useContext(RegistrationContext);
-  if (context === undefined) {
-    throw new Error('useRegistration must be used within a RegistrationProvider');
-  }
-  return context;
-};
-
-// Re-export types from types file for convenience
-export type { GensOrigin, FamilyHeadEducation, FamilyPhilosophy, GensData, RegistrationData } from '@/types/registration';
