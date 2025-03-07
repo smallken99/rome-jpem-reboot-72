@@ -13,7 +13,6 @@ export const TresorStats: React.FC = () => {
         trend="up"
         trendValue="+2.4%"
         description="Balance actuelle"
-        onClick={() => {}} 
       />
       
       <StatBox 
@@ -23,7 +22,6 @@ export const TresorStats: React.FC = () => {
         trend="up"
         trendValue="+1.1%"
         description="Tributum"
-        onClick={() => {}} 
       />
       
       <StatBox 
@@ -33,7 +31,6 @@ export const TresorStats: React.FC = () => {
         trend="down"
         trendValue="-5.2%"
         description="Dépenses"
-        onClick={() => {}} 
       />
       
       <StatBox 
@@ -43,7 +40,6 @@ export const TresorStats: React.FC = () => {
         trend="up"
         trendValue="+12.3%"
         description="Dépenses"
-        onClick={() => {}} 
       />
       
       <StatBox 
@@ -53,7 +49,6 @@ export const TresorStats: React.FC = () => {
         trend="up"
         trendValue="+8.7%"
         description="Portorium"
-        onClick={() => {}} 
       />
     </div>
   );

@@ -14,7 +14,6 @@ export const RepubliqueMain: React.FC = () => {
     <div className="space-y-6">
       <PageHeader 
         title="Gestion de la République" 
-        description={`En tant que ${currentMagistracy.name}, vous avez accès à certaines fonctions de l'administration romaine. Gérez Rome selon vos prérogatives.`}
       />
       
       <RepubliqueStats />

@@ -1,59 +1,54 @@
 
 import React from 'react';
 import { StatBox } from '@/components/ui-custom/StatBox';
-import { Coins, Users, Building, Balance, Award } from 'lucide-react';
+import { Landmark, Coins, Users, Scale, ChevronsUp } from 'lucide-react';
 
 export const RepubliqueStats: React.FC = () => {
   return (
     <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
       <StatBox 
-        title="Trésor public"
+        title="Trésor Public"
         value="3,450,000 As"
         icon={<Coins className="w-5 h-5" />}
         trend="up"
         trendValue="+2.4%"
-        description="Depuis le dernier mois"
-        onClick={() => {}} 
+        description="Solde actuel"
       />
       
       <StatBox 
         title="Population"
-        value="1,250,000"
+        value="450,000"
         icon={<Users className="w-5 h-5" />}
         trend="up"
-        trendValue="+1.1%"
-        description="Citoyens et non-citoyens"
-        onClick={() => {}} 
+        trendValue="+1.2%"
+        description="Citoyens romains"
       />
       
       <StatBox 
-        title="Bâtiments publics"
-        value="412"
-        icon={<Building className="w-5 h-5" />}
+        title="Stabilité"
+        value="Élevée"
+        icon={<Scale className="w-5 h-5" />}
         trend="neutral"
         trendValue="0%"
-        description="Sur tout le territoire"
-        onClick={() => {}} 
+        description="État actuel"
       />
       
       <StatBox 
-        title="Procès en cours"
-        value="23"
-        icon={<Balance className="w-5 h-5" />}
+        title="Magistrats"
+        value="24 actifs"
+        icon={<Landmark className="w-5 h-5" />}
         trend="down"
-        trendValue="-15%"
-        description="En attente de jugement"
-        onClick={() => {}} 
+        trendValue="-2"
+        description="Postes occupés"
       />
       
       <StatBox 
-        title="Réformes en cours"
-        value="5"
-        icon={<Award className="w-5 h-5" />}
+        title="Influence"
+        value="70%"
+        icon={<ChevronsUp className="w-5 h-5" />}
         trend="up"
-        trendValue="+2"
-        description="À voter au Sénat"
-        onClick={() => {}} 
+        trendValue="+5%"
+        description="Prestige de Rome"
       />
     </div>
   );

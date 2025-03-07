@@ -2,80 +2,46 @@
 import React from 'react';
 import { RomanCard } from '@/components/ui-custom/RomanCard';
 import { PageHeader } from '@/components/ui-custom/PageHeader';
-import { ActionButton } from '@/components/ui-custom/ActionButton';
-import { Home, Gavel, Plus } from 'lucide-react';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { JudiciaryStats } from '@/components/republique/justice/JudiciaryStats';
 import { ProcesTable } from '@/components/republique/justice/ProcesTable';
+import { Separator } from '@/components/ui/separator';
 
 export const JusticePage: React.FC = () => {
   return (
     <div className="space-y-6">
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-        <PageHeader 
-          title="Système Judiciaire" 
-          description="Supervisez les tribunaux romains, présidez les procès et rendez la justice au nom du Sénat et du Peuple Romain."
-        />
-        <div className="flex gap-2">
-          <ActionButton
-            variant="default"
-            label="Nouveau Procès"
-            icon={<Plus className="h-4 w-4" />}
-          />
-          <ActionButton
-            variant="outline"
-            label="Retour"
-            to="/republique"
-            icon={<Home className="h-4 w-4" />}
-          />
-        </div>
-      </div>
+      <PageHeader 
+        title="Justice & Tribunaux" 
+      />
       
       <JudiciaryStats />
       
-      <Tabs defaultValue="en-cours" className="space-y-4">
-        <TabsList className="bg-white border border-rome-gold/30">
-          <TabsTrigger value="en-cours" className="data-[state=active]:bg-rome-gold/10">
-            <Gavel className="h-4 w-4 mr-2" />
-            Procès en cours
-          </TabsTrigger>
-          <TabsTrigger value="a-venir" className="data-[state=active]:bg-rome-gold/10">
-            Procès à venir
-          </TabsTrigger>
-          <TabsTrigger value="jugements" className="data-[state=active]:bg-rome-gold/10">
-            Jugements récents
-          </TabsTrigger>
-          <TabsTrigger value="archives" className="data-[state=active]:bg-rome-gold/10">
-            Archives
-          </TabsTrigger>
-        </TabsList>
-        
-        <TabsContent value="en-cours">
-          <ProcesTable status="en-cours" />
-        </TabsContent>
-        
-        <TabsContent value="a-venir">
-          <ProcesTable status="a-venir" />
-        </TabsContent>
-        
-        <TabsContent value="jugements">
-          <ProcesTable status="juge" />
-        </TabsContent>
-        
-        <TabsContent value="archives">
-          <RomanCard>
-            <RomanCard.Header>
-              <h2 className="font-cinzel text-lg">Archives Judiciaires</h2>
-            </RomanCard.Header>
-            <RomanCard.Content>
-              <p className="text-muted-foreground mb-6">
-                Consultez les archives des procès historiques et des précédents juridiques importants.
-              </p>
-              {/* Le contenu des archives serait ici */}
-            </RomanCard.Content>
-          </RomanCard>
-        </TabsContent>
-      </Tabs>
+      <RomanCard>
+        <RomanCard.Header>
+          <h2 className="font-cinzel text-lg">Procès en Cours</h2>
+        </RomanCard.Header>
+        <RomanCard.Content>
+          <ProcesTable />
+        </RomanCard.Content>
+      </RomanCard>
+      
+      <RomanCard>
+        <RomanCard.Header>
+          <h2 className="font-cinzel text-lg">Administration de la Justice</h2>
+        </RomanCard.Header>
+        <RomanCard.Content>
+          <div className="space-y-4">
+            <p>
+              En tant que Préteur, vous êtes responsable de l'administration de la justice à Rome.
+              Supervisez les tribunaux et assurez-vous que la loi est appliquée équitablement.
+            </p>
+            <Separator className="my-4 border-rome-gold/30" />
+            <p className="text-sm text-muted-foreground">
+              Le respect de la justice est fondamental pour maintenir l'ordre social et la confiance 
+              des citoyens dans les institutions de la République.
+            </p>
+          </div>
+        </RomanCard.Content>
+      </RomanCard>
     </div>
   );
 };

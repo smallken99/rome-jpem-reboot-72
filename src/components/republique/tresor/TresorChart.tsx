@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { BarChart } from '@/components/ui/chart';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 
 export const TresorChart: React.FC = () => {
   // Données pour le graphique (en milliers d'As)
@@ -21,14 +21,25 @@ export const TresorChart: React.FC = () => {
 
   return (
     <div className="h-80">
-      <BarChart 
-        data={data}
-        index="name"
-        categories={['revenus', 'dépenses']}
-        colors={['#84cc16', '#ef4444']}
-        valueFormatter={(value) => `${value.toLocaleString()} As`}
-        yAxisWidth={60}
-      />
+      <ResponsiveContainer width="100%" height="100%">
+        <BarChart
+          data={data}
+          margin={{
+            top: 20,
+            right: 30,
+            left: 20,
+            bottom: 5,
+          }}
+        >
+          <CartesianGrid strokeDasharray="3 3" />
+          <XAxis dataKey="name" />
+          <YAxis />
+          <Tooltip formatter={(value) => `${value.toLocaleString()} As`} />
+          <Legend />
+          <Bar dataKey="revenus" fill="#84cc16" />
+          <Bar dataKey="dépenses" fill="#ef4444" />
+        </BarChart>
+      </ResponsiveContainer>
     </div>
   );
 };
