@@ -1,6 +1,5 @@
 
 import React from 'react';
-import Layout from '@/components/layout/Layout';
 import { PageHeader } from '@/components/ui-custom/PageHeader';
 import { RomanCard } from '@/components/ui-custom/RomanCard';
 import { JudiciaryStats } from '@/components/republique/justice/JudiciaryStats';
@@ -15,12 +14,6 @@ interface ProcesData {
   type: string;
   statut: string;
   date: string;
-}
-
-// Interface pour les props de ProcesTable
-interface ProcesTableProps {
-  proces: ProcesData[];
-  status: string;
 }
 
 export const JusticePage: React.FC = () => {
@@ -77,7 +70,7 @@ export const JusticePage: React.FC = () => {
   ];
 
   return (
-    <Layout>
+    <div>
       <PageHeader 
         title="Justice" 
         subtitle="Administration des lois et des tribunaux de Rome" 
@@ -93,7 +86,7 @@ export const JusticePage: React.FC = () => {
             <h2 className="font-cinzel text-lg">Procès en Cours</h2>
           </RomanCard.Header>
           <RomanCard.Content>
-            <ProcesTable proces={procesCourants} status="current" />
+            <ProcesTable proces={procesCourants} status="en-cours" />
           </RomanCard.Content>
         </RomanCard>
         
@@ -102,10 +95,10 @@ export const JusticePage: React.FC = () => {
             <h2 className="font-cinzel text-lg">Procès Passés</h2>
           </RomanCard.Header>
           <RomanCard.Content>
-            <ProcesTable proces={procesPassés} status="past" />
+            <ProcesTable proces={procesPassés} status="juge" />
           </RomanCard.Content>
         </RomanCard>
       </div>
-    </Layout>
+    </div>
   );
 };

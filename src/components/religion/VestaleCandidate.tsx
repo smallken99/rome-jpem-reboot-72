@@ -24,12 +24,12 @@ export const VestaleCandidate: React.FC<VestaleCandidateProps> = ({ candidate, o
 
   // Qualités pertinentes pour une vestale
   const qualities = [
-    { name: 'Piété', value: candidate.stats.piety },
-    { name: 'Éloquence', value: candidate.stats.oratory },
+    { name: 'Piété', value: candidate.stats.piety || 0 },
+    { name: 'Éloquence', value: candidate.stats.oratory || 0 },
   ];
 
   // Calculer si la candidate est particulièrement prometteuse (piété élevée)
-  const isPromising = candidate.stats.piety > 70;
+  const isPromising = (candidate.stats.piety || 0) > 70;
 
   return (
     <div className="border border-rome-gold/30 rounded-md p-4 bg-white hover:border-rome-gold/60 transition-all">
@@ -85,7 +85,7 @@ export const VestaleCandidate: React.FC<VestaleCandidateProps> = ({ candidate, o
                 <p className="text-sm text-muted-foreground">
                   Âge: {candidate.age} ans<br />
                   Éducation: {candidate.education?.type || 'Non débutée'}<br />
-                  Personnalité: {candidate.personality || 'Douce et pieuse'}
+                  Personnalité: {candidate.traits?.join(', ') || 'Douce et pieuse'}
                 </p>
               </div>
               

@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { FunctionCard } from '@/components/republique/ui/FunctionCard';
-import { Coins, Map, Receipt, LineChart } from 'lucide-react';
+import { Coins, Map, Receipt, LineChart, LandPlot } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
 export const QuesteurFunctions: React.FC = () => {
@@ -34,6 +34,16 @@ export const QuesteurFunctions: React.FC = () => {
           icon={<Map className="h-8 w-8" />}
           color="bg-amber-100"
           iconColor="text-amber-600"
+        />
+      </Link>
+      
+      <Link to="/republique/ager">
+        <FunctionCard
+          title="Ager Publicus"
+          description="Gérez l'attribution des terres agricoles aux citoyens et vétérans romains."
+          icon={<LandPlot className="h-8 w-8" />}
+          color="bg-lime-100"
+          iconColor="text-lime-600"
         />
       </Link>
       
