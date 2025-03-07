@@ -23,6 +23,8 @@ export const FamilleRoutes: React.FC = () => {
       <Route path="/education/child/:childId" element={<ChildEducationDetailPage />} />
       <Route path="/education/preceptors" element={<EducationPage />} />
       <Route path="/education/preceptors/:preceptorId" element={<PreceptorDetailPage />} />
+      <Route path="/education/current" element={<EducationPage />} />
+      <Route path="/education/paths" element={<EducationPage />} />
       <Route path="/heritage" element={<Heritage />} />
       <Route path="/heritage/heir/:heirId" element={<InheritanceDetailsPage />} />
       <Route path="/heritage/dowry/:femaleId" element={<DowryManagementPage />} />

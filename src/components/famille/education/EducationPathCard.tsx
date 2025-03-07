@@ -1,12 +1,16 @@
+
 import React from 'react';
 import { Sword, Building, ScrollText, ShieldQuestion } from 'lucide-react';
 import { EducationPath } from './types/educationTypes';
+import { useNavigate } from 'react-router-dom';
 
 interface EducationPathCardProps {
   path: EducationPath;
 }
 
 export const EducationPathCard: React.FC<EducationPathCardProps> = ({ path }) => {
+  const navigate = useNavigate();
+  
   const getSuitabilityText = (suitableFor: string) => {
     switch(suitableFor) {
       case 'both':
@@ -35,6 +39,10 @@ export const EducationPathCard: React.FC<EducationPathCardProps> = ({ path }) =>
       default:
         return 'Améliore une caractéristique';
     }
+  };
+  
+  const handleViewPreceptorsClick = () => {
+    navigate(`/famille/education/preceptors?type=${path.type}`);
   };
 
   return (
@@ -70,7 +78,10 @@ export const EducationPathCard: React.FC<EducationPathCardProps> = ({ path }) =>
       </div>
       
       <div className="mt-4 flex justify-end">
-        <button className="roman-btn-outline text-xs">
+        <button 
+          className="roman-btn-outline text-xs"
+          onClick={handleViewPreceptorsClick}
+        >
           Voir les précepteurs disponibles
         </button>
       </div>

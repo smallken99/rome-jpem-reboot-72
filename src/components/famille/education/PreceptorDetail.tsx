@@ -13,7 +13,7 @@ import { PreceptorLoading } from './components/PreceptorLoading';
 import { PreceptorNotFound } from './components/PreceptorNotFound';
 
 export const PreceptorDetail: React.FC = () => {
-  const { preceptor, loading, handleHire } = usePreceptorDetail();
+  const { preceptor, loading, isHiring, handleHire } = usePreceptorDetail();
   
   // Afficher un message de chargement pendant la recherche
   if (loading) {
@@ -57,8 +57,9 @@ export const PreceptorDetail: React.FC = () => {
           
           <PreceptorActions 
             cost={preceptor.cost} 
-            available={preceptor.available} 
-            onHire={handleHire} 
+            available={preceptor.available && !isHiring} 
+            onHire={handleHire}
+            isHiring={isHiring}
           />
         </CardContent>
       </Card>

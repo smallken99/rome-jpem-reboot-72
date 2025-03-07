@@ -1,7 +1,7 @@
 
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
-import { toast } from 'sonner';
+import { useToast } from '@/hooks/use-toast';
 
 // Les données simulées pour le précepteur
 const preceptorTypes = ['rhetoric', 'philosophy', 'military', 'religion', 'arts'];
@@ -22,10 +22,12 @@ export const usePreceptorDetail = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const childId = searchParams.get('childId');
+  const { toast } = useToast();
   
   // État pour stocker les données du précepteur
   const [preceptor, setPreceptor] = useState<Preceptor | null>(null);
   const [loading, setLoading] = useState(true);
+  const [isHiring, setIsHiring] = useState(false);
   
   // Simuler le chargement des données du précepteur
   useEffect(() => {
@@ -57,21 +59,34 @@ export const usePreceptorDetail = () => {
   const handleHire = () => {
     if (!preceptor) return;
     
-    // Afficher un message de succès
-    toast.success(`${preceptor.name} a été embauché comme précepteur`);
+    setIsHiring(true);
     
-    // Rediriger vers la page appropriée
-    if (childId) {
-      navigate(`/famille/education/child/${childId}`);
-    } else {
-      navigate('/famille/education/preceptors');
-    }
+    // Simuler le temps de traitement
+    setTimeout(() => {
+      // Afficher un message de succès
+      toast({
+        title: "Précepteur embauché",
+        description: `${preceptor.name} a été embauché comme précepteur pour ${childId ? 'votre enfant' : 'votre famille'}.`,
+      });
+      
+      setIsHiring(false);
+      
+      // Rediriger vers la page appropriée
+      setTimeout(() => {
+        if (childId) {
+          navigate(`/famille/education/child/${childId}`);
+        } else {
+          navigate('/famille/education/preceptors');
+        }
+      }, 500);
+    }, 1000);
   };
 
   return {
     preceptor,
     loading,
     childId,
+    isHiring,
     handleHire
   };
 };

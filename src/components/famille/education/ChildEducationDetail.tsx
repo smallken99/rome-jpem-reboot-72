@@ -1,6 +1,6 @@
 
-import React from 'react';
-import { useParams } from 'react-router-dom';
+import React, { useState } from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
 import { Card, CardContent } from '@/components/ui/card';
 import { ChildHeader } from './components/ChildHeader';
 import { EducationTypeSelector } from './components/EducationTypeSelector';
@@ -11,9 +11,13 @@ import { EducationFormActions } from './components/EducationFormActions';
 import { ChildNotFound } from './components/ChildNotFound';
 import { PageHeading } from './components/PageHeading';
 import { useChildEducation } from './hooks/useChildEducation';
+import { useToast } from '@/hooks/use-toast';
 
 export const ChildEducationDetail = () => {
   const { childId } = useParams<{ childId: string }>();
+  const navigate = useNavigate();
+  const { toast } = useToast();
+  
   const { 
     child, 
     availablePaths, 
@@ -22,6 +26,30 @@ export const ChildEducationDetail = () => {
     handleSubmit,
     isInvalidEducation
   } = useChildEducation(childId);
+  
+  const onSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (isInvalidEducation) {
+      toast({
+        title: "Éducation invalide",
+        description: "L'éducation militaire n'est pas recommandée pour une fille romaine.",
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    // Simulate saving education data
+    toast({
+      title: "Éducation modifiée",
+      description: `L'éducation de ${child?.name} a été mise à jour avec succès.`,
+    });
+    
+    // Redirect back to education page
+    setTimeout(() => {
+      navigate('/famille/education');
+    }, 1500);
+  };
   
   // Si l'enfant n'est pas trouvé, afficher un message
   if (!child) {
@@ -42,7 +70,7 @@ export const ChildEducationDetail = () => {
         
         <CardContent className="p-4">
           {/* Formulaire de modification de l'éducation */}
-          <form onSubmit={handleSubmit}>
+          <form onSubmit={onSubmit}>
             <div className="space-y-6">
               {/* Sélection du type d'éducation */}
               <EducationTypeSelector
@@ -70,7 +98,11 @@ export const ChildEducationDetail = () => {
               />
               
               {/* Boutons d'action */}
-              <EducationFormActions />
+              <EducationFormActions 
+                onSubmit={onSubmit}
+                isLoading={false}
+                childId={childId}
+              />
             </div>
           </form>
         </CardContent>

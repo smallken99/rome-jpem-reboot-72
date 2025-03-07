@@ -6,6 +6,7 @@ import { educationPaths } from './data';
 import { PreceptorsByType } from './types/educationTypes';
 import { Badge } from '@/components/ui/badge';
 import { getRelatedStatName } from './utils/educationUtils';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 
 interface PreceptorListProps {
   preceptors: PreceptorsByType;
@@ -13,6 +14,18 @@ interface PreceptorListProps {
 }
 
 export const PreceptorList: React.FC<PreceptorListProps> = ({ preceptors, refreshPreceptors }) => {
+  const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const childId = searchParams.get('childId');
+  
+  const handleEngageClick = (teacherId: string) => {
+    if (childId) {
+      navigate(`/famille/education/preceptors/${teacherId}?childId=${childId}`);
+    } else {
+      navigate(`/famille/education/preceptors/${teacherId}`);
+    }
+  };
+  
   return (
     <>
       <div className="flex justify-end mb-4">
@@ -76,7 +89,12 @@ export const PreceptorList: React.FC<PreceptorListProps> = ({ preceptors, refres
                     
                     <div className="flex justify-between items-center mt-3">
                       <span className="text-sm font-medium">{teacher.fee} denarii/an</span>
-                      <button className="roman-btn-outline text-xs">Engager</button>
+                      <button 
+                        className="roman-btn-outline text-xs"
+                        onClick={() => handleEngageClick(teacher.id)}
+                      >
+                        Engager
+                      </button>
                     </div>
                   </div>
                 ))}

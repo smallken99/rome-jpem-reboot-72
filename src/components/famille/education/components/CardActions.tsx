@@ -19,6 +19,10 @@ export const CardActions: React.FC<CardActionsProps> = ({
   const hasEducation = educationType !== 'none';
   const navigate = useNavigate();
   
+  const handleChangePreceptor = () => {
+    navigate(`/famille/education/preceptors?childId=${childId}&type=${educationType}`);
+  };
+  
   return (
     <div className="mt-4 flex justify-end gap-2">
       {hasEducation && (
@@ -26,7 +30,7 @@ export const CardActions: React.FC<CardActionsProps> = ({
           variant="outline"
           label="Changer de précepteur"
           className="text-xs bg-rome-navy/5 hover:bg-rome-navy/10"
-          to={`/famille/education/preceptors?childId=${childId}`}
+          onClick={handleChangePreceptor}
         />
       )}
       <ActionButton 
