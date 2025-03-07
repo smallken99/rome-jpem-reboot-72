@@ -1,4 +1,9 @@
 
+import { urbanResidentialBuildings } from './urbanResidentialBuildings';
+import { religiousBuildings } from './religiousBuildings';
+import { publicBuildings } from './publicBuildings';
+import { ruralProperties } from './ruralProperties';
+
 export { urbanResidentialBuildings } from './urbanResidentialBuildings';
 export { religiousBuildings } from './religiousBuildings';
 export { publicBuildings } from './publicBuildings';

@@ -13,7 +13,7 @@ export const urbanResidentialBuildings: Record<string, BuildingDescription> = {
     ],
     initialCost: 25000,
     maintenanceCost: 1200,
-    prestige: 0,
+    prestige: 5,
     popularite: 15
   },
   domus: {
@@ -27,7 +27,7 @@ export const urbanResidentialBuildings: Record<string, BuildingDescription> = {
     initialCost: 50000,
     maintenanceCost: 2500,
     prestige: 20,
-    popularite: 5
+    popularite: 10
   },
   villa_urbana: {
     name: "Villa Urbana",
@@ -40,6 +40,6 @@ export const urbanResidentialBuildings: Record<string, BuildingDescription> = {
     initialCost: 100000,
     maintenanceCost: 5000,
     prestige: 35,
-    popularite: 10
+    popularite: 15
   }
 };

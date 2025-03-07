@@ -49,7 +49,7 @@ export const ruralProperties: Record<string, BuildingDescription> = {
     ],
     initialCost: 85000,
     maintenanceCost: 4500,
-    prestige: 8,
+    prestige: 0,
     income: 10000
   },
   paturage_equides: {
@@ -62,7 +62,7 @@ export const ruralProperties: Record<string, BuildingDescription> = {
     ],
     initialCost: 100000,
     maintenanceCost: 8000,
-    prestige: 15,
+    prestige: 0,
     income: 15000
   },
   paturage_bovins: {
@@ -75,7 +75,7 @@ export const ruralProperties: Record<string, BuildingDescription> = {
     ],
     initialCost: 80000,
     maintenanceCost: 6000,
-    prestige: 6,
+    prestige: 0,
     income: 9000
   },
   paturage_moutons: {
@@ -88,7 +88,7 @@ export const ruralProperties: Record<string, BuildingDescription> = {
     ],
     initialCost: 70000,
     maintenanceCost: 4000,
-    prestige: 5,
+    prestige: 0,
     income: 8500
   }
 };

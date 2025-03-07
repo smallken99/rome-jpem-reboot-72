@@ -65,12 +65,14 @@ export const useUrbanPropertyCalculator = (
           break;
       }
       
-      setBuildingDetails({
+      // Les bâtiments urbains ne génèrent pas de revenus
+      const adjustedBuilding = {
         ...building,
         initialCost: Math.round(building.initialCost * costMultiplier * locationMultiplier),
-        maintenanceCost: Math.round(building.maintenanceCost * costMultiplier),
-        income: building.income ? Math.round(building.income * costMultiplier * locationMultiplier) : 0
-      });
+        maintenanceCost: Math.round(building.maintenanceCost * costMultiplier)
+      };
+      
+      setBuildingDetails(adjustedBuilding);
     } else {
       setBuildingDetails(null);
     }

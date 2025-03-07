@@ -32,7 +32,9 @@ export const useRuralPropertyCalculator = (
         production: property.production ? {
           ...property.production,
           amount: Math.round(property.production.amount * costMultiplier)
-        } : undefined
+        } : undefined,
+        // Les propriétés rurales n'apportent pas de prestige
+        prestige: 0
       };
       
       setPropertyDetails(adjustedProperty);
