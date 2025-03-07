@@ -11,11 +11,15 @@ export interface PropertyProfitData {
 
 export interface OptimizationRecommendation {
   id: number;
-  propertyId: number;
-  propertyName: string;
-  action: string;
-  potentialSavings: number;
+  propertyId?: number;
+  propertyName?: string;
+  action?: string;
+  potentialSavings?: number;
   description: string;
+  title: string;
+  impact: 'low' | 'medium' | 'high';
+  estimatedRevenue?: number;
+  estimatedSavings?: number;
 }
 
 export interface RevenueExpenseChartData {
@@ -28,6 +32,7 @@ export interface RevenueExpenseChartData {
 export interface RevenueSourceData {
   name: string;
   value: number;
+  color?: string;
 }
 
 export type ChartViewType = "yearly" | "monthly";
@@ -47,4 +52,10 @@ export interface ProfitablePropertiesTableProps {
 // For OptimizationRecommendations
 export interface OptimizationRecommendationsProps {
   recommendations: OptimizationRecommendation[];
+}
+
+// For ProfitabilityHeader
+export interface ProfitabilityHeaderProps {
+  activeView: ChartViewType;
+  setActiveView: (view: ChartViewType) => void;
 }

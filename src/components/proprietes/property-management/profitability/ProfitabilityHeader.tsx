@@ -1,11 +1,7 @@
 
 import React from 'react';
 import { Button } from '@/components/ui/button';
-
-interface ProfitabilityHeaderProps {
-  activeView: 'yearly' | 'monthly';
-  setActiveView: (view: 'yearly' | 'monthly') => void;
-}
+import { ProfitabilityHeaderProps } from '../types/profitabilityTypes';
 
 export const ProfitabilityHeader: React.FC<ProfitabilityHeaderProps> = ({
   activeView,

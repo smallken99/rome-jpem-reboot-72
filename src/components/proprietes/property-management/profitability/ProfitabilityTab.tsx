@@ -20,7 +20,10 @@ export const ProfitabilityTab: React.FC = () => {
   
   return (
     <div className="space-y-6">
-      <ProfitabilityHeader />
+      <ProfitabilityHeader 
+        activeView={activeView}
+        setActiveView={setActiveView}
+      />
       
       <div className="flex justify-end mb-4">
         <Tabs defaultValue="yearly" value={activeView} onValueChange={(value) => setActiveView(value as ChartViewType)}>
