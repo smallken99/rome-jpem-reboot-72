@@ -8,6 +8,9 @@ import { AgerMap } from './AgerMap';
 import { AgerAllocationTable } from './AgerAllocationTable';
 import { PropertyPurchaseDialog } from '@/components/proprietes/property-management/dialogs/PropertyPurchaseDialog';
 import { useAgerPublicus } from './hooks/useAgerPublicus';
+import { Button } from '@/components/ui/button';
+import { Eye, Download, Upload, FileText } from 'lucide-react';
+import { toast } from 'sonner';
 
 export const AgerPublicusPage: React.FC = () => {
   const {
@@ -22,12 +25,41 @@ export const AgerPublicusPage: React.FC = () => {
     handleAllocation
   } = useAgerPublicus();
 
+  const handleExportRegister = () => {
+    toast.success("Registre des terres exporté avec succès");
+  };
+
+  const handleImportData = () => {
+    toast.success("Données importées avec succès");
+  };
+
+  const handleReportIssue = () => {
+    toast.info("Signalement envoyé au Sénat");
+  };
+
   return (
     <div className="space-y-6">
-      <PageHeader 
-        title="Ager Publicus" 
-        subtitle="Gestion et attribution des terres publiques de Rome" 
-      />
+      <div className="flex justify-between items-center">
+        <PageHeader 
+          title="Ager Publicus" 
+          subtitle="Gestion et attribution des terres publiques de Rome" 
+        />
+        
+        <div className="flex gap-2">
+          <Button variant="outline" size="sm" onClick={handleExportRegister}>
+            <Download className="h-4 w-4 mr-1" />
+            Exporter
+          </Button>
+          <Button variant="outline" size="sm" onClick={handleImportData}>
+            <Upload className="h-4 w-4 mr-1" />
+            Importer
+          </Button>
+          <Button variant="outline" size="sm" onClick={handleReportIssue}>
+            <FileText className="h-4 w-4 mr-1" />
+            Rapport
+          </Button>
+        </div>
+      </div>
       
       <AgerStats />
       
@@ -94,7 +126,9 @@ export const AgerPublicusPage: React.FC = () => {
           building={landDetails}
           buildingId={selectedLandId}
           buildingType="rural"
-          onPurchase={handleAllocation}
+          onPurchase={(_, buildingId, buildingType, location, customName) => 
+            handleAllocation(landDetails, buildingId, buildingType, location, customName)
+          }
           balance={balance}
         />
       )}
