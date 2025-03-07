@@ -5,8 +5,9 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Checkbox } from '@/components/ui/checkbox';
 import { UserPlus, Eye, EyeOff } from 'lucide-react';
-import { useToast } from '@/components/ui/use-toast';
+import { useToast } from '@/hooks/use-toast';
 import { Link } from 'react-router-dom';
+import AlertMessage from '@/components/ui-custom/AlertMessage';
 
 const RegisterForm = () => {
   const [name, setName] = useState('');
@@ -17,29 +18,21 @@ const RegisterForm = () => {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [acceptTerms, setAcceptTerms] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [validationError, setValidationError] = useState<string | null>(null);
   const { toast } = useToast();
   const navigate = useNavigate();
 
   const handleRegister = (e: React.FormEvent) => {
     e.preventDefault();
+    setValidationError(null);
     
     if (password !== confirmPassword) {
-      toast({
-        title: "Erreur",
-        description: "Les mots de passe ne correspondent pas",
-        variant: "destructive",
-        duration: 3000,
-      });
+      setValidationError("Les mots de passe ne correspondent pas");
       return;
     }
     
     if (!acceptTerms) {
-      toast({
-        title: "Erreur",
-        description: "Vous devez accepter les conditions d'utilisation",
-        variant: "destructive",
-        duration: 3000,
-      });
+      setValidationError("Vous devez accepter les conditions d'utilisation");
       return;
     }
     
@@ -60,6 +53,15 @@ const RegisterForm = () => {
 
   return (
     <form onSubmit={handleRegister} className="space-y-4">
+      {validationError && (
+        <AlertMessage 
+          type="error" 
+          title="Erreur de validation" 
+          message={validationError} 
+          onClose={() => setValidationError(null)}
+        />
+      )}
+      
       <div className="space-y-2">
         <label htmlFor="name" className="block text-sm font-medium text-rome-navy">
           Nom d'utilisateur
