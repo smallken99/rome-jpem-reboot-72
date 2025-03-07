@@ -1,5 +1,6 @@
 
-import React from 'react';
+import React, { useEffect } from 'react';
+import { useLocation } from 'react-router-dom';
 import { EducationTabs } from './education/EducationTabs';
 import { EducationHeader } from './education/components/EducationHeader';
 import { EducationInfoBox } from './education/components/EducationInfoBox';
@@ -17,6 +18,7 @@ export const Education: React.FC<EducationProps> = ({
   onNameChange,
   onEducationChange 
 }) => {
+  const location = useLocation();
   const {
     activeTab,
     setActiveTab,
@@ -24,6 +26,13 @@ export const Education: React.FC<EducationProps> = ({
     generatePreceptors,
     children
   } = useEducationSystem(characters);
+
+  // Handle tab changes from route state
+  useEffect(() => {
+    if (location.state && location.state.tab) {
+      setActiveTab(location.state.tab);
+    }
+  }, [location.state, setActiveTab]);
 
   return (
     <div className="education">

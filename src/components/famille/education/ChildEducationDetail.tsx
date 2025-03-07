@@ -17,6 +17,7 @@ export const ChildEducationDetail = () => {
   const { childId } = useParams<{ childId: string }>();
   const navigate = useNavigate();
   const { toast } = useToast();
+  const [isSubmitting, setIsSubmitting] = useState(false);
   
   const { 
     child, 
@@ -27,9 +28,7 @@ export const ChildEducationDetail = () => {
     isInvalidEducation
   } = useChildEducation(childId);
   
-  const onSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    
+  const onSubmit = () => {
     if (isInvalidEducation) {
       toast({
         title: "Éducation invalide",
@@ -39,16 +38,24 @@ export const ChildEducationDetail = () => {
       return;
     }
     
-    // Simulate saving education data
-    toast({
-      title: "Éducation modifiée",
-      description: `L'éducation de ${child?.name} a été mise à jour avec succès.`,
-    });
+    setIsSubmitting(true);
     
-    // Redirect back to education page
+    // Simulate saving education data
     setTimeout(() => {
+      toast({
+        title: "Éducation modifiée",
+        description: `L'éducation de ${child?.name} a été mise à jour avec succès.`,
+      });
+      
+      // Redirect back to education page
+      setIsSubmitting(false);
       navigate('/famille/education');
     }, 1500);
+  };
+  
+  const handleFormSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    onSubmit();
   };
   
   // Si l'enfant n'est pas trouvé, afficher un message
@@ -70,7 +77,7 @@ export const ChildEducationDetail = () => {
         
         <CardContent className="p-4">
           {/* Formulaire de modification de l'éducation */}
-          <form onSubmit={onSubmit}>
+          <form onSubmit={handleFormSubmit}>
             <div className="space-y-6">
               {/* Sélection du type d'éducation */}
               <EducationTypeSelector
@@ -100,7 +107,7 @@ export const ChildEducationDetail = () => {
               {/* Boutons d'action */}
               <EducationFormActions 
                 onSubmit={onSubmit}
-                isLoading={false}
+                isLoading={isSubmitting}
                 childId={childId}
               />
             </div>

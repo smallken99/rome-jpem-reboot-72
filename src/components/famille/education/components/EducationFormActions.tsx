@@ -19,6 +19,12 @@ export const EducationFormActions: React.FC<EducationFormActionsProps> = ({
     ? `/famille/education/child/${childId}` 
     : "/famille/education";
 
+  const handleSubmit = (e: React.MouseEvent) => {
+    if (onSubmit) {
+      onSubmit();
+    }
+  };
+
   return (
     <div className="flex justify-end gap-2 pt-4">
       <ActionButton 
@@ -33,7 +39,7 @@ export const EducationFormActions: React.FC<EducationFormActionsProps> = ({
         variant="default"
         icon={isLoading ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <SaveIcon className="h-4 w-4" />}
         disabled={isLoading}
-        onClick={onSubmit}
+        onClick={handleSubmit}
       />
     </div>
   );

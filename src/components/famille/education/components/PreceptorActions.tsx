@@ -2,6 +2,7 @@
 import React from 'react';
 import { ActionButton } from '@/components/ui-custom/ActionButton';
 import { Loader2 } from 'lucide-react';
+import { useSearchParams } from 'react-router-dom';
 
 interface PreceptorActionsProps {
   cost: number;
@@ -16,12 +17,20 @@ export const PreceptorActions: React.FC<PreceptorActionsProps> = ({
   onHire,
   isHiring = false
 }) => {
+  const [searchParams] = useSearchParams();
+  const childId = searchParams.get('childId');
+  
+  // Determine the back URL based on if we have a child ID
+  const backUrl = childId 
+    ? `/famille/education/child/${childId}` 
+    : "/famille/education/preceptors";
+
   return (
     <div className="flex justify-end gap-2 pt-4">
       <ActionButton 
         variant="outline"
         label="Retour"
-        to="/famille/education/preceptors"
+        to={backUrl}
         disabled={isHiring}
       />
       <ActionButton 
