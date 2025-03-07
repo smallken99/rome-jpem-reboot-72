@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -162,6 +161,11 @@ const Login = () => {
             <p>Pour tester la connexion:</p>
             <p className="mt-1"><strong>Admin:</strong> admin@rome.com / admin123</p>
             <p><strong>Utilisateur:</strong> user@rome.com / user123</p>
+            <p className="mt-4 text-rome-terracotta">
+              <Link to="/create-gens" className="hover:underline">
+                Accéder directement à la création de Gens (démo)
+              </Link>
+            </p>
           </div>
         </div>
       </div>

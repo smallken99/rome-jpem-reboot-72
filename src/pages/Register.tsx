@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -53,7 +52,8 @@ const Register = () => {
         description: "Bienvenue dans la République Romaine",
         duration: 3000,
       });
-      navigate('/');
+      // Rediriger vers la création de la Gens
+      navigate('/create-gens');
     }, 1500);
   };
 
@@ -77,14 +77,14 @@ const Register = () => {
             <form onSubmit={handleRegister} className="space-y-4">
               <div className="space-y-2">
                 <label htmlFor="name" className="block text-sm font-medium text-rome-navy">
-                  Nom de famille romaine
+                  Nom d'utilisateur
                 </label>
                 <Input
                   id="name"
                   type="text"
                   value={name}
                   onChange={(e) => setName(e.target.value)}
-                  placeholder="Cornelius, Junius, Fabius..."
+                  placeholder="Votre nom d'utilisateur"
                   required
                   className="w-full"
                 />

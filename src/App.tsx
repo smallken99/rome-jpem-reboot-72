@@ -16,6 +16,7 @@ import NotFound from "./pages/NotFound";
 import Welcome from "./pages/Welcome";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
+import CreateGens from "./pages/CreateGens";
 import Admin from "./pages/Admin";
 
 const queryClient = new QueryClient();
@@ -31,6 +32,7 @@ const App = () => (
           <Route path="/welcome" element={<Welcome />} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
+          <Route path="/create-gens" element={<CreateGens />} />
           
           {/* Pages protégées - normalement nous ajouterions un AuthGuard */}
           <Route path="/" element={<Index />} />
