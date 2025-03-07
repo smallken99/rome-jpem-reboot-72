@@ -1,7 +1,9 @@
 
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { useToast } from '@/hooks/use-toast';
+import { useFormFields } from './useFormFields';
+import { usePasswordVisibility } from './usePasswordVisibility';
+import { useFormSubmission } from './useFormSubmission';
+import { validateRegisterForm } from '@/utils/validationUtils';
 
 export interface RegisterFormData {
   name: string;
@@ -12,80 +14,52 @@ export interface RegisterFormData {
 }
 
 export const useRegisterForm = () => {
-  const [formData, setFormData] = useState<RegisterFormData>({
+  const { fields: formData, updateField: updateFormField } = useFormFields<RegisterFormData>({
     name: '',
     email: '',
     password: '',
     confirmPassword: '',
     acceptTerms: false
   });
-  const [showPassword, setShowPassword] = useState(false);
-  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
+  
+  const passwordVisibility = usePasswordVisibility(false);
+  const confirmPasswordVisibility = usePasswordVisibility(false);
+  
   const [validationError, setValidationError] = useState<string | null>(null);
-  const { toast } = useToast();
-  const navigate = useNavigate();
-
-  const updateFormField = <K extends keyof RegisterFormData>(
-    field: K,
-    value: RegisterFormData[K]
-  ) => {
-    setFormData(prev => ({
-      ...prev,
-      [field]: value
-    }));
-  };
-
-  const togglePasswordVisibility = (field: 'password' | 'confirmPassword') => {
-    if (field === 'password') {
-      setShowPassword(prev => !prev);
-    } else {
-      setShowConfirmPassword(prev => !prev);
-    }
-  };
-
+  
   const validateForm = (): boolean => {
     setValidationError(null);
     
-    if (formData.password !== formData.confirmPassword) {
-      setValidationError("Les mots de passe ne correspondent pas");
-      return false;
-    }
+    const validation = validateRegisterForm(
+      formData.name,
+      formData.email,
+      formData.password,
+      formData.confirmPassword,
+      formData.acceptTerms
+    );
     
-    if (!formData.acceptTerms) {
-      setValidationError("Vous devez accepter les conditions d'utilisation");
+    if (!validation.isValid) {
+      setValidationError(validation.error);
       return false;
     }
     
     return true;
   };
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    
-    if (!validateForm()) {
-      return;
+  
+  const { isLoading, handleSubmit } = useFormSubmission(validateForm, '/create-gens');
+  
+  const togglePasswordVisibility = (field: 'password' | 'confirmPassword') => {
+    if (field === 'password') {
+      passwordVisibility.toggle();
+    } else {
+      confirmPasswordVisibility.toggle();
     }
-    
-    setIsLoading(true);
-    
-    // Simulation d'inscription (à remplacer par une vraie API)
-    setTimeout(() => {
-      setIsLoading(false);
-      toast({
-        title: "Inscription réussie",
-        description: "Bienvenue dans la République Romaine",
-        duration: 3000,
-      });
-      // Rediriger vers la création de la Gens
-      navigate('/create-gens');
-    }, 1500);
   };
-
+  
   return {
     formData,
-    showPassword,
-    showConfirmPassword,
+    showPassword: passwordVisibility.isVisible,
+    showConfirmPassword: confirmPasswordVisibility.isVisible,
     isLoading,
     validationError,
     updateFormField,
