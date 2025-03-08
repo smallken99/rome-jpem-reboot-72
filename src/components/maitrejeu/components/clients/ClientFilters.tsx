@@ -1,21 +1,15 @@
 
 import React from 'react';
-import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { 
-  DropdownMenu, 
-  DropdownMenuContent, 
-  DropdownMenuTrigger, 
-  DropdownMenuRadioGroup, 
-  DropdownMenuRadioItem, 
-  DropdownMenuSeparator 
-} from '@/components/ui/dropdown-menu';
-import { Search, UserPlus, Star, Filter, SortAsc, SortDesc } from 'lucide-react';
+import { Input } from '@/components/ui/input';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Plus, Search, SlidersHorizontal, FileSpreadsheet, ArrowUpDown } from 'lucide-react';
 import { ClientFilter, ClientSort } from '../../types/clients';
+import { ClientType } from '@/components/clientele/ClientCard';
 
 interface ClientFiltersProps {
   searchTerm: string;
-  setSearchTerm: (searchTerm: string) => void;
+  setSearchTerm: (term: string) => void;
   currentClientFilter: ClientFilter;
   setCurrentClientFilter: (filter: ClientFilter) => void;
   currentSort: ClientSort;
@@ -34,109 +28,123 @@ export const ClientFilters: React.FC<ClientFiltersProps> = ({
   onAddClient,
   onAddAdvancedClient
 }) => {
+  // Available client types
+  const clientTypes: ClientType[] = ['plebeien', 'noble', 'marchand', 'etranger', 'militaire'];
+  
+  // Function to handle type filter change
+  const handleTypeFilterChange = (value: string) => {
+    if (value === 'all') {
+      const { type, ...rest } = currentClientFilter;
+      setCurrentClientFilter(rest);
+    } else {
+      setCurrentClientFilter({
+        ...currentClientFilter,
+        type: value as ClientType
+      });
+    }
+  };
+  
+  // Function to handle assigned filter change
+  const handleAssignedFilterChange = (value: string) => {
+    setCurrentClientFilter({
+      ...currentClientFilter,
+      assignedOnly: value === 'assigned'
+    });
+  };
+  
+  // Function to handle sort change
+  const handleSortChange = (value: string) => {
+    const [field, direction] = value.split('-');
+    setCurrentSort({
+      field: field as keyof import('../../types/clients').Client,
+      direction: direction as 'asc' | 'desc'
+    });
+  };
+  
   return (
-    <div className="flex flex-col sm:flex-row justify-between gap-2 mb-4">
-      <div className="relative flex-1 max-w-md">
-        <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
-        <Input
-          placeholder="Rechercher un client..."
-          className="pl-8"
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-        />
+    <div className="flex flex-col gap-4">
+      <div className="flex flex-col sm:flex-row gap-2 items-start sm:items-center">
+        <div className="relative flex-1">
+          <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+          <Input
+            type="search"
+            placeholder="Rechercher un client..."
+            className="pl-8"
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+          />
+        </div>
+        
+        <div className="flex gap-2">
+          <Button onClick={onAddClient} className="whitespace-nowrap">
+            <Plus className="w-4 h-4 mr-2" />
+            Ajouter
+          </Button>
+          
+          <Button onClick={onAddAdvancedClient} variant="outline" className="whitespace-nowrap">
+            <FileSpreadsheet className="w-4 h-4 mr-2" />
+            Avancé
+          </Button>
+        </div>
       </div>
       
-      <div className="flex flex-wrap gap-2">
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="outline" size="sm" className="h-10">
-              <Filter className="h-4 w-4 mr-2" />
-              Filtres
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="w-[200px]">
-            <DropdownMenuRadioGroup value={currentClientFilter.type || "all"} onValueChange={(value) => {
-              setCurrentClientFilter({...currentClientFilter, type: value === "all" ? undefined : value});
-            }}>
-              <DropdownMenuRadioItem value="all">Tous les types</DropdownMenuRadioItem>
-              <DropdownMenuRadioItem value="artisan_commercant">Artisans & Commerçants</DropdownMenuRadioItem>
-              <DropdownMenuRadioItem value="politicien">Politiciens</DropdownMenuRadioItem>
-              <DropdownMenuRadioItem value="religieux">Religieux</DropdownMenuRadioItem>
-              <DropdownMenuRadioItem value="proprietaire">Propriétaires</DropdownMenuRadioItem>
-              <DropdownMenuRadioItem value="pegre">Pègre</DropdownMenuRadioItem>
-            </DropdownMenuRadioGroup>
-            
-            <DropdownMenuSeparator />
-            
-            <DropdownMenuRadioGroup value={currentClientFilter.location || "all"} onValueChange={(value) => {
-              setCurrentClientFilter({...currentClientFilter, location: value === "all" ? undefined : value});
-            }}>
-              <DropdownMenuRadioItem value="all">Tous les quartiers</DropdownMenuRadioItem>
-              <DropdownMenuRadioItem value="Forum">Forum</DropdownMenuRadioItem>
-              <DropdownMenuRadioItem value="Subure">Subure</DropdownMenuRadioItem>
-              <DropdownMenuRadioItem value="Palatin">Palatin</DropdownMenuRadioItem>
-              <DropdownMenuRadioItem value="Aventin">Aventin</DropdownMenuRadioItem>
-            </DropdownMenuRadioGroup>
-            
-            <DropdownMenuSeparator />
-            
-            <DropdownMenuRadioGroup value={currentClientFilter.loyalty || "all"} onValueChange={(value) => {
-              setCurrentClientFilter({...currentClientFilter, loyalty: value === "all" ? undefined : value});
-            }}>
-              <DropdownMenuRadioItem value="all">Toutes loyautés</DropdownMenuRadioItem>
-              <DropdownMenuRadioItem value="faible">Loyauté faible</DropdownMenuRadioItem>
-              <DropdownMenuRadioItem value="moyenne">Loyauté moyenne</DropdownMenuRadioItem>
-              <DropdownMenuRadioItem value="forte">Loyauté forte</DropdownMenuRadioItem>
-            </DropdownMenuRadioGroup>
-            
-            <DropdownMenuSeparator />
-            
-            <DropdownMenuRadioGroup value={currentClientFilter.assignedOnly ? "assigned" : "all"} onValueChange={(value) => {
-              setCurrentClientFilter({...currentClientFilter, assignedOnly: value === "assigned"});
-            }}>
-              <DropdownMenuRadioItem value="all">Tous les clients</DropdownMenuRadioItem>
-              <DropdownMenuRadioItem value="assigned">Clients assignés seulement</DropdownMenuRadioItem>
-            </DropdownMenuRadioGroup>
-          </DropdownMenuContent>
-        </DropdownMenu>
+      <div className="flex flex-wrap gap-2 bg-muted/50 p-2 rounded-md">
+        <div className="flex items-center gap-1.5">
+          <SlidersHorizontal className="h-4 w-4 text-muted-foreground" />
+          <span className="text-sm font-medium">Filtres:</span>
+        </div>
         
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="outline" size="sm" className="h-10">
-              {currentSort.direction === 'asc' ? <SortAsc className="h-4 w-4 mr-2" /> : <SortDesc className="h-4 w-4 mr-2" />}
-              Tri: {currentSort.field}
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="w-[200px]">
-            <DropdownMenuRadioGroup value={currentSort.field} onValueChange={(value) => {
-              setCurrentSort({...currentSort, field: value as keyof ClientSort['field']});
-            }}>
-              <DropdownMenuRadioItem value="name">Nom</DropdownMenuRadioItem>
-              <DropdownMenuRadioItem value="type">Type</DropdownMenuRadioItem>
-              <DropdownMenuRadioItem value="location">Quartier</DropdownMenuRadioItem>
-              <DropdownMenuRadioItem value="loyalty">Loyauté</DropdownMenuRadioItem>
-            </DropdownMenuRadioGroup>
-            
-            <DropdownMenuSeparator />
-            
-            <DropdownMenuRadioGroup value={currentSort.direction} onValueChange={(value) => {
-              setCurrentSort({...currentSort, direction: value as 'asc' | 'desc'});
-            }}>
-              <DropdownMenuRadioItem value="asc">Ascendant</DropdownMenuRadioItem>
-              <DropdownMenuRadioItem value="desc">Descendant</DropdownMenuRadioItem>
-            </DropdownMenuRadioGroup>
-          </DropdownMenuContent>
-        </DropdownMenu>
+        <Select
+          value={currentClientFilter.type || 'all'}
+          onValueChange={handleTypeFilterChange}
+        >
+          <SelectTrigger className="h-8 w-[120px] bg-white">
+            <SelectValue placeholder="Type" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">Tous</SelectItem>
+            {clientTypes.map(type => (
+              <SelectItem key={type} value={type}>{type}</SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
         
-        <Button size="sm" onClick={onAddClient} className="h-10">
-          <UserPlus className="h-4 w-4 mr-2" />
-          Ajouter
-        </Button>
+        <Select
+          value={currentClientFilter.assignedOnly ? 'assigned' : 'all'}
+          onValueChange={handleAssignedFilterChange}
+        >
+          <SelectTrigger className="h-8 w-[120px] bg-white">
+            <SelectValue placeholder="Assignation" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">Tous</SelectItem>
+            <SelectItem value="assigned">Assignés</SelectItem>
+          </SelectContent>
+        </Select>
         
-        <Button size="sm" variant="outline" onClick={onAddAdvancedClient} className="h-10">
-          <Star className="h-4 w-4 mr-2" />
-          Avancé
-        </Button>
+        <div className="ml-auto flex items-center gap-1.5">
+          <ArrowUpDown className="h-4 w-4 text-muted-foreground" />
+          <span className="text-sm font-medium">Trier par:</span>
+        </div>
+        
+        <Select
+          value={`${currentSort.field}-${currentSort.direction}`}
+          onValueChange={handleSortChange}
+        >
+          <SelectTrigger className="h-8 w-[140px] bg-white">
+            <SelectValue placeholder="Trier par" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="name-asc">Nom (A-Z)</SelectItem>
+            <SelectItem value="name-desc">Nom (Z-A)</SelectItem>
+            <SelectItem value="type-asc">Type (A-Z)</SelectItem>
+            <SelectItem value="type-desc">Type (Z-A)</SelectItem>
+            <SelectItem value="location-asc">Lieu (A-Z)</SelectItem>
+            <SelectItem value="location-desc">Lieu (Z-A)</SelectItem>
+            <SelectItem value="loyalty-asc">Loyauté (A-Z)</SelectItem>
+            <SelectItem value="loyalty-desc">Loyauté (Z-A)</SelectItem>
+          </SelectContent>
+        </Select>
       </div>
     </div>
   );
