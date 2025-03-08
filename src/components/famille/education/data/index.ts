@@ -1,4 +1,3 @@
-
 import { EducationPath, Preceptor } from '../types/educationTypes';
 import { 
   BookOpen, 
@@ -17,7 +16,7 @@ export const educationPaths: EducationPath[] = [
     id: 'political',
     name: 'Éducation Politique',
     description: 'Formation à l\'art de la politique romaine',
-    icon: <Scale size={22} />,
+    icon: Scale,
     benefits: [
       'Compréhension des institutions romaines',
       'Connaissance des procédures législatives',
@@ -46,7 +45,7 @@ export const educationPaths: EducationPath[] = [
     id: 'rhetoric',
     name: 'Éducation Rhétorique',
     description: 'Maîtrise de l\'art oratoire, essentiel pour la vie publique',
-    icon: <MessageCircle size={22} />,
+    icon: MessageCircle,
     benefits: [
       'Éloquence publique',
       'Capacité de persuasion',
@@ -75,7 +74,7 @@ export const educationPaths: EducationPath[] = [
     id: 'military',
     name: 'Éducation Militaire',
     description: 'Formation aux arts de la guerre et au commandement',
-    icon: <Sword size={22} />,
+    icon: Sword,
     benefits: [
       'Compétences tactiques et stratégiques',
       'Discipline physique et mentale',
@@ -104,7 +103,7 @@ export const educationPaths: EducationPath[] = [
     id: 'religious',
     name: 'Éducation Religieuse',
     description: 'Étude des cultes et rituels romains',
-    icon: <Landmark size={22} />,
+    icon: Landmark,
     benefits: [
       'Connaissance des rites et cérémonies',
       'Compréhension des présages et augures',
@@ -133,7 +132,7 @@ export const educationPaths: EducationPath[] = [
     id: 'philosophical',
     name: 'Éducation Philosophique',
     description: 'Étude des grandes écoles philosophiques grecques et romaines',
-    icon: <BookOpen size={22} />,
+    icon: BookOpen,
     benefits: [
       'Sagesse et connaissance',
       'Raisonnement logique',
@@ -162,7 +161,7 @@ export const educationPaths: EducationPath[] = [
     id: 'diplomatic',
     name: 'Éducation Diplomatique',
     description: 'Formation aux relations internationales et à la négociation',
-    icon: <HeartHandshake size={22} />,
+    icon: HeartHandshake,
     benefits: [
       'Art de la négociation',
       'Connaissance des cultures étrangères',
@@ -191,7 +190,7 @@ export const educationPaths: EducationPath[] = [
     id: 'administrative',
     name: 'Éducation Administrative',
     description: 'Formation à la gestion publique et aux finances',
-    icon: <GraduationCap size={22} />,
+    icon: GraduationCap,
     benefits: [
       'Compétences en gestion financière',
       'Connaissance des procédures administratives',
@@ -220,7 +219,7 @@ export const educationPaths: EducationPath[] = [
     id: 'leadership',
     name: 'Éducation au Leadership',
     description: 'Formation aux qualités de meneur et de commandement',
-    icon: <Award size={22} />,
+    icon: Award,
     benefits: [
       'Art de commander et d\'inspirer',
       'Gestion des groupes et des conflits',

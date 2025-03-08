@@ -1,12 +1,13 @@
 
 // Types pour le système d'éducation
 import { ReactNode } from 'react';
+import { LucideIcon } from 'lucide-react';
 
 export interface EducationPath {
   id: string;
   name: string;
   description: string;
-  icon: ReactNode;
+  icon: LucideIcon;
   benefits: string[];
   requirements: {
     age: number;
