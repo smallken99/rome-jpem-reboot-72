@@ -11,10 +11,7 @@ import { useEducation } from './context/EducationContext';
 export const EducationTabs: React.FC = () => {
   const [activeTab, setActiveTab] = useState("current");
   const location = useLocation();
-  const { 
-    preceptors, 
-    refreshPreceptors 
-  } = useEducation();
+  const { refreshPreceptors } = useEducation();
   
   // Handle tab changes from route state
   useEffect(() => {
@@ -29,7 +26,7 @@ export const EducationTabs: React.FC = () => {
       
       <CurrentEducationTab />
       <EducationPathsTab />
-      <PreceptorsTab preceptors={preceptors} refreshPreceptors={refreshPreceptors} />
+      <PreceptorsTab />
     </Tabs>
   );
 };

@@ -26,8 +26,11 @@ export const ChildHeader: React.FC<ChildHeaderProps> = ({
   
   // Enregistrer le nouveau nom
   const handleSave = () => {
-    if (newName.trim() && onNameChange) {
-      onNameChange(child.id, newName.trim());
+    // We need to make sure child.id exists, which comes from the parent component
+    const childId = 'id' in child ? child.id : '';
+    
+    if (newName.trim() && onNameChange && childId) {
+      onNameChange(childId, newName.trim());
     }
     setIsEditing(false);
   };

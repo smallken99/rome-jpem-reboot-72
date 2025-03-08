@@ -89,6 +89,7 @@ export interface PreceptorsByType {
 // Interface pour les props des composants d'éducation
 export interface ChildHeaderProps {
   child: {
+    id?: string;
     name: string;
     age: number;
     gender: string;
