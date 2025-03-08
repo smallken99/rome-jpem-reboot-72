@@ -10,3 +10,10 @@ export const romanNameSuffixes = [
   'Cassius', 'Domitius', 'Flavius', 'Fulvius', 'Julius', 'Junius', 'Licinius', 'Marius',
   'Octavius', 'Pompeius', 'Porcius', 'Sempronius', 'Sulpicius', 'Tullius', 'Vitellius'
 ];
+
+// Fonction pour générer un nom romain aléatoire
+export const generateRomanName = (): string => {
+  const prefix = romanNamePrefixes[Math.floor(Math.random() * romanNamePrefixes.length)];
+  const suffix = romanNameSuffixes[Math.floor(Math.random() * romanNameSuffixes.length)];
+  return `${prefix} ${suffix}`;
+};

@@ -1,6 +1,7 @@
 
-import React, { useEffect, useState } from 'react';
-import { useParams, useSearchParams } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
+import { useEducation } from './context/EducationContext';
 import { PreceptorHeader } from './components/PreceptorHeader';
 import { PreceptorQualityStars } from './components/PreceptorQualityStars';
 import { PreceptorSpeciality } from './components/PreceptorSpeciality';
@@ -9,89 +10,85 @@ import { PreceptorCostInfo } from './components/PreceptorCostInfo';
 import { PreceptorActions } from './components/PreceptorActions';
 import { PreceptorNotFound } from './components/PreceptorNotFound';
 import { PreceptorLoading } from './components/PreceptorLoading';
-import { useEducation } from './context/EducationContext';
-import { useNavigate } from 'react-router-dom';
+import { Separator } from '@/components/ui/separator';
+import { toast } from 'sonner';
 import { Preceptor } from './types/educationTypes';
 
 export const PreceptorDetail: React.FC = () => {
-  const { preceptorId } = useParams<{ preceptorId: string }>();
-  const [searchParams] = useSearchParams();
-  const childId = searchParams.get('childId');
+  const { preceptorId, speciality } = useParams<{ preceptorId: string, speciality: string }>();
   const navigate = useNavigate();
-  
   const { 
-    preceptors, 
-    hirePreceptor,
-    hiredPreceptors,
-    refreshPreceptors 
+    loadPreceptorsByType, 
+    hirePreceptor, 
+    isHiringPreceptor, 
+    hiredPreceptors 
   } = useEducation();
   
-  // État pour le précepteur sélectionné
+  const [isLoading, setIsLoading] = useState(true);
   const [preceptor, setPreceptor] = useState<Preceptor | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [hiring, setHiring] = useState(false);
   
+  // Charger le précepteur
   useEffect(() => {
-    // Assurons-nous que les précepteurs sont chargés
-    if (Object.keys(preceptors).length === 0) {
-      refreshPreceptors();
-    }
-    
-    // Simulons un chargement
-    const timer = setTimeout(() => setLoading(false), 800);
-    return () => clearTimeout(timer);
-  }, [preceptors, refreshPreceptors]);
-  
-  useEffect(() => {
-    if (!loading && preceptorId) {
-      // Cherchons d'abord parmi les précepteurs embauchés
-      const hiredPreceptor = hiredPreceptors.find(p => p.id === preceptorId);
-      if (hiredPreceptor) {
-        setPreceptor(hiredPreceptor);
-        return;
-      }
+    const loadPreceptor = async () => {
+      setIsLoading(true);
       
-      // Sinon, chercher dans tous les types de précepteurs disponibles
-      let foundPreceptor: Preceptor | null = null;
-      
-      Object.values(preceptors).forEach(preceptorList => {
-        const found = preceptorList.find(p => p.id === preceptorId);
-        if (found) {
-          foundPreceptor = found;
+      try {
+        if (!preceptorId || !speciality) {
+          throw new Error("Identifiant du précepteur manquant");
         }
-      });
-      
-      setPreceptor(foundPreceptor);
-    }
-  }, [preceptorId, preceptors, hiredPreceptors, loading]);
+        
+        // Vérifier d'abord si ce précepteur est déjà embauché
+        const existingPreceptor = hiredPreceptors.find(p => p.id === preceptorId);
+        
+        if (existingPreceptor) {
+          setPreceptor(existingPreceptor);
+        } else {
+          // Sinon charger tous les précepteurs du type spécifié
+          const preceptors = await loadPreceptorsByType(speciality);
+          const foundPreceptor = preceptors.find(p => p.id === preceptorId);
+          
+          if (!foundPreceptor) {
+            throw new Error("Précepteur non trouvé");
+          }
+          
+          setPreceptor(foundPreceptor);
+        }
+      } catch (error) {
+        console.error('Erreur lors du chargement du précepteur:', error);
+        toast.error("Impossible de charger les informations du précepteur");
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    
+    loadPreceptor();
+  }, [preceptorId, speciality, loadPreceptorsByType, hiredPreceptors]);
   
   // Gérer l'embauche du précepteur
-  const handleHire = () => {
+  const handleHire = async () => {
     if (!preceptor) return;
     
-    setHiring(true);
-    
-    const success = hirePreceptor(preceptor, childId || undefined);
-    
-    if (success) {
-      // Rediriger après un court délai pour donner l'impression d'un processus
-      setTimeout(() => {
-        setHiring(false);
-        
-        // Rediriger vers la page de détail de l'enfant si un enfant était spécifié
-        if (childId) {
-          navigate(`/famille/education/child/${childId}`);
-        } else {
-          navigate('/famille/education');
-        }
-      }, 1500);
-    } else {
-      setHiring(false);
+    try {
+      const success = await hirePreceptor(preceptor);
+      
+      if (success) {
+        toast.success(`${preceptor.name} a été embauché avec succès!`);
+        navigate('/famille/education/preceptors');
+      } else {
+        toast.error("Une erreur est survenue lors de l'embauche du précepteur");
+      }
+    } catch (error) {
+      console.error('Erreur lors de l\'embauche:', error);
+      toast.error("Une erreur est survenue lors de l'embauche du précepteur");
     }
   };
   
-  // Afficher un chargement pendant la recherche du précepteur
-  if (loading) {
+  const handleCancel = () => {
+    navigate('/famille/education/preceptors');
+  };
+  
+  // Affichage pendant le chargement
+  if (isLoading) {
     return <PreceptorLoading />;
   }
   
@@ -100,40 +97,67 @@ export const PreceptorDetail: React.FC = () => {
     return <PreceptorNotFound />;
   }
   
+  // Détermine si le précepteur est déjà engagé
+  const isAlreadyHired = hiredPreceptors.some(p => p.id === preceptor.id);
+  
   return (
-    <div className="preceptor-detail space-y-6">
-      {/* En-tête avec le nom du précepteur */}
+    <div className="space-y-6">
+      {/* En-tête avec les informations du précepteur */}
       <PreceptorHeader 
         name={preceptor.name} 
-        reputation={preceptor.reputation}
+        reputation={preceptor.reputation} 
       />
       
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <div className="space-y-6">
-          {/* Qualité du précepteur (étoiles) */}
-          <PreceptorQualityStars quality={preceptor.quality} />
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div className="md:col-span-2 space-y-6">
+          {/* Qualité du précepteur */}
+          <div>
+            <h3 className="text-lg font-semibold mb-2">Qualité</h3>
+            <PreceptorQualityStars quality={preceptor.quality} />
+          </div>
           
-          {/* Spécialité du précepteur */}
-          <PreceptorSpeciality speciality={preceptor.speciality} />
+          {/* Spécialité */}
+          <div>
+            <h3 className="text-lg font-semibold mb-2">Spécialité</h3>
+            <PreceptorSpeciality specialty={preceptor.speciality} />
+          </div>
           
-          {/* Biographie du précepteur */}
-          <PreceptorBiography background={preceptor.background} />
+          <Separator />
+          
+          {/* Biographie */}
+          <div>
+            <h3 className="text-lg font-semibold mb-2">Biographie</h3>
+            <PreceptorBiography text={preceptor.background} />
+          </div>
         </div>
         
         <div className="space-y-6">
-          {/* Informations sur le coût */}
-          <PreceptorCostInfo 
-            cost={preceptor.cost} 
-            available={preceptor.available}
-          />
-          
-          {/* Actions (embaucher, retour) */}
-          <PreceptorActions 
-            cost={preceptor.cost}
-            available={preceptor.available}
-            onHire={handleHire}
-            isHiring={hiring}
-          />
+          {/* Informations de coût */}
+          <div className="border rounded-lg p-4 bg-white shadow-sm">
+            <h3 className="text-lg font-semibold mb-4">Informations de recrutement</h3>
+            
+            {isAlreadyHired ? (
+              <PreceptorCostInfo 
+                cost={preceptor.cost} 
+                available={false} 
+              />
+            ) : (
+              <PreceptorCostInfo 
+                cost={preceptor.cost} 
+                available={preceptor.available} 
+              />
+            )}
+            
+            {/* Actions: Embaucher ou retourner */}
+            <div className="mt-6">
+              <PreceptorActions 
+                onHire={handleHire}
+                onCancel={handleCancel}
+                isAvailable={!isAlreadyHired && preceptor.available}
+                isLoading={isHiringPreceptor}
+              />
+            </div>
+          </div>
         </div>
       </div>
     </div>

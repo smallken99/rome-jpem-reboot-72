@@ -17,3 +17,11 @@ export const specialties = {
     'Mystères d\'Eleusis', 'Prophéties sibyllines', 'Cultes orientaux', 'Sacrifices rituels'
   ]
 };
+
+// Liste complète des spécialités pour les précepteurs
+export const allSpecialties = [
+  'Rhétorique', 'Droit romain', 'Philosophie stoïcienne', 'Tactique militaire', 'Art oratoire',
+  'Stratégie militaire', 'Rituel religieux', 'Augure', 'Divination', 'Commerce maritime',
+  'Négociation marchande', 'Diplomatie', 'Histoire romaine', 'Mathématiques', 'Astronomie',
+  'Poésie', 'Littérature grecque', 'Médecine', 'Ingénierie militaire', 'Architecture'
+];

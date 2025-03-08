@@ -1,50 +1,117 @@
 
 import React from 'react';
-import { Sword, Building, ScrollText } from 'lucide-react';
-import { EducationPath } from '../types/educationTypes';
+import { Shield, Book, Cross } from 'lucide-react';
 
-// Parcours éducatifs avec cursus annuel et statistiques explicitement liées
-export const educationPaths: EducationPath[] = [
+export const educationPaths = [
   {
-    type: 'military',
-    icon: <Sword className="h-5 w-5" />,
-    title: 'Éducation Militaire',
-    description: 'Formation aux arts de la guerre, stratégie et leadership sur le champ de bataille.',
-    minAge: 10, // Abaissé de 12 à 10 ans
-    suitableFor: 'male', // Explicitly for males only
-    duration: 2,
-    annualCurriculum: [
-      { year: 1, name: "Initiation Martiale", skills: ["Maniement du bouclier", "Discipline militaire", "Marche forcée"] },
-      { year: 2, name: "Tactiques Avancées", skills: ["Formation en phalange", "Commandement", "Stratégie de bataille"] }
+    id: 'military',
+    name: 'Éducation Militaire',
+    description: 'Former un futur commandant militaire, apprendre les arts de la guerre et du commandement',
+    icon: <Shield className="h-8 w-8 text-red-600" />,
+    benefits: [
+      'Augmente significativement les compétences de commandement',
+      'Améliore le prestige militaire de la famille',
+      'Ouvre la voie à une carrière dans l\'armée romaine'
     ],
-    relatedStat: 'martialEducation' // Explicitly links to martialEducation stat
+    requirements: {
+      age: 7,
+      gender: 'male',
+      cost: 1200,
+      duration: '8 ans'
+    },
+    outcomes: [
+      'Tribun militaire',
+      'Légat de légion',
+      'Commandant de cavalerie'
+    ],
+    specialties: [
+      'Combat à l\'épée', 
+      'Tactique de bataille', 
+      'Survivre en campagne', 
+      'Guerilla et embuscades', 
+      'Commandement de légion', 
+      'Cavalerie', 
+      'Archerie', 
+      'Siège', 
+      'Navigation militaire'
+    ]
   },
   {
-    type: 'political',
-    icon: <Building className="h-5 w-5" />,
-    title: 'Éducation Politique',
-    description: 'Éducation en rhétorique, droit et philosophie pour exceller au Sénat.',
-    minAge: 6, // Abaissé de 8 à 6 ans
-    suitableFor: 'both',
-    duration: 2,
-    annualCurriculum: [
-      { year: 1, name: "Fondations Politiques", skills: ["Histoire romaine", "Poésie grecque", "Élocution"] },
-      { year: 2, name: "Art Oratoire Avancé", skills: ["Rhétorique", "Droit romain", "Débat public"] }
+    id: 'political',
+    name: 'Éducation Politique',
+    description: 'Former un orateur, un juriste et un politicien romains',
+    icon: <Book className="h-8 w-8 text-blue-600" />,
+    benefits: [
+      'Améliore l\'éloquence et la capacité de persuasion',
+      'Développe les connaissances juridiques et politiques',
+      'Crée des connections avec d\'autres familles patriciennes'
     ],
-    relatedStat: 'oratory' // Explicitly links to oratory stat
+    requirements: {
+      age: 7,
+      gender: 'male',
+      cost: 1500,
+      duration: '10 ans'
+    },
+    outcomes: [
+      'Avocat du forum',
+      'Sénateur influent',
+      'Magistrat'
+    ],
+    specialties: [
+      'Rhétorique avancée', 
+      'Débat public', 
+      'Politique et législation', 
+      'Droit romain',
+      'Stoïcisme et éthique politique', 
+      'Administration provinciale', 
+      'Diplomatie',
+      'Histoire romaine', 
+      'Grec ancien'
+    ]
   },
   {
-    type: 'religious',
-    icon: <ScrollText className="h-5 w-5" />,
-    title: 'Éducation Religieuse',
-    description: 'Étude des rites sacrés, divination et traditions religieuses romaines.',
-    minAge: 5, // Abaissé de 6 à 5 ans
-    suitableFor: 'both',
-    duration: 2,
-    annualCurriculum: [
-      { year: 1, name: "Fondations Religieuses", skills: ["Panthéon romain", "Calendrier sacré", "Offrandes rituelles"] },
-      { year: 2, name: "Rituels et Cérémonies Avancés", skills: ["Divination", "Sacrifices", "Direction des cérémonies"] }
+    id: 'religious',
+    name: 'Éducation Religieuse',
+    description: 'Former un prêtre ou une vestale pour servir les dieux de Rome',
+    icon: <Cross className="h-8 w-8 text-amber-600" />,
+    benefits: [
+      'Apporte la faveur divine à la famille',
+      'Améliore le prestige religieux',
+      'Offre une influence spirituelle sur le peuple romain'
     ],
-    relatedStat: 'piety' // Explicitly links to piety stat
-  },
+    requirements: {
+      age: 6,
+      gender: 'both',
+      cost: 1000,
+      duration: '12 ans'
+    },
+    outcomes: [
+      'Prêtre de Jupiter',
+      'Vestale',
+      'Augure',
+      'Pontife'
+    ],
+    specialties: [
+      'Rites et cérémonies', 
+      'Divination et présages', 
+      'Traditions religieuses', 
+      'Culte de Vesta',
+      'Lecture des entrailles', 
+      'Interprétation des augures', 
+      'Rituels funéraires',
+      'Mystères d\'Eleusis', 
+      'Prophéties sibyllines'
+    ]
+  }
 ];
+
+// Fonction utilitaire pour obtenir un chemin d'éducation par ID
+export const getEducationPathById = (id: string) => {
+  return educationPaths.find(path => path.id === id);
+};
+
+// Fonction utilitaire pour obtenir la liste des spécialités d'un chemin d'éducation
+export const getSpecialtiesByPath = (pathId: string) => {
+  const path = getEducationPathById(pathId);
+  return path ? path.specialties : [];
+};

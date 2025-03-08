@@ -1,63 +1,115 @@
 
-// Type for a preceptor (teacher)
-export type Preceptor = {
+// Types pour le système d'éducation
+
+export interface EducationPath {
   id: string;
   name: string;
-  speciality: string;
-  reputation: 'Excellent' | 'Bon' | 'Moyen';
-  fee: number;
-  statBonus: number;
-  gender: 'male' | 'female';
-};
+  description: string;
+  icon: React.ReactNode;
+  benefits: string[];
+  requirements: {
+    age: number;
+    gender: 'male' | 'female' | 'both';
+    cost: number;
+    duration: string;
+  };
+  outcomes: string[];
+  specialties: string[];
+}
 
-export type PreceptorsByType = {
-  [key: string]: Preceptor[];
-};
-
-export type EducationHistory = {
-  type: string;
-  mentor: string;
-  speciality?: string;
-  completedAt: number; // Age when completed
-  statBonus: number;
-  skills: string[];
-  duration: number; // How many years it took
-};
-
-export type ChildEducation = {
-  type: string;
-  mentor: string | null;
-  progress: number;
-  skills: string[];
-  speciality?: string;
-  pityBonus?: number;
-  yearsCompleted?: number;
-  totalYears?: number;
-  statBonus?: number;
-  // Track previous educations with more details
-  educationHistory?: EducationHistory[];
-};
-
-export type Child = {
+export interface Child {
   id: string;
   name: string;
   age: number;
   gender: string;
-  currentEducation: ChildEducation;
-};
-
-export type EducationPath = {
-  type: string;
-  icon: React.ReactNode;
-  title: string;
-  description: string;
-  minAge: number; // Lowered minimum ages for faster progression
-  suitableFor: string; // "all", "male" or "female"
-  duration: number;
-  annualCurriculum: {
-    year: number;
-    name: string;
+  currentEducation: {
+    type: string;
+    mentor: string | null;
     skills: string[];
-  }[];
-  relatedStat: string;
-};
+    progress: number;
+  };
+}
+
+export interface Preceptor {
+  id: string;
+  name: string;
+  speciality: string;
+  reputation: "Excellent" | "Bon" | "Moyen";
+  quality: number;
+  cost: number;
+  available: boolean;
+  background: string;
+  childId: string | null;
+}
+
+export interface PreceptorsByType {
+  [key: string]: Preceptor[];
+}
+
+// Interface pour les props des composants d'éducation
+export interface ChildHeaderProps {
+  name: string;
+  age: number;
+  gender: string;
+}
+
+export interface EducationTypeSelectorProps {
+  selectedType: string;
+  onChange: (type: string) => void;
+  childGender: string;
+}
+
+export interface EducationSpecialtySelectorProps {
+  educationType: string;
+  selectedSpecialties: string[];
+  onChange: (specialties: string[]) => void;
+}
+
+export interface MentorInfoProps {
+  mentors: Preceptor[];
+  selectedMentor: string | null;
+  onChange: (mentorId: string | null) => void;
+}
+
+export interface StatBonusInfoProps {
+  hasMentor: boolean;
+  educationType: string;
+}
+
+export interface PietyBonusProps {
+  bonus?: number;
+}
+
+export interface EducationWarningProps {
+  name: string;
+  currentEducationType: string;
+}
+
+export interface PreceptorHeaderProps {
+  name: string;
+  reputation: "Excellent" | "Bon" | "Moyen";
+}
+
+export interface PreceptorSpecialityProps {
+  specialty: string;
+}
+
+export interface PreceptorBiographyProps {
+  text: string;
+}
+
+export interface PreceptorQualityStarsProps {
+  quality: number;
+}
+
+export interface PreceptorCostInfoProps {
+  cost: number;
+  available: boolean;
+}
+
+export interface PreceptorActionsProps {
+  onHire: () => void;
+  onCancel: () => void;
+  isAvailable: boolean;
+  isLoading?: boolean;
+}

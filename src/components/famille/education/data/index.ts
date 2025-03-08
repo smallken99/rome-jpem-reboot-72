@@ -1,16 +1,15 @@
 
-import { PreceptorsByType, Preceptor } from '../types/educationTypes';
 import { generateRomanName } from './romanNames';
 import { assignRandomTitle } from './titles';
 import { v4 as uuidv4 } from 'uuid';
+import { allSpecialties } from './specialties';
 
-// Liste des spécialités possibles pour les précepteurs
-const specialties = [
-  'Rhétorique', 'Droit romain', 'Philosophie stoïcienne', 'Tactique militaire', 'Art oratoire',
-  'Stratégie militaire', 'Rituel religieux', 'Augure', 'Divination', 'Commerce maritime',
-  'Négociation marchande', 'Diplomatie', 'Histoire romaine', 'Mathématiques', 'Astronomie',
-  'Poésie', 'Littérature grecque', 'Médecine', 'Ingénierie militaire', 'Architecture'
-];
+// Fonction pour déterminer la réputation du précepteur en fonction de sa qualité
+export const getReputationFromQuality = (quality: number): "Excellent" | "Bon" | "Moyen" => {
+  if (quality >= 8) return "Excellent";
+  if (quality >= 5) return "Bon";
+  return "Moyen";
+};
 
 // Générer un background aléatoire pour un précepteur
 const generateBackground = (speciality: string, quality: number): string => {
@@ -39,11 +38,11 @@ const generateBackground = (speciality: string, quality: number): string => {
 };
 
 // Générer un précepteur aléatoire
-const generatePreceptor = (speciality?: string): Preceptor => {
+export const generatePreceptor = (speciality?: string) => {
   const id = uuidv4();
-  const actualSpeciality = speciality || specialties[Math.floor(Math.random() * specialties.length)];
+  const actualSpeciality = speciality || allSpecialties[Math.floor(Math.random() * allSpecialties.length)];
   const quality = Math.floor(Math.random() * 10) + 1;
-  const reputation = Math.floor(quality * 0.8 * 10);
+  const reputation = getReputationFromQuality(quality);
   const cost = 50 + (quality * 25) + (Math.floor(Math.random() * 50));
   const name = generateRomanName();
   const title = assignRandomTitle(actualSpeciality);
@@ -57,16 +56,17 @@ const generatePreceptor = (speciality?: string): Preceptor => {
     quality,
     cost,
     available: Math.random() > 0.3, // 70% des précepteurs sont disponibles
-    background
+    background,
+    childId: null  // Ajout de la propriété childId pour le suivi des assignations
   };
 };
 
 // Générer une liste de précepteurs par spécialité
-export const generatePreceptors = (): Record<string, Preceptor[]> => {
-  const result: Record<string, Preceptor[]> = {};
+export const generatePreceptors = () => {
+  const result: Record<string, any[]> = {};
   
   // Générer 3-5 précepteurs pour chaque spécialité
-  specialties.forEach(speciality => {
+  allSpecialties.forEach(speciality => {
     const count = Math.floor(Math.random() * 3) + 3;
     const typePreceptors = Array.from({ length: count }, () => generatePreceptor(speciality));
     result[speciality] = typePreceptors;
@@ -74,3 +74,9 @@ export const generatePreceptors = (): Record<string, Preceptor[]> => {
   
   return result;
 };
+
+// Exporter les spécialités pour être utilisées ailleurs
+export { allSpecialties as specialties } from './specialties';
+export { specialties } from './specialties';
+export { romanNamePrefixes, romanNameSuffixes } from './romanNames';
+export { titles } from './titles';

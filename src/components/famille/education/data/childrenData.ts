@@ -1,52 +1,52 @@
 
-import { Child } from '../types/educationTypes';
-
-// Exemple de données d'enfants avec leur éducation actuelle
-export const children: Child[] = [
+// Données mockées pour les enfants
+export const children = [
   {
     id: '1',
-    name: 'Titus Tullius',
-    age: 15,
+    name: 'Marcus Aurelius',
+    age: 10,
     gender: 'male',
     currentEducation: {
-      type: 'military',
-      mentor: 'Centurion Flavius Aquila',
-      speciality: 'Tactique de bataille',
-      progress: 65,
-      pityBonus: 10, // Piety bonus from religious activities
-      skills: ['Tactique de base', 'Maniement du glaive', 'Discipline militaire'],
-      yearsCompleted: 1,
-      totalYears: 2
+      type: 'political',
+      mentor: null,
+      skills: ['Rhétorique avancée', 'Débat public'],
+      progress: 35
     }
   },
   {
     id: '2',
-    name: 'Lucia Tullia Minor',
-    age: 12,
+    name: 'Julia Flavia',
+    age: 9,
     gender: 'female',
     currentEducation: {
-      type: 'political',
-      mentor: 'Sénateur Marcus Porcius',
-      speciality: 'Rhétorique avancée',
-      progress: 40,
-      pityBonus: 5, // Small piety bonus
-      skills: ['Rhétorique', 'Histoire romaine', 'Poésie grecque'],
-      yearsCompleted: 1,
-      totalYears: 2
+      type: 'religious',
+      mentor: 'Pontifex Maximus Claudius',
+      skills: ['Rites et cérémonies', 'Traditions religieuses'],
+      progress: 25
     }
   },
   {
     id: '3',
-    name: 'Quintus Tullius',
-    age: 10,
+    name: 'Gaius Septimius',
+    age: 12,
     gender: 'male',
+    currentEducation: {
+      type: 'military',
+      mentor: 'Centurion Quintus Sertorius',
+      skills: ['Combat à l\'épée', 'Tactique de bataille'],
+      progress: 60
+    }
+  },
+  {
+    id: '4',
+    name: 'Livia Augusta',
+    age: 7,
+    gender: 'female',
     currentEducation: {
       type: 'none',
       mentor: null,
-      progress: 0,
       skills: [],
-      yearsCompleted: 0,
-      totalYears: 0
+      progress: 0
     }
-  },
+  }
 ];

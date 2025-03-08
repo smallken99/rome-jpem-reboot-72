@@ -139,7 +139,9 @@ const ChildEducationDetail: React.FC = () => {
       
       {/* Bonus de piété (pour les éducations religieuses) */}
       {selectedType === 'religious' && (
-        <PietyBonus />
+        <PietyBonus 
+          bonus={10}
+        />
       )}
       
       {/* Boutons d'action */}

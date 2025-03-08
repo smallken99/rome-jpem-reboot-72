@@ -1,108 +1,146 @@
-
-import React from 'react';
-import { ShieldQuestion, TrendingUp, User, Users } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { useEducation } from './context/EducationContext';
+import { specialties } from './data';
+import { Preceptor } from './types/educationTypes';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { educationPaths } from './data';
-import { PreceptorsByType } from './types/educationTypes';
+import { Search, Filter } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Separator } from '@/components/ui/separator';
 import { Badge } from '@/components/ui/badge';
-import { getRelatedStatName } from './utils/educationUtils';
-import { useNavigate, useSearchParams } from 'react-router-dom';
+import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import { PreceptorQualityStars } from './components/PreceptorQualityStars';
 
-interface PreceptorListProps {
-  preceptors: PreceptorsByType;
-  refreshPreceptors: () => void;
-}
-
-export const PreceptorList: React.FC<PreceptorListProps> = ({ preceptors, refreshPreceptors }) => {
+export const PreceptorList: React.FC = () => {
+  const { 
+    loadPreceptorsByType, 
+    hiredPreceptors 
+  } = useEducation();
   const navigate = useNavigate();
-  const [searchParams] = useSearchParams();
-  const childId = searchParams.get('childId');
   
-  const handleEngageClick = (teacherId: string) => {
-    if (childId) {
-      navigate(`/famille/education/preceptors/${teacherId}?childId=${childId}`);
-    } else {
-      navigate(`/famille/education/preceptors/${teacherId}`);
-    }
+  const [activeSpecialty, setActiveSpecialty] = useState(specialties[0]);
+  const [preceptors, setPreceptors] = useState<Preceptor[]>([]);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [filterQuality, setFilterQuality] = useState('');
+  const [isLoading, setIsLoading] = useState(true);
+  
+  useEffect(() => {
+    const loadPreceptors = async () => {
+      setIsLoading(true);
+      const loadedPreceptors = await loadPreceptorsByType(activeSpecialty);
+      setPreceptors(loadedPreceptors);
+      setIsLoading(false);
+    };
+    
+    loadPreceptors();
+  }, [activeSpecialty, loadPreceptorsByType]);
+  
+  // Filtrer les précepteurs
+  const filteredPreceptors = preceptors.filter(preceptor => {
+    const searchMatch = preceptor.name.toLowerCase().includes(searchTerm.toLowerCase());
+    const qualityMatch = filterQuality ? String(preceptor.quality) === filterQuality : true;
+    
+    return searchMatch && qualityMatch;
+  });
+  
+  const handlePreceptorClick = (preceptor: Preceptor) => {
+    navigate(`/famille/education/preceptor/${preceptor.id}/${activeSpecialty}`);
   };
   
   return (
-    <>
-      <div className="flex justify-end mb-4">
-        <Button 
-          variant="outline" 
-          onClick={refreshPreceptors}
-          className="border-rome-gold/30 hover:bg-rome-gold/10 hover:text-rome-navy"
-        >
-          Actualiser la Liste des Précepteurs
-        </Button>
+    <div className="space-y-6">
+      {/* En-tête et filtres */}
+      <div className="flex flex-col md:flex-row items-center justify-between space-y-4 md:space-y-0">
+        <h2 className="text-2xl font-bold">Précepteurs disponibles</h2>
+        
+        <div className="flex items-center space-x-4">
+          <Input
+            type="text"
+            placeholder="Rechercher un précepteur..."
+            className="max-w-md"
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+          />
+          
+          <Select value={filterQuality} onValueChange={setFilterQuality}>
+            <SelectTrigger className="w-[180px]">
+              <SelectValue placeholder="Filtrer par qualité" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="">Toutes les qualités</SelectItem>
+              <SelectItem value="1">Qualité 1</SelectItem>
+              <SelectItem value="2">Qualité 2</SelectItem>
+              <SelectItem value="3">Qualité 3</SelectItem>
+              <SelectItem value="4">Qualité 4</SelectItem>
+              <SelectItem value="5">Qualité 5</SelectItem>
+              <SelectItem value="6">Qualité 6</SelectItem>
+              <SelectItem value="7">Qualité 7</SelectItem>
+              <SelectItem value="8">Qualité 8</SelectItem>
+              <SelectItem value="9">Qualité 9</SelectItem>
+              <SelectItem value="10">Qualité 10</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
       </div>
       
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-4">
-        {Object.entries(preceptors).map(([type, teacherList]) => {
-          // Get the education path title
-          const pathTitle = educationPaths.find(path => path.type === type)?.title || type;
-          // Get the education path icon
-          const pathIcon = educationPaths.find(path => path.type === type)?.icon || <ShieldQuestion className="h-5 w-5" />;
-          // Get the related stat name
-          const relatedStat = getRelatedStatName(type);
-          
-          return (
-            <div key={type} className="roman-card p-4">
-              <div className="flex items-center gap-2 mb-3">
-                {pathIcon}
-                <h3 className="font-cinzel">Précepteurs en {pathTitle.replace('Éducation ', '')}</h3>
+      <Separator />
+      
+      {/* Tabs de spécialités */}
+      <Tabs defaultValue={activeSpecialty} className="w-full">
+        <TabsList className="grid grid-cols-3 md:grid-cols-6">
+          {specialties.map(specialty => (
+            <TabsTrigger 
+              key={specialty} 
+              value={specialty}
+              onClick={() => setActiveSpecialty(specialty)}
+            >
+              {specialty}
+            </TabsTrigger>
+          ))}
+        </TabsList>
+        
+        {specialties.map(specialty => (
+          <TabsContent key={specialty} value={specialty}>
+            {isLoading ? (
+              <div className="text-center py-12 text-muted-foreground italic">
+                Chargement des précepteurs...
               </div>
-              
-              <div className="space-y-4">
-                {teacherList.map(teacher => (
-                  <div key={teacher.id} className="border border-muted rounded p-3 hover:border-rome-gold/50 transition-colors">
-                    <div className="flex justify-between items-start">
-                      <div className="flex items-center gap-1.5">
-                        <h4 className="font-medium">{teacher.name}</h4>
-                        {teacher.gender === 'female' ? (
-                          <Badge variant="outline" className="bg-pink-50 text-pink-700 text-xs py-0 h-5 border-pink-200">
-                            <User className="h-3 w-3 mr-1" /> F
-                          </Badge>
-                        ) : (
-                          <Badge variant="outline" className="bg-blue-50 text-blue-700 text-xs py-0 h-5 border-blue-200">
-                            <User className="h-3 w-3 mr-1" /> H
-                          </Badge>
-                        )}
-                      </div>
-                      <span className={`text-xs px-2 py-1 rounded ${
-                        teacher.reputation === 'Excellent' ? 'bg-green-100 text-green-800' :
-                        teacher.reputation === 'Bon' ? 'bg-blue-100 text-blue-800' :
-                        'bg-gray-100 text-gray-800'
-                      }`}>
-                        {teacher.reputation}
-                      </span>
-                    </div>
-                    
-                    <p className="text-sm text-muted-foreground mt-1">Spécialité: {teacher.speciality}</p>
-                    
-                    {/* Display stat bonus information */}
-                    <div className="mt-2 flex items-center gap-1 text-xs bg-green-50 p-2 rounded text-green-700">
-                      <TrendingUp className="h-3 w-3" />
-                      <span>Bonus à {relatedStat}: +{teacher.statBonus} points après validation</span>
-                    </div>
-                    
-                    <div className="flex justify-between items-center mt-3">
-                      <span className="text-sm font-medium">{teacher.fee} denarii/an</span>
-                      <button 
-                        className="roman-btn-outline text-xs"
-                        onClick={() => handleEngageClick(teacher.id)}
-                      >
-                        Engager
-                      </button>
-                    </div>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {filteredPreceptors.length > 0 ? (
+                  filteredPreceptors.map(preceptor => (
+                    <Card 
+                      key={preceptor.id}
+                      className="cursor-pointer hover:shadow-md transition-shadow duration-200"
+                      onClick={() => handlePreceptorClick(preceptor)}
+                    >
+                      <CardHeader>
+                        <CardTitle className="text-lg font-semibold">{preceptor.name}</CardTitle>
+                      </CardHeader>
+                      <CardContent className="space-y-2">
+                        <div className="flex items-center space-x-2">
+                          <PreceptorQualityStars quality={preceptor.quality} />
+                        </div>
+                        <p className="text-sm text-muted-foreground">{preceptor.speciality}</p>
+                        <Badge variant="secondary">{preceptor.reputation}</Badge>
+                      </CardContent>
+                      <CardFooter className="text-sm text-muted-foreground">
+                        Coût: {preceptor.cost} As
+                      </CardFooter>
+                    </Card>
+                  ))
+                ) : (
+                  <div className="text-center py-12 text-muted-foreground italic">
+                    Aucun précepteur trouvé avec ces critères.
                   </div>
-                ))}
+                )}
               </div>
-            </div>
-          );
-        })}
-      </div>
-    </>
+            )}
+          </TabsContent>
+        ))}
+      </Tabs>
+    </div>
   );
 };
