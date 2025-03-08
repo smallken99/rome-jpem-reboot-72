@@ -1,0 +1,65 @@
+
+@layer components {
+  .roman-border {
+    @apply border-2 border-rome-gold/70 relative before:absolute before:inset-0 before:border before:border-rome-gold/30 before:m-1;
+  }
+  
+  .column-divider {
+    @apply relative py-4;
+  }
+  
+  .column-divider::before {
+    content: "";
+    background-image: url('/images/column-divider.svg');
+    background-repeat: repeat-y;
+    @apply absolute left-0 top-0 h-full w-5;
+  }
+  
+  .roman-card {
+    @apply bg-white/80 backdrop-blur-sm shadow-md border border-rome-gold/30 rounded-md overflow-hidden transition-all duration-300;
+  }
+  
+  .roman-card-header {
+    @apply border-b border-rome-gold/30 px-4 py-3;
+  }
+  
+  .roman-btn {
+    @apply bg-gradient-to-r from-rome-terracotta to-rome-terracotta/90 text-white font-cinzel py-2 px-4 rounded shadow hover:from-rome-terracotta/90 hover:to-rome-terracotta/80 transition-all duration-200;
+  }
+  
+  .roman-btn-secondary {
+    @apply bg-gradient-to-r from-rome-navy to-rome-navy/90 text-white font-cinzel py-2 px-4 rounded shadow hover:from-rome-navy/90 hover:to-rome-navy/80 transition-all duration-200;
+  }
+  
+  .roman-btn-outline {
+    @apply border-2 border-rome-terracotta text-rome-terracotta font-cinzel py-1.5 px-4 rounded shadow hover:bg-rome-terracotta/10 transition-all duration-200;
+  }
+  
+  .nav-item {
+    @apply font-cinzel tracking-wide text-rome-navy hover:text-rome-terracotta transition-colors py-2 relative after:absolute after:bottom-0 after:left-0 after:h-0.5 after:w-0 after:bg-rome-terracotta hover:after:w-full after:transition-all after:duration-300;
+  }
+  
+  .nav-item-active {
+    @apply text-rome-terracotta after:w-full;
+  }
+  
+  .page-transition {
+    @apply animate-fade-up;
+  }
+  
+  .section-title {
+    @apply font-cinzel text-2xl md:text-3xl font-bold text-rome-navy border-b-2 border-rome-gold/50 pb-2 mb-6 inline-block;
+  }
+  
+  .stat-box {
+    @apply roman-card p-4;
+  }
+  
+  .stat-label {
+    @apply text-sm uppercase text-muted-foreground font-medium;
+  }
+  
+  .stat-value {
+    @apply text-xl font-cinzel text-rome-navy font-semibold;
+  }
+}

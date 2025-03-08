@@ -1,0 +1,18 @@
+
+/* Scrollbar customization */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  @apply bg-rome-gold/10;
+}
+
+::-webkit-scrollbar-thumb {
+  @apply bg-rome-gold/40 rounded-full;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  @apply bg-rome-gold/60;
+}

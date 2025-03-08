@@ -1,0 +1,23 @@
+
+/* Animation classes */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slideIn {
+  from { transform: translateY(20px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+.animate-fade-up {
+  animation: slideIn 0.5s ease-out forwards;
+}
+
+/* Roman texture background */
+.bg-roman-pattern {
+  @apply bg-rome-parchment;
+  background-image: url('/images/roman-pattern.svg');
+  background-repeat: repeat;
+  background-size: 100px 100px;
+}
