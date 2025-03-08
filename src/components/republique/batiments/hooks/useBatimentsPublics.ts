@@ -2,6 +2,7 @@
 import { usePublicBuildings } from './usePublicBuildings';
 import { useConstructionProjects } from './useConstructionProjects';
 import { PublicBuilding, ConstructionProject } from '../types/buildingTypes';
+import { toast } from 'sonner';
 
 export type { PublicBuilding, ConstructionProject } from '../types/buildingTypes';
 
@@ -39,6 +40,8 @@ export const useBatimentsPublics = () => {
         benefits: completedProject.benefits,
         investmentAmount: completedProject.estimatedCost,
         constructionStatus: 'completed',
+        population: Math.floor(Math.random() * 500) + 100, // Population aléatoire qui utilise le bâtiment
+        publicApproval: 85 // Approbation initiale élevée pour un nouveau bâtiment
       };
       
       addPublicBuilding(newBuilding);

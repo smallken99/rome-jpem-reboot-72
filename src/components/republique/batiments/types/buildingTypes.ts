@@ -15,6 +15,10 @@ export interface PublicBuilding {
   constructionStatus: 'planned' | 'in_progress' | 'completed' | 'damaged' | 'abandoned';
   constructionProgress?: number; // 0-100
   image?: string;
+  population?: number; // Population qui utilise le bâtiment
+  revenueGeneration?: number; // Revenus générés par le bâtiment
+  employmentCapacity?: number; // Nombre d'emplois créés
+  publicApproval?: number; // Approbation publique (0-100)
 }
 
 export interface ConstructionProject {
@@ -30,4 +34,43 @@ export interface ConstructionProject {
   benefits: string[];
   sponsors: string[];
   approved: boolean;
+  proposedBy?: string; // Magistrat qui a proposé le projet
+  requiredResources?: {
+    stone?: number;
+    timber?: number;
+    marble?: number;
+    labor?: number;
+  };
+}
+
+export interface BuildingType {
+  id: string;
+  name: string;
+  category: 'administrative' | 'religious' | 'entertainment' | 'infrastructure' | 'military' | 'commercial';
+  description: string;
+  baseCost: number;
+  maintenanceMultiplier: number;
+  benefits: string[];
+  prerequisites?: string[];
+  image?: string;
+}
+
+export interface BuildingStatistics {
+  totalBuildings: number;
+  totalInvestment: number;
+  averageCondition: number;
+  byCategory: Record<string, number>;
+  buildingsByStatus: Record<string, number>;
+  totalMaintenanceCost: number;
+  publicApprovalAverage: number;
+}
+
+export interface RepublicResource {
+  id: string;
+  name: string;
+  amount: number;
+  unit: string;
+  value: number; // Valeur par unité en As
+  source: string;
+  lastUpdated: number; // Année
 }

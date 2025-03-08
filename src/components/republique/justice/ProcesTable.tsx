@@ -19,9 +19,14 @@ export interface ProcesData {
 export interface ProcesTableProps {
   proces: ProcesData[];
   status: 'en-cours' | 'juge';
+  onAssign?: (procesId: string) => void;
 }
 
-export const ProcesTable: React.FC<ProcesTableProps> = ({ proces, status }) => {
+export const ProcesTable: React.FC<ProcesTableProps> = ({ 
+  proces, 
+  status,
+  onAssign 
+}) => {
   const [selectedProces, setSelectedProces] = useState<string | null>(null);
 
   const getStatutBadge = (statut: string) => {
@@ -51,8 +56,9 @@ export const ProcesTable: React.FC<ProcesTableProps> = ({ proces, status }) => {
   };
 
   const handlePresider = (procesId: string) => {
-    console.log(`Présider le procès ${procesId}`);
-    // Logique à implémenter pour présider un procès
+    if (onAssign) {
+      onAssign(procesId);
+    }
   };
 
   return (
