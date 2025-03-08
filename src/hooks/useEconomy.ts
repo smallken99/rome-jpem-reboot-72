@@ -9,7 +9,7 @@ type Transaction = {
   recipient: string;
   category: string;
   description: string;
-  timestamp: Date;
+  date: Date; // Assurons-nous que la propriété date existe
   type: 'income' | 'expense';
 };
 
@@ -49,7 +49,7 @@ export const useEconomy = create<EconomyState>((set, get) => ({
       recipient,
       category,
       description,
-      timestamp: new Date(),
+      date: new Date(),
       type: 'expense'
     };
     
@@ -72,7 +72,7 @@ export const useEconomy = create<EconomyState>((set, get) => ({
       recipient: "Pater Familias",
       category,
       description,
-      timestamp: new Date(),
+      date: new Date(),
       type: 'income'
     };
     

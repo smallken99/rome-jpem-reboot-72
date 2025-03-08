@@ -6,7 +6,7 @@ import { VestaleCandidate, characterToVestaleCandidate } from '@/types/vestale';
 import { PageHeader } from '@/components/ui-custom/PageHeader';
 import { RomanCard } from '@/components/ui-custom/RomanCard';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Fire, Star, Info, Heart, Book, Shield, AlertCircle } from 'lucide-react';
+import { Flame, Star, Info, Heart, Book, Shield, AlertCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
@@ -74,7 +74,7 @@ const ReligionMain = () => {
               <RomanCard>
                 <RomanCard.Header>
                   <h2 className="font-cinzel text-lg flex items-center gap-2">
-                    <Fire className="h-4 w-4 text-rome-gold" />
+                    <Flame className="h-4 w-4 text-rome-gold" />
                     Le Collège des Vestales
                   </h2>
                 </RomanCard.Header>
@@ -185,7 +185,7 @@ const VestaleCandidateCard: React.FC<{ candidate: VestaleCandidate }> = ({ candi
       </div>
       
       <div className="space-y-2 mb-3">
-        <StatItem icon={<Fire className="h-3 w-3" />} name="Piété" value={stats.piety} />
+        <StatItem icon={<Flame className="h-3 w-3" />} name="Piété" value={stats.piety} />
         <StatItem icon={<Shield className="h-3 w-3" />} name="Discipline" value={stats.discipline} />
         <StatItem icon={<Book className="h-3 w-3" />} name="Intelligence" value={stats.intelligence} />
         <StatItem icon={<Heart className="h-3 w-3" />} name="Charisme" value={stats.charisma} />

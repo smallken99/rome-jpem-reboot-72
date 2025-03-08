@@ -33,20 +33,16 @@ export const useSlaveManagement = (initialSlaves: number = 25) => {
     }
     
     // Effectuer la transaction via le système économique
-    const transactionSuccess = economy.makePayment(
+    economy.makePayment(
       totalCost,
       "Marchand d'esclaves",
       "Personnel",
       `Achat de ${amount} esclaves`
     );
     
-    if (transactionSuccess) {
-      setTotalSlaves(prev => prev + amount);
-      toast.success(`Acquisition de ${amount} esclaves pour ${totalCost.toLocaleString()} As`);
-      return true;
-    }
-    
-    return false;
+    setTotalSlaves(prev => prev + amount);
+    toast.success(`Acquisition de ${amount} esclaves pour ${totalCost.toLocaleString()} As`);
+    return true;
   };
   
   // Vente d'esclaves
@@ -59,20 +55,16 @@ export const useSlaveManagement = (initialSlaves: number = 25) => {
     const totalProfit = amount * Math.floor(slavePrice * 0.7); // 70% du prix d'achat
     
     // Enregistrer la transaction via le système économique
-    const transactionSuccess = economy.receivePayment(
+    economy.receivePayment(
       totalProfit,
       "Marché aux esclaves",
       "Vente de personnel",
       `Vente de ${amount} esclaves`
     );
     
-    if (transactionSuccess) {
-      setTotalSlaves(prev => prev - amount);
-      toast.success(`Vente de ${amount} esclaves pour ${totalProfit.toLocaleString()} As`);
-      return true;
-    }
-    
-    return false;
+    setTotalSlaves(prev => prev - amount);
+    toast.success(`Vente de ${amount} esclaves pour ${totalProfit.toLocaleString()} As`);
+    return true;
   };
   
   // Assigner des esclaves à une propriété
