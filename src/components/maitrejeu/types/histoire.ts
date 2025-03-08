@@ -1,5 +1,5 @@
 
-import { GameDate, ImportanceType } from './common';
+import { GameDate, ImportanceType, Season } from './common';
 
 export interface HistoireEntry {
   id: string;
@@ -10,4 +10,7 @@ export interface HistoireEntry {
   importance: ImportanceType;
   visible: boolean;
   auteur?: string;
+  type?: string;
+  description?: string;
+  personnagesImpliqués?: string[];
 }

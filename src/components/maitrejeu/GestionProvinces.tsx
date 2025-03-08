@@ -1,106 +1,116 @@
 
-import React, { useState, useEffect } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
+import React, { useState } from 'react';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Search, PlusCircle, MapPin } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Search, Plus, MapPin } from 'lucide-react';
+import { Input } from '@/components/ui/input';
+import { ProvincesMap } from './components/ProvincesMap';
 import { ProvinceCard } from './components/ProvinceCard';
 import { ProvinceModal } from './components/ProvinceModal';
-import { ProvincesMap } from './components/ProvincesMap';
-import { ProvincesData } from './components/ProvincesData';
-import { Province } from './types/provinces';
 import { useMaitreJeu } from './context';
+import { Province } from './types/provinces';
 
 export const GestionProvinces = () => {
   const { provinces, updateProvince } = useMaitreJeu();
-  const [searchTerm, setSearchTerm] = useState('');
-  const [selectedTab, setSelectedTab] = useState('carte');
-  const [showProvinceModal, setShowProvinceModal] = useState(false);
-  const [selectedProvince, setSelectedProvince] = useState<Province | null>(null);
   
-  // Filtre pour les provinces
-  const filteredProvinces = provinces.filter(province => 
-    province.nom.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    (province.région && province.région.toLowerCase().includes(searchTerm.toLowerCase())) ||
-    (province.gouverneur && province.gouverneur.toLowerCase().includes(searchTerm.toLowerCase()))
-  );
-
-  // Gestion de la sélection de province sur la carte
+  const [searchTerm, setSearchTerm] = useState('');
+  const [activeTab, setActiveTab] = useState('liste');
+  const [selectedProvince, setSelectedProvince] = useState<Province | null>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  
   const handleProvinceSelect = (provinceId: string) => {
     const province = provinces.find(p => p.id === provinceId);
     if (province) {
       setSelectedProvince(province);
-      setShowProvinceModal(true);
+      setIsModalOpen(true);
     }
-  };
-
-  // Gestion de la mise à jour d'une province
-  const handleSaveProvince = (updatedProvince: Province) => {
-    updateProvince(updatedProvince.id, updatedProvince);
-    setShowProvinceModal(false);
   };
   
-  // Fonction pour voir les détails d'une province
-  const handleViewProvince = (provinceId: string) => {
-    const province = provinces.find(p => p.id === provinceId);
-    if (province) {
-      setSelectedProvince(province);
-      setShowProvinceModal(true);
-    }
+  const handleCloseModal = () => {
+    setIsModalOpen(false);
+    setSelectedProvince(null);
   };
+  
+  const handleSaveProvince = (updatedProvince: Province) => {
+    updateProvince(updatedProvince);
+    handleCloseModal();
+  };
+  
+  // Filter provinces based on search
+  const filteredProvinces = provinces.filter(province => 
+    province.nom.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    province.région.toLowerCase().includes(searchTerm.toLowerCase())
+  );
   
   return (
-    <div className="p-4">
-      <div className="flex justify-between items-center mb-6">
-        <h2 className="text-2xl font-semibold">Gestion des Provinces</h2>
-        <div className="flex items-center space-x-2">
-          <div className="relative">
-            <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-            <Input
-              type="search"
-              placeholder="Rechercher une province..."
-              className="pl-8 w-[250px]"
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-            />
-          </div>
-        </div>
-      </div>
-      
-      <Tabs value={selectedTab} onValueChange={setSelectedTab} className="mb-6">
-        <TabsList>
-          <TabsTrigger value="carte">Carte</TabsTrigger>
-          <TabsTrigger value="liste">Liste des provinces</TabsTrigger>
-          <TabsTrigger value="économie">Données économiques</TabsTrigger>
-        </TabsList>
+    <div className="space-y-6">
+      <Card>
+        <CardHeader>
+          <CardTitle>Gestion des Provinces</CardTitle>
+          <CardDescription>
+            Gérez les provinces de la République et leurs ressources
+          </CardDescription>
+          
+          <Tabs value={activeTab} onValueChange={setActiveTab} className="mt-4">
+            <TabsList className="grid w-full grid-cols-2">
+              <TabsTrigger value="liste">Liste des Provinces</TabsTrigger>
+              <TabsTrigger value="carte">Carte de l'Empire</TabsTrigger>
+            </TabsList>
+          </Tabs>
+        </CardHeader>
         
-        <TabsContent value="carte">
-          <ProvincesMap provinces={provinces} onProvinceSelect={handleProvinceSelect} />
-        </TabsContent>
-        
-        <TabsContent value="liste">
-          <div className="grid grid-cols-3 gap-4">
-            {filteredProvinces.map(province => (
-              <ProvinceCard 
-                key={province.id} 
-                province={province} 
-                onViewProvince={handleViewProvince} 
+        <CardContent>
+          <div className="flex gap-4 mb-6">
+            <div className="relative flex-1">
+              <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+              <Input
+                placeholder="Rechercher une province..."
+                className="pl-8"
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
               />
-            ))}
+            </div>
+            <Button>
+              <Plus className="h-4 w-4 mr-2" />
+              Nouvelle Province
+            </Button>
           </div>
-        </TabsContent>
-        
-        <TabsContent value="économie">
-          <ProvincesData provinces={provinces} onViewProvince={handleViewProvince} />
-        </TabsContent>
-      </Tabs>
+          
+          <TabsContent value="liste" className="mt-0">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {filteredProvinces.map((province) => (
+                <ProvinceCard 
+                  key={province.id} 
+                  province={province} 
+                  onSelect={() => handleProvinceSelect(province.id)}
+                />
+              ))}
+              
+              {filteredProvinces.length === 0 && (
+                <div className="col-span-full text-center py-10 text-muted-foreground">
+                  Aucune province ne correspond à votre recherche.
+                </div>
+              )}
+            </div>
+          </TabsContent>
+          
+          <TabsContent value="carte" className="mt-0">
+            <div className="h-[500px] border rounded-md overflow-hidden">
+              <ProvincesMap 
+                provinces={provinces} 
+                onProvinceSelect={handleProvinceSelect}
+              />
+            </div>
+          </TabsContent>
+        </CardContent>
+      </Card>
       
       {selectedProvince && (
-        <ProvinceModal
-          province={selectedProvince}
-          open={showProvinceModal}
-          onClose={() => setShowProvinceModal(false)}
+        <ProvinceModal 
+          province={selectedProvince} 
+          isOpen={isModalOpen}
+          onClose={handleCloseModal} 
           onSave={handleSaveProvince}
         />
       )}

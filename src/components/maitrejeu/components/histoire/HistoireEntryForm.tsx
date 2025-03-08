@@ -4,7 +4,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { HistoireEntry, Season } from '../../types/histoire';
+import { HistoireEntry } from '../../types/histoire';
+import { Season } from '../../types/common';
 
 interface HistoireEntryFormProps {
   year: number;
@@ -25,6 +26,9 @@ export const HistoireEntryForm: React.FC<HistoireEntryFormProps> = ({
       season: season,
       day: 1
     },
+    catégorie: 'POLITIQUE',
+    importance: 'normale',
+    visible: true,
     personnagesImpliqués: [],
     type: 'POLITIQUE'
   });
@@ -66,6 +70,9 @@ export const HistoireEntryForm: React.FC<HistoireEntryFormProps> = ({
         season: season,
         day: 1
       },
+      catégorie: 'POLITIQUE',
+      importance: 'normale',
+      visible: true,
       personnagesImpliqués: [],
       type: 'POLITIQUE'
     });

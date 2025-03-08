@@ -10,8 +10,8 @@ export * from './elections';
 export * from './magistratures';
 export * from './histoire';
 export * from './timeManagement';
-export * from './context';
 
 // Explicitly re-export types with correct syntax
 export type { GamePhase, Season, ImportanceType, PhaseType } from './common';
 export type { GameDate } from './common';
+export { generateId, adaptLegacyData, convertTimeSeasonToMaitreJeuSeason, convertMaitreJeuSeasonToTimeSeason, createGameDate } from './common';

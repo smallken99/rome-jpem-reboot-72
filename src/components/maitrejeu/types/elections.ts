@@ -1,5 +1,5 @@
 
-import { GameDate } from './common';
+import { GameDate, Season } from './common';
 
 export interface Election {
   id: string;

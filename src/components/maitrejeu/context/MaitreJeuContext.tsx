@@ -1,16 +1,11 @@
-
 import React, { createContext, useState, useContext, useEffect, ReactNode } from 'react';
 import { v4 as uuidv4 } from 'uuid';
-import { createGameDate, generateId } from '../types/compatibilityAdapter';
+import { generateId } from '../types/common';
 import { 
   GamePhase, 
   Season, 
   ImportanceType 
 } from '../types/common';
-import { 
-  MaitreJeuContextType,
-  TimeContextType 
-} from './types';
 import { Equilibre } from '../types/equilibre';
 import { Province } from '../types/provinces';
 import { SenateurJouable } from '../types/senateurs';
@@ -19,8 +14,39 @@ import { Election } from '../types/elections';
 import { Loi } from '../types/lois';
 import { HistoireEntry } from '../types/histoire';
 
+export interface MaitreJeuContextType {
+  // État du jeu
+  currentYear: number;
+  currentSeason: Season;
+  currentPhase: GamePhase;
+  
+  // Données du jeu
+  senateurs: SenateurJouable[];
+  provinces: Province[];
+  equilibre: Equilibre;
+  evenements: Evenement[];
+  elections: Election[];
+  lois: Loi[];
+  histoireEntries: HistoireEntry[];
+  
+  // Fonctions pour mettre à jour les données
+  advanceTime: () => void;
+  changePhase: (phase: GamePhase) => void;
+  updateSenateur: (updatedSenateur: SenateurJouable) => void;
+  assignSenateurToPlayer: (senateurId: string, playerId: string | null) => void;
+  updateProvince: (updatedProvince: Province) => void;
+  addEvenement: (newEvenement: Omit<Evenement, 'id'>) => void;
+  resolveEvenement: (evenementId: string, optionId: string) => void;
+  planifierElection: (magistrature: string, year: number, season: Season) => void;
+  addCandidateToElection: (electionId: string, candidateId: string) => void;
+  proposerLoi: (nouvelleLoi: Omit<Loi, 'id'>) => void;
+  voterLoi: (loiId: string, type: 'pour' | 'contre' | 'abstention', nombre: number) => void;
+  addHistoireEntry: (entry: Omit<HistoireEntry, 'id'>) => void;
+  updateEquilibre: (newValues: Partial<Equilibre>) => void;
+}
+
 // Contexte pour le maître du jeu
-const MaitreJeuContext = createContext<MaitreJeuContextType>({} as MaitreJeuContextType);
+export const MaitreJeuContext = createContext<MaitreJeuContextType>({} as MaitreJeuContextType);
 
 // Hook pour utiliser le contexte
 export const useMaitreJeu = () => useContext(MaitreJeuContext);
@@ -159,11 +185,15 @@ export const MaitreJeuProvider: React.FC<MaitreJeuProviderProps> = ({ children }
     {
       id: '1',
       magistrature: 'CONSUL',
+      annee: 632,
+      saison: 'SUMMER',
+      candidats: ['Gaius Julius Caesar', 'Marcus Calpurnius Bibulus'],
+      results: null,
+      status: 'planifiée',
+      // Compatibility fields
       year: 632,
       season: 'SUMMER',
-      candidates: ['Gaius Julius Caesar', 'Marcus Calpurnius Bibulus'],
-      results: null,
-      status: 'planifiée'
+      candidates: ['Gaius Julius Caesar', 'Marcus Calpurnius Bibulus']
     }
   ]);
   
@@ -300,12 +330,16 @@ export const MaitreJeuProvider: React.FC<MaitreJeuProviderProps> = ({ children }
   const planifierElection = (magistrature: string, year: number, season: Season) => {
     const nouvelleElection: Election = {
       id: generateId(),
-      magistrature: magistrature as any,
+      magistrature,
+      annee: year,
+      saison: season,
+      candidats: [],
+      results: null,
+      status: 'planifiée',
+      // Compatibility fields
       year,
       season,
-      candidates: [],
-      results: null,
-      status: 'planifiée'
+      candidates: []
     };
     
     setElections(prev => [...prev, nouvelleElection]);
@@ -316,7 +350,8 @@ export const MaitreJeuProvider: React.FC<MaitreJeuProviderProps> = ({ children }
       if (e.id === electionId) {
         return {
           ...e,
-          candidates: [...e.candidates, candidateId]
+          candidats: [...e.candidats, candidateId],
+          candidates: [...e.candidates || [], candidateId]
         };
       }
       return e;

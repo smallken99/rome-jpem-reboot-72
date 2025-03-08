@@ -1,171 +1,115 @@
-// Mise à jour des imports pour ElectionPlanner
-import React, { useState, useContext } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
+
+import React, { useState } from 'react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { PlusCircle, Calendar, User } from 'lucide-react';
-import { MaitreJeuContext } from '../context/MaitreJeuContext';
-import { MagistratureType } from '../types/magistratures';
-import { Season } from '../types/common';
-import { SenateurJouable } from '../types/senateurs';
+import { Button } from '@/components/ui/button';
+import { Calendar } from '@/components/ui/calendar';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { Calendar as CalendarIcon } from 'lucide-react';
+import { cn } from '@/lib/utils';
+import { format } from 'date-fns';
+import { useMaitreJeu } from '../context';
 
-interface ElectionPlannerProps {
-  senateurs: SenateurJouable[];
-  onScheduleElection: (magistrature: MagistratureType, year: number, season: Season) => void;
-}
-
-export const ElectionPlanner: React.FC<ElectionPlannerProps> = ({ 
-  senateurs,
-  onScheduleElection 
-}) => {
-  const { currentYear, currentSeason, elections } = useContext(MaitreJeuContext);
+const ElectionPlanner = () => {
+  const { currentYear, currentSeason, elections, planifierElection } = useMaitreJeu();
   
-  const [selectedMagistrature, setSelectedMagistrature] = useState<MagistratureType>('CONSUL');
-  const [selectedYear, setSelectedYear] = useState<number>(currentYear);
-  const [selectedSeason, setSelectedSeason] = useState<Season>(currentSeason);
+  const [magistrature, setMagistrature] = useState('CONSUL');
+  const [date, setDate] = useState<Date | undefined>(new Date());
+  const [season, setSeason] = useState('SPRING');
   
-  // Fonction pour planifier une élection
-  const handleScheduleElection = () => {
-    onScheduleElection(selectedMagistrature, selectedYear, selectedSeason);
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (date) {
+      const year = date.getFullYear();
+      planifierElection(magistrature, year, season as any);
+    }
   };
   
-  // Filtrer les magistratures disponibles
-  const availableMagistrates = [
-    { value: 'CONSUL', label: 'Consul' },
-    { value: 'PRETEUR', label: 'Préteur' },
-    { value: 'EDILE', label: 'Édile' },
-    { value: 'QUESTEUR', label: 'Questeur' },
-    { value: 'CENSEUR', label: 'Censeur' },
-    { value: 'TRIBUN', label: 'Tribun' },
-    { value: 'PONTIFEX_MAXIMUS', label: 'Pontifex Maximus' }
-  ];
-  
-  // Options pour les années
-  const years = [currentYear, currentYear + 1, currentYear + 2].map(y => ({
-    value: y,
-    label: `${y} AUC`
-  }));
-  
-  // Options pour les saisons
-  const seasons = [
-    { value: 'SPRING', label: 'Printemps' },
-    { value: 'SUMMER', label: 'Été' },
-    { value: 'AUTUMN', label: 'Automne' },
-    { value: 'WINTER', label: 'Hiver' }
-  ];
-  
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>Planifier une élection</CardTitle>
-      </CardHeader>
-      <CardContent>
-        <div className="grid grid-cols-4 gap-4 mb-4">
-          <div>
-            <Select
-              value={selectedMagistrature}
-              onValueChange={(v) => setSelectedMagistrature(v as MagistratureType)}
-            >
-              <SelectTrigger>
-                <SelectValue placeholder="Magistrature" />
-              </SelectTrigger>
-              <SelectContent>
-                {availableMagistrates.map(mag => (
-                  <SelectItem key={mag.value} value={mag.value}>
-                    {mag.label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-          
-          <div>
-            <Select
-              value={selectedYear.toString()}
-              onValueChange={(v) => setSelectedYear(parseInt(v))}
-            >
-              <SelectTrigger>
-                <SelectValue placeholder="Année" />
-              </SelectTrigger>
-              <SelectContent>
-                {years.map(year => (
-                  <SelectItem key={year.value} value={year.value.toString()}>
-                    {year.label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-          
-          <div>
-            <Select
-              value={selectedSeason}
-              onValueChange={(v) => setSelectedSeason(v as Season)}
-            >
+    <div className="rounded-lg border p-4">
+      <h3 className="text-lg font-semibold mb-4">Planifier une élection</h3>
+      
+      <form onSubmit={handleSubmit} className="space-y-4">
+        <div>
+          <label className="block text-sm font-medium mb-1">Magistrature</label>
+          <Select value={magistrature} onValueChange={setMagistrature}>
+            <SelectTrigger>
+              <SelectValue placeholder="Sélectionner une magistrature" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="CONSUL">Consul</SelectItem>
+              <SelectItem value="PRETEUR">Préteur</SelectItem>
+              <SelectItem value="EDILE">Édile</SelectItem>
+              <SelectItem value="QUESTEUR">Questeur</SelectItem>
+              <SelectItem value="CENSEUR">Censeur</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+        
+        <div>
+          <label className="block text-sm font-medium mb-1">Date</label>
+          <div className="grid grid-cols-2 gap-2">
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button
+                  variant="outline"
+                  className={cn(
+                    "justify-start text-left font-normal",
+                    !date && "text-muted-foreground"
+                  )}
+                >
+                  <CalendarIcon className="mr-2 h-4 w-4" />
+                  {date ? format(date, "PPP") : <span>Choisir une date</span>}
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-auto p-0">
+                <Calendar
+                  mode="single"
+                  selected={date}
+                  onSelect={setDate}
+                  initialFocus
+                />
+              </PopoverContent>
+            </Popover>
+            
+            <Select value={season} onValueChange={setSeason}>
               <SelectTrigger>
                 <SelectValue placeholder="Saison" />
               </SelectTrigger>
               <SelectContent>
-                {seasons.map(season => (
-                  <SelectItem key={season.value} value={season.value}>
-                    {season.label}
-                  </SelectItem>
-                ))}
+                <SelectItem value="SPRING">Printemps</SelectItem>
+                <SelectItem value="SUMMER">Été</SelectItem>
+                <SelectItem value="AUTUMN">Automne</SelectItem>
+                <SelectItem value="WINTER">Hiver</SelectItem>
               </SelectContent>
             </Select>
           </div>
-          
-          <Button onClick={handleScheduleElection}>
-            <PlusCircle className="h-4 w-4 mr-2" />
-            Planifier l'élection
-          </Button>
         </div>
         
-        {/* Reste du composant (liste des élections planifiées, etc.) */}
-        <h3 className="text-lg font-semibold mb-2">Élections planifiées</h3>
-        {elections.length === 0 ? (
-          <Alert>
-            <Calendar className="h-4 w-4" />
-            <AlertDescription>
-              Aucune élection n'est planifiée pour le moment.
-            </AlertDescription>
-          </Alert>
+        <Button type="submit" className="w-full">
+          Planifier l'élection
+        </Button>
+      </form>
+      
+      <div className="mt-4">
+        <h4 className="font-medium mb-2">Élections planifiées</h4>
+        {elections && elections.length > 0 ? (
+          <ul className="space-y-2">
+            {elections.map((election) => (
+              <li key={election.id} className="border rounded p-2 text-sm">
+                <div className="font-medium">{election.magistrature}</div>
+                <div className="text-muted-foreground">
+                  {election.year || election.annee} - {election.season || election.saison} ({election.status})
+                </div>
+              </li>
+            ))}
+          </ul>
         ) : (
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Magistrature</TableHead>
-                <TableHead>Année</TableHead>
-                <TableHead>Saison</TableHead>
-                <TableHead>Candidats</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {elections.map(election => (
-                <TableRow key={election.id}>
-                  <TableCell>{election.magistrature}</TableCell>
-                  <TableCell>{election.année} AUC</TableCell>
-                  <TableCell>{election.saison}</TableCell>
-                  <TableCell>
-                    {election.candidats.length > 0 ? (
-                      election.candidats.map(candidat => (
-                        <div key={candidat.id} className="flex items-center space-x-2">
-                          <User className="h-4 w-4" />
-                          <span>{candidat.nom}</span>
-                        </div>
-                      ))
-                    ) : (
-                      <span>Aucun candidat</span>
-                    )}
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
+          <p className="text-sm text-muted-foreground">Aucune élection planifiée.</p>
         )}
-      </CardContent>
-    </Card>
+      </div>
+    </div>
   );
 };
+
+export default ElectionPlanner;
