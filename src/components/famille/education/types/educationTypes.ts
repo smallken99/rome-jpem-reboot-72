@@ -1,11 +1,12 @@
 
 // Types pour le système d'éducation
+import { ReactNode } from 'react';
 
 export interface EducationPath {
   id: string;
   name: string;
   description: string;
-  icon: React.ReactNode;
+  icon: ReactNode;
   benefits: string[];
   requirements: {
     age: number;
@@ -183,11 +184,12 @@ export interface EducationContextType {
   selectedPreceptor: Preceptor | null;
   isLoading: boolean;
   isHiringPreceptor: boolean;
+  hiredPreceptors: Preceptor[];
   setSelectedChild: (child: Child | null) => void;
   setSelectedPreceptor: (preceptor: Preceptor | null) => void;
   loadPreceptorsByType: (speciality: string) => Preceptor[];
-  hirePreceptor: (childId: string, preceptorId: string) => Promise<void>;
-  changeChildEducation: (childId: string, educationType: string, preceptorId: string | null, speciality?: string) => void;
+  hirePreceptor: (preceptor: Preceptor) => Promise<boolean>;
+  startChildEducation: (childId: string, educationType: string, mentorId: string | null, specialties?: string[]) => boolean;
   getEducationProgress: (childId: string) => number;
   advanceEducation: (childId: string) => void;
   completeEducation: (childId: string) => void;

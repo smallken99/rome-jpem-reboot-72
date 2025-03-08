@@ -1,181 +1,167 @@
 
-import { Season } from "@/utils/timeSystem";
+import { ReactNode } from 'react';
 
-// Types pour le système MaitreJeu
-export interface GameState {
+// Types pour le système temporel
+export interface TimeState {
   year: number;
-  season: Season;
-  dayInSeason: number;
-  gamePhase: GamePhase;
+  month: number;
+  day: number;
+  season: 'hiver' | 'printemps' | 'été' | 'automne';
+  consulat: string;
+  advanceTime: (days: number) => void;
 }
 
-export type GamePhase = 
-  | 'VOTE_DES_LOIS'
-  | 'ÉLECTIONS'
-  | 'ADMINISTRATION'
-  | 'GUERRE'
-  | 'CRISES'
-  | 'DIPLOMATIE'
-  | 'COMMERCE';
-
-export interface Equilibre {
-  plebeiens: number; // 0-100, satisfaction du peuple
-  patriciens: number; // 0-100, satisfaction des familles nobles
-  armée: number; // 0-100, force et loyauté
-  religion: number; // 0-100, piété et faveur des dieux
-  économie: number; // 0-100, santé économique 
-  diplomatie: number; // 0-100, relations extérieures
-}
-
+// Types pour les événements
 export interface Evenement {
   id: string;
-  title: string;
+  type: 'politique' | 'militaire' | 'économique' | 'religieux' | 'social';
+  titre: string;
   description: string;
   date: {
     year: number;
-    season: Season;
+    month: number;
+    day: number;
   };
-  impact: Partial<Equilibre>;
-  sourcePersistante: boolean;
-  type: 'CRISE' | 'GUERRE' | 'POLITIQUE' | 'RELIGION' | 'ÉCONOMIQUE' | 'DIPLOMATIQUE' | 'SOCIAL';
+  impact: {
+    stabilité?: number;
+    trésorPublique?: number;
+    prestigeRome?: number;
+    religion?: number;
+    autre?: Record<string, number>;
+  };
+  options?: Array<{
+    id: string;
+    titre: string;
+    description: string;
+    conséquences: string;
+    impactModifiers: Record<string, number>;
+  }>;
   résolu: boolean;
-  actions: EvenementAction[];
+  optionChoisie?: string;
+  acteur?: string;
 }
 
-export interface EvenementAction {
-  id: string;
-  description: string;
-  impact: Partial<Equilibre>;
-  coût: number;
-  risque: number; // 0-100
-}
-
-export interface HistoireEntry {
-  id: string;
-  title: string;
-  description: string;
-  date: {
-    year: number;
-    season: Season;
-  };
-  type: 'MAJEUR' | 'MINEUR';
-  personnagesImpliqués: string[];
-  images?: string[];
-}
-
+// Types pour les provinces
 export interface Province {
   id: string;
   nom: string;
-  gouverneur: string | null;
-  ressources: {
-    blé: number;
-    or: number;
-    bois: number;
-    pierre: number;
-    fer: number;
-  };
-  loyauté: number; // 0-100
-  garnisonMilitaire: number; // taille de la garnison
+  region: string;
+  statut: 'pacifiée' | 'instable' | 'en révolte' | 'en guerre';
   population: number;
-  revenus: number;
-  dépenses: number;
-  statut: 'PACIFIÉE' | 'REBELLE' | 'EN_GUERRE' | 'INSTABLE';
-  position: {
+  richesse: number;
+  revenuAnnuel: number;
+  impôts: number;
+  gouverneur: string | null;
+  légions: number;
+  garnison: number;
+  loyauté: number;
+  ressourcesPrincipales: string[];
+  problèmes: string[];
+  opportunités: string[];
+  coordonnées: {
     x: number;
     y: number;
   };
 }
 
-export interface Senateur {
+// Types pour les senateurs
+export interface SenateurJouable {
   id: string;
   nom: string;
-  âge: number;
   famille: string;
-  faction: string;
-  stats: {
-    éloquence: number;
-    guerre: number;
-    intrigue: number;
-    administration: number;
-    diplomatie: number;
-  };
-  magistrature: string | null;
-  richesse: number;
+  âge: number;
+  fonctionActuelle: string | null;
+  statut: 'actif' | 'inactif' | 'décédé';
+  popularité: number;
   influence: number;
-  réputation: number;
-  assignéJoueur: string | null;
+  richesse: number;
+  compétences: Record<string, number>;
+  relations: Record<string, number>;
+  appartenance: string | null;
+  ambition: string;
+  joueurId: string | null;
 }
 
-export interface Faction {
+// Types pour les factions politiques
+export interface FactionPolitique {
   id: string;
   nom: string;
-  leader: string;
+  idéologie: string;
   membres: string[];
+  leader: string;
   influence: number;
-  objectifs: string[];
-  couleur: string;
+  alliés: string[];
+  ennemis: string[];
+  programme: string[];
 }
 
-export interface Election {
-  id: string;
-  poste: string;
-  candidats: string[];
-  date: {
-    year: number;
-    season: Season;
-  };
-  résultat: string | null;
-}
-
+// Types pour les lois
 export interface Loi {
   id: string;
   nom: string;
   description: string;
   proposéPar: string;
-  datePropositon: {
+  datePrésentation: {
     year: number;
-    season: Season;
+    month: number;
+    day: number;
   };
-  votes: {
-    pour: number;
-    contre: number;
-    abstention: number;
+  dateVote?: {
+    year: number;
+    month: number;
+    day: number;
   };
-  status: 'PROPOSÉE' | 'ADOPTÉE' | 'REJETÉE';
-  effets: Partial<Equilibre> & { description: string };
+  résultat?: 'adoptée' | 'rejetée' | 'en attente';
+  votePour: number;
+  voteContre: number;
+  abstentions: number;
+  effets: string[];
+  statusActuel: 'en préparation' | 'présentée' | 'débattue' | 'votée' | 'promulguée' | 'abrogée';
 }
 
+// Types pour le contexte Maître du Jeu
 export interface MaitreJeuContextType {
-  gameState: GameState;
-  equilibre: Equilibre;
-  evenements: Evenement[];
-  histoireEntries: HistoireEntry[];
-  provinces: Province[];
-  senateurs: Senateur[];
-  factions: Faction[];
-  elections: Election[];
-  lois: Loi[];
+  // Gestion du temps
+  advanceDay: () => void;
+  advanceMonth: () => void;
+  advanceYear: () => void;
+  advanceCustom: (days: number) => void;
   
-  // Actions
-  setGameState: (gameState: GameState) => void;
-  advanceTime: () => void;
-  modifyEquilibre: (changes: Partial<Equilibre>) => void;
-  addEvenement: (evenement: Evenement) => void;
-  resolveEvenement: (id: string) => void;
-  addHistoireEntry: (entry: HistoireEntry) => void;
-  updateHistoireEntry: (id: string, entry: Partial<HistoireEntry>) => void;
-  deleteHistoireEntry: (id: string) => void;
-  addProvince: (province: Province) => void;
-  updateProvince: (id: string, province: Partial<Province>) => void;
-  assignGouverneur: (provinceId: string, senateurId: string) => void;
-  addSenateur: (senateur: Senateur) => void;
-  updateSenateur: (id: string, senateur: Partial<Senateur>) => void;
-  assignSenateurToPlayer: (senateurId: string, playerId: string) => void;
-  addFaction: (faction: Faction) => void;
-  updateFaction: (id: string, faction: Partial<Faction>) => void;
-  addElection: (election: Election) => void;
-  resolveElection: (id: string, gagnant: string) => void;
-  addLoi: (loi: Loi) => void;
-  updateLoi: (id: string, loi: Partial<Loi>) => void;
-  voteLoi: (id: string, vote: 'pour' | 'contre' | 'abstention', count: number) => void;
+  // Gestion des événements
+  événementsEnCours: Evenement[];
+  événementsHistoriques: Evenement[];
+  ajouterÉvénement: (événement: Omit<Evenement, 'id'>) => string;
+  résoudreÉvénement: (événementId: string, optionId?: string) => void;
+  modifierÉvénement: (événement: Evenement) => void;
+  
+  // Gestion des provinces
+  provinces: Province[];
+  ajouterProvince: (province: Omit<Province, 'id'>) => string;
+  modifierProvince: (province: Province) => void;
+  attribuerGouverneur: (provinceId: string, gouverneurId: string | null) => void;
+  
+  // Gestion des sénateurs
+  senateursJouables: SenateurJouable[];
+  senateursAssignes: Record<string, string>;
+  ajouterSénateur: (sénateur: Omit<SenateurJouable, 'id'>) => string;
+  modifierSénateur: (sénateur: SenateurJouable) => void;
+  assignerJoueur: (senateurId: string, joueurId: string | null) => void;
+  
+  // Gestion des lois
+  lois: Loi[];
+  ajouterLoi: (loi: Omit<Loi, 'id'>) => string;
+  modifierLoi: (loi: Loi) => void;
+  voterLoi: (loiId: string, résultat: 'adoptée' | 'rejetée', votePour: number, voteContre: number, abstentions: number) => void;
+  
+  // Gestion des factions
+  factionsPolitiques: FactionPolitique[];
+  ajouterFaction: (faction: Omit<FactionPolitique, 'id'>) => string;
+  modifierFaction: (faction: FactionPolitique) => void;
+  
+  // Gestion de l'économie
+  trésorPublique: number;
+  modifierTrésor: (montant: number, raison: string) => void;
+  
+  // Chargé du contexte
+  isLoading: boolean;
 }
