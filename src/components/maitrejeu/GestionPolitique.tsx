@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -7,7 +8,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { PlusCircle, Calendar, Book } from 'lucide-react';
 import { Loi } from './types';
 import { useMaitreJeu } from './context';
-import { MagistratureType, Season } from './types/index';
+import { MagistratureTypes } from './types/index';
+import { Season } from './types/common';
 import { v4 as uuidv4 } from 'uuid';
 
 export const GestionPolitique = () => {

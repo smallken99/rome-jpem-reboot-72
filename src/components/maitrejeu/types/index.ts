@@ -4,7 +4,7 @@ import * as EquilibreTypes from './equilibre';
 import * as ProvinceTypes from './provinces';
 import * as EventTypes from './evenements';
 import * as LoisTypes from './lois';
-export { default as MagistratureTypes } from './magistratures';
+export { MagistratureType } from './magistratures'; 
 export type { GamePhase, Season, GameDate, ImportanceType } from './common';
 
 // Resolve ambiguous exports
@@ -19,5 +19,5 @@ export type { Election } from './elections';
 export type { Equilibre } from './equilibre';
 export type { SenateurJouable } from './senateurs';
 export type { Province } from './provinces';
-export type { Evenement, EvenementAction, EvenementOption } from './evenements';
+export type { Evenement, EvenementAction } from './evenements';
 export type { Loi } from './lois';

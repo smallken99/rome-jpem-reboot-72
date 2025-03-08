@@ -1,3 +1,4 @@
+
 import { Season } from "@/components/maitrejeu/types/common";
 
 // Fonction pour convertir une saison en nom français
