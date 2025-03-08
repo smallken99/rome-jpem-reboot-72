@@ -2,7 +2,8 @@
 import React from 'react';
 import { ActionButton } from '@/components/ui-custom/ActionButton';
 import { useNavigate } from 'react-router-dom';
-import { useToast } from '@/hooks/use-toast';
+import { toast } from 'sonner';
+import { useEducation } from '../context/EducationContext';
 
 interface CardActionsProps {
   educationType: string;
@@ -19,24 +20,18 @@ export const CardActions: React.FC<CardActionsProps> = ({
 }) => {
   const hasEducation = educationType !== 'none';
   const navigate = useNavigate();
-  const { toast } = useToast();
+  const { completeEducation } = useEducation();
   
   const handleChangePreceptor = () => {
     navigate(`/famille/education/preceptors?childId=${childId}&type=${educationType}`);
   };
   
   const handleRemoveEducation = () => {
-    // Simulate removing education
-    toast({
-      title: "Éducation supprimée",
-      description: "L'éducation de l'enfant a été réinitialisée.",
-      variant: "default",
-    });
+    // Use our context to complete the education
+    completeEducation(childId);
     
-    // Redirect to refresh the page
-    setTimeout(() => {
-      navigate(`/famille/education`);
-    }, 500);
+    // Show feedback
+    toast(`Éducation supprimée`);
   };
   
   return (

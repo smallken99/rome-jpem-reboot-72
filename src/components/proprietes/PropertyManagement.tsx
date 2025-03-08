@@ -1,93 +1,72 @@
-
-import React, { useState, useEffect } from 'react';
-import { RomanCard } from '@/components/ui-custom/RomanCard';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { PropertyManagementHeader } from './property-management/PropertyManagementHeader';
-import { UrbanPropertiesTab } from './property-management/UrbanPropertiesTab';
+import React, { useState } from 'react';
+import { Tabs, TabsContent } from '@/components/ui/tabs';
+import PropertyManagementHeader from './property-management/PropertyManagementHeader';
 import { RuralPropertiesTab } from './property-management/RuralPropertiesTab';
-import { MaintenanceTab } from './property-management/MaintenanceTab';
-import { ProfitabilityTab } from './property-management/profitability/ProfitabilityTab';
-import { SlaveManagementTab } from './property-management/SlaveManagementTab';
+// Fix import by importing default export
+import UrbanPropertiesTab from './property-management/UrbanPropertiesTab';
 import { MonetaryManagementTab } from './property-management/MonetaryManagementTab';
-import { useLocation, useNavigate } from 'react-router-dom';
-import { toast } from 'sonner';
+import { MaintenanceTab } from './property-management/MaintenanceTab';
+import { SlaveManagementTab } from './property-management/SlaveManagementTab';
+import { ProfitabilityTab } from './property-management/profitability/ProfitabilityTab';
 
-export const PropertyManagement: React.FC = () => {
-  const location = useLocation();
-  const navigate = useNavigate();
-  const [activeTab, setActiveTab] = useState<string>(() => {
-    // Get tab from URL hash or default to 'urbaines'
-    const hash = location.hash.replace('#', '');
-    return hash || 'urbaines';
-  });
-
-  // Update URL hash when tab changes
-  const handleTabChange = (value: string) => {
-    setActiveTab(value);
-    navigate(`${location.pathname}#${value}`, { replace: true });
-    toast.info(`Section ${getTabLabel(value)} sélectionnée`);
-  };
-
-  // Met à jour l'onglet actif si l'URL change
-  useEffect(() => {
-    const hash = location.hash.replace('#', '');
-    if (hash && hash !== activeTab) {
-      setActiveTab(hash);
-    }
-  }, [location.hash]);
-  
-  // Récupère le label de l'onglet pour le message toast
-  const getTabLabel = (tabValue: string): string => {
-    switch (tabValue) {
-      case 'urbaines': return 'Propriétés urbaines';
-      case 'rurales': return 'Propriétés rurales'; 
-      case 'esclaves': return 'Gestion des esclaves';
-      case 'monetaire': return 'Finances';
-      case 'entretien': return 'Entretien';
-      case 'revenus': return 'Rentabilité';
-      default: return 'Propriétés';
-    }
-  };
+const PropertyManagement = () => {
+  const [activeTab, setActiveTab] = useState("urban");
 
   return (
-    <RomanCard className="mb-6">
+    <div className="property-management">
       <PropertyManagementHeader />
-      <RomanCard.Content>
-        <Tabs value={activeTab} onValueChange={handleTabChange} className="mb-6">
-          <TabsList className="w-full justify-start border border-rome-gold/30 bg-rome-parchment overflow-x-auto">
-            <TabsTrigger value="urbaines" className="data-[state=active]:bg-white">Urbaines</TabsTrigger>
-            <TabsTrigger value="rurales" className="data-[state=active]:bg-white">Rurales</TabsTrigger>
-            <TabsTrigger value="esclaves" className="data-[state=active]:bg-white">Esclaves</TabsTrigger>
-            <TabsTrigger value="monetaire" className="data-[state=active]:bg-white">Finances</TabsTrigger>
-            <TabsTrigger value="entretien" className="data-[state=active]:bg-white">Entretien</TabsTrigger>
-            <TabsTrigger value="revenus" className="data-[state=active]:bg-white">Rentabilité</TabsTrigger>
-          </TabsList>
-          
-          <TabsContent value="urbaines" className="pt-4">
-            <UrbanPropertiesTab />
-          </TabsContent>
-          
-          <TabsContent value="rurales" className="pt-4">
-            <RuralPropertiesTab />
-          </TabsContent>
-          
-          <TabsContent value="esclaves" className="pt-4">
-            <SlaveManagementTab />
-          </TabsContent>
-          
-          <TabsContent value="monetaire" className="pt-4">
-            <MonetaryManagementTab />
-          </TabsContent>
-          
-          <TabsContent value="entretien" className="pt-4">
-            <MaintenanceTab />
-          </TabsContent>
-          
-          <TabsContent value="revenus" className="pt-4">
-            <ProfitabilityTab />
-          </TabsContent>
-        </Tabs>
-      </RomanCard.Content>
-    </RomanCard>
+      
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="mt-6">
+        <div className="overflow-x-auto">
+          <div className="w-full flex items-center justify-start space-x-4 py-2 border-b">
+            <button
+              className={`px-4 py-2 rounded-md text-sm font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 data-[state=active]:bg-secondary data-[state=active]:text-secondary-foreground ${activeTab === 'urban' ? 'bg-secondary text-secondary-foreground' : 'hover:bg-muted'}`}
+              onClick={() => setActiveTab("urban")}
+            >
+              Propriétés Urbaines
+            </button>
+            <button
+              className={`px-4 py-2 rounded-md text-sm font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 data-[state=active]:bg-secondary data-[state=active]:text-secondary-foreground ${activeTab === 'rural' ? 'bg-secondary text-secondary-foreground' : 'hover:bg-muted'}`}
+              onClick={() => setActiveTab("rural")}
+            >
+              Propriétés Rurales
+            </button>
+            <button
+              className={`px-4 py-2 rounded-md text-sm font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 data-[state=active]:bg-secondary data-[state=active]:text-secondary-foreground ${activeTab === 'monetary' ? 'bg-secondary text-secondary-foreground' : 'hover:bg-muted'}`}
+              onClick={() => setActiveTab("monetary")}
+            >
+              Gestion Monétaire
+            </button>
+            <button
+              className={`px-4 py-2 rounded-md text-sm font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 data-[state=active]:bg-secondary data-[state=active]:text-secondary-foreground ${activeTab === 'maintenance' ? 'bg-secondary text-secondary-foreground' : 'hover:bg-muted'}`}
+              onClick={() => setActiveTab("maintenance")}
+            >
+              Maintenance
+            </button>
+            <button
+              className={`px-4 py-2 rounded-md text-sm font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 data-[state=active]:bg-secondary data-[state=active]:text-secondary-foreground ${activeTab === 'slaves' ? 'bg-secondary text-secondary-foreground' : 'hover:bg-muted'}`}
+              onClick={() => setActiveTab("slaves")}
+            >
+              Esclaves
+            </button>
+            <button
+              className={`px-4 py-2 rounded-md text-sm font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 data-[state=active]:bg-secondary data-[state=active]:text-secondary-foreground ${activeTab === 'profitability' ? 'bg-secondary text-secondary-foreground' : 'hover:bg-muted'}`}
+              onClick={() => setActiveTab("profitability")}
+            >
+              Rentabilité
+            </button>
+          </div>
+        </div>
+
+        <UrbanPropertiesTab />
+        <RuralPropertiesTab />
+        <MonetaryManagementTab />
+        <MaintenanceTab />
+        <SlaveManagementTab />
+        <ProfitabilityTab />
+      </Tabs>
+    </div>
   );
 };
+
+export default PropertyManagement;

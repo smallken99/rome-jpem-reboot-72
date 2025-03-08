@@ -2,34 +2,11 @@
 import React from 'react';
 import { TabsContent } from '@/components/ui/tabs';
 import ChildEducationCard from '../ChildEducationCard';
-import { Child } from '../types/educationTypes';
-import { Character } from '@/types/character';
+import { useEducation } from '../context/EducationContext';
 
-interface CurrentEducationTabProps {
-  onNameChange?: (characterId: string, newName: string) => void;
-  characters?: Character[];
-}
-
-export const CurrentEducationTab: React.FC<CurrentEducationTabProps> = ({ 
-  onNameChange,
-  characters = []
-}) => {
-  // Convert Character objects to Child objects for the education system
-  const children: Child[] = characters
-    .filter(char => char.age < 18)
-    .map(char => ({
-      id: char.id,
-      name: char.name,
-      age: char.age,
-      gender: char.gender,
-      currentEducation: {
-        type: char.education?.type || 'none',
-        mentor: char.education?.mentor || null,
-        progress: 0,
-        skills: char.education?.specialties || [],
-        // Add additional education fields as needed
-      }
-    }));
+export const CurrentEducationTab: React.FC = () => {
+  // Use education context to get children
+  const { children } = useEducation();
 
   return (
     <TabsContent value="current">
@@ -40,7 +17,6 @@ export const CurrentEducationTab: React.FC<CurrentEducationTabProps> = ({
               <ChildEducationCard 
                 key={child.id} 
                 child={child} 
-                onChangeName={onNameChange}
               />
             ))
           ) : (

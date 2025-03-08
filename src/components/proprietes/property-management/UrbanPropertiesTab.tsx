@@ -1,84 +1,68 @@
+
 import React from 'react';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { PropertyPurchaseDialog } from './dialogs/PropertyPurchaseDialog';
+import { TabsContent } from '@/components/ui/tabs';
+import { UrbanPropertySelector } from './urban/UrbanPropertySelector';
+import { UrbanPropertyDetails } from './urban/UrbanPropertyDetails';
 import { OwnedUrbanPropertiesSection } from './urban/owned/OwnedUrbanPropertiesSection';
 import { UrbanCatalogueSection } from './urban/catalogue/UrbanCatalogueSection';
 import { useUrbanPropertiesTab } from './urban/hooks/useUrbanPropertiesTab';
 
-const UrbanPropertiesTab: React.FC = () => {
+// For type safety, define the allowed building types
+type AllowedBuildingType = 'residential' | 'religious' | 'public' | 'military';
+type UrbanBuildingCategory = 'religious' | 'public' | 'urban' | 'rural';
+
+const UrbanPropertiesTab = () => {
   const {
     selectedBuildingType,
-    setSelectedBuildingType,
-    selectedBuildingId,
-    setSelectedBuildingId,
-    purchaseDialogOpen,
-    setPurchaseDialogOpen,
-    selectedBuildingDetails,
-    filteredOwnedBuildings,
-    handlePurchase,
-    balance,
-    toggleMaintenance,
-    performMaintenance,
-    sellBuilding,
-    calculateBuildingValue,
-    assignSlaves,
-    availableSlaves
+    selectedBuilding,
+    filteredBuildings,
+    handleBuildingTypeChange,
+    handleBuildingSelect,
+    isViewingCatalogue,
+    setIsViewingCatalogue,
   } = useUrbanPropertiesTab();
 
   return (
-    <Tabs defaultValue="owned" className="w-full">
-      <div className="flex justify-between mb-4">
-        <div className="space-x-1">
-          <TabsList>
-            <TabsTrigger value="owned">Mes propriétés</TabsTrigger>
-            <TabsTrigger value="catalogue">Catalogue</TabsTrigger>
-          </TabsList>
+    <TabsContent value="urban" className="space-y-6">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {/* Left panel: Building selector */}
+        <div className="lg:col-span-1 space-y-6">
+          <UrbanPropertySelector
+            selectedBuildingType={selectedBuildingType as AllowedBuildingType}
+            onBuildingTypeChange={handleBuildingTypeChange}
+            isViewingCatalogue={isViewingCatalogue}
+            setIsViewingCatalogue={setIsViewingCatalogue}
+          />
+          
+          {isViewingCatalogue ? (
+            <UrbanCatalogueSection 
+              buildingType={selectedBuildingType as AllowedBuildingType} 
+              onBuildingSelect={handleBuildingSelect}
+            />
+          ) : (
+            <OwnedUrbanPropertiesSection
+              buildingType={selectedBuildingType as AllowedBuildingType}
+              onBuildingSelect={handleBuildingSelect}
+              selectedBuildingId={selectedBuilding?.id}
+            />
+          )}
+        </div>
+        
+        {/* Right panel: Building details */}
+        <div className="lg:col-span-2">
+          {selectedBuilding ? (
+            <UrbanPropertyDetails 
+              building={selectedBuilding} 
+              buildingCategory={selectedBuildingType as UrbanBuildingCategory}
+            />
+          ) : (
+            <div className="border rounded-lg p-6 bg-card text-center text-muted-foreground">
+              <p>Sélectionnez une propriété pour voir les détails</p>
+            </div>
+          )}
         </div>
       </div>
-
-      <TabsContent value="owned" className="mt-0">
-        <OwnedUrbanPropertiesSection 
-          selectedBuildingType={selectedBuildingType}
-          filteredOwnedBuildings={filteredOwnedBuildings}
-          balance={balance}
-          availableSlaves={availableSlaves}
-          setPurchaseDialogOpen={setPurchaseDialogOpen}
-          toggleMaintenance={toggleMaintenance}
-          performMaintenance={performMaintenance}
-          assignSlaves={assignSlaves}
-          sellBuilding={sellBuilding}
-          calculateBuildingValue={calculateBuildingValue}
-        />
-      </TabsContent>
-
-      <TabsContent value="catalogue" className="mt-0">
-        <UrbanCatalogueSection 
-          selectedBuildingType={selectedBuildingType}
-          setSelectedBuildingType={setSelectedBuildingType}
-          selectedBuildingId={selectedBuildingId}
-          setSelectedBuildingId={setSelectedBuildingId}
-          selectedBuildingDetails={selectedBuildingDetails}
-          purchaseDialogOpen={purchaseDialogOpen}
-          setPurchaseDialogOpen={setPurchaseDialogOpen}
-        />
-      </TabsContent>
-
-      {/* Dialogue d'achat */}
-      {selectedBuildingDetails && (
-        <PropertyPurchaseDialog 
-          open={purchaseDialogOpen} 
-          onOpenChange={setPurchaseDialogOpen}
-          buildingDetails={selectedBuildingDetails}
-          buildingId={selectedBuildingId || ''}
-          buildingType={
-            selectedBuildingType === 'residential' ? 'urban' : 
-            selectedBuildingType as 'religious' | 'public' | 'military'
-          }
-          onPurchase={handlePurchase}
-          balance={balance}
-        />
-      )}
-    </Tabs>
+    </TabsContent>
   );
 };
 

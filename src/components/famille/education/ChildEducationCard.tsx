@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { Check, GraduationCap, Ban } from 'lucide-react';
+import { Check, GraduationCap, Ban, Clock } from 'lucide-react';
 import { AnnualProgress } from './components/AnnualProgress';
 import { MentorInfo } from './components/MentorInfo';
 import { CardActions } from './components/CardActions';
@@ -9,24 +9,46 @@ import { PietyBonus } from './components/PietyBonus';
 import { EducationWarning } from './components/EducationWarning';
 import { StatBonusInfo } from './components/StatBonusInfo';
 import { Child } from './types/educationTypes';
+import { Button } from '@/components/ui/button';
+import { useEducation } from './context/EducationContext';
 
 interface ChildEducationCardProps {
   child: Child;
-  onChangeName?: (id: string, newName: string) => void;
 }
 
-const ChildEducationCard: React.FC<ChildEducationCardProps> = ({ child, onChangeName }) => {
+const ChildEducationCard: React.FC<ChildEducationCardProps> = ({ child }) => {
+  // Use our education context for functionality
+  const { 
+    educatingChildren, 
+    advanceEducationYear, 
+    completeEducation,
+    updateChildName 
+  } = useEducation();
+  
   // Determine if the child has an ongoing education
   const hasEducation = child.currentEducation?.type && child.currentEducation.type !== 'none';
   
   // Check if female with military education (invalid in Roman times)
   const hasInvalidEducation = child.gender === 'female' && child.currentEducation?.type === 'military';
   
+  // Check if education is in progress
+  const isEducating = educatingChildren[child.id];
+  
+  // Handle advancing education by a year
+  const handleAdvanceYear = () => {
+    advanceEducationYear(child.id);
+  };
+  
+  // Handle name change
+  const handleNameChange = (id: string, newName: string) => {
+    updateChildName(id, newName);
+  };
+  
   return (
     <div className="rounded-lg border bg-card text-card-foreground shadow-sm overflow-hidden">
       <ChildHeader 
         child={child} 
-        onNameChange={onChangeName}
+        onNameChange={handleNameChange}
         hasInvalidEducation={hasInvalidEducation}
       />
       
@@ -63,7 +85,9 @@ const ChildEducationCard: React.FC<ChildEducationCardProps> = ({ child, onChange
                 </h3>
                 <p className="text-sm text-muted-foreground">
                   Type: {child.currentEducation.type === 'military' ? 'Militaire' : 
-                        child.currentEducation.type === 'political' ? 'Politique' : 'Religieuse'}
+                        child.currentEducation.type === 'political' ? 'Politique' : 
+                        child.currentEducation.type === 'religious' ? 'Religieuse' :
+                        child.currentEducation.type === 'commercial' ? 'Commerce' : 'Inconnue'}
                 </p>
               </div>
               
@@ -103,6 +127,32 @@ const ChildEducationCard: React.FC<ChildEducationCardProps> = ({ child, onChange
                   statBonus={child.currentEducation.statBonus}
                 />
               </div>
+            </div>
+            
+            {/* Add education progression buttons */}
+            <div className="mt-4 pt-4 border-t flex justify-end gap-2">
+              <Button
+                variant="outline"
+                size="sm"
+                disabled={isEducating}
+                onClick={handleAdvanceYear}
+                className="flex items-center gap-1"
+              >
+                <Clock className="h-4 w-4" />
+                {isEducating ? 'En cours...' : 'Avancer d\'une année'}
+              </Button>
+              
+              {child.currentEducation.progress >= 90 && (
+                <Button
+                  variant="default"
+                  size="sm"
+                  onClick={() => completeEducation(child.id)}
+                  className="bg-green-600 hover:bg-green-700"
+                >
+                  <GraduationCap className="h-4 w-4 mr-1" />
+                  Compléter l'éducation
+                </Button>
+              )}
             </div>
           </div>
         )}
