@@ -1,165 +1,123 @@
 
-import { useState } from 'react';
-import { toast } from 'sonner';
-import { ruralProperties } from '@/components/proprietes/data/buildings';
-import { BuildingDescription } from '@/components/proprietes/data/types/buildingTypes';
-import { OwnedBuilding } from '@/components/proprietes/hooks/building/types';
+import { useState, useEffect } from 'react';
+import { LandParcel } from '../types';
 
-// Interface pour les terres de l'Ager Publicus (basée sur le modèle des bâtiments ruraux)
-interface AgerLand {
-  id: string;
-  name: string;
-  location: string;
-  description: string;
-  size: string;
-  type: string;
-  value: number;
-  status: 'available' | 'allocated' | 'reserved';
-  allocatedTo?: string;
-  revenue?: number;
-  buildingTypeId: string; // Correspond à l'ID du type de propriété rurale
-}
+// Sample data for mockup purposes
+const mockParcels: LandParcel[] = [
+  {
+    id: "1",
+    name: "Campus Martius",
+    location: "Rome",
+    size: 1200,
+    type: "cultivable",
+    status: "protected",
+    value: 120000,
+    coordinates: { x: 150, y: 120 },
+    resources: { fertility: 8, water: 9, minerals: 2 },
+    description: "Terres sacrées dédiées à Mars, utilisées principalement pour les cérémonies religieuses et l'entraînement militaire."
+  },
+  {
+    id: "2", 
+    name: "Ager Latinus",
+    location: "Latium",
+    size: 5000,
+    type: "cultivable",
+    status: "allocated",
+    value: 450000,
+    allocation: {
+      familyId: "fam-12",
+      familyName: "Claudii",
+      since: "603 AUC",
+      until: "613 AUC"
+    },
+    coordinates: { x: 200, y: 150 },
+    resources: { fertility: 7, water: 6, minerals: 3 },
+    description: "Vastes terres fertiles idéales pour la culture du blé et des oliviers."
+  },
+  {
+    id: "3",
+    name: "Saltus Vescinus",
+    location: "Campanie",
+    size: 3000,
+    type: "pastoral",
+    status: "allocated",
+    value: 250000,
+    allocation: {
+      familyId: "fam-7",
+      familyName: "Cornelii",
+      since: "601 AUC"
+    },
+    coordinates: { x: 250, y: 180 },
+    resources: { fertility: 6, water: 8, minerals: 1 },
+    description: "Pâturages de haute qualité, parfaits pour l'élevage de moutons et de bétail."
+  },
+  {
+    id: "4",
+    name: "Sylva Ciminia",
+    location: "Étrurie",
+    size: 4000,
+    type: "forest",
+    status: "available",
+    value: 300000,
+    coordinates: { x: 180, y: 100 },
+    resources: { fertility: 5, water: 7, minerals: 4 },
+    description: "Forêt dense riche en bois de construction et en gibier."
+  },
+  {
+    id: "5",
+    name: "Colles Albani",
+    location: "Latium",
+    size: 2500,
+    type: "rocky",
+    status: "available",
+    value: 100000,
+    coordinates: { x: 190, y: 140 },
+    resources: { fertility: 2, water: 4, minerals: 8 },
+    description: "Terrain rocheux contenant des gisements de pierre de qualité pour la construction."
+  },
+  {
+    id: "6",
+    name: "Lacus Trasimenus",
+    location: "Ombrie",
+    size: 1800,
+    type: "wetland",
+    status: "disputed",
+    value: 150000,
+    coordinates: { x: 220, y: 90 },
+    resources: { fertility: 4, water: 10, minerals: 1 },
+    description: "Zone humide riche en poissons et en roseaux, son attribution est contestée par plusieurs familles."
+  }
+];
 
-export function useAgerPublicus() {
-  const [selectedLandId, setSelectedLandId] = useState<string | null>(null);
-  const [allocationDialogOpen, setAllocationDialogOpen] = useState(false);
-  const balance = 1000000; // Solde du trésor public simulé
-  
-  // Mockup de terres disponibles
-  const [availableLands, setAvailableLands] = useState<AgerLand[]>([
-    {
-      id: '1',
-      name: 'Plaines de Campanie',
-      location: 'Campanie',
-      description: 'Terres fertiles idéales pour la culture céréalière',
-      size: '5,000 jugera',
-      type: 'Terres arables',
-      value: 500000,
-      status: 'available',
-      buildingTypeId: 'domaine_cereales'
-    },
-    {
-      id: '2',
-      name: 'Collines du Latium',
-      location: 'Latium',
-      description: 'Terres vallonnées adaptées à la viticulture',
-      size: '3,200 jugera',
-      type: 'Vignobles',
-      value: 450000,
-      status: 'available',
-      buildingTypeId: 'domaine_vignoble'
-    },
-    {
-      id: '3',
-      name: 'Pâturages de Lucanie',
-      location: 'Lucanie',
-      description: 'Vastes pâturages idéaux pour l\'élevage',
-      size: '4,500 jugera',
-      type: 'Pâturages',
-      value: 350000,
-      status: 'available',
-      buildingTypeId: 'paturage_bovins'
-    },
-    {
-      id: '4',
-      name: 'Oliveraies d\'Étrurie',
-      location: 'Étrurie',
-      description: 'Terres adaptées à la culture d\'oliviers',
-      size: '2,800 jugera',
-      type: 'Oliveraies',
-      value: 420000,
-      status: 'available',
-      buildingTypeId: 'domaine_oliviers'
-    }
-  ]);
-  
-  // Mockup de terres déjà attribuées
-  const [ownedLands, setOwnedLands] = useState<AgerLand[]>([
-    {
-      id: '5',
-      name: 'Terres de Vénétie',
-      location: 'Vénétie',
-      description: 'Terres fertiles au nord de l\'Italie',
-      size: '3,800 jugera',
-      type: 'Terres arables',
-      value: 480000,
-      status: 'allocated',
-      allocatedTo: 'Lucius Calpurnius',
-      revenue: 35000,
-      buildingTypeId: 'domaine_cereales'
-    },
-    {
-      id: '6',
-      name: 'Vignobles de Sicile',
-      location: 'Sicile',
-      description: 'Terres viticoles sur l\'île de Sicile',
-      size: '2,500 jugera',
-      type: 'Vignobles',
-      value: 380000,
-      status: 'allocated',
-      allocatedTo: 'Marcus Fabius',
-      revenue: 42000,
-      buildingTypeId: 'domaine_vignoble'
-    }
-  ]);
-  
-  // Obtenir les détails de la terre sélectionnée (convertir en format de propriété rurale)
-  const getLandDetails = (landId: string): BuildingDescription | null => {
-    const land = [...availableLands, ...ownedLands].find(land => land.id === landId);
-    if (!land) return null;
-    
-    // Utiliser les détails du type de bâtiment rural correspondant
-    return ruralProperties[land.buildingTypeId] || null;
-  };
-  
-  const landDetails = selectedLandId ? getLandDetails(selectedLandId) : null;
-  
-  // Gérer l'attribution d'une terre
-  const handleAllocation = (
-    building: BuildingDescription,
-    buildingId: string,
-    buildingType: 'urban' | 'rural' | 'religious' | 'public',
-    location: string,
-    customName?: string
-  ) => {
-    // Trouver la terre à attribuer
-    const landToAllocate = availableLands.find(land => land.id === selectedLandId);
-    if (!landToAllocate) {
-      toast.error("Terre introuvable");
-      return false;
-    }
-    
-    // Simuler le processus d'attribution
-    setTimeout(() => {
-      // Retirer de la liste des terres disponibles
-      setAvailableLands(prev => prev.filter(land => land.id !== selectedLandId));
-      
-      // Ajouter à la liste des terres attribuées
-      const newAllocatedLand = {
-        ...landToAllocate,
-        status: 'allocated' as const,
-        allocatedTo: customName || 'Citoyen romain',
-        revenue: Math.floor(landToAllocate.value * 0.08) // Revenu estimé à 8% de la valeur
-      };
-      
-      setOwnedLands(prev => [...prev, newAllocatedLand]);
-      
-      toast.success(`Terre "${landToAllocate.name}" attribuée avec succès à ${customName || 'un citoyen romain'}`);
-      setAllocationDialogOpen(false);
-    }, 1000);
-    
-    return true;
-  };
+export const useAgerPublicus = () => {
+  const [landParcels, setLandParcels] = useState<LandParcel[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<Error | null>(null);
 
-  return {
-    selectedLandId,
-    setSelectedLandId,
-    allocationDialogOpen,
-    setAllocationDialogOpen,
-    landDetails,
-    ownedLands,
-    availableLands,
-    balance,
-    handleAllocation
-  };
-}
+  useEffect(() => {
+    const fetchLandParcels = async () => {
+      try {
+        // Simulate API call
+        setIsLoading(true);
+        
+        // In a real app, this would be an API call
+        // const response = await fetch('/api/ager-publicus');
+        // const data = await response.json();
+        
+        // For now, use mock data
+        setTimeout(() => {
+          setLandParcels(mockParcels);
+          setIsLoading(false);
+        }, 800);
+      } catch (err) {
+        console.error('Error fetching land parcels:', err);
+        setError(err instanceof Error ? err : new Error('Failed to fetch land parcels'));
+        setIsLoading(false);
+      }
+    };
+
+    fetchLandParcels();
+  }, []);
+
+  return { landParcels, isLoading, error };
+};
