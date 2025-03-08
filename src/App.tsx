@@ -19,6 +19,7 @@ import Login from "./pages/Login";
 import Register from "./pages/Register";
 import CreateGens from "./pages/CreateGens";
 import Admin from "./pages/Admin";
+import MaitreJeu from "./pages/MaitreJeu";
 
 // Création du client React Query
 const queryClient = new QueryClient({
@@ -59,6 +60,9 @@ const App = () => (
           
           {/* Page admin */}
           <Route path="/admin/*" element={<Admin />} />
+          
+          {/* Page maître du jeu */}
+          <Route path="/maitre-jeu/*" element={<MaitreJeu />} />
           
           {/* Route 404 */}
           <Route path="*" element={<NotFound />} />

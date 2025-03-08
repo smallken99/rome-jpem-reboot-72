@@ -12,7 +12,8 @@ import {
   ChevronRight,
   Landmark,
   User,
-  Gavel
+  Gavel,
+  Shield
 } from 'lucide-react';
 
 interface SidebarNavigationProps {
@@ -32,6 +33,8 @@ export const SidebarNavigation: React.FC<SidebarNavigationProps> = ({ isExpanded
     { path: '/religion', label: 'Religion', icon: <Landmark className="h-5 w-5" /> },
     { path: '/messages', label: 'Messages', icon: <MessageSquare className="h-5 w-5" /> },
     { path: '/rapports', label: 'Rapports', icon: <BarChart className="h-5 w-5" /> },
+    // Ajout du lien vers la page Maître du Jeu
+    { path: '/maitre-jeu', label: 'Maître du Jeu', icon: <Shield className="h-5 w-5" /> },
   ];
   
   const subNavItems = {
