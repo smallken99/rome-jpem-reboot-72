@@ -1,80 +1,58 @@
 
 import React from 'react';
-import { 
-  Card, 
-  CardContent, 
-  CardHeader, 
-  CardTitle, 
-  CardFooter 
-} from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
+import { Card, CardContent, CardFooter, CardHeader } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { SenateurCardProps, SenateurJouable } from '../types';
+import { Badge } from '@/components/ui/badge';
+import { Eye } from 'lucide-react';
+import { SenateurJouable, SenateurCardProps } from '../types/senateurs';
 
-const SenateurCard = ({ senateur, isAssigned, playerName, onEdit }: SenateurCardProps) => {
-  // Fonction pour calculer la somme des statistiques
-  const calculateStatSum = (senateur: SenateurJouable) => {
-    const stats = senateur.stats;
-    return (
-      stats.éloquence +
-      stats.administration +
-      stats.militaire +
-      stats.intrigue +
-      stats.charisme
-    );
-  };
-  
-  // Fonction pour calculer la moyenne des statistiques
-  const calculateStatAverage = (senateur: SenateurJouable) => {
-    return calculateStatSum(senateur) / 5;
-  };
-  
-  // Obtenir la couleur appropriée pour la faction
-  const getFactionColor = (faction: string) => {
-    switch (faction) {
-      case 'Optimates':
-        return 'bg-blue-500';
-      case 'Populares':
-        return 'bg-red-500';
-      case 'Moderati':
-        return 'bg-green-500';
-      default:
-        return 'bg-gray-500';
-    }
-  };
-
+const SenateurCard: React.FC<SenateurCardProps> = ({ senateur, onViewSenateur }) => {
   return (
-    <Card className="w-full max-w-sm">
-      <CardHeader>
-        <CardTitle className="text-lg font-semibold">{senateur.nom}</CardTitle>
-      </CardHeader>
-      <CardContent>
-        <div className="space-y-2">
-          <p>
-            <span className="font-medium">Famille:</span> {senateur.famille}
-          </p>
-          <p>
-            <span className="font-medium">Âge:</span> {senateur.âge}
-          </p>
-          {isAssigned && playerName && (
-            <p>
-              <span className="font-medium">Joueur:</span> {playerName}
-            </p>
-          )}
-          <p>
-            <span className="font-medium">Faction:</span>
-            <Badge className={getFactionColor(senateur.faction)}>
-              {senateur.faction}
+    <Card className="overflow-hidden">
+      <CardHeader className="bg-slate-50 pb-2">
+        <div className="flex justify-between items-start">
+          <div>
+            <h3 className="font-semibold text-lg">{senateur.nom}</h3>
+            <p className="text-sm text-muted-foreground">{senateur.famille}</p>
+          </div>
+          {senateur.stats && (
+            <Badge variant={senateur.stats.eloquence > 3 ? "default" : "outline"} className="ml-2">
+              Éloquence: {senateur.stats.eloquence}
             </Badge>
-          </p>
-          <p>
-            <span className="font-medium">Statistiques:</span> Moyenne {calculateStatAverage(senateur)}
-          </p>
+          )}
+        </div>
+      </CardHeader>
+      <CardContent className="pt-4">
+        <div className="space-y-2">
+          {senateur.faction && (
+            <div className="flex justify-between text-sm">
+              <span className="text-muted-foreground">Faction:</span>
+              <span>{senateur.faction}</span>
+            </div>
+          )}
+          {senateur.fonctionActuelle && (
+            <div className="flex justify-between text-sm">
+              <span className="text-muted-foreground">Fonction:</span>
+              <span>{senateur.fonctionActuelle}</span>
+            </div>
+          )}
+          {senateur.magistrature && (
+            <div className="flex justify-between text-sm">
+              <span className="text-muted-foreground">Magistrature:</span>
+              <span>{senateur.magistrature}</span>
+            </div>
+          )}
         </div>
       </CardContent>
-      <CardFooter className="flex justify-between">
-        <Button variant="secondary" onClick={onEdit}>
-          Modifier
+      <CardFooter className="border-t pt-3 bg-slate-50">
+        <Button 
+          variant="ghost" 
+          size="sm" 
+          className="w-full"
+          onClick={() => onViewSenateur(senateur.id)}
+        >
+          <Eye className="h-4 w-4 mr-2" />
+          Voir les détails
         </Button>
       </CardFooter>
     </Card>

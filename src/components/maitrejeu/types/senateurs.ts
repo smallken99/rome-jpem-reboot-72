@@ -1,43 +1,39 @@
 
 import { GameDate } from './common';
-import { MagistratureType } from './magistratures';
 
 export interface SenateurJouable {
   id: string;
   nom: string;
   famille: string;
-  age: number;
-  playerId?: string; // Ajouté pour résoudre l'erreur
   faction?: string;
-  statut: string;
-  compétences: {
-    éloquence: number;
-    guerre: number;
+  playerId?: string;
+  âge?: number;
+  fonctionActuelle?: string;
+  magistrature?: string;
+  appartenance?: string;
+  stats?: {
+    eloquence: number;
+    militaire: number;
     administration: number;
     intrigue: number;
   };
-  popularité: number;
-  influence: number;
-  richesse: number;
-  clientèle: number;
-  prestige: number;
-  cursusHonorum?: {
-    questeur?: GameDate;
-    édile?: GameDate;
-    préteur?: GameDate;
-    consul?: GameDate;
-    censeur?: GameDate;
-  };
-  magistratureActuelle?: MagistratureType;
-  posteActuel?: string;
-  provinces?: string[];
-  alliés?: string[];
-  ennemis?: string[];
-  traits?: string[];
-  historique?: string[];
+  // Additional properties can be added here
+}
+
+export interface SenateurCardProps {
+  senateur: SenateurJouable;
+  onViewSenateur: (id: string) => void;
+}
+
+export interface SenateurModalProps {
+  senateur: SenateurJouable;
+  open: boolean;
+  onClose: () => void;
+  onSave: (updatedSenateur: SenateurJouable) => void;
 }
 
 export interface AssignmentTableProps {
   senateurs: SenateurJouable[];
-  onAssignToPlayer: (senateurId: string, playerId: string) => void;
+  assignments: Record<string, string>;
+  onAssign: (senateurId: string, playerId: string) => void;
 }

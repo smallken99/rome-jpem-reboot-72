@@ -1,7 +1,16 @@
 
-import { Season, ImportanceType, GameDate } from './common';
+import { GameDate, ImportanceType } from './common';
 
-export type EvenementType = 'POLITIQUE' | 'GUERRE' | 'CRISE' | 'ECONOMIQUE' | 'ÉCONOMIQUE' | 'RELIGION' | 'DIPLOMATIQUE' | 'SOCIAL';
+export type EvenementType = 'POLITIQUE' | 'GUERRE' | 'ECONOMIQUE' | 'RELIGION' | 'DIPLOMATIQUE' | 'SOCIAL' | 'CRISE';
+
+export interface EvenementAction {
+  id: string;
+  texte: string; 
+  effets: Record<string, any>;
+  // Additional properties for compatibility
+  label?: string;
+  consequence?: string;
+}
 
 export interface Evenement {
   id: string;
@@ -10,37 +19,18 @@ export interface Evenement {
   type: EvenementType;
   date: GameDate;
   importance: ImportanceType;
-  options?: EvenementAction[];
+  options: EvenementAction[];
   resolved: boolean;
-  impact?: any; // Pour compatibilité avec le code existant
+  resolvedOption?: string;
 }
 
-export interface EvenementAction {
-  id: string;
-  texte: string;
-  titre?: string; // Pour compatibilité avec le code existant
-  description?: string; // Pour compatibilité avec le code existant
-  effets: {
-    stabilité?: number;
-    trésorPublique?: number;
-    prestigeRome?: number;
-    religion?: number;
-    influence?: number;
-    finance?: number;
-    militaire?: number;
-    economie?: number;
-    autre?: string;
-  };
-  résultat?: string;
-  impact?: any; // Pour compatibilité avec le code existant
+export interface EvenementFormProps {
+  isOpen: boolean;
+  onClose: () => void;
 }
 
 export interface EvenementsListProps {
   evenements: Evenement[];
   onResolve: (id: string, optionId: string) => void;
-  filteredType?: EvenementType | 'ALL';
-}
-
-export interface PoliticalEventsTimelineProps {
-  events: any[];
+  filteredType: EvenementType | 'ALL';
 }

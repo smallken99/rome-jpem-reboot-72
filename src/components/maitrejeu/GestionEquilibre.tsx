@@ -1,3 +1,4 @@
+
 import { Tab } from '@headlessui/react';
 import { useState } from 'react';
 import { useMaitreJeu } from './context';
@@ -71,12 +72,13 @@ export const GestionEquilibre = () => {
         <TabsContent value="historique">
           {equilibre.historique && (
             <PoliticalEventsTimeline events={Array.isArray(equilibre.historique) ? equilibre.historique.map(event => {
-              if (!('id' in event)) {
+              // If the event is in the old format, convert it to the new format
+              if (event.année !== undefined && event.saison !== undefined) {
                 return {
                   id: uuidv4(),
                   date: {
-                    year: event.année || 0,
-                    season: event.saison || 'SPRING'
+                    year: event.année,
+                    season: event.saison
                   },
                   title: `Année ${event.année}, ${event.saison}`,
                   description: '',
@@ -92,7 +94,7 @@ export const GestionEquilibre = () => {
                   diplomatie: event.diplomatie
                 } as PoliticalEvent;
               }
-              return event as PoliticalEvent;
+              return event;
             }) : []} />
           )}
         </TabsContent>

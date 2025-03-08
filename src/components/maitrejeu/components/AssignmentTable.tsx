@@ -1,26 +1,21 @@
+
 import React, { useState } from 'react';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogTrigger } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
-import { 
-  SenateurJouable, 
-  Province, 
-  AssignmentTableProps 
-} from '../types/compatibilityAdapter';
+import { AssignmentTableProps } from '../types/senateurs';
 import { toast } from 'sonner';
 import { Search, Save, AlertCircle, User } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 
 export const AssignmentTable: React.FC<AssignmentTableProps> = ({ 
   senateurs, 
-  assignments, 
+  assignments,
   onAssign 
 }) => {
   const [searchTerm, setSearchTerm] = useState('');
-  const [playerNames, setPlayerNames] = useState<Record<string, string>>({});
-  const [currentAssignments, setCurrentAssignments] = useState<Record<string, string>>(assignments);
+  const [currentAssignments, setCurrentAssignments] = useState<Record<string, string>>(assignments || {});
   
   const players = [
     { id: 'player1', name: 'Jules César' },
@@ -135,7 +130,7 @@ export const AssignmentTable: React.FC<AssignmentTableProps> = ({
       <div className="bg-muted/50 rounded-md p-4">
         <h3 className="text-sm font-medium mb-2">Sénateurs déjà assignés</h3>
         <div className="flex flex-wrap gap-2">
-          {Object.entries(assignments).map(([senateurId, playerId]) => {
+          {Object.entries(assignments || {}).map(([senateurId, playerId]) => {
             const senateur = senateurs.find(s => s.id === senateurId);
             const player = players.find(p => p.id === playerId);
             
@@ -149,7 +144,7 @@ export const AssignmentTable: React.FC<AssignmentTableProps> = ({
             );
           })}
           
-          {Object.keys(assignments).length === 0 && (
+          {Object.keys(assignments || {}).length === 0 && (
             <p className="text-sm text-muted-foreground">Aucun sénateur n'est actuellement assigné</p>
           )}
         </div>

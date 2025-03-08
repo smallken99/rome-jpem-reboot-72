@@ -23,7 +23,7 @@ export const EquilibreBarChart: React.FC<EquilibreChartProps> = ({ equilibre }) 
         <XAxis dataKey="name" />
         <YAxis />
         <Tooltip />
-        <Bar dataKey="value" fill={(entry) => entry.color} />
+        <Bar dataKey="value" fill={(entry) => entry.color || '#8884d8'} />
       </BarChart>
     </ResponsiveContainer>
   );

@@ -1,128 +1,144 @@
-import React, { useState, useEffect } from 'react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
+
+import React, { useState } from 'react';
+import { v4 as uuidv4 } from 'uuid';
+import { useMaitreJeu } from '../context';
+import { 
+  Dialog, 
+  DialogContent, 
+  DialogHeader, 
+  DialogTitle,
+  DialogFooter,
+  DialogDescription,
+} from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { PlusCircle, Trash2 } from 'lucide-react';
-import { useMaitreJeu } from '../context';
-import { EvenementType, EvenementAction, Season } from '../types';
-import { v4 as uuidv4 } from 'uuid';
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
+import { Label } from '@/components/ui/label';
+import { Plus, Trash } from 'lucide-react';
+import { EvenementType, EvenementAction, EvenementFormProps } from '../types/evenements';
+import { ImportanceType } from '../types/common';
 
-interface CreateEvenementFormProps {
-  isOpen: boolean;
-  onClose: () => void;
-}
-
-export const CreateEvenementForm: React.FC<CreateEvenementFormProps> = ({ isOpen, onClose }) => {
-  const { addEvenement, currentYear, currentSeason } = useMaitreJeu();
+export const CreateEvenementForm: React.FC<EvenementFormProps> = ({ isOpen, onClose }) => {
+  const { currentYear, currentSeason, addEvenement } = useMaitreJeu();
+  
   const [evenement, setEvenement] = useState({
     titre: '',
     description: '',
     type: 'POLITIQUE' as EvenementType,
     date: { year: currentYear, season: currentSeason },
-    importance: 'normale' as 'majeure' | 'mineure' | 'normale',
+    importance: 'normale' as ImportanceType,
     options: [] as EvenementAction[],
     resolved: false
   });
-  const [newOption, setNewOption] = useState({ label: '', consequence: '' });
-  const [errorMessage, setErrorMessage] = useState('');
   
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    const { name, value } = e.target;
-    setEvenement(prev => ({ ...prev, [name]: value }));
-  };
-  
-  const handleSelectChange = (name: string, value: EvenementType | 'majeure' | 'mineure' | 'normale') => {
-    setEvenement(prev => ({ ...prev, [name]: value }));
-  };
+  const [optionText, setOptionText] = useState('');
+  const [consequence, setConsequence] = useState('');
   
   const handleAddOption = () => {
-    if (!newOption.label || !newOption.consequence) {
-      setErrorMessage("Veuillez remplir tous les champs de l'option.");
-      return;
-    }
+    if (optionText.trim() === '') return;
+    
+    // Create a new option with the correct structure
+    const newOption: EvenementAction = {
+      id: uuidv4(),
+      texte: optionText,
+      effets: {},
+      label: optionText,
+      consequence: consequence
+    };
+    
+    // Update the evenement state with the new option
     setEvenement(prev => ({
       ...prev,
-      options: [...prev.options, { ...newOption, id: uuidv4() }]
+      options: [...prev.options, newOption]
     }));
-    setNewOption({ label: '', consequence: '' });
-    setErrorMessage('');
+    
+    // Clear the input fields
+    setOptionText('');
+    setConsequence('');
   };
   
   const handleRemoveOption = (id: string) => {
     setEvenement(prev => ({
       ...prev,
-      options: prev.options.filter(option => option.id !== id)
+      options: prev.options.filter(opt => opt.id !== id)
     }));
   };
   
-  const handleOptionChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    const { name, value } = e.target;
-    setNewOption(prev => ({ ...prev, [name]: value }));
-  };
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    
-    if (!evenement.titre || !evenement.description || evenement.options.length === 0) {
-      setErrorMessage("Veuillez remplir tous les champs et ajouter au moins une option.");
+  const handleSubmit = () => {
+    if (evenement.titre.trim() === '' || evenement.description.trim() === '' || evenement.options.length === 0) {
+      // Show error toast or validation message
       return;
     }
     
-    // Ajouter ID à l'événement
-    const evenementWithId = {
+    // Add an id to the event
+    const eventWithId = {
       ...evenement,
-      id: uuidv4(), // Utiliser UUID pour générer un ID unique
-      date: { year: currentYear, season: currentSeason },
-      resolved: false
+      id: uuidv4()
     };
     
-    addEvenement(evenementWithId);
+    addEvenement(eventWithId);
     onClose();
+    
+    // Reset the form
+    setEvenement({
+      titre: '',
+      description: '',
+      type: 'POLITIQUE',
+      date: { year: currentYear, season: currentSeason },
+      importance: 'normale',
+      options: [],
+      resolved: false
+    });
   };
   
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-[600px]">
+      <DialogContent className="max-w-md mx-auto">
         <DialogHeader>
           <DialogTitle>Créer un nouvel événement</DialogTitle>
           <DialogDescription>
-            Ajoutez un événement qui aura un impact sur le jeu.
+            Définissez les détails de l'événement et ses options de résolution.
           </DialogDescription>
         </DialogHeader>
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div>
-            <Label htmlFor="titre">Titre de l'événement</Label>
+        
+        <div className="space-y-4 py-2">
+          <div className="space-y-2">
+            <Label htmlFor="title">Titre</Label>
             <Input 
-              id="titre" 
-              name="titre" 
-              value={evenement.titre} 
-              onChange={handleInputChange} 
+              id="title" 
+              value={evenement.titre}
+              onChange={(e) => setEvenement(prev => ({ ...prev, titre: e.target.value }))}
+              placeholder="Titre de l'événement"
             />
           </div>
-          <div>
-            <Label htmlFor="description">Description de l'événement</Label>
-            <Textarea
-              id="description"
-              name="description"
+          
+          <div className="space-y-2">
+            <Label htmlFor="description">Description</Label>
+            <Textarea 
+              id="description" 
               value={evenement.description}
-              onChange={handleInputChange}
+              onChange={(e) => setEvenement(prev => ({ ...prev, description: e.target.value }))}
+              placeholder="Description détaillée de l'événement"
               rows={3}
             />
           </div>
+          
           <div className="grid grid-cols-2 gap-4">
-            <div>
-              <Label htmlFor="type">Type d'événement</Label>
-              <Select value={evenement.type} onValueChange={(value) => handleSelectChange('type', value as EvenementType)}>
-                <SelectTrigger id="type">
-                  <SelectValue placeholder="Sélectionner un type" />
+            <div className="space-y-2">
+              <Label htmlFor="type">Type</Label>
+              <Select 
+                value={evenement.type}
+                onValueChange={(value) => setEvenement(prev => ({ ...prev, type: value as EvenementType }))}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Type d'événement" />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="POLITIQUE">Politique</SelectItem>
-                  <SelectItem value="ECONOMIQUE">Économique</SelectItem>
                   <SelectItem value="GUERRE">Guerre</SelectItem>
+                  <SelectItem value="ECONOMIQUE">Économique</SelectItem>
                   <SelectItem value="RELIGION">Religion</SelectItem>
                   <SelectItem value="DIPLOMATIQUE">Diplomatique</SelectItem>
                   <SelectItem value="SOCIAL">Social</SelectItem>
@@ -130,64 +146,85 @@ export const CreateEvenementForm: React.FC<CreateEvenementFormProps> = ({ isOpen
                 </SelectContent>
               </Select>
             </div>
-            <div>
-              <Label htmlFor="importance">Importance</Label>
-              <Select value={evenement.importance} onValueChange={(value) => handleSelectChange('importance', value as 'majeure' | 'mineure' | 'normale')}>
-                <SelectTrigger id="importance">
-                  <SelectValue placeholder="Sélectionner l'importance" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="majeure">Majeure</SelectItem>
-                  <SelectItem value="mineure">Mineure</SelectItem>
-                  <SelectItem value="normale">Normale</SelectItem>
-                </SelectContent>
-              </Select>
+            
+            <div className="space-y-2">
+              <Label>Importance</Label>
+              <RadioGroup 
+                value={evenement.importance} 
+                onValueChange={(value) => setEvenement(prev => ({ ...prev, importance: value as ImportanceType }))}
+                className="flex space-x-2"
+              >
+                <div className="flex items-center space-x-1">
+                  <RadioGroupItem value="mineure" id="mineure" />
+                  <Label htmlFor="mineure">Mineure</Label>
+                </div>
+                <div className="flex items-center space-x-1">
+                  <RadioGroupItem value="normale" id="normale" />
+                  <Label htmlFor="normale">Normale</Label>
+                </div>
+                <div className="flex items-center space-x-1">
+                  <RadioGroupItem value="majeure" id="majeure" />
+                  <Label htmlFor="majeure">Majeure</Label>
+                </div>
+              </RadioGroup>
             </div>
           </div>
-          <div>
-            <h4 className="text-sm font-medium">Options de l'événement</h4>
-            <div className="space-y-2">
-              {evenement.options.map(option => (
-                <div key={option.id} className="flex items-center space-x-2">
-                  <div className="flex-1">
-                    <p className="text-sm">{option.label}</p>
-                    <p className="text-xs text-muted-foreground">{option.consequence}</p>
-                  </div>
-                  <Button variant="ghost" size="icon" onClick={() => handleRemoveOption(option.id)}>
-                    <Trash2 className="h-4 w-4" />
-                  </Button>
+          
+          <div className="space-y-4 border-t pt-4">
+            <Label>Options de résolution</Label>
+            
+            {evenement.options.map((option) => (
+              <div key={option.id} className="flex items-start justify-between p-2 border rounded-md bg-slate-50">
+                <div>
+                  <p className="font-medium">{option.texte}</p>
+                  <p className="text-sm text-muted-foreground mt-1">{option.consequence}</p>
                 </div>
-              ))}
-            </div>
-            <div className="flex items-center space-x-2 mt-2">
-              <Input
-                type="text"
-                placeholder="Label de l'option"
-                name="label"
-                value={newOption.label}
-                onChange={handleOptionChange}
-              />
-              <Input
-                type="text"
-                placeholder="Conséquence de l'option"
-                name="consequence"
-                value={newOption.consequence}
-                onChange={handleOptionChange}
-              />
-              <Button type="button" variant="secondary" size="sm" onClick={handleAddOption}>
-                <PlusCircle className="h-4 w-4 mr-2" />
-                Ajouter
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => handleRemoveOption(option.id)}
+                >
+                  <Trash className="h-4 w-4" />
+                </Button>
+              </div>
+            ))}
+            
+            <div className="space-y-2">
+              <div>
+                <Label htmlFor="option-text">Texte de l'option</Label>
+                <Input 
+                  id="option-text" 
+                  value={optionText}
+                  onChange={(e) => setOptionText(e.target.value)}
+                  placeholder="Ex: Accepter le traité"
+                />
+              </div>
+              <div>
+                <Label htmlFor="consequence">Conséquence</Label>
+                <Input 
+                  id="consequence" 
+                  value={consequence}
+                  onChange={(e) => setConsequence(e.target.value)}
+                  placeholder="Ex: +10 en diplomatie, -5 en richesse"
+                />
+              </div>
+              <Button
+                type="button"
+                variant="outline"
+                className="w-full"
+                onClick={handleAddOption}
+              >
+                <Plus className="h-4 w-4 mr-2" />
+                Ajouter cette option
               </Button>
             </div>
           </div>
-          {errorMessage && <p className="text-red-500 text-sm">{errorMessage}</p>}
-          <DialogFooter>
-            <Button type="button" variant="outline" onClick={onClose}>
-              Annuler
-            </Button>
-            <Button type="submit">Créer l'événement</Button>
-          </DialogFooter>
-        </form>
+        </div>
+        
+        <DialogFooter>
+          <Button variant="outline" onClick={onClose}>Annuler</Button>
+          <Button onClick={handleSubmit}>Créer l'événement</Button>
+        </DialogFooter>
       </DialogContent>
     </Dialog>
   );

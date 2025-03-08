@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { useMaitreJeu } from './context';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -5,10 +6,10 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Search, PlusCircle } from 'lucide-react';
-import { SenateurCard } from './components/SenateurCard';
+import SenateurCard from './components/SenateurCard';
 import { SenateurModal } from './components/SenateurModal';
 import { AssignmentTable } from './components/AssignmentTable';
-import { SenateurJouable } from './types';
+import { SenateurJouable } from './types/senateurs';
 
 export const GestionSenateurs = () => {
   const { senateurs, updateSenateur, assignSenateurToPlayer } = useMaitreJeu();
@@ -16,6 +17,9 @@ export const GestionSenateurs = () => {
   const [selectedTab, setSelectedTab] = useState('liste');
   const [showSenateurModal, setShowSenateurModal] = useState(false);
   const [selectedSenateur, setSelectedSenateur] = useState<SenateurJouable | null>(null);
+  
+  // Dummy assignments object for the AssignmentTable
+  const [assignments, setAssignments] = useState<Record<string, string>>({});
   
   // Filtre pour les sénateurs
   const filteredSenateurs = senateurs.filter(senateur => 
@@ -42,6 +46,10 @@ export const GestionSenateurs = () => {
   // Gestion de l'assignation d'un sénateur à un joueur
   const handleAssignToPlayer = (senateurId: string, playerId: string) => {
     assignSenateurToPlayer(senateurId, playerId);
+    setAssignments(prev => ({
+      ...prev,
+      [senateurId]: playerId
+    }));
   };
   
   return (
@@ -93,7 +101,8 @@ export const GestionSenateurs = () => {
         <TabsContent value="assignations">
           <AssignmentTable 
             senateurs={senateurs}
-            onAssignToPlayer={handleAssignToPlayer}
+            assignments={assignments}
+            onAssign={handleAssignToPlayer}
           />
         </TabsContent>
         
