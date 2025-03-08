@@ -15,6 +15,12 @@ export interface EducationPath {
   };
   outcomes: string[];
   specialties: string[];
+  type?: string;
+  title?: string;
+  duration?: string;
+  minAge?: number;
+  suitableFor?: 'male' | 'female' | 'both';
+  relatedStat?: string;
 }
 
 export interface Child {
@@ -27,7 +33,22 @@ export interface Child {
     mentor: string | null;
     skills: string[];
     progress: number;
+    speciality?: string;
+    yearsCompleted?: number;
+    totalYears?: number;
+    pityBonus?: number;
+    statBonus?: string;
+    educationHistory?: EducationHistory[];
   };
+}
+
+export interface EducationHistory {
+  type: string;
+  startYear: number;
+  endYear?: number;
+  completed: boolean;
+  mentor?: string;
+  skills: string[];
 }
 
 export interface Preceptor {
@@ -92,6 +113,7 @@ export interface PreceptorHeaderProps {
 
 export interface PreceptorSpecialityProps {
   specialty: string;
+  type?: string;
 }
 
 export interface PreceptorBiographyProps {
@@ -109,7 +131,7 @@ export interface PreceptorCostInfoProps {
 
 export interface PreceptorActionsProps {
   onHire: () => void;
-  onCancel: () => void;
+  onCancel?: () => void;
   isAvailable: boolean;
   isLoading?: boolean;
 }

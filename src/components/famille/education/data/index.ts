@@ -77,6 +77,5 @@ export const generatePreceptors = () => {
 
 // Exporter les spécialités pour être utilisées ailleurs
 export { allSpecialties as specialties } from './specialties';
-export { specialties } from './specialties';
 export { romanNamePrefixes, romanNameSuffixes } from './romanNames';
 export { titles } from './titles';
