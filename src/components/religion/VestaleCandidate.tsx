@@ -1,99 +1,109 @@
 
 import React from 'react';
-import { Character, CharacterStat } from '@/types/character';
-import { Card, CardContent, CardFooter, CardHeader } from '@/components/ui/card';
+import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { StatBar } from '@/components/famille/StatBar';
+import { Avatar } from '@/components/ui/avatar';
+import { Badge } from '@/components/ui/badge';
+import StatBar from '@/components/famille/StatBar';
+import { VestaleCandidate } from '@/types/vestale';
 
 interface VestaleCandidateProps {
-  character: Character;
-  onSelect: (characterId: string) => void;
+  candidate: VestaleCandidate;
+  onPropose: (characterId: string) => void;
 }
 
-export const VestaleCandidate: React.FC<VestaleCandidateProps> = ({ 
-  character, 
-  onSelect 
-}) => {
-  // Fonction pour vérifier si un stat est supérieur à une valeur
-  const isStatHigherThan = (stat: number | CharacterStat, value: number): boolean => {
-    if (typeof stat === 'number') {
-      return stat > value;
-    }
-    return false;
+export const VestaleCandidate: React.FC<VestaleCandidateProps> = ({ candidate, onPropose }) => {
+  // Calcule l'adéquation globale de la candidate
+  const calculateSuitability = () => {
+    const pietyFactor = candidate.stats.piety * 2; // La piété est le facteur le plus important
+    const disciplineFactor = candidate.stats.discipline * 1.5;
+    const intelligenceFactor = candidate.stats.intelligence;
+    const charismafactor = candidate.stats.charisma * 0.5;
+    
+    const total = pietyFactor + disciplineFactor + intelligenceFactor + charismafactor;
+    // Score maximal théorique: (10*2) + (10*1.5) + 10 + (10*0.5) = 20 + 15 + 10 + 5 = 50
+    return Math.round((total / 50) * 100);
   };
-
-  // Fonction pour transformer un stat en string lisible
-  const formatStat = (stat: number | CharacterStat): string => {
-    if (typeof stat === 'number') {
-      return stat.toString();
-    }
-    return '0';
+  
+  const suitability = calculateSuitability();
+  const getSuitabilityColor = () => {
+    if (suitability >= 80) return 'text-green-600';
+    if (suitability >= 60) return 'text-lime-600';
+    if (suitability >= 40) return 'text-amber-600';
+    return 'text-rose-600';
   };
-
+  
+  const isMarried = !!candidate.spouse;
+  
   return (
-    <Card className="border border-amber-200 bg-amber-50/50">
-      <CardHeader className="bg-amber-100">
-        <div className="text-center">
-          <h3 className="font-cinzel text-lg">{character.firstName} {character.lastName}</h3>
-          <p className="text-sm text-muted-foreground">Âge: {character.age} ans</p>
-        </div>
-      </CardHeader>
-      <CardContent className="pt-4 space-y-4">
-        <div className="grid grid-cols-2 gap-2">
-          <div>
-            <p className="text-sm font-medium mb-1">Piété:</p>
-            <StatBar 
-              value={typeof character.stats.piety === 'number' ? character.stats.piety : 0} 
-              maxValue={100} 
-              className={isStatHigherThan(character.stats.piety, 70) ? "bg-green-500" : "bg-amber-500"}
-            />
-          </div>
-          <div>
-            <p className="text-sm font-medium mb-1">Discipline:</p>
-            <StatBar 
-              value={typeof character.stats.discipline === 'number' ? character.stats.discipline : 0} 
-              maxValue={100} 
-              className={isStatHigherThan(character.stats.discipline, 60) ? "bg-green-500" : "bg-amber-500"}
-            />
-          </div>
-        </div>
-
-        <div>
-          <h4 className="text-sm font-medium mb-1">Traits:</h4>
-          <div className="flex flex-wrap gap-1">
-            {character.traits && character.traits.map((trait, index) => (
-              <span key={index} className="text-xs bg-white px-2 py-1 rounded border">
-                {trait}
-              </span>
-            ))}
-          </div>
-        </div>
-
-        <div>
-          <h4 className="text-sm font-medium mb-1">Éligibilité:</h4>
-          <p className="text-sm">
-            {character.spouse ? (
-              <span className="text-red-600">Non éligible - Déjà mariée</span>
-            ) : (
-              isStatHigherThan(character.stats.piety, 70) && isStatHigherThan(character.stats.discipline, 60) ? (
-                <span className="text-green-600">Excellente candidate</span>
-              ) : (
-                <span className="text-amber-600">Candidate acceptable</span>
-              )
+    <Card className="p-4 hover:shadow-md transition-shadow">
+      <div className="flex gap-4">
+        <Avatar className="h-16 w-16 rounded-full border-2 border-amber-200">
+          <img 
+            src={candidate.avatar || "/placeholder.svg"} 
+            alt={`${candidate.firstName} ${candidate.lastName}`} 
+          />
+        </Avatar>
+        
+        <div className="flex-1">
+          <h3 className="font-medium text-lg">{candidate.firstName} {candidate.lastName}</h3>
+          <div className="flex gap-2 mt-1">
+            <Badge variant="outline" className="bg-amber-50 text-amber-800">
+              {candidate.age} ans
+            </Badge>
+            {isMarried && (
+              <Badge variant="outline" className="bg-rose-50 text-rose-800">
+                Mariée
+              </Badge>
             )}
-          </p>
+          </div>
+          
+          <div className="mt-3 space-y-1">
+            <div className="flex justify-between text-sm">
+              <span>Discipline</span>
+              <span>{candidate.stats.discipline}/10</span>
+            </div>
+            <StatBar value={candidate.stats.discipline * 10} maxValue={100} color="bg-purple-500" />
+            
+            <div className="flex justify-between text-sm mt-2">
+              <span>Piété</span>
+              <span>{candidate.stats.piety}/10</span>
+            </div>
+            <StatBar value={candidate.stats.piety * 10} maxValue={100} color="bg-amber-500" />
+          </div>
+          
+          {candidate.traits && candidate.traits.length > 0 && (
+            <div className="mt-3">
+              <p className="text-xs text-muted-foreground">Traits:</p>
+              <div className="flex flex-wrap gap-1 mt-1">
+                {candidate.traits.map((trait, index) => (
+                  <Badge key={index} variant="outline" className="text-xs">
+                    {trait}
+                  </Badge>
+                ))}
+              </div>
+            </div>
+          )}
         </div>
-      </CardContent>
-      <CardFooter>
+      </div>
+      
+      <div className="flex justify-between items-center mt-4 pt-3 border-t">
+        <div>
+          <span className="text-sm">Adéquation:</span>
+          <span className={`ml-2 font-medium ${getSuitabilityColor()}`}>
+            {suitability}%
+          </span>
+        </div>
+        
         <Button 
-          variant="outline" 
-          className="w-full border-amber-300 hover:bg-amber-100"
-          onClick={() => onSelect(character.id)}
-          disabled={character.spouse !== undefined}
+          onClick={() => onPropose(candidate.id)}
+          disabled={isMarried}
+          size="sm"
+          variant={isMarried ? "outline" : "default"}
         >
-          Sélectionner comme Vestale
+          {isMarried ? "Non éligible" : "Proposer"}
         </Button>
-      </CardFooter>
+      </div>
     </Card>
   );
 };

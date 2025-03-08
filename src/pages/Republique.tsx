@@ -12,6 +12,7 @@ import { PolitiquePage } from '@/components/republique/pages/PolitiquePage';
 import { LoisPage } from '@/components/republique/pages/LoisPage';
 import { BatimentsPage } from '@/components/republique/pages/BatimentsPage';
 import { SecuritePage } from '@/components/republique/pages/SecuritePage';
+import { BureauxPage } from '@/components/republique/pages/BureauxPage';
 
 const Republique = () => {
   return (
@@ -27,6 +28,8 @@ const Republique = () => {
         <Route path="/ager" element={<AgerPublicusPage />} />
         <Route path="/batiments" element={<BatimentsPage />} />
         <Route path="/securite" element={<SecuritePage />} />
+        <Route path="/bureaux" element={<BureauxPage />} />
+        <Route path="/bureaux/:bureau" element={<BureauxPage />} />
         <Route path="*" element={<Navigate to="/republique" replace />} />
       </Routes>
     </Layout>

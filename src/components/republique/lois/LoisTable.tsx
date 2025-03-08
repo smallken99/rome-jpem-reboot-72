@@ -1,145 +1,136 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
-import { Eye, ThumbsUp, ThumbsDown } from 'lucide-react';
-import { formatRomanDate } from '@/utils/formatUtils';
-import { StatusBadge } from '../../batiments/components/StatusBadge';
+import { Edit, FileText, MoreHorizontal, Plus, Trash2 } from 'lucide-react';
+import { Badge } from '@/components/ui/badge';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 
-export interface Law {
+// Types pour les lois
+interface Loi {
   id: string;
-  title: string;
-  proposedBy: string;
-  proposedDate: {
-    year: number;
-    season: string;
-    day: number;
-  };
-  status: string;
-  category: string;
-  votes?: {
-    for: number;
-    against: number;
-  };
+  titre: string;
+  description: string;
+  dateAdoption: string;
+  status: 'active' | 'proposed' | 'rejected' | 'amended';
 }
 
-interface LoisTableProps {
-  laws: Law[];
-  onViewDetails?: (law: Law) => void;
-  onVote?: (lawId: string, vote: 'for' | 'against') => void;
-}
-
-export const LoisTable: React.FC<LoisTableProps> = ({
-  laws = [],
-  onViewDetails,
-  onVote
-}) => {
-  const canVoteOnLaw = (status: string) => {
-    return status === 'pending' || status === 'voting';
-  };
-
-  const getStatusLabel = (status: string) => {
-    switch(status) {
-      case 'approved':
-        return 'approved';
+export const LoisTable = () => {
+  const [lois, setLois] = useState<Loi[]>([
+    {
+      id: "1",
+      titre: "Lex Hortensia",
+      description: "Les plébiscites votés par le concile de la plèbe ont force de loi pour tous les citoyens.",
+      dateAdoption: "287 av. J.-C.",
+      status: "active"
+    },
+    {
+      id: "2",
+      titre: "Lex Valeria Horatia",
+      description: "Rétablit le droit d'appel au peuple contre les décisions des magistrats.",
+      dateAdoption: "449 av. J.-C.",
+      status: "active"
+    },
+    {
+      id: "3",
+      titre: "Lex Canuleia",
+      description: "Autorise le mariage entre patriciens et plébéiens.",
+      dateAdoption: "445 av. J.-C.",
+      status: "active"
+    },
+    {
+      id: "4",
+      titre: "Lex Licinia Sextia",
+      description: "Limite la quantité de terres publiques qu'un individu peut posséder.",
+      dateAdoption: "367 av. J.-C.",
+      status: "amended"
+    },
+    {
+      id: "5",
+      titre: "Nouvelle Loi Agraire",
+      description: "Proposition de redistribution des terres publiques aux citoyens nécessiteux.",
+      dateAdoption: "En discussion",
+      status: "proposed"
+    }
+  ]);
+  
+  // Fonction pour obtenir le badge de statut
+  const getStatusBadge = (status: string) => {
+    switch (status) {
+      case 'active':
+        return <Badge className="bg-green-100 text-green-800 border-green-200">Active</Badge>;
+      case 'proposed':
+        return <Badge className="bg-blue-100 text-blue-800 border-blue-200">Proposée</Badge>;
       case 'rejected':
-        return 'abandoned';
-      case 'pending':
-      case 'voting':
-        return 'in_progress';
+        return <Badge className="bg-red-100 text-red-800 border-red-200">Rejetée</Badge>;
+      case 'amended':
+        return <Badge className="bg-amber-100 text-amber-800 border-amber-200">Amendée</Badge>;
       default:
-        return status;
+        return <Badge variant="outline">{status}</Badge>;
     }
   };
 
   return (
-    <div className="rounded-md border">
-      <Table>
-        <TableHeader>
-          <TableRow>
-            <TableHead className="w-[300px]">Titre</TableHead>
-            <TableHead>Proposée par</TableHead>
-            <TableHead>Date</TableHead>
-            <TableHead>Statut</TableHead>
-            <TableHead>Votes</TableHead>
-            <TableHead className="text-right">Actions</TableHead>
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {laws.length === 0 ? (
-            <TableRow>
-              <TableCell colSpan={6} className="h-24 text-center">
-                Aucune loi trouvée.
-              </TableCell>
+    <div>
+      <div className="flex justify-between items-center mb-4">
+        <div>
+          <h3 className="text-lg font-semibold">Lois de la République</h3>
+          <p className="text-sm text-muted-foreground">Gérez les lois et décrets en vigueur</p>
+        </div>
+        <Button variant="outline" className="roman-btn-outline">
+          <Plus className="h-4 w-4 mr-2" />
+          Nouvelle Loi
+        </Button>
+      </div>
+      
+      <div className="rounded-md border">
+        <Table>
+          <TableHeader>
+            <TableRow className="bg-muted/50">
+              <TableHead className="font-cinzel">Titre</TableHead>
+              <TableHead className="font-cinzel">Description</TableHead>
+              <TableHead className="font-cinzel">Date d'Adoption</TableHead>
+              <TableHead className="font-cinzel">Statut</TableHead>
+              <TableHead className="text-right font-cinzel">Actions</TableHead>
             </TableRow>
-          ) : (
-            laws.map((law) => (
-              <TableRow key={law.id}>
-                <TableCell className="font-medium">{law.title}</TableCell>
-                <TableCell>{law.proposedBy}</TableCell>
-                <TableCell>
-                  {formatRomanDate(
-                    law.proposedDate.year,
-                    law.proposedDate.season,
-                    law.proposedDate.day
-                  )}
-                </TableCell>
-                <TableCell>
-                  <StatusBadge status={getStatusLabel(law.status)} />
-                </TableCell>
-                <TableCell>
-                  {law.votes ? (
-                    <div className="flex items-center gap-2">
-                      <div className="flex items-center">
-                        <ThumbsUp className="h-4 w-4 text-green-600 mr-1" />
-                        <span>{law.votes.for}</span>
-                      </div>
-                      <div className="flex items-center">
-                        <ThumbsDown className="h-4 w-4 text-red-600 mr-1" />
-                        <span>{law.votes.against}</span>
-                      </div>
-                    </div>
-                  ) : (
-                    <span className="text-muted-foreground">Pas de vote</span>
-                  )}
-                </TableCell>
+          </TableHeader>
+          <TableBody>
+            {lois.map((loi) => (
+              <TableRow key={loi.id}>
+                <TableCell className="font-medium">{loi.titre}</TableCell>
+                <TableCell>{loi.description}</TableCell>
+                <TableCell>{loi.dateAdoption}</TableCell>
+                <TableCell>{getStatusBadge(loi.status)}</TableCell>
                 <TableCell className="text-right">
-                  <div className="flex justify-end gap-2">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => onViewDetails && onViewDetails(law)}
-                    >
-                      <Eye className="h-4 w-4" />
-                    </Button>
-                    
-                    {canVoteOnLaw(law.status) && onVote && (
-                      <>
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          className="border-green-300 bg-green-50"
-                          onClick={() => onVote(law.id, 'for')}
-                        >
-                          <ThumbsUp className="h-4 w-4 text-green-600" />
-                        </Button>
-                        
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          className="border-red-300 bg-red-50"
-                          onClick={() => onVote(law.id, 'against')}
-                        >
-                          <ThumbsDown className="h-4 w-4 text-red-600" />
-                        </Button>
-                      </>
-                    )}
-                  </div>
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button variant="ghost" className="h-8 w-8 p-0">
+                        <span className="sr-only">Ouvrir le menu</span>
+                        <MoreHorizontal className="h-4 w-4" />
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end">
+                      <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                      <DropdownMenuItem>
+                        <FileText className="h-4 w-4 mr-2" />
+                        Voir le texte
+                      </DropdownMenuItem>
+                      <DropdownMenuItem>
+                        <Edit className="h-4 w-4 mr-2" />
+                        Modifier
+                      </DropdownMenuItem>
+                      <DropdownMenuSeparator />
+                      <DropdownMenuItem>
+                        <Trash2 className="h-4 w-4 mr-2" />
+                        Supprimer
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
                 </TableCell>
               </TableRow>
-            ))
-          )}
-        </TableBody>
-      </Table>
+            ))}
+          </TableBody>
+        </Table>
+      </div>
     </div>
   );
 };

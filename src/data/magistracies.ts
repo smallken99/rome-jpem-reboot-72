@@ -1,5 +1,5 @@
 
-import { Gavel, Scroll, Book, Shield, Users, Landmark, Award, Flag, File, Coins } from 'lucide-react';
+import { Gavel, Scroll, Book, Shield, Users, Landmark, Award, Flag, File, Coins, Scale, Building, Swords, Hammer, BookOpenCheck } from 'lucide-react';
 import React from 'react';
 
 // Define types for magistracies and senatorial positions
@@ -10,10 +10,12 @@ export interface Magistrate {
   name: string;
   type: MagistrateType;
   description: string;
-  icon: React.ElementType;  // Changed from ReactNode to ElementType
+  icon: React.ElementType;
   iconBgColor: string;
   iconColor: string;
   active: boolean;
+  responsibilities?: string[];
+  bureauAccess?: string[];
 }
 
 // All possible magistracies
@@ -23,20 +25,40 @@ export const magistracies: Magistrate[] = [
     name: 'Questeur',
     type: 'magistracy',
     description: 'Responsable des finances publiques, de la gestion du trésor et des dépenses de l\'État. Première étape du cursus honorum.',
-    icon: Coins,  // Directly use the component reference
+    icon: Coins,
     iconBgColor: 'bg-rome-gold/10',
     iconColor: 'text-rome-gold',
     active: false,
+    responsibilities: [
+      "Gérer le trésor public (aerarium)",
+      "Administrer les finances publiques",
+      "Collecter et superviser les impôts",
+      "Effectuer les paiements publics",
+      "Distribuer les terres publiques"
+    ],
+    bureauAccess: [
+      "tresor", "impots", "ager", "domaines", "depenses"
+    ]
   },
   {
     id: 'edile',
     name: 'Édile',
     type: 'magistracy',
     description: 'Chargé de l\'entretien des édifices publics, de l\'approvisionnement de Rome et de l\'organisation des jeux et festivals.',
-    icon: Landmark,
+    icon: Building,
     iconBgColor: 'bg-rome-terracotta/10',
     iconColor: 'text-rome-terracotta',
     active: false,
+    responsibilities: [
+      "Superviser l'entretien des édifices publics",
+      "Organiser les jeux et festivals publics",
+      "Assurer l'approvisionnement de Rome",
+      "Maintenir l'ordre public dans la ville",
+      "Veiller à l'application des règlements commerciaux"
+    ],
+    bureauAccess: [
+      "securite", "batiments", "marches", "jeux", "enquetes"
+    ]
   },
   {
     id: 'preteur',
@@ -47,26 +69,56 @@ export const magistracies: Magistrate[] = [
     iconBgColor: 'bg-rome-navy/10',
     iconColor: 'text-rome-navy',
     active: true,
+    responsibilities: [
+      "Administrer la justice civile et criminelle",
+      "Présider les tribunaux",
+      "Émettre des édits (edictum praetoris)",
+      "Commander des légions en cas de nécessité",
+      "Gérer les affaires juridiques avec les non-citoyens"
+    ],
+    bureauAccess: [
+      "justice", "proces", "tribunaux", "edits", "affaires-etrangeres"
+    ]
   },
   {
     id: 'consul',
     name: 'Consul',
     type: 'magistracy',
     description: 'Plus haute magistrature ordinaire, les deux consuls dirigent l\'État et commandent l\'armée. Ils président le Sénat et les assemblées.',
-    icon: Award,
+    icon: Swords,
     iconBgColor: 'bg-purple-100',
     iconColor: 'text-purple-700',
     active: false,
+    responsibilities: [
+      "Commander les armées romaines",
+      "Présider le Sénat",
+      "Diriger l'administration de l'État",
+      "Convoquer les assemblées populaires",
+      "Représenter Rome dans les relations diplomatiques"
+    ],
+    bureauAccess: [
+      "armee", "senat", "diplomatie", "politique", "elections"
+    ]
   },
   {
     id: 'censeur',
     name: 'Censeur',
     type: 'magistracy',
     description: 'Chargé du recensement des citoyens et de l\'évaluation de leur fortune. Veille également à la moralité publique.',
-    icon: File,
+    icon: BookOpenCheck,
     iconBgColor: 'bg-blue-100',
     iconColor: 'text-blue-700',
     active: false,
+    responsibilities: [
+      "Réaliser le recensement des citoyens",
+      "Évaluer la fortune des citoyens",
+      "Superviser la moralité publique",
+      "Réviser les listes du Sénat",
+      "Commander les grands travaux publics"
+    ],
+    bureauAccess: [
+      "lois", "recensement", "morale", "travaux", "senateurs"
+    ]
   },
   {
     id: 'pontife',
@@ -77,6 +129,16 @@ export const magistracies: Magistrate[] = [
     iconBgColor: 'bg-amber-100',
     iconColor: 'text-amber-700',
     active: false,
+    responsibilities: [
+      "Interpréter les présages",
+      "Veiller au respect du calendrier religieux",
+      "Superviser les rites et cérémonies",
+      "Interpréter le droit sacré",
+      "Gérer les temples et sanctuaires"
+    ],
+    bureauAccess: [
+      "religion", "ceremonies", "temples", "oracles", "vestales"
+    ]
   },
   {
     id: 'tribun',
@@ -87,6 +149,16 @@ export const magistracies: Magistrate[] = [
     iconBgColor: 'bg-rose-100',
     iconColor: 'text-rose-700',
     active: false,
+    responsibilities: [
+      "Protéger les plébéiens",
+      "Opposer son veto aux décisions du Sénat",
+      "Convoquer le concile de la plèbe",
+      "Proposer des lois favorables à la plèbe",
+      "Poursuivre les magistrats abusifs"
+    ],
+    bureauAccess: [
+      "assemblees", "reformes", "petitions", "veto", "protection"
+    ]
   },
 ];
 
@@ -101,6 +173,16 @@ export const senatorialPositions: Magistrate[] = [
     iconBgColor: 'bg-emerald-100',
     iconColor: 'text-emerald-700',
     active: false,
+    responsibilities: [
+      "Conserver les textes de loi",
+      "Archiver les décisions du Sénat",
+      "Conseiller les magistrats sur le droit existant",
+      "Authentifier les documents officiels",
+      "Gérer la bibliothèque juridique"
+    ],
+    bureauAccess: [
+      "archives", "registre", "bibliotheque", "documents", "authentification"
+    ]
   },
   {
     id: 'historien',
@@ -111,6 +193,16 @@ export const senatorialPositions: Magistrate[] = [
     iconBgColor: 'bg-cyan-100',
     iconColor: 'text-cyan-700',
     active: false,
+    responsibilities: [
+      "Documenter les événements importants",
+      "Rédiger les annales de la République",
+      "Préserver la mémoire institutionnelle",
+      "Conseiller sur les précédents historiques",
+      "Réaliser des recherches historiques"
+    ],
+    bureauAccess: [
+      "histoire", "annales", "memoires", "recherche", "consultations"
+    ]
   },
   {
     id: 'flamine',
@@ -121,6 +213,16 @@ export const senatorialPositions: Magistrate[] = [
     iconBgColor: 'bg-indigo-100',
     iconColor: 'text-indigo-700',
     active: false,
+    responsibilities: [
+      "Officier les rites d'une divinité spécifique",
+      "Maintenir le temple attribué",
+      "Interpréter les signes divins",
+      "Conseiller sur les questions religieuses",
+      "Organiser les fêtes sacrées"
+    ],
+    bureauAccess: [
+      "cultes", "rites", "divination", "ceremonies", "fetes"
+    ]
   },
 ];
 
@@ -131,9 +233,19 @@ export const currentMagistracy: Magistrate = magistracies.find(m => m.active) ||
   type: 'magistracy',
   description: 'En tant que Préteur, Marcus Aurelius administre la justice civile à Rome et peut commander des légions en l\'absence des consuls.',
   icon: Gavel,
-  iconBgColor: 'bg-rome-terracotta/10',
-  iconColor: 'text-rome-terracotta',
+  iconBgColor: 'bg-rome-navy/10',
+  iconColor: 'text-rome-navy',
   active: true,
+  responsibilities: [
+    "Administrer la justice civile et criminelle",
+    "Présider les tribunaux",
+    "Émettre des édits (edictum praetoris)",
+    "Commander des légions en cas de nécessité",
+    "Gérer les affaires juridiques avec les non-citoyens"
+  ],
+  bureauAccess: [
+    "justice", "proces", "tribunaux", "edits", "affaires-etrangeres"
+  ]
 };
 
 // Export all possible positions for reuse

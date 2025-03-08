@@ -1,44 +1,43 @@
 
 import React from 'react';
 import { RomanCard } from '@/components/ui-custom/RomanCard';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { QuesteurFunctions } from '@/components/republique/functions/QuesteurFunctions';
-import { EdileFunctions } from '@/components/republique/functions/EdileFunctions';
-import { PreteurFunctions } from '@/components/republique/functions/PreteurFunctions';
-import { ConsulFunctions } from '@/components/republique/functions/ConsulFunctions';
-import { CenseurFunctions } from '@/components/republique/functions/CenseurFunctions';
+import { Link } from 'react-router-dom';
+import { Button } from '@/components/ui/button';
 import { currentMagistracy } from '@/data/magistracies';
 
 export const RepubliqueFunctions: React.FC = () => {
-  // Détermine les fonctions disponibles selon la magistrature actuelle
-  const getMagistrateFunctions = () => {
-    switch (currentMagistracy.id) {
-      case 'questeur':
-        return <QuesteurFunctions />;
-      case 'edile':
-        return <EdileFunctions />;
-      case 'preteur':
-        return <PreteurFunctions />;
-      case 'consul':
-        return <ConsulFunctions />;
-      case 'censeur':
-        return <CenseurFunctions />;
-      default:
-        return (
-          <div className="p-6 text-center text-muted-foreground">
-            <p>Vous n'occupez actuellement aucune magistrature.</p>
-          </div>
-        );
-    }
-  };
-
+  const MagistrateIcon = currentMagistracy.icon;
+  
   return (
     <RomanCard>
       <RomanCard.Header>
         <h2 className="font-cinzel text-lg">Fonctions Disponibles</h2>
       </RomanCard.Header>
       <RomanCard.Content>
-        {getMagistrateFunctions()}
+        <div className="space-y-4">
+          <p className="text-muted-foreground">
+            En tant que {currentMagistracy.name}, vous avez accès aux fonctions suivantes :
+          </p>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {currentMagistracy.bureauAccess?.map((accessPath, index) => (
+              <Link key={index} to={`/republique/${accessPath}`} className="block">
+                <Button variant="outline" className="w-full justify-start gap-2 py-6">
+                  <MagistrateIcon className={`h-5 w-5 ${currentMagistracy.iconColor}`} />
+                  <span className="capitalize">{accessPath.replace('-', ' ')}</span>
+                </Button>
+              </Link>
+            ))}
+          </div>
+          
+          <div className="flex justify-center mt-4">
+            <Link to={`/republique/bureaux/${currentMagistracy.id}`}>
+              <Button className="roman-btn">
+                Accéder au Bureau du {currentMagistracy.name}
+              </Button>
+            </Link>
+          </div>
+        </div>
       </RomanCard.Content>
     </RomanCard>
   );

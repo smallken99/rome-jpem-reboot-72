@@ -1,12 +1,12 @@
 
 import React from 'react';
 import { FunctionCard } from '@/components/republique/ui/FunctionCard';
-import { Coins, Map, Receipt, LineChart, LandPlot } from 'lucide-react';
+import { Coins, Map, Receipt, LineChart, LandPlot, Calculator, Archive, Database } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
 export const QuesteurFunctions: React.FC = () => {
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
       <Link to="/republique/tresor">
         <FunctionCard
           title="Trésor Public"
@@ -54,6 +54,36 @@ export const QuesteurFunctions: React.FC = () => {
           icon={<LineChart className="h-8 w-8" />}
           color="bg-blue-100"
           iconColor="text-blue-600"
+        />
+      </Link>
+      
+      <Link to="/republique/rapports-financiers">
+        <FunctionCard
+          title="Rapports Financiers"
+          description="Préparez des rapports financiers pour le Sénat et les magistrats."
+          icon={<Archive className="h-8 w-8" />}
+          color="bg-purple-100"
+          iconColor="text-purple-600"
+        />
+      </Link>
+      
+      <Link to="/republique/audit">
+        <FunctionCard
+          title="Audit des Comptes"
+          description="Examinez les comptes des provinces et des magistrats pour garantir leur intégrité."
+          icon={<Calculator className="h-8 w-8" />}
+          color="bg-rose-100"
+          iconColor="text-rose-600"
+        />
+      </Link>
+      
+      <Link to="/republique/registres-financiers">
+        <FunctionCard
+          title="Registres Financiers"
+          description="Consultez l'historique des transactions et l'évolution des finances publiques."
+          icon={<Database className="h-8 w-8" />}
+          color="bg-cyan-100"
+          iconColor="text-cyan-600"
         />
       </Link>
     </div>
