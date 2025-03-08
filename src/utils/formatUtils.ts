@@ -20,3 +20,44 @@ export const formatDate = (year: number, season: Season, day?: number): string =
   }
   return `${seasonName} ${year} AUC`;
 };
+
+// Fonction pour formater un montant d'argent en sesterces
+export const formatMoney = (amount: number): string => {
+  return new Intl.NumberFormat('fr-FR').format(amount) + " As";
+};
+
+// Fonction pour formater la durée de fonctionnement
+export const formatUptime = (seconds: number): string => {
+  const days = Math.floor(seconds / 86400);
+  const hours = Math.floor((seconds % 86400) / 3600);
+  const minutes = Math.floor((seconds % 3600) / 60);
+  
+  if (days > 0) {
+    return `${days}j ${hours}h ${minutes}m`;
+  } else if (hours > 0) {
+    return `${hours}h ${minutes}m`;
+  } else {
+    return `${minutes}m`;
+  }
+};
+
+// Fonction pour convertir entre les types de saisons
+export const convertTimeSeasonToMaitreJeuSeason = (season: import('@/utils/timeSystem').Season): Season => {
+  const seasonMap: Record<import('@/utils/timeSystem').Season, Season> = {
+    'Ver': 'SPRING',
+    'Aestas': 'SUMMER',
+    'Autumnus': 'AUTUMN',
+    'Hiems': 'WINTER'
+  };
+  return seasonMap[season];
+};
+
+export const convertMaitreJeuSeasonToTimeSeason = (season: Season): import('@/utils/timeSystem').Season => {
+  const seasonMap: Record<Season, import('@/utils/timeSystem').Season> = {
+    'SPRING': 'Ver',
+    'SUMMER': 'Aestas',
+    'AUTUMN': 'Autumnus',
+    'WINTER': 'Hiems'
+  };
+  return seasonMap[season];
+};

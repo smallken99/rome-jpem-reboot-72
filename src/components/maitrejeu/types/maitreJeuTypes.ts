@@ -5,11 +5,13 @@ import { Season as TimeSystemSeason } from '@/utils/timeSystem';
 export type Season = 'SPRING' | 'SUMMER' | 'AUTUMN' | 'WINTER';
 
 // Types de base
-export type EvenementType = 'POLITIQUE' | 'GUERRE' | 'CRISE' | 'ECONOMIQUE' | 'RELIGION' | 'DIPLOMATIQUE' | 'SOCIAL';
+export type EvenementType = 'POLITIQUE' | 'GUERRE' | 'CRISE' | 'ECONOMIQUE' | 'ÉCONOMIQUE' | 'RELIGION' | 'DIPLOMATIQUE' | 'SOCIAL';
 export type ImportanceType = 'majeure' | 'mineure' | 'normale';
-export type GamePhase = 'SETUP' | 'ELECTION' | 'ACTION' | 'SENAT' | 'EVENEMENT';
+export type GamePhase = 'SETUP' | 'ELECTION' | 'ACTION' | 'SENAT' | 'EVENEMENT' | 'ADMINISTRATION';
 export type Faction = 'Populares' | 'Optimates' | 'Moderates' | 'Indépendant';
-export type MagistratureType = 'CONSUL' | 'PRETEUR' | 'EDILE' | 'QUESTEUR' | 'CENSEUR' | 'TRIBUN' | 'PONTIFEX_MAXIMUS';
+export type MagistratureType = 'CONSUL' | 'PRETEUR' | 'PRÉTEUR' | 'EDILE' | 'QUESTEUR' | 'CENSEUR' | 'TRIBUN' | 'PONTIFEX_MAXIMUS';
+export type PhaseType = string;
+export type FactionPolitique = string;
 
 // Structures de données principales
 export interface Equilibre {
@@ -43,7 +45,7 @@ export interface Loi {
   date: {
     year: number;
     season: Season;
-    day: number;
+    day?: number;
   };
   état: 'proposée' | 'votée' | 'rejetée' | 'amendée';
   importance: ImportanceType;
@@ -61,6 +63,7 @@ export interface Loi {
     economie?: number;
     autre?: string;
   };
+  impact?: any; // Pour compatibilité avec le code existant
 }
 
 export interface Province {
@@ -68,8 +71,10 @@ export interface Province {
   nom: string;
   gouverneur: string | null;
   région: string;
+  region?: string; // Pour compatibilité avec le code existant
   population: number;
-  status: 'pacifiée' | 'instable' | 'rebelle' | 'conquise';
+  status: 'pacifiée' | 'instable' | 'rebelle' | 'conquise' | 'en révolte';
+  statut?: string; // Pour compatibilité avec le code existant
   description: string;
   revenu: number;
   dépense: number;
@@ -86,6 +91,7 @@ export interface Province {
     x: number;
     y: number;
   };
+  armée?: number; // Pour compatibilité avec le code existant
 }
 
 export interface SenateurJouable {
@@ -93,6 +99,7 @@ export interface SenateurJouable {
   nom: string;
   famille: string;
   âge: number;
+  age?: number; // Pour compatibilité avec le code existant
   joueurId: string | null;
   stats: {
     éloquence: number;
@@ -113,6 +120,8 @@ export interface SenateurJouable {
   appartenance?: string;
   compétences?: Record<string, number>;
   relations?: Record<string, number>;
+  votes?: number; // Pour compatibilité avec le code existant
+  senateurId?: string; // Pour compatibilité avec le code existant
 }
 
 export interface Evenement {
@@ -123,16 +132,18 @@ export interface Evenement {
   date: {
     year: number;
     season: Season;
-    day: number;
+    day?: number;
   };
   importance: ImportanceType;
   options?: EvenementAction[];
   resolved: boolean;
+  impact?: any; // Pour compatibilité avec le code existant
 }
 
 export interface EvenementAction {
   id: string;
   texte: string;
+  titre?: string; // Pour compatibilité avec le code existant
   effets: {
     stabilité?: number;
     trésorPublique?: number;
@@ -145,16 +156,18 @@ export interface EvenementAction {
     autre?: string;
   };
   résultat?: string;
+  impact?: any; // Pour compatibilité avec le code existant
 }
 
 export interface HistoireEntry {
   id: string;
   titre: string;
   contenu: string;
+  description?: string; // Pour compatibilité avec le code existant
   date: {
     year: number;
     season: Season;
-    day: number;
+    day?: number;
   };
   type?: string;
   personnagesImpliqués?: string[];
@@ -170,6 +183,35 @@ export interface Election {
   terminée: boolean;
 }
 
+// Props pour les composants
+export interface EquilibreChartProps {
+  equilibre: Equilibre;
+}
+
+export interface PartisGraphProps {
+  populaires: number;
+  optimates: number;
+  moderates: number;
+}
+
+export interface PoliticalEventsTimelineProps {
+  events: any[];
+}
+
+export interface TimeManagementProps {
+  currentYear: number;
+  currentSeason: Season;
+  currentPhase: GamePhase;
+  onAdvance: () => void;
+  onPhaseChange: (phase: GamePhase) => void;
+}
+
+export interface EvenementsListProps {
+  evenements: Evenement[];
+  onResolve: (id: string, optionId: string) => void;
+  filteredType?: EvenementType | 'ALL';
+}
+
 // Interfaces de composants
 export interface MaitreJeuContextType {
   // État du jeu
@@ -182,6 +224,8 @@ export interface MaitreJeuContextType {
   currentYear: number;
   currentSeason: Season;
   currentPhase: GamePhase;
+  year?: number; // Pour compatibilité avec le code existant
+  season?: Season; // Pour compatibilité avec le code existant
   
   // Entities
   equilibre: Equilibre;
@@ -191,6 +235,7 @@ export interface MaitreJeuContextType {
   evenements: Evenement[];
   histoireEntries: HistoireEntry[];
   elections: Election[];
+  factions?: any[]; // Pour compatibilité avec le code existant
   
   // Actions
   advanceTime: () => void;
@@ -200,7 +245,7 @@ export interface MaitreJeuContextType {
   
   // Political
   addLoi: (loi: Omit<Loi, "id">) => void;
-  voteLoi: (id: string, vote: 'pour' | 'contre' | 'abstention') => void;
+  voteLoi: (id: string, vote: 'pour' | 'contre' | 'abstention', count?: number) => void;
   scheduleElection: (magistrature: MagistratureType, year: number, season: Season) => string;
   
   // Events management
@@ -216,6 +261,9 @@ export interface MaitreJeuContextType {
   // Senateurs
   updateSenateur: (id: string, updates: Partial<SenateurJouable>) => void;
   assignSenateurToPlayer: (senateurId: string, playerId: string) => void;
+  addSenateur?: (senateur: Omit<SenateurJouable, "id">) => void; // Pour compatibilité avec le code existant
+  deleteSenateur?: (id: string) => void; // Pour compatibilité avec le code existant
+  assignSenateur?: (senateurId: string, playerId: string) => void; // Pour compatibilité avec le code existant
 }
 
 // Props interfaces for components
@@ -227,20 +275,21 @@ export interface ProvincesMapProps {
 export interface ProvinceModalProps {
   province: Province;
   open: boolean;
-  onClose: () => void;
+  onClose?: () => void;
   onSave: (province: Province) => void;
 }
 
 export interface SenateurModalProps {
   senateur: SenateurJouable;
   open: boolean;
-  onClose: () => void;
+  isOpen?: boolean; // Pour compatibilité avec le code existant
+  onClose?: () => void;
   onSave: (senateur: SenateurJouable) => void;
 }
 
 export interface ProvinceCardProps {
   province: Province;
-  onViewProvince: () => void;
+  onViewProvince: (provinceId: string) => void;
 }
 
 export interface SenateurCardProps {
@@ -253,6 +302,7 @@ export interface SenateurCardProps {
 export interface LoisTableProps {
   lois: Loi[];
   searchTerm?: string;
+  onVote?: (id: string, vote: 'pour' | 'contre' | 'abstention') => void;
 }
 
 export interface ElectionPlannerProps {

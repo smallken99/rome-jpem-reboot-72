@@ -1,187 +1,381 @@
-
-import React, { useState } from 'react';
-import { useMaitreJeu } from './context/MaitreJeuContext';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import React, { useState, useEffect } from 'react';
+import { PageHeader } from '@/components/ui-custom/PageHeader';
+import { RomanCard } from '@/components/ui-custom/RomanCard';
 import { Button } from '@/components/ui/button';
-import { 
-  UserPlus, Search, Filter, SlidersHorizontal
-} from 'lucide-react';
 import { Input } from '@/components/ui/input';
-import { 
-  DropdownMenu, 
-  DropdownMenuContent, 
-  DropdownMenuItem, 
-  DropdownMenuTrigger 
-} from '@/components/ui/dropdown-menu';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { useMaitreJeu } from './context/MaitreJeuContext';
 import { SenateurCard } from './components/SenateurCard';
 import { SenateurModal } from './components/SenateurModal';
 import { AssignmentTable } from './components/AssignmentTable';
+import { toast } from 'sonner';
+import { 
+  Search, 
+  UserPlus, 
+  Filter, 
+  Users, 
+  UserCheck, 
+  Shield, 
+  Sword, 
+  BookOpen, 
+  Scale 
+} from 'lucide-react';
+import { 
+  Select, 
+  SelectContent, 
+  SelectItem, 
+  SelectTrigger, 
+  SelectValue 
+} from '@/components/ui/select';
+import { SenateurJouable, Faction } from './types/maitreJeuTypes';
 
-export const GestionSenateurs: React.FC = () => {
-  const { senateurs, factions, addSenateur, updateSenateur, deleteSenateur, assignSenateur } = useMaitreJeu();
-  
+export const GestionSenateurs = () => {
+  const { 
+    senateurs, 
+    updateSenateur, 
+    assignSenateurToPlayer,
+    // Optionally use these if available
+    addSenateur = () => {},
+    deleteSenateur = () => {},
+    assignSenateur = assignSenateurToPlayer,
+    factions = []
+  } = useMaitreJeu();
+
   const [searchTerm, setSearchTerm] = useState('');
-  const [filter, setFilter] = useState('all');
-  const [sortBy, setSortBy] = useState('nom');
-  const [activeTab, setActiveTab] = useState('senateurs');
-  const [modalOpen, setModalOpen] = useState(false);
-  const [selectedSenateurId, setSelectedSenateurId] = useState<string>('');
+  const [factionFilter, setFactionFilter] = useState<string>('all');
+  const [magistratureFilter, setMagistratureFilter] = useState<string>('all');
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [selectedSenateur, setSelectedSenateur] = useState<SenateurJouable | null>(null);
+  const [isAssignmentModalOpen, setIsAssignmentModalOpen] = useState(false);
+  const [assignments, setAssignments] = useState<Record<string, string>>({});
   
-  const senateurAssignments = senateurs.reduce((acc, senateur) => {
-    if (senateur.joueurId) {
-      acc[senateur.id] = senateur.joueurId;
-    }
-    return acc;
-  }, {} as Record<string, string>);
+  // Simuler des joueurs pour l'assignation
+  const players = [
+    { id: 'player1', name: 'Marcus Aurelius' },
+    { id: 'player2', name: 'Julius Caesar' },
+    { id: 'player3', name: 'Cicero' },
+    { id: 'player4', name: 'Brutus' },
+    { id: 'player5', name: 'Crassus' },
+  ];
   
-  const handleAddSenateur = () => {
-    setSelectedSenateurId('');
-    setModalOpen(true);
-  };
+  // Initialiser les assignations à partir des sénateurs
+  useEffect(() => {
+    const initialAssignments: Record<string, string> = {};
+    senateurs.forEach(senateur => {
+      if (senateur.joueurId) {
+        initialAssignments[senateur.id] = senateur.joueurId;
+      }
+    });
+    setAssignments(initialAssignments);
+  }, [senateurs]);
   
-  const handleEditSenateur = (senateurId: string) => {
-    setSelectedSenateurId(senateurId);
-    setModalOpen(true);
-  };
-  
-  const handleSaveSenateur = (senateur: any) => {
-    if (!selectedSenateurId) {
-      addSenateur(senateur);
-    } else {
-      updateSenateur(selectedSenateurId, senateur);
-    }
-    setModalOpen(false);
-  };
-  
-  const handleAssignSenateur = (senateurId: string, playerId: string) => {
-    assignSenateur(senateurId, playerId);
-  };
-  
+  // Filtrer les sénateurs en fonction des critères
   const filteredSenateurs = senateurs.filter(senateur => {
-    const matchesSearch = senateur.nom.toLowerCase().includes(searchTerm.toLowerCase()) 
-      || senateur.famille.toLowerCase().includes(searchTerm.toLowerCase());
-      
-    if (filter === 'all') return matchesSearch;
-    if (filter === 'assigned') return matchesSearch && !!senateur.joueurId;
-    if (filter === 'unassigned') return matchesSearch && !senateur.joueurId;
-    if (filter === 'magistrature') return matchesSearch && !!senateur.magistrature;
-    if (filter === 'faction' && senateur.faction) {
-      return matchesSearch && senateur.faction.toLowerCase() === filter.toLowerCase();
-    }
+    const matchesSearch = 
+      senateur.nom.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      senateur.famille.toLowerCase().includes(searchTerm.toLowerCase());
     
-    return matchesSearch;
+    const matchesFaction = 
+      factionFilter === 'all' || 
+      senateur.faction.toLowerCase() === factionFilter.toLowerCase();
+    
+    const matchesMagistrature = 
+      magistratureFilter === 'all' || 
+      (magistratureFilter === 'none' && !senateur.magistrature) ||
+      (senateur.magistrature && senateur.magistrature.toLowerCase() === magistratureFilter.toLowerCase());
+    
+    return matchesSearch && matchesFaction && matchesMagistrature;
   });
   
-  const sortedSenateurs = [...filteredSenateurs].sort((a, b) => {
-    if (sortBy === 'nom') return a.nom.localeCompare(b.nom);
-    if (sortBy === 'famille') return a.famille.localeCompare(b.famille);
-    if (sortBy === 'age' && a.âge && b.âge) return b.âge - a.âge;
-    return 0;
-  });
+  // Gérer l'édition d'un sénateur
+  const handleEditSenateur = (senateur: SenateurJouable) => {
+    setSelectedSenateur(senateur);
+    setIsModalOpen(true);
+  };
   
-  const selectedSenateur = selectedSenateurId 
-    ? senateurs.find(s => s.id === selectedSenateurId) 
-    : undefined;
+  // Sauvegarder les modifications d'un sénateur
+  const handleSaveSenateur = (updatedSenateur: SenateurJouable) => {
+    updateSenateur(updatedSenateur.id, updatedSenateur);
+    setIsModalOpen(false);
+    toast.success(`Sénateur mis à jour: ${updatedSenateur.nom}`);
+  };
   
+  // Assigner un sénateur à un joueur
+  const handleAssignSenateur = (senateurId: string, playerId: string) => {
+    assignSenateurToPlayer(senateurId, playerId);
+    setAssignments(prev => ({
+      ...prev,
+      [senateurId]: playerId
+    }));
+    
+    const senateur = senateurs.find(s => s.id === senateurId);
+    const player = players.find(p => p.id === playerId);
+    
+    if (senateur && player) {
+      toast.success(`${senateur.nom} assigné à ${player.name}`);
+    }
+  };
+  
+  // Obtenir le nom du joueur à partir de son ID
+  const getPlayerName = (playerId: string | null): string | null => {
+    if (!playerId) return null;
+    const player = players.find(p => p.id === playerId);
+    return player ? player.name : null;
+  };
+
   return (
-    <div className="space-y-6">
+    <div>
       <div className="flex justify-between items-center">
-        <h2 className="text-2xl font-bold">Gestion des Sénateurs</h2>
-        <Button 
-          className="flex items-center gap-2"
-          onClick={handleAddSenateur}
-        >
-          <UserPlus className="h-4 w-4" />
-          <span>Nouveau Sénateur</span>
-        </Button>
+        <PageHeader 
+          title="Gestion des Sénateurs" 
+          subtitle="Administrez les sénateurs de la République Romaine" 
+        />
+        
+        <div className="flex gap-2">
+          <Button variant="outline" onClick={() => setIsAssignmentModalOpen(true)}>
+            <UserCheck className="h-4 w-4 mr-2" />
+            Assigner aux joueurs
+          </Button>
+          <Button>
+            <UserPlus className="h-4 w-4 mr-2" />
+            Nouveau Sénateur
+          </Button>
+        </div>
       </div>
       
-      <Tabs value={activeTab} onValueChange={setActiveTab}>
-        <TabsList>
-          <TabsTrigger value="senateurs">Sénateurs</TabsTrigger>
-          <TabsTrigger value="assignments">Assignation aux joueurs</TabsTrigger>
-        </TabsList>
+      <div className="flex flex-col md:flex-row gap-4 mt-6">
+        <div className="relative flex-grow">
+          <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+          <Input
+            placeholder="Rechercher un sénateur..."
+            className="pl-8"
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+          />
+        </div>
         
-        <div className="my-4 flex flex-col md:flex-row gap-4">
-          <div className="relative w-full md:w-64">
-            <Search className="absolute left-2 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-            <Input 
-              placeholder="Rechercher..." 
-              value={searchTerm} 
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="pl-8" 
-            />
-          </div>
-          
-          <Select value={filter} onValueChange={setFilter}>
-            <SelectTrigger className="w-full md:w-48">
-              <SelectValue placeholder="Filtrer" />
+        <div className="flex gap-2">
+          <Select value={factionFilter} onValueChange={setFactionFilter}>
+            <SelectTrigger className="w-[180px]">
+              <Filter className="h-4 w-4 mr-2" />
+              <span>Faction</span>
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">Tous les sénateurs</SelectItem>
-              <SelectItem value="assigned">Assignés</SelectItem>
-              <SelectItem value="unassigned">Non-assignés</SelectItem>
-              <SelectItem value="magistrature">Avec magistrature</SelectItem>
-              {factions?.map(faction => (
-                <SelectItem key={faction.id} value={faction.nom.toLowerCase()}>
-                  {faction.nom}
-                </SelectItem>
-              ))}
+              <SelectItem value="all">Toutes les factions</SelectItem>
+              <SelectItem value="Populares">Populares</SelectItem>
+              <SelectItem value="Optimates">Optimates</SelectItem>
+              <SelectItem value="Moderates">Modérés</SelectItem>
+              <SelectItem value="Indépendant">Indépendants</SelectItem>
             </SelectContent>
           </Select>
           
-          <Select value={sortBy} onValueChange={setSortBy}>
-            <SelectTrigger className="w-full md:w-48">
-              <SelectValue placeholder="Trier par" />
+          <Select value={magistratureFilter} onValueChange={setMagistratureFilter}>
+            <SelectTrigger className="w-[180px]">
+              <Shield className="h-4 w-4 mr-2" />
+              <span>Magistrature</span>
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="nom">Par nom</SelectItem>
-              <SelectItem value="famille">Par famille</SelectItem>
-              <SelectItem value="age">Par âge</SelectItem>
+              <SelectItem value="all">Toutes</SelectItem>
+              <SelectItem value="CONSUL">Consuls</SelectItem>
+              <SelectItem value="PRETEUR">Préteurs</SelectItem>
+              <SelectItem value="EDILE">Édiles</SelectItem>
+              <SelectItem value="QUESTEUR">Questeurs</SelectItem>
+              <SelectItem value="CENSEUR">Censeurs</SelectItem>
+              <SelectItem value="TRIBUN">Tribuns</SelectItem>
+              <SelectItem value="none">Sans magistrature</SelectItem>
             </SelectContent>
           </Select>
         </div>
+      </div>
+      
+      <Tabs defaultValue="cards" className="mt-6">
+        <TabsList>
+          <TabsTrigger value="cards">
+            <Users className="h-4 w-4 mr-2" />
+            Cartes
+          </TabsTrigger>
+          <TabsTrigger value="stats">
+            <Scale className="h-4 w-4 mr-2" />
+            Statistiques
+          </TabsTrigger>
+          <TabsTrigger value="history">
+            <BookOpen className="h-4 w-4 mr-2" />
+            Historique
+          </TabsTrigger>
+          <TabsTrigger value="military">
+            <Sword className="h-4 w-4 mr-2" />
+            Commandements
+          </TabsTrigger>
+        </TabsList>
         
-        <TabsContent value="senateurs">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {sortedSenateurs.map(senateur => (
-              <SenateurCard 
-                key={senateur.id}
-                senateur={senateur}
-                playerName={senateur.joueurId || ""}
-                isAssigned={!!senateur.joueurId}
-                onEdit={() => handleEditSenateur(senateur.id)}
-              />
-            ))}
+        <TabsContent value="cards">
+          <div className="grid md:grid-cols-3 gap-6 mt-6">
+            {filteredSenateurs.map((senateur) => {
+              const playerName = getPlayerName(senateur.joueurId);
+              return (
+                <SenateurCard
+                  key={senateur.id}
+                  senateur={senateur}
+                  isAssigned={!!senateur.joueurId}
+                  playerName={playerName || ""}
+                  onEdit={() => handleEditSenateur(senateur)}
+                />
+              );
+            })}
           </div>
         </TabsContent>
         
-        <TabsContent value="assignments">
-          <Card>
-            <CardHeader>
-              <CardTitle>Assignation des Sénateurs aux Joueurs</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <AssignmentTable 
-                senateurs={senateurs}
-                assignments={senateurAssignments}
-                onAssign={handleAssignSenateur}
-              />
-            </CardContent>
-          </Card>
+        <TabsContent value="stats">
+          <RomanCard>
+            <RomanCard.Header>
+              <h2 className="font-cinzel text-lg">Statistiques du Sénat</h2>
+            </RomanCard.Header>
+            <RomanCard.Content>
+              <p className="text-muted-foreground">
+                Analyse statistique des sénateurs et de leurs affiliations.
+              </p>
+              
+              <div className="mt-4 grid grid-cols-2 md:grid-cols-4 gap-4">
+                <div className="bg-muted rounded-lg p-4">
+                  <h3 className="text-sm font-medium text-muted-foreground">Total Sénateurs</h3>
+                  <p className="text-2xl font-bold">{senateurs.length}</p>
+                </div>
+                
+                <div className="bg-muted rounded-lg p-4">
+                  <h3 className="text-sm font-medium text-muted-foreground">Populares</h3>
+                  <p className="text-2xl font-bold">{senateurs.filter(s => s.faction === 'Populares').length}</p>
+                </div>
+                
+                <div className="bg-muted rounded-lg p-4">
+                  <h3 className="text-sm font-medium text-muted-foreground">Optimates</h3>
+                  <p className="text-2xl font-bold">{senateurs.filter(s => s.faction === 'Optimates').length}</p>
+                </div>
+                
+                <div className="bg-muted rounded-lg p-4">
+                  <h3 className="text-sm font-medium text-muted-foreground">Modérés</h3>
+                  <p className="text-2xl font-bold">{senateurs.filter(s => s.faction === 'Moderates').length}</p>
+                </div>
+              </div>
+              
+              <div className="mt-6">
+                <h3 className="font-medium mb-2">Répartition des magistratures</h3>
+                {/* Placeholder pour un graphique ou une visualisation */}
+                <div className="h-64 bg-muted rounded-lg flex items-center justify-center">
+                  <p className="text-muted-foreground">Graphique de répartition des magistratures</p>
+                </div>
+              </div>
+            </RomanCard.Content>
+          </RomanCard>
+        </TabsContent>
+        
+        <TabsContent value="history">
+          <RomanCard>
+            <RomanCard.Header>
+              <h2 className="font-cinzel text-lg">Historique des Sénateurs</h2>
+            </RomanCard.Header>
+            <RomanCard.Content>
+              <p className="text-muted-foreground mb-4">
+                Chronologie des événements importants liés aux sénateurs.
+              </p>
+              
+              <div className="space-y-4">
+                {/* Placeholder pour une timeline */}
+                <div className="border-l-2 border-muted pl-4 py-2">
+                  <h3 className="font-medium">705 AUC - Élection consulaire</h3>
+                  <p className="text-sm text-muted-foreground">Marcus Tullius Cicero élu consul</p>
+                </div>
+                
+                <div className="border-l-2 border-muted pl-4 py-2">
+                  <h3 className="font-medium">704 AUC - Scandale politique</h3>
+                  <p className="text-sm text-muted-foreground">Lucius Sergius Catilina accusé de corruption</p>
+                </div>
+                
+                <div className="border-l-2 border-muted pl-4 py-2">
+                  <h3 className="font-medium">703 AUC - Réforme agraire</h3>
+                  <p className="text-sm text-muted-foreground">Proposition de loi par les tribuns de la plèbe</p>
+                </div>
+              </div>
+            </RomanCard.Content>
+          </RomanCard>
+        </TabsContent>
+        
+        <TabsContent value="military">
+          <RomanCard>
+            <RomanCard.Header>
+              <h2 className="font-cinzel text-lg">Commandements Militaires</h2>
+            </RomanCard.Header>
+            <RomanCard.Content>
+              <p className="text-muted-foreground mb-4">
+                Sénateurs actuellement en charge de commandements militaires.
+              </p>
+              
+              <div className="overflow-x-auto">
+                <table className="w-full">
+                  <thead>
+                    <tr className="border-b">
+                      <th className="text-left py-2">Sénateur</th>
+                      <th className="text-left py-2">Province</th>
+                      <th className="text-left py-2">Légions</th>
+                      <th className="text-left py-2">Statut</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {senateurs
+                      .filter(s => s.province !== null)
+                      .map((senateur, index) => (
+                        <tr key={index} className="border-b">
+                          <td className="py-2">{senateur.nom}</td>
+                          <td className="py-2">{senateur.province}</td>
+                          <td className="py-2">2</td>
+                          <td className="py-2">
+                            <span className="px-2 py-1 bg-green-100 text-green-800 rounded-full text-xs">
+                              En campagne
+                            </span>
+                          </td>
+                        </tr>
+                      ))}
+                    
+                    {senateurs.filter(s => s.province !== null).length === 0 && (
+                      <tr>
+                        <td colSpan={4} className="py-4 text-center text-muted-foreground">
+                          Aucun sénateur n'est actuellement en charge d'un commandement militaire
+                        </td>
+                      </tr>
+                    )}
+                  </tbody>
+                </table>
+              </div>
+            </RomanCard.Content>
+          </RomanCard>
         </TabsContent>
       </Tabs>
-      
+
       {selectedSenateur && (
         <SenateurModal
           senateur={selectedSenateur}
-          isOpen={modalOpen}
-          onClose={() => setModalOpen(false)}
+          open={isModalOpen}
+          onClose={() => setIsModalOpen(false)}
           onSave={handleSaveSenateur}
         />
       )}
+      
+      <RomanCard.Dialog
+        open={isAssignmentModalOpen}
+        onOpenChange={setIsAssignmentModalOpen}
+        title="Assigner des Sénateurs aux Joueurs"
+      >
+        <AssignmentTable 
+          senateurs={senateurs}
+          assignments={assignments}
+          onAssign={handleAssignSenateur}
+        />
+        
+        <div className="flex justify-end mt-4">
+          <Button onClick={() => setIsAssignmentModalOpen(false)}>
+            Fermer
+          </Button>
+        </div>
+      </RomanCard.Dialog>
     </div>
   );
 };
