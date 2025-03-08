@@ -11,6 +11,7 @@ import {
 export const useProfitabilityData = () => {
   const [activeView, setActiveView] = useState<'overview' | 'detail'>('overview');
   const [chartViewType, setChartViewType] = useState<ChartViewType>('yearly');
+  const [selectedYear, setSelectedYear] = useState<number>(new Date().getFullYear());
   
   // Revenue and expense data for charts
   const chartData: RevenueExpenseChartData[] = [
@@ -70,11 +71,33 @@ export const useProfitabilityData = () => {
   const totalProfit = totalRevenue - totalExpenses;
   const overallRoi = (totalProfit / totalExpenses) * 100;
   
+  // Get property by ID
+  const getPropertyById = (id: number | string): PropertyProfitData | undefined => {
+    const propertyId = typeof id === 'string' ? parseInt(id, 10) : id;
+    return profitableProperties.find(property => property.id === propertyId);
+  };
+  
+  // Filter properties by type
+  const filterPropertiesByType = (type: string): PropertyProfitData[] => {
+    return profitableProperties.filter(property => property.type === type);
+  };
+  
+  // Sort properties by profitability
+  const sortPropertiesByProfitability = (order: 'asc' | 'desc' = 'desc'): PropertyProfitData[] => {
+    return [...profitableProperties].sort((a, b) => {
+      return order === 'desc' 
+        ? b.profitMargin - a.profitMargin
+        : a.profitMargin - b.profitMargin;
+    });
+  };
+  
   return {
     activeView,
     setActiveView,
     chartViewType,
     setChartViewType,
+    selectedYear,
+    setSelectedYear,
     chartData,
     revenueSourcesData,
     profitableProperties,
@@ -82,6 +105,9 @@ export const useProfitabilityData = () => {
     totalRevenue,
     totalExpenses,
     totalProfit,
-    overallRoi
+    overallRoi,
+    getPropertyById,
+    filterPropertiesByType,
+    sortPropertiesByProfitability
   };
 };
