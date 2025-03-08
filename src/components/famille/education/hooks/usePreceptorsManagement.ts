@@ -1,114 +1,141 @@
 
-import { useState, useEffect } from 'react';
+import { useState, useCallback } from 'react';
 import { Preceptor, PreceptorsByType } from '../types/educationTypes';
+import { generatePreceptors } from '../data/preceptors';
 import { toast } from 'sonner';
 
 export const usePreceptorsManagement = () => {
-  const [preceptors, setPreceptors] = useState<PreceptorsByType>({});
+  const [preceptors, setPreceptors] = useState<PreceptorsByType>(generatePreceptors());
   const [hiredPreceptors, setHiredPreceptors] = useState<Preceptor[]>([]);
-  
-  // Refresh available preceptors
-  const refreshPreceptors = () => {
-    // This would usually fetch from an API
-    // For now we'll just use what the original code had
-    import('../data').then(({ generatePreceptors }) => {
-      const newPreceptors = generatePreceptors();
-      setPreceptors(getPreceptorsByType(Object.values(newPreceptors).flat()));
-    }).catch(err => {
-      console.error("Error loading preceptors:", err);
-      toast.error("Impossible de charger les précepteurs");
-    });
-  };
-  
-  // Initialize preceptors on first load
-  useEffect(() => {
-    refreshPreceptors();
+  const [isHiringPreceptor, setIsHiringPreceptor] = useState(false);
+
+  // Refresh the list of available preceptors
+  const refreshPreceptors = useCallback(() => {
+    setPreceptors(generatePreceptors());
   }, []);
-  
+
+  // Load preceptors by type
+  const loadPreceptorsByType = useCallback(async (type: string): Promise<Preceptor[]> => {
+    // In a real app, this would be an API call
+    // Simulating an async operation
+    return new Promise((resolve) => {
+      setTimeout(() => {
+        const typePreceptors = preceptors[type] || [];
+        resolve(typePreceptors);
+      }, 500);
+    });
+  }, [preceptors]);
+
   // Hire a preceptor
-  const hirePreceptor = (preceptor: Preceptor, childId?: string) => {
-    setHiredPreceptors(prev => [...prev, {...preceptor, childId}]);
+  const hirePreceptor = useCallback((preceptor: Preceptor, childId?: string): boolean => {
+    setIsHiringPreceptor(true);
     
-    toast.success(
-      childId 
-        ? `${preceptor.name} a été embauché pour éduquer votre enfant.` 
-        : `${preceptor.name} a été embauché comme précepteur de votre famille.`
-    );
-    
-    return true;
-  };
-  
-  // Fire a preceptor
-  const firePreceptor = (preceptorId: string) => {
-    const preceptor = hiredPreceptors.find(p => p.id === preceptorId);
-    
-    if (!preceptor) {
-      toast.error("Précepteur introuvable");
-      return false;
-    }
-    
-    setHiredPreceptors(prev => prev.filter(p => p.id !== preceptorId));
-    toast.success(`${preceptor.name} n'est plus à votre service.`);
-    
-    return true;
-  };
-  
-  // Assign preceptor to a child
-  const assignPreceptorToChild = (preceptorId: string, childId: string) => {
-    setHiredPreceptors(prev => 
-      prev.map(p => p.id === preceptorId ? {...p, childId} : p)
-    );
-    
-    const preceptor = hiredPreceptors.find(p => p.id === preceptorId);
-    if (preceptor) {
-      toast.success(`${preceptor.name} a été assigné à l'éducation de votre enfant.`);
-    }
-    
-    return true;
-  };
-  
-  // Get preceptors by education type
-  const getPreceptorsByType = (preceptors: Preceptor[]): PreceptorsByType => {
-    const result: PreceptorsByType = {};
-    
-    preceptors.forEach(preceptor => {
-      if (!preceptor.speciality) return;
-      
-      const type = determineEducationType(preceptor.speciality);
-      if (!result[type]) {
-        result[type] = [];
+    try {
+      // Check if already hired
+      if (hiredPreceptors.some(p => p.id === preceptor.id)) {
+        toast.error("Ce précepteur est déjà à votre service");
+        return false;
       }
       
-      result[type].push(preceptor);
-    });
-    
-    return result;
-  };
-  
-  // Helper to determine education type from specialty
-  const determineEducationType = (specialty: string): string => {
-    const militaryKeywords = ['tactique', 'combat', 'guerre', 'militaire'];
-    const politicalKeywords = ['rhétorique', 'politique', 'éloquence', 'droit'];
-    const religiousKeywords = ['rituel', 'divin', 'religieux', 'augure', 'vestale'];
-    const commercialKeywords = ['commerce', 'négoce', 'marchand', 'économie'];
-    
-    const specialty_lower = specialty.toLowerCase();
-    
-    if (militaryKeywords.some(kw => specialty_lower.includes(kw))) return 'military';
-    if (politicalKeywords.some(kw => specialty_lower.includes(kw))) return 'political';
-    if (religiousKeywords.some(kw => specialty_lower.includes(kw))) return 'religious';
-    if (commercialKeywords.some(kw => specialty_lower.includes(kw))) return 'commercial';
-    
-    return 'political'; // Default to political education
-  };
-  
+      // Create a copy of the preceptor with updated status
+      const hiredPreceptor: Preceptor = {
+        ...preceptor,
+        available: false,
+        childId: childId || null
+      };
+      
+      // Add to hired preceptors
+      setHiredPreceptors(prev => [...prev, hiredPreceptor]);
+      
+      // Update available preceptors
+      setPreceptors(prev => {
+        const updatedPreceptors = { ...prev };
+        const typeKey = preceptor.id.split('-')[0];
+        
+        if (updatedPreceptors[typeKey]) {
+          updatedPreceptors[typeKey] = updatedPreceptors[typeKey].map(p => 
+            p.id === preceptor.id ? { ...p, available: false } : p
+          );
+        }
+        
+        return updatedPreceptors;
+      });
+      
+      return true;
+    } catch (error) {
+      console.error("Error hiring preceptor:", error);
+      return false;
+    } finally {
+      setIsHiringPreceptor(false);
+    }
+  }, [hiredPreceptors]);
+
+  // Fire a preceptor
+  const firePreceptor = useCallback((preceptorId: string): boolean => {
+    try {
+      // Find the preceptor to fire
+      const preceptorIndex = hiredPreceptors.findIndex(p => p.id === preceptorId);
+      
+      if (preceptorIndex === -1) {
+        toast.error("Précepteur non trouvé");
+        return false;
+      }
+      
+      // Remove from hired preceptors
+      setHiredPreceptors(prev => prev.filter(p => p.id !== preceptorId));
+      
+      // Update available preceptors list
+      setPreceptors(prev => {
+        const updatedPreceptors = { ...prev };
+        const typeKey = preceptorId.split('-')[0];
+        
+        if (updatedPreceptors[typeKey]) {
+          updatedPreceptors[typeKey] = updatedPreceptors[typeKey].map(p => 
+            p.id === preceptorId ? { ...p, available: true } : p
+          );
+        }
+        
+        return updatedPreceptors;
+      });
+      
+      return true;
+    } catch (error) {
+      console.error("Error firing preceptor:", error);
+      return false;
+    }
+  }, [hiredPreceptors]);
+
+  // Assign a preceptor to a child
+  const assignPreceptorToChild = useCallback((preceptorId: string, childId: string): boolean => {
+    try {
+      // Find the preceptor to assign
+      const preceptorIndex = hiredPreceptors.findIndex(p => p.id === preceptorId);
+      
+      if (preceptorIndex === -1) {
+        toast.error("Précepteur non trouvé");
+        return false;
+      }
+      
+      // Update preceptor's assignment
+      setHiredPreceptors(prev => prev.map(p => 
+        p.id === preceptorId ? { ...p, childId } : p
+      ));
+      
+      return true;
+    } catch (error) {
+      console.error("Error assigning preceptor:", error);
+      return false;
+    }
+  }, [hiredPreceptors]);
+
   return {
     preceptors,
     hiredPreceptors,
+    isHiringPreceptor,
     refreshPreceptors,
+    loadPreceptorsByType,
     hirePreceptor,
     firePreceptor,
-    assignPreceptorToChild,
-    getPreceptorsByType
+    assignPreceptorToChild
   };
 };

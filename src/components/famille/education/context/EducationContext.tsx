@@ -22,7 +22,9 @@ export const EducationProvider: React.FC<EducationProviderProps> = ({
   const {
     preceptors,
     hiredPreceptors,
+    isHiringPreceptor,
     refreshPreceptors,
+    loadPreceptorsByType,
     hirePreceptor,
     firePreceptor,
     assignPreceptorToChild
@@ -50,6 +52,8 @@ export const EducationProvider: React.FC<EducationProviderProps> = ({
       preceptors,
       hiredPreceptors,
       educatingChildren,
+      isHiringPreceptor,
+      loadPreceptorsByType,
       refreshPreceptors,
       hirePreceptor,
       firePreceptor,

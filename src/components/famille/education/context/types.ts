@@ -22,6 +22,8 @@ export interface EducationContextType {
   advanceEducationYear: (childId: string) => void;
   completeEducation: (childId: string) => void;
   updateChildName: (childId: string, newName: string) => void;
+  loadPreceptorsByType?: (type: string) => Promise<Preceptor[]>;
+  isHiringPreceptor?: boolean;
 }
 
 export interface EducationProviderProps {

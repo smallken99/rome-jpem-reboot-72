@@ -44,14 +44,18 @@ export const PreceptorDetail: React.FC = () => {
           setPreceptor(existingPreceptor);
         } else {
           // Sinon charger tous les précepteurs du type spécifié
-          const preceptors = await loadPreceptorsByType(speciality);
-          const foundPreceptor = preceptors.find(p => p.id === preceptorId);
-          
-          if (!foundPreceptor) {
-            throw new Error("Précepteur non trouvé");
+          if (loadPreceptorsByType) {
+            const preceptors = await loadPreceptorsByType(speciality);
+            const foundPreceptor = preceptors.find(p => p.id === preceptorId);
+            
+            if (!foundPreceptor) {
+              throw new Error("Précepteur non trouvé");
+            }
+            
+            setPreceptor(foundPreceptor);
+          } else {
+            throw new Error("Fonction de chargement des précepteurs non disponible");
           }
-          
-          setPreceptor(foundPreceptor);
         }
       } catch (error) {
         console.error('Erreur lors du chargement du précepteur:', error);
@@ -104,8 +108,10 @@ export const PreceptorDetail: React.FC = () => {
     <div className="space-y-6">
       {/* En-tête avec les informations du précepteur */}
       <PreceptorHeader 
-        name={preceptor.name} 
-        reputation={preceptor.reputation} 
+        preceptor={{
+          name: preceptor.name,
+          reputation: preceptor.reputation
+        }}
       />
       
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -119,7 +125,10 @@ export const PreceptorDetail: React.FC = () => {
           {/* Spécialité */}
           <div>
             <h3 className="text-lg font-semibold mb-2">Spécialité</h3>
-            <PreceptorSpeciality specialty={preceptor.speciality} />
+            <PreceptorSpeciality 
+              type={preceptor.speciality.split(' ')[0]} 
+              specialty={preceptor.speciality} 
+            />
           </div>
           
           <Separator />
@@ -127,7 +136,7 @@ export const PreceptorDetail: React.FC = () => {
           {/* Biographie */}
           <div>
             <h3 className="text-lg font-semibold mb-2">Biographie</h3>
-            <PreceptorBiography text={preceptor.background} />
+            <PreceptorBiography bio={preceptor.background} />
           </div>
         </div>
         
@@ -152,7 +161,6 @@ export const PreceptorDetail: React.FC = () => {
             <div className="mt-6">
               <PreceptorActions 
                 onHire={handleHire}
-                onCancel={handleCancel}
                 isAvailable={!isAlreadyHired && preceptor.available}
                 isLoading={isHiringPreceptor}
               />

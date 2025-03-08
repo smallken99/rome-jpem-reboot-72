@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useEducation } from './context/EducationContext';
 import { specialties } from './data';
@@ -15,7 +16,8 @@ import { PreceptorQualityStars } from './components/PreceptorQualityStars';
 
 export const PreceptorList: React.FC = () => {
   const { 
-    loadPreceptorsByType, 
+    refreshPreceptors,
+    loadPreceptorsByType,
     hiredPreceptors 
   } = useEducation();
   const navigate = useNavigate();
@@ -29,8 +31,13 @@ export const PreceptorList: React.FC = () => {
   useEffect(() => {
     const loadPreceptors = async () => {
       setIsLoading(true);
-      const loadedPreceptors = await loadPreceptorsByType(activeSpecialty);
-      setPreceptors(loadedPreceptors);
+      if (loadPreceptorsByType) {
+        const loadedPreceptors = await loadPreceptorsByType(activeSpecialty);
+        setPreceptors(loadedPreceptors);
+      } else {
+        console.error("loadPreceptorsByType function is not available");
+        setPreceptors([]);
+      }
       setIsLoading(false);
     };
     
