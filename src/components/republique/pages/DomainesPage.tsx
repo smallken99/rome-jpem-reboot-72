@@ -5,6 +5,9 @@ import { PageHeader } from '@/components/ui-custom/PageHeader';
 import { DomainesPublics } from '@/components/republique/domaines/DomainesPublics';
 import { AttributionTerres } from '@/components/republique/domaines/AttributionTerres';
 import { Separator } from '@/components/ui/separator';
+import { Button } from '@/components/ui/button';
+import { Link } from 'react-router-dom';
+import { MapPin, Users, Newspaper } from 'lucide-react';
 
 export const DomainesPage: React.FC = () => {
   return (
@@ -28,8 +31,32 @@ export const DomainesPage: React.FC = () => {
               L'Ager Publicus représente l'ensemble des terres appartenant à la République romaine.
               En tant que magistrat, vous êtes responsable de leur attribution et gestion.
             </p>
+            
             <Separator className="my-4 border-rome-gold/30" />
-            <p className="text-sm text-muted-foreground">
+            
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <Link to="/republique/ager">
+                <Button variant="outline" className="w-full h-auto py-4 flex flex-col items-center justify-center gap-2">
+                  <MapPin className="h-6 w-6 text-rome-navy" />
+                  <span className="font-medium">Parcelles de l'Ager</span>
+                  <span className="text-xs text-muted-foreground">Gérer les terres publiques</span>
+                </Button>
+              </Link>
+              
+              <Button variant="outline" className="w-full h-auto py-4 flex flex-col items-center justify-center gap-2">
+                <Users className="h-6 w-6 text-amber-700" />
+                <span className="font-medium">Main d'œuvre publique</span>
+                <span className="text-xs text-muted-foreground">Fonctionnaires et esclaves publics</span>
+              </Button>
+              
+              <Button variant="outline" className="w-full h-auto py-4 flex flex-col items-center justify-center gap-2">
+                <Newspaper className="h-6 w-6 text-green-700" />
+                <span className="font-medium">Récoltes et production</span>
+                <span className="text-xs text-muted-foreground">Suivi des rendements agricoles</span>
+              </Button>
+            </div>
+            
+            <p className="text-sm text-muted-foreground mt-4">
               Une distribution équitable des terres publiques contribue à la stabilité sociale et 
               à la prospérité économique de Rome.
             </p>

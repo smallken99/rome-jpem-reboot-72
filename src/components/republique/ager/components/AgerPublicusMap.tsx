@@ -2,6 +2,9 @@
 import React from 'react';
 import { LandParcel } from '../types';
 import { Card } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { UsersRound, Wheat, Trees } from 'lucide-react';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 
 interface AgerPublicusMapProps {
   parcels: LandParcel[];
@@ -23,6 +26,28 @@ export const AgerPublicusMap: React.FC<AgerPublicusMapProps> = ({
       </Card>
     );
   }
+  
+  // Aide à obtenir l'icône du type de parcelle
+  const getParcelTypeIcon = (type: LandParcel['type']) => {
+    switch (type) {
+      case 'cultivable':
+        return <Wheat className="h-4 w-4 text-amber-600" />;
+      case 'forest':
+        return <Trees className="h-4 w-4 text-emerald-700" />;
+      default:
+        return null;
+    }
+  };
+  
+  // Obtenir une couleur basée sur l'efficacité de la main d'œuvre
+  const getEfficiencyColor = (efficiency?: number) => {
+    if (!efficiency) return 'bg-gray-200';
+    if (efficiency >= 80) return 'bg-green-500';
+    if (efficiency >= 60) return 'bg-green-400';
+    if (efficiency >= 40) return 'bg-yellow-400';
+    if (efficiency >= 20) return 'bg-orange-400';
+    return 'bg-red-500';
+  };
   
   // This is a placeholder for a real map implementation
   // In a real app, this would use a mapping library like Leaflet or Google Maps
@@ -51,9 +76,44 @@ export const AgerPublicusMap: React.FC<AgerPublicusMapProps> = ({
                 `}
                 onClick={() => onSelectParcel(parcel)}
               >
-                <div className="font-medium">{parcel.name}</div>
+                <div className="font-medium flex items-center justify-center gap-1">
+                  {getParcelTypeIcon(parcel.type)} 
+                  <span>{parcel.name}</span>
+                </div>
                 <div className="text-xs text-muted-foreground">{parcel.location}</div>
                 <div className="text-xs">{parcel.size} iugera</div>
+                
+                {/* Indicateur de main d'œuvre */}
+                <div className="mt-2 flex justify-center gap-1">
+                  {parcel.workforce && (
+                    <TooltipProvider>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <Badge variant="outline" className="flex items-center gap-1 h-5">
+                            <UsersRound className="h-3 w-3" />
+                            <span>{(parcel.workforce.magistrates || 0) + (parcel.workforce.overseers || 0) + (parcel.workforce.publicSlaves || 0)}</span>
+                          </Badge>
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          <div className="text-xs">
+                            <p>Magistrats: {parcel.workforce.magistrates || 0}</p>
+                            <p>Contremaîtres: {parcel.workforce.overseers || 0}</p>
+                            <p>Esclaves: {parcel.workforce.publicSlaves || 0}</p>
+                          </div>
+                        </TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
+                  )}
+                  
+                  {parcel.workforce?.efficiency !== undefined && (
+                    <div className="flex items-center gap-1">
+                      <div 
+                        className={`h-2 w-2 rounded-full ${getEfficiencyColor(parcel.workforce.efficiency)}`}
+                      ></div>
+                      <span className="text-xs">{parcel.workforce.efficiency}%</span>
+                    </div>
+                  )}
+                </div>
               </div>
             ))}
 
