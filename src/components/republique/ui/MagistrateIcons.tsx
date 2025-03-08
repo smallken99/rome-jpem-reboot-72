@@ -1,54 +1,49 @@
 
 import React from 'react';
 import { 
-  Gavel, Scroll, Book, Shield, Users, 
-  Landmark, Award, Flag, File, Coins, 
-  Scale, Building, Swords, Hammer, 
-  BookOpenCheck, Map, Receipt, 
-  LineChart, LandPlot, Calculator,
-  Archive, Database 
+  Coins, 
+  Scales, 
+  Shield, 
+  LandPlot, 
+  ScrollText, 
+  Building,
+  BookOpen,
+  BadgeDollarSign,
+  Gavel,
+  Crown,
+  StarIcon 
 } from 'lucide-react';
 
-export const MagistrateIcons = {
-  // Magistratures
-  questeur: Coins,
-  edile: Building,
-  preteur: Gavel,
-  consul: Swords,
-  censeur: BookOpenCheck,
-  pontife: Shield,
-  tribun: Users,
-  
-  // Fonctions du questeur
-  tresor: Coins,
-  impots: Receipt,
-  domaines: Map,
-  ager: LandPlot,
-  depenses: LineChart,
-  
-  // Fonctions génériques
-  default: Landmark,
-  law: Scale,
-  archive: Archive,
-  database: Database,
-  calculator: Calculator,
-  
-  // Fonctions qu'on peut réutiliser
-  getDynamicIcon: (iconName: string) => {
-    const iconKey = iconName.toLowerCase() as keyof typeof MagistrateIcons;
-    if (typeof MagistrateIcons[iconKey] === 'function') {
-      return MagistrateIcons[iconKey];
-    }
-    return MagistrateIcons.default;
-  }
+type MagistrateIconProps = {
+  magistrate: string;
+  size?: number;
+  className?: string;
 };
 
-export interface MagistrateIconProps {
-  name: string;
-  className?: string;
-}
+export const MagistrateIcon: React.FC<MagistrateIconProps> = ({ 
+  magistrate, 
+  size = 24, 
+  className = "" 
+}) => {
+  // Map des icônes par magistrature
+  const iconMap: Record<string, React.ReactNode> = {
+    questeur: <Coins size={size} className={className} />,
+    consul: <Crown size={size} className={className} />,
+    censeur: <ScrollText size={size} className={className} />,
+    preteur: <Scales size={size} className={className} />,
+    edile: <Building size={size} className={className} />,
+    tribun: <Shield size={size} className={className} />,
+    augure: <StarIcon size={size} className={className} />,
+    pontife: <BookOpen size={size} className={className} />,
+    fiscal: <BadgeDollarSign size={size} className={className} />,
+    juge: <Gavel size={size} className={className} />,
+    agraire: <LandPlot size={size} className={className} />
+  };
 
-export const MagistrateIcon: React.FC<MagistrateIconProps> = ({ name, className = "h-6 w-6" }) => {
-  const IconComponent = MagistrateIcons.getDynamicIcon(name);
-  return <IconComponent className={className} />;
+  // Retourne l'icône appropriée ou une icône par défaut
+  return (
+    <>
+      {iconMap[magistrate.toLowerCase()] || <Coins size={size} className={className} />}
+    </>
+  );
 };

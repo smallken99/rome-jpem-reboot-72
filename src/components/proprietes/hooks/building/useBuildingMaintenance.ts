@@ -3,11 +3,13 @@ import { useState } from 'react';
 import { toast } from 'sonner';
 import { usePatrimoine } from '@/hooks/usePatrimoine';
 import { useBuildingInventory } from './useBuildingInventory';
+import { useEconomy } from '@/hooks/useEconomy';
 
 export function useBuildingMaintenance() {
   const [isLoading, setIsLoading] = useState(false);
-  const { balance, updateBalance } = usePatrimoine();
+  const { balance } = usePatrimoine();
   const { ownedBuildings, updateBuildingProperty } = useBuildingInventory();
+  const economy = useEconomy();
   
   // Toggle maintenance of a building
   const toggleMaintenance = (buildingId: number, enabled: boolean) => {
@@ -35,7 +37,7 @@ export function useBuildingMaintenance() {
       return false;
     }
     
-    if (balance < building.maintenanceCost) {
+    if (!economy.canAfford(building.maintenanceCost)) {
       toast.error("Fonds insuffisants pour effectuer l'entretien");
       setIsLoading(false);
       return false;
@@ -46,8 +48,13 @@ export function useBuildingMaintenance() {
       updateBuildingProperty(buildingId, 'condition', 100);
       updateBuildingProperty(buildingId, 'lastMaintenance', new Date());
       
-      // Deduct maintenance cost from balance
-      updateBalance(-building.maintenanceCost);
+      // Deduct maintenance cost using economy system
+      economy.makePayment(
+        building.maintenanceCost,
+        "Service d'entretien",
+        "Maintenance",
+        `Entretien de "${building.name}"`
+      );
       
       toast.success(`Entretien de "${building.name}" effectué avec succès`);
       setIsLoading(false);
@@ -60,6 +67,7 @@ export function useBuildingMaintenance() {
   return {
     isLoading,
     toggleMaintenance,
-    performMaintenance
+    performMaintenance,
+    balance // Still provide the balance for UI
   };
 }

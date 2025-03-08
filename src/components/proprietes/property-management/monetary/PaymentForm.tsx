@@ -8,6 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Check, AlertCircle } from 'lucide-react';
 import { Recipient } from '../hooks/useMonetaryManagement';
 import { toast } from 'sonner';
+import { useEconomy } from '@/hooks/useEconomy';
 
 type PaymentFormProps = {
   makePayment: (recipientId: string, amount: number, description: string, category: string) => boolean;
@@ -21,6 +22,7 @@ export const PaymentForm: React.FC<PaymentFormProps> = ({ makePayment, recipient
   const [description, setDescription] = useState('');
   const [category, setCategory] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const economy = useEconomy();
   
   // Catégories de dépenses prédéfinies
   const categories = [
@@ -61,6 +63,13 @@ export const PaymentForm: React.FC<PaymentFormProps> = ({ makePayment, recipient
         return;
       }
       
+      // Vérifier si le joueur a les fonds suffisants via le système économique
+      if (!economy.canAfford(numericAmount)) {
+        toast.error(`Fonds insuffisants pour ce paiement (solde: ${economy.balance.toLocaleString()} As)`);
+        setIsSubmitting(false);
+        return;
+      }
+      
       const success = makePayment(recipientId, numericAmount, description, category);
       
       if (success) {
@@ -83,7 +92,7 @@ export const PaymentForm: React.FC<PaymentFormProps> = ({ makePayment, recipient
       <div className="mb-4">
         <h3 className="font-cinzel text-lg text-rome-navy mb-2">Effectuer un paiement</h3>
         <p className="text-sm text-muted-foreground mb-4">
-          Solde disponible: <span className="font-bold">{balance.toLocaleString()} As</span>
+          Solde disponible: <span className="font-bold">{economy.balance.toLocaleString()} As</span>
         </p>
       </div>
       
@@ -114,7 +123,7 @@ export const PaymentForm: React.FC<PaymentFormProps> = ({ makePayment, recipient
               onChange={(e) => setAmount(e.target.value)}
               placeholder="Montant en As"
               min="1"
-              max={balance}
+              max={economy.balance}
               required
             />
           </div>

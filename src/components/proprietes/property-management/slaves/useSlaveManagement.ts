@@ -2,6 +2,7 @@
 import { useState } from 'react';
 import { toast } from 'sonner';
 import { usePatrimoine } from '@/hooks/usePatrimoine';
+import { useEconomy } from '@/hooks/useEconomy';
 
 interface SlaveAssignment {
   propertyId: string;
@@ -13,7 +14,8 @@ export const useSlaveManagement = (initialSlaves: number = 25) => {
   const [totalSlaves, setTotalSlaves] = useState(initialSlaves);
   const [slavePrice, setSlavePrice] = useState(800);
   const [slaveAssignments, setSlaveAssignments] = useState<SlaveAssignment[]>([]);
-  const { balance, updateBalance } = usePatrimoine();
+  const { balance } = usePatrimoine();
+  const economy = useEconomy();
   
   // Calculer le nombre total d'esclaves assignés
   const assignedSlaves = slaveAssignments.reduce(
@@ -25,15 +27,26 @@ export const useSlaveManagement = (initialSlaves: number = 25) => {
   const purchaseSlaves = (amount: number) => {
     const totalCost = amount * slavePrice;
     
-    if (balance < totalCost) {
+    if (!economy.canAfford(totalCost)) {
       toast.error(`Fonds insuffisants pour acheter ${amount} esclaves (coût: ${totalCost.toLocaleString()} As)`);
       return false;
     }
     
-    setTotalSlaves(prev => prev + amount);
-    updateBalance(-totalCost);
-    toast.success(`Acquisition de ${amount} esclaves pour ${totalCost.toLocaleString()} As`);
-    return true;
+    // Effectuer la transaction via le système économique
+    const transactionSuccess = economy.makePayment(
+      totalCost,
+      "Marchand d'esclaves",
+      "Personnel",
+      `Achat de ${amount} esclaves`
+    );
+    
+    if (transactionSuccess) {
+      setTotalSlaves(prev => prev + amount);
+      toast.success(`Acquisition de ${amount} esclaves pour ${totalCost.toLocaleString()} As`);
+      return true;
+    }
+    
+    return false;
   };
   
   // Vente d'esclaves
@@ -45,10 +58,21 @@ export const useSlaveManagement = (initialSlaves: number = 25) => {
     
     const totalProfit = amount * Math.floor(slavePrice * 0.7); // 70% du prix d'achat
     
-    setTotalSlaves(prev => prev - amount);
-    updateBalance(totalProfit);
-    toast.success(`Vente de ${amount} esclaves pour ${totalProfit.toLocaleString()} As`);
-    return true;
+    // Enregistrer la transaction via le système économique
+    const transactionSuccess = economy.receivePayment(
+      totalProfit,
+      "Marché aux esclaves",
+      "Vente de personnel",
+      `Vente de ${amount} esclaves`
+    );
+    
+    if (transactionSuccess) {
+      setTotalSlaves(prev => prev - amount);
+      toast.success(`Vente de ${amount} esclaves pour ${totalProfit.toLocaleString()} As`);
+      return true;
+    }
+    
+    return false;
   };
   
   // Assigner des esclaves à une propriété
@@ -98,6 +122,7 @@ export const useSlaveManagement = (initialSlaves: number = 25) => {
     purchaseSlaves,
     sellSlaves,
     assignSlavesToProperty,
-    removeSlaveAssignment
+    removeSlaveAssignment,
+    balance // Fournir la balance pour l'UI
   };
 };

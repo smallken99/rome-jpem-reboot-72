@@ -6,9 +6,24 @@ import {
   ArrowDownRight,
   Check
 } from 'lucide-react';
+import { useEconomy } from '@/hooks/useEconomy';
 
 export const TresorTable: React.FC = () => {
-  const transactions = [
+  const economy = useEconomy();
+  
+  // Utiliser les transactions du système économique
+  const economicTransactions = economy.transactions.slice(0, 5);
+  
+  // Créer une structure de données formatée pour l'affichage
+  const transactions = economicTransactions.map((transaction, index) => ({
+    id: transaction.id,
+    date: formatRomanDate(transaction.date),
+    description: transaction.description,
+    montant: `${transaction.type === 'income' ? '+' : '-'}${transaction.amount.toLocaleString()} As`,
+    categorie: transaction.category,
+    type: transaction.type === 'income' ? 'revenu' : 'depense',
+    approuvePar: "Quintus Fabius Maximus"
+  })) || [
     { 
       id: 1,
       date: "XV Kal. Mar.",
@@ -55,6 +70,22 @@ export const TresorTable: React.FC = () => {
       approuvePar: "Quintus Fabius Maximus"
     },
   ];
+
+  // Fonction pour formater les dates au format romain
+  function formatRomanDate(date: Date): string {
+    // Implémentation simple pour convertir une date en format romain
+    const month = date.getMonth() + 1;
+    const day = date.getDate();
+    
+    // Noms simplifiés des mois romains
+    const romanMonths = [
+      "Ian.", "Feb.", "Mar.", "Apr.", "Mai.", "Jun.",
+      "Jul.", "Aug.", "Sep.", "Oct.", "Nov.", "Dec."
+    ];
+    
+    // Format simplifié
+    return `${day} ${romanMonths[month - 1]}`;
+  }
 
   return (
     <div className="overflow-x-auto">

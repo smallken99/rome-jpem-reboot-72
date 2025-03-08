@@ -1,7 +1,8 @@
 
 import { Character } from './character';
 
-export interface VestaleCandidate extends Character {
+export type VestaleCandidate = {
+  id: string;
   firstName: string;
   lastName: string;
   spouse?: string;
@@ -12,4 +13,5 @@ export interface VestaleCandidate extends Character {
     intelligence: number;
     charisma: number;
   };
-}
+  avatar?: string;
+};

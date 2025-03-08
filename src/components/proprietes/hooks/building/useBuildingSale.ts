@@ -4,11 +4,13 @@ import { toast } from 'sonner';
 import { usePatrimoine } from '@/hooks/usePatrimoine';
 import { useBuildingInventory } from './useBuildingInventory';
 import { OwnedBuilding } from './types';
+import { useEconomy } from '@/hooks/useEconomy';
 
 export function useBuildingSale() {
   const [isLoading, setIsLoading] = useState(false);
   const { updateBalance } = usePatrimoine();
   const { ownedBuildings, removeBuilding } = useBuildingInventory();
+  const economy = useEconomy();
   
   // Calculate market value of a building
   const calculateBuildingValue = (buildingId: number): number => {
@@ -41,8 +43,13 @@ export function useBuildingSale() {
       // Remove building from list
       removeBuilding(buildingId);
       
-      // Add sale amount to balance
-      updateBalance(estimatedValue);
+      // Add sale amount via economy system
+      economy.receivePayment(
+        estimatedValue,
+        "Marché immobilier",
+        "Vente de propriété",
+        `Vente de "${buildingToSell.name}"`
+      );
       
       toast.success(`Vente de "${buildingToSell.name}" réalisée pour ${estimatedValue.toLocaleString()} As`);
       setIsLoading(false);

@@ -1,5 +1,6 @@
 
 import { useState, useEffect } from 'react';
+import { useEconomy } from '@/hooks/useEconomy';
 
 export type Transaction = {
   id: string;
@@ -28,9 +29,13 @@ export type FinancialStats = {
 };
 
 export const useMonetaryManagement = () => {
-  // État pour le solde et les transactions
-  const [balance, setBalance] = useState(250000);
+  const economy = useEconomy();
+  
+  // État pour les transactions
   const [transactions, setTransactions] = useState<Transaction[]>([]);
+  
+  // Utiliser la balance du système économique central
+  const balance = economy.balance;
   
   // Simuler des données de destinataires pour les paiements
   const [recipients] = useState<Recipient[]>([
@@ -43,58 +48,23 @@ export const useMonetaryManagement = () => {
     { id: '7', name: 'Temple de Jupiter', type: 'autre' },
   ]);
   
-  // Simuler des transactions initiales
+  // Synchroniser les transactions avec le système économique
   useEffect(() => {
-    const initialTransactions: Transaction[] = [
-      {
-        id: '1',
-        date: new Date(2023, 2, 15),
-        amount: 25000,
-        recipient: 'Domaine viticole de Campanie',
-        description: 'Revenus trimestriels',
-        type: 'income',
-        category: 'Production agricole'
-      },
-      {
-        id: '2',
-        date: new Date(2023, 2, 10),
-        amount: 12000,
-        recipient: 'Architecte Vitruvius',
-        description: 'Rénovation de la Villa Urbana',
-        type: 'expense',
-        category: 'Entretien des propriétés'
-      },
-      {
-        id: '3',
-        date: new Date(2023, 2, 5),
-        amount: 8000,
-        recipient: 'Marchand d\'esclaves',
-        description: 'Achat de 10 esclaves pour le domaine',
-        type: 'expense',
-        category: 'Personnel'
-      },
-      {
-        id: '4',
-        date: new Date(2023, 2, 1),
-        amount: 15000,
-        recipient: 'Insula de la Via Sacra',
-        description: 'Loyers mensuels',
-        type: 'income',
-        category: 'Propriétés locatives'
-      },
-      {
-        id: '5',
-        date: new Date(2023, 1, 20),
-        amount: 5000,
-        recipient: 'Client Quintus Fabius',
-        description: 'Prêt accordé',
-        type: 'expense',
-        category: 'Relations clientèle'
-      }
-    ];
+    const economicTransactions = economy.transactions;
     
-    setTransactions(initialTransactions);
-  }, []);
+    // Convertir les transactions économiques au format attendu par ce hook
+    const formattedTransactions: Transaction[] = economicTransactions.map(et => ({
+      id: et.id,
+      date: et.date,
+      amount: et.amount,
+      recipient: et.description.split(':')[0] || 'Inconnu',
+      description: et.description.split(':')[1]?.trim() || et.description,
+      type: et.type,
+      category: et.category
+    }));
+    
+    setTransactions(formattedTransactions);
+  }, [economy.transactions]);
   
   // Statistiques des revenus
   const incomeStats: FinancialStats = {
@@ -120,20 +90,22 @@ export const useMonetaryManagement = () => {
     ]
   };
   
-  // Ajouter une transaction
+  // Ajouter une transaction via le système économique centralisé
   const addTransaction = (transaction: Omit<Transaction, 'id'>) => {
-    const newTransaction = {
-      ...transaction,
-      id: Math.random().toString(36).substring(2, 11),
-    };
-    
-    setTransactions(prev => [newTransaction, ...prev]);
-    
-    // Mettre à jour le solde
     if (transaction.type === 'income') {
-      setBalance(prev => prev + transaction.amount);
+      return economy.receivePayment(
+        transaction.amount,
+        transaction.recipient,
+        transaction.category,
+        transaction.description
+      );
     } else {
-      setBalance(prev => prev - transaction.amount);
+      return economy.makePayment(
+        transaction.amount,
+        transaction.recipient,
+        transaction.category,
+        transaction.description
+      );
     }
   };
   
@@ -144,7 +116,7 @@ export const useMonetaryManagement = () => {
     description: string, 
     category: string
   ) => {
-    if (amount <= 0 || amount > balance) {
+    if (amount <= 0 || !economy.canAfford(amount)) {
       throw new Error(amount <= 0 
         ? 'Le montant doit être positif' 
         : 'Fonds insuffisants pour ce paiement');
@@ -155,16 +127,12 @@ export const useMonetaryManagement = () => {
       throw new Error('Destinataire non trouvé');
     }
     
-    addTransaction({
-      date: new Date(),
+    return economy.makePayment(
       amount,
-      recipient: recipient.name,
-      description,
-      type: 'expense',
-      category
-    });
-    
-    return true;
+      recipient.name,
+      category,
+      description
+    );
   };
   
   return {

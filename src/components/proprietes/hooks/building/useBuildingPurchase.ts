@@ -5,11 +5,13 @@ import { BuildingDescription } from '../../data/types/buildingTypes';
 import { usePatrimoine } from '@/hooks/usePatrimoine';
 import { useBuildingInventory } from './useBuildingInventory';
 import { OwnedBuilding } from './types';
+import { useEconomy } from '@/hooks/useEconomy';
 
 export function useBuildingPurchase() {
   const [isLoading, setIsLoading] = useState(false);
-  const { balance, updateBalance } = usePatrimoine();
+  const { balance } = usePatrimoine();
   const { addBuilding } = useBuildingInventory();
+  const economy = useEconomy();
   
   // Purchase a new building
   const purchaseBuilding = (
@@ -21,8 +23,8 @@ export function useBuildingPurchase() {
   ) => {
     setIsLoading(true);
     
-    // Check if balance is sufficient
-    if (balance < building.initialCost) {
+    // Check if balance is sufficient using the economy system
+    if (!economy.canAfford(building.initialCost)) {
       toast.error("Fonds insuffisants pour cette acquisition");
       setIsLoading(false);
       return false;
@@ -46,8 +48,13 @@ export function useBuildingPurchase() {
       // Add to owned buildings
       addBuilding(newBuilding);
       
-      // Deduct cost from balance
-      updateBalance(-building.initialCost);
+      // Make the transaction using the economy system
+      economy.makePayment(
+        building.initialCost,
+        "Vendeur de propriété",
+        "Immobilier",
+        `Achat de "${newBuilding.name}" à ${location}`
+      );
       
       toast.success(`Acquisition de "${newBuilding.name}" réalisée avec succès`);
       setIsLoading(false);
@@ -59,6 +66,7 @@ export function useBuildingPurchase() {
   
   return {
     isLoading,
-    purchaseBuilding
+    purchaseBuilding,
+    balance, // Still provide the balance for UI
   };
 }

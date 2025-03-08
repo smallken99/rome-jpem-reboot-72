@@ -1,6 +1,7 @@
 
-import { useState } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { toast } from 'sonner';
+import { useEconomy } from './useEconomy';
 
 export type Resource = {
   id: string;
@@ -20,7 +21,10 @@ export type ResourceTransaction = {
 };
 
 export function usePatrimoine() {
-  const [balance, setBalance] = useState<number>(500000);
+  // Utiliser le système économique centralisé pour la gestion de la trésorerie
+  const economy = useEconomy();
+  
+  // État pour les ressources et les transactions de ressources
   const [resources, setResources] = useState<Resource[]>([
     { id: 'vin', name: 'Vin', amount: 200, unit: 'amphores', value: 50 },
     { id: 'huile_olive', name: "Huile d'olive", amount: 300, unit: 'amphores', value: 40 },
@@ -29,19 +33,19 @@ export function usePatrimoine() {
   ]);
   const [resourceTransactions, setResourceTransactions] = useState<ResourceTransaction[]>([]);
 
-  // Modifier le solde (positif pour ajouter, négatif pour soustraire)
-  const updateBalance = (amount: number) => {
-    setBalance(prev => {
-      const newBalance = prev + amount;
-      if (newBalance < 0) {
-        toast.error("Attention: Votre trésorerie est négative!");
-        return newBalance;
-      }
-      return newBalance;
-    });
+  // Récupérer le solde du système économique centralisé
+  const balance = economy.balance;
+  
+  // Fonction pour modifier le solde, délégué au système économique
+  const updateBalance = useCallback((amount: number) => {
+    if (amount > 0) {
+      economy.receivePayment(amount, "Ajustement", "Patrimoine", "Ajustement du patrimoine");
+    } else if (amount < 0) {
+      economy.makePayment(Math.abs(amount), "Ajustement", "Patrimoine", "Ajustement du patrimoine");
+    }
     return true;
-  };
-
+  }, [economy]);
+  
   // Ajouter une ressource (production des domaines ruraux)
   const addResource = (resourceId: string, amount: number) => {
     const resourceExists = resources.find(r => r.id === resourceId);
@@ -116,8 +120,13 @@ export function usePatrimoine() {
     
     setResourceTransactions(prev => [...prev, transaction]);
     
-    // Mettre à jour le solde
-    updateBalance(totalPrice);
+    // Mettre à jour le solde via le système économique
+    economy.receivePayment(
+      totalPrice,
+      "Marché commercial",
+      "Vente de ressources",
+      `Vente de ${amount} ${resource.unit} de ${resource.name}`
+    );
     
     toast.success(`Vente de ${amount} ${resource.unit} de ${resource.name} pour ${totalPrice.toLocaleString()} As`);
     return true;
@@ -127,8 +136,8 @@ export function usePatrimoine() {
   const buyResource = (resourceId: string, amount: number, pricePerUnit: number) => {
     const totalPrice = amount * pricePerUnit;
     
-    // Vérifier si le solde est suffisant
-    if (balance < totalPrice) {
+    // Vérifier si le solde est suffisant en utilisant le système économique
+    if (!economy.canAfford(totalPrice)) {
       toast.error("Fonds insuffisants pour cet achat");
       return false;
     }
@@ -161,8 +170,13 @@ export function usePatrimoine() {
     
     setResourceTransactions(prev => [...prev, transaction]);
     
-    // Mettre à jour le solde
-    updateBalance(-totalPrice);
+    // Mettre à jour le solde via le système économique
+    economy.makePayment(
+      totalPrice,
+      "Fournisseur",
+      "Achat de ressources",
+      `Achat de ${amount} ${resource.unit} de ${resource.name}`
+    );
     
     toast.success(`Achat de ${amount} ${resource.unit} de ${resource.name} pour ${totalPrice.toLocaleString()} As`);
     return true;
