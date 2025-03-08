@@ -60,8 +60,9 @@ export const useEducationProgress = () => {
         speciality: currentEducation.speciality,
         completedAt: child.age,
         statBonus: currentEducation.statBonus || 20,
-        skills: currentEducation.skills,
-        duration: currentEducation.yearsCompleted || 1
+        skills: currentEducation.skills || [],
+        startYear: 0, // Ajouté pour satisfaire le type
+        completed: true // Ajouté pour satisfaire le type
       };
       
       onComplete(child.id, completedEducation);

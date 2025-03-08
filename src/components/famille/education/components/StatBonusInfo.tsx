@@ -1,23 +1,27 @@
 
 import React from 'react';
-import { Award } from 'lucide-react';
+import { StatBonusInfoProps } from '../types/educationTypes';
 import { getRelatedStatName } from '../utils/educationUtils';
-
-interface StatBonusInfoProps {
-  educationType: string;
-  statBonus?: number;
-}
+import { TrendingUp } from 'lucide-react';
 
 export const StatBonusInfo: React.FC<StatBonusInfoProps> = ({ 
-  educationType, 
-  statBonus = 0 
+  educationType,
+  statBonus = 15
 }) => {
-  if (statBonus <= 0) return null;
+  // Obtenir le nom de la statistique associée
+  const statName = getRelatedStatName(educationType);
+  
+  if (!statName) return null;
   
   return (
-    <div className="mt-2 flex items-center gap-1 text-xs bg-green-50 p-2 rounded text-green-700">
-      <Award className="h-3 w-3" />
-      <span>À la validation: +{statBonus} en {getRelatedStatName(educationType)}</span>
+    <div className="bg-green-50 border border-green-200 rounded-md p-4 flex items-start gap-3">
+      <TrendingUp className="h-5 w-5 text-green-500 mt-0.5 flex-shrink-0" />
+      <div>
+        <h3 className="font-medium text-green-800">Bonus de statistique</h3>
+        <p className="text-green-700">
+          Cette éducation améliorera <span className="font-semibold">{statName}</span> de {statBonus} points.
+        </p>
+      </div>
     </div>
   );
 };

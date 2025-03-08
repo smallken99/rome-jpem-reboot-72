@@ -67,6 +67,7 @@ export interface EducationHistory {
   speciality?: string;
   statBonus?: number; // Changé de string à number
   completedAt?: number;
+  duration?: number;
 }
 
 export interface Preceptor {
@@ -87,13 +88,17 @@ export interface PreceptorsByType {
 
 // Interface pour les props des composants d'éducation
 export interface ChildHeaderProps {
-  name: string;
-  age: number;
-  gender: string;
+  child: {
+    name: string;
+    age: number;
+    gender: string;
+  };
+  onNameChange?: (id: string, newName: string) => void;
+  hasInvalidEducation?: boolean;
 }
 
 export interface EducationTypeSelectorProps {
-  selectedType: string;
+  value: string;
   onChange: (type: string) => void;
   childGender: string;
 }
@@ -105,14 +110,13 @@ export interface EducationSpecialtySelectorProps {
 }
 
 export interface MentorInfoProps {
-  mentors: Preceptor[];
-  selectedMentor: string | null;
-  onChange: (mentorId: string | null) => void;
+  mentor?: string | null;
+  speciality?: string;
 }
 
 export interface StatBonusInfoProps {
-  hasMentor: boolean;
   educationType: string;
+  statBonus?: number;
 }
 
 export interface PietyBonusProps {
@@ -120,22 +124,24 @@ export interface PietyBonusProps {
 }
 
 export interface EducationWarningProps {
-  name: string;
-  currentEducationType: string;
+  icon?: ReactNode;
+  text: string;
 }
 
 export interface PreceptorHeaderProps {
-  name: string;
-  reputation: "Excellent" | "Bon" | "Moyen";
+  preceptor: {
+    name: string;
+    reputation: "Excellent" | "Bon" | "Moyen";
+  };
 }
 
 export interface PreceptorSpecialityProps {
-  specialty: string;
   type?: string;
+  specialty: string;
 }
 
 export interface PreceptorBiographyProps {
-  text: string;
+  bio: string;
 }
 
 export interface PreceptorQualityStarsProps {
@@ -149,7 +155,6 @@ export interface PreceptorCostInfoProps {
 
 export interface PreceptorActionsProps {
   onHire: () => void;
-  onCancel?: () => void;
   isAvailable: boolean;
   isLoading?: boolean;
 }

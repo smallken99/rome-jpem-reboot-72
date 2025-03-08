@@ -91,22 +91,23 @@ const ChildEducationDetail: React.FC = () => {
     <div className="space-y-6">
       {/* En-tête avec les informations de l'enfant */}
       <ChildHeader 
-        name={child.name} 
-        age={child.age} 
-        gender={child.gender} 
+        child={{
+          name: child.name,
+          age: child.age,
+          gender: child.gender
+        }}
       />
       
       {/* Avertissement si l'enfant est déjà en éducation */}
       {child.currentEducation && child.currentEducation.type !== 'none' && (
         <EducationWarning 
-          name={child.name}
-          currentEducationType={child.currentEducation.type}
+          text={`${child.name} est déjà engagé dans une éducation de type ${child.currentEducation.type}. Changer son éducation annulera ses progrès actuels.`}
         />
       )}
       
       {/* Sélecteur de type d'éducation */}
       <EducationTypeSelector 
-        selectedType={selectedType} 
+        value={selectedType} 
         onChange={setSelectedType} 
         childGender={child.gender}
       />
@@ -122,18 +123,31 @@ const ChildEducationDetail: React.FC = () => {
       
       {/* Sélection du mentor */}
       {selectedType !== 'none' && (
-        <MentorInfo 
-          mentors={availableMentors}
-          selectedMentor={selectedMentor}
-          onChange={setSelectedMentor}
-        />
+        <div className="space-y-2">
+          <h3 className="text-lg font-medium">Précepteur</h3>
+          <p className="text-sm text-muted-foreground mb-4">
+            Choisissez un précepteur pour améliorer l'éducation de votre enfant.
+          </p>
+          <select
+            className="w-full p-2 border rounded"
+            value={selectedMentor || ''}
+            onChange={(e) => setSelectedMentor(e.target.value || null)}
+          >
+            <option value="">Aucun précepteur (autodidacte)</option>
+            {availableMentors.map(mentor => (
+              <option key={mentor.id} value={mentor.id}>
+                {mentor.name} - {mentor.speciality}
+              </option>
+            ))}
+          </select>
+        </div>
       )}
       
       {/* Information sur les bonus de statistiques */}
       {selectedType !== 'none' && (
         <StatBonusInfo 
-          hasMentor={!!selectedMentor} 
           educationType={selectedType}
+          statBonus={selectedMentor ? 25 : 15}
         />
       )}
       

@@ -1,73 +1,77 @@
 
 import React from 'react';
-import { Checkbox } from '@/components/ui/checkbox';
-import { Label } from '@/components/ui/label';
-import { specialties } from '../data';
-
-export interface EducationSpecialtySelectorProps {
-  educationType: string;
-  selectedSpecialties: string[];
-  onChange: (specialties: string[]) => void;
-}
+import { EducationSpecialtySelectorProps } from '../types/educationTypes';
+import { educationPaths } from '../data';
+import { Check, X } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
 
 export const EducationSpecialtySelector: React.FC<EducationSpecialtySelectorProps> = ({
   educationType,
   selectedSpecialties,
   onChange
 }) => {
-  // Obtenir les spécialités disponibles pour ce type d'éducation
-  const availableSpecialties = specialties[educationType as keyof typeof specialties] || [];
+  // Trouver le chemin d'éducation correspondant
+  const educationPath = educationPaths.find(path => path.id === educationType);
   
-  // Gérer le changement de sélection
-  const handleSpecialtyChange = (specialty: string, isChecked: boolean) => {
-    if (isChecked) {
-      // Si on sélectionne, ajouter à la liste (max 3)
-      if (selectedSpecialties.length < 3) {
+  if (!educationPath) return null;
+  
+  // Gérer la sélection d'une spécialité
+  const handleSpecialtyToggle = (specialty: string) => {
+    if (selectedSpecialties.includes(specialty)) {
+      onChange(selectedSpecialties.filter(spec => spec !== specialty));
+    } else {
+      // Limiter à 2 spécialités maximum
+      if (selectedSpecialties.length < 2) {
         onChange([...selectedSpecialties, specialty]);
       }
-    } else {
-      // Si on désélectionne, retirer de la liste
-      onChange(selectedSpecialties.filter(s => s !== specialty));
     }
   };
+  
+  // Vérifier si une spécialité est sélectionnée
+  const isSelected = (specialty: string) => selectedSpecialties.includes(specialty);
   
   return (
     <div className="space-y-4">
       <div>
-        <h3 className="text-lg font-semibold">Spécialités</h3>
+        <h3 className="text-lg font-medium">Spécialités</h3>
         <p className="text-sm text-muted-foreground">
-          Choisissez jusqu'à 3 spécialités sur lesquelles l'enfant se concentrera. 
-          Ces domaines progresseront plus rapidement.
+          Choisissez jusqu'à 2 spécialités sur lesquelles votre enfant se concentrera.
         </p>
       </div>
       
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        {availableSpecialties.map((specialty) => (
-          <div key={specialty} className="flex items-center space-x-2">
-            <Checkbox 
-              id={`specialty-${specialty}`}
-              checked={selectedSpecialties.includes(specialty)}
-              onCheckedChange={(checked) => handleSpecialtyChange(specialty, checked === true)}
-              disabled={!selectedSpecialties.includes(specialty) && selectedSpecialties.length >= 3}
-            />
-            <Label 
-              htmlFor={`specialty-${specialty}`}
-              className="cursor-pointer"
-            >
-              {specialty}
-            </Label>
-          </div>
+      <div className="flex flex-wrap gap-2">
+        {educationPath.specialties && typeof educationPath.specialties.map === 'function' && educationPath.specialties.map(specialty => (
+          <Button
+            key={specialty}
+            variant={isSelected(specialty) ? "default" : "outline"}
+            className={isSelected(specialty) ? "bg-blue-600" : ""}
+            onClick={() => handleSpecialtyToggle(specialty)}
+          >
+            {isSelected(specialty) && <Check className="mr-2 h-4 w-4" />}
+            {specialty}
+          </Button>
         ))}
       </div>
       
       {selectedSpecialties.length > 0 && (
-        <div className="mt-4 p-3 bg-muted rounded-md">
-          <p className="text-sm font-medium">Spécialités sélectionnées:</p>
-          <ul className="list-disc list-inside text-sm">
-            {selectedSpecialties.map(s => (
-              <li key={s}>{s}</li>
+        <div className="mt-4">
+          <h4 className="text-sm font-medium mb-2">Spécialités sélectionnées:</h4>
+          <div className="flex flex-wrap gap-2">
+            {selectedSpecialties.map(spec => (
+              <Badge key={spec} className="pl-2 pr-1 py-1 flex items-center gap-1">
+                {spec}
+                <Button 
+                  variant="ghost" 
+                  size="icon"
+                  className="h-5 w-5 ml-1"
+                  onClick={() => handleSpecialtyToggle(spec)}
+                >
+                  <X className="h-3 w-3" />
+                </Button>
+              </Badge>
             ))}
-          </ul>
+          </div>
         </div>
       )}
     </div>
