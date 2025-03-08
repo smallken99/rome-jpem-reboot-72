@@ -1,10 +1,9 @@
-
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent } from '@/components/ui/dialog';
 import { ClientModal } from './components/client-modal';
-import { AdvancedClientModal } from './components/AdvancedClientModal';
+import { AdvancedClientModal } from './components/advanced-client-modal';
 import { ClientCompetenceManager } from './components/ClientCompetenceManager';
 import { 
   ClientFilters, 
