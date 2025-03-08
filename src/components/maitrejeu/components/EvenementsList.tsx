@@ -1,133 +1,234 @@
-import React, { useState } from 'react';
+
+import React from 'react';
 import { Button } from '@/components/ui/button';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
-import { DotsHorizontalIcon } from '@radix-ui/react-icons';
+import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { 
+  AlertTriangle, 
+  Shield, 
+  BookOpen, 
+  Users, 
+  CreditCard, 
+  Briefcase,
+  Landmark,
+  MoveRight,
+  CheckCircle
+} from 'lucide-react';
+import { EvenementsListProps, EvenementType } from '../types/maitreJeuTypes';
 
-// Importer les constantes de type pour EvenementType
-import { EvenementType, EVENEMENT_TYPES } from '../types/maitreJeuTypes';
-
-export const EvenementsList = ({ evenements, onResolve, filteredType }) => {
-  const [showConfirmation, setShowConfirmation] = useState(false);
-  const [selectedEventId, setSelectedEventId] = useState(null);
-
-  const handleResolve = (eventId) => {
-    setSelectedEventId(eventId);
-    setShowConfirmation(true);
-  };
-
-  const confirmResolve = () => {
-    if (selectedEventId && onResolve) {
-      onResolve(selectedEventId);
+export const EvenementsList: React.FC<EvenementsListProps> = ({ evenements, onResolve, filteredType }) => {
+  // Helper to get season name in French
+  const getSeasonName = (season: string): string => {
+    switch (season) {
+      case 'SPRING': return 'Printemps';
+      case 'SUMMER': return 'Été';
+      case 'AUTUMN': return 'Automne';
+      case 'WINTER': return 'Hiver';
+      default: return season;
     }
-    setShowConfirmation(false);
-    setSelectedEventId(null);
   };
-
-  const cancelResolve = () => {
-    setShowConfirmation(false);
-    setSelectedEventId(null);
-  };
-
-  const getTypeColor = (type: EvenementType) => {
-    if (type === EVENEMENT_TYPES.CRISE) return 'bg-red-500';
-    if (type === EVENEMENT_TYPES.GUERRE) return 'bg-orange-500';
-    if (type === EVENEMENT_TYPES.POLITIQUE) return 'bg-blue-500';
-    if (type === EVENEMENT_TYPES.RELIGION) return 'bg-purple-500';
-    if (type === EVENEMENT_TYPES.ÉCONOMIQUE) return 'bg-green-500';
-    if (type === EVENEMENT_TYPES.DIPLOMATIQUE) return 'bg-cyan-500';
-    if (type === EVENEMENT_TYPES.SOCIAL) return 'bg-yellow-500';
-    return 'bg-gray-500';
-  };
-
-  const filteredEvenements = evenements.filter(evenement => {
-    return !filteredType || evenement.type === filteredType;
-  });
   
-  // Corriger les références de 'title' à 'titre'
-  // Corriger les références à 'actions' avec vérifications nullables
-  // Corriger les comparaisons d'impact
+  // Helper to get event type icon and color
+  const getEventTypeInfo = (type: EvenementType) => {
+    switch (type) {
+      case 'CRISE':
+        return { 
+          icon: <AlertTriangle className="h-5 w-5" />, 
+          color: 'bg-red-100 text-red-800 border-red-200'
+        };
+      case 'GUERRE':
+        return { 
+          icon: <Shield className="h-5 w-5" />, 
+          color: 'bg-orange-100 text-orange-800 border-orange-200'
+        };
+      case 'POLITIQUE':
+        return { 
+          icon: <BookOpen className="h-5 w-5" />, 
+          color: 'bg-purple-100 text-purple-800 border-purple-200'
+        };
+      case 'RELIGION':
+        return { 
+          icon: <Landmark className="h-5 w-5" />, 
+          color: 'bg-blue-100 text-blue-800 border-blue-200'
+        };
+      case 'ÉCONOMIQUE':
+        return { 
+          icon: <CreditCard className="h-5 w-5" />, 
+          color: 'bg-green-100 text-green-800 border-green-200'
+        };
+      case 'DIPLOMATIQUE':
+        return { 
+          icon: <Briefcase className="h-5 w-5" />, 
+          color: 'bg-teal-100 text-teal-800 border-teal-200'
+        };
+      case 'SOCIAL':
+        return { 
+          icon: <Users className="h-5 w-5" />, 
+          color: 'bg-amber-100 text-amber-800 border-amber-200'
+        };
+      default:
+        return { 
+          icon: <BookOpen className="h-5 w-5" />, 
+          color: 'bg-gray-100 text-gray-800 border-gray-200'
+        };
+    }
+  };
+  
+  // Filter events based on selected type
+  const filteredEvents = filteredType === 'ALL' 
+    ? evenements 
+    : evenements.filter(event => event.type === filteredType);
+  
+  // Sort by unresolved first, then by date
+  const sortedEvents = [...filteredEvents].sort((a, b) => {
+    if (a.resolved !== b.resolved) {
+      return a.resolved ? 1 : -1;
+    }
+    
+    // Sort by year and season
+    if (a.date.year !== b.date.year) {
+      return b.date.year - a.date.year;
+    }
+    
+    const seasonOrder = { 'WINTER': 0, 'AUTUMN': 1, 'SUMMER': 2, 'SPRING': 3 };
+    return (seasonOrder[b.date.season] || 0) - (seasonOrder[a.date.season] || 0);
+  });
+
+  if (sortedEvents.length === 0) {
+    return (
+      <div className="text-center py-12">
+        <p className="text-muted-foreground">Aucun événement à afficher</p>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-4">
-      {filteredEvenements.map(evenement => (
-        <div key={evenement.id} className="border rounded-lg p-4 bg-white shadow-sm">
-          <div className="flex items-center gap-2 mb-2">
-            <div className={`w-3 h-3 rounded-full ${getTypeColor(evenement.type)}`}></div>
-            <h3 className="font-bold">{evenement.titre}</h3>
-          </div>
-          
-          <p className="text-sm">{evenement.description}</p>
-          
-          {/* Gestion conditionnelle des actions */}
-          {evenement.actions && evenement.actions.length > 0 && (
-            <div className="mt-4 space-y-2">
-              <h4 className="font-semibold text-sm">Actions possibles :</h4>
-              {evenement.actions.map(action => (
-                <div key={action.id} className="p-2 border border-gray-200 rounded">
-                  <p className="text-sm font-medium">{action.titre}</p>
-                  <p className="text-xs">{action.description}</p>
-                  <p className="text-xs italic">Conséquences: {action.conséquences}</p>
+      {sortedEvents.map(event => {
+        const { icon, color } = getEventTypeInfo(event.type);
+        
+        return (
+          <Card 
+            key={event.id} 
+            className={`${event.resolved ? 'opacity-70' : ''}`}
+          >
+            <CardHeader className="pb-2">
+              <div className="flex justify-between items-start">
+                <div className="flex items-center gap-2">
+                  <Badge className={color}>
+                    <span className="flex items-center gap-1">
+                      {icon}
+                      {event.type}
+                    </span>
+                  </Badge>
+                  
+                  {event.resolved && (
+                    <Badge variant="outline" className="bg-green-50 text-green-800 border-green-200">
+                      <CheckCircle className="h-3 w-3 mr-1" />
+                      Résolu
+                    </Badge>
+                  )}
+                  
+                  {event.sourcePersistante && (
+                    <Badge variant="outline" className="bg-blue-50 text-blue-800 border-blue-200">
+                      Persistant
+                    </Badge>
+                  )}
                 </div>
-              ))}
-            </div>
-          )}
-          
-          {/* Correction du rendu de l'impact pour gérer les types corrects */}
-          {evenement.impact && (
-            <div className="mt-2 text-sm">
-              <p className="font-semibold">Impact :</p>
-              <ul className="list-disc pl-5">
-                {evenement.impact.stabilité !== undefined && (
-                  <li className={evenement.impact.stabilité > 0 ? 'text-green-600' : 'text-red-600'}>
-                    Stabilité: {evenement.impact.stabilité > 0 ? '+' : ''}{evenement.impact.stabilité}
-                  </li>
+                
+                <div className="text-sm text-muted-foreground">
+                  {`${event.date.year} - ${getSeasonName(event.date.season)}`}
+                </div>
+              </div>
+              
+              <CardTitle className="text-lg mt-2">{event.titre}</CardTitle>
+            </CardHeader>
+            
+            <CardContent>
+              <p className="text-sm text-muted-foreground mb-4">
+                {event.description}
+              </p>
+              
+              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2 text-sm">
+                {event.impact.influence !== 0 && (
+                  <div className={`px-2 py-1 rounded ${
+                    event.impact.influence > 0 ? 'bg-green-50' : 'bg-red-50'
+                  }`}>
+                    <span className="font-medium">Influence:</span> {event.impact.influence > 0 ? '+' : ''}{event.impact.influence}
+                  </div>
                 )}
-                {evenement.impact.trésorPublique !== undefined && (
-                  <li className={evenement.impact.trésorPublique > 0 ? 'text-green-600' : 'text-red-600'}>
-                    Trésor Publique: {evenement.impact.trésorPublique > 0 ? '+' : ''}{evenement.impact.trésorPublique}
-                  </li>
+                
+                {event.impact.finance !== 0 && (
+                  <div className={`px-2 py-1 rounded ${
+                    event.impact.finance > 0 ? 'bg-green-50' : 'bg-red-50'
+                  }`}>
+                    <span className="font-medium">Finances:</span> {event.impact.finance > 0 ? '+' : ''}{event.impact.finance}
+                  </div>
                 )}
-                {evenement.impact.prestigeRome !== undefined && (
-                  <li className={evenement.impact.prestigeRome > 0 ? 'text-green-600' : 'text-red-600'}>
-                    Prestige de Rome: {evenement.impact.prestigeRome > 0 ? '+' : ''}{evenement.impact.prestigeRome}
-                  </li>
+                
+                {event.impact.militaire !== 0 && (
+                  <div className={`px-2 py-1 rounded ${
+                    event.impact.militaire > 0 ? 'bg-green-50' : 'bg-red-50'
+                  }`}>
+                    <span className="font-medium">Militaire:</span> {event.impact.militaire > 0 ? '+' : ''}{event.impact.militaire}
+                  </div>
                 )}
-                {evenement.impact.religion !== undefined && (
-                  <li className={evenement.impact.religion > 0 ? 'text-green-600' : 'text-red-600'}>
-                    Religion: {evenement.impact.religion > 0 ? '+' : ''}{evenement.impact.religion}
-                  </li>
+                
+                {event.impact.religion !== 0 && (
+                  <div className={`px-2 py-1 rounded ${
+                    event.impact.religion > 0 ? 'bg-green-50' : 'bg-red-50'
+                  }`}>
+                    <span className="font-medium">Religion:</span> {event.impact.religion > 0 ? '+' : ''}{event.impact.religion}
+                  </div>
                 )}
-                {evenement.impact.autre && Object.keys(evenement.impact.autre).map(key => (
-                  <li key={key} className="text-gray-600">
-                    {key}: {evenement.impact.autre[key]}
-                  </li>
-                ))}
-              </ul>
-            </div>
-          )}
-
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="ghost" className="ml-auto h-8 w-8 p-0">
-                <span className="sr-only">Ouvrir le menu</span>
-                <DotsHorizontalIcon className="h-4 w-4" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              <DropdownMenuLabel>Actions</DropdownMenuLabel>
-              <DropdownMenuItem onClick={() => handleResolve(evenement.id)}>
-                Marquer comme résolu
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
-        </div>
-      ))}
+                
+                {event.impact.economie !== 0 && (
+                  <div className={`px-2 py-1 rounded ${
+                    event.impact.economie > 0 ? 'bg-green-50' : 'bg-red-50'
+                  }`}>
+                    <span className="font-medium">Économie:</span> {event.impact.economie > 0 ? '+' : ''}{event.impact.economie}
+                  </div>
+                )}
+              </div>
+              
+              {!event.resolved && event.actions && event.actions.length > 0 && (
+                <div className="mt-4 border-t pt-4">
+                  <h4 className="font-medium mb-2">Actions possibles:</h4>
+                  <div className="space-y-2">
+                    {event.actions.map(action => (
+                      <div key={action.id} className="bg-gray-50 p-3 rounded-md">
+                        <div className="font-medium">{action.titre}</div>
+                        <p className="text-sm text-muted-foreground">{action.description}</p>
+                        <div className="mt-1.5 flex gap-4 text-xs">
+                          {typeof action.coût === 'number' && (
+                            <span className="text-amber-700">Coût: {action.coût}</span>
+                          )}
+                          {typeof action.risque === 'number' && (
+                            <span className="text-red-700">Risque: {action.risque}</span>
+                          )}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </CardContent>
+            
+            {!event.resolved && (
+              <CardFooter className="pt-0">
+                <Button 
+                  variant="outline" 
+                  className="ml-auto"
+                  onClick={() => onResolve(event.id)}
+                >
+                  <MoveRight className="h-4 w-4 mr-2" />
+                  Marquer comme résolu
+                </Button>
+              </CardFooter>
+            )}
+          </Card>
+        );
+      })}
     </div>
   );
 };

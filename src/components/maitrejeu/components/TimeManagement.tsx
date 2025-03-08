@@ -1,32 +1,20 @@
+
 import React from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Calendar } from 'lucide-react';
-import { Season } from '@/utils/timeSystem';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { GamePhase } from '../types/maitreJeuTypes';
 import { Button } from '@/components/ui/button';
+import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@/components/ui/select';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Season, PhaseType, TimeManagementProps } from '../types/maitreJeuTypes';
 
-interface TimeManagementProps {
-  year: number;
-  season: Season;
-  phase: GamePhase;
-  onAdvance: () => void;
-  onPhaseChange: (phase: GamePhase) => void;
-}
-
-export const TimeManagement: React.FC<TimeManagementProps> = ({ year, season, phase, onAdvance, onPhaseChange }) => {
-  const getSeasonColor = (s: Season) => {
-    switch (s) {
-      case 'SPRING': return 'bg-emerald-500';
-      case 'SUMMER': return 'bg-yellow-500';
-      case 'AUTUMN': return 'bg-orange-500';
-      case 'WINTER': return 'bg-blue-500';
-      default: return 'bg-gray-500';
-    }
-  };
-  
-  const getSeasonName = (s: Season) => {
-    switch (s) {
+export const TimeManagement: React.FC<TimeManagementProps> = ({ 
+  year, 
+  season, 
+  phase, 
+  onAdvance, 
+  onPhaseChange 
+}) => {
+  // Helper to convert season to french
+  const getSeasonName = (season: Season): string => {
+    switch (season) {
       case 'SPRING': return 'Printemps';
       case 'SUMMER': return 'Été';
       case 'AUTUMN': return 'Automne';
@@ -34,64 +22,68 @@ export const TimeManagement: React.FC<TimeManagementProps> = ({ year, season, ph
       default: return 'Inconnu';
     }
   };
-  
-  const getPhaseName = (phase: GamePhase) => {
+
+  // Helper to convert phase to french
+  const getPhaseName = (phase: PhaseType): string => {
     switch (phase) {
-      case 'VOTE_DES_LOIS': return 'Vote des lois';
-      case 'ÉLECTIONS': return 'Élections';
-      case 'ADMINISTRATION': return 'Administration';
-      case 'GUERRE': return 'Guerre';
-      case 'DIPLOMATIE': return 'Diplomatie';
-      case 'COMMERCE': return 'Commerce';
-      case 'CRISES': return 'Crises';
+      case 'ADMINISTRATIVE': return 'Administrative';
+      case 'POLITIQUE': return 'Politique';
+      case 'ACTIONS': return 'Actions';
+      case 'RESOLUTION': return 'Résolution';
       default: return 'Inconnue';
     }
   };
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle className="text-lg flex items-center gap-2">
-          <Calendar className="h-5 w-5" />
-          Gestion du temps
-        </CardTitle>
-      </CardHeader>
-      
-      <CardContent className="space-y-4">
-        <div className="flex items-center gap-2 mb-1">
-          <h3 className="font-semibold">Année courante:</h3>
-          <span className="text-lg">{year} AUC</span>
-        </div>
-        
-        <div className="flex items-center gap-2 mb-3">
-          <h3 className="font-semibold">Saison courante:</h3>
-          <span className={`px-2 py-1 rounded text-white ${getSeasonColor(season)}`}>
-            {getSeasonName(season)}
-          </span>
-        </div>
-        
-        <div className="mb-4">
-          <h3 className="font-semibold mb-2">Phase de jeu actuelle:</h3>
-          <Select value={phase} onValueChange={onPhaseChange}>
-            <SelectTrigger className="w-[280px]">
-              <SelectValue placeholder={getPhaseName(phase)} />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="VOTE_DES_LOIS">Vote des lois</SelectItem>
-              <SelectItem value="ÉLECTIONS">Élections</SelectItem>
-              <SelectItem value="ADMINISTRATION">Administration</SelectItem>
-              <SelectItem value="GUERRE">Guerre</SelectItem>
-              <SelectItem value="DIPLOMATIE">Diplomatie</SelectItem>
-              <SelectItem value="COMMERCE">Commerce</SelectItem>
-              <SelectItem value="CRISES">Crises</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
-        
-        <Button onClick={onAdvance} className="roman-btn">
-          Avancer le temps
-        </Button>
-      </CardContent>
-    </Card>
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+      <Card>
+        <CardHeader className="pb-2">
+          <CardTitle className="text-lg">Période Actuelle</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-4">
+            <div className="flex items-center justify-between">
+              <span className="text-muted-foreground">Année:</span>
+              <span className="font-medium">{year}</span>
+            </div>
+            <div className="flex items-center justify-between">
+              <span className="text-muted-foreground">Saison:</span>
+              <span className="font-medium">{getSeasonName(season)}</span>
+            </div>
+            <div className="flex items-center justify-between">
+              <span className="text-muted-foreground">Phase:</span>
+              <span className="font-medium">{getPhaseName(phase)}</span>
+            </div>
+            <Button className="w-full" onClick={onAdvance}>
+              Avancer au tour suivant
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader className="pb-2">
+          <CardTitle className="text-lg">Gestion de la Phase</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-4">
+            <p className="text-sm text-muted-foreground">
+              Changez la phase actuelle du jeu. Chaque phase permet d'effectuer des actions différentes.
+            </p>
+            <Select value={phase} onValueChange={(value) => onPhaseChange(value as PhaseType)}>
+              <SelectTrigger>
+                <SelectValue placeholder="Sélectionner une phase" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="ADMINISTRATIVE">Phase Administrative</SelectItem>
+                <SelectItem value="POLITIQUE">Phase Politique</SelectItem>
+                <SelectItem value="ACTIONS">Phase d'Actions</SelectItem>
+                <SelectItem value="RESOLUTION">Phase de Résolution</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+        </CardContent>
+      </Card>
+    </div>
   );
 };

@@ -1,82 +1,81 @@
 
 import React from 'react';
-import { useMaitreJeu } from '../context/MaitreJeuContext';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Progress } from '@/components/ui/progress';
-import { Shield, Users, Swords, Scale, Globe, Building } from 'lucide-react';
+import {
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  Legend,
+  ResponsiveContainer,
+} from 'recharts';
+import { EquilibreChartProps } from '../types/maitreJeuTypes';
 
-export const EquilibreBarChart: React.FC = () => {
-  const { equilibre } = useMaitreJeu();
-  
-  const getValueColor = (value: number): string => {
-    if (value < 30) return 'bg-red-500';
-    if (value < 50) return 'bg-amber-500';
-    if (value < 70) return 'bg-emerald-500';
-    return 'bg-green-600';
-  };
-  
+export const EquilibreBarChart: React.FC<EquilibreChartProps> = ({ equilibre }) => {
+  // Format data for use in the chart
+  const chartData = [
+    {
+      name: 'Plébéiens',
+      value: equilibre.plebeiens,
+      fill: '#f59e0b', // amber
+    },
+    {
+      name: 'Patriciens',
+      value: equilibre.patriciens,
+      fill: '#9333ea', // purple
+    },
+    {
+      name: 'Armée',
+      value: equilibre.armée,
+      fill: '#ef4444', // red
+    },
+    {
+      name: 'Religion',
+      value: equilibre.religion,
+      fill: '#3b82f6', // blue
+    },
+    {
+      name: 'Économie',
+      value: equilibre.économie,
+      fill: '#22c55e', // green
+    },
+    {
+      name: 'Diplomatie',
+      value: equilibre.diplomatie,
+      fill: '#14b8a6', // teal
+    },
+  ];
+
   return (
-    <Card className="mb-6">
-      <CardHeader className="pb-2">
-        <CardTitle className="text-lg">État de la République</CardTitle>
-      </CardHeader>
-      <CardContent className="space-y-6">
-        <div className="space-y-3">
-          <div className="flex items-center justify-between mb-1">
-            <div className="flex items-center">
-              <Users className="h-5 w-5 mr-2 text-blue-500" />
-              <span>Plébéiens</span>
-            </div>
-            <span className="text-sm font-medium">{equilibre.plebeiens}%</span>
-          </div>
-          <Progress value={equilibre.plebeiens} className={`h-2 ${getValueColor(equilibre.plebeiens)}`} />
-          
-          <div className="flex items-center justify-between mb-1">
-            <div className="flex items-center">
-              <Shield className="h-5 w-5 mr-2 text-purple-500" />
-              <span>Patriciens</span>
-            </div>
-            <span className="text-sm font-medium">{equilibre.patriciens}%</span>
-          </div>
-          <Progress value={equilibre.patriciens} className={`h-2 ${getValueColor(equilibre.patriciens)}`} />
-          
-          <div className="flex items-center justify-between mb-1">
-            <div className="flex items-center">
-              <Swords className="h-5 w-5 mr-2 text-red-500" />
-              <span>Armée</span>
-            </div>
-            <span className="text-sm font-medium">{equilibre.armée}%</span>
-          </div>
-          <Progress value={equilibre.armée} className={`h-2 ${getValueColor(equilibre.armée)}`} />
-          
-          <div className="flex items-center justify-between mb-1">
-            <div className="flex items-center">
-              <Globe className="h-5 w-5 mr-2 text-green-500" />
-              <span>Religion</span>
-            </div>
-            <span className="text-sm font-medium">{equilibre.religion}%</span>
-          </div>
-          <Progress value={equilibre.religion} className={`h-2 ${getValueColor(equilibre.religion)}`} />
-          
-          <div className="flex items-center justify-between mb-1">
-            <div className="flex items-center">
-              <Building className="h-5 w-5 mr-2 text-amber-500" />
-              <span>Économie</span>
-            </div>
-            <span className="text-sm font-medium">{equilibre.économie}%</span>
-          </div>
-          <Progress value={equilibre.économie} className={`h-2 ${getValueColor(equilibre.économie)}`} />
-          
-          <div className="flex items-center justify-between mb-1">
-            <div className="flex items-center">
-              <Scale className="h-5 w-5 mr-2 text-indigo-500" />
-              <span>Diplomatie</span>
-            </div>
-            <span className="text-sm font-medium">{equilibre.diplomatie}%</span>
-          </div>
-          <Progress value={equilibre.diplomatie} className={`h-2 ${getValueColor(equilibre.diplomatie)}`} />
-        </div>
-      </CardContent>
-    </Card>
+    <div className="h-96 w-full">
+      <ResponsiveContainer width="100%" height="100%">
+        <BarChart
+          data={chartData}
+          margin={{
+            top: 20,
+            right: 30,
+            left: 20,
+            bottom: 5,
+          }}
+        >
+          <CartesianGrid strokeDasharray="3 3" />
+          <XAxis dataKey="name" />
+          <YAxis domain={[0, 100]} />
+          <Tooltip
+            formatter={(value: number) => [`${value}%`, 'Influence']}
+            labelStyle={{ color: '#18181b' }}
+            contentStyle={{
+              backgroundColor: '#ffffff',
+              border: '1px solid #e2e8f0',
+              borderRadius: '0.375rem',
+              padding: '0.5rem',
+            }}
+          />
+          <Legend />
+          <Bar dataKey="value" name="Influence %" />
+        </BarChart>
+      </ResponsiveContainer>
+    </div>
   );
 };
