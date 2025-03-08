@@ -9,7 +9,6 @@ import { useEconomy } from '@/hooks/useEconomy';
 
 export function useBuildingPurchase() {
   const [isLoading, setIsLoading] = useState(false);
-  const { balance } = usePatrimoine();
   const { addBuilding } = useBuildingInventory();
   const economy = useEconomy();
   
@@ -49,16 +48,22 @@ export function useBuildingPurchase() {
       addBuilding(newBuilding);
       
       // Make the transaction using the economy system
-      economy.makePayment(
+      const success = economy.makePayment(
         building.initialCost,
         "Vendeur de propriété",
         "Immobilier",
         `Achat de "${newBuilding.name}" à ${location}`
       );
       
-      toast.success(`Acquisition de "${newBuilding.name}" réalisée avec succès`);
+      if (success) {
+        toast.success(`Acquisition de "${newBuilding.name}" réalisée avec succès`);
+      } else {
+        // This should not happen since we checked canAfford before, but just in case
+        toast.error("La transaction a échoué");
+      }
+      
       setIsLoading(false);
-      return true;
+      return success;
     }, 1000);
     
     return true;
@@ -67,6 +72,6 @@ export function useBuildingPurchase() {
   return {
     isLoading,
     purchaseBuilding,
-    balance, // Still provide the balance for UI
+    balance: economy.balance, // Provide balance from economy system
   };
 }

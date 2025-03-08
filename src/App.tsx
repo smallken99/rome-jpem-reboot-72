@@ -20,7 +20,16 @@ import Register from "./pages/Register";
 import CreateGens from "./pages/CreateGens";
 import Admin from "./pages/Admin";
 
-const queryClient = new QueryClient();
+// Création du client React Query
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      refetchOnWindowFocus: false,
+      retry: 1,
+      staleTime: 5 * 60 * 1000, // 5 minutes
+    },
+  },
+});
 
 const App = () => (
   <QueryClientProvider client={queryClient}>

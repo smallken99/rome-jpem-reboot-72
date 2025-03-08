@@ -8,7 +8,6 @@ import { useEconomy } from '@/hooks/useEconomy';
 
 export function useBuildingSale() {
   const [isLoading, setIsLoading] = useState(false);
-  const { updateBalance } = usePatrimoine();
   const { ownedBuildings, removeBuilding } = useBuildingInventory();
   const economy = useEconomy();
   
@@ -47,7 +46,7 @@ export function useBuildingSale() {
       economy.receivePayment(
         estimatedValue,
         "Marché immobilier",
-        "Vente de propriété",
+        "Immobilier",
         `Vente de "${buildingToSell.name}"`
       );
       

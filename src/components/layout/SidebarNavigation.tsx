@@ -58,6 +58,13 @@ export const SidebarNavigation: React.FC<SidebarNavigationProps> = ({ isExpanded
       { path: '/republique/domaines', label: 'Terres Publiques' },
       { path: '/republique/batiments', label: 'Bâtiments Publics' },
       { path: '/republique/lois', label: 'Lois' },
+      { path: '/republique/bureaux', label: 'Bureaux' }
+    ],
+    '/religion': [
+      { path: '/religion/vestales', label: 'Vestales' },
+      { path: '/religion/temples', label: 'Temples' },
+      { path: '/religion/ceremonies', label: 'Cérémonies' },
+      { path: '/religion/augures', label: 'Augures' },
     ],
     '/rapports': [
       { path: '/rapports/influence', label: 'Influence' },

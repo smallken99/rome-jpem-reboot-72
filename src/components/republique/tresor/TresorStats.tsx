@@ -7,11 +7,22 @@ import { useEconomy } from '@/hooks/useEconomy';
 export const TresorStats: React.FC = () => {
   const economy = useEconomy();
   
-  // Utiliser les données du système économique pour calculer les valeurs
-  const totalTaxes = 1250000;
-  const travaux = 850000;
-  const armee = 1200000;
-  const commerce = 980000;
+  // Récupérer les totaux par catégorie
+  const incomeTotals = economy.getCategoryTotals('income');
+  const expenseTotals = economy.getCategoryTotals('expense');
+  
+  // Calculer les valeurs pour chaque section
+  const getTotalForCategory = (category: string, type: 'income' | 'expense') => {
+    const totals = type === 'income' ? incomeTotals : expenseTotals;
+    const found = totals.find(t => t.category === category);
+    return found?.total || 0;
+  };
+  
+  // Utiliser des valeurs calculées ou des exemples si les catégories n'existent pas encore
+  const totalTaxes = getTotalForCategory('Tributum', 'income') || 1250000;
+  const travauxPublics = getTotalForCategory('Travaux Publics', 'expense') || 850000;
+  const armeeDepenses = getTotalForCategory('Armée', 'expense') || 1200000;
+  const commerceRevenu = getTotalForCategory('Commerce', 'income') || 980000;
   
   return (
     <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
@@ -35,7 +46,7 @@ export const TresorStats: React.FC = () => {
       
       <StatBox 
         title="Travaux publics"
-        value={`${travaux.toLocaleString()} As`}
+        value={`${travauxPublics.toLocaleString()} As`}
         icon={<Building className="w-5 h-5" />}
         trend="down"
         trendValue="-5.2%"
@@ -44,7 +55,7 @@ export const TresorStats: React.FC = () => {
       
       <StatBox 
         title="Armée"
-        value={`${armee.toLocaleString()} As`}
+        value={`${armeeDepenses.toLocaleString()} As`}
         icon={<Swords className="w-5 h-5" />}
         trend="up"
         trendValue="+12.3%"
@@ -53,7 +64,7 @@ export const TresorStats: React.FC = () => {
       
       <StatBox 
         title="Commerce"
-        value={`${commerce.toLocaleString()} As`}
+        value={`${commerceRevenu.toLocaleString()} As`}
         icon={<Ship className="w-5 h-5" />}
         trend="up"
         trendValue="+8.7%"
