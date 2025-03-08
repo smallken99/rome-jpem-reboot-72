@@ -4,12 +4,11 @@ import { CharacterStat } from '@/types/character';
 import { 
   Users, 
   MessageCircle, 
-  Feather, 
-  Sword,
   Heart,
+  Sword,
   GraduationCap,
-  Shield,
   Award,
+  Shield,
   ShieldOff,
   type LucideIcon
 } from 'lucide-react';
@@ -23,8 +22,7 @@ const STAT_ICONS: Record<string, LucideIcon> = {
   martialEducation: Sword,
   intelligence: GraduationCap,
   influence: Award,
-  leadership: Shield,
-  default: Feather
+  leadership: Shield
 };
 
 // Map of color names to their respective Tailwind classes
@@ -36,8 +34,7 @@ const COLOR_CLASSES: Record<string, string> = {
   purple: 'bg-purple-500',
   terracotta: 'bg-rome-terracotta',
   navy: 'bg-rome-navy',
-  gold: 'bg-rome-gold',
-  default: 'bg-gray-500'
+  gold: 'bg-rome-gold'
 };
 
 // Map of standardized descriptions for each stat type
@@ -48,8 +45,7 @@ const STAT_DESCRIPTIONS: Record<string, string> = {
   martialEducation: "Maîtrise des arts militaires et de la stratégie",
   intelligence: "Capacité d'analyse et de résolution de problèmes",
   influence: "Pouvoir et connexions au sein de la société romaine",
-  leadership: "Capacité à diriger et inspirer les autres",
-  default: "Caractéristique d'importance pour le personnage"
+  leadership: "Capacité à diriger et inspirer les autres"
 };
 
 interface StatBarProps {
@@ -60,13 +56,13 @@ interface StatBarProps {
 
 const StatBar: React.FC<StatBarProps> = ({ stat, disabled = false, pietyBonus }) => {
   // Get the appropriate icon component
-  const IconComponent = disabled ? ShieldOff : (STAT_ICONS[stat.icon] || STAT_ICONS.default);
+  const IconComponent = disabled ? ShieldOff : (STAT_ICONS[stat.icon] || STAT_ICONS.popularity);
   
   // Get the appropriate color class
-  const colorClass = disabled ? 'bg-gray-400' : (COLOR_CLASSES[stat.color] || COLOR_CLASSES.default);
+  const colorClass = disabled ? 'bg-gray-400' : (COLOR_CLASSES[stat.color] || COLOR_CLASSES.blue);
   
   // Get standardized description (overriding the one provided in the stat object)
-  const standardDescription = STAT_DESCRIPTIONS[stat.icon] || STAT_DESCRIPTIONS.default;
+  const standardDescription = STAT_DESCRIPTIONS[stat.icon] || STAT_DESCRIPTIONS.popularity;
   
   // Calculate the total value including piety bonus if applicable
   const baseValue = stat.value;

@@ -1,37 +1,44 @@
 
-import React, { useEffect, useState } from 'react';
-import { Calendar, Clock, SunDim, Hourglass } from 'lucide-react';
-import { useTimeStore, useTimeEvents, formatRomanSeason } from '@/utils/timeSystem';
+import React, { useState } from 'react';
+import { Calendar, Hourglass, SunDim } from 'lucide-react';
+import { useTimeStore, formatRomanSeason } from '@/utils/timeSystem';
 
 interface TimePanelProps {
   minimal?: boolean;
 }
 
 export const TimePanel: React.FC<TimePanelProps> = ({ minimal = false }) => {
-  const { year, season, dayInSeason, formatDate } = useTimeStore();
+  const { year, season, dayInSeason, formatDate, advanceDay, advanceSeason } = useTimeStore();
   const [timeMessage, setTimeMessage] = useState<string | null>(null);
   
-  // Get time advancement function
-  const { advanceTime } = useTimeEvents(
-    // Day change
-    () => {
-      // Clear any existing message after 3 seconds
-      if (timeMessage) {
-        const timer = setTimeout(() => setTimeMessage(null), 3000);
-        return () => clearTimeout(timer);
+  // Fonction pour avancer le temps
+  const handleAdvanceTime = () => {
+    // Sauvegarder l'état actuel pour comparaison
+    const currentSeason = season;
+    const currentYear = year;
+    
+    // Avancer d'un jour
+    advanceDay();
+    
+    // Si nous atteignons la fin de la saison
+    if (dayInSeason >= 90) {
+      // Avancer la saison
+      advanceSeason();
+      
+      // Afficher un message de nouvelle saison
+      setTimeMessage(`Nouvelle saison: ${formatRomanSeason(season)}`);
+      
+      // Si nous avons terminé une année complète
+      if (currentSeason === 'Hiems' && season === 'Ver') {
+        setTimeMessage(`Nouvelle année: ${year + 1} AUC`);
       }
-    },
-    // Season change
-    (newSeason) => {
-      setTimeMessage(`Nouvelle saison: ${formatRomanSeason(newSeason)}`);
-    },
-    // Year change
-    (newYear) => {
-      setTimeMessage(`Nouvelle année: ${newYear} AUC`);
+      
+      // Effacer le message après 3 secondes
+      setTimeout(() => setTimeMessage(null), 3000);
     }
-  );
+  };
   
-  // Get season icon and color
+  // Obtenir l'icône et la couleur de la saison
   const getSeasonInfo = () => {
     switch (season) {
       case 'Ver':
@@ -70,9 +77,9 @@ export const TimePanel: React.FC<TimePanelProps> = ({ minimal = false }) => {
         </div>
         
         <button
-          onClick={() => advanceTime()}
+          onClick={handleAdvanceTime}
           className="p-1.5 rounded-full bg-muted/50 hover:bg-muted transition-colors"
-          title="Avancer le temps (pour démonstration)"
+          title="Avancer le temps"
         >
           <Hourglass className="h-4 w-4 text-muted-foreground" />
         </button>

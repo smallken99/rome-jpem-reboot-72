@@ -47,11 +47,16 @@ export const CharacterStats: React.FC<CharacterStatsProps> = ({ stats, className
     }
   };
 
+  // Filtrer pour n'afficher que les stats principales
+  const mainStats = stats.filter(stat => 
+    ['popularity', 'oratory', 'piety', 'martialEducation'].includes(stat.icon)
+  );
+
   return (
     <div className={cn("space-y-3", className)}>
-      {stats.map((stat, index) => {
-        // For females: disable martial education and add piety bonus
-        // For males: no changes
+      {mainStats.map((stat, index) => {
+        // Pour les femmes: désactiver l'éducation martiale et ajouter un bonus de piété
+        // Pour les hommes: aucun changement
         const isDisabledStat = isFemale && stat.icon === 'martialEducation';
         const shouldAddPietyBonus = isFemale && stat.icon === 'piety';
         const statInfo = getStatInfo(stat.icon);

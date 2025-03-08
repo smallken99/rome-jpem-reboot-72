@@ -8,17 +8,17 @@ export const FamilyStatsSection: React.FC = () => {
     <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
       <StatBox 
         title="Influence Sénatoriale" 
-        value="72/100" 
-        description="Classement des familles basé sur les inscrits"
+        value="72" 
+        description="Position parmi les familles patriciennes"
         icon={<Award className="h-5 w-5" />}
         trend="up"
         trendValue="+3"
         className="bg-white/90 backdrop-blur-sm border border-rome-gold/30 hover:border-rome-gold/50 transition-all duration-300"
       />
       <StatBox 
-        title="Richesse Apparente" 
+        title="Fortune Familiale" 
         value="3,450,000 As" 
-        description="Aucun changement significatif"
+        description="Patrimoine total de la Gens"
         icon={<Coins className="h-5 w-5" />}
         trend="neutral"
         trendValue="0"
@@ -27,7 +27,7 @@ export const FamilyStatsSection: React.FC = () => {
       <StatBox 
         title="Réputation" 
         value="Respectée" 
-        description="En hausse dans l'opinion publique"
+        description="Dignitas familiale"
         icon={<Flag className="h-5 w-5" />}
         trend="up"
         trendValue="+5%"

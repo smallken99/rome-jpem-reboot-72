@@ -2,7 +2,7 @@
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
-import { Cpu, HardDrive, Memory, Clock } from 'lucide-react';
+import { Cpu, HardDrive, Clock } from 'lucide-react';
 import { useAdmin } from '../../context/AdminContext';
 import { formatUptime } from '@/utils/formatUtils';
 
@@ -60,8 +60,6 @@ export const SystemStatusCard: React.FC = () => {
             <Progress 
               value={cpuUsage} 
               className="h-2 bg-muted"
-              // Utilisons une propriété compatible avec notre composant Progress
-              // Sans utiliser indicatorClassName qui n'existe pas
               style={{ 
                 '--progress-indicator-color': getStatusClass(cpuUsage).replace('bg-', '')
               } as React.CSSProperties}
@@ -72,7 +70,7 @@ export const SystemStatusCard: React.FC = () => {
           <div className="space-y-2">
             <div className="flex justify-between items-center">
               <div className="flex items-center gap-2">
-                <Memory className="h-4 w-4 text-muted-foreground" />
+                <HardDrive className="h-4 w-4 text-muted-foreground" />
                 <span className="text-sm font-medium">Mémoire</span>
               </div>
               <span className={`text-sm font-medium ${getStatusColor(memoryUsage)}`}>

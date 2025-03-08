@@ -1,81 +1,306 @@
 
-import { generateRomanName } from './romanNames';
-import { assignRandomTitle } from './titles';
-import { v4 as uuidv4 } from 'uuid';
-import { allSpecialties } from './specialties';
+import { EducationPath, Preceptor } from '../types/educationTypes';
+import { 
+  BookOpen, 
+  Sword, 
+  Landmark, 
+  Scale, 
+  MessageCircle, 
+  HeartHandshake,
+  GraduationCap,
+  Award
+} from 'lucide-react';
 
-// Fonction pour déterminer la réputation du précepteur en fonction de sa qualité
-export const getReputationFromQuality = (quality: number): "Excellent" | "Bon" | "Moyen" => {
-  if (quality >= 8) return "Excellent";
-  if (quality >= 5) return "Bon";
-  return "Moyen";
-};
+// Types d'éducation disponibles
+export const educationPaths: EducationPath[] = [
+  {
+    id: 'political',
+    name: 'Éducation Politique',
+    description: 'Formation à l\'art de la politique romaine',
+    icon: <Scale size={22} />,
+    benefits: [
+      'Compréhension des institutions romaines',
+      'Connaissance des procédures législatives',
+      'Développement des relations politiques'
+    ],
+    requirements: {
+      age: 10,
+      gender: 'male',
+      cost: 5000,
+      duration: '2 ans'
+    },
+    outcomes: [
+      'Capacité à briguer des postes électoraux',
+      'Réseau de contacts politiques',
+      'Amélioration de l\'Éloquence et de la Popularité'
+    ],
+    specialties: [
+      'Procédures sénatoriales',
+      'Droit romain',
+      'Éloquence civique',
+      'Histoire politique'
+    ],
+    relatedStat: 'popularity'
+  },
+  {
+    id: 'rhetoric',
+    name: 'Éducation Rhétorique',
+    description: 'Maîtrise de l\'art oratoire, essentiel pour la vie publique',
+    icon: <MessageCircle size={22} />,
+    benefits: [
+      'Éloquence publique',
+      'Capacité de persuasion',
+      'Construction d\'arguments logiques'
+    ],
+    requirements: {
+      age: 8,
+      gender: 'both',
+      cost: 4000,
+      duration: '3 ans'
+    },
+    outcomes: [
+      'Capacité à prononcer des discours convaincants',
+      'Amélioration significative de l\'Éloquence',
+      'Compétence en négociation'
+    ],
+    specialties: [
+      'Rhétorique grecque',
+      'Débat public',
+      'Composition littéraire',
+      'Art de la mémoire'
+    ],
+    relatedStat: 'oratory'
+  },
+  {
+    id: 'military',
+    name: 'Éducation Militaire',
+    description: 'Formation aux arts de la guerre et au commandement',
+    icon: <Sword size={22} />,
+    benefits: [
+      'Compétences tactiques et stratégiques',
+      'Discipline physique et mentale',
+      'Connaissance des armes et formations'
+    ],
+    requirements: {
+      age: 12,
+      gender: 'male',
+      cost: 3500,
+      duration: '2 ans'
+    },
+    outcomes: [
+      'Préparation au service militaire',
+      'Capacité à commander des troupes',
+      'Amélioration de l\'Éducation Martiale'
+    ],
+    specialties: [
+      'Tactique légionnaire',
+      'Équitation militaire',
+      'Fortifications',
+      'Navigation militaire'
+    ],
+    relatedStat: 'martialEducation'
+  },
+  {
+    id: 'religious',
+    name: 'Éducation Religieuse',
+    description: 'Étude des cultes et rituels romains',
+    icon: <Landmark size={22} />,
+    benefits: [
+      'Connaissance des rites et cérémonies',
+      'Compréhension des présages et augures',
+      'Maîtrise du calendrier religieux'
+    ],
+    requirements: {
+      age: 8,
+      gender: 'both',
+      cost: 4500,
+      duration: '3 ans'
+    },
+    outcomes: [
+      'Capacité à interpréter les présages',
+      'Possibilité d\'accéder aux collèges sacerdotaux',
+      'Amélioration de la Piété'
+    ],
+    specialties: [
+      'Divination',
+      'Rituels sacrificiels',
+      'Cultes familiaux',
+      'Mystères étrusques'
+    ],
+    relatedStat: 'piety'
+  },
+  {
+    id: 'philosophical',
+    name: 'Éducation Philosophique',
+    description: 'Étude des grandes écoles philosophiques grecques et romaines',
+    icon: <BookOpen size={22} />,
+    benefits: [
+      'Sagesse et connaissance',
+      'Raisonnement logique',
+      'Compréhension de l\'éthique'
+    ],
+    requirements: {
+      age: 14,
+      gender: 'both',
+      cost: 6000,
+      duration: '4 ans'
+    },
+    outcomes: [
+      'Capacité d\'analyse et de réflexion',
+      'Amélioration de la Sagesse',
+      'Respect des pairs intellectuels'
+    ],
+    specialties: [
+      'Stoïcisme',
+      'Épicurisme',
+      'Académie platonicienne',
+      'Scepticisme'
+    ],
+    relatedStat: 'intelligence'
+  },
+  {
+    id: 'diplomatic',
+    name: 'Éducation Diplomatique',
+    description: 'Formation aux relations internationales et à la négociation',
+    icon: <HeartHandshake size={22} />,
+    benefits: [
+      'Art de la négociation',
+      'Connaissance des cultures étrangères',
+      'Maîtrise des langues'
+    ],
+    requirements: {
+      age: 12,
+      gender: 'both',
+      cost: 5500,
+      duration: '3 ans'
+    },
+    outcomes: [
+      'Préparation aux missions diplomatiques',
+      'Capacité à négocier des traités',
+      'Amélioration de l\'Influence'
+    ],
+    specialties: [
+      'Protocole diplomatique',
+      'Langues étrangères',
+      'Géographie politique',
+      'Histoire des relations étrangères'
+    ],
+    relatedStat: 'influence'
+  },
+  {
+    id: 'administrative',
+    name: 'Éducation Administrative',
+    description: 'Formation à la gestion publique et aux finances',
+    icon: <GraduationCap size={22} />,
+    benefits: [
+      'Compétences en gestion financière',
+      'Connaissance des procédures administratives',
+      'Maîtrise du droit fiscal'
+    ],
+    requirements: {
+      age: 14,
+      gender: 'male',
+      cost: 4000,
+      duration: '2 ans'
+    },
+    outcomes: [
+      'Capacité à gérer les finances publiques',
+      'Expertise en taxation et trésorerie',
+      'Amélioration de l\'Intelligence'
+    ],
+    specialties: [
+      'Comptabilité publique',
+      'Réglementation commerciale',
+      'Administration provinciale',
+      'Gestion des travaux publics'
+    ],
+    relatedStat: 'intelligence'
+  },
+  {
+    id: 'leadership',
+    name: 'Éducation au Leadership',
+    description: 'Formation aux qualités de meneur et de commandement',
+    icon: <Award size={22} />,
+    benefits: [
+      'Art de commander et d\'inspirer',
+      'Gestion des groupes et des conflits',
+      'Prise de décision'
+    ],
+    requirements: {
+      age: 15,
+      gender: 'male',
+      cost: 6000,
+      duration: '2 ans'
+    },
+    outcomes: [
+      'Capacité à diriger des équipes',
+      'Respect et loyauté des subordonnés',
+      'Amélioration du Leadership'
+    ],
+    specialties: [
+      'Commandement civil',
+      'Autorité et charisme',
+      'Résolution de conflits',
+      'Planification stratégique'
+    ],
+    relatedStat: 'leadership'
+  }
+];
 
-// Générer un background aléatoire pour un précepteur
-const generateBackground = (speciality: string, quality: number): string => {
-  const backgrounds = [
-    `Formé dans les meilleures écoles d'Athènes, ce précepteur a enseigné à de nombreux jeunes patriciens.`,
-    `Ancien esclave grec affranchi pour ses connaissances exceptionnelles.`,
-    `Vétéran de l'armée romaine reconverti dans l'enseignement.`,
-    `Issu d'une famille de lettrés étrusques, il a étudié à Rome et en Grèce.`,
-    `Ancien magistrat qui a décidé de transmettre son savoir après une longue carrière.`,
-    `Philosophe errant qui a voyagé dans tout le monde méditerranéen avant de s'installer à Rome.`,
-    `Fils d'un célèbre orateur, il a appris aux côtés des plus grands maîtres de l'éloquence.`
-  ];
-
-  // Ajouter des éléments spécifiques selon la qualité
-  const qualityAdditions = [
-    `Ses méthodes sont rudimentaires mais efficaces.`,
-    `Il manque parfois de patience avec les élèves les moins doués.`,
-    `Reconnu pour sa pédagogie adaptée à chaque élève.`,
-    `Sa réputation d'excellence est connue dans toute la République.`,
-    `On dit que même les Sénateurs viennent lui demander conseil.`
-  ];
-
-  const qualityIndex = Math.min(Math.floor(quality / 2), qualityAdditions.length - 1);
+// Générer des précepteurs (mentors) pour le système d'éducation
+export const generatePreceptors = (): Record<string, Preceptor[]> => {
+  const preceptorsByType: Record<string, Preceptor[]> = {};
   
-  return `${backgrounds[Math.floor(Math.random() * backgrounds.length)]} ${qualityAdditions[qualityIndex]} Spécialisé en ${speciality}.`;
-};
-
-// Générer un précepteur aléatoire
-export const generatePreceptor = (speciality?: string) => {
-  const id = uuidv4();
-  const actualSpeciality = speciality || allSpecialties[Math.floor(Math.random() * allSpecialties.length)];
-  const quality = Math.floor(Math.random() * 10) + 1;
-  const reputation = getReputationFromQuality(quality);
-  const cost = 50 + (quality * 25) + (Math.floor(Math.random() * 50));
-  const name = generateRomanName();
-  const title = assignRandomTitle(actualSpeciality);
-  const background = generateBackground(actualSpeciality, quality);
+  // Liste des noms romains pour les précepteurs
+  const romanNames = [
+    'Gaius Livius', 'Marcus Tullius', 'Quintus Fabius', 'Lucius Aemilius', 
+    'Titus Flavius', 'Publius Cornelius', 'Gnaeus Pompeius', 'Sextus Julius',
+    'Aulus Postumius', 'Decimus Valerius', 'Tiberius Claudius', 'Marcus Porcius',
+    'Servius Sulpicius', 'Manius Curius', 'Appius Claudius', 'Spurius Furius'
+  ];
   
-  return {
-    id,
-    name: `${title} ${name}`,
-    speciality: actualSpeciality,
-    reputation,
-    quality,
-    cost,
-    available: Math.random() > 0.3, // 70% des précepteurs sont disponibles
-    background,
-    childId: null  // Ajout de la propriété childId pour le suivi des assignations
+  // Liste des spécialités pour chaque type d'éducation
+  const specialties: Record<string, string[]> = {
+    political: ['Procédures sénatoriales', 'Droit romain', 'Éloquence civique', 'Histoire politique'],
+    rhetoric: ['Rhétorique grecque', 'Débat public', 'Composition littéraire', 'Art de la mémoire'],
+    military: ['Tactique légionnaire', 'Équitation militaire', 'Fortifications', 'Navigation militaire'],
+    religious: ['Divination', 'Rituels sacrificiels', 'Cultes familiaux', 'Mystères étrusques'],
+    philosophical: ['Stoïcisme', 'Épicurisme', 'Académie platonicienne', 'Scepticisme'],
+    diplomatic: ['Protocole diplomatique', 'Langues étrangères', 'Géographie politique', 'Histoire des relations étrangères'],
+    administrative: ['Comptabilité publique', 'Réglementation commerciale', 'Administration provinciale', 'Gestion des travaux publics'],
+    leadership: ['Commandement civil', 'Autorité et charisme', 'Résolution de conflits', 'Planification stratégique']
   };
-};
-
-// Générer une liste de précepteurs par spécialité
-export const generatePreceptors = () => {
-  const result: Record<string, any[]> = {};
   
-  // Générer 3-5 précepteurs pour chaque spécialité
-  allSpecialties.forEach(speciality => {
-    const count = Math.floor(Math.random() * 3) + 3;
-    const typePreceptors = Array.from({ length: count }, () => generatePreceptor(speciality));
-    result[speciality] = typePreceptors;
+  // Créer les précepteurs pour chaque type d'éducation
+  Object.keys(specialties).forEach(type => {
+    preceptorsByType[type] = [];
+    
+    // Générer 3 précepteurs pour chaque type
+    for (let i = 0; i < 3; i++) {
+      const reputation = i === 0 ? "Excellent" : i === 1 ? "Bon" : "Moyen";
+      const quality = i === 0 ? 5 : i === 1 ? 4 : 3;
+      const cost = i === 0 ? 10000 : i === 1 ? 7000 : 4000;
+      
+      // Choisir aléatoirement un nom et une spécialité
+      const nameIndex = Math.floor(Math.random() * romanNames.length);
+      const specialtyIndex = Math.floor(Math.random() * specialties[type].length);
+      
+      preceptorsByType[type].push({
+        id: `${type}-${i}`,
+        name: `${romanNames[nameIndex]} ${i === 0 ? 'le Sage' : i === 1 ? 'l\'Érudit' : ''}`,
+        speciality: specialties[type][specialtyIndex],
+        reputation,
+        quality,
+        cost,
+        available: true,
+        background: `Un éducateur expérimenté, spécialisé en ${specialties[type][specialtyIndex]}.`,
+        childId: null
+      });
+      
+      // Éviter les doublons de noms
+      romanNames.splice(nameIndex, 1);
+    }
   });
   
-  return result;
+  return preceptorsByType;
 };
-
-// Exporter les spécialités pour être utilisées ailleurs
-export { allSpecialties as specialties } from './specialties';
-export { romanNamePrefixes, romanNameSuffixes } from './romanNames';
-export { titles } from './titles';

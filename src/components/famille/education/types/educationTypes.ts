@@ -38,7 +38,7 @@ export interface Child {
     yearsCompleted?: number;
     totalYears?: number;
     pityBonus?: number;
-    statBonus?: string;
+    statBonus?: number; // Changé de string à number
     educationHistory?: EducationHistory[];
   };
 }
@@ -52,7 +52,7 @@ export interface ChildEducation {
   yearsCompleted?: number;
   totalYears?: number;
   pityBonus?: number;
-  statBonus?: string;
+  statBonus?: number; // Changé de string à number
   educationHistory?: EducationHistory[];
 }
 
@@ -64,7 +64,7 @@ export interface EducationHistory {
   mentor?: string;
   skills: string[];
   speciality?: string;
-  statBonus?: string;
+  statBonus?: number; // Changé de string à number
   completedAt?: number;
 }
 
@@ -153,45 +153,23 @@ export interface PreceptorActionsProps {
   isLoading?: boolean;
 }
 
-export interface UrbanPropertySelectorProps {
-  selectedBuildingType: string;
-  onBuildingTypeChange: (type: string) => void;
-  isViewingCatalogue: boolean;
-  setIsViewingCatalogue: (value: boolean) => void;
-}
-
-export interface UrbanCatalogueSectionProps {
-  buildingType: string;
-  onBuildingSelect: (building: any) => void;
-}
-
-export interface OwnedUrbanPropertiesSectionProps {
-  buildingType: string;
-  onBuildingSelect: (building: any) => void;
-  selectedBuildingId: string;
-}
-
-export interface UrbanPropertyDetailsProps {
-  building: any;
-  buildingCategory: string;
-}
-
 export interface EducationContextType {
   children: Child[];
-  preceptorsByType: PreceptorsByType;
+  preceptors: PreceptorsByType;
   availablePreceptors: Preceptor[];
   selectedChild: Child | null;
   selectedPreceptor: Preceptor | null;
   isLoading: boolean;
-  isHiringPreceptor: boolean;
   hiredPreceptors: Preceptor[];
+  educatingChildren: Record<string, boolean>;
   setSelectedChild: (child: Child | null) => void;
   setSelectedPreceptor: (preceptor: Preceptor | null) => void;
-  loadPreceptorsByType: (speciality: string) => Preceptor[];
-  hirePreceptor: (preceptor: Preceptor) => Promise<boolean>;
-  startChildEducation: (childId: string, educationType: string, mentorId: string | null, specialties?: string[]) => boolean;
-  getEducationProgress: (childId: string) => number;
-  advanceEducation: (childId: string) => void;
-  completeEducation: (childId: string) => void;
   refreshPreceptors: () => void;
+  hirePreceptor: (preceptor: Preceptor, childId?: string) => boolean;
+  firePreceptor: (preceptorId: string) => boolean;
+  assignPreceptorToChild: (preceptorId: string, childId: string) => boolean;
+  startChildEducation: (childId: string, educationType: string, mentorId: string | null, specialties?: string[]) => boolean;
+  advanceEducationYear: (childId: string) => void;
+  completeEducation: (childId: string) => void;
+  updateChildName: (childId: string, newName: string) => void;
 }
