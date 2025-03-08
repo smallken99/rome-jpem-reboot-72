@@ -39,6 +39,12 @@ export const TimeManagement = () => {
       case 'MILITAIRE': return 'Militaire';
       case 'RELIGION': return 'Religion';
       case 'SOCIAL': return 'Social';
+      case 'SETUP': return 'Installation';
+      case 'ELECTION': return 'Élection';
+      case 'ACTION': return 'Action';
+      case 'SENAT': return 'Sénat';
+      case 'EVENEMENT': return 'Événement';
+      case 'ADMINISTRATION': return 'Administration';
       default: return phase;
     }
   };
@@ -70,6 +76,12 @@ export const TimeManagement = () => {
                 <SelectItem value="MILITAIRE">Militaire</SelectItem>
                 <SelectItem value="RELIGION">Religion</SelectItem>
                 <SelectItem value="SOCIAL">Social</SelectItem>
+                <SelectItem value="SETUP">Installation</SelectItem>
+                <SelectItem value="ELECTION">Élection</SelectItem>
+                <SelectItem value="ACTION">Action</SelectItem>
+                <SelectItem value="SENAT">Sénat</SelectItem>
+                <SelectItem value="EVENEMENT">Événement</SelectItem>
+                <SelectItem value="ADMINISTRATION">Administration</SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -77,7 +89,7 @@ export const TimeManagement = () => {
           <div>
             <h3 className="font-semibold mb-2">Avancer le Temps</h3>
             <div className="grid grid-cols-2 gap-2">
-              <Button onClick={() => handleAdvanceTime()} className="w-full">
+              <Button onClick={handleAdvanceTime} className="w-full">
                 <ArrowRight className="h-4 w-4 mr-2" />
                 Saison Suivante
               </Button>

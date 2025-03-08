@@ -8,11 +8,12 @@ import { Calendar as CalendarIcon } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { format } from 'date-fns';
 import { useMaitreJeu } from '../context';
+import { MagistratureType } from '../types/magistratures';
 
 const ElectionPlanner = () => {
   const { currentYear, currentSeason, elections, scheduleElection } = useMaitreJeu();
   
-  const [magistrature, setMagistrature] = useState('CONSUL');
+  const [magistrature, setMagistrature] = useState<MagistratureType>('CONSUL');
   const [date, setDate] = useState<Date | undefined>(new Date());
   const [season, setSeason] = useState('SPRING');
   
@@ -32,7 +33,7 @@ const ElectionPlanner = () => {
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>
           <label className="block text-sm font-medium mb-1">Magistrature</label>
-          <Select value={magistrature} onValueChange={setMagistrature}>
+          <Select value={magistrature} onValueChange={(value) => setMagistrature(value as MagistratureType)}>
             <SelectTrigger>
               <SelectValue placeholder="Sélectionner une magistrature" />
             </SelectTrigger>

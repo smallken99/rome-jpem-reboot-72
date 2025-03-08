@@ -4,7 +4,7 @@ import { Season as TimeSystemSeason } from '@/utils/timeSystem';
 // Types de base
 export type Season = 'SPRING' | 'SUMMER' | 'AUTUMN' | 'WINTER';
 export type ImportanceType = 'majeure' | 'mineure' | 'normale';
-export type GamePhase = 'SETUP' | 'ELECTION' | 'ACTION' | 'SENAT' | 'EVENEMENT' | 'ADMINISTRATION';
+export type GamePhase = 'SETUP' | 'ELECTION' | 'ACTION' | 'SENAT' | 'EVENEMENT' | 'ADMINISTRATION' | 'POLITIQUE' | 'ECONOMIE' | 'MILITAIRE' | 'RELIGION' | 'SOCIAL';
 export type PhaseType = string;
 
 // Fonction de conversion entre les types de saisons

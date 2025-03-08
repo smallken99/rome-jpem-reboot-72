@@ -1,6 +1,6 @@
 
 import { SenateurJouable, Province, Evenement, Election, HistoireEntry, Loi, Equilibre } from '../types';
-import { GameDate } from '../types/common';
+import { GameDate, Season, GamePhase } from '../types/common';
 
 // Données initiales pour les sénateurs
 export const initialSenateurs: SenateurJouable[] = [
