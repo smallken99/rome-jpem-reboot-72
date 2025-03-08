@@ -1,13 +1,11 @@
-
 import React, { useState } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Label } from '@/components/ui/label';
-import { Calendar, UserPlus } from 'lucide-react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Season, MagistratureType, SenateurJouable } from '../types/maitreJeuTypes';
+import { formatDate } from '@/utils/formatUtils';
 import { useMaitreJeu } from '../context/MaitreJeuContext';
-import { MagistratureType, SenateurJouable } from '../types/maitreJeuTypes';
-import { convertMaitreJeuSeasonToTimeSeason } from '@/utils/formatUtils';
 
 interface ElectionPlannerProps {
   senateurs: SenateurJouable[];
@@ -15,79 +13,69 @@ interface ElectionPlannerProps {
 }
 
 export const ElectionPlanner: React.FC<ElectionPlannerProps> = ({ senateurs, onScheduleElection }) => {
-  const { currentYear, currentSeason, gameState } = useMaitreJeu();
+  const { gameState } = useMaitreJeu();
+  const { year, season } = gameState;
   
   const [selectedMagistrature, setSelectedMagistrature] = useState<MagistratureType>('CONSUL');
-  const [selectedYear, setSelectedYear] = useState<number>(currentYear || gameState.year);
-  const [selectedSeason, setSelectedSeason] = useState<Season>(currentSeason || gameState.season);
+  const [selectedYear, setSelectedYear] = useState(year);
+  const [selectedSeason, setSelectedSeason] = useState<Season>(season);
   
   const handleScheduleElection = () => {
     onScheduleElection(selectedMagistrature, selectedYear, selectedSeason);
   };
   
-  // Obtenir les magistrats actuels pour affichage
-  const currentMagistrates = senateurs.filter(s => s.magistrature !== null);
-  
-  // Générer les options d'années
-  const yearOptions = [];
-  for (let i = 0; i < 5; i++) {
-    yearOptions.push((currentYear || gameState.year) + i);
-  }
-  
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle className="text-lg font-cinzel">Planifier une élection</CardTitle>
-      </CardHeader>
-      <CardContent>
-        <div className="space-y-4">
-          <div className="space-y-2">
-            <Label htmlFor="magistrature">Type de magistrature</Label>
-            <Select 
-              value={selectedMagistrature} 
-              onValueChange={(value) => setSelectedMagistrature(value as MagistratureType)}
-            >
-              <SelectTrigger id="magistrature">
-                <SelectValue placeholder="Sélectionner une magistrature" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="CONSUL">Consul</SelectItem>
-                <SelectItem value="PRETEUR">Préteur</SelectItem>
-                <SelectItem value="EDILE">Édile</SelectItem>
-                <SelectItem value="QUESTEUR">Questeur</SelectItem>
-                <SelectItem value="CENSEUR">Censeur</SelectItem>
-                <SelectItem value="TRIBUN">Tribun de la Plèbe</SelectItem>
-                <SelectItem value="PONTIFEX_MAXIMUS">Pontifex Maximus</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-          
-          <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="year">Année</Label>
+    <div className="space-y-4">
+      <div className="flex flex-col md:flex-row gap-4">
+        <Card className="flex-1">
+          <CardHeader>
+            <CardTitle>Planifier une élection</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div>
+              <label className="text-sm text-gray-500 mb-1 block">Magistrature</label>
               <Select 
-                value={selectedYear.toString()} 
-                onValueChange={(value) => setSelectedYear(parseInt(value))}
+                value={selectedMagistrature} 
+                onValueChange={(value) => setSelectedMagistrature(value as MagistratureType)}
               >
-                <SelectTrigger id="year">
-                  <SelectValue placeholder="Année" />
+                <SelectTrigger>
+                  <SelectValue placeholder="Sélectionner une magistrature" />
                 </SelectTrigger>
                 <SelectContent>
-                  {yearOptions.map(year => (
-                    <SelectItem key={year} value={year.toString()}>{year} AUC</SelectItem>
-                  ))}
+                  <SelectItem value="CONSUL">Consul</SelectItem>
+                  <SelectItem value="PRETEUR">Préteur</SelectItem>
+                  <SelectItem value="EDILE">Édile</SelectItem>
+                  <SelectItem value="QUESTEUR">Questeur</SelectItem>
+                  <SelectItem value="CENSEUR">Censeur</SelectItem>
+                  <SelectItem value="TRIBUN">Tribun de la Plèbe</SelectItem>
                 </SelectContent>
               </Select>
             </div>
             
-            <div className="space-y-2">
-              <Label htmlFor="season">Saison</Label>
+            <div>
+              <label className="text-sm text-gray-500 mb-1 block">Année</label>
+              <Select 
+                value={selectedYear.toString()} 
+                onValueChange={(value) => setSelectedYear(parseInt(value))}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Sélectionner une année" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value={year.toString()}>{year} AUC (Actuelle)</SelectItem>
+                  <SelectItem value={(year + 1).toString()}>{year + 1} AUC (Prochaine)</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            
+            <div>
+              <label className="text-sm text-gray-500 mb-1 block">Saison</label>
               <Select 
                 value={selectedSeason} 
                 onValueChange={(value) => setSelectedSeason(value as Season)}
               >
-                <SelectTrigger id="season">
-                  <SelectValue placeholder="Saison" />
+                <SelectTrigger>
+                  <SelectValue placeholder="Sélectionner une saison" />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="SPRING">Printemps</SelectItem>
@@ -97,33 +85,87 @@ export const ElectionPlanner: React.FC<ElectionPlannerProps> = ({ senateurs, onS
                 </SelectContent>
               </Select>
             </div>
-          </div>
-          
-          <Button 
-            onClick={handleScheduleElection} 
-            className="w-full"
-          >
-            <Calendar className="mr-2 h-4 w-4" />
-            Planifier l'élection
-          </Button>
-        </div>
+            
+            <Button 
+              onClick={handleScheduleElection}
+              className="w-full"
+            >
+              Programmer l'élection
+            </Button>
+          </CardContent>
+        </Card>
         
-        <div className="mt-6 border-t pt-4">
-          <h3 className="font-medium text-sm mb-2">Magistrats actuels</h3>
-          <div className="space-y-2">
-            {currentMagistrates.length > 0 ? (
-              currentMagistrates.map((magistrat, index) => (
-                <div key={index} className="flex justify-between text-sm">
-                  <span>{magistrat.nom} ({magistrat.famille})</span>
-                  <span className="text-muted-foreground">{magistrat.magistrature} - {magistrat.faction}</span>
+        <Card className="flex-1">
+          <CardHeader>
+            <CardTitle>Candidats potentiels</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <Tabs defaultValue="tous">
+              <TabsList className="mb-4">
+                <TabsTrigger value="tous">Tous</TabsTrigger>
+                <TabsTrigger value="populares">Populares</TabsTrigger>
+                <TabsTrigger value="optimates">Optimates</TabsTrigger>
+                <TabsTrigger value="moderates">Moderates</TabsTrigger>
+              </TabsList>
+              
+              <TabsContent value="tous">
+                <div className="space-y-2">
+                  {senateurs
+                    .filter(s => !s.magistrature)
+                    .map(senateur => (
+                      <div key={senateur.id} className="flex justify-between items-center p-2 bg-gray-50 rounded">
+                        <div>
+                          <p className="font-medium">{senateur.nom}</p>
+                          <p className="text-sm text-gray-500">{senateur.faction}</p>
+                        </div>
+                        <div className="text-sm">Éligible</div>
+                      </div>
+                    ))}
                 </div>
-              ))
-            ) : (
-              <p className="text-sm text-muted-foreground italic">Aucun magistrat actuellement en poste</p>
-            )}
-          </div>
-        </div>
-      </CardContent>
-    </Card>
+              </TabsContent>
+              
+              <TabsContent value="populares">
+                <div className="space-y-2">
+                  {senateurs
+                    .filter(s => !s.magistrature && s.faction === 'Populares')
+                    .map(senateur => (
+                      <div key={senateur.id} className="flex justify-between items-center p-2 bg-gray-50 rounded">
+                        <p className="font-medium">{senateur.nom}</p>
+                        <div className="text-sm">Éligible</div>
+                      </div>
+                    ))}
+                </div>
+              </TabsContent>
+              
+              <TabsContent value="optimates">
+                <div className="space-y-2">
+                  {senateurs
+                    .filter(s => !s.magistrature && s.faction === 'Optimates')
+                    .map(senateur => (
+                      <div key={senateur.id} className="flex justify-between items-center p-2 bg-gray-50 rounded">
+                        <p className="font-medium">{senateur.nom}</p>
+                        <div className="text-sm">Éligible</div>
+                      </div>
+                    ))}
+                </div>
+              </TabsContent>
+              
+              <TabsContent value="moderates">
+                <div className="space-y-2">
+                  {senateurs
+                    .filter(s => !s.magistrature && s.faction === 'Moderates')
+                    .map(senateur => (
+                      <div key={senateur.id} className="flex justify-between items-center p-2 bg-gray-50 rounded">
+                        <p className="font-medium">{senateur.nom}</p>
+                        <div className="text-sm">Éligible</div>
+                      </div>
+                    ))}
+                </div>
+              </TabsContent>
+            </Tabs>
+          </CardContent>
+        </Card>
+      </div>
+    </div>
   );
 };

@@ -1,24 +1,24 @@
 
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { PartisGraphProps } from '../types/maitreJeuTypes';
 import { PieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip } from 'recharts';
+import { PartisGraphProps } from '../types/maitreJeuTypes';
 
-export const PartisGraph: React.FC<PartisGraphProps> = ({ factions }) => {
-  // Préparer les données pour le graphique
-  const data = factions.map(faction => ({
-    name: faction.nom,
-    value: faction.influence,
-    color: faction.couleur
-  }));
+export const PartisGraph: React.FC<PartisGraphProps> = ({ populaires, optimates, moderates, factions }) => {
+  // Si on a reçu factions directement, utiliser ces données
+  const data = factions || [
+    { name: 'Populares', value: populaires || 35, color: '#ef4444' },
+    { name: 'Optimates', value: optimates || 40, color: '#3b82f6' },
+    { name: 'Moderates', value: moderates || 25, color: '#a855f7' },
+  ];
   
   return (
-    <Card>
-      <CardHeader className="pb-2">
-        <CardTitle className="text-lg">Équilibre des factions</CardTitle>
+    <Card className="h-full">
+      <CardHeader>
+        <CardTitle>Équilibre des factions</CardTitle>
       </CardHeader>
       <CardContent>
-        <div className="h-[300px]">
+        <div className="h-64">
           <ResponsiveContainer width="100%" height="100%">
             <PieChart>
               <Pie
@@ -26,7 +26,6 @@ export const PartisGraph: React.FC<PartisGraphProps> = ({ factions }) => {
                 cx="50%"
                 cy="50%"
                 labelLine={false}
-                innerRadius={60}
                 outerRadius={80}
                 fill="#8884d8"
                 dataKey="value"
@@ -36,30 +35,10 @@ export const PartisGraph: React.FC<PartisGraphProps> = ({ factions }) => {
                   <Cell key={`cell-${index}`} fill={entry.color} />
                 ))}
               </Pie>
-              <Tooltip 
-                formatter={(value) => [`${value}%`, 'Influence']}
-                labelFormatter={(name) => `Faction: ${name}`}
-              />
+              <Tooltip formatter={(value) => [`${value}%`, 'Influence']} />
               <Legend />
             </PieChart>
           </ResponsiveContainer>
-        </div>
-        
-        <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-4">
-          {factions.map(faction => (
-            <div key={faction.id} className="p-3 rounded-md border" style={{ borderColor: faction.couleur }}>
-              <div className="font-medium text-sm" style={{ color: faction.couleur }}>{faction.nom}</div>
-              <div className="text-xs text-muted-foreground mb-2">{faction.description}</div>
-              <div className="text-xs">
-                <span className="font-medium">Objectifs:</span>
-                <ul className="list-disc list-inside mt-1">
-                  {faction.objectifs.map((objectif, index) => (
-                    <li key={index}>{objectif}</li>
-                  ))}
-                </ul>
-              </div>
-            </div>
-          ))}
         </div>
       </CardContent>
     </Card>

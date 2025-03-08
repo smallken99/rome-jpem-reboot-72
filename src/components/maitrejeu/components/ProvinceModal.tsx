@@ -1,336 +1,231 @@
 
 import React, { useState, useEffect } from 'react';
-import { 
-  Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription 
-} from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Province, SenateurJouable } from '../types/maitreJeuTypes';
-import { Badge } from '@/components/ui/badge';
+import { Slider } from '@/components/ui/slider';
+import { Province } from '../types/maitreJeuTypes';
 
-interface ProvinceModalProps {
+export interface ProvinceModalProps {
+  province: Province;
   open: boolean;
-  onOpenChange: (open: boolean) => void;
-  province: Province | null;
-  senateurs: SenateurJouable[];
+  onClose?: () => void;
   onSave: (province: Province) => void;
 }
 
 export const ProvinceModal: React.FC<ProvinceModalProps> = ({
-  open,
-  onOpenChange,
   province,
-  senateurs,
+  open,
+  onClose = () => {},
   onSave
 }) => {
-  const [editedProvince, setEditedProvince] = useState<Province | null>(null);
+  const [editedProvince, setEditedProvince] = useState<Province>(province);
   
   useEffect(() => {
-    if (province) {
-      setEditedProvince({ ...province });
-    }
+    setEditedProvince(province);
   }, [province]);
   
-  if (!editedProvince) return null;
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    const { name, value } = e.target;
+    setEditedProvince(prev => ({ ...prev, [name]: value }));
+  };
+  
+  const handleNumberChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setEditedProvince(prev => ({ ...prev, [name]: parseInt(value) }));
+  };
+  
+  const handleStatusChange = (value: string) => {
+    setEditedProvince(prev => ({ 
+      ...prev, 
+      status: value as Province['status'],
+      statut: value // Pour compatibilité
+    }));
+  };
+  
+  const handleSelectChange = (field: keyof Province, value: string) => {
+    setEditedProvince(prev => ({ ...prev, [field]: value }));
+  };
+  
+  const handleSliderChange = (field: keyof Province, value: number[]) => {
+    setEditedProvince(prev => ({ ...prev, [field]: value[0] }));
+  };
   
   const handleSave = () => {
     onSave(editedProvince);
-    onOpenChange(false);
+    onClose();
   };
-  
-  const handleStatutChange = (value: string) => {
-    setEditedProvince({
-      ...editedProvince,
-      statut: value as 'pacifiée' | 'instable' | 'en révolte' | 'en guerre'
-    });
-  };
-  
-  const handleGouverneurChange = (value: string) => {
-    setEditedProvince({
-      ...editedProvince,
-      gouverneur: value === 'null' ? null : value
-    });
-  };
-  
-  const handleInputChange = (field: keyof Province, value: any) => {
-    setEditedProvince({
-      ...editedProvince,
-      [field]: value
-    });
-  };
-  
-  const eligibleSenators = senateurs.filter(s => 
-    s.statut === 'actif' && (!s.fonctionActuelle || s.fonctionActuelle === 'Gouverneur')
-  );
   
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+    <Dialog open={open} onOpenChange={(isOpen) => !isOpen && onClose()}>
+      <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>Gestion de la Province: {editedProvince.nom}</DialogTitle>
-          <DialogDescription>
-            Gérez les détails et l'administration de cette province
-          </DialogDescription>
+          <DialogTitle className="text-xl font-cinzel">Province: {editedProvince.nom}</DialogTitle>
         </DialogHeader>
         
-        <Tabs defaultValue="details" className="w-full">
-          <TabsList className="grid grid-cols-3 mb-4">
-            <TabsTrigger value="details">Détails</TabsTrigger>
-            <TabsTrigger value="military">Forces militaires</TabsTrigger>
-            <TabsTrigger value="economy">Économie</TabsTrigger>
-          </TabsList>
-          
-          <TabsContent value="details" className="space-y-4">
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <label className="text-sm font-medium">Nom de la province</label>
-                <Input 
-                  value={editedProvince.nom}
-                  onChange={(e) => handleInputChange('nom', e.target.value)}
-                />
-              </div>
-              
-              <div className="space-y-2">
-                <label className="text-sm font-medium">Région</label>
-                <Input 
-                  value={editedProvince.region}
-                  onChange={(e) => handleInputChange('region', e.target.value)}
-                />
-              </div>
-              
-              <div className="space-y-2">
-                <label className="text-sm font-medium">Statut</label>
-                <Select 
-                  value={editedProvince.statut} 
-                  onValueChange={handleStatutChange}
-                >
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="pacifiée">Pacifiée</SelectItem>
-                    <SelectItem value="instable">Instable</SelectItem>
-                    <SelectItem value="en révolte">En révolte</SelectItem>
-                    <SelectItem value="en guerre">En guerre</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              
-              <div className="space-y-2">
-                <label className="text-sm font-medium">Gouverneur</label>
-                <Select 
-                  value={editedProvince.gouverneur || 'null'} 
-                  onValueChange={handleGouverneurChange}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Aucun gouverneur" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="null">Aucun gouverneur</SelectItem>
-                    {eligibleSenators.map(senator => (
-                      <SelectItem key={senator.id} value={senator.nom}>
-                        {senator.nom}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-              
-              <div className="space-y-2">
-                <label className="text-sm font-medium">Population</label>
-                <Input 
-                  type="number"
-                  value={editedProvince.population}
-                  onChange={(e) => handleInputChange('population', parseInt(e.target.value))}
-                />
-              </div>
-              
-              <div className="space-y-2">
-                <label className="text-sm font-medium">Loyauté</label>
-                <Input 
-                  type="number"
-                  min="0"
-                  max="100"
-                  value={editedProvince.loyauté}
-                  onChange={(e) => handleInputChange('loyauté', parseInt(e.target.value))}
-                />
-              </div>
+        <div className="grid gap-4 py-4">
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <Label htmlFor="nom">Nom</Label>
+              <Input 
+                id="nom" 
+                name="nom" 
+                value={editedProvince.nom} 
+                onChange={handleInputChange} 
+              />
             </div>
             
-            <div className="space-y-2">
-              <label className="text-sm font-medium">Ressources principales</label>
-              <div className="flex flex-wrap gap-2">
-                {editedProvince.ressourcesPrincipales.map((ressource, index) => (
-                  <Badge key={index}>
-                    {ressource}
-                    <button
-                      className="ml-1 text-xs"
-                      onClick={() => {
-                        const newResources = [...editedProvince.ressourcesPrincipales];
-                        newResources.splice(index, 1);
-                        handleInputChange('ressourcesPrincipales', newResources);
-                      }}
-                    >
-                      ×
-                    </button>
-                  </Badge>
-                ))}
-                <Input 
-                  placeholder="Ajouter une ressource..."
-                  className="w-40"
-                  onKeyDown={(e) => {
-                    if (e.key === 'Enter' && e.currentTarget.value) {
-                      handleInputChange('ressourcesPrincipales', [
-                        ...editedProvince.ressourcesPrincipales,
-                        e.currentTarget.value
-                      ]);
-                      e.currentTarget.value = '';
-                    }
-                  }}
-                />
-              </div>
+            <div>
+              <Label htmlFor="région">Région</Label>
+              <Input 
+                id="région" 
+                name="région" 
+                value={editedProvince.région || editedProvince.region || ''} 
+                onChange={(e) => {
+                  setEditedProvince(prev => ({ 
+                    ...prev, 
+                    région: e.target.value,
+                    region: e.target.value // Pour compatibilité
+                  }));
+                }} 
+              />
             </div>
-          </TabsContent>
+          </div>
           
-          <TabsContent value="military" className="space-y-4">
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <label className="text-sm font-medium">Légions</label>
-                <Input 
-                  type="number"
-                  min="0"
-                  value={editedProvince.légions}
-                  onChange={(e) => handleInputChange('légions', parseInt(e.target.value))}
-                />
-                <p className="text-xs text-muted-foreground">Une légion représente environ 5,000 soldats</p>
-              </div>
-              
-              <div className="space-y-2">
-                <label className="text-sm font-medium">Garnison</label>
-                <Input 
-                  type="number"
-                  min="0"
-                  value={editedProvince.garnison}
-                  onChange={(e) => handleInputChange('garnison', parseInt(e.target.value))}
-                />
-                <p className="text-xs text-muted-foreground">Forces auxiliaires et de maintien de l'ordre</p>
-              </div>
+          <div>
+            <Label htmlFor="status">Statut</Label>
+            <Select 
+              value={editedProvince.status || editedProvince.statut || ''} 
+              onValueChange={handleStatusChange}
+            >
+              <SelectTrigger id="status">
+                <SelectValue placeholder="Sélectionner un statut" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="pacifiée">Pacifiée</SelectItem>
+                <SelectItem value="instable">Instable</SelectItem>
+                <SelectItem value="rebelle">Rebelle</SelectItem>
+                <SelectItem value="conquise">Conquise récemment</SelectItem>
+                <SelectItem value="en révolte">En révolte</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+          
+          <div>
+            <Label htmlFor="description">Description</Label>
+            <Textarea 
+              id="description" 
+              name="description" 
+              value={editedProvince.description} 
+              onChange={handleInputChange} 
+              rows={3}
+            />
+          </div>
+          
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <Label htmlFor="population">Population</Label>
+              <Input 
+                id="population" 
+                name="population" 
+                type="number" 
+                value={editedProvince.population} 
+                onChange={handleNumberChange} 
+              />
             </div>
             
-            <div className="space-y-2">
-              <label className="text-sm font-medium">Problèmes</label>
-              <div className="flex flex-wrap gap-2">
-                {editedProvince.problèmes.map((probleme, index) => (
-                  <Badge key={index} variant="destructive">
-                    {probleme}
-                    <button
-                      className="ml-1 text-xs"
-                      onClick={() => {
-                        const newProblems = [...editedProvince.problèmes];
-                        newProblems.splice(index, 1);
-                        handleInputChange('problèmes', newProblems);
-                      }}
-                    >
-                      ×
-                    </button>
-                  </Badge>
-                ))}
-                <Input 
-                  placeholder="Ajouter un problème..."
-                  className="w-40"
-                  onKeyDown={(e) => {
-                    if (e.key === 'Enter' && e.currentTarget.value) {
-                      handleInputChange('problèmes', [
-                        ...editedProvince.problèmes,
-                        e.currentTarget.value
-                      ]);
-                      e.currentTarget.value = '';
-                    }
-                  }}
-                />
-              </div>
+            <div>
+              <Label htmlFor="revenuAnnuel">Revenu annuel (As)</Label>
+              <Input 
+                id="revenuAnnuel" 
+                name="revenuAnnuel" 
+                type="number" 
+                value={editedProvince.revenuAnnuel} 
+                onChange={handleNumberChange} 
+              />
             </div>
-          </TabsContent>
+          </div>
           
-          <TabsContent value="economy" className="space-y-4">
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <label className="text-sm font-medium">Richesse</label>
-                <Input 
-                  type="number"
-                  min="0"
-                  value={editedProvince.richesse}
-                  onChange={(e) => handleInputChange('richesse', parseInt(e.target.value))}
-                />
-              </div>
-              
-              <div className="space-y-2">
-                <label className="text-sm font-medium">Revenu annuel</label>
-                <Input 
-                  type="number"
-                  min="0"
-                  value={editedProvince.revenuAnnuel}
-                  onChange={(e) => handleInputChange('revenuAnnuel', parseInt(e.target.value))}
-                />
-              </div>
-              
-              <div className="space-y-2">
-                <label className="text-sm font-medium">Impôts (taux en %)</label>
-                <Input 
-                  type="number"
-                  min="0"
-                  max="100"
-                  value={editedProvince.impôts}
-                  onChange={(e) => handleInputChange('impôts', parseInt(e.target.value))}
-                />
-              </div>
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <Label htmlFor="impôts">Impôts</Label>
+              <Input 
+                id="impôts" 
+                name="impôts" 
+                type="number" 
+                value={editedProvince.impôts} 
+                onChange={handleNumberChange} 
+              />
             </div>
             
-            <div className="space-y-2">
-              <label className="text-sm font-medium">Opportunités</label>
-              <div className="flex flex-wrap gap-2">
-                {editedProvince.opportunités.map((opportunite, index) => (
-                  <Badge key={index} variant="secondary">
-                    {opportunite}
-                    <button
-                      className="ml-1 text-xs"
-                      onClick={() => {
-                        const newOpportunities = [...editedProvince.opportunités];
-                        newOpportunities.splice(index, 1);
-                        handleInputChange('opportunités', newOpportunities);
-                      }}
-                    >
-                      ×
-                    </button>
-                  </Badge>
-                ))}
-                <Input 
-                  placeholder="Ajouter une opportunité..."
-                  className="w-40"
-                  onKeyDown={(e) => {
-                    if (e.key === 'Enter' && e.currentTarget.value) {
-                      handleInputChange('opportunités', [
-                        ...editedProvince.opportunités,
-                        e.currentTarget.value
-                      ]);
-                      e.currentTarget.value = '';
-                    }
-                  }}
-                />
-              </div>
+            <div>
+              <Label htmlFor="richesse">Richesse</Label>
+              <Input 
+                id="richesse" 
+                name="richesse" 
+                type="number" 
+                value={editedProvince.richesse} 
+                onChange={handleNumberChange} 
+              />
             </div>
-          </TabsContent>
-        </Tabs>
+          </div>
+          
+          <div>
+            <div className="flex justify-between">
+              <Label htmlFor="loyauté">Loyauté</Label>
+              <span>{editedProvince.loyauté}</span>
+            </div>
+            <Slider
+              id="loyauté"
+              defaultValue={[editedProvince.loyauté]}
+              max={100}
+              step={1}
+              onValueChange={(value) => handleSliderChange('loyauté' as keyof Province, value)}
+            />
+          </div>
+          
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <Label htmlFor="légions">Légions</Label>
+              <Input 
+                id="légions" 
+                name="légions" 
+                type="number" 
+                value={editedProvince.légions} 
+                onChange={handleNumberChange} 
+              />
+            </div>
+            
+            <div>
+              <Label htmlFor="garnison">Garnison</Label>
+              <Input 
+                id="garnison" 
+                name="garnison" 
+                type="number" 
+                value={editedProvince.garnison} 
+                onChange={handleNumberChange} 
+              />
+            </div>
+          </div>
+          
+          <div>
+            <Label htmlFor="gouverneur">Gouverneur</Label>
+            <Input 
+              id="gouverneur" 
+              name="gouverneur" 
+              value={editedProvince.gouverneur || ''} 
+              onChange={handleInputChange} 
+              placeholder="Aucun gouverneur assigné"
+            />
+          </div>
+        </div>
         
         <DialogFooter>
-          <Button variant="outline" onClick={() => onOpenChange(false)}>
-            Annuler
-          </Button>
-          <Button onClick={handleSave}>
-            Sauvegarder les modifications
-          </Button>
+          <Button variant="outline" onClick={onClose}>Annuler</Button>
+          <Button onClick={handleSave}>Sauvegarder</Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>

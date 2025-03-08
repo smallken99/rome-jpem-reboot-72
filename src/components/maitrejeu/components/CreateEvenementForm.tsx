@@ -1,332 +1,406 @@
-import React, { useState, useEffect } from 'react';
-import {
-  Form,
-  FormControl,
-  FormDescription,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form"
-import { Input } from "@/components/ui/input"
-import { Button } from "@/components/ui/button"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Textarea } from "@/components/ui/textarea"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Label } from "@/components/ui/label"
-import { Plus, Trash } from 'lucide-react';
-import { toast } from 'sonner';
-import { useForm } from "react-hook-form"
-import { Evenement, EvenementType, ImportanceType, Season } from '../types/maitreJeuTypes';
 
-interface CreateEvenementFormProps {
-  onCreateEvenement: (evenement: Omit<Evenement, 'id'>) => void;
-}
+import React, { useState } from 'react';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Slider } from '@/components/ui/slider';
+import { Check, Plus, Trash2 } from 'lucide-react';
+import { useForm, useFieldArray, Controller } from 'react-hook-form';
+import { EvenementType, ImportanceType, Season } from '../types/maitreJeuTypes';
+import { useMaitreJeu } from '../context/MaitreJeuContext';
+import { z } from 'zod';
+import { zodResolver } from '@hookform/resolvers/zod';
 
-export const CreateEvenementForm: React.FC<CreateEvenementFormProps> = ({ onCreateEvenement }) => {
-  const [formData, setFormData] = useState({
-    titre: '',
-    description: '',
-    type: 'POLITIQUE' as EvenementType,
-    year: 275,
-    season: 'SPRING' as Season,
-    day: 1,
-    importance: 'normale' as ImportanceType,
-    options: [{ texte: '', effets: {}, résultat: '' }]
-  });
+// Définir le schéma de validation
+const evenementSchema = z.object({
+  titre: z.string().min(3, "Le titre doit contenir au moins 3 caractères"),
+  description: z.string().min(10, "La description doit contenir au moins 10 caractères"),
+  type: z.string(),
+  importance: z.string(),
+  date: z.object({
+    year: z.number().int().positive(),
+    season: z.string(),
+    day: z.number().int().min(1).max(90).optional()
+  }),
+  options: z.array(
+    z.object({
+      id: z.string().optional(),
+      texte: z.string().min(3, "Le texte doit contenir au moins 3 caractères"),
+      effets: z.object({
+        stabilité: z.number().or(z.string()).optional().transform(val => Number(val) || 0),
+        trésorPublique: z.number().or(z.string()).optional().transform(val => Number(val) || 0),
+        prestigeRome: z.number().or(z.string()).optional().transform(val => Number(val) || 0),
+        religion: z.number().or(z.string()).optional().transform(val => Number(val) || 0),
+        influence: z.number().or(z.string()).optional().transform(val => Number(val) || 0),
+        finance: z.number().or(z.string()).optional().transform(val => Number(val) || 0),
+        militaire: z.number().or(z.string()).optional().transform(val => Number(val) || 0),
+        economie: z.number().or(z.string()).optional().transform(val => Number(val) || 0),
+        autre: z.string().optional()
+      })
+    })
+  ).min(2, "Un événement doit avoir au moins 2 options")
+});
+
+type EvenementFormValues = z.infer<typeof evenementSchema>;
+
+const defaultOption = {
+  texte: '',
+  effets: {
+    stabilité: 0,
+    trésorPublique: 0,
+    prestigeRome: 0,
+    religion: 0,
+    influence: 0,
+    finance: 0,
+    militaire: 0,
+    economie: 0,
+    autre: ''
+  }
+};
+
+export const CreateEvenementForm: React.FC = () => {
+  const { gameState, addEvenement } = useMaitreJeu();
+  const { year, season } = gameState;
+  const [showForm, setShowForm] = useState(false);
   
-  const [validationErrors, setValidationErrors] = useState<Record<string, string>>({});
-  
-  const form = useForm();
-  
-  const handleInputChange = (event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
-    const { name, value } = event.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
-    setValidationErrors(prev => ({ ...prev, [name]: '' }));
-  };
-  
-  const handleOptionChange = (index: number, field: string, value: any) => {
-    const updatedOptions = [...formData.options];
-    updatedOptions[index] = { ...updatedOptions[index], [field]: value };
-    setFormData(prev => ({ ...prev, options: updatedOptions }));
-    setValidationErrors(prev => ({ ...prev, [`option-${index}`]: '' }));
-  };
-  
-  const addOption = () => {
-    setFormData(prev => ({
-      ...prev,
-      options: [...prev.options, { texte: '', effets: {}, résultat: '' }]
-    }));
-  };
-  
-  const removeOption = (index: number) => {
-    const updatedOptions = [...formData.options];
-    updatedOptions.splice(index, 1);
-    setFormData(prev => ({ ...prev, options: updatedOptions }));
-  };
-  
-  const resetForm = () => {
-    setFormData({
+  const { register, handleSubmit, control, formState: { errors }, reset } = useForm<EvenementFormValues>({
+    resolver: zodResolver(evenementSchema),
+    defaultValues: {
       titre: '',
       description: '',
       type: 'POLITIQUE',
-      year: 275,
-      season: 'SPRING',
-      day: 1,
       importance: 'normale',
-      options: [{ texte: '', effets: {}, résultat: '' }]
-    });
-    setValidationErrors({});
-  };
-
-  // Remplacer uniquement les parties problématiques
-const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
-  event.preventDefault();
+      date: {
+        year: year,
+        season: season,
+        day: 1
+      },
+      options: [{ ...defaultOption }, { ...defaultOption }]
+    }
+  });
   
-  // Validation des champs
-  let isValid = true;
-  const errors: Record<string, string> = {};
+  const { fields, append, remove } = useFieldArray({
+    control,
+    name: 'options'
+  });
   
-  if (!formData.titre.trim()) {
-    errors.titre = "Le titre est requis";
-    isValid = false;
-  }
-  
-  if (!formData.description.trim()) {
-    errors.description = "La description est requise";
-    isValid = false;
-  }
-  
-  // Convertir en nombre pour la comparaison
-  const dayNumber = Number(formData.day);
-  if (isNaN(dayNumber) || dayNumber < 1 || dayNumber > 90) {
-    errors.day = "Le jour doit être entre 1 et 90";
-    isValid = false;
-  }
-  
-  // Vérifier chaque option
-  if (formData.options.length > 0) {
-    formData.options.forEach((option, index) => {
-      if (!option.texte.trim()) {
-        errors[`option-${index}`] = "Le texte de l'option est requis";
-        isValid = false;
+  const onSubmit = (data: EvenementFormValues) => {
+    const transformedOptions = data.options.map(option => ({
+      ...option,
+      id: `option-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+      effets: {
+        ...option.effets,
+        stabilité: Number(option.effets.stabilité) || 0,
+        trésorPublique: Number(option.effets.trésorPublique) || 0,
+        prestigeRome: Number(option.effets.prestigeRome) || 0,
+        religion: Number(option.effets.religion) || 0,
+        influence: Number(option.effets.influence) || 0,
+        finance: Number(option.effets.finance) || 0,
+        militaire: Number(option.effets.militaire) || 0,
+        economie: Number(option.effets.economie) || 0
       }
+    }));
+    
+    addEvenement({
+      ...data,
+      type: data.type as EvenementType,
+      importance: data.importance as ImportanceType,
+      date: {
+        ...data.date,
+        season: data.date.season as Season
+      },
+      options: transformedOptions,
+      resolved: false
     });
-  }
-  
-  // Si formulaire non valide, afficher les erreurs
-  if (!isValid) {
-    setValidationErrors(errors);
-    return;
-  }
-  
-  // Créer l'événement
-  const nouvelEvenement: Omit<Evenement, 'id'> = {
-    titre: formData.titre,
-    description: formData.description,
-    type: formData.type,
-    date: {
-      year: parseInt(formData.year.toString()),
-      season: formData.season,
-      day: parseInt(formData.day.toString())
-    },
-    importance: formData.importance,
-    options: formData.options.map(option => ({
-      id: '', // Sera généré par le système
-      texte: option.texte,
-      effets: option.effets,
-      résultat: option.résultat || ''
-    })),
-    resolved: false
+    
+    reset();
+    setShowForm(false);
   };
   
-  // Ajouter l'événement
-  onCreateEvenement(nouvelEvenement);
+  const addOption = () => {
+    append({ ...defaultOption });
+  };
   
-  // Réinitialiser le formulaire
-  resetForm();
-  
-  toast.success('Événement créé avec succès');
-};
-
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle className="text-lg font-cinzel">Créer un nouvel événement</CardTitle>
-      </CardHeader>
-      <CardContent>
-        <Form {...form}>
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div>
-              <FormItem>
-                <FormLabel>Titre</FormLabel>
-                <FormControl>
+    <div className="mt-4">
+      {!showForm && (
+        <Button onClick={() => setShowForm(true)} className="w-full">
+          <Plus className="mr-2 h-4 w-4" />
+          Créer un nouvel événement
+        </Button>
+      )}
+      
+      {showForm && (
+        <Card>
+          <CardHeader>
+            <CardTitle>Créer un nouvel événement</CardTitle>
+          </CardHeader>
+          <form onSubmit={handleSubmit(onSubmit)}>
+            <CardContent className="space-y-6">
+              <div className="space-y-4">
+                <div>
+                  <Label htmlFor="titre">Titre</Label>
                   <Input 
-                    name="titre"
-                    value={formData.titre}
-                    onChange={handleInputChange}
-                    placeholder="Titre de l'événement"
+                    id="titre" 
+                    {...register('titre')} 
+                    className={errors.titre ? "border-red-500" : ""}
                   />
-                </FormControl>
-                {validationErrors.titre && (
-                  <p className="text-sm text-red-500">{validationErrors.titre}</p>
-                )}
-              </FormItem>
-            </div>
-            
-            <div>
-              <FormItem>
-                <FormLabel>Description</FormLabel>
-                <FormControl>
-                  <Textarea
-                    name="description"
-                    value={formData.description}
-                    onChange={handleInputChange}
-                    placeholder="Description de l'événement"
+                  {errors.titre && <p className="text-sm text-red-500 mt-1">{errors.titre.message}</p>}
+                </div>
+                
+                <div>
+                  <Label htmlFor="description">Description</Label>
+                  <Textarea 
+                    id="description" 
+                    {...register('description')} 
+                    className={errors.description ? "border-red-500" : ""}
                   />
-                </FormControl>
-                {validationErrors.description && (
-                  <p className="text-sm text-red-500">{validationErrors.description}</p>
-                )}
-              </FormItem>
-            </div>
-            
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <FormItem>
-                  <FormLabel>Type</FormLabel>
-                  <Select
-                    name="type"
-                    value={formData.type}
-                    onValueChange={(value) => setFormData(prev => ({ ...prev, type: value as EvenementType }))}
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Type d'événement" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="POLITIQUE">Politique</SelectItem>
-                      <SelectItem value="GUERRE">Guerre</SelectItem>
-                      <SelectItem value="CRISE">Crise</SelectItem>
-                      <SelectItem value="ECONOMIQUE">Économique</SelectItem>
-                      <SelectItem value="RELIGION">Religion</SelectItem>
-                      <SelectItem value="DIPLOMATIQUE">Diplomatique</SelectItem>
-                      <SelectItem value="SOCIAL">Social</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </FormItem>
-              </div>
-              
-              <div>
-                <FormItem>
-                  <FormLabel>Importance</FormLabel>
-                  <Select
-                    name="importance"
-                    value={formData.importance}
-                    onValueChange={(value) => setFormData(prev => ({ ...prev, importance: value as ImportanceType }))}
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Importance" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="majeure">Majeure</SelectItem>
-                      <SelectItem value="mineure">Mineure</SelectItem>
-                      <SelectItem value="normale">Normale</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </FormItem>
-              </div>
-            </div>
-            
-            <div className="grid grid-cols-3 gap-4">
-              <div>
-                <FormItem>
-                  <FormLabel>Année</FormLabel>
-                  <FormControl>
-                    <Input
-                      type="number"
-                      name="year"
-                      value={formData.year}
-                      onChange={handleInputChange}
-                      placeholder="Année"
-                    />
-                  </FormControl>
-                </FormItem>
-              </div>
-              
-              <div>
-                <FormItem>
-                  <FormLabel>Saison</FormLabel>
-                  <Select
-                    name="season"
-                    value={formData.season}
-                    onValueChange={(value) => setFormData(prev => ({ ...prev, season: value as Season }))}
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Saison" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="SPRING">Printemps</SelectItem>
-                      <SelectItem value="SUMMER">Été</SelectItem>
-                      <SelectItem value="AUTUMN">Automne</SelectItem>
-                      <SelectItem value="WINTER">Hiver</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </FormItem>
-              </div>
-              
-              <div>
-                <FormItem>
-                  <FormLabel>Jour</FormLabel>
-                  <FormControl>
-                    <Input
-                      type="number"
-                      name="day"
-                      value={formData.day}
-                      onChange={handleInputChange}
-                      placeholder="Jour"
-                    />
-                  </FormControl>
-                  {validationErrors.day && (
-                    <p className="text-sm text-red-500">{validationErrors.day}</p>
-                  )}
-                </FormItem>
-              </div>
-            </div>
-            
-            <div>
-              <FormLabel>Options</FormLabel>
-              {formData.options.map((option, index) => (
-                <div key={index} className="flex space-x-2 mb-2">
-                  <div className="flex-grow">
-                    <FormItem>
-                      <FormControl>
-                        <Input
-                          type="text"
-                          placeholder={`Option ${index + 1}`}
-                          value={option.texte}
-                          onChange={(e) => handleOptionChange(index, 'texte', e.target.value)}
-                        />
-                      </FormControl>
-                      {validationErrors[`option-${index}`] && (
-                        <p className="text-sm text-red-500">{validationErrors[`option-${index}`]}</p>
+                  {errors.description && <p className="text-sm text-red-500 mt-1">{errors.description.message}</p>}
+                </div>
+                
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <Label htmlFor="type">Type</Label>
+                    <Controller
+                      control={control}
+                      name="type"
+                      render={({ field }) => (
+                        <Select onValueChange={field.onChange} value={field.value}>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Sélectionner un type" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="POLITIQUE">Politique</SelectItem>
+                            <SelectItem value="GUERRE">Guerre</SelectItem>
+                            <SelectItem value="CRISE">Crise</SelectItem>
+                            <SelectItem value="ECONOMIQUE">Économique</SelectItem>
+                            <SelectItem value="RELIGION">Religion</SelectItem>
+                            <SelectItem value="DIPLOMATIQUE">Diplomatie</SelectItem>
+                            <SelectItem value="SOCIAL">Social</SelectItem>
+                          </SelectContent>
+                        </Select>
                       )}
-                    </FormItem>
+                    />
                   </div>
-                  <Button variant="outline" size="icon" onClick={() => removeOption(index)}>
-                    <Trash className="h-4 w-4" />
+                  
+                  <div>
+                    <Label htmlFor="importance">Importance</Label>
+                    <Controller
+                      control={control}
+                      name="importance"
+                      render={({ field }) => (
+                        <Select onValueChange={field.onChange} value={field.value}>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Sélectionner l'importance" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="mineure">Mineure</SelectItem>
+                            <SelectItem value="normale">Normale</SelectItem>
+                            <SelectItem value="majeure">Majeure</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      )}
+                    />
+                  </div>
+                </div>
+                
+                <div className="grid grid-cols-3 gap-4">
+                  <div>
+                    <Label htmlFor="date.year">Année</Label>
+                    <Input 
+                      id="date.year" 
+                      type="number" 
+                      {...register('date.year', { valueAsNumber: true })} 
+                    />
+                  </div>
+                  
+                  <div>
+                    <Label htmlFor="date.season">Saison</Label>
+                    <Controller
+                      control={control}
+                      name="date.season"
+                      render={({ field }) => (
+                        <Select onValueChange={field.onChange} value={field.value}>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Saison" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="SPRING">Printemps</SelectItem>
+                            <SelectItem value="SUMMER">Été</SelectItem>
+                            <SelectItem value="AUTUMN">Automne</SelectItem>
+                            <SelectItem value="WINTER">Hiver</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      )}
+                    />
+                  </div>
+                  
+                  <div>
+                    <Label htmlFor="date.day">Jour (optionnel)</Label>
+                    <Input 
+                      id="date.day" 
+                      type="number" 
+                      min={1}
+                      max={90}
+                      {...register('date.day', { valueAsNumber: true })} 
+                    />
+                  </div>
+                </div>
+              </div>
+              
+              <div className="space-y-4">
+                <div className="flex justify-between items-center">
+                  <h3 className="text-lg font-semibold">Options</h3>
+                  <Button type="button" onClick={addOption} variant="outline" size="sm">
+                    <Plus className="h-4 w-4 mr-1" />
+                    Ajouter option
                   </Button>
                 </div>
-              ))}
-              <Button type="button" variant="secondary" onClick={addOption}>
-                <Plus className="h-4 w-4 mr-2" />
-                Ajouter une option
+                
+                {errors.options && errors.options.message && (
+                  <p className="text-sm text-red-500">{errors.options.message}</p>
+                )}
+                
+                {fields.map((field, index) => (
+                  <Card key={field.id} className="border-gray-200">
+                    <CardHeader className="py-3 px-4">
+                      <div className="flex justify-between items-center">
+                        <h4 className="text-md font-medium">Option {index + 1}</h4>
+                        {index > 1 && (
+                          <Button
+                            type="button"
+                            onClick={() => remove(index)}
+                            variant="ghost"
+                            size="sm"
+                            className="h-8 w-8 p-0 text-red-500"
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        )}
+                      </div>
+                    </CardHeader>
+                    <CardContent className="py-3 px-4">
+                      <div className="space-y-4">
+                        <div>
+                          <Label htmlFor={`options.${index}.texte`}>Texte de l'option</Label>
+                          <Textarea 
+                            id={`options.${index}.texte`} 
+                            {...register(`options.${index}.texte`)}
+                            className={errors.options?.[index]?.texte ? "border-red-500" : ""}
+                          />
+                          {errors.options?.[index]?.texte && (
+                            <p className="text-sm text-red-500 mt-1">{errors.options?.[index]?.texte?.message}</p>
+                          )}
+                        </div>
+                        
+                        <div className="grid grid-cols-2 gap-4">
+                          <div>
+                            <Label htmlFor={`options.${index}.effets.stabilité`}>Effet sur la stabilité</Label>
+                            <Input 
+                              id={`options.${index}.effets.stabilité`} 
+                              type="number" 
+                              {...register(`options.${index}.effets.stabilité`)} 
+                            />
+                          </div>
+                          
+                          <div>
+                            <Label htmlFor={`options.${index}.effets.trésorPublique`}>Effet sur le trésor</Label>
+                            <Input 
+                              id={`options.${index}.effets.trésorPublique`} 
+                              type="number" 
+                              {...register(`options.${index}.effets.trésorPublique`)} 
+                            />
+                          </div>
+                        </div>
+                        
+                        <div className="grid grid-cols-2 gap-4">
+                          <div>
+                            <Label htmlFor={`options.${index}.effets.prestigeRome`}>Effet sur le prestige</Label>
+                            <Input 
+                              id={`options.${index}.effets.prestigeRome`} 
+                              type="number" 
+                              {...register(`options.${index}.effets.prestigeRome`)} 
+                            />
+                          </div>
+                          
+                          <div>
+                            <Label htmlFor={`options.${index}.effets.religion`}>Effet sur la religion</Label>
+                            <Input 
+                              id={`options.${index}.effets.religion`} 
+                              type="number" 
+                              {...register(`options.${index}.effets.religion`)} 
+                            />
+                          </div>
+                        </div>
+                        
+                        <div className="grid grid-cols-2 gap-4">
+                          <div>
+                            <Label htmlFor={`options.${index}.effets.influence`}>Effet sur l'influence</Label>
+                            <Input 
+                              id={`options.${index}.effets.influence`} 
+                              type="number" 
+                              {...register(`options.${index}.effets.influence`)} 
+                            />
+                          </div>
+                          
+                          <div>
+                            <Label htmlFor={`options.${index}.effets.finance`}>Effet sur les finances</Label>
+                            <Input 
+                              id={`options.${index}.effets.finance`} 
+                              type="number" 
+                              {...register(`options.${index}.effets.finance`)} 
+                            />
+                          </div>
+                        </div>
+                        
+                        <div className="grid grid-cols-2 gap-4">
+                          <div>
+                            <Label htmlFor={`options.${index}.effets.militaire`}>Effet militaire</Label>
+                            <Input 
+                              id={`options.${index}.effets.militaire`} 
+                              type="number" 
+                              {...register(`options.${index}.effets.militaire`)} 
+                            />
+                          </div>
+                          
+                          <div>
+                            <Label htmlFor={`options.${index}.effets.economie`}>Effet économique</Label>
+                            <Input 
+                              id={`options.${index}.effets.economie`} 
+                              type="number" 
+                              {...register(`options.${index}.effets.economie`)} 
+                            />
+                          </div>
+                        </div>
+                        
+                        <div>
+                          <Label htmlFor={`options.${index}.effets.autre`}>Autres effets (texte)</Label>
+                          <Input 
+                            id={`options.${index}.effets.autre`} 
+                            {...register(`options.${index}.effets.autre`)} 
+                          />
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            </CardContent>
+            <CardFooter className="flex justify-between">
+              <Button type="button" variant="outline" onClick={() => setShowForm(false)}>
+                Annuler
               </Button>
-            </div>
-            
-            <Button type="submit">Créer l'événement</Button>
+              <Button type="submit">
+                <Check className="mr-2 h-4 w-4" />
+                Créer l'événement
+              </Button>
+            </CardFooter>
           </form>
-        </Form>
-      </CardContent>
-    </Card>
+        </Card>
+      )}
+    </div>
   );
 };

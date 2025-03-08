@@ -8,7 +8,16 @@ export type Season = 'SPRING' | 'SUMMER' | 'AUTUMN' | 'WINTER';
 export type EvenementType = 'POLITIQUE' | 'GUERRE' | 'CRISE' | 'ECONOMIQUE' | 'ÉCONOMIQUE' | 'RELIGION' | 'DIPLOMATIQUE' | 'SOCIAL';
 export type ImportanceType = 'majeure' | 'mineure' | 'normale';
 export type GamePhase = 'SETUP' | 'ELECTION' | 'ACTION' | 'SENAT' | 'EVENEMENT' | 'ADMINISTRATION';
-export type Faction = 'Populares' | 'Optimates' | 'Moderates' | 'Indépendant';
+export type Faction = string | { 
+  id: string; 
+  nom: string; 
+  description: string; 
+  leader: any; 
+  membres: any[]; 
+  influence: number; 
+  couleur: string; 
+  objectifs: string[];
+};
 export type MagistratureType = 'CONSUL' | 'PRETEUR' | 'PRÉTEUR' | 'EDILE' | 'QUESTEUR' | 'CENSEUR' | 'TRIBUN' | 'PONTIFEX_MAXIMUS';
 export type PhaseType = string;
 export type FactionPolitique = string;
@@ -33,6 +42,9 @@ export interface Equilibre {
     économie: number;
     religion: number;
     diplomatie: number;
+    populaires?: number;
+    optimates?: number;
+    moderates?: number;
   }[];
 }
 
@@ -92,6 +104,7 @@ export interface Province {
     y: number;
   };
   armée?: number; // Pour compatibilité avec le code existant
+  ressources?: string[]; // Pour compatibilité avec le code existant
 }
 
 export interface SenateurJouable {
@@ -122,6 +135,7 @@ export interface SenateurJouable {
   relations?: Record<string, number>;
   votes?: number; // Pour compatibilité avec le code existant
   senateurId?: string; // Pour compatibilité avec le code existant
+  soutiens?: any[]; // Pour compatibilité avec le code existant
 }
 
 export interface Evenement {
@@ -144,6 +158,7 @@ export interface EvenementAction {
   id: string;
   texte: string;
   titre?: string; // Pour compatibilité avec le code existant
+  description?: string; // Pour compatibilité avec le code existant
   effets: {
     stabilité?: number;
     trésorPublique?: number;
@@ -164,6 +179,7 @@ export interface HistoireEntry {
   titre: string;
   contenu: string;
   description?: string; // Pour compatibilité avec le code existant
+  catégorie?: string; // Pour compatibilité avec le code existant
   date: {
     year: number;
     season: Season;
@@ -189,9 +205,10 @@ export interface EquilibreChartProps {
 }
 
 export interface PartisGraphProps {
-  populaires: number;
-  optimates: number;
-  moderates: number;
+  populaires?: number;
+  optimates?: number;
+  moderates?: number;
+  factions?: { name: string; value: number; color: string; }[];
 }
 
 export interface PoliticalEventsTimelineProps {
@@ -202,6 +219,9 @@ export interface TimeManagementProps {
   currentYear: number;
   currentSeason: Season;
   currentPhase: GamePhase;
+  year?: number; // Pour compatibilité avec le code existant
+  season?: Season; // Pour compatibilité avec le code existant
+  phase?: GamePhase; // Pour compatibilité avec le code existant
   onAdvance: () => void;
   onPhaseChange: (phase: GamePhase) => void;
 }

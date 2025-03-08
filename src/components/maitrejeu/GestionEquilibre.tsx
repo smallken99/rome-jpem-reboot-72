@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -188,7 +189,7 @@ export const GestionEquilibre = () => {
         </CardContent>
       </Card>
       
-      <div className="flex space-x-2 mb-4 overflow-x-auto pb-2">
+      <div className="flex space-x-2 mb-4 overflow-x-auto pb-2 mt-4">
         <Button
           size="sm"
           variant={filteredType === 'ALL' ? 'default' : 'outline'}

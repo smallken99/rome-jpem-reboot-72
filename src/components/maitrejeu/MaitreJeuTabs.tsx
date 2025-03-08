@@ -13,7 +13,8 @@ import { GamePhase } from './types/maitreJeuTypes';
 export const MaitreJeuTabs: React.FC = () => {
   const { 
     gameState,
-    changePhase
+    changePhase,
+    advanceTime
   } = useMaitreJeu();
   
   const { year, season, phase } = gameState;
@@ -28,10 +29,11 @@ export const MaitreJeuTabs: React.FC = () => {
         <h1 className="text-3xl font-bold">Console du Maître de Jeu</h1>
         
         <TimeManagement 
-          year={year}
-          season={season}
+          currentYear={year}
+          currentSeason={season}
           currentPhase={phase}
           onPhaseChange={handlePhaseChange}
+          onAdvance={advanceTime}
         />
       </div>
       

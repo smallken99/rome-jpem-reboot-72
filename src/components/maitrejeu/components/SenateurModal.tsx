@@ -1,351 +1,296 @@
 
 import React, { useState, useEffect } from 'react';
-import { 
-  Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription 
-} from '@/components/ui/dialog';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { SenateurJouable, FactionPolitique } from '../types/maitreJeuTypes';
-import { Slider } from '@/components/ui/slider';
+import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Button } from "@/components/ui/button";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Slider } from "@/components/ui/slider";
+import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { MagistratureType, SenateurJouable } from '../types/maitreJeuTypes';
 
-interface SenateurModalProps {
+export interface SenateurModalProps {
+  senateur: SenateurJouable;
   open: boolean;
-  onOpenChange: (open: boolean) => void;
-  senateur: SenateurJouable | null;
-  factions: FactionPolitique[];
+  onClose?: () => void;
   onSave: (senateur: SenateurJouable) => void;
 }
 
-export const SenateurModal: React.FC<SenateurModalProps> = ({
-  open,
-  onOpenChange,
-  senateur,
-  factions,
-  onSave
+export const SenateurModal: React.FC<SenateurModalProps> = ({ 
+  senateur, 
+  open, 
+  onClose = () => {}, 
+  onSave 
 }) => {
-  const [editedSenateur, setEditedSenateur] = useState<SenateurJouable | null>(null);
+  const [editedSenateur, setEditedSenateur] = useState<SenateurJouable>(senateur);
   
   useEffect(() => {
-    if (senateur) {
-      setEditedSenateur({ ...senateur });
-    }
+    setEditedSenateur(senateur);
   }, [senateur]);
   
-  if (!editedSenateur) return null;
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setEditedSenateur(prev => ({ ...prev, [name]: value }));
+  };
+  
+  const handleSelectChange = (name: keyof SenateurJouable, value: string) => {
+    setEditedSenateur(prev => ({ ...prev, [name]: value }));
+  };
+  
+  const handleStatsChange = (statName: string, value: number[]) => {
+    setEditedSenateur(prev => ({
+      ...prev,
+      stats: {
+        ...prev.stats,
+        [statName]: value[0]
+      }
+    }));
+  };
+  
+  const handleNumberChange = (name: keyof SenateurJouable, value: number) => {
+    setEditedSenateur(prev => ({ ...prev, [name]: value }));
+  };
   
   const handleSave = () => {
     onSave(editedSenateur);
-    onOpenChange(false);
+    onClose();
   };
-  
-  const handleInputChange = (field: keyof SenateurJouable, value: any) => {
-    setEditedSenateur({
-      ...editedSenateur,
-      [field]: value
-    });
-  };
-  
-  const handleCompetenceChange = (competence: string, value: number) => {
-    setEditedSenateur({
-      ...editedSenateur,
-      compétences: {
-        ...editedSenateur.compétences,
-        [competence]: value
-      }
-    });
-  };
-  
-  const handleRelationChange = (famille: string, value: number) => {
-    setEditedSenateur({
-      ...editedSenateur,
-      relations: {
-        ...editedSenateur.relations,
-        [famille]: value
-      }
-    });
-  };
-  
-  const fonctions = [
-    "Aucune fonction",
-    "Consul",
-    "Préteur",
-    "Édile",
-    "Questeur",
-    "Tribun de la plèbe",
-    "Censeur",
-    "Gouverneur",
-    "Légat",
-    "Pontife"
-  ];
   
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+    <Dialog open={open} onOpenChange={(isOpen) => !isOpen && onClose()}>
+      <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>Gestion du Sénateur: {editedSenateur.nom}</DialogTitle>
-          <DialogDescription>
-            Modifiez les détails, compétences et caractéristiques de ce sénateur
-          </DialogDescription>
+          <DialogTitle className="text-xl font-cinzel">Éditer le Sénateur</DialogTitle>
         </DialogHeader>
         
-        <Tabs defaultValue="details" className="w-full">
-          <TabsList className="grid grid-cols-3 mb-4">
-            <TabsTrigger value="details">Détails personnels</TabsTrigger>
-            <TabsTrigger value="competences">Compétences</TabsTrigger>
-            <TabsTrigger value="relations">Relations</TabsTrigger>
-          </TabsList>
-          
-          <TabsContent value="details" className="space-y-4">
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <label className="text-sm font-medium">Nom</label>
-                <Input 
+        <div className="grid gap-6 py-4">
+          <div className="flex items-center space-x-6">
+            <Avatar className="h-20 w-20">
+              <AvatarImage src={`/images/senateurs/${editedSenateur.id}.jpg`} alt={editedSenateur.nom} />
+              <AvatarFallback className="text-lg">{editedSenateur.nom.charAt(0)}</AvatarFallback>
+            </Avatar>
+            
+            <div>
+              <div className="mb-4">
+                <Label htmlFor="nom">Nom</Label>
+                <Input
+                  id="nom"
+                  name="nom"
                   value={editedSenateur.nom}
-                  onChange={(e) => handleInputChange('nom', e.target.value)}
+                  onChange={handleInputChange}
                 />
               </div>
               
-              <div className="space-y-2">
-                <label className="text-sm font-medium">Famille</label>
-                <Input 
+              <div className="mb-4">
+                <Label htmlFor="famille">Famille</Label>
+                <Input
+                  id="famille"
+                  name="famille"
                   value={editedSenateur.famille}
-                  onChange={(e) => handleInputChange('famille', e.target.value)}
+                  onChange={handleInputChange}
                 />
-              </div>
-              
-              <div className="space-y-2">
-                <label className="text-sm font-medium">Âge</label>
-                <Input 
-                  type="number"
-                  min="25"
-                  max="80"
-                  value={editedSenateur.âge}
-                  onChange={(e) => handleInputChange('âge', parseInt(e.target.value))}
-                />
-              </div>
-              
-              <div className="space-y-2">
-                <label className="text-sm font-medium">Statut</label>
-                <Select 
-                  value={editedSenateur.statut} 
-                  onValueChange={(value) => handleInputChange('statut', value as 'actif' | 'inactif' | 'décédé')}
-                >
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="actif">Actif</SelectItem>
-                    <SelectItem value="inactif">Inactif</SelectItem>
-                    <SelectItem value="décédé">Décédé</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              
-              <div className="space-y-2">
-                <label className="text-sm font-medium">Fonction actuelle</label>
-                <Select 
-                  value={editedSenateur.fonctionActuelle || "Aucune fonction"} 
-                  onValueChange={(value) => handleInputChange('fonctionActuelle', value === "Aucune fonction" ? null : value)}
-                >
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {fonctions.map(fonction => (
-                      <SelectItem key={fonction} value={fonction}>
-                        {fonction}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-              
-              <div className="space-y-2">
-                <label className="text-sm font-medium">Appartenance politique</label>
-                <Select 
-                  value={editedSenateur.appartenance || "Indépendant"} 
-                  onValueChange={(value) => handleInputChange('appartenance', value === "Indépendant" ? null : value)}
-                >
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="Indépendant">Indépendant</SelectItem>
-                    {factions.map(faction => (
-                      <SelectItem key={faction.id} value={faction.nom}>
-                        {faction.nom}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
               </div>
             </div>
-            
-            <div className="space-y-2">
-              <label className="text-sm font-medium">Ambition</label>
-              <Textarea 
-                value={editedSenateur.ambition}
-                onChange={(e) => handleInputChange('ambition', e.target.value)}
-                placeholder="Décrivez les ambitions de ce sénateur..."
+          </div>
+          
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <Label htmlFor="âge">Âge</Label>
+              <Input
+                id="âge"
+                name="âge"
+                type="number"
+                value={editedSenateur.âge || editedSenateur.age || 35}
+                onChange={(e) => handleNumberChange('âge', parseInt(e.target.value))}
               />
             </div>
             
-            <div className="space-y-4 pt-4">
-              <div className="space-y-2">
-                <div className="flex justify-between">
-                  <label className="text-sm font-medium">Popularité</label>
-                  <span className="text-sm">{editedSenateur.popularité}%</span>
-                </div>
-                <Slider 
-                  value={[editedSenateur.popularité]} 
-                  min={0} 
-                  max={100} 
-                  step={1}
-                  onValueChange={(values) => handleInputChange('popularité', values[0])}
-                />
-              </div>
-              
-              <div className="space-y-2">
-                <div className="flex justify-between">
-                  <label className="text-sm font-medium">Influence</label>
-                  <span className="text-sm">{editedSenateur.influence}%</span>
-                </div>
-                <Slider 
-                  value={[editedSenateur.influence]} 
-                  min={0} 
-                  max={100} 
-                  step={1}
-                  onValueChange={(values) => handleInputChange('influence', values[0])}
-                />
-              </div>
-              
-              <div className="space-y-2">
-                <div className="flex justify-between">
-                  <label className="text-sm font-medium">Richesse</label>
-                  <span className="text-sm">{editedSenateur.richesse}%</span>
-                </div>
-                <Slider 
-                  value={[editedSenateur.richesse]} 
-                  min={0} 
-                  max={100} 
-                  step={1}
-                  onValueChange={(values) => handleInputChange('richesse', values[0])}
-                />
-              </div>
+            <div>
+              <Label htmlFor="faction">Faction</Label>
+              <Select
+                value={editedSenateur.faction}
+                onValueChange={(value) => handleSelectChange('faction', value)}
+              >
+                <SelectTrigger id="faction">
+                  <SelectValue placeholder="Sélectionner une faction" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="Populares">Populares</SelectItem>
+                  <SelectItem value="Optimates">Optimates</SelectItem>
+                  <SelectItem value="Moderates">Moderates</SelectItem>
+                  <SelectItem value="Indépendant">Indépendant</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
-          </TabsContent>
+          </div>
           
-          <TabsContent value="competences" className="space-y-6">
-            {Object.entries(editedSenateur.compétences).map(([competence, value]) => (
-              <div key={competence} className="space-y-2">
-                <div className="flex justify-between">
-                  <label className="text-sm font-medium">{competence}</label>
-                  <span className="text-sm">{value} / 10</span>
-                </div>
-                <Slider 
-                  value={[value]} 
-                  min={1} 
-                  max={10} 
-                  step={1}
-                  onValueChange={(values) => handleCompetenceChange(competence, values[0])}
-                />
-              </div>
-            ))}
-            
-            <div className="pt-2 border-t">
-              <div className="flex items-center">
-                <Input
-                  placeholder="Ajouter une compétence..."
-                  className="flex-1"
-                  onKeyDown={(e) => {
-                    if (e.key === 'Enter' && e.currentTarget.value) {
-                      handleCompetenceChange(e.currentTarget.value, 1);
-                      e.currentTarget.value = '';
-                    }
-                  }}
-                />
-                <Button
-                  variant="outline"
-                  className="ml-2"
-                  onClick={() => {
-                    const input = document.querySelector('input[placeholder="Ajouter une compétence..."]') as HTMLInputElement;
-                    if (input && input.value) {
-                      handleCompetenceChange(input.value, 1);
-                      input.value = '';
-                    }
-                  }}
-                >
-                  Ajouter
-                </Button>
-              </div>
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <Label htmlFor="magistrature">Magistrature</Label>
+              <Select
+                value={editedSenateur.magistrature || ""}
+                onValueChange={(value) => handleSelectChange('magistrature', value as MagistratureType)}
+              >
+                <SelectTrigger id="magistrature">
+                  <SelectValue placeholder="Sélectionner une magistrature" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="">Aucune</SelectItem>
+                  <SelectItem value="CONSUL">Consul</SelectItem>
+                  <SelectItem value="PRETEUR">Préteur</SelectItem>
+                  <SelectItem value="EDILE">Édile</SelectItem>
+                  <SelectItem value="QUESTEUR">Questeur</SelectItem>
+                  <SelectItem value="CENSEUR">Censeur</SelectItem>
+                  <SelectItem value="TRIBUN">Tribun de la Plèbe</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
-          </TabsContent>
+            
+            <div>
+              <Label htmlFor="province">Province</Label>
+              <Select
+                value={editedSenateur.province || ""}
+                onValueChange={(value) => handleSelectChange('province', value)}
+              >
+                <SelectTrigger id="province">
+                  <SelectValue placeholder="Sélectionner une province" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="">Aucune</SelectItem>
+                  <SelectItem value="hispania">Hispanie</SelectItem>
+                  <SelectItem value="gallia">Gaule</SelectItem>
+                  <SelectItem value="sicilia">Sicile</SelectItem>
+                  <SelectItem value="sardinia">Sardaigne</SelectItem>
+                  <SelectItem value="macedonia">Macédoine</SelectItem>
+                  <SelectItem value="africa">Afrique</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
           
-          <TabsContent value="relations" className="space-y-6">
-            {Object.entries(editedSenateur.relations).map(([famille, value]) => (
-              <div key={famille} className="space-y-2">
-                <div className="flex justify-between">
-                  <label className="text-sm font-medium">{famille}</label>
-                  <span className="text-sm">{value > 0 ? '+' : ''}{value}</span>
-                </div>
-                <Slider 
-                  value={[value]} 
-                  min={-10} 
-                  max={10} 
-                  step={1}
-                  onValueChange={(values) => handleRelationChange(famille, values[0])}
-                />
-                <p className="text-xs text-muted-foreground">
-                  {value > 7 ? 'Alliance forte' 
-                    : value > 3 ? 'Amitié'
-                    : value > 0 ? 'Relation cordiale'
-                    : value > -4 ? 'Relation neutre'
-                    : value > -8 ? 'Rivalité'
-                    : 'Inimitié profonde'}
-                </p>
-              </div>
-            ))}
+          <div className="space-y-4">
+            <h3 className="font-semibold">Statistiques</h3>
             
-            <div className="pt-2 border-t">
-              <div className="flex items-center">
-                <Input
-                  placeholder="Ajouter une relation familiale..."
-                  className="flex-1"
-                  onKeyDown={(e) => {
-                    if (e.key === 'Enter' && e.currentTarget.value) {
-                      handleRelationChange(e.currentTarget.value, 0);
-                      e.currentTarget.value = '';
-                    }
-                  }}
-                />
-                <Button
-                  variant="outline"
-                  className="ml-2"
-                  onClick={() => {
-                    const input = document.querySelector('input[placeholder="Ajouter une relation familiale..."]') as HTMLInputElement;
-                    if (input && input.value) {
-                      handleRelationChange(input.value, 0);
-                      input.value = '';
-                    }
-                  }}
-                >
-                  Ajouter
-                </Button>
+            <div>
+              <div className="flex justify-between">
+                <Label htmlFor="eloquence">Éloquence</Label>
+                <span>{editedSenateur.stats.éloquence}</span>
               </div>
+              <Slider
+                id="eloquence"
+                defaultValue={[editedSenateur.stats.éloquence]}
+                max={10}
+                step={1}
+                onValueChange={(value) => handleStatsChange('éloquence', value)}
+              />
             </div>
-          </TabsContent>
-        </Tabs>
+            
+            <div>
+              <div className="flex justify-between">
+                <Label htmlFor="administration">Administration</Label>
+                <span>{editedSenateur.stats.administration}</span>
+              </div>
+              <Slider
+                id="administration"
+                defaultValue={[editedSenateur.stats.administration]}
+                max={10}
+                step={1}
+                onValueChange={(value) => handleStatsChange('administration', value)}
+              />
+            </div>
+            
+            <div>
+              <div className="flex justify-between">
+                <Label htmlFor="militaire">Militaire</Label>
+                <span>{editedSenateur.stats.militaire}</span>
+              </div>
+              <Slider
+                id="militaire"
+                defaultValue={[editedSenateur.stats.militaire]}
+                max={10}
+                step={1}
+                onValueChange={(value) => handleStatsChange('militaire', value)}
+              />
+            </div>
+            
+            <div>
+              <div className="flex justify-between">
+                <Label htmlFor="intrigue">Intrigue</Label>
+                <span>{editedSenateur.stats.intrigue}</span>
+              </div>
+              <Slider
+                id="intrigue"
+                defaultValue={[editedSenateur.stats.intrigue]}
+                max={10}
+                step={1}
+                onValueChange={(value) => handleStatsChange('intrigue', value)}
+              />
+            </div>
+            
+            <div>
+              <div className="flex justify-between">
+                <Label htmlFor="charisme">Charisme</Label>
+                <span>{editedSenateur.stats.charisme}</span>
+              </div>
+              <Slider
+                id="charisme"
+                defaultValue={[editedSenateur.stats.charisme]}
+                max={10}
+                step={1}
+                onValueChange={(value) => handleStatsChange('charisme', value)}
+              />
+            </div>
+          </div>
+          
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <div className="flex justify-between">
+                <Label htmlFor="influence">Influence</Label>
+                <span>{editedSenateur.influence}</span>
+              </div>
+              <Slider
+                id="influence"
+                defaultValue={[editedSenateur.influence]}
+                max={100}
+                step={1}
+                onValueChange={(value) => handleNumberChange('influence', value[0])}
+              />
+            </div>
+            
+            <div>
+              <div className="flex justify-between">
+                <Label htmlFor="richesse">Richesse</Label>
+                <span>{editedSenateur.richesse}</span>
+              </div>
+              <Slider
+                id="richesse"
+                defaultValue={[editedSenateur.richesse]}
+                max={10000}
+                step={100}
+                onValueChange={(value) => handleNumberChange('richesse', value[0])}
+              />
+            </div>
+          </div>
+          
+          <div>
+            <div className="flex justify-between">
+              <Label htmlFor="popularite">Popularité</Label>
+              <span>{editedSenateur.popularité}</span>
+            </div>
+            <Slider
+              id="popularite"
+              defaultValue={[editedSenateur.popularité]}
+              max={100}
+              step={1}
+              onValueChange={(value) => handleNumberChange('popularité', value[0])}
+            />
+          </div>
+        </div>
         
         <DialogFooter>
-          <Button variant="outline" onClick={() => onOpenChange(false)}>
-            Annuler
-          </Button>
-          <Button onClick={handleSave}>
-            Sauvegarder les modifications
-          </Button>
+          <Button variant="outline" onClick={onClose}>Annuler</Button>
+          <Button onClick={handleSave}>Sauvegarder</Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>
