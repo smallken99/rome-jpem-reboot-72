@@ -4,7 +4,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { PropertyManagementHeader } from './property-management/PropertyManagementHeader';
 import { MonetaryManagementTab } from './property-management/MonetaryManagementTab';
 import { RuralPropertiesTab } from './property-management/RuralPropertiesTab';
-import { UrbanPropertiesTab } from './property-management/UrbanPropertiesTab';
+import UrbanPropertiesTab from './property-management/UrbanPropertiesTab';
 import { ProfitabilityTab } from './property-management/profitability/ProfitabilityTab';
 import { SlaveManagementTab } from './property-management/SlaveManagementTab';
 import { MaintenanceTab } from './property-management/MaintenanceTab';

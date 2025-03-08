@@ -1,58 +1,72 @@
 
 import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { children, educationPaths } from '../data';
-import { Child, EducationPath } from '../types/educationTypes';
+import { Child } from '../types/educationTypes';
+// Import preceptors but access children differently - this might need to be adjusted based on actual data structure
+import { preceptors } from '../data';
 
-export const useChildEducation = (childId: string | undefined) => {
-  const navigate = useNavigate();
-  const [child, setChild] = useState<Child | null>(null);
-  const [availablePaths, setAvailablePaths] = useState<EducationPath[]>([]);
-  const [selectedEducationType, setSelectedEducationType] = useState<string>('');
-  
-  // Chercher les données de l'enfant
-  useEffect(() => {
-    if (childId) {
-      const foundChild = children.find(c => c.id === childId);
-      if (foundChild) {
-        setChild(foundChild);
-        setSelectedEducationType(foundChild.currentEducation.type);
-        
-        // Filtrer les parcours éducatifs disponibles en fonction du genre et de l'âge
-        const filteredPaths = educationPaths.filter(path => {
-          const genderMatch = path.suitableFor === 'both' || 
-                             (path.suitableFor === 'male' && foundChild.gender === 'male') ||
-                             (path.suitableFor === 'female' && foundChild.gender === 'female');
-          const ageMatch = foundChild.age >= path.minAge;
-          return genderMatch && ageMatch;
-        });
-        
-        setAvailablePaths(filteredPaths);
-      }
+// Mock children data - replace with actual implementation if there's a real source
+const mockChildren: Child[] = [
+  {
+    id: "1",
+    name: "Marcus",
+    age: 10,
+    gender: "male",
+    currentEducation: {
+      type: "military",
+      mentor: null,
+      skills: [],
+      progress: 0
     }
-  }, [childId]);
+  },
+  {
+    id: "2",
+    name: "Livia",
+    age: 8,
+    gender: "female",
+    currentEducation: {
+      type: "religious",
+      mentor: null,
+      skills: [],
+      progress: 0
+    }
+  }
+];
+
+export const useChildEducation = () => {
+  const [children, setChildren] = useState<Child[]>(mockChildren);
+  const [selectedChildId, setSelectedChildId] = useState<string | null>(null);
   
-  // Gestionnaire pour le changement du type d'éducation
-  const handleEducationTypeChange = (type: string) => {
-    setSelectedEducationType(type);
-  };
+  const selectedChild = selectedChildId ? 
+    children.find(child => child.id === selectedChildId) || null : null;
   
-  // Gestionnaire pour la soumission du formulaire
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    // Ici, nous simulons la mise à jour des données de l'enfant
-    // Dans une application réelle, vous feriez un appel à l'API
-    
-    // Rediriger vers la page d'éducation principale
-    navigate('/famille/education');
+  const updateChildEducation = (
+    childId: string, 
+    educationType: string, 
+    mentor: string | null = null,
+    specialties: string[] = []
+  ) => {
+    setChildren(prevChildren => 
+      prevChildren.map(child => 
+        child.id === childId 
+          ? {
+              ...child,
+              currentEducation: {
+                ...child.currentEducation,
+                type: educationType,
+                mentor,
+                skills: specialties
+              }
+            }
+          : child
+      )
+    );
   };
   
   return {
-    child,
-    availablePaths,
-    selectedEducationType,
-    handleEducationTypeChange,
-    handleSubmit,
-    isInvalidEducation: child?.gender === 'female' && selectedEducationType === 'military'
+    children,
+    selectedChild,
+    selectedChildId,
+    setSelectedChildId,
+    updateChildEducation
   };
 };
