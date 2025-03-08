@@ -1,8 +1,9 @@
 
+// Mise à jour des imports pour PartisGraph
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { PieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip } from 'recharts';
-import { PartisGraphProps } from '../types/maitreJeuTypes';
+import { PartisGraphProps } from '../types/equilibre';
 
 export const PartisGraph: React.FC<PartisGraphProps> = ({ populaires, optimates, moderates, factions }) => {
   // Si on a reçu factions directement, utiliser ces données

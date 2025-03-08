@@ -1,9 +1,10 @@
 
+// Mise à jour des imports pour la gestion du temps
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { seasonToFrench } from '@/utils/formatUtils';
-import { GamePhase, Season, TimeManagementProps } from '../types/maitreJeuTypes';
+import { GamePhase, TimeManagementProps } from '../types/timeManagement';
 
 export const TimeManagement: React.FC<TimeManagementProps> = ({ 
   currentYear, 

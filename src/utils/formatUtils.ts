@@ -1,5 +1,5 @@
 
-import { Season } from "@/components/maitrejeu/types/maitreJeuTypes";
+import { Season } from "@/components/maitrejeu/types/common";
 
 // Fonction pour convertir une saison en nom français
 export const seasonToFrench = (season: Season): string => {

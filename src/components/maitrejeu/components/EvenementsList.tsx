@@ -1,35 +1,35 @@
-
 import React, { useState } from 'react';
-import { Evenement, EvenementType } from '../types/maitreJeuTypes';
-import { Card, CardContent } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { AlertTriangle, Calendar, ArrowDown, Info, Check } from 'lucide-react';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { AlertCircle, AlertTriangle, FileText, Filter } from "lucide-react";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { formatDate } from '@/utils/formatUtils';
+import { Evenement, EvenementAction, EvenementType, EvenementsListProps } from '../types/evenements';
 
 interface EvenementsListProps {
   evenements: Evenement[];
   onResolve: (id: string, optionId: string) => void;
+  filteredType?: string;
 }
 
 export const EvenementsList: React.FC<EvenementsListProps> = ({ 
   evenements, 
-  onResolve 
+  onResolve,
+  filteredType = 'ALL' 
 }) => {
   const [detailsOpen, setDetailsOpen] = useState<string | null>(null);
   const [filter, setFilter] = useState<EvenementType | null>(null);
   
-  // Obtenez les événements filtrés et triés par importance et non résolus en premier
   const filteredEvents = evenements
     .filter(evt => !filter || evt.type === filter)
     .sort((a, b) => {
-      // Les non résolus d'abord
       if (a.resolved !== b.resolved) {
         return a.resolved ? 1 : -1;
       }
       
-      // Ensuite par importance
       if (a.importance !== b.importance) {
         if (a.importance === 'majeure') return -1;
         if (b.importance === 'majeure') return 1;
@@ -37,7 +37,6 @@ export const EvenementsList: React.FC<EvenementsListProps> = ({
         if (b.importance === 'normale') return 1;
       }
       
-      // Enfin par date (les plus récents d'abord)
       return b.date.year - a.date.year;
     });
   
