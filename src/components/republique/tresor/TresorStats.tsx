@@ -1,75 +1,111 @@
 
 import React from 'react';
-import { StatBox } from '@/components/ui-custom/StatBox';
-import { Coins, Building, Swords, Ship, LandPlot } from 'lucide-react';
+import { ArrowUpRight, ArrowDownRight, Coins, TrendingUp, ShieldCheck, Scale } from 'lucide-react';
 import { useEconomy } from '@/hooks/useEconomy';
 
 export const TresorStats: React.FC = () => {
+  // Pour l'instant, nous utilisons des données fictives
+  // Dans une implémentation réelle, ces données viendraient d'une API ou d'un hook
+  const totalTreasury = 15785000;
+  const annualRevenue = 3250000;
+  const annualExpenses = 2780000;
+  const monthlyBalance = 39000;
+  const reserves = 4500000;
+  const taxCollection = 87;
+
   const economy = useEconomy();
   
-  // Récupérer les totaux par catégorie
-  const incomeTotals = economy.getCategoryTotals('income');
-  const expenseTotals = economy.getCategoryTotals('expense');
-  
-  // Calculer les valeurs pour chaque section
-  const getTotalForCategory = (category: string, type: 'income' | 'expense') => {
-    const totals = type === 'income' ? incomeTotals : expenseTotals;
-    const found = totals.find(t => t.category === category);
-    return found?.total || 0;
-  };
-  
-  // Utiliser des valeurs calculées ou des exemples si les catégories n'existent pas encore
-  const totalTaxes = getTotalForCategory('Tributum', 'income') || 1250000;
-  const travauxPublics = getTotalForCategory('Travaux Publics', 'expense') || 850000;
-  const armeeDepenses = getTotalForCategory('Armée', 'expense') || 1200000;
-  const commerceRevenu = getTotalForCategory('Commerce', 'income') || 980000;
-  
   return (
-    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
-      <StatBox 
-        title="Solde"
-        value={`${economy.balance.toLocaleString()} As`}
-        icon={<Coins className="w-5 h-5" />}
-        trend={economy.balance > 3000000 ? "up" : "down"}
-        trendValue={economy.balance > 3000000 ? "+2.4%" : "-1.2%"}
-        description="Balance actuelle"
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+      <StatCard 
+        title="Trésor Total" 
+        value={`${(totalTreasury / 1000000).toFixed(2)}M As`}
+        icon={<Coins className="h-5 w-5 text-rome-gold" />}
+        description="Fonds disponibles dans le Trésor"
+        color="bg-rome-gold/10"
       />
       
-      <StatBox 
-        title="Impôts directs"
-        value={`${totalTaxes.toLocaleString()} As`}
-        icon={<LandPlot className="w-5 h-5" />}
-        trend="up"
-        trendValue="+1.1%"
-        description="Tributum"
+      <StatCard 
+        title="Revenus Annuels" 
+        value={`${(annualRevenue / 1000000).toFixed(2)}M As`}
+        change={+9.4}
+        icon={<ArrowUpRight className="h-5 w-5 text-green-600" />}
+        description="Croissance par rapport à l'année précédente"
+        color="bg-green-50"
       />
       
-      <StatBox 
-        title="Travaux publics"
-        value={`${travauxPublics.toLocaleString()} As`}
-        icon={<Building className="w-5 h-5" />}
-        trend="down"
-        trendValue="-5.2%"
-        description="Dépenses"
+      <StatCard 
+        title="Dépenses Annuelles" 
+        value={`${(annualExpenses / 1000000).toFixed(2)}M As`}
+        change={+5.2}
+        icon={<ArrowDownRight className="h-5 w-5 text-amber-600" />}
+        description="Augmentation par rapport à l'année précédente"
+        color="bg-amber-50"
       />
       
-      <StatBox 
-        title="Armée"
-        value={`${armeeDepenses.toLocaleString()} As`}
-        icon={<Swords className="w-5 h-5" />}
-        trend="up"
-        trendValue="+12.3%"
-        description="Dépenses"
+      <StatCard 
+        title="Balance Mensuelle" 
+        value={`+${monthlyBalance.toLocaleString()} As`}
+        icon={<TrendingUp className="h-5 w-5 text-green-600" />}
+        description="Excédent moyen mensuel"
+        color="bg-green-50"
       />
       
-      <StatBox 
-        title="Commerce"
-        value={`${commerceRevenu.toLocaleString()} As`}
-        icon={<Ship className="w-5 h-5" />}
-        trend="up"
-        trendValue="+8.7%"
-        description="Portorium"
+      <StatCard 
+        title="Réserves Stratégiques" 
+        value={`${(reserves / 1000000).toFixed(2)}M As`}
+        icon={<ShieldCheck className="h-5 w-5 text-rome-navy" />}
+        description="Fonds réservés aux urgences"
+        color="bg-rome-navy/10"
       />
+      
+      <StatCard 
+        title="Efficacité de Collecte" 
+        value={`${taxCollection}%`}
+        icon={<Scale className="h-5 w-5 text-rome-terracotta" />}
+        description="Taux de recouvrement des impôts"
+        color="bg-rome-terracotta/10"
+      />
+    </div>
+  );
+};
+
+interface StatCardProps {
+  title: string;
+  value: string;
+  change?: number;
+  icon: React.ReactNode;
+  description: string;
+  color: string;
+}
+
+const StatCard: React.FC<StatCardProps> = ({ 
+  title, 
+  value, 
+  change, 
+  icon, 
+  description,
+  color
+}) => {
+  return (
+    <div className={`p-4 rounded-md border border-rome-gold/30 ${color} shadow-sm hover:shadow-md transition-all duration-300`}>
+      <div className="flex justify-between">
+        <div>
+          <p className="text-sm font-medium text-muted-foreground">{title}</p>
+          <div className="flex items-center gap-1 mt-1">
+            <p className="text-2xl font-cinzel font-semibold">{value}</p>
+            {change !== undefined && (
+              <span className={`text-xs px-1.5 py-0.5 rounded-full ${change > 0 ? 'text-green-600 bg-green-100' : 'text-red-600 bg-red-100'}`}>
+                {change > 0 ? '+' : ''}{change}%
+              </span>
+            )}
+          </div>
+        </div>
+        <div className="p-2 rounded-full bg-white/70 backdrop-blur-sm shadow-sm">
+          {icon}
+        </div>
+      </div>
+      <p className="text-xs text-muted-foreground mt-2">{description}</p>
     </div>
   );
 };
