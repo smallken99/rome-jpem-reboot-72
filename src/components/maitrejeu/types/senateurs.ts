@@ -1,7 +1,6 @@
 
 import { GameDate } from './common';
 
-// Types pour les sénateurs
 export interface SenateurJouable {
   id: string;
   nom: string;
@@ -10,71 +9,28 @@ export interface SenateurJouable {
   popularite: number;
   richesse: number;
   influence: number;
-  fonction?: string;
-  appartenance?: string;
+  fonction: string;
+  appartenance: string;
   status: string;
-  magistrature?: string;
+  magistrature: string;
   playerId: string | null;
+  // Propriétés de compatibilité
+  âge?: number;
+  popularité?: number;
+  fonctionActuelle?: string;
+  statut?: string;
+  stats?: Record<string, number>;
 }
 
-export interface SenateurNonJouable {
-  id: string;
-  nom: string;
-  famille: string;
-  age: number;
-  faction: string;
-  statut: string;
+export interface SenateurCardProps {
+  senateur: SenateurJouable;
+  onSelect?: (id: string) => void;
+  selected?: boolean;
 }
 
-export interface SenateurHistorique {
-  id: string;
-  nom: string;
-  dates: {
-    naissance?: GameDate;
-    mort?: GameDate;
-  };
-  accomplissements: string[];
-  famille: string;
-}
-
-export interface FactionPolitique {
-  id: string;
-  nom: string;
-  leader: string;
-  membres: string[];
-  influence: number;
-  idéologie: string;
-  alliés: string[];
-  rivaux: string[];
-}
-
-// Interfaces pour les assignations spéciales
-export interface AssignationPolitique {
-  id: string;
-  senateurId: string;
-  poste: string;
-  début: GameDate;
-  fin?: GameDate;
-  description: string;
-}
-
-export interface AssignationMilitaire {
-  id: string;
-  senateurId: string;
-  province: string;
-  armée: string;
-  début: GameDate;
-  fin?: GameDate;
-  succès: boolean[];
-}
-
-// Interfaces pour les composants de l'UI
-export interface SenateurListProps {
-  senateurs: SenateurJouable[];
-  onViewSenateur: (id: string) => void;
-}
-
-export interface AssignmentTableProps {
-  senateurs: SenateurJouable[];
-  onAssign: (senateurId: string, playerId: string) => void;
+export interface SenateurModalProps {
+  isOpen: boolean;
+  senateur: SenateurJouable | null;
+  onClose: () => void;
+  onUpdate: (senateur: SenateurJouable) => void;
 }

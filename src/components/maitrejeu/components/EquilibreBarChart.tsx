@@ -1,51 +1,63 @@
 
 import React from 'react';
-import { Bar } from '@nivo/bar';
+import { ResponsiveBar } from '@nivo/bar';
 import { Equilibre } from '../types/equilibre';
 
-interface EquilibreChartProps {
+interface EquilibreBarChartProps {
   equilibre: Equilibre;
 }
 
-export const EquilibreBarChart: React.FC<EquilibreChartProps> = ({ equilibre }) => {
-  const chartData = [
-    {
-      name: 'Population',
-      value: equilibre.population
-    },
-    {
-      name: 'Armée',
-      value: equilibre.armée
-    },
-    {
-      name: 'Morale',
-      value: equilibre.morale
-    },
-    {
-      name: 'Loyauté',
-      value: equilibre.loyauté
-    }
+export const EquilibreBarChart: React.FC<EquilibreBarChartProps> = ({ equilibre }) => {
+  const data = [
+    { name: 'Population', value: equilibre.population },
+    { name: 'Armée', value: equilibre.armée },
+    { name: 'Économie', value: equilibre.économie },
+    { name: 'Morale', value: equilibre.morale },
+    { name: 'Loyauté', value: equilibre.loyauté },
+    { name: 'Patriciens', value: equilibre.patriciens },
+    { name: 'Plébéiens', value: equilibre.plébéiens || equilibre.plebeiens || 0 },
   ];
-  
+
   return (
-    <div className="h-80 mt-6">
-      <Bar
-        data={chartData}
+    <div style={{ height: 300 }}>
+      <ResponsiveBar
+        data={data}
         keys={['value']}
         indexBy="name"
-        margin={{ top: 10, right: 30, bottom: 50, left: 60 }}
+        margin={{ top: 20, right: 20, bottom: 40, left: 40 }}
         padding={0.3}
         valueScale={{ type: 'linear' }}
         indexScale={{ type: 'band', round: true }}
         colors={{ scheme: 'nivo' }}
+        defs={[
+          {
+            id: 'dots',
+            type: 'patternDots',
+            background: 'inherit',
+            color: '#38bcb2',
+            size: 4,
+            padding: 1,
+            stagger: true
+          },
+          {
+            id: 'lines',
+            type: 'patternLines',
+            background: 'inherit',
+            color: '#eed312',
+            rotation: -45,
+            lineWidth: 6,
+            spacing: 10
+          }
+        ]}
+        fill={[{ match: { id: 'value' }, id: 'dots' }]}
         borderColor={{ from: 'color', modifiers: [['darker', 1.6]] }}
         axisTop={null}
         axisRight={null}
         axisBottom={{
           tickSize: 5,
           tickPadding: 5,
-          tickRotation: 0,
-          legend: 'Domaine',
+          tickRotation: -45,
+          legend: 'Catégorie',
           legendPosition: 'middle',
           legendOffset: 32
         }}
@@ -53,39 +65,18 @@ export const EquilibreBarChart: React.FC<EquilibreChartProps> = ({ equilibre }) 
           tickSize: 5,
           tickPadding: 5,
           tickRotation: 0,
-          legend: 'Niveau',
+          legend: 'Valeur',
           legendPosition: 'middle',
           legendOffset: -40
         }}
         labelSkipWidth={12}
         labelSkipHeight={12}
         labelTextColor={{ from: 'color', modifiers: [['darker', 1.6]] }}
-        legends={[
-          {
-            dataFrom: 'keys',
-            anchor: 'bottom-right',
-            direction: 'column',
-            justify: false,
-            translateX: 120,
-            translateY: 0,
-            itemsSpacing: 2,
-            itemWidth: 100,
-            itemHeight: 20,
-            itemDirection: 'left-to-right',
-            itemOpacity: 0.85,
-            symbolSize: 20,
-            effects: [
-              {
-                on: 'hover',
-                style: {
-                  itemOpacity: 1
-                }
-              }
-            ]
-          }
-        ]}
+        animate={true}
+        motionStiffness={90}
+        motionDamping={15}
         role="application"
-        ariaLabel="État de la République"
+        ariaLabel="Équilibre de la République"
       />
     </div>
   );

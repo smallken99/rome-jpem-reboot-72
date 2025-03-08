@@ -1,193 +1,238 @@
 
 import React, { useState, useEffect } from 'react';
-import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { SenateurJouable } from '../types/senateurs';
-import { MagistratureType } from '../types/magistratures';
-
-interface SenateurModalProps {
-  senateur: SenateurJouable;
-  open: boolean;
-  onClose: () => void;
-  onSave: (updatedSenateur: SenateurJouable) => void;
-}
+import { SenateurJouable, SenateurModalProps } from '../types/senateurs';
 
 export const SenateurModal: React.FC<SenateurModalProps> = ({ 
+  isOpen, 
   senateur, 
-  open, 
-  onClose = () => {}, 
-  onSave 
+  onClose, 
+  onUpdate 
 }) => {
-  const [editedSenateur, setEditedSenateur] = useState<SenateurJouable>(senateur);
+  const [editedSenateur, setEditedSenateur] = useState<SenateurJouable | null>(null);
   
   useEffect(() => {
-    setEditedSenateur(senateur);
+    if (senateur) {
+      setEditedSenateur({...senateur});
+    }
   }, [senateur]);
-
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    const { name, value } = e.target;
-    setEditedSenateur(prev => ({ ...prev, [name]: value }));
-  };
   
-  const handleNumberChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
-    setEditedSenateur(prev => ({ ...prev, [name]: parseInt(value) }));
-  };
-  
-  const handleSelectChange = (field: keyof SenateurJouable, value: string) => {
-    setEditedSenateur(prev => ({ ...prev, [field]: value }));
+  const handleChange = (field: keyof SenateurJouable, value: any) => {
+    if (!editedSenateur) return;
+    
+    setEditedSenateur(prev => {
+      if (!prev) return prev;
+      
+      // Pour les champs numériques
+      if (['age', 'popularite', 'richesse', 'influence'].includes(field as string)) {
+        return {
+          ...prev,
+          [field]: Number(value)
+        };
+      }
+      
+      return {
+        ...prev,
+        [field]: value
+      };
+    });
   };
   
   const handleSave = () => {
-    onSave(editedSenateur);
-    onClose();
+    if (editedSenateur) {
+      onUpdate(editedSenateur);
+      onClose();
+    }
   };
-
+  
+  if (!senateur || !editedSenateur) return null;
+  
   return (
-    <Dialog open={open} onOpenChange={isOpen => !isOpen && onClose()}>
-      <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
+    <Dialog open={isOpen} onOpenChange={onClose}>
+      <DialogContent className="sm:max-w-[500px]">
         <DialogHeader>
-          <DialogTitle className="text-xl">Détails du Sénateur</DialogTitle>
+          <DialogTitle>Modifier le Sénateur</DialogTitle>
+          <DialogDescription>
+            Modifiez les informations du sénateur {senateur.nom}.
+          </DialogDescription>
         </DialogHeader>
         
         <div className="grid gap-4 py-4">
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <Label htmlFor="nom">Nom</Label>
-              <Input 
-                id="nom" 
-                name="nom" 
-                value={editedSenateur.nom} 
-                onChange={handleInputChange} 
-              />
-            </div>
-            
-            <div>
-              <Label htmlFor="famille">Famille</Label>
-              <Input 
-                id="famille" 
-                name="famille" 
-                value={editedSenateur.famille} 
-                onChange={handleInputChange} 
-              />
-            </div>
-          </div>
-          
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <Label htmlFor="age">Âge</Label>
-              <Input 
-                id="age" 
-                name="age" 
-                type="number" 
-                value={editedSenateur.age} 
-                onChange={handleNumberChange} 
-              />
-            </div>
-            
-            <div>
-              <Label htmlFor="popularite">Popularité</Label>
-              <Input 
-                id="popularite" 
-                name="popularite" 
-                type="number" 
-                value={editedSenateur.popularite} 
-                onChange={handleNumberChange} 
-              />
-            </div>
-          </div>
-          
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <Label htmlFor="richesse">Richesse</Label>
-              <Input 
-                id="richesse" 
-                name="richesse" 
-                type="number" 
-                value={editedSenateur.richesse} 
-                onChange={handleNumberChange} 
-              />
-            </div>
-            
-            <div>
-              <Label htmlFor="influence">Influence</Label>
-              <Input 
-                id="influence" 
-                name="influence" 
-                type="number" 
-                value={editedSenateur.influence} 
-                onChange={handleNumberChange} 
-              />
-            </div>
-          </div>
-          
-          <div>
-            <Label htmlFor="fonction">Fonction Actuelle</Label>
-            <Input 
-              id="fonction" 
-              name="fonction" 
-              value={editedSenateur.fonction || ''} 
-              onChange={handleInputChange} 
+          <div className="grid grid-cols-4 items-center gap-4">
+            <Label htmlFor="nom" className="text-right">
+              Nom
+            </Label>
+            <Input
+              id="nom"
+              value={editedSenateur.nom}
+              onChange={(e) => handleChange('nom', e.target.value)}
+              className="col-span-3"
             />
           </div>
           
-          <div>
-            <Label htmlFor="appartenance">Appartenance</Label>
-            <Input 
-              id="appartenance" 
-              name="appartenance" 
-              value={editedSenateur.appartenance || ''} 
-              onChange={handleInputChange} 
+          <div className="grid grid-cols-4 items-center gap-4">
+            <Label htmlFor="famille" className="text-right">
+              Famille
+            </Label>
+            <Input
+              id="famille"
+              value={editedSenateur.famille}
+              onChange={(e) => handleChange('famille', e.target.value)}
+              className="col-span-3"
             />
           </div>
           
-          <div>
-            <Label htmlFor="status">Statut</Label>
-            <Select 
-              value={editedSenateur.status || ''} 
-              onValueChange={(value) => handleSelectChange('status' as keyof SenateurJouable, value)}
+          <div className="grid grid-cols-4 items-center gap-4">
+            <Label htmlFor="age" className="text-right">
+              Âge
+            </Label>
+            <Input
+              id="age"
+              type="number"
+              value={editedSenateur.âge || editedSenateur.age}
+              onChange={(e) => handleChange('age', e.target.value)}
+              className="col-span-3"
+            />
+          </div>
+          
+          <div className="grid grid-cols-4 items-center gap-4">
+            <Label htmlFor="popularite" className="text-right">
+              Popularité
+            </Label>
+            <Input
+              id="popularite"
+              type="number"
+              value={editedSenateur.popularité || editedSenateur.popularite}
+              onChange={(e) => handleChange('popularite', e.target.value)}
+              className="col-span-3"
+            />
+          </div>
+          
+          <div className="grid grid-cols-4 items-center gap-4">
+            <Label htmlFor="richesse" className="text-right">
+              Richesse
+            </Label>
+            <Input
+              id="richesse"
+              type="number"
+              value={editedSenateur.richesse}
+              onChange={(e) => handleChange('richesse', e.target.value)}
+              className="col-span-3"
+            />
+          </div>
+          
+          <div className="grid grid-cols-4 items-center gap-4">
+            <Label htmlFor="influence" className="text-right">
+              Influence
+            </Label>
+            <Input
+              id="influence"
+              type="number"
+              value={editedSenateur.influence}
+              onChange={(e) => handleChange('influence', e.target.value)}
+              className="col-span-3"
+            />
+          </div>
+          
+          <div className="grid grid-cols-4 items-center gap-4">
+            <Label htmlFor="fonction" className="text-right">
+              Fonction
+            </Label>
+            <Input
+              id="fonction"
+              value={editedSenateur.fonctionActuelle || editedSenateur.fonction}
+              onChange={(e) => handleChange('fonction', e.target.value)}
+              className="col-span-3"
+            />
+          </div>
+          
+          <div className="grid grid-cols-4 items-center gap-4">
+            <Label htmlFor="appartenance" className="text-right">
+              Appartenance
+            </Label>
+            <Select
+              value={editedSenateur.appartenance}
+              onValueChange={(value) => handleChange('appartenance', value)}
             >
-              <SelectTrigger id="status">
-                <SelectValue placeholder="Sélectionner un statut" />
+              <SelectTrigger className="col-span-3">
+                <SelectValue placeholder="Sélectionner un parti" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="actif">Actif</SelectItem>
-                <SelectItem value="retraité">Retraité</SelectItem>
-                <SelectItem value="exilé">Exilé</SelectItem>
-                <SelectItem value="décédé">Décédé</SelectItem>
+                <SelectItem value="Populares">Populares</SelectItem>
+                <SelectItem value="Optimates">Optimates</SelectItem>
+                <SelectItem value="Neutre">Neutre</SelectItem>
               </SelectContent>
             </Select>
           </div>
           
-          <div>
-            <Label htmlFor="magistrature">Magistrature</Label>
-            <Select 
-              value={editedSenateur.magistrature || ''} 
-              onValueChange={(value) => handleSelectChange('magistrature' as keyof SenateurJouable, value)}
+          <div className="grid grid-cols-4 items-center gap-4">
+            <Label htmlFor="statut" className="text-right">
+              Statut
+            </Label>
+            <Select
+              value={editedSenateur.statut || editedSenateur.status}
+              onValueChange={(value) => handleChange('status', value)}
             >
-              <SelectTrigger id="magistrature">
+              <SelectTrigger className="col-span-3">
+                <SelectValue placeholder="Sélectionner un statut" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="actif">Actif</SelectItem>
+                <SelectItem value="décédé">Décédé</SelectItem>
+                <SelectItem value="retraité">Retraité</SelectItem>
+                <SelectItem value="exilé">Exilé</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+          
+          <div className="grid grid-cols-4 items-center gap-4">
+            <Label htmlFor="magistrature" className="text-right">
+              Magistrature
+            </Label>
+            <Select
+              value={editedSenateur.magistrature}
+              onValueChange={(value) => handleChange('magistrature', value)}
+            >
+              <SelectTrigger className="col-span-3">
                 <SelectValue placeholder="Sélectionner une magistrature" />
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="CONSUL">Consul</SelectItem>
                 <SelectItem value="PRETEUR">Préteur</SelectItem>
-                <SelectItem value="PRÉTEUR">Préteur (Ancien)</SelectItem>
                 <SelectItem value="EDILE">Édile</SelectItem>
                 <SelectItem value="QUESTEUR">Questeur</SelectItem>
                 <SelectItem value="CENSEUR">Censeur</SelectItem>
                 <SelectItem value="TRIBUN">Tribun</SelectItem>
-                <SelectItem value="PONTIFEX_MAXIMUS">Pontifex Maximus</SelectItem>
+                <SelectItem value="AUCUNE">Aucune</SelectItem>
               </SelectContent>
             </Select>
+          </div>
+          
+          <div className="grid grid-cols-4 items-center gap-4">
+            <Label htmlFor="playerId" className="text-right">
+              ID Joueur
+            </Label>
+            <Input
+              id="playerId"
+              value={editedSenateur.playerId || ''}
+              onChange={(e) => handleChange('playerId', e.target.value || null)}
+              className="col-span-3"
+              placeholder="Laisser vide si non assigné"
+            />
           </div>
         </div>
         
         <DialogFooter>
-          <Button variant="outline" onClick={onClose}>Annuler</Button>
-          <Button onClick={handleSave}>Sauvegarder</Button>
+          <Button variant="outline" onClick={onClose}>
+            Annuler
+          </Button>
+          <Button onClick={handleSave}>
+            Enregistrer
+          </Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>

@@ -7,6 +7,9 @@ export interface EvenementAction {
   id: string;
   texte: string;
   effets: Record<string, number>;
+  // Propriétés de compatibilité avec l'ancien système
+  label?: string;
+  consequence?: string;
 }
 
 export interface Evenement {
@@ -19,6 +22,11 @@ export interface Evenement {
   options: EvenementAction[];
   resolved: boolean;
   selectedOption?: string;
+}
+
+export interface EvenementFormProps {
+  isOpen: boolean;
+  onClose: () => void;
 }
 
 export interface PoliticalEvent {

@@ -1,19 +1,16 @@
 
-import { Season } from './common';
-import { MagistratureType } from './magistratures';
-import { SenateurJouable } from './senateurs';
+import { GameDate } from './common';
 
 export interface Election {
   id: string;
-  année: number;
-  saison: Season;
-  magistrature: MagistratureType;
-  candidats: SenateurJouable[];
-  élu: SenateurJouable | null;
-  terminée: boolean;
-}
-
-export interface ElectionPlannerProps {
-  senateurs: SenateurJouable[];
-  onScheduleElection: (magistrature: MagistratureType, year: number, season: Season) => void;
+  magistrature: string;
+  annee: number;
+  saison: string;
+  candidats: string[];
+  results: Record<string, number> | null;
+  status: 'planifiée' | 'en cours' | 'terminée';
+  // Propriétés de compatibilité
+  year?: number;
+  season?: string;
+  candidates?: string[];
 }

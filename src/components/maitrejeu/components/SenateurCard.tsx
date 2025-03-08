@@ -1,62 +1,71 @@
 
 import React from 'react';
-import { Card, CardContent, CardFooter, CardHeader } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Eye } from 'lucide-react';
+import { User } from 'lucide-react';
 import { SenateurJouable, SenateurCardProps } from '../types/senateurs';
 
-const SenateurCard: React.FC<SenateurCardProps> = ({ senateur, onViewSenateur }) => {
+export const SenateurCard: React.FC<SenateurCardProps> = ({ 
+  senateur, 
+  onSelect,
+  selected = false
+}) => {
   return (
-    <Card className="overflow-hidden">
-      <CardHeader className="bg-slate-50 pb-2">
-        <div className="flex justify-between items-start">
-          <div>
-            <h3 className="font-semibold text-lg">{senateur.nom}</h3>
-            <p className="text-sm text-muted-foreground">{senateur.famille}</p>
-          </div>
-          {senateur.stats && (
-            <Badge variant={senateur.stats.eloquence > 3 ? "default" : "outline"} className="ml-2">
-              Éloquence: {senateur.stats.eloquence}
-            </Badge>
-          )}
+    <Card 
+      className={`cursor-pointer hover:shadow-md transition-all ${selected ? 'ring-2 ring-primary' : ''}`}
+      onClick={() => onSelect && onSelect(senateur.id)}
+    >
+      <CardHeader className="pb-2 flex flex-row items-center justify-between space-y-0">
+        <div className="flex flex-col">
+          <h3 className="font-semibold">{senateur.nom}</h3>
+          <p className="text-sm text-muted-foreground">{senateur.famille}</p>
+        </div>
+        <div className="h-8 w-8 rounded-full bg-muted flex items-center justify-center">
+          <User className="h-4 w-4" />
         </div>
       </CardHeader>
-      <CardContent className="pt-4">
+      <CardContent>
         <div className="space-y-2">
-          {senateur.faction && (
-            <div className="flex justify-between text-sm">
-              <span className="text-muted-foreground">Faction:</span>
-              <span>{senateur.faction}</span>
+          <div className="flex justify-between">
+            <span className="text-sm">Âge:</span>
+            <span className="text-sm font-medium">{senateur.âge || senateur.age}</span>
+          </div>
+          
+          <div className="flex justify-between">
+            <span className="text-sm">Popularité:</span>
+            <span className="text-sm font-medium">{senateur.popularité || senateur.popularite}</span>
+          </div>
+          
+          <div className="flex justify-between">
+            <span className="text-sm">Fonction:</span>
+            <Badge variant="outline">{senateur.fonctionActuelle || senateur.fonction}</Badge>
+          </div>
+          
+          <div className="flex justify-between">
+            <span className="text-sm">Parti:</span>
+            <Badge 
+              variant="secondary"
+              className={senateur.appartenance === 'Populares' ? 'bg-red-100 text-red-800' : 'bg-blue-100 text-blue-800'}
+            >
+              {senateur.appartenance}
+            </Badge>
+          </div>
+          
+          {senateur.playerId ? (
+            <div className="mt-2 pt-2 border-t">
+              <Badge className="bg-green-100 text-green-800 w-full justify-center">
+                Joueur Assigné
+              </Badge>
             </div>
-          )}
-          {senateur.fonctionActuelle && (
-            <div className="flex justify-between text-sm">
-              <span className="text-muted-foreground">Fonction:</span>
-              <span>{senateur.fonctionActuelle}</span>
-            </div>
-          )}
-          {senateur.magistrature && (
-            <div className="flex justify-between text-sm">
-              <span className="text-muted-foreground">Magistrature:</span>
-              <span>{senateur.magistrature}</span>
+          ) : (
+            <div className="mt-2 pt-2 border-t">
+              <Badge variant="outline" className="w-full justify-center">
+                Non assigné
+              </Badge>
             </div>
           )}
         </div>
       </CardContent>
-      <CardFooter className="border-t pt-3 bg-slate-50">
-        <Button 
-          variant="ghost" 
-          size="sm" 
-          className="w-full"
-          onClick={() => onViewSenateur(senateur.id)}
-        >
-          <Eye className="h-4 w-4 mr-2" />
-          Voir les détails
-        </Button>
-      </CardFooter>
     </Card>
   );
 };
-
-export default SenateurCard;

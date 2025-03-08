@@ -1,53 +1,16 @@
 
 import { Season as TimeSystemSeason } from '@/utils/timeSystem';
+import { Province } from './provinces';
+import { SenateurJouable } from './senateurs';
+import { Loi } from './lois';
+import { Season, GameDate, ImportanceType, GamePhase, PhaseType } from './common';
 
-// Types réexportés depuis les modules appropriés - on évite les duplications
-export { Season, GameDate, ImportanceType, GamePhase, PhaseType } from './common';
-export { Province } from './provinces';
-export { SenateurJouable } from './senateurs';
-export { Evenement, EvenementAction, EvenementType } from './evenements';
-export { Loi } from './lois';
-
-// Interfaces de props pour les composants
-export interface ProvincesMapProps {
-  provinces: Province[];
-  onProvinceSelect: (id: string) => void;
-}
-
-export interface ProvinceModalProps {
-  province: Province;
-  onSave: (province: Province) => void;
-  open: boolean;
-  onClose: () => void;
-}
-
-export interface ProvinceCardProps {
-  province: Province;
-  onClick: (id: string) => void;
-}
-
-export interface ProvinceDataProps {
-  provinces: Province[];
-}
-
-export interface SenateurModalProps {
-  senateur: SenateurJouable;
-  open: boolean;
-  onClose: () => void;
-  onSave: (updatedSenateur: SenateurJouable) => void;
-}
-
-export interface SenateurCardProps {
-  senateur: SenateurJouable;
-  onViewSenateur: (id: string) => void;
-}
-
-export interface LoisTableProps {
-  lois: Loi[];
-  onVote?: (loiId: string, vote: 'pour' | 'contre' | 'abstention') => void;
-  onAbroger?: (loiId: string) => void;
-  onEdit?: (loiId: string) => void;
-}
+// Re-export de types avec export type
+export type { Season, GameDate, ImportanceType, GamePhase, PhaseType };
+export type { Province } from './provinces';
+export type { SenateurJouable } from './senateurs';
+export type { Evenement, EvenementAction, EvenementType } from './evenements';
+export type { Loi } from './lois';
 
 // Fonction de conversion entre les types de saisons
 export const convertTimeSeasonToMaitreJeuSeason = (season: TimeSystemSeason): Season => {
@@ -70,84 +33,115 @@ export const convertMaitreJeuSeasonToTimeSeason = (season: Season): TimeSystemSe
   return seasonMap[season];
 };
 
-// Fonctions de migration et d'adaptation pour faciliter la transition
-export const adaptLegacyData = {
-  // Convertir les anciens formats de date
-  dateFormat: (year: number, season: TimeSystemSeason): GameDate => {
-    return {
-      year,
-      season: convertTimeSeasonToMaitreJeuSeason(season)
-    };
+// Adaptations pour la Province
+export const adaptProvince = {
+  convertVariationLoyaute: (province: Province) => {
+    if ('loyautéVariation' in province && !('variationLoyauté' in province)) {
+      return { ...province, variationLoyauté: province.loyautéVariation };
+    }
+    return province;
   },
   
-  // Assurer la compatibilité avec les propriétés renommées
-  propertyNames: <T extends Record<string, any>>(data: T, mapping: Record<string, string>): any => {
-    const result: Record<string, any> = { ...data };
-    Object.entries(mapping).forEach(([oldKey, newKey]) => {
-      if (oldKey in data && !(newKey in data)) {
-        result[newKey] = data[oldKey];
-      }
-    });
-    return result;
+  convertDernierEvenement: (province: Province) => {
+    if ('dernierEvenement' in province && !('dernierEvénement' in province)) {
+      return { ...province, dernierEvénement: province.dernierEvenement };
+    }
+    return province;
   },
   
-  // Assurer la conversion des types d'événements
-  evenementType: (type: string): string => {
-    const typeMap: Record<string, string> = {
-      'politique': 'POLITIQUE',
-      'economique': 'ECONOMIQUE',
-      'économique': 'ECONOMIQUE',
-      'guerre': 'GUERRE',
-      'religion': 'RELIGION',
-      'diplomatique': 'DIPLOMATIQUE',
-      'social': 'SOCIAL',
-      'crise': 'CRISE'
-    };
-    return typeMap[type.toLowerCase()] || type.toUpperCase();
-  },
-  
-  // Assurer la conversion des statuts de province
-  provinceStatus: (status: string): string => {
-    const statusMap: Record<string, string> = {
-      'pacifiée': 'pacifiée',
-      'pacifiee': 'pacifiée',
-      'instable': 'instable',
-      'rebelle': 'rebelle',
-      'conquise': 'conquise',
-      'en révolte': 'rebelle',
-      'en revolte': 'rebelle'
-    };
-    return statusMap[status.toLowerCase()] || 'instable';
-  },
-  
-  // Assurer la conversion des magistratures
-  magistratureType: (type: string): string => {
-    const typeMap: Record<string, string> = {
-      'préteur': 'PRETEUR',
-      'preteur': 'PRETEUR',
-      'consul': 'CONSUL',
-      'édile': 'EDILE',
-      'edile': 'EDILE',
-      'questeur': 'QUESTEUR',
-      'censeur': 'CENSEUR',
-      'tribun': 'TRIBUN'
-    };
-    return typeMap[type.toLowerCase()] || type.toUpperCase();
+  convertCoordonnees: (province: Province) => {
+    if ('position' in province && !('coordonnées' in province)) {
+      return { ...province, coordonnées: province.position };
+    }
+    return province;
   }
 };
 
-// Fonction utilitaire pour créer des identifiants uniques
+// Adaptations pour le Senateur
+export const adaptSenateur = {
+  convertAge: (senateur: SenateurJouable) => {
+    if ('age' in senateur && !('âge' in senateur)) {
+      return { ...senateur, âge: senateur.age };
+    }
+    return senateur;
+  },
+  
+  convertPopularite: (senateur: SenateurJouable) => {
+    if ('popularite' in senateur && !('popularité' in senateur)) {
+      return { ...senateur, popularité: senateur.popularite };
+    }
+    return senateur;
+  },
+  
+  convertFonction: (senateur: SenateurJouable) => {
+    if ('fonction' in senateur && !('fonctionActuelle' in senateur)) {
+      return { ...senateur, fonctionActuelle: senateur.fonction };
+    }
+    return senateur;
+  },
+  
+  convertStatut: (senateur: SenateurJouable) => {
+    if ('status' in senateur && !('statut' in senateur)) {
+      return { ...senateur, statut: senateur.status };
+    }
+    return senateur;
+  }
+};
+
+// Adaptations pour les Lois
+export const adaptLoi = {
+  normaliseCategorieType: (loi: Loi) => {
+    // Normaliser les types de catégorie
+    const categorieMap: Record<string, string> = {
+      'économique': 'ECONOMIQUE',
+      'economique': 'ECONOMIQUE',
+      'politique': 'POLITIQUE',
+      'sociale': 'SOCIALE',
+      'social': 'SOCIALE',
+      'religieuse': 'RELIGIEUSE',
+      'religieux': 'RELIGIEUSE',
+      'militaire': 'MILITAIRE'
+    };
+    
+    if ('catégorie' in loi) {
+      const normalizedCategorie = categorieMap[loi.catégorie.toLowerCase()] || loi.catégorie.toUpperCase();
+      return { ...loi, catégorie: normalizedCategorie };
+    }
+    
+    return loi;
+  }
+};
+
+// Adaptateur principal
+export const adaptData = {
+  convertSenateurFields: (senateur: SenateurJouable): SenateurJouable => {
+    return adaptSenateur.convertStatut(
+      adaptSenateur.convertFonction(
+        adaptSenateur.convertPopularite(
+          adaptSenateur.convertAge(senateur)
+        )
+      )
+    );
+  },
+  
+  convertProvinceFields: (province: Province): Province => {
+    return adaptProvince.convertCoordonnees(
+      adaptProvince.convertDernierEvenement(
+        adaptProvince.convertVariationLoyaute(province)
+      )
+    );
+  },
+  
+  convertLoiFields: (loi: Loi): Loi => {
+    return adaptLoi.normaliseCategorieType(loi);
+  },
+  
+  createGameDate: (year: number, season: Season): GameDate => {
+    return { year, season };
+  }
+};
+
+// Pour générer des identifiants uniques
 export const generateId = (): string => {
   return Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
 };
-
-// Fonction pour créer une nouvelle date de jeu à partir de l'année et saison actuelle
-export const createGameDate = (year: number, season: Season): GameDate => {
-  return { year, season };
-};
-
-// Types compatibles pour la migration vers la nouvelle structure
-export interface BackwardCompatible {
-  // Propriétés de compatibilité pour les anciennes versions
-  [key: string]: any;
-}

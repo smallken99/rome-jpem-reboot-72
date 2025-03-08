@@ -1,101 +1,75 @@
 
 import React from 'react';
-import { Button } from "@/components/ui/button";
+import { Badge } from '@/components/ui/badge';
 import { Province } from '../types/provinces';
 
 interface ProvincesMapProps {
   provinces: Province[];
-  onProvinceSelect: (id: string) => void;
+  onSelectProvince: (id: string) => void;
+  selectedProvinceId?: string;
 }
 
+const getProvinceColor = (status: string) => {
+  switch (status.toLowerCase()) {
+    case 'pacifiée':
+    case 'pacifiee':
+      return 'bg-green-500';
+    case 'instable':
+      return 'bg-yellow-500';
+    case 'rebelle':
+    case 'en révolte':
+    case 'en revolte':
+      return 'bg-red-500';
+    case 'conquise':
+      return 'bg-blue-500';
+    default:
+      return 'bg-gray-500';
+  }
+};
+
 export const ProvincesMap: React.FC<ProvincesMapProps> = ({ 
-  provinces,
-  onProvinceSelect
+  provinces, 
+  onSelectProvince, 
+  selectedProvinceId 
 }) => {
-  // Fonction pour obtenir la couleur appropriée selon le statut
-  const getProvinceColor = (status: string) => {
-    switch(status) {
-      case 'pacifiée':
-        return '#4ade80'; // Vert
-      case 'instable':
-        return '#facc15'; // Jaune
-      case 'rebelle':
-        return '#ef4444'; // Rouge
-      case 'conquise':
-        return '#60a5fa'; // Bleu
-      default:
-        return '#94a3b8'; // Gris
-    }
-  };
-  
-  const mapWidth = 600;
-  const mapHeight = 400;
-  
   return (
-    <div className="bg-white p-4 rounded-md shadow overflow-x-auto">
-      <h3 className="text-lg font-semibold mb-4">Carte des Provinces</h3>
-      
-      <svg width={mapWidth} height={mapHeight} viewBox={`0 0 ${mapWidth} ${mapHeight}`} className="border border-gray-200 bg-blue-50">
-        {/* Mer Méditerranée (fond bleu clair) */}
-        <rect x="0" y="0" width={mapWidth} height={mapHeight} fill="#cfe2ff" />
+    <div className="relative w-full h-[500px] border rounded-lg bg-slate-100">
+      <div className="absolute inset-0 p-4">
+        <h3 className="text-lg font-medium mb-2">Carte des Provinces</h3>
         
-        {/* Italie (masse terrestre centrale) */}
-        <path d="M250,100 L300,80 L320,150 L280,250 L230,280 L200,200 Z" fill="#e9d8a6" stroke="#bda77a" strokeWidth="1" />
-        
-        {/* Provinces */}
-        {provinces.map((province) => {
-          if (!province.position) return null;
+        {/* Représentation simplifiée de la carte */}
+        {provinces.map(province => {
+          // Gérer la compatibilité entre position et coordonnées
+          const coords = province.coordonnées || province.position;
+          if (!coords) return null;
           
-          const { x, y } = province.position;
-          const radius = 20;
-          const color = getProvinceColor(province.status);
+          const isSelected = selectedProvinceId === province.id;
           
           return (
-            <g key={province.id} onClick={() => onProvinceSelect(province.id)} style={{ cursor: 'pointer' }}>
-              <circle 
-                cx={x} 
-                cy={y} 
-                r={radius} 
-                fill={color} 
-                stroke="#ffffff" 
-                strokeWidth="2"
-                opacity="0.8"
+            <div 
+              key={province.id}
+              className={`absolute cursor-pointer transition-all duration-200 ${isSelected ? 'z-10' : 'z-0'}`}
+              style={{ 
+                left: `${coords.x}px`, 
+                top: `${coords.y}px`,
+                transform: 'translate(-50%, -50%)'
+              }}
+              onClick={() => onSelectProvince(province.id)}
+            >
+              <div 
+                className={`${getProvinceColor(province.status)} w-4 h-4 rounded-full ${
+                  isSelected ? 'ring-4 ring-primary shadow-lg' : ''
+                }`}
               />
-              <text 
-                x={x} 
-                y={y} 
-                textAnchor="middle" 
-                dominantBaseline="middle" 
-                fill="#333333" 
-                fontSize="10"
-                fontWeight="bold"
-              >
-                {province.nom}
-              </text>
-            </g>
+              {isSelected && (
+                <div className="absolute top-5 left-1/2 transform -translate-x-1/2 bg-white p-2 rounded shadow-md text-xs whitespace-nowrap">
+                  <p className="font-medium">{province.nom}</p>
+                  <Badge className="mt-1" variant="outline">{province.status}</Badge>
+                </div>
+              )}
+            </div>
           );
         })}
-        
-        {/* Légende */}
-        <g transform="translate(20, 340)">
-          <text x="0" y="0" fontSize="12" fontWeight="bold">Statut des provinces:</text>
-          
-          <circle cx="10" cy="20" r="6" fill="#4ade80" />
-          <text x="20" y="23" fontSize="10">Pacifiée</text>
-          
-          <circle cx="10" cy="40" r="6" fill="#facc15" />
-          <text x="20" y="43" fontSize="10">Instable</text>
-          
-          <circle cx="10" cy="60" r="6" fill="#ef4444" />
-          <text x="20" y="63" fontSize="10">Rebelle</text>
-          
-          <circle cx="90" cy="20" r="6" fill="#60a5fa" />
-          <text x="100" y="23" fontSize="10">Conquise</text>
-        </g>
-      </svg>
-      
-      <div className="mt-4 text-sm text-gray-500 italic">
-        Cliquez sur une province pour voir ses détails ou la modifier.
       </div>
     </div>
   );
