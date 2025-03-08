@@ -1,6 +1,12 @@
-import React, { useState } from 'react';
+
+import React from 'react';
 import { Button } from "@/components/ui/button";
-import { Province, ProvincesMapProps } from '../types/compatibilityAdapter';
+import { Province } from '../types/provinces';
+
+interface ProvincesMapProps {
+  provinces: Province[];
+  onProvinceSelect: (id: string) => void;
+}
 
 export const ProvincesMap: React.FC<ProvincesMapProps> = ({ 
   provinces,
@@ -38,9 +44,9 @@ export const ProvincesMap: React.FC<ProvincesMapProps> = ({
         
         {/* Provinces */}
         {provinces.map((province) => {
-          if (!province.coordonnées) return null;
+          if (!province.position) return null;
           
-          const { x, y } = province.coordonnées;
+          const { x, y } = province.position;
           const radius = 20;
           const color = getProvinceColor(province.status);
           

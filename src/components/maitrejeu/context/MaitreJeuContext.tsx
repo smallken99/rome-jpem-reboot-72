@@ -1,458 +1,429 @@
-import React, { createContext, useContext, useState, ReactNode, useEffect } from 'react';
-import { useTimeStore } from '@/utils/timeSystem';
-import { convertTimeSeasonToMaitreJeuSeason } from '@/components/maitrejeu/types/common';
-import { 
-  Faction, 
-  FactionPolitique, 
-  Equilibre, 
-  Province, 
-  Loi, 
-  Evenement, 
-  SenateurJouable, 
-  HistoireEntry, 
-  GamePhase,
-  Season,
-  MagistratureType
-} from '../types/index';
+
+import React, { createContext, useState, useContext, useEffect, ReactNode } from 'react';
 import { v4 as uuidv4 } from 'uuid';
+import { createGameDate, generateId } from '../types/compatibilityAdapter';
+import { 
+  GamePhase, 
+  Season, 
+  ImportanceType 
+} from '../types/common';
+import { 
+  MaitreJeuContextType,
+  TimeContextType 
+} from './types';
+import { Equilibre } from '../types/equilibre';
+import { Province } from '../types/provinces';
+import { SenateurJouable } from '../types/senateurs';
+import { Evenement, EvenementAction, EvenementType } from '../types/evenements';
+import { Election } from '../types/elections';
+import { Loi } from '../types/lois';
+import { HistoireEntry } from '../types/histoire';
 
-// Définition du type pour le contexte MaitreJeu
-export interface MaitreJeuContextType {
-  factions: Faction[];
-  addFaction: (faction: Faction) => void;
-  updateFaction: (id: string, updates: Partial<Faction>) => void;
-  removeFaction: (id: string) => void;
-  
-  factionsPolitiques: FactionPolitique[];
-  addFactionPolitique: (factionPolitique: FactionPolitique) => void;
-  updateFactionPolitique: (id: string, updates: Partial<FactionPolitique>) => void;
-  removeFactionPolitique: (id: string) => void;
-  
-  equilibre: Equilibre;
-  updateEquilibre: (updates: Partial<Equilibre>) => void;
-  updateFactionBalance: (populaires: number, optimates: number, moderates: number) => void;
-  
-  provinces: Province[];
-  addProvince: (province: Province) => void;
-  updateProvince: (id: string, updates: Partial<Province>) => void;
-  removeProvince: (id: string) => void;
-  
-  lois: Loi[];
-  addLoi: (loi: Loi) => void;
-  updateLoi: (id: string, updates: Partial<Loi>) => void;
-  removeLoi: (id: string) => void;
-  voteLoi: (id: string, vote: 'pour' | 'contre' | 'abstention') => void;
-  
-  evenements: Evenement[];
-  addEvenement: (evenement: Evenement) => void;
-  updateEvenement: (id: string, updates: Partial<Evenement>) => void;
-  removeEvenement: (id: string) => void;
-  resolveEvenement: (id: string, optionId: string) => void;
-  
-  senateurs: SenateurJouable[];
-  addSenateur: (senateur: SenateurJouable) => void;
-  updateSenateur: (id: string, updates: Partial<SenateurJouable>) => void;
-  removeSenateur: (id: string) => void;
-  assignSenateurToPlayer: (id: string, playerId: string) => void;
-  
-  histoireEntries: HistoireEntry[];
-  addHistoireEntry: (histoireEntry: Omit<HistoireEntry, "id">) => void;
-  updateHistoireEntry: (id: string, updates: Partial<HistoireEntry>) => void;
-  removeHistoireEntry: (id: string) => void;
-  
-  gameState: {
-    year: number;
-    season: Season;
-    phase: GamePhase;
-  };
-  setGameState: (updates: Partial<{ year: number; season: Season; phase: GamePhase }>) => void;
-  
-  // Pour compatibilité avec le code précédent
-  currentYear: number;
-  currentSeason: Season;
-  currentPhase: GamePhase;
-  advanceTime: () => void;
-  changePhase: (phase: GamePhase) => void;
-  
-  // Elections
-  elections: any[];
-  scheduleElection: (magistrature: MagistratureType, year: number, season: Season) => void;
-  
-  // Méthodes de réinitialisation
-  resetGameS0eason: () => void;
-  resetGameYear: () => void;
-  resetGamePhase: () => void;
-}
+// Contexte pour le maître du jeu
+const MaitreJeuContext = createContext<MaitreJeuContextType>({} as MaitreJeuContextType);
 
-// Création du contexte MaitreJeu avec une valeur par défaut
-export const MaitreJeuContext = createContext<MaitreJeuContextType>({
-  factions: [],
-  addFaction: () => {},
-  updateFaction: () => {},
-  removeFaction: () => {},
-  
-  factionsPolitiques: [],
-  addFactionPolitique: () => {},
-  updateFactionPolitique: () => {},
-  removeFactionPolitique: () => {},
-  
-  equilibre: {
-    morale: 50,
-    loyauté: 50,
-    populaires: 35,
-    optimates: 40,
-    moderates: 25,
-    armée: 10000,
-    historique: []
-  },
-  updateEquilibre: () => {},
-  updateFactionBalance: () => {},
-  
-  provinces: [],
-  addProvince: () => {},
-  updateProvince: () => {},
-  removeProvince: () => {},
-  
-  lois: [],
-  addLoi: () => {},
-  updateLoi: () => {},
-  removeLoi: () => {},
-  voteLoi: () => {},
-  
-  evenements: [],
-  addEvenement: () => {},
-  updateEvenement: () => {},
-  removeEvenement: () => {},
-  resolveEvenement: () => {},
-  
-  senateurs: [],
-  addSenateur: () => {},
-  updateSenateur: () => {},
-  removeSenateur: () => {},
-  assignSenateurToPlayer: () => {},
-  
-  histoireEntries: [],
-  addHistoireEntry: () => {},
-  updateHistoireEntry: () => {},
-  removeHistoireEntry: () => {},
-  
-  gameState: {
-    year: 200,
-    season: 'SPRING',
-    phase: 'ADMINISTRATION'
-  },
-  setGameState: () => {},
-  
-  currentYear: 200,
-  currentSeason: 'SPRING',
-  currentPhase: 'ADMINISTRATION',
-  advanceTime: () => {},
-  changePhase: () => {},
-  
-  elections: [],
-  scheduleElection: () => {},
-  
-  resetGameS0eason: () => {},
-  resetGameYear: () => {},
-  resetGamePhase: () => {},
-});
-
-// Hook personnalisé pour utiliser le contexte MaitreJeu
+// Hook pour utiliser le contexte
 export const useMaitreJeu = () => useContext(MaitreJeuContext);
 
-// Définition du provider MaitreJeu
-export const MaitreJeuProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
-  // Récupérer les données actuelles depuis timeSystem
-  const timeSystem = useTimeStore();
-  const currentSystemSeason = timeSystem.season;
+interface MaitreJeuProviderProps {
+  children: ReactNode;
+}
+
+export const MaitreJeuProvider: React.FC<MaitreJeuProviderProps> = ({ children }) => {
+  // État du temps
+  const [currentYear, setCurrentYear] = useState<number>(632);
+  const [currentSeason, setCurrentSeason] = useState<Season>('SPRING');
+  const [currentPhase, setCurrentPhase] = useState<GamePhase>('ADMINISTRATION');
   
-  // Conversion du format de saison attendu par ce contexte
-  const initialSeason = convertTimeSeasonToMaitreJeuSeason(currentSystemSeason);
+  // Données du jeu
+  const [senateurs, setSenateurs] = useState<SenateurJouable[]>([
+    {
+      id: '1',
+      nom: 'Marcus Porcius Cato',
+      famille: 'Porcius',
+      age: 45,
+      popularite: 70,
+      richesse: 5000000,
+      influence: 85,
+      fonction: 'Censeur',
+      appartenance: 'Optimates',
+      status: 'actif',
+      magistrature: 'CENSEUR',
+      playerId: 'admin'
+    },
+    {
+      id: '2',
+      nom: 'Gaius Julius Caesar',
+      famille: 'Julius',
+      age: 38,
+      popularite: 85,
+      richesse: 8000000,
+      influence: 75,
+      fonction: 'Proconsul',
+      appartenance: 'Populares',
+      status: 'actif',
+      magistrature: 'CONSUL',
+      playerId: null
+    }
+  ]);
   
-  // Utilisez initialSeason au lieu d'une valeur codée en dur
-  const [season, setSeason] = useState<Season>(initialSeason);
-  const [year, setYear] = useState(timeSystem.year);
-  const [phase, setPhase] = useState<GamePhase>('ADMINISTRATION');
+  const [provinces, setProvinces] = useState<Province[]>([
+    {
+      id: '1',
+      nom: 'Hispania Citerior',
+      gouverneur: 'Quintus Servilius',
+      région: 'Ibérie',
+      population: 1500000,
+      status: 'pacifiée',
+      description: 'Province Nord de l\'Espagne',
+      richesse: 750000,
+      loyauté: 75,
+      loyautéVariation: 5,
+      ressources: ['Argent', 'Fer', 'Céréales'],
+      armée: {
+        légions: 2,
+        auxiliaires: 5000,
+        navires: 10
+      },
+      impôts: 120000,
+      dernierEvenement: 'Révolte des Lusitaniens matée par le gouverneur',
+      position: { x: 150, y: 200 }
+    },
+    {
+      id: '2',
+      nom: 'Gallia Cisalpina',
+      gouverneur: 'Marcus Calpurnius',
+      région: 'Gaule',
+      population: 2000000,
+      status: 'instable',
+      description: 'Gaule au nord de l\'Italie',
+      richesse: 950000,
+      loyauté: 65,
+      loyautéVariation: -3,
+      ressources: ['Or', 'Bois', 'Bétail'],
+      armée: {
+        légions: 3,
+        auxiliaires: 8000,
+        navires: 5
+      },
+      impôts: 180000,
+      dernierEvenement: 'Incursions de tribus gauloise à la frontière',
+      position: { x: 240, y: 150 }
+    }
+  ]);
   
-  const [factions, setFactions] = useState<Faction[]>([]);
-  const [factionsPolitiques, setFactionsPolitiques] = useState<FactionPolitique[]>([]);
   const [equilibre, setEquilibre] = useState<Equilibre>({
-    morale: 50,
-    loyauté: 50,
-    populaires: 35,
-    optimates: 40,
-    moderates: 25,
-    armée: 10000,
-    historique: []
+    population: 80,
+    armée: 70,
+    économie: 65,
+    morale: 60,
+    loyauté: 75,
+    patriciens: 50,
+    plébéiens: 60,
+    populares: 45,
+    optimates: 55,
+    neutrales: 50
   });
-  const [provinces, setProvinces] = useState<Province[]>([]);
-  const [lois, setLois] = useState<Loi[]>([]);
-  const [evenements, setEvenements] = useState<Evenement[]>([]);
-  const [senateurs, setSenateurs] = useState<SenateurJouable[]>([]);
-  const [histoireEntries, setHistoireEntries] = useState<HistoireEntry[]>([]);
-  const [elections, setElections] = useState<any[]>([]);
   
-  // Fonctions de gestion des factions
-  const addFaction = (faction: Faction) => {
-    setFactions([...factions, faction]);
+  const [evenements, setEvenements] = useState<Evenement[]>([
+    {
+      id: '1',
+      titre: 'Invasion des Helvètes',
+      description: 'Les Helvètes migrent en masse et menacent la Gaule Transalpine.',
+      type: 'GUERRE',
+      date: { year: 632, season: 'WINTER' },
+      importance: 'majeure',
+      options: [
+        {
+          id: '1a',
+          texte: 'Envoyer deux légions pour les arrêter',
+          effets: {
+            'armée': -10,
+            'économie': -5
+          }
+        },
+        {
+          id: '1b',
+          texte: 'Négocier un passage pacifique',
+          effets: {
+            'diplomatie': +5,
+            'populaires': +3
+          }
+        }
+      ],
+      resolved: false
+    }
+  ]);
+  
+  const [elections, setElections] = useState<Election[]>([
+    {
+      id: '1',
+      magistrature: 'CONSUL',
+      year: 632,
+      season: 'SUMMER',
+      candidates: ['Gaius Julius Caesar', 'Marcus Calpurnius Bibulus'],
+      results: null,
+      status: 'planifiée'
+    }
+  ]);
+  
+  const [lois, setLois] = useState<Loi[]>([
+    {
+      id: '1',
+      titre: 'Lex Agraria',
+      description: 'Redistribuer les terres publiques aux vétérans et citoyens pauvres.',
+      proposeur: 'Gaius Julius Caesar',
+      catégorie: 'économique',
+      date: { year: 632, season: 'SPRING' },
+      état: 'proposée',
+      importance: 'majeure',
+      votesPositifs: 120,
+      votesNégatifs: 90,
+      votesAbstention: 30,
+      effets: {
+        'populares': +10,
+        'optimates': -8,
+        'plébéiens': +15
+      }
+    }
+  ]);
+
+  const [histoireEntries, setHistoireEntries] = useState<HistoireEntry[]>([
+    {
+      id: '1',
+      titre: 'Fondation du Premier Triumvirat',
+      contenu: 'Pompée, Crassus et César forment une alliance politique secrète.',
+      date: { year: 631, season: 'AUTUMN' },
+      catégorie: 'POLITIQUE',
+      importance: 'majeure',
+      auteur: 'Système',
+      visible: true
+    }
+  ]);
+  
+  // Fonctions pour mettre à jour les données
+  const advanceTime = () => {
+    const seasons: Season[] = ['SPRING', 'SUMMER', 'AUTUMN', 'WINTER'];
+    const currentIndex = seasons.indexOf(currentSeason);
+    
+    if (currentIndex === seasons.length - 1) {
+      setCurrentYear(prev => prev + 1);
+      setCurrentSeason('SPRING');
+    } else {
+      setCurrentSeason(seasons[currentIndex + 1] as Season);
+    }
+    
+    // Réinitialiser la phase du jeu
+    setCurrentPhase('ADMINISTRATION');
   };
   
-  const updateFaction = (id: string, updates: Partial<Faction>) => {
-    setFactions(factions.map(faction => faction.id === id ? { ...faction, ...updates } : faction));
+  const changePhase = (phase: GamePhase) => {
+    setCurrentPhase(phase);
   };
   
-  const removeFaction = (id: string) => {
-    setFactions(factions.filter(faction => faction.id !== id));
-  };
-  
-  // Fonctions de gestion des factions politiques
-  const addFactionPolitique = (factionPolitique: FactionPolitique) => {
-    setFactionsPolitiques([...factionsPolitiques, factionPolitique]);
-  };
-  
-  const updateFactionPolitique = (id: string, updates: Partial<FactionPolitique>) => {
-    setFactionsPolitiques(factionsPolitiques.map(factionPolitique => 
-      factionPolitique.id === id ? { ...factionPolitique, ...updates } : factionPolitique
+  // Fonctions pour les sénateurs
+  const updateSenateur = (updatedSenateur: SenateurJouable) => {
+    setSenateurs(prev => prev.map(s => 
+      s.id === updatedSenateur.id ? updatedSenateur : s
     ));
   };
   
-  const removeFactionPolitique = (id: string) => {
-    setFactionsPolitiques(factionsPolitiques.filter(factionPolitique => factionPolitique.id !== id));
+  const assignSenateurToPlayer = (senateurId: string, playerId: string | null) => {
+    setSenateurs(prev => prev.map(s => 
+      s.id === senateurId ? { ...s, playerId } : s
+    ));
   };
   
-  // Fonctions de gestion de l'équilibre
-  const updateEquilibre = (updates: Partial<Equilibre>) => {
-    setEquilibre({ ...equilibre, ...updates });
+  // Fonctions pour les provinces
+  const updateProvince = (updatedProvince: Province) => {
+    setProvinces(prev => prev.map(p => 
+      p.id === updatedProvince.id ? updatedProvince : p
+    ));
   };
   
-  // Fonctions de gestion des provinces
-  const addProvince = (province: Province) => {
-    setProvinces([...provinces, province]);
-  };
-  
-  const updateProvince = (id: string, updates: Partial<Province>) => {
-    setProvinces(provinces.map(province => province.id === id ? { ...province, ...updates } : province));
-  };
-  
-  const removeProvince = (id: string) => {
-    setProvinces(provinces.filter(province => province.id !== id));
-  };
-  
-  // Fonctions de gestion des lois
-  const addLoi = (loi: Loi) => {
-    setLois([...lois, loi]);
-  };
-  
-  const updateLoi = (id: string, updates: Partial<Loi>) => {
-    setLois(lois.map(loi => loi.id === id ? { ...loi, ...updates } : loi));
-  };
-  
-  const removeLoi = (id: string) => {
-    setLois(lois.filter(loi => loi.id !== id));
-  };
-  
-  const voteLoi = (id: string, vote: 'pour' | 'contre' | 'abstention') => {
-    setLois(lois.map(loi => {
-      if (loi.id === id) {
-        const updatedLoi = { ...loi };
-        if (vote === 'pour') updatedLoi.votesPositifs++;
-        else if (vote === 'contre') updatedLoi.votesNégatifs++;
-        else updatedLoi.votesAbstention++;
-        return updatedLoi;
-      }
-      return loi;
-    }));
-  };
-  
-  // Fonctions de gestion des événements
-  const addEvenement = (evenement: Evenement) => {
-    const eventWithId = evenement.id ? evenement : {
-      ...evenement,
+  // Fonctions pour les événements
+  const addEvenement = (newEvenement: Omit<Evenement, 'id'>) => {
+    const evenementWithId: Evenement = {
+      ...newEvenement,
       id: uuidv4()
     };
-    setEvenements([...evenements, eventWithId]);
+    setEvenements(prev => [...prev, evenementWithId]);
   };
   
-  const updateEvenement = (id: string, updates: Partial<Evenement>) => {
-    setEvenements(evenements.map(evenement => evenement.id === id ? { ...evenement, ...updates } : evenement));
-  };
-  
-  const removeEvenement = (id: string) => {
-    setEvenements(evenements.filter(evenement => evenement.id !== id));
-  };
-  
-  const resolveEvenement = (id: string, optionId: string) => {
-    setEvenements(evenements.map(evenement => {
-      if (evenement.id === id) {
-        return { ...evenement, resolved: true, chosenOption: optionId };
+  const resolveEvenement = (evenementId: string, optionId: string) => {
+    setEvenements(prev => prev.map(e => {
+      if (e.id === evenementId) {
+        const selectedOption = e.options.find(o => o.id === optionId);
+        if (!selectedOption) return e;
+        
+        return {
+          ...e,
+          resolved: true,
+          selectedOption: optionId
+        };
       }
-      return evenement;
+      return e;
     }));
-  };
-  
-  // Fonctions de gestion des sénateurs
-  const addSenateur = (senateur: SenateurJouable) => {
-    setSenateurs([...senateurs, senateur]);
-  };
-  
-  const updateSenateur = (id: string, updates: Partial<SenateurJouable>) => {
-    setSenateurs(senateurs.map(senateur => senateur.id === id ? { ...senateur, ...updates } : senateur));
-  };
-  
-  const removeSenateur = (id: string) => {
-    setSenateurs(senateurs.filter(senateur => senateur.id !== id));
-  };
-  
-  const assignSenateurToPlayer = (id: string, playerId: string) => {
-    setSenateurs(senateurs.map(senateur => 
-      senateur.id === id ? { ...senateur, playerId } : senateur
-    ));
-  };
-  
-  // Fonctions de gestion de l'histoire
-  const addHistoireEntry = (histoireEntry: Omit<HistoireEntry, "id">) => {
-    const newEntry = {
-      ...histoireEntry,
-      id: uuidv4()
-    };
-    setHistoireEntries([...histoireEntries, newEntry]);
-  };
-  
-  const updateHistoireEntry = (id: string, updates: Partial<HistoireEntry>) => {
-    setHistoireEntries(histoireEntries.map(histoireEntry => 
-      histoireEntry.id === id ? { ...histoireEntry, ...updates } : histoireEntry
-    ));
-  };
-  
-  const removeHistoireEntry = (id: string) => {
-    setHistoireEntries(histoireEntries.filter(histoireEntry => histoireEntry.id !== id));
-  };
-  
-  // Fonction pour mettre à jour l'état du jeu (année, saison, phase)
-  const setGameState = (updates: Partial<{ year: number; season: Season; phase: GamePhase }>) => {
-    if (updates.year !== undefined) {
-      setYear(updates.year);
-    }
-    if (updates.season !== undefined) {
-      setSeason(updates.season);
-    }
-    if (updates.phase !== undefined) {
-      setPhase(updates.phase);
-    }
-  };
-
-  // Synchronisation avec le système de temps global
-  useEffect(() => {
-    const systemSeason = timeSystem.season;
-    const convertedSeason = convertTimeSeasonToMaitreJeuSeason(systemSeason);
-    setSeason(convertedSeason);
-    setYear(timeSystem.year);
-  }, [timeSystem.season, timeSystem.year]);
-
-  // Fonctions de réinitialisation
-  const resetGameS0eason = () => {
-    setSeason(initialSeason);
-  };
-
-  const resetGameYear = () => {
-    setYear(200);
-  };
-
-  const resetGamePhase = () => {
-    setPhase('ADMINISTRATION');
-  };
-  
-  const updateFactionBalance = (populaires: number, optimates: number, moderates: number) => {
-    updateEquilibre({ 
-      morale: equilibre.morale,
-      loyauté: equilibre.loyauté,
-      armée: equilibre.armée,
-      populaires, 
-      optimates, 
-      moderates 
+    
+    // Appliquer les effets de l'option choisie
+    const evenement = evenements.find(e => e.id === evenementId);
+    if (!evenement) return;
+    
+    const selectedOption = evenement.options.find(o => o.id === optionId);
+    if (!selectedOption || !selectedOption.effets) return;
+    
+    // Mettre à jour l'équilibre en fonction des effets
+    setEquilibre(prev => {
+      const newEquilibre: Partial<Equilibre> = { ...prev };
+      
+      if ('population' in selectedOption.effets) {
+        newEquilibre.population = prev.population + (selectedOption.effets.population || 0);
+      }
+      if ('armée' in selectedOption.effets) {
+        newEquilibre.armée = prev.armée + (selectedOption.effets.armée || 0);
+      }
+      if ('économie' in selectedOption.effets) {
+        newEquilibre.économie = prev.économie + (selectedOption.effets.économie || 0);
+      }
+      if ('morale' in selectedOption.effets) {
+        newEquilibre.morale = prev.morale + (selectedOption.effets.morale || 0);
+      }
+      if ('loyauté' in selectedOption.effets) {
+        newEquilibre.loyauté = prev.loyauté + (selectedOption.effets.loyauté || 0);
+      }
+      
+      return newEquilibre as Equilibre;
     });
   };
-
-  const advanceTime = () => {
-    // Implémentez la logique d'avancement du temps ici
-    const seasons: Season[] = ['SPRING', 'SUMMER', 'AUTUMN', 'WINTER'];
-    const currentSeasonIndex = seasons.indexOf(season);
-    if (currentSeasonIndex === seasons.length - 1) {
-      // C'est l'hiver, on passe à l'année suivante et au printemps
-      setYear(year + 1);
-      setSeason('SPRING');
-    } else {
-      // On passe à la saison suivante
-      setSeason(seasons[currentSeasonIndex + 1] as Season);
-    }
-  };
-
-  const changePhase = (newPhase: GamePhase) => setPhase(newPhase);
-
-  const scheduleElection = (magistrature: MagistratureType, year: number, season: Season) => {
-    const newElection = {
-      id: uuidv4(),
-      magistrature,
-      date: { year, season },
+  
+  // Fonctions pour les élections
+  const planifierElection = (magistrature: string, year: number, season: Season) => {
+    const nouvelleElection: Election = {
+      id: generateId(),
+      magistrature: magistrature as any,
+      year,
+      season,
       candidates: [],
-      status: 'scheduled'
+      results: null,
+      status: 'planifiée'
     };
-    setElections([...elections, newElection]);
+    
+    setElections(prev => [...prev, nouvelleElection]);
+  };
+  
+  const addCandidateToElection = (electionId: string, candidateId: string) => {
+    setElections(prev => prev.map(e => {
+      if (e.id === electionId) {
+        return {
+          ...e,
+          candidates: [...e.candidates, candidateId]
+        };
+      }
+      return e;
+    }));
+  };
+  
+  // Fonctions pour les lois
+  const proposerLoi = (nouvelleLoi: Omit<Loi, 'id'>) => {
+    const loiAvecId: Loi = {
+      ...nouvelleLoi,
+      id: uuidv4()
+    };
+    
+    setLois(prev => [...prev, loiAvecId]);
+  };
+  
+  const voterLoi = (loiId: string, type: 'pour' | 'contre' | 'abstention', nombre: number) => {
+    setLois(prev => prev.map(l => {
+      if (l.id === loiId) {
+        const updatedLoi = { ...l };
+        
+        if (type === 'pour') {
+          updatedLoi.votesPositifs += nombre;
+        } else if (type === 'contre') {
+          updatedLoi.votesNégatifs += nombre;
+        } else {
+          updatedLoi.votesAbstention += nombre;
+        }
+        
+        // Vérifier si la loi est adoptée ou rejetée
+        const totalVotes = updatedLoi.votesPositifs + updatedLoi.votesNégatifs + updatedLoi.votesAbstention;
+        const majorite = totalVotes / 2;
+        
+        if (updatedLoi.votesPositifs > majorite) {
+          updatedLoi.état = 'adoptée';
+        } else if (updatedLoi.votesNégatifs > majorite) {
+          updatedLoi.état = 'rejetée';
+        }
+        
+        return updatedLoi;
+      }
+      return l;
+    }));
+  };
+  
+  // Fonctions pour l'histoire
+  const addHistoireEntry = (entry: Omit<HistoireEntry, 'id'>) => {
+    const newEntry: HistoireEntry = {
+      ...entry,
+      id: uuidv4()
+    };
+    
+    setHistoireEntries(prev => [...prev, newEntry]);
+  };
+  
+  // Fonction pour mettre à jour l'équilibre global
+  const updateEquilibre = (newValues: Partial<Equilibre>) => {
+    setEquilibre(prev => ({
+      ...prev,
+      ...newValues
+    }));
+  };
+  
+  // Value à fournir au contexte
+  const contextValue: MaitreJeuContextType = {
+    // Temps
+    currentYear,
+    currentSeason,
+    currentPhase,
+    advanceTime,
+    changePhase,
+    
+    // Sénateurs
+    senateurs,
+    updateSenateur,
+    assignSenateurToPlayer,
+    
+    // Provinces
+    provinces,
+    updateProvince,
+    
+    // Équilibre
+    equilibre,
+    updateEquilibre,
+    
+    // Événements
+    evenements,
+    addEvenement,
+    resolveEvenement,
+    
+    // Élections
+    elections,
+    planifierElection,
+    addCandidateToElection,
+    
+    // Lois
+    lois,
+    proposerLoi,
+    voterLoi,
+    
+    // Histoire
+    histoireEntries,
+    addHistoireEntry
   };
   
   return (
-    <MaitreJeuContext.Provider value={{
-      factions,
-      addFaction,
-      updateFaction,
-      removeFaction,
-      factionsPolitiques,
-      addFactionPolitique,
-      updateFactionPolitique,
-      removeFactionPolitique,
-      equilibre,
-      updateEquilibre,
-      provinces,
-      addProvince,
-      updateProvince,
-      removeProvince,
-      lois,
-      addLoi,
-      updateLoi,
-      removeLoi,
-      voteLoi,
-      evenements,
-      addEvenement,
-      updateEvenement,
-      removeEvenement,
-      resolveEvenement,
-      senateurs,
-      addSenateur,
-      updateSenateur,
-      removeSenateur,
-      assignSenateurToPlayer,
-      histoireEntries,
-      addHistoireEntry,
-      updateHistoireEntry,
-      removeHistoireEntry,
-      gameState: {
-        year,
-        season,
-        phase
-      },
-      setGameState,
-      resetGameS0eason,
-      resetGameYear,
-      resetGamePhase,
-      currentYear: year,
-      currentSeason: season,
-      currentPhase: phase,
-      advanceTime,
-      changePhase,
-      elections,
-      scheduleElection,
-      updateFactionBalance,
-    }}>
+    <MaitreJeuContext.Provider value={contextValue}>
       {children}
     </MaitreJeuContext.Provider>
   );

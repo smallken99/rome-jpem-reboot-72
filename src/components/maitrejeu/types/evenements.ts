@@ -1,15 +1,12 @@
 
 import { GameDate, ImportanceType } from './common';
 
-export type EvenementType = 'POLITIQUE' | 'GUERRE' | 'ECONOMIQUE' | 'RELIGION' | 'DIPLOMATIQUE' | 'SOCIAL' | 'CRISE';
+export type EvenementType = 'POLITIQUE' | 'ECONOMIQUE' | 'GUERRE' | 'RELIGION' | 'DIPLOMATIQUE' | 'SOCIAL' | 'CRISE';
 
 export interface EvenementAction {
   id: string;
-  texte: string; 
-  effets: Record<string, any>;
-  // Additional properties for compatibility
-  label?: string;
-  consequence?: string;
+  texte: string;
+  effets: Record<string, number>;
 }
 
 export interface Evenement {
@@ -21,16 +18,21 @@ export interface Evenement {
   importance: ImportanceType;
   options: EvenementAction[];
   resolved: boolean;
-  resolvedOption?: string;
+  selectedOption?: string;
 }
 
-export interface EvenementFormProps {
-  isOpen: boolean;
-  onClose: () => void;
-}
-
-export interface EvenementsListProps {
-  evenements: Evenement[];
-  onResolve: (id: string, optionId: string) => void;
-  filteredType: EvenementType | 'ALL';
+export interface PoliticalEvent {
+  id: string;
+  date: GameDate;
+  title: string;
+  description: string;
+  type: EvenementType;
+  importance: ImportanceType;
+  resolved?: boolean;
+  impact?: {
+    politique?: number;
+    sociale?: number;
+    economique?: number;
+    militaire?: number;
+  };
 }

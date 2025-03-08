@@ -1,8 +1,8 @@
 
 import { GameDate, ImportanceType } from './common';
 
-export type LoiStatus = 'proposée' | 'votée' | 'rejetée' | 'en attente';
-export type LoiCategory = 'politique' | 'économique' | 'militaire' | 'judiciaire' | 'sociale' | 'religieuse';
+export type LoiEtat = 'proposée' | 'adoptée' | 'rejetée' | 'abrogée';
+export type LoiCategorie = 'politique' | 'économique' | 'militaire' | 'religieuse' | 'sociale' | 'judiciaire';
 
 export interface Loi {
   id: string;
@@ -11,15 +11,35 @@ export interface Loi {
   proposeur: string;
   catégorie: string;
   date: GameDate;
-  état: LoiStatus;
+  état: LoiEtat;
   importance: ImportanceType;
   votesPositifs: number;
   votesNégatifs: number;
   votesAbstention: number;
-  effets: Record<string, any>;
+  effets: Record<string, number>;
 }
 
-export interface LoisTableProps {
-  lois: Loi[];
-  onVote?: (id: string, vote: 'pour' | 'contre' | 'abstention') => void;
+export interface LoiHistorique extends Loi {
+  conséquences: string;
+  amendements?: string[];
+}
+
+export interface LoiProposition {
+  id: string;
+  titre: string;
+  description: string;
+  proposeur: string;
+  catégorie: LoiCategorie;
+  effetsEstimés: Record<string, number>;
+  dateProposition: GameDate;
+  supporteurs: string[];
+  opposants: string[];
+}
+
+export interface LoiReference {
+  id: string;
+  titre: string;
+  description: string;
+  année: number;
+  status: LoiEtat;
 }

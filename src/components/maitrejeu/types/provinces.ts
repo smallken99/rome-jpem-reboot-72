@@ -1,47 +1,86 @@
 
 import { GameDate } from './common';
 
-export type ProvinceStatus = 'pacifiée' | 'instable' | 'rebelle' | 'conquise' | 'en révolte';
-
+// Types pour les provinces
 export interface Province {
   id: string;
   nom: string;
   gouverneur: string;
   région: string;
-  region?: string; // For backward compatibility
+  region?: string; // Pour compatibilité
   population: number;
-  status: ProvinceStatus;
-  statut?: string; // For backward compatibility
+  status: 'pacifiée' | 'instable' | 'rebelle' | 'conquise' | 'en révolte';
+  statut?: string; // Pour compatibilité
   description: string;
-  ressources: string[];
   richesse: number;
   loyauté: number;
-  loyauteVariation?: number; // Optional property for change tracking
-  armée: number;
-  dernierEvenement?: {
-    date: GameDate;
-    description: string;
+  loyautéVariation?: number;
+  ressources: string[];
+  armée: {
+    légions: number;
+    auxiliaires: number;
+    navires: number;
   };
-  position?: any; // For map positioning
+  impôts: number;
+  dernierEvenement?: string;
+  position?: {
+    x: number;
+    y: number;
+  };
 }
 
-export interface ProvinceCardProps {
-  province: Province;
-  onClick: (id: string) => void;
+export interface ProvinceEvent {
+  id: string;
+  provinceId: string;
+  date: GameDate;
+  type: 'rébellion' | 'guerre' | 'crise' | 'célébration' | 'pacification';
+  description: string;
+  résolu: boolean;
+  conséquences?: string;
 }
 
-export interface ProvinceModalProps {
-  province: Province;
-  onSave: (province: Province) => void;
-  open: boolean;
-  onClose: () => void;
+export interface Gouverneur {
+  id: string;
+  nom: string;
+  provinceId: string;
+  senateurId: string;
+  début: GameDate;
+  fin?: GameDate;
+  actions: string[];
+  succès: boolean[];
 }
 
-export interface ProvincesMapProps {
+export interface ProvinceData {
+  id: string;
+  nom: string;
+  histoire: string;
+  population: {
+    historique: { date: GameDate; valeur: number }[];
+    actuelle: number;
+  };
+  économie: {
+    historique: { date: GameDate; valeur: number }[];
+    actuelle: number;
+  };
+  loyauté: {
+    historique: { date: GameDate; valeur: number }[];
+    actuelle: number;
+  };
+}
+
+// Armées stationnées dans une province
+export interface ArméeProvinciale {
+  id: string;
+  provinceId: string;
+  légions: number;
+  auxiliaires: number;
+  navires: number;
+  moral: number;
+  commandant?: string;
+}
+
+// Interfaces pour les composants de l'UI
+export interface ProvinceListProps {
   provinces: Province[];
-  onProvinceSelect: (id: string) => void;
-}
-
-export interface ProvincesDataProps {
-  provinces: Province[];
+  onViewProvince: (id: string) => void;
 }

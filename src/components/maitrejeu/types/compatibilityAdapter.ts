@@ -1,43 +1,14 @@
 
 import { Season as TimeSystemSeason } from '@/utils/timeSystem';
-import { Season, GameDate, PhaseType, ImportanceType } from './common';
-import { Province } from './provinces';
-import { SenateurJouable } from './senateurs';
 
-// Types de base
-export type Season = 'SPRING' | 'SUMMER' | 'AUTUMN' | 'WINTER';
-export type ImportanceType = 'majeure' | 'mineure' | 'normale';
-export type GamePhase = 'SETUP' | 'ELECTION' | 'ACTION' | 'SENAT' | 'EVENEMENT' | 'ADMINISTRATION';
+// Types réexportés depuis les modules appropriés - on évite les duplications
+export { Season, GameDate, ImportanceType, GamePhase, PhaseType } from './common';
+export { Province } from './provinces';
+export { SenateurJouable } from './senateurs';
+export { Evenement, EvenementAction, EvenementType } from './evenements';
+export { Loi } from './lois';
 
-// Fonction de conversion entre les types de saisons
-export const convertTimeSeasonToMaitreJeuSeason = (season: TimeSystemSeason): Season => {
-  const seasonMap: Record<TimeSystemSeason, Season> = {
-    'Ver': 'SPRING',
-    'Aestas': 'SUMMER',
-    'Autumnus': 'AUTUMN',
-    'Hiems': 'WINTER'
-  };
-  return seasonMap[season];
-};
-
-export const convertMaitreJeuSeasonToTimeSeason = (season: Season): TimeSystemSeason => {
-  const seasonMap: Record<Season, TimeSystemSeason> = {
-    'SPRING': 'Ver',
-    'SUMMER': 'Aestas',
-    'AUTUMN': 'Autumnus',
-    'WINTER': 'Hiems'
-  };
-  return seasonMap[season];
-};
-
-// Interface de date commune
-export interface GameDate {
-  year: number;
-  season: Season;
-  day?: number;
-}
-
-// Define component props interfaces here for compatibility
+// Interfaces de props pour les composants
 export interface ProvincesMapProps {
   provinces: Province[];
   onProvinceSelect: (id: string) => void;
@@ -70,6 +41,34 @@ export interface SenateurCardProps {
   senateur: SenateurJouable;
   onViewSenateur: (id: string) => void;
 }
+
+export interface LoisTableProps {
+  lois: Loi[];
+  onVote?: (loiId: string, vote: 'pour' | 'contre' | 'abstention') => void;
+  onAbroger?: (loiId: string) => void;
+  onEdit?: (loiId: string) => void;
+}
+
+// Fonction de conversion entre les types de saisons
+export const convertTimeSeasonToMaitreJeuSeason = (season: TimeSystemSeason): Season => {
+  const seasonMap: Record<TimeSystemSeason, Season> = {
+    'Ver': 'SPRING',
+    'Aestas': 'SUMMER',
+    'Autumnus': 'AUTUMN',
+    'Hiems': 'WINTER'
+  };
+  return seasonMap[season];
+};
+
+export const convertMaitreJeuSeasonToTimeSeason = (season: Season): TimeSystemSeason => {
+  const seasonMap: Record<Season, TimeSystemSeason> = {
+    'SPRING': 'Ver',
+    'SUMMER': 'Aestas',
+    'AUTUMN': 'Autumnus',
+    'WINTER': 'Hiems'
+  };
+  return seasonMap[season];
+};
 
 // Fonctions de migration et d'adaptation pour faciliter la transition
 export const adaptLegacyData = {

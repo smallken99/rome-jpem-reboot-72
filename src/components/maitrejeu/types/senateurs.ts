@@ -1,39 +1,80 @@
 
 import { GameDate } from './common';
 
+// Types pour les sénateurs
 export interface SenateurJouable {
   id: string;
   nom: string;
   famille: string;
-  faction?: string;
-  playerId?: string;
-  âge?: number;
-  fonctionActuelle?: string;
-  magistrature?: string;
+  age: number;
+  popularite: number;
+  richesse: number;
+  influence: number;
+  fonction?: string;
   appartenance?: string;
-  stats?: {
-    eloquence: number;
-    militaire: number;
-    administration: number;
-    intrigue: number;
+  status: string;
+  magistrature?: string;
+  playerId: string | null;
+}
+
+export interface SenateurNonJouable {
+  id: string;
+  nom: string;
+  famille: string;
+  age: number;
+  faction: string;
+  statut: string;
+}
+
+export interface SenateurHistorique {
+  id: string;
+  nom: string;
+  dates: {
+    naissance?: GameDate;
+    mort?: GameDate;
   };
-  // Additional properties can be added here
+  accomplissements: string[];
+  famille: string;
 }
 
-export interface SenateurCardProps {
-  senateur: SenateurJouable;
+export interface FactionPolitique {
+  id: string;
+  nom: string;
+  leader: string;
+  membres: string[];
+  influence: number;
+  idéologie: string;
+  alliés: string[];
+  rivaux: string[];
+}
+
+// Interfaces pour les assignations spéciales
+export interface AssignationPolitique {
+  id: string;
+  senateurId: string;
+  poste: string;
+  début: GameDate;
+  fin?: GameDate;
+  description: string;
+}
+
+export interface AssignationMilitaire {
+  id: string;
+  senateurId: string;
+  province: string;
+  armée: string;
+  début: GameDate;
+  fin?: GameDate;
+  succès: boolean[];
+}
+
+// Interfaces pour les composants de l'UI
+export interface SenateurListProps {
+  senateurs: SenateurJouable[];
   onViewSenateur: (id: string) => void;
-}
-
-export interface SenateurModalProps {
-  senateur: SenateurJouable;
-  open: boolean;
-  onClose: () => void;
-  onSave: (updatedSenateur: SenateurJouable) => void;
 }
 
 export interface AssignmentTableProps {
   senateurs: SenateurJouable[];
-  assignments: Record<string, string>;
   onAssign: (senateurId: string, playerId: string) => void;
 }

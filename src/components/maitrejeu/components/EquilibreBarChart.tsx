@@ -1,30 +1,92 @@
 
 import React from 'react';
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
-import { EquilibreChartProps } from '../types/equilibre';
+import { Bar } from '@nivo/bar';
+import { Equilibre } from '../types/equilibre';
+
+interface EquilibreChartProps {
+  equilibre: Equilibre;
+}
 
 export const EquilibreBarChart: React.FC<EquilibreChartProps> = ({ equilibre }) => {
-  const data = [
-    { name: 'Populares', value: equilibre.populaires, color: '#ef4444' },
-    { name: 'Optimates', value: equilibre.optimates, color: '#3b82f6' },
-    { name: 'Moderates', value: equilibre.moderates, color: '#a855f7' },
-    { name: 'Morale', value: equilibre.morale || 50, color: '#10b981' },
-    { name: 'Loyauté', value: equilibre.loyauté || 50, color: '#f59e0b' },
-    { name: 'Armée', value: equilibre.armée / 200, color: '#6366f1' },
+  const chartData = [
+    {
+      name: 'Population',
+      value: equilibre.population
+    },
+    {
+      name: 'Armée',
+      value: equilibre.armée
+    },
+    {
+      name: 'Morale',
+      value: equilibre.morale
+    },
+    {
+      name: 'Loyauté',
+      value: equilibre.loyauté
+    }
   ];
-
+  
   return (
-    <ResponsiveContainer width="100%" height={300}>
-      <BarChart
-        data={data}
-        margin={{ top: 20, right: 30, left: 20, bottom: 5 }}
-      >
-        <CartesianGrid strokeDasharray="3 3" />
-        <XAxis dataKey="name" />
-        <YAxis />
-        <Tooltip />
-        <Bar dataKey="value" fill={(entry) => entry.color || '#8884d8'} />
-      </BarChart>
-    </ResponsiveContainer>
+    <div className="h-80 mt-6">
+      <Bar
+        data={chartData}
+        keys={['value']}
+        indexBy="name"
+        margin={{ top: 10, right: 30, bottom: 50, left: 60 }}
+        padding={0.3}
+        valueScale={{ type: 'linear' }}
+        indexScale={{ type: 'band', round: true }}
+        colors={{ scheme: 'nivo' }}
+        borderColor={{ from: 'color', modifiers: [['darker', 1.6]] }}
+        axisTop={null}
+        axisRight={null}
+        axisBottom={{
+          tickSize: 5,
+          tickPadding: 5,
+          tickRotation: 0,
+          legend: 'Domaine',
+          legendPosition: 'middle',
+          legendOffset: 32
+        }}
+        axisLeft={{
+          tickSize: 5,
+          tickPadding: 5,
+          tickRotation: 0,
+          legend: 'Niveau',
+          legendPosition: 'middle',
+          legendOffset: -40
+        }}
+        labelSkipWidth={12}
+        labelSkipHeight={12}
+        labelTextColor={{ from: 'color', modifiers: [['darker', 1.6]] }}
+        legends={[
+          {
+            dataFrom: 'keys',
+            anchor: 'bottom-right',
+            direction: 'column',
+            justify: false,
+            translateX: 120,
+            translateY: 0,
+            itemsSpacing: 2,
+            itemWidth: 100,
+            itemHeight: 20,
+            itemDirection: 'left-to-right',
+            itemOpacity: 0.85,
+            symbolSize: 20,
+            effects: [
+              {
+                on: 'hover',
+                style: {
+                  itemOpacity: 1
+                }
+              }
+            ]
+          }
+        ]}
+        role="application"
+        ariaLabel="État de la République"
+      />
+    </div>
   );
 };

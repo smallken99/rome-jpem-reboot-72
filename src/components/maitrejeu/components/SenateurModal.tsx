@@ -1,14 +1,19 @@
-// Mise à jour des imports pour le modal de sénateur
+
 import React, { useState, useEffect } from 'react';
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Slider } from '@/components/ui/slider';
-import { SenateurJouable, SenateurModalProps } from '../types/senateurs';
+import { SenateurJouable } from '../types/senateurs';
 import { MagistratureType } from '../types/magistratures';
+
+interface SenateurModalProps {
+  senateur: SenateurJouable;
+  open: boolean;
+  onClose: () => void;
+  onSave: (updatedSenateur: SenateurJouable) => void;
+}
 
 export const SenateurModal: React.FC<SenateurModalProps> = ({ 
   senateur, 
@@ -34,10 +39,6 @@ export const SenateurModal: React.FC<SenateurModalProps> = ({
   
   const handleSelectChange = (field: keyof SenateurJouable, value: string) => {
     setEditedSenateur(prev => ({ ...prev, [field]: value }));
-  };
-  
-  const handleSliderChange = (field: keyof SenateurJouable, value: number[]) => {
-    setEditedSenateur(prev => ({ ...prev, [field]: value[0] }));
   };
   
   const handleSave = () => {
@@ -77,23 +78,23 @@ export const SenateurModal: React.FC<SenateurModalProps> = ({
           
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <Label htmlFor="âge">Âge</Label>
+              <Label htmlFor="age">Âge</Label>
               <Input 
-                id="âge" 
-                name="âge" 
+                id="age" 
+                name="age" 
                 type="number" 
-                value={editedSenateur.âge} 
+                value={editedSenateur.age} 
                 onChange={handleNumberChange} 
               />
             </div>
             
             <div>
-              <Label htmlFor="popularité">Popularité</Label>
+              <Label htmlFor="popularite">Popularité</Label>
               <Input 
-                id="popularité" 
-                name="popularité" 
+                id="popularite" 
+                name="popularite" 
                 type="number" 
-                value={editedSenateur.popularité} 
+                value={editedSenateur.popularite} 
                 onChange={handleNumberChange} 
               />
             </div>
@@ -124,11 +125,11 @@ export const SenateurModal: React.FC<SenateurModalProps> = ({
           </div>
           
           <div>
-            <Label htmlFor="fonctionActuelle">Fonction Actuelle</Label>
+            <Label htmlFor="fonction">Fonction Actuelle</Label>
             <Input 
-              id="fonctionActuelle" 
-              name="fonctionActuelle" 
-              value={editedSenateur.fonctionActuelle || ''} 
+              id="fonction" 
+              name="fonction" 
+              value={editedSenateur.fonction || ''} 
               onChange={handleInputChange} 
             />
           </div>
@@ -144,12 +145,12 @@ export const SenateurModal: React.FC<SenateurModalProps> = ({
           </div>
           
           <div>
-            <Label htmlFor="statut">Statut</Label>
+            <Label htmlFor="status">Statut</Label>
             <Select 
-              value={editedSenateur.statut || ''} 
-              onValueChange={(value) => handleSelectChange('statut', value)}
+              value={editedSenateur.status || ''} 
+              onValueChange={(value) => handleSelectChange('status' as keyof SenateurJouable, value)}
             >
-              <SelectTrigger id="statut">
+              <SelectTrigger id="status">
                 <SelectValue placeholder="Sélectionner un statut" />
               </SelectTrigger>
               <SelectContent>
@@ -165,7 +166,7 @@ export const SenateurModal: React.FC<SenateurModalProps> = ({
             <Label htmlFor="magistrature">Magistrature</Label>
             <Select 
               value={editedSenateur.magistrature || ''} 
-              onValueChange={(value) => handleSelectChange('magistrature', value as MagistratureType)}
+              onValueChange={(value) => handleSelectChange('magistrature' as keyof SenateurJouable, value)}
             >
               <SelectTrigger id="magistrature">
                 <SelectValue placeholder="Sélectionner une magistrature" />
