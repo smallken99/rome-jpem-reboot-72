@@ -1,6 +1,8 @@
 
 import { SenateurJouable, Province, Evenement, Election, HistoireEntry, Loi, Equilibre } from '../types';
 import { GameDate, Season, GamePhase } from '../types/common';
+import { Client } from '../types/clients';
+import { v4 as uuidv4 } from 'uuid';
 
 // Données initiales pour les sénateurs
 export const initialSenateurs: SenateurJouable[] = [
@@ -69,6 +71,49 @@ export const initialSenateurs: SenateurJouable[] = [
     fonction: "Préteur",
     popularite: 55,
     appartenance: "Optimates"
+  }
+];
+
+// Données initiales pour les clients
+export const initialClients: Client[] = [
+  {
+    id: uuidv4(),
+    name: "Marcus Tullius",
+    type: "artisan_commercant",
+    subType: "Forgeron",
+    location: "Forum",
+    loyalty: "moyenne",
+    influences: {
+      political: 3,
+      popular: 6,
+      religious: 2
+    }
+  },
+  {
+    id: uuidv4(),
+    name: "Lucius Cornelius",
+    type: "religieux",
+    subType: "Augure",
+    location: "Capitole",
+    loyalty: "forte",
+    influences: {
+      political: 7,
+      popular: 4,
+      religious: 9
+    }
+  },
+  {
+    id: uuidv4(),
+    name: "Gaius Marius",
+    type: "politicien",
+    subType: "Orateur du Forum",
+    location: "Forum",
+    loyalty: "faible",
+    influences: {
+      political: 8,
+      popular: 7,
+      religious: 3
+    }
   }
 ];
 

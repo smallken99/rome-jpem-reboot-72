@@ -10,7 +10,8 @@ import {
   initialLois,
   initialEquilibre,
   initialDate,
-  initialPhase
+  initialPhase,
+  initialClients
 } from './initialState';
 import { createSenateurOperations } from './senateurOperations';
 import { createProvinceOperations } from './provinceOperations';
@@ -20,6 +21,7 @@ import { createHistoireOperations } from './histoireOperations';
 import { createLoiOperations } from './loiOperations';
 import { createEquilibreOperations } from './equilibreOperations';
 import { createTimeOperations } from './timeOperations';
+import { createClientOperations } from './clientOperations';
 
 // Création du contexte avec une valeur par défaut
 const MaitreJeuContext = createContext<MaitreJeuContextType>({} as MaitreJeuContextType);
@@ -36,6 +38,7 @@ export const MaitreJeuProvider: React.FC<{ children: React.ReactNode }> = ({ chi
   const [equilibre, setEquilibre] = useState(initialEquilibre);
   const [currentDate, setCurrentDate] = useState(initialDate);
   const [currentPhase, setCurrentPhase] = useState(initialPhase);
+  const [clients, setClients] = useState(initialClients);
 
   // Calcul des valeurs dérivées
   const currentYear = currentDate.year;
@@ -50,6 +53,7 @@ export const MaitreJeuProvider: React.FC<{ children: React.ReactNode }> = ({ chi
   const loiOps = createLoiOperations(setLois);
   const equilibreOps = createEquilibreOperations(setEquilibre);
   const timeOps = createTimeOperations(setCurrentDate, setCurrentPhase);
+  const clientOps = createClientOperations(setClients);
 
   const contextValue: MaitreJeuContextType = {
     // Sénateurs
@@ -86,6 +90,11 @@ export const MaitreJeuProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     equilibre,
     setEquilibre,
     ...equilibreOps,
+    
+    // Clients
+    clients,
+    setClients,
+    ...clientOps,
     
     // Date et phases
     currentDate,

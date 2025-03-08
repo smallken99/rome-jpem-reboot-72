@@ -10,6 +10,7 @@ import {
 } from '../types';
 import { GameDate, Season, GamePhase } from '../types/common';
 import { MagistratureType } from '../types/magistratures';
+import { Client, ClientCreationData } from '../types/clients';
 
 // Type du contexte
 export interface MaitreJeuContextType {
@@ -51,6 +52,14 @@ export interface MaitreJeuContextType {
   equilibre: Equilibre | null;
   setEquilibre: React.Dispatch<React.SetStateAction<Equilibre | null>>;
   updateEquilibre: (updates: Partial<Equilibre>) => void;
+  
+  // Contexte des clients
+  clients: Client[];
+  setClients: React.Dispatch<React.SetStateAction<Client[]>>;
+  addClient: (client: ClientCreationData) => string;
+  updateClient: (id: string, updates: Partial<Client>) => void;
+  deleteClient: (id: string) => void;
+  assignClientToSenateur: (clientId: string, senateurId: string | null) => void;
   
   // Contexte de date
   currentDate: GameDate;

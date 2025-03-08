@@ -18,6 +18,7 @@ import { GestionPolitique } from '@/components/maitrejeu/GestionPolitique';
 import { GestionEquilibre } from '@/components/maitrejeu/GestionEquilibre';
 import { GestionProvinces } from '@/components/maitrejeu/GestionProvinces';
 import { GestionHistoire } from '@/components/maitrejeu/GestionHistoire';
+import { GestionClients } from '@/components/maitrejeu/GestionClients';
 
 const MaitreJeu = () => {
   const [activeTab, setActiveTab] = useState('senateurs');
@@ -77,6 +78,14 @@ const MaitreJeu = () => {
                 >
                   <Users className="h-5 w-5 mr-2" />
                   Gestion des Sénateurs
+                </Button>
+                <Button 
+                  variant={activeTab === 'clients' ? 'default' : 'ghost'} 
+                  className="w-full justify-start"
+                  onClick={() => setActiveTab('clients')}
+                >
+                  <UserPlus className="h-5 w-5 mr-2" />
+                  Gestion des Clients
                 </Button>
                 <Button 
                   variant={activeTab === 'politique' ? 'default' : 'ghost'} 
@@ -146,12 +155,14 @@ const MaitreJeu = () => {
                 <CardHeader>
                   <CardTitle className="font-cinzel text-rome-navy flex items-center gap-2">
                     {activeTab === 'senateurs' && <Users className="h-5 w-5" />}
+                    {activeTab === 'clients' && <UserPlus className="h-5 w-5" />}
                     {activeTab === 'politique' && <Gavel className="h-5 w-5" />}
                     {activeTab === 'equilibre' && <Scale className="h-5 w-5" />}
                     {activeTab === 'provinces' && <Globe className="h-5 w-5" />}
                     {activeTab === 'histoire' && <BookText className="h-5 w-5" />}
                     
                     {activeTab === 'senateurs' && 'Gestion des Sénateurs'}
+                    {activeTab === 'clients' && 'Gestion des Clients'}
                     {activeTab === 'politique' && 'Influence Politique'}
                     {activeTab === 'equilibre' && 'Équilibrage du Jeu'}
                     {activeTab === 'provinces' && 'Provinces & Guerres'}
@@ -160,6 +171,7 @@ const MaitreJeu = () => {
                   
                   <CardDescription>
                     {activeTab === 'senateurs' && 'Créez, modifiez ou supprimez des sénateurs et leurs caractéristiques.'}
+                    {activeTab === 'clients' && 'Gérez le réseau de clientèle, ajoutez ou supprimez des clients et assignez-les aux sénateurs.'}
                     {activeTab === 'politique' && 'Ajoutez des lois, créez des événements politiques et des crises.'}
                     {activeTab === 'equilibre' && 'Ajustez les richesses, relations et autres paramètres pour équilibrer le jeu.'}
                     {activeTab === 'provinces' && 'Gérez les provinces et lancez des campagnes militaires.'}
@@ -169,6 +181,7 @@ const MaitreJeu = () => {
                 
                 <CardContent>
                   {activeTab === 'senateurs' && <GestionSenateurs />}
+                  {activeTab === 'clients' && <GestionClients />}
                   {activeTab === 'politique' && <GestionPolitique />}
                   {activeTab === 'equilibre' && <GestionEquilibre />}
                   {activeTab === 'provinces' && <GestionProvinces />}
