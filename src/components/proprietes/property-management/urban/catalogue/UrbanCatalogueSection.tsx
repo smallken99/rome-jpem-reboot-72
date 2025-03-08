@@ -2,8 +2,6 @@
 import React from 'react';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
-import { UrbanPropertySelector } from '../UrbanPropertySelector';
-import { UrbanPropertyDetails } from '../UrbanPropertyDetails';
 import { BuildingDescription } from '../../../data/types/buildingTypes';
 
 interface UrbanCatalogueSectionProps {
@@ -38,22 +36,12 @@ export const UrbanCatalogueSection: React.FC<UrbanCatalogueSectionProps> = ({
             <TabsTrigger value="public">Publics</TabsTrigger>
             <TabsTrigger value="military">Militaires</TabsTrigger>
           </TabsList>
-          
-          <div className="border border-rome-gold/30 rounded-md p-4 bg-white">
-            <UrbanPropertySelector 
-              buildingType={selectedBuildingType}
-              selectedId={selectedBuildingId || ''}
-              onSelect={setSelectedBuildingId}
-            />
-          </div>
         </Tabs>
       </div>
       
       <div className="lg:col-span-3">
         {selectedBuildingDetails ? (
           <div className="border border-rome-gold/30 rounded-md p-6 bg-white relative">
-            <UrbanPropertyDetails buildingDetails={selectedBuildingDetails} />
-            
             <div className="mt-6">
               <Button 
                 className="roman-btn w-full sm:w-auto"

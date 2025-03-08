@@ -1,59 +1,54 @@
 
 import React from 'react';
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card';
-import { Building } from 'lucide-react';
-import { allBuildingTypes } from '../../data/buildings';
+import { Button } from '@/components/ui/button';
+import { Grid2X2, List, PlusCircle } from 'lucide-react';
 
-export interface UrbanPropertySelectorProps {
-  buildingType: 'residential' | 'religious' | 'public' | 'military';
+interface UrbanPropertySelectorProps {
+  buildingType: string;
   selectedId: string;
   onSelect: (id: string) => void;
+  isViewingCatalogue?: boolean;
+  setIsViewingCatalogue?: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
 export const UrbanPropertySelector: React.FC<UrbanPropertySelectorProps> = ({
   buildingType,
   selectedId,
   onSelect,
+  isViewingCatalogue = false,
+  setIsViewingCatalogue
 }) => {
-  const buildings = allBuildingTypes[
-    buildingType === 'residential'
-      ? 'urbanResidential'
-      : buildingType
-  ] as {
-    [key: string]: {
-      name: string;
-      description: string;
-    };
-  };
-
   return (
-    <div>
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        {Object.entries(buildings).map(([id, building]) => (
-          <Card
-            key={id}
-            className={`cursor-pointer hover:bg-accent hover:text-accent-foreground ${
-              selectedId === id ? 'bg-accent text-accent-foreground' : ''
-            }`}
-            onClick={() => onSelect(id)}
-          >
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Building className="h-4 w-4" />
-                {building.name}
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <CardDescription>{building.description}</CardDescription>
-            </CardContent>
-          </Card>
-        ))}
+    <div className="border rounded-md p-4 bg-card">
+      <div className="flex justify-between items-center mb-4">
+        <h3 className="font-cinzel text-lg text-rome-navy">
+          Propriétés {buildingType === 'residential' ? 'Résidentielles' : 
+                      buildingType === 'religious' ? 'Religieuses' : 
+                      buildingType === 'public' ? 'Publiques' : 'Militaires'}
+        </h3>
+        
+        {setIsViewingCatalogue && (
+          <div className="flex items-center space-x-2">
+            <Button
+              variant="outline"
+              size="sm"
+              className={!isViewingCatalogue ? "bg-rome-gold/20" : ""}
+              onClick={() => setIsViewingCatalogue(false)}
+            >
+              <List className="h-4 w-4 mr-1" />
+              Mes propriétés
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              className={isViewingCatalogue ? "bg-rome-gold/20" : ""}
+              onClick={() => setIsViewingCatalogue(true)}
+            >
+              <Grid2X2 className="h-4 w-4 mr-1" />
+              Catalogue
+            </Button>
+          </div>
+        )}
       </div>
     </div>
   );

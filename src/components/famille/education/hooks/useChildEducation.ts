@@ -1,72 +1,31 @@
 
-import { useState, useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { Child } from '../types/educationTypes';
-// Import preceptors from data/index
-import { preceptors } from '../data/index';
+import { useEducation } from '../context/EducationContext';
+import { educationPaths } from '../data/index';
 
-// Mock children data - replace with actual implementation if there's a real source
-const mockChildren: Child[] = [
-  {
-    id: "1",
-    name: "Marcus",
-    age: 10,
-    gender: "male",
-    currentEducation: {
-      type: "military",
-      mentor: null,
-      skills: [],
-      progress: 0
-    }
-  },
-  {
-    id: "2",
-    name: "Livia",
-    age: 8,
-    gender: "female",
-    currentEducation: {
-      type: "religious",
-      mentor: null,
-      skills: [],
-      progress: 0
-    }
-  }
-];
-
-export const useChildEducation = () => {
-  const [children, setChildren] = useState<Child[]>(mockChildren);
-  const [selectedChildId, setSelectedChildId] = useState<string | null>(null);
+export const useChildEducation = (childId: string) => {
+  const { children } = useEducation();
+  const [child, setChild] = useState<Child | null>(null);
+  const [loading, setLoading] = useState(true);
   
-  const selectedChild = selectedChildId ? 
-    children.find(child => child.id === selectedChildId) || null : null;
+  useEffect(() => {
+    if (Array.isArray(children) && children.length > 0) {
+      const foundChild = children.find(c => c.id === childId);
+      setChild(foundChild || null);
+      setLoading(false);
+    } else {
+      setLoading(false);
+    }
+  }, [children, childId]);
   
-  const updateChildEducation = (
-    childId: string, 
-    educationType: string, 
-    mentor: string | null = null,
-    specialties: string[] = []
-  ) => {
-    setChildren(prevChildren => 
-      prevChildren.map(child => 
-        child.id === childId 
-          ? {
-              ...child,
-              currentEducation: {
-                ...child.currentEducation,
-                type: educationType,
-                mentor,
-                skills: specialties
-              }
-            }
-          : child
-      )
-    );
-  };
+  const educationPath = child?.currentEducation?.type 
+    ? educationPaths.find(path => path.type === child.currentEducation.type)
+    : null;
   
   return {
-    children,
-    selectedChild,
-    selectedChildId,
-    setSelectedChildId,
-    updateChildEducation
+    child,
+    loading,
+    educationPath
   };
 };

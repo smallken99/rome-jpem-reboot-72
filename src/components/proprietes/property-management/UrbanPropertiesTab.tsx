@@ -14,13 +14,15 @@ type UrbanBuildingCategory = 'religious' | 'public' | 'urban' | 'rural';
 const UrbanPropertiesTab = () => {
   const {
     selectedBuildingType,
+    setSelectedBuildingType,
     selectedBuildingId,
-    selectedBuildingDetails: selectedBuilding,
+    setSelectedBuildingId,
+    selectedBuildingDetails,
     purchaseDialogOpen,
     setPurchaseDialogOpen,
     balance,
     availableSlaves,
-    filteredOwnedBuildings: filteredBuildings,
+    filteredOwnedBuildings,
     sellBuilding,
     calculateBuildingValue,
     toggleMaintenance,
@@ -31,11 +33,11 @@ const UrbanPropertiesTab = () => {
   const [isViewingCatalogue, setIsViewingCatalogue] = useState(false);
 
   const handleBuildingTypeChange = (type: AllowedBuildingType) => {
-    // This would be implemented in your hook
+    setSelectedBuildingType(type);
   };
 
   const handleBuildingSelect = (id: string) => {
-    // This would be implemented in your hook
+    setSelectedBuildingId(id);
   };
 
   return (
@@ -53,18 +55,18 @@ const UrbanPropertiesTab = () => {
           
           {isViewingCatalogue ? (
             <UrbanCatalogueSection 
-              selectedBuildingType={selectedBuildingType as AllowedBuildingType}
+              selectedBuildingType={selectedBuildingType}
               setSelectedBuildingType={handleBuildingTypeChange}
               selectedBuildingId={selectedBuildingId}
               setSelectedBuildingId={handleBuildingSelect}
-              selectedBuildingDetails={selectedBuilding}
+              selectedBuildingDetails={selectedBuildingDetails}
               purchaseDialogOpen={purchaseDialogOpen}
               setPurchaseDialogOpen={setPurchaseDialogOpen}
             />
           ) : (
             <OwnedUrbanPropertiesSection
-              selectedBuildingType={selectedBuildingType as AllowedBuildingType}
-              filteredOwnedBuildings={filteredBuildings || []}
+              selectedBuildingType={selectedBuildingType === 'military' ? 'public' : selectedBuildingType}
+              filteredOwnedBuildings={filteredOwnedBuildings || []}
               balance={balance}
               availableSlaves={availableSlaves}
               setPurchaseDialogOpen={setPurchaseDialogOpen}
@@ -79,9 +81,9 @@ const UrbanPropertiesTab = () => {
         
         {/* Right panel: Building details */}
         <div className="lg:col-span-2">
-          {selectedBuilding ? (
+          {selectedBuildingDetails ? (
             <UrbanPropertyDetails 
-              buildingDetails={selectedBuilding}
+              buildingDetails={selectedBuildingDetails}
             />
           ) : (
             <div className="border rounded-lg p-6 bg-card text-center text-muted-foreground">

@@ -1,84 +1,114 @@
 
-import { Preceptor, PreceptorsByType } from './types/educationTypes';
+import { romanNames, romanNamePrefixes, romanNameSuffixes } from './data/romanNames';
+import { educationSpecialties } from './data/specialties';
 
 /**
- * Filter preceptors by type and sort by quality
+ * Safely checks if an object is an array with elements
+ * @param obj The object to check
+ * @returns True if the object is an array with at least one element
  */
-export const filterPreceptorsByType = (
-  preceptors: PreceptorsByType,
-  type: string
-): Preceptor[] => {
-  if (!preceptors || !type || !(type in preceptors)) {
-    return [];
-  }
-
-  // Safely check if preceptors[type] is an array before accessing length
-  const typePreceptors = preceptors[type];
-  if (!Array.isArray(typePreceptors)) {
-    return [];
-  }
-
-  return [...typePreceptors].sort((a, b) => b.quality - a.quality);
+export const isNonEmptyArray = (obj: any): boolean => {
+  return Array.isArray(obj) && obj.length > 0;
 };
 
 /**
- * Get available preceptors from all types
+ * Safely gets an array length, returning 0 for non-arrays
+ * @param obj The object to check
+ * @returns The length of the array or 0 if not an array
  */
-export const getAllAvailablePreceptors = (preceptors: PreceptorsByType): Preceptor[] => {
-  if (!preceptors) return [];
-  
-  const allAvailablePreceptors: Preceptor[] = [];
-  
-  // Loop through all preceptor types
-  Object.keys(preceptors).forEach(type => {
-    if (Array.isArray(preceptors[type])) {
-      const availableFromType = preceptors[type].filter(p => p.available);
-      allAvailablePreceptors.push(...availableFromType);
-    }
-  });
-  
-  return allAvailablePreceptors.sort((a, b) => b.quality - a.quality);
+export const safeArrayLength = (obj: any): number => {
+  return Array.isArray(obj) ? obj.length : 0;
 };
 
-// Add these functions to support useEducationSystem
+/**
+ * Generates a random Roman name for a preceptor
+ * @returns A Roman name
+ */
 export const generateRomanName = (): string => {
-  // This is a simplified implementation for now
-  const praenomina = ['Marcus', 'Lucius', 'Gaius', 'Publius', 'Quintus', 'Titus', 'Aulus'];
-  const nomina = ['Cornelius', 'Junius', 'Claudius', 'Valerius', 'Aurelius', 'Flavius', 'Servilius'];
-  const cognomina = ['Scipio', 'Cicero', 'Caesar', 'Cato', 'Brutus', 'Sulla', 'Maximus'];
+  const nameIndex = Math.floor(Math.random() * romanNames.length);
+  const usePrefix = Math.random() > 0.7;
+  const useSuffix = Math.random() > 0.7;
   
-  const randomPraenomen = praenomina[Math.floor(Math.random() * praenomina.length)];
-  const randomNomen = nomina[Math.floor(Math.random() * nomina.length)];
-  const randomCognomen = cognomina[Math.floor(Math.random() * cognomina.length)];
+  let name = romanNames[nameIndex];
   
-  return `${randomPraenomen} ${randomNomen} ${randomCognomen}`;
+  if (usePrefix) {
+    const prefixIndex = Math.floor(Math.random() * romanNamePrefixes.length);
+    name = `${romanNamePrefixes[prefixIndex]} ${name}`;
+  }
+  
+  if (useSuffix) {
+    const suffixIndex = Math.floor(Math.random() * romanNameSuffixes.length);
+    name = `${name} ${romanNameSuffixes[suffixIndex]}`;
+  }
+  
+  return name;
 };
 
-export const generateSpeciality = (): string => {
-  const specialities = ['Rhétorique', 'Philosophie', 'Droit', 'Art Militaire', 'Histoire', 'Mathématiques', 'Littérature'];
-  return specialities[Math.floor(Math.random() * specialities.length)];
+/**
+ * Generates a random speciality for a preceptor
+ * @param educationType The type of education
+ * @returns A speciality
+ */
+export const generateSpeciality = (educationType: string): string => {
+  if (!educationSpecialties[educationType]) {
+    return "Général";
+  }
+  
+  const specialtyIndex = Math.floor(Math.random() * educationSpecialties[educationType].length);
+  return educationSpecialties[educationType][specialtyIndex];
 };
 
+/**
+ * Generates a random reputation for a preceptor
+ * @returns A reputation string
+ */
 export const generateReputation = (): "Excellent" | "Bon" | "Moyen" => {
-  const reputations: ["Excellent", "Bon", "Moyen"] = ["Excellent", "Bon", "Moyen"];
-  return reputations[Math.floor(Math.random() * reputations.length)];
+  const rand = Math.random();
+  if (rand > 0.7) return "Excellent";
+  if (rand > 0.4) return "Bon";
+  return "Moyen";
 };
 
-export const generateFee = (): number => {
-  // Random fee between 500 and 2000
-  return Math.floor(Math.random() * 1500) + 500;
+/**
+ * Generates a random fee based on reputation
+ * @param reputation The reputation of the preceptor
+ * @returns A fee amount
+ */
+export const generateFee = (reputation: "Excellent" | "Bon" | "Moyen"): number => {
+  switch (reputation) {
+    case "Excellent": return 8000 + Math.floor(Math.random() * 4000);
+    case "Bon": return 5000 + Math.floor(Math.random() * 3000);
+    case "Moyen": return 2000 + Math.floor(Math.random() * 3000);
+    default: return 3000;
+  }
 };
 
-export const generateTitle = (): string => {
-  const titles = ['Docteur', 'Professeur', 'Maître', 'Sage'];
-  return titles[Math.floor(Math.random() * titles.length)];
+/**
+ * Generates a title for a preceptor
+ * @param reputation The reputation of the preceptor
+ * @returns A title
+ */
+export const generateTitle = (reputation: "Excellent" | "Bon" | "Moyen"): string => {
+  switch (reputation) {
+    case "Excellent": return "le Sage";
+    case "Bon": return "l'Érudit";
+    case "Moyen": return "";
+    default: return "";
+  }
 };
 
+/**
+ * Generates a stat bonus for education
+ * @returns A stat bonus number
+ */
 export const generateStatBonus = (): number => {
-  // Generate a stat bonus between 1 and 5
   return Math.floor(Math.random() * 5) + 1;
 };
 
-export const generateGender = (): string => {
-  return Math.random() > 0.5 ? 'male' : 'female';
+/**
+ * Generates a random gender
+ * @returns Either 'male' or 'female'
+ */
+export const generateGender = (): 'male' | 'female' => {
+  return Math.random() > 0.7 ? 'female' : 'male';
 };
