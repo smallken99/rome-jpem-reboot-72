@@ -16,6 +16,10 @@ import { LoisTable } from './components/LoisTable';
 import { PoliticalEventsTimeline } from './components/PoliticalEventsTimeline';
 import { ElectionPlanner } from './components/ElectionPlanner';
 import { useMaitreJeu } from './context/MaitreJeuContext';
+import { PlusCircle } from 'lucide-react';
+import { Label } from '@/components/ui/label';
+import { Slider } from '@/components/ui/slider';
+import { Textarea } from '@/components/ui/textarea';
 
 export const GestionPolitique = () => {
   const { 

@@ -10,6 +10,8 @@ import {
   AssignmentTableProps 
 } from '../types/compatibilityAdapter';
 import { toast } from 'sonner';
+import { Search, Save, AlertCircle, User } from 'lucide-react';
+import { Badge } from '@/components/ui/badge';
 
 export const AssignmentTable: React.FC<AssignmentTableProps> = ({ 
   senateurs, 

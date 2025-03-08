@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -7,7 +6,7 @@ import { AlertCircle, ArrowUp, ArrowDown } from "lucide-react";
 import { formatDate } from '@/utils/formatUtils';
 import { Province, ProvinceCardProps } from '../types/compatibilityAdapter';
 
-export const ProvinceCard: React.FC<ProvinceCardProps> = ({ province, onProvinceSelected }) => {
+export const ProvinceCard: React.FC<ProvinceCardProps> = ({ province, onViewProvince }) => {
   const getStatusColor = (status: string) => {
     switch (status) {
       case 'pacifiée': return 'bg-green-100 text-green-800 border-green-200';
@@ -19,7 +18,7 @@ export const ProvinceCard: React.FC<ProvinceCardProps> = ({ province, onProvince
   };
   
   const handleProvinceClick = () => {
-    onProvinceSelected(province);
+    onViewProvince(province.id);
   };
   
   return (
@@ -39,7 +38,7 @@ export const ProvinceCard: React.FC<ProvinceCardProps> = ({ province, onProvince
         </p>
         <div className="flex items-center text-xs">
           <span className="mr-2">Loyauté:</span>
-          <span className="font-medium">{province.loyaute}%</span>
+          <span className="font-medium">{province.loyauté}%</span>
           {province.loyauteVariation && (
             <span className={`ml-1 ${province.loyauteVariation > 0 ? 'text-green-600' : 'text-red-600'}`}>
               {province.loyauteVariation > 0 ? <ArrowUp className="h-3 w-3 inline-block align-middle" /> : <ArrowDown className="h-3 w-3 inline-block align-middle" />}
@@ -50,7 +49,7 @@ export const ProvinceCard: React.FC<ProvinceCardProps> = ({ province, onProvince
       </CardContent>
       <CardFooter className="flex justify-between items-center">
         <span className="text-xs text-gray-600">
-          Dernier événement: {formatDate(province.dernierEvenement.year, province.dernierEvenement.season)}
+          Dernier événement: {formatDate(province.lastEvent?.year, province.lastEvent?.season)}
         </span>
         <Button onClick={handleProvinceClick} size="sm">
           Voir détails

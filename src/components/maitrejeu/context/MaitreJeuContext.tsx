@@ -1,4 +1,3 @@
-
 import React, { createContext, useContext, useState, ReactNode, useEffect } from 'react';
 import { useTimeStore } from '@/utils/timeSystem';
 import { convertTimeSeasonToMaitreJeuSeason } from '@/components/maitrejeu/types/common';
@@ -29,6 +28,7 @@ export interface MaitreJeuContextType {
   
   equilibre: Equilibre;
   updateEquilibre: (updates: Partial<Equilibre>) => void;
+  updateFactionBalance: (populaires: number, optimates: number, moderates: number) => void;
   
   provinces: Province[];
   addProvince: (province: Province) => void;
@@ -39,6 +39,7 @@ export interface MaitreJeuContextType {
   addLoi: (loi: Loi) => void;
   updateLoi: (id: string, updates: Partial<Loi>) => void;
   removeLoi: (id: string) => void;
+  voteLoi: (id: string, vote: 'pour' | 'contre' | 'abstention') => void;
   
   evenements: Evenement[];
   addEvenement: (evenement: Evenement) => void;
@@ -50,9 +51,10 @@ export interface MaitreJeuContextType {
   addSenateur: (senateur: SenateurJouable) => void;
   updateSenateur: (id: string, updates: Partial<SenateurJouable>) => void;
   removeSenateur: (id: string) => void;
+  assignSenateurToPlayer: (id: string, playerId: string) => void;
   
   histoireEntries: HistoireEntry[];
-  addHistoireEntry: (histoireEntry: HistoireEntry) => void;
+  addHistoireEntry: (histoireEntry: Omit<HistoireEntry, "id">) => void;
   updateHistoireEntry: (id: string, updates: Partial<HistoireEntry>) => void;
   removeHistoireEntry: (id: string) => void;
   
@@ -63,7 +65,18 @@ export interface MaitreJeuContextType {
   };
   setGameState: (updates: Partial<{ year: number; season: Season; phase: GamePhase }>) => void;
   
-  resetGameSeason: () => void;
+  // For compatibility with previous code
+  currentYear: number;
+  currentSeason: Season;
+  currentPhase: GamePhase;
+  advanceTime: () => void;
+  changePhase: (phase: GamePhase) => void;
+  
+  // Elections
+  elections: any[];
+  scheduleElection: (date: { year: number, season: Season }, type: string, candidates: string[]) => void;
+  
+  resetGameS0eason: () => void;
   resetGameYear: () => void;
   resetGamePhase: () => void;
 }
@@ -88,6 +101,7 @@ const MaitreJeuContext = createContext<MaitreJeuContextType>({
     loyalisme: 50
   },
   updateEquilibre: () => {},
+  updateFactionBalance: () => {},
   
   provinces: [],
   addProvince: () => {},
@@ -98,6 +112,7 @@ const MaitreJeuContext = createContext<MaitreJeuContextType>({
   addLoi: () => {},
   updateLoi: () => {},
   removeLoi: () => {},
+  voteLoi: () => {},
   
   evenements: [],
   addEvenement: () => {},
@@ -109,6 +124,7 @@ const MaitreJeuContext = createContext<MaitreJeuContextType>({
   addSenateur: () => {},
   updateSenateur: () => {},
   removeSenateur: () => {},
+  assignSenateurToPlayer: () => {},
   
   histoireEntries: [],
   addHistoireEntry: () => {},
@@ -122,7 +138,16 @@ const MaitreJeuContext = createContext<MaitreJeuContextType>({
   },
   setGameState: () => {},
   
-  resetGameSeason: () => {},
+  currentYear: 200,
+  currentSeason: 'SPRING',
+  currentPhase: 'ADMINISTRATION',
+  advanceTime: () => {},
+  changePhase: () => {},
+  
+  elections: [],
+  scheduleElection: () => {},
+  
+  resetGameS0eason: () => {},
   resetGameYear: () => {},
   resetGamePhase: () => {},
 });
@@ -254,7 +279,7 @@ export const MaitreJeuProvider: React.FC<{ children: ReactNode }> = ({ children 
   };
   
   // Fonctions de gestion de l'histoire
-  const addHistoireEntry = (histoireEntry: HistoireEntry) => {
+  const addHistoireEntry = (histoireEntry: Omit<HistoireEntry, "id">) => {
     setHistoireEntries([...histoireEntries, { ...histoireEntry, id: Math.random().toString(36).substring(2, 15) }]);
   };
   
@@ -290,7 +315,7 @@ export const MaitreJeuProvider: React.FC<{ children: ReactNode }> = ({ children 
   }, [timeSystem.season, timeSystem.year]);
 
   // Fonctions de réinitialisation
-  const resetGameSeason = () => {
+  const resetGameS0eason = () => {
     setSeason(initialSeason);
   };
 
@@ -301,6 +326,30 @@ export const MaitreJeuProvider: React.FC<{ children: ReactNode }> = ({ children 
   const resetGamePhase = () => {
     setPhase('ADMINISTRATION');
   };
+  
+  const updateFactionBalance = (populaires: number, optimates: number, moderates: number) => {
+    updateEquilibre({ 
+      population: equilibre.population,
+      armee: equilibre.armee,
+      richesse: equilibre.richesse,
+      moral: equilibre.moral,
+      loyalisme: equilibre.loyalisme,
+      populaires, 
+      optimates, 
+      moderates 
+    });
+  };
+
+  const voteLoi = () => {};
+  const assignSenateurToPlayer = () => {};
+
+  const advanceTime = () => {
+    // Implement time advancement logic here
+  };
+
+  const changePhase = (newPhase: GamePhase) => setPhase(newPhase);
+
+  const scheduleElection = () => {};
   
   return (
     <MaitreJeuContext.Provider value={{
@@ -322,6 +371,7 @@ export const MaitreJeuProvider: React.FC<{ children: ReactNode }> = ({ children 
       addLoi,
       updateLoi,
       removeLoi,
+      voteLoi,
       evenements,
       addEvenement,
       updateEvenement,
@@ -331,6 +381,7 @@ export const MaitreJeuProvider: React.FC<{ children: ReactNode }> = ({ children 
       addSenateur,
       updateSenateur,
       removeSenateur,
+      assignSenateurToPlayer,
       histoireEntries,
       addHistoireEntry,
       updateHistoireEntry,
@@ -341,9 +392,17 @@ export const MaitreJeuProvider: React.FC<{ children: ReactNode }> = ({ children 
         phase
       },
       setGameState,
-      resetGameSeason,
+      resetGameS0eason,
       resetGameYear,
-      resetGamePhase
+      resetGamePhase,
+      currentYear: year,
+      currentSeason: season,
+      currentPhase: phase,
+      advanceTime,
+      changePhase,
+      elections: [],
+      scheduleElection,
+      updateFactionBalance,
     }}>
       {children}
     </MaitreJeuContext.Provider>
