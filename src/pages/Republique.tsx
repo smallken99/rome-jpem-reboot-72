@@ -11,6 +11,7 @@ import { AgerPublicusPage } from '@/components/republique/ager/AgerPublicusPage'
 import { PolitiquePage } from '@/components/republique/pages/PolitiquePage';
 import { LoisPage } from '@/components/republique/pages/LoisPage';
 import { BatimentsPage } from '@/components/republique/pages/BatimentsPage';
+import { SecuritePage } from '@/components/republique/pages/SecuritePage';
 
 const Republique = () => {
   return (
@@ -25,6 +26,7 @@ const Republique = () => {
         <Route path="/impots" element={<ImpotsPage />} />
         <Route path="/ager" element={<AgerPublicusPage />} />
         <Route path="/batiments" element={<BatimentsPage />} />
+        <Route path="/securite" element={<SecuritePage />} />
         <Route path="*" element={<Navigate to="/republique" replace />} />
       </Routes>
     </Layout>

@@ -98,7 +98,9 @@ export const BatimentsTable: React.FC<BatimentsTableProps> = ({
                               <Progress 
                                 value={building.condition} 
                                 className="h-2"
-                                indicatorClassName={getConditionColor(building.condition)}
+                                // Utilisons className au lieu de indicatorClassName qui n'est pas disponible
+                                // Le style sera appliqué via CSS personnalisé
+                                className={`h-2 ${getConditionColor(building.condition)}`}
                               />
                             </div>
                           </TooltipTrigger>

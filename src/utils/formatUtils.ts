@@ -134,3 +134,47 @@ export const formatStatusBadge = (status: string): { label: string, className: s
   }
 };
 
+/**
+ * Formate un rôle utilisateur
+ * @param role Rôle à formater
+ * @returns Configuration du badge pour le rôle
+ */
+export const formatUserRole = (role: string): { label: string, className: string } => {
+  switch(role.toLowerCase()) {
+    case "admin":
+      return { label: "Administrateur", className: "bg-rome-terracotta/20 text-rome-terracotta" };
+    case "moderator":
+      return { label: "Modérateur", className: "bg-rome-navy/20 text-rome-navy" };
+    case "game_master":
+    case "gm":
+    case "mj":
+      return { label: "Maître du Jeu", className: "bg-purple-100 text-purple-800" };
+    case "player":
+    case "joueur":
+      return { label: "Joueur", className: "bg-blue-100 text-blue-800" };
+    default:
+      return { label: role, className: "bg-gray-200 text-gray-700" };
+  }
+};
+
+/**
+ * Formate l'activité d'un utilisateur
+ * @param lastActive Date de dernière activité
+ * @returns Information sur l'activité
+ */
+export const formatUserActivity = (lastActive: Date | string): { text: string, className: string } => {
+  const now = new Date();
+  const activeDate = typeof lastActive === 'string' ? new Date(lastActive) : lastActive;
+  const diffTime = Math.abs(now.getTime() - activeDate.getTime());
+  const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+  
+  if (diffDays === 0) {
+    return { text: "Aujourd'hui", className: "text-green-600" };
+  } else if (diffDays <= 7) {
+    return { text: `Il y a ${diffDays} jour${diffDays > 1 ? 's' : ''}`, className: "text-blue-600" };
+  } else if (diffDays <= 30) {
+    return { text: `Il y a ${Math.floor(diffDays / 7)} semaine${Math.floor(diffDays / 7) > 1 ? 's' : ''}`, className: "text-amber-600" };
+  } else {
+    return { text: `Il y a plus d'un mois`, className: "text-gray-600" };
+  }
+};
