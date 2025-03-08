@@ -8,9 +8,33 @@ import UrbanPropertiesTab from './property-management/UrbanPropertiesTab';
 import { ProfitabilityTab } from './property-management/profitability/ProfitabilityTab';
 import { SlaveManagementTab } from './property-management/SlaveManagementTab';
 import { MaintenanceTab } from './property-management/MaintenanceTab';
+import { RelatedFeatures, RelatedFeature } from '@/components/ui-custom/RelatedFeatures';
+import { MapPin, Wallet, Archive, TrendingUp, Home, Wheat, Coins } from 'lucide-react';
 
 const PropertyManagement: React.FC = () => {
   const [activeTab, setActiveTab] = useState('urbain');
+  
+  // Fonctionnalités liées au patrimoine
+  const relatedFeatures: RelatedFeature[] = [
+    {
+      title: "Carte des propriétés",
+      description: "Visualisez vos propriétés sur une carte interactive de l'Empire",
+      path: "/patrimoine/carte",
+      icon: <MapPin className="h-5 w-5 text-rome-navy" />
+    },
+    {
+      title: "Gestion économique",
+      description: "Gérez vos finances, revenus et dépenses",
+      path: "/patrimoine/economie",
+      icon: <Wallet className="h-5 w-5 text-rome-navy" />
+    },
+    {
+      title: "Gestion des stocks",
+      description: "Gérez les ressources stockées dans vos propriétés",
+      path: "/patrimoine/stockage",
+      icon: <Archive className="h-5 w-5 text-rome-navy" />
+    }
+  ];
   
   return (
     <div className="space-y-6">
@@ -62,6 +86,8 @@ const PropertyManagement: React.FC = () => {
           </div>
         </TabsContent>
       </Tabs>
+      
+      <RelatedFeatures features={relatedFeatures} title="Autres aspects de la gestion patrimoniale" />
     </div>
   );
 };

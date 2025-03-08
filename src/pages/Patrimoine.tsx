@@ -2,74 +2,101 @@
 import React from 'react';
 import { PageHeader } from '@/components/ui-custom/PageHeader';
 import Layout from '@/components/layout/Layout';
-import { Routes, Route, Navigate } from 'react-router-dom';
-import PropertyManagement from '@/components/proprietes/PropertyManagement';
+import { Routes, Route, Navigate, useLocation } from 'react-router-dom';
+import { PropertyRoutes } from '@/components/proprietes/routes/PropertyRoutes';
 import { EconomieTabs } from '@/components/economie/EconomieTabs';
 import { PropertyMap } from '@/components/proprietes/PropertyMap';
 import { StorageManagement } from '@/components/proprietes/StorageManagement';
+import { SectionNavigation, NavigationItem } from '@/components/ui-custom/SectionNavigation';
+import { Building, MapPin, Wallet, Archive } from 'lucide-react';
+
+const PatrimoineNavigation: React.FC = () => {
+  const navigationItems: NavigationItem[] = [
+    { label: "Propriétés", path: "/patrimoine/proprietes", icon: <Building className="h-4 w-4" /> },
+    { label: "Carte", path: "/patrimoine/carte", icon: <MapPin className="h-4 w-4" /> },
+    { label: "Économie", path: "/patrimoine/economie", icon: <Wallet className="h-4 w-4" /> },
+    { label: "Stockage", path: "/patrimoine/stockage", icon: <Archive className="h-4 w-4" /> },
+  ];
+  
+  return <SectionNavigation items={navigationItems} />;
+};
 
 const Patrimoine: React.FC = () => {
+  const location = useLocation();
+  
+  // Déterminer le titre et sous-titre en fonction de la route active
+  const getHeaderContent = () => {
+    if (location.pathname.includes('/proprietes')) {
+      // Si c'est un détail de propriété (contient un ID après /proprietes/)
+      if (location.pathname.match(/\/proprietes\/\d+/)) {
+        return {
+          title: "Détail de la propriété",
+          subtitle: "Informations et gestion d'une propriété spécifique"
+        };
+      }
+      return {
+        title: "Propriétés",
+        subtitle: "Gestion détaillée des propriétés"
+      };
+    } else if (location.pathname.includes('/carte')) {
+      return {
+        title: "Carte des propriétés",
+        subtitle: "Visualisation géographique de vos propriétés"
+      };
+    } else if (location.pathname.includes('/economie')) {
+      return {
+        title: "Économie",
+        subtitle: "Gestion financière et économique"
+      };
+    } else if (location.pathname.includes('/stockage')) {
+      return {
+        title: "Stockage",
+        subtitle: "Gestion des stocks et des ressources"
+      };
+    } else {
+      return {
+        title: "Patrimoine",
+        subtitle: "Gestion des propriétés et des ressources"
+      };
+    }
+  };
+  
+  const headerContent = getHeaderContent();
+  
   return (
     <Layout>
+      <PageHeader 
+        title={headerContent.title} 
+        subtitle={headerContent.subtitle} 
+      />
+      
+      <PatrimoineNavigation />
+      
       <Routes>
-        <Route path="/" element={
-          <>
-            <PageHeader 
-              title="Patrimoine" 
-              subtitle="Gestion des propriétés et des ressources" 
-            />
-            <div className="roman-card">
-              <PropertyManagement />
-            </div>
-          </>
-        } />
+        <Route path="/" element={<Navigate to="/patrimoine/proprietes" replace />} />
         
-        <Route path="/proprietes" element={
-          <>
-            <PageHeader 
-              title="Propriétés" 
-              subtitle="Gestion détaillée des propriétés" 
-            />
-            <div className="roman-card">
-              <PropertyManagement />
-            </div>
-          </>
+        <Route path="/proprietes/*" element={
+          <div className="roman-card">
+            <PropertyRoutes />
+          </div>
         } />
         
         <Route path="/carte" element={
-          <>
-            <PageHeader 
-              title="Carte des propriétés" 
-              subtitle="Visualisation géographique de vos propriétés" 
-            />
-            <div className="roman-card">
-              <PropertyMap />
-            </div>
-          </>
+          <div className="roman-card">
+            <PropertyMap />
+          </div>
         } />
         
         <Route path="/economie" element={
-          <>
-            <PageHeader 
-              title="Économie" 
-              subtitle="Gestion financière et économique" 
-            />
-            <div className="roman-card">
-              <EconomieTabs />
-            </div>
-          </>
+          <div className="roman-card">
+            <EconomieTabs />
+          </div>
         } />
         
         <Route path="/stockage" element={
-          <>
-            <PageHeader 
-              title="Stockage" 
-              subtitle="Gestion des stocks et des ressources" 
-            />
-            <div className="roman-card">
-              <StorageManagement />
-            </div>
-          </>
+          <div className="roman-card">
+            <StorageManagement />
+          </div>
         } />
         
         <Route path="*" element={<Navigate to="/patrimoine" replace />} />

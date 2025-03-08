@@ -10,6 +10,7 @@ interface RomanCardProps {
 interface RomanCardHeaderProps {
   children: React.ReactNode;
   className?: string;
+  actions?: React.ReactNode;
 }
 
 interface RomanCardContentProps {
@@ -39,13 +40,20 @@ interface RomanCardDialogProps {
   onOpenChange?: (open: boolean) => void;
 }
 
+interface RomanCardActionsProps {
+  children: React.ReactNode;
+  className?: string;
+}
+
 const RomanCardHeader: React.FC<RomanCardHeaderProps> = ({ 
   children, 
-  className 
+  className,
+  actions
 }) => {
   return (
-    <div className={cn("border-b border-rome-gold/20 p-4 font-medium", className)}>
-      {children}
+    <div className={cn("border-b border-rome-gold/20 p-4 font-medium flex justify-between items-center", className)}>
+      <div>{children}</div>
+      {actions && <div>{actions}</div>}
     </div>
   );
 };
@@ -112,6 +120,17 @@ const RomanCardDialog: React.FC<RomanCardDialogProps> = ({
   );
 };
 
+const RomanCardActions: React.FC<RomanCardActionsProps> = ({
+  children,
+  className
+}) => {
+  return (
+    <div className={cn("flex flex-wrap items-center gap-2 pt-4 border-t border-rome-gold/20 mt-4", className)}>
+      {children}
+    </div>
+  );
+};
+
 const RomanCard = ({ 
   children, 
   className,
@@ -129,5 +148,6 @@ RomanCard.Footer = RomanCardFooter;
 RomanCard.Title = RomanCardTitle;
 RomanCard.Description = RomanCardDescription;
 RomanCard.Dialog = RomanCardDialog;
+RomanCard.Actions = RomanCardActions;
 
 export { RomanCard };

@@ -1,29 +1,137 @@
 
-import React from 'react';
+import React, { useState } from 'react';
+import { RomanCard } from '@/components/ui-custom/RomanCard';
+import { useBuildingInventory } from './hooks/building/useBuildingInventory';
+import { Button } from '@/components/ui/button';
+import { useNavigate } from 'react-router-dom';
+import { Map, Search, Building, Navigation, Home, Wheat } from 'lucide-react';
+import { Input } from '@/components/ui/input';
+import { OwnedBuilding } from './hooks/building/types';
 
 export const PropertyMap: React.FC = () => {
-  // Dans une implémentation réelle, on pourrait utiliser une bibliothèque 
-  // de cartographie comme Leaflet ou MapboxGL
+  const { ownedBuildings } = useBuildingInventory();
+  const navigate = useNavigate();
+  const [searchTerm, setSearchTerm] = useState('');
+  const [selectedRegion, setSelectedRegion] = useState<string | null>(null);
+  
+  const regions = [...new Set(ownedBuildings.map(b => {
+    // Extraire la région de l'emplacement (avant le premier tiret)
+    const regionPart = b.location.split(' - ')[0];
+    return regionPart;
+  }))];
+  
+  const filteredBuildings = ownedBuildings.filter(building => {
+    const matchesSearch = searchTerm === '' || 
+      building.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      building.location.toLowerCase().includes(searchTerm.toLowerCase());
+    
+    const matchesRegion = selectedRegion === null || 
+      building.location.startsWith(selectedRegion);
+    
+    return matchesSearch && matchesRegion;
+  });
+  
+  const getBuildingIcon = (buildingType: string) => {
+    switch (buildingType) {
+      case 'urban':
+        return <Home className="h-5 w-5 text-blue-600" />;
+      case 'rural':
+        return <Wheat className="h-5 w-5 text-green-600" />;
+      case 'religious':
+        return <Building className="h-5 w-5 text-purple-600" />;
+      default:
+        return <Building className="h-5 w-5 text-gray-600" />;
+    }
+  };
+  
+  const handleViewDetails = (propertyId: number) => {
+    navigate(`/patrimoine/proprietes/${propertyId}`);
+  };
   
   return (
-    <div className="aspect-video relative border border-rome-gold/30 rounded-md overflow-hidden bg-rome-marble/50">
-      <div className="absolute inset-0 flex items-center justify-center">
-        <div className="text-center p-6 bg-white/80 backdrop-blur-sm rounded-md border border-rome-gold/30">
-          <h3 className="font-cinzel text-xl mb-2">Carte interactive</h3>
-          <p className="text-muted-foreground">
-            Vue d'ensemble de vos propriétés à travers la République Romaine.
-          </p>
-          <p className="mt-4 text-sm italic">
-            Cliquez sur les marqueurs pour voir les détails de chaque propriété.
-          </p>
-        </div>
-      </div>
-      
-      {/* Ici on placerait différents marqueurs pour les propriétés */}
-      <div className="absolute top-1/4 left-1/3 w-4 h-4 bg-rome-terracotta rounded-full animate-pulse"></div>
-      <div className="absolute top-1/3 left-1/2 w-4 h-4 bg-rome-terracotta rounded-full animate-pulse"></div>
-      <div className="absolute top-2/3 left-1/4 w-4 h-4 bg-rome-terracotta rounded-full animate-pulse"></div>
-      <div className="absolute top-1/2 left-2/3 w-4 h-4 bg-rome-terracotta rounded-full animate-pulse"></div>
+    <div className="space-y-6">
+      <RomanCard>
+        <RomanCard.Header>
+          <div className="flex flex-col sm:flex-row sm:items-center gap-4 w-full">
+            <h2 className="font-cinzel text-lg">Carte des propriétés</h2>
+            <div className="flex-1 relative">
+              <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
+              <Input
+                placeholder="Rechercher une propriété..."
+                className="pl-8"
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+              />
+            </div>
+          </div>
+        </RomanCard.Header>
+        <RomanCard.Content>
+          <div className="flex flex-col md:flex-row gap-6">
+            <div className="md:w-1/4">
+              <h3 className="font-medium mb-3">Régions</h3>
+              <div className="space-y-2">
+                <Button
+                  variant={selectedRegion === null ? "default" : "outline"}
+                  className={selectedRegion === null ? "roman-btn w-full justify-start" : "w-full justify-start"}
+                  onClick={() => setSelectedRegion(null)}
+                >
+                  <Map className="mr-2 h-4 w-4" />
+                  Toutes les régions
+                </Button>
+                
+                {regions.map(region => (
+                  <Button
+                    key={region}
+                    variant={selectedRegion === region ? "default" : "outline"}
+                    className={selectedRegion === region ? "roman-btn w-full justify-start" : "w-full justify-start"}
+                    onClick={() => setSelectedRegion(region)}
+                  >
+                    <Navigation className="mr-2 h-4 w-4" />
+                    {region}
+                  </Button>
+                ))}
+              </div>
+            </div>
+            
+            <div className="md:w-3/4">
+              <div className="border border-rome-gold/20 rounded-md h-[400px] bg-[#e8e0d0] flex items-center justify-center">
+                <div className="text-center text-muted-foreground">
+                  <Map className="h-16 w-16 mx-auto text-rome-gold/40" />
+                  <p className="mt-4">Carte interactive en cours de développement</p>
+                </div>
+              </div>
+              
+              <div className="mt-6">
+                <h3 className="font-medium mb-3">Propriétés ({filteredBuildings.length})</h3>
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {filteredBuildings.map(building => (
+                    <div 
+                      key={building.id}
+                      className="border border-rome-gold/30 rounded-md p-4 hover:bg-rome-gold/5 transition-colors"
+                    >
+                      <div className="flex items-start gap-3">
+                        {getBuildingIcon(building.buildingType)}
+                        <div className="flex-1">
+                          <h4 className="font-medium">{building.name}</h4>
+                          <p className="text-sm text-muted-foreground">{building.location}</p>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className="mt-2"
+                            onClick={() => handleViewDetails(building.id)}
+                          >
+                            Voir détails
+                          </Button>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </div>
+        </RomanCard.Content>
+      </RomanCard>
     </div>
   );
 };
