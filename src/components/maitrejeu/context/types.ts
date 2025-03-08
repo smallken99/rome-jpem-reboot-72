@@ -10,7 +10,7 @@ import {
 } from '../types';
 import { GameDate, Season, GamePhase } from '../types/common';
 import { MagistratureType } from '../types/magistratures';
-import { Client, ClientCreationData } from '../types/clients';
+import { Client, ClientCreationData, ClientFilter, ClientSort } from '../types/clients';
 
 // Type du contexte
 export interface MaitreJeuContextType {
@@ -60,6 +60,11 @@ export interface MaitreJeuContextType {
   updateClient: (id: string, updates: Partial<Client>) => void;
   deleteClient: (id: string) => void;
   assignClientToSenateur: (clientId: string, senateurId: string | null) => void;
+  adjustCompetencePoints: (clientId: string, points: number) => void;
+  updateSpecialAbilities: (clientId: string, abilities: string[]) => void;
+  filterClients: (clients: Client[], filter: ClientFilter) => Client[];
+  sortClients: (clients: Client[], sort: ClientSort) => Client[];
+  changeClientStatus: (clientId: string, status: 'active' | 'inactive' | 'probation') => void;
   
   // Contexte de date
   currentDate: GameDate;

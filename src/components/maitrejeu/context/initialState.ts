@@ -87,7 +87,14 @@ export const initialClients: Client[] = [
       political: 3,
       popular: 6,
       religious: 2
-    }
+    },
+    competencePoints: 5,
+    specialAbilities: ["Armurerie", "Contacts militaires"],
+    activeStatus: "active",
+    relationshipLevel: 4,
+    backstory: "Forgeron réputé qui équipe les légions romaines, bien vu par les militaires.",
+    lastInteraction: new Date().toISOString(),
+    assignedToSenateurId: "1"
   },
   {
     id: uuidv4(),
@@ -100,7 +107,13 @@ export const initialClients: Client[] = [
       political: 7,
       popular: 4,
       religious: 9
-    }
+    },
+    competencePoints: 8,
+    specialAbilities: ["Divination", "Influence religieuse"],
+    activeStatus: "active",
+    relationshipLevel: 7,
+    backstory: "Augure estimé qui interprète les présages. Ses prédictions sont écoutées par le Sénat.",
+    lastInteraction: new Date().toISOString()
   },
   {
     id: uuidv4(),
@@ -113,7 +126,51 @@ export const initialClients: Client[] = [
       political: 8,
       popular: 7,
       religious: 3
-    }
+    },
+    competencePoints: 6,
+    specialAbilities: ["Éloquence", "Intrigue politique"],
+    activeStatus: "active",
+    relationshipLevel: 3,
+    backstory: "Orateur populaire capable de retourner une foule. Il vend ses talents au plus offrant.",
+    lastInteraction: new Date().toISOString(),
+    assignedToSenateurId: "2"
+  },
+  {
+    id: uuidv4(),
+    name: "Publius Licinius",
+    type: "proprietaire",
+    subType: "Propriétaire terrien",
+    location: "Palatin",
+    loyalty: "moyenne",
+    influences: {
+      political: 5,
+      popular: 3,
+      religious: 2
+    },
+    competencePoints: 4,
+    specialAbilities: ["Commerce agricole", "Réseau d'approvisionnement"],
+    activeStatus: "active",
+    relationshipLevel: 5,
+    backstory: "Grand propriétaire terrien qui possède des domaines en Campanie. Fournit du grain à la Ville."
+  },
+  {
+    id: uuidv4(),
+    name: "Titus Flavius",
+    type: "pegre",
+    subType: "Chef de gang",
+    location: "Subure",
+    loyalty: "forte",
+    influences: {
+      political: 4,
+      popular: 8,
+      religious: 1
+    },
+    competencePoints: 7,
+    specialAbilities: ["Intimidation", "Réseau souterrain"],
+    activeStatus: "probation",
+    relationshipLevel: 6,
+    backstory: "Contrôle les rues de la Subure. Utile pour influencer les votes ou faire taire des opposants.",
+    assignedToSenateurId: "3"
   }
 ];
 
