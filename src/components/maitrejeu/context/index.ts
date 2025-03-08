@@ -1,3 +1,3 @@
 
 // Réexportation du contexte MaitreJeu
-export { MaitreJeuContext, MaitreJeuProvider } from './MaitreJeuContext';
+export { MaitreJeuContext, MaitreJeuProvider, useMaitreJeu, type MaitreJeuContextType } from './MaitreJeuContext';

@@ -1,52 +1,63 @@
 
-// Mise à jour du MaitreJeuTabs
-import { useState } from 'react';
+import React, { useState } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { GestionEquilibre } from './GestionEquilibre';
-import { GestionHistoire } from './GestionHistoire';
 import { GestionPolitique } from './GestionPolitique';
 import { GestionProvinces } from './GestionProvinces';
 import { GestionSenateurs } from './GestionSenateurs';
+import { GestionHistoire } from './GestionHistoire';
 import { TimeManagement } from './components/TimeManagement';
-import { useContext } from 'react';
-import { MaitreJeuContext } from './context/MaitreJeuContext';
-import { GamePhase } from './types/common';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { useMaitreJeu } from './context';
 
 export const MaitreJeuTabs = () => {
-  const [activeTab, setActiveTab] = useState('equilibre');
+  const [activeTab, setActiveTab] = useState('time');
   const { 
     currentYear, 
     currentSeason, 
-    currentPhase,
+    currentPhase, 
     advanceTime, 
     changePhase 
-  } = useContext(MaitreJeuContext);
-
-  const handlePhaseChange = (newPhase: GamePhase) => {
-    changePhase(newPhase);
-  };
-
+  } = useMaitreJeu();
+  
   return (
     <div className="p-4">
-      <div className="mb-6 flex justify-between items-center">
-        <h1 className="text-2xl font-bold font-cinzel">Console du Maître de Jeu</h1>
-        <TimeManagement 
-          currentYear={currentYear}
-          currentSeason={currentSeason}
-          currentPhase={currentPhase}
-          onAdvance={advanceTime}
-          onPhaseChange={handlePhaseChange}
-        />
+      <div className="mb-6">
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle>Console Maître de Jeu</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="flex justify-between items-center">
+              <div>
+                <p className="text-sm text-muted-foreground">
+                  Année: <span className="font-medium">{currentYear} AUC</span> | 
+                  Saison: <span className="font-medium">
+                    {currentSeason === 'SPRING' ? 'Printemps' : 
+                     currentSeason === 'SUMMER' ? 'Été' : 
+                     currentSeason === 'AUTUMN' ? 'Automne' : 'Hiver'}
+                  </span> | 
+                  Phase: <span className="font-medium">{currentPhase}</span>
+                </p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
       </div>
-
-      <Tabs defaultValue="equilibre" value={activeTab} onValueChange={setActiveTab}>
-        <TabsList className="w-full">
-          <TabsTrigger value="equilibre">Équilibre & Événements</TabsTrigger>
-          <TabsTrigger value="politique">Politique & Sénat</TabsTrigger>
-          <TabsTrigger value="provinces">Provinces & Gouverneurs</TabsTrigger>
-          <TabsTrigger value="senateurs">Sénateurs & Joueurs</TabsTrigger>
-          <TabsTrigger value="histoire">Histoire & Journal</TabsTrigger>
+      
+      <Tabs value={activeTab} onValueChange={setActiveTab}>
+        <TabsList className="mb-4">
+          <TabsTrigger value="time">Temps</TabsTrigger>
+          <TabsTrigger value="equilibre">Équilibre</TabsTrigger>
+          <TabsTrigger value="politique">Politique</TabsTrigger>
+          <TabsTrigger value="provinces">Provinces</TabsTrigger>
+          <TabsTrigger value="senateurs">Sénateurs</TabsTrigger>
+          <TabsTrigger value="histoire">Histoire</TabsTrigger>
         </TabsList>
+        
+        <TabsContent value="time">
+          <TimeManagement />
+        </TabsContent>
         
         <TabsContent value="equilibre">
           <GestionEquilibre />

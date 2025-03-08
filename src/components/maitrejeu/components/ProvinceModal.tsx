@@ -1,125 +1,153 @@
-import React, { useState } from 'react';
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Badge } from "@/components/ui/badge";
-import { formatDate } from '@/utils/formatUtils';
-import { Province, ProvinceModalProps } from '../types/compatibilityAdapter';
 
-interface ProvinceModalProps {
-  open: boolean;
-  setOpen: (open: boolean) => void;
+import React, { useState } from 'react';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Province } from '../types';
+
+export interface ProvinceModalProps {
   province: Province;
-  onSave: (province: Province) => void;
+  open: boolean;
+  onClose: () => void;
+  onSave: (updatedProvince: Province) => void;
 }
 
-export const ProvinceModal: React.FC<ProvinceModalProps> = ({ open, setOpen, province, onSave }) => {
-  const [editedProvince, setEditedProvince] = useState({ ...province });
-  
+export const ProvinceModal: React.FC<ProvinceModalProps> = ({ province, open, onClose, onSave }) => {
+  const [editedProvince, setEditedProvince] = useState<Province>({
+    ...province
+  });
+
   const handleSave = () => {
     onSave(editedProvince);
-    setOpen(false);
+    onClose();
   };
-  
+
+  const handleChange = (field: keyof Province, value: any) => {
+    setEditedProvince(prev => ({ ...prev, [field]: value }));
+  };
+
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
-      <DialogContent>
+    <Dialog open={open} onOpenChange={onClose}>
+      <DialogContent className="max-w-md">
         <DialogHeader>
-          <DialogTitle>Modifier la province: {province.name}</DialogTitle>
-          <DialogDescription>
-            Effectuez les modifications nécessaires et enregistrez.
-          </DialogDescription>
+          <DialogTitle>Modifier la province: {province.nom}</DialogTitle>
         </DialogHeader>
-        
         <div className="grid gap-4 py-4">
           <div className="grid grid-cols-4 items-center gap-4">
-            <label htmlFor="name" className="text-right">Nom</label>
-            <Input 
-              id="name" 
-              value={editedProvince.name} 
-              onChange={(e) => setEditedProvince({ ...editedProvince, name: e.target.value })} 
-              className="col-span-3" 
+            <Label htmlFor="name" className="text-right">
+              Nom
+            </Label>
+            <Input
+              id="name"
+              value={editedProvince.nom}
+              onChange={(e) => handleChange('nom', e.target.value)}
+              className="col-span-3"
             />
           </div>
           
           <div className="grid grid-cols-4 items-center gap-4">
-            <label htmlFor="ruler" className="text-right">Gouverneur</label>
-            <Input 
-              id="ruler" 
-              value={editedProvince.ruler} 
-              onChange={(e) => setEditedProvince({ ...editedProvince, ruler: e.target.value })} 
-              className="col-span-3" 
+            <Label htmlFor="ruler" className="text-right">
+              Gouverneur
+            </Label>
+            <Input
+              id="ruler"
+              value={editedProvince.gouverneur}
+              onChange={(e) => handleChange('gouverneur', e.target.value)}
+              className="col-span-3"
             />
           </div>
           
           <div className="grid grid-cols-4 items-center gap-4">
-            <label htmlFor="population" className="text-right">Population</label>
-            <Input 
-              type="number" 
-              id="population" 
-              value={editedProvince.population} 
-              onChange={(e) => setEditedProvince({ ...editedProvince, population: parseInt(e.target.value) })} 
-              className="col-span-3" 
+            <Label htmlFor="region" className="text-right">
+              Région
+            </Label>
+            <Input
+              id="region"
+              value={editedProvince.région}
+              onChange={(e) => handleChange('région', e.target.value)}
+              className="col-span-3"
             />
           </div>
           
           <div className="grid grid-cols-4 items-center gap-4">
-            <label htmlFor="wealth" className="text-right">Richesse</label>
-            <Input 
-              type="number" 
-              id="wealth" 
-              value={editedProvince.wealth} 
-              onChange={(e) => setEditedProvince({ ...editedProvince, wealth: parseInt(e.target.value) })} 
-              className="col-span-3" 
+            <Label htmlFor="richesse" className="text-right">
+              Richesse
+            </Label>
+            <Input
+              id="richesse"
+              type="number"
+              value={editedProvince.richesse || 0}
+              onChange={(e) => handleChange('richesse', parseInt(e.target.value))}
+              className="col-span-3"
             />
           </div>
           
           <div className="grid grid-cols-4 items-center gap-4">
-            <label htmlFor="loyalty" className="text-right">Loyauté</label>
-            <Input 
-              type="number" 
-              id="loyalty" 
-              value={editedProvince.loyalty} 
-              onChange={(e) => setEditedProvince({ ...editedProvince, loyalty: parseInt(e.target.value) })} 
-              className="col-span-3" 
+            <Label htmlFor="loyaute" className="text-right">
+              Loyauté
+            </Label>
+            <Input
+              id="loyaute"
+              type="number"
+              value={editedProvince.loyaute || 0}
+              onChange={(e) => handleChange('loyaute', parseInt(e.target.value))}
+              className="col-span-3"
             />
           </div>
           
           <div className="grid grid-cols-4 items-center gap-4">
-            <label htmlFor="status" className="text-right">Statut</label>
-            <Select value={editedProvince.status} onValueChange={(value) => setEditedProvince({ ...editedProvince, status: value })}>
+            <Label htmlFor="status" className="text-right">
+              Statut
+            </Label>
+            <Select 
+              value={editedProvince.status} 
+              onValueChange={(value) => handleChange('status', value as "pacifiée" | "instable" | "rebelle" | "conquise" | "en révolte")}
+            >
               <SelectTrigger className="col-span-3">
-                <SelectValue placeholder="Select a status" />
+                <SelectValue placeholder="Statut" />
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="pacifiée">Pacifiée</SelectItem>
                 <SelectItem value="instable">Instable</SelectItem>
                 <SelectItem value="rebelle">Rebelle</SelectItem>
                 <SelectItem value="conquise">Conquise</SelectItem>
+                <SelectItem value="en révolte">En Révolte</SelectItem>
               </SelectContent>
             </Select>
           </div>
           
           <div className="grid grid-cols-4 items-center gap-4">
-            <label htmlFor="description" className="text-right">Description</label>
-            <Textarea
-              id="description"
-              value={editedProvince.description}
-              onChange={(e) => setEditedProvince({ ...editedProvince, description: e.target.value })}
+            <Label htmlFor="population" className="text-right">
+              Population
+            </Label>
+            <Input
+              id="population"
+              type="number"
+              value={editedProvince.population}
+              onChange={(e) => handleChange('population', parseInt(e.target.value))}
               className="col-span-3"
             />
           </div>
+          
+          <div className="grid grid-cols-4 items-center gap-4">
+            <Label htmlFor="description" className="text-right">
+              Description
+            </Label>
+            <Textarea
+              id="description"
+              value={editedProvince.description}
+              onChange={(e) => handleChange('description', e.target.value)}
+              className="col-span-3"
+              rows={3}
+            />
+          </div>
         </div>
-        
         <DialogFooter>
-          <Button type="button" variant="secondary" onClick={() => setOpen(false)}>
-            Annuler
-          </Button>
-          <Button type="button" onClick={handleSave}>
-            Enregistrer
-          </Button>
+          <Button type="button" variant="outline" onClick={onClose}>Annuler</Button>
+          <Button type="button" onClick={handleSave}>Enregistrer</Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>

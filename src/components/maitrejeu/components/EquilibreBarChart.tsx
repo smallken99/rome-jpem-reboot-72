@@ -1,73 +1,39 @@
-import React from 'react';
-import { ResponsiveBar } from '@nivo/bar';
-import { Equilibre, EquilibreChartProps } from '../types/compatibilityAdapter';
 
-const EquilibreBarChart: React.FC<EquilibreChartProps> = ({ data }) => {
+import React from 'react';
+import { Bar, BarChart, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
+import { Equilibre } from '../types';
+
+export interface EquilibreChartProps {
+  equilibre: Equilibre;
+}
+
+export const EquilibreBarChart: React.FC<EquilibreChartProps> = ({ equilibre }) => {
+  // Préparer les données pour le graphique
   const chartData = [
-    {
-      "parti": "Optimates",
-      "valeur": data.optimates,
-      "color": "hsl(62, 70%, 50%)"
-    },
-    {
-      "parti": "Populares",
-      "valeur": data.populares,
-      "color": "hsl(179, 70%, 50%)"
-    },
-    {
-      "parti": "Equites",
-      "valeur": data.equites,
-      "color": "hsl(344, 70%, 50%)"
-    },
-    {
-      "parti": "Senat",
-      "valeur": data.senat,
-      "color": "hsl(122, 70%, 50%)"
-    }
+    { name: 'Moral', value: equilibre.moral || 0 },
+    { name: 'Loyauté', value: equilibre.loyaute || 0 },
+    { name: 'Populaires', value: equilibre.populaires || 0 },
+    { name: 'Optimates', value: equilibre.optimates || 0 },
+    { name: 'Modérés', value: equilibre.moderates || 0 },
   ];
 
   return (
-    <div style={{ height: '300px' }}>
-      <ResponsiveBar
+    <ResponsiveContainer width="100%" height={300}>
+      <BarChart
         data={chartData}
-        keys={['valeur']}
-        indexBy="parti"
-        margin={{ top: 20, right: 20, bottom: 50, left: 60 }}
-        padding={0.3}
-        colors={({ data }) => data.color}
-        axisTop={null}
-        axisRight={null}
-        axisBottom={{
-          tickSize: 5,
-          tickPadding: 5,
-          tickRotation: 0,
-          legend: 'Partis',
-          legendPosition: 'middle',
-          legendOffset: 32
+        margin={{
+          top: 20,
+          right: 30,
+          left: 20,
+          bottom: 5,
         }}
-        axisLeft={{
-          tickSize: 5,
-          tickPadding: 5,
-          tickRotation: 0,
-          legend: 'Valeur',
-          legendPosition: 'middle',
-          legendOffset: -40
-        }}
-        labelSkipWidth={12}
-        labelSkipHeight={12}
-        labelTextColor={{ from: 'color', modifiers: [['darker', 1.6]] }}
-        legends={[]}
-        tooltip={({ data, indexValue }) => (
-          <div>
-            <strong>{indexValue}</strong>: {data.valeur}
-          </div>
-        )}
-        role="application"
-        ariaLabel="Equilibre des Partis"
-        barAriaLabel={e => `${e.id}: ${e.formattedValue} `}
-      />
-    </div>
+      >
+        <CartesianGrid strokeDasharray="3 3" />
+        <XAxis dataKey="name" />
+        <YAxis />
+        <Tooltip />
+        <Bar dataKey="value" name="Valeur" fill="#8884d8" />
+      </BarChart>
+    </ResponsiveContainer>
   );
 };
-
-export { EquilibreBarChart };

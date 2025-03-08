@@ -12,5 +12,6 @@ export * from './histoire';
 export * from './timeManagement';
 export * from './context';
 
-// Explicitly re-export GamePhase to resolve ambiguity
-export { GamePhase, Season, ImportanceType } from './common';
+// Explicitly re-export types with correct syntax
+export type { GamePhase, Season, ImportanceType, PhaseType } from './common';
+export type { GameDate } from './common';

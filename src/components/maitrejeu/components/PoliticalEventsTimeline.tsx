@@ -1,24 +1,57 @@
-import React from 'react';
-import { Timeline, TimelineItem, TimelineHeader, TimelineIcon, TimelineTitle, TimelineBody } from "@/components/ui/timeline";
-import { Badge } from "@/components/ui/badge";
-import { formatDate } from '@/utils/formatUtils';
-import { Evenement, PoliticalEventsTimelineProps } from '../types/compatibilityAdapter';
 
-export const PoliticalEventsTimeline: React.FC<PoliticalEventsTimelineProps> = ({ entries }) => {
+import React from 'react';
+import { Timeline, TimelineItem, TimelineHeader, TimelineIcon, TimelineTitle, TimelineBody } from '@/components/ui/timeline';
+import { CalendarIcon, FlagIcon, ScrollIcon } from 'lucide-react';
+
+export interface PoliticalEvent {
+  id: string;
+  date: string;
+  title: string;
+  description: string;
+  type: 'election' | 'crisis' | 'law' | 'other';
+}
+
+export interface PoliticalEventsTimelineProps {
+  events: PoliticalEvent[];
+}
+
+export const PoliticalEventsTimeline: React.FC<PoliticalEventsTimelineProps> = ({ events }) => {
+  const getEventIcon = (type: string) => {
+    switch (type) {
+      case 'election':
+        return <FlagIcon className="h-4 w-4" />;
+      case 'law':
+        return <ScrollIcon className="h-4 w-4" />;
+      default:
+        return <CalendarIcon className="h-4 w-4" />;
+    }
+  };
+
   return (
     <Timeline>
-      {entries.map(entry => (
-        <TimelineItem key={entry.id}>
+      {events && events.map((event) => (
+        <TimelineItem key={event.id}>
           <TimelineHeader>
-            <TimelineIcon />
-            <TimelineTitle>{entry.titre}</TimelineTitle>
-            <Badge variant="secondary">{formatDate(entry.date.year, entry.date.season, entry.date.day)}</Badge>
+            <TimelineIcon icon={getEventIcon(event.type)} />
+            <TimelineTitle>{event.title}</TimelineTitle>
           </TimelineHeader>
           <TimelineBody>
-            {entry.contenu}
+            <p className="text-xs text-muted-foreground mb-1">{event.date}</p>
+            <p>{event.description}</p>
           </TimelineBody>
         </TimelineItem>
       ))}
+      {(!events || events.length === 0) && (
+        <TimelineItem>
+          <TimelineHeader>
+            <TimelineIcon icon={<CalendarIcon className="h-4 w-4" />} />
+            <TimelineTitle>Aucun événement enregistré</TimelineTitle>
+          </TimelineHeader>
+          <TimelineBody>
+            <p>Les événements politiques apparaîtront ici.</p>
+          </TimelineBody>
+        </TimelineItem>
+      )}
     </Timeline>
   );
 };

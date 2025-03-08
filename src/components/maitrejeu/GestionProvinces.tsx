@@ -1,24 +1,19 @@
 
-// Mise à jour des imports pour GestionProvinces
-import { useContext, useState, useEffect } from 'react';
-import { MaitreJeuContext } from './context/MaitreJeuContext';
+import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Search, PlusCircle, MapPin } from 'lucide-react';
-import { Badge } from '@/components/ui/badge';
 import { ProvinceCard } from './components/ProvinceCard';
 import { ProvinceModal } from './components/ProvinceModal';
 import { ProvincesMap } from './components/ProvincesMap';
 import { ProvincesData } from './components/ProvincesData';
 import { Province } from './types/provinces';
+import { useMaitreJeu } from './context';
 
 export const GestionProvinces = () => {
-  const { provinces, updateProvince } = useContext(MaitreJeuContext);
+  const { provinces, updateProvince } = useMaitreJeu();
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedTab, setSelectedTab] = useState('carte');
   const [showProvinceModal, setShowProvinceModal] = useState(false);

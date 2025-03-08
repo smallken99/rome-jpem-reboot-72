@@ -1,3 +1,4 @@
+
 import React, { createContext, useContext, useState, ReactNode, useEffect } from 'react';
 import { useTimeStore } from '@/utils/timeSystem';
 import { convertTimeSeasonToMaitreJeuSeason } from '@/components/maitrejeu/types/common';
@@ -11,8 +12,10 @@ import {
   SenateurJouable, 
   HistoireEntry, 
   GamePhase,
-  Season
+  Season,
+  MagistratureType
 } from '../types/index';
+import { v4 as uuidv4 } from 'uuid';
 
 // Définition du type pour le contexte MaitreJeu
 export interface MaitreJeuContextType {
@@ -65,7 +68,7 @@ export interface MaitreJeuContextType {
   };
   setGameState: (updates: Partial<{ year: number; season: Season; phase: GamePhase }>) => void;
   
-  // For compatibility with previous code
+  // Pour compatibilité avec le code précédent
   currentYear: number;
   currentSeason: Season;
   currentPhase: GamePhase;
@@ -74,15 +77,16 @@ export interface MaitreJeuContextType {
   
   // Elections
   elections: any[];
-  scheduleElection: (date: { year: number, season: Season }, type: string, candidates: string[]) => void;
+  scheduleElection: (magistrature: MagistratureType, year: number, season: Season) => void;
   
+  // Méthodes de réinitialisation
   resetGameS0eason: () => void;
   resetGameYear: () => void;
   resetGamePhase: () => void;
 }
 
 // Création du contexte MaitreJeu avec une valeur par défaut
-const MaitreJeuContext = createContext<MaitreJeuContextType>({
+export const MaitreJeuContext = createContext<MaitreJeuContextType>({
   factions: [],
   addFaction: () => {},
   updateFaction: () => {},
@@ -94,11 +98,13 @@ const MaitreJeuContext = createContext<MaitreJeuContextType>({
   removeFactionPolitique: () => {},
   
   equilibre: {
-    population: 1000000,
-    armee: 10000,
-    richesse: 1000000,
     moral: 50,
-    loyalisme: 50
+    loyaute: 50,
+    populaires: 35,
+    optimates: 40,
+    moderates: 25,
+    armée: 10000,
+    historique: []
   },
   updateEquilibre: () => {},
   updateFactionBalance: () => {},
@@ -172,17 +178,20 @@ export const MaitreJeuProvider: React.FC<{ children: ReactNode }> = ({ children 
   const [factions, setFactions] = useState<Faction[]>([]);
   const [factionsPolitiques, setFactionsPolitiques] = useState<FactionPolitique[]>([]);
   const [equilibre, setEquilibre] = useState<Equilibre>({
-    population: 1000000,
-    armee: 10000,
-    richesse: 1000000,
     moral: 50,
-    loyalisme: 50
+    loyaute: 50,
+    populaires: 35,
+    optimates: 40,
+    moderates: 25,
+    armée: 10000,
+    historique: []
   });
   const [provinces, setProvinces] = useState<Province[]>([]);
   const [lois, setLois] = useState<Loi[]>([]);
   const [evenements, setEvenements] = useState<Evenement[]>([]);
   const [senateurs, setSenateurs] = useState<SenateurJouable[]>([]);
   const [histoireEntries, setHistoireEntries] = useState<HistoireEntry[]>([]);
+  const [elections, setElections] = useState<any[]>([]);
   
   // Fonctions de gestion des factions
   const addFaction = (faction: Faction) => {
@@ -243,9 +252,26 @@ export const MaitreJeuProvider: React.FC<{ children: ReactNode }> = ({ children 
     setLois(lois.filter(loi => loi.id !== id));
   };
   
+  const voteLoi = (id: string, vote: 'pour' | 'contre' | 'abstention') => {
+    setLois(lois.map(loi => {
+      if (loi.id === id) {
+        const updatedLoi = { ...loi };
+        if (vote === 'pour') updatedLoi.votesPositifs++;
+        else if (vote === 'contre') updatedLoi.votesNégatifs++;
+        else updatedLoi.votesAbstention++;
+        return updatedLoi;
+      }
+      return loi;
+    }));
+  };
+  
   // Fonctions de gestion des événements
   const addEvenement = (evenement: Evenement) => {
-    setEvenements([...evenements, evenement]);
+    const eventWithId = {
+      ...evenement,
+      id: evenement.id || uuidv4()
+    };
+    setEvenements([...evenements, eventWithId]);
   };
   
   const updateEvenement = (id: string, updates: Partial<Evenement>) => {
@@ -278,9 +304,19 @@ export const MaitreJeuProvider: React.FC<{ children: ReactNode }> = ({ children 
     setSenateurs(senateurs.filter(senateur => senateur.id !== id));
   };
   
+  const assignSenateurToPlayer = (id: string, playerId: string) => {
+    setSenateurs(senateurs.map(senateur => 
+      senateur.id === id ? { ...senateur, playerId } : senateur
+    ));
+  };
+  
   // Fonctions de gestion de l'histoire
   const addHistoireEntry = (histoireEntry: Omit<HistoireEntry, "id">) => {
-    setHistoireEntries([...histoireEntries, { ...histoireEntry, id: Math.random().toString(36).substring(2, 15) }]);
+    const newEntry = {
+      ...histoireEntry,
+      id: uuidv4()
+    };
+    setHistoireEntries([...histoireEntries, newEntry]);
   };
   
   const updateHistoireEntry = (id: string, updates: Partial<HistoireEntry>) => {
@@ -329,27 +365,41 @@ export const MaitreJeuProvider: React.FC<{ children: ReactNode }> = ({ children 
   
   const updateFactionBalance = (populaires: number, optimates: number, moderates: number) => {
     updateEquilibre({ 
-      population: equilibre.population,
-      armee: equilibre.armee,
-      richesse: equilibre.richesse,
       moral: equilibre.moral,
-      loyalisme: equilibre.loyalisme,
+      loyaute: equilibre.loyaute,
+      armée: equilibre.armée,
       populaires, 
       optimates, 
       moderates 
     });
   };
 
-  const voteLoi = () => {};
-  const assignSenateurToPlayer = () => {};
-
   const advanceTime = () => {
-    // Implement time advancement logic here
+    // Implémentez la logique d'avancement du temps ici
+    const seasons: Season[] = ['SPRING', 'SUMMER', 'AUTUMN', 'WINTER'];
+    const currentSeasonIndex = seasons.indexOf(season);
+    if (currentSeasonIndex === seasons.length - 1) {
+      // C'est l'hiver, on passe à l'année suivante et au printemps
+      setYear(year + 1);
+      setSeason('SPRING');
+    } else {
+      // On passe à la saison suivante
+      setSeason(seasons[currentSeasonIndex + 1] as Season);
+    }
   };
 
   const changePhase = (newPhase: GamePhase) => setPhase(newPhase);
 
-  const scheduleElection = () => {};
+  const scheduleElection = (magistrature: MagistratureType, year: number, season: Season) => {
+    const newElection = {
+      id: uuidv4(),
+      magistrature,
+      date: { year, season },
+      candidates: [],
+      status: 'scheduled'
+    };
+    setElections([...elections, newElection]);
+  };
   
   return (
     <MaitreJeuContext.Provider value={{
@@ -400,7 +450,7 @@ export const MaitreJeuProvider: React.FC<{ children: ReactNode }> = ({ children 
       currentPhase: phase,
       advanceTime,
       changePhase,
-      elections: [],
+      elections,
       scheduleElection,
       updateFactionBalance,
     }}>
@@ -409,5 +459,4 @@ export const MaitreJeuProvider: React.FC<{ children: ReactNode }> = ({ children 
   );
 };
 
-// Export du contexte et du provider
 export default MaitreJeuContext;

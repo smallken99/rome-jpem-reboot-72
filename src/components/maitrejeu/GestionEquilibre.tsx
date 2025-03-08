@@ -1,6 +1,7 @@
+
 import { Tab } from '@headlessui/react';
-import { useContext, useState } from 'react';
-import { MaitreJeuContext } from './context/MaitreJeuContext';
+import { useState } from 'react';
+import { useMaitreJeu } from './context';
 import { EvenementsList } from './components/EvenementsList';
 import { EquilibreBarChart } from './components/EquilibreBarChart';
 import { PoliticalEventsTimeline } from './components/PoliticalEventsTimeline';
@@ -14,7 +15,7 @@ import { PlusCircle, RefreshCw } from 'lucide-react';
 import { EvenementType } from './types/evenements';
 
 export const GestionEquilibre = () => {
-  const { equilibre, updateEquilibre, evenements, resolveEvenement } = useContext(MaitreJeuContext);
+  const { equilibre, updateEquilibre, evenements, resolveEvenement } = useMaitreJeu();
   const [showCreateEvent, setShowCreateEvent] = useState(false);
   const [filteredType, setFilteredType] = useState<EvenementType | 'ALL'>('ALL');
   
@@ -73,7 +74,7 @@ export const GestionEquilibre = () => {
               <CardDescription>Évolution des forces au fil du temps.</CardDescription>
             </CardHeader>
             <CardContent>
-              <PoliticalEventsTimeline events={equilibre.historique} />
+              <PoliticalEventsTimeline events={equilibre.historique || []} />
             </CardContent>
           </Card>
         </TabsContent>
