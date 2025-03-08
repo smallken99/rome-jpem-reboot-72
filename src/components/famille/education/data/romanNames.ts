@@ -1,19 +1,12 @@
 
-// Données des noms romains pour la génération aléatoire
-export const romanNamePrefixes = [
-  'Marcus', 'Lucius', 'Gaius', 'Quintus', 'Publius', 'Titus', 'Servius', 'Aulus',
-  'Gnaeus', 'Decimus', 'Spurius', 'Sextus', 'Tiberius', 'Manius', 'Appius', 'Vibius'
+// Liste des noms romains pour les précepteurs
+export const romanNames = [
+  'Gaius Livius', 'Marcus Tullius', 'Quintus Fabius', 'Lucius Aemilius', 
+  'Titus Flavius', 'Publius Cornelius', 'Gnaeus Pompeius', 'Sextus Julius',
+  'Aulus Postumius', 'Decimus Valerius', 'Tiberius Claudius', 'Marcus Porcius',
+  'Servius Sulpicius', 'Manius Curius', 'Appius Claudius', 'Spurius Furius'
 ];
 
-export const romanNameSuffixes = [
-  'Claudius', 'Cornelius', 'Fabius', 'Valerius', 'Aemilius', 'Aurelius', 'Caecilius', 'Calpurnius',
-  'Cassius', 'Domitius', 'Flavius', 'Fulvius', 'Julius', 'Junius', 'Licinius', 'Marius',
-  'Octavius', 'Pompeius', 'Porcius', 'Sempronius', 'Sulpicius', 'Tullius', 'Vitellius'
-];
-
-// Fonction pour générer un nom romain aléatoire
-export const generateRomanName = (): string => {
-  const prefix = romanNamePrefixes[Math.floor(Math.random() * romanNamePrefixes.length)];
-  const suffix = romanNameSuffixes[Math.floor(Math.random() * romanNameSuffixes.length)];
-  return `${prefix} ${suffix}`;
-};
+// Export en tant que préfixes et suffixes pour la compatibilité avec d'autres fichiers
+export const romanNamePrefixes = romanNames.map(name => name.split(' ')[0]);
+export const romanNameSuffixes = romanNames.map(name => name.split(' ')[1]);

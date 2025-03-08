@@ -1,47 +1,43 @@
 
-// Données mockées pour les enfants
-export const children = [
+import { Child } from '../types/educationTypes';
+
+// Mock children data for development and testing
+export const children: Child[] = [
   {
-    id: '1',
-    name: 'Marcus Aurelius',
-    age: 10,
-    gender: 'male',
-    currentEducation: {
-      type: 'political',
-      mentor: null,
-      skills: ['Rhétorique avancée', 'Débat public'],
-      progress: 35
-    }
-  },
-  {
-    id: '2',
-    name: 'Julia Flavia',
-    age: 9,
-    gender: 'female',
-    currentEducation: {
-      type: 'religious',
-      mentor: 'Pontifex Maximus Claudius',
-      skills: ['Rites et cérémonies', 'Traditions religieuses'],
-      progress: 25
-    }
-  },
-  {
-    id: '3',
-    name: 'Gaius Septimius',
+    id: 'child-1',
+    name: 'Marcus',
     age: 12,
     gender: 'male',
     currentEducation: {
       type: 'military',
-      mentor: 'Centurion Quintus Sertorius',
-      skills: ['Combat à l\'épée', 'Tactique de bataille'],
-      progress: 60
+      mentor: 'Gaius Livius le Sage',
+      skills: ['Tactique légionnaire', 'Équitation militaire'],
+      progress: 35,
+      yearsCompleted: 1,
+      totalYears: 2,
+      statBonus: 25
     }
   },
   {
-    id: '4',
-    name: 'Livia Augusta',
-    age: 7,
+    id: 'child-2',
+    name: 'Julia',
+    age: 10,
     gender: 'female',
+    currentEducation: {
+      type: 'rhetoric',
+      mentor: 'Publius Cornelius l\'Érudit',
+      skills: ['Rhétorique grecque', 'Composition littéraire'],
+      progress: 20,
+      yearsCompleted: 0,
+      totalYears: 3,
+      statBonus: 20
+    }
+  },
+  {
+    id: 'child-3',
+    name: 'Lucius',
+    age: 15,
+    gender: 'male',
     currentEducation: {
       type: 'none',
       mentor: null,

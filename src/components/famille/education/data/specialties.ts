@@ -1,27 +1,15 @@
 
-// Spécialités par type d'éducation
-export const specialties = {
-  military: [
-    'Combat à l\'épée', 'Tactique de bataille', 'Survivre en campagne', 'Guerilla et embuscades', 
-    'Commandement de légion', 'Cavalerie', 'Archerie', 'Siège', 'Navigation militaire',
-    'Logistique militaire', 'Fortification', 'Combat en formation'
-  ],
-  political: [
-    'Rhétorique avancée', 'Débat public', 'Politique et législation', 'Droit romain',
-    'Stoïcisme et éthique politique', 'Administration provinciale', 'Diplomatie',
-    'Histoire romaine', 'Grec ancien', 'Éloquence', 'Philosophie politique'
-  ],
-  religious: [
-    'Rites et cérémonies', 'Divination et présages', 'Traditions religieuses', 'Culte de Vesta',
-    'Lecture des entrailles', 'Interprétation des augures', 'Rituels funéraires',
-    'Mystères d\'Eleusis', 'Prophéties sibyllines', 'Cultes orientaux', 'Sacrifices rituels'
-  ]
+// Liste des spécialités pour chaque type d'éducation
+export const educationSpecialties: Record<string, string[]> = {
+  political: ['Procédures sénatoriales', 'Droit romain', 'Éloquence civique', 'Histoire politique'],
+  rhetoric: ['Rhétorique grecque', 'Débat public', 'Composition littéraire', 'Art de la mémoire'],
+  military: ['Tactique légionnaire', 'Équitation militaire', 'Fortifications', 'Navigation militaire'],
+  religious: ['Divination', 'Rituels sacrificiels', 'Cultes familiaux', 'Mystères étrusques'],
+  philosophical: ['Stoïcisme', 'Épicurisme', 'Académie platonicienne', 'Scepticisme'],
+  diplomatic: ['Protocole diplomatique', 'Langues étrangères', 'Géographie politique', 'Histoire des relations étrangères'],
+  administrative: ['Comptabilité publique', 'Réglementation commerciale', 'Administration provinciale', 'Gestion des travaux publics'],
+  leadership: ['Commandement civil', 'Autorité et charisme', 'Résolution de conflits', 'Planification stratégique']
 };
 
-// Liste complète des spécialités pour les précepteurs
-export const allSpecialties = [
-  'Rhétorique', 'Droit romain', 'Philosophie stoïcienne', 'Tactique militaire', 'Art oratoire',
-  'Stratégie militaire', 'Rituel religieux', 'Augure', 'Divination', 'Commerce maritime',
-  'Négociation marchande', 'Diplomatie', 'Histoire romaine', 'Mathématiques', 'Astronomie',
-  'Poésie', 'Littérature grecque', 'Médecine', 'Ingénierie militaire', 'Architecture'
-];
+// Export a flat list of all specialties for use in other components
+export const specialties = Object.values(educationSpecialties).flat();
