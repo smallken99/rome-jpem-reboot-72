@@ -1,118 +1,96 @@
-
 import React from 'react';
-import { useMaitreJeu } from '../context/MaitreJeuContext';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { ActionButton } from '@/components/ui-custom/ActionButton';
-import { Clock, Calendar, FastForward } from 'lucide-react';
-import { toast } from 'sonner';
-import { formatRomanSeason } from '@/utils/timeSystem';
+import { Calendar } from 'lucide-react';
+import { Season } from '@/utils/timeSystem';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { GamePhase } from '../types/maitreJeuTypes';
+import { Button } from '@/components/ui/button';
 
-export const TimeManagement: React.FC = () => {
-  const { year, season, gamePhase, advanceTime, setGamePhase } = useMaitreJeu();
-  
-  const handleAdvancePhase = () => {
-    // Avancer à la phase suivante
-    advanceTime();
-  };
-  
-  const handleAdvanceSeason = () => {
-    // Avancer d'une saison complète (toutes les phases)
-    const phases = [
-      'VOTE_DES_LOIS',
-      'ÉLECTIONS',
-      'ADMINISTRATION',
-      'GUERRE',
-      'DIPLOMATIE',
-      'COMMERCE',
-      'CRISES'
-    ];
-    
-    // Avancer pour chaque phase jusqu'à revenir à la première
-    const currentPhaseIndex = phases.indexOf(gamePhase);
-    for (let i = 0; i < phases.length; i++) {
-      advanceTime();
+interface TimeManagementProps {
+  year: number;
+  season: Season;
+  phase: GamePhase;
+  onAdvance: () => void;
+  onPhaseChange: (phase: GamePhase) => void;
+}
+
+export const TimeManagement: React.FC<TimeManagementProps> = ({ year, season, phase, onAdvance, onPhaseChange }) => {
+  const getSeasonColor = (s: Season) => {
+    switch (s) {
+      case 'SPRING': return 'bg-emerald-500';
+      case 'SUMMER': return 'bg-yellow-500';
+      case 'AUTUMN': return 'bg-orange-500';
+      case 'WINTER': return 'bg-blue-500';
+      default: return 'bg-gray-500';
     }
-    
-    toast({
-      title: "Nouvelle saison",
-      description: `Nous sommes maintenant en ${formatRomanSeason(season)}, ${year} AUC`,
-    });
   };
   
-  const handleAdvanceYear = () => {
-    // Avancer d'une année complète (4 saisons)
-    for (let i = 0; i < 4; i++) {
-      handleAdvanceSeason();
+  const getSeasonName = (s: Season) => {
+    switch (s) {
+      case 'SPRING': return 'Printemps';
+      case 'SUMMER': return 'Été';
+      case 'AUTUMN': return 'Automne';
+      case 'WINTER': return 'Hiver';
+      default: return 'Inconnu';
     }
-    
-    toast({
-      title: "Nouvelle année",
-      description: `Nous sommes maintenant en l'an ${year} AUC`,
-    });
   };
   
+  const getPhaseName = (phase: GamePhase) => {
+    switch (phase) {
+      case 'VOTE_DES_LOIS': return 'Vote des lois';
+      case 'ÉLECTIONS': return 'Élections';
+      case 'ADMINISTRATION': return 'Administration';
+      case 'GUERRE': return 'Guerre';
+      case 'DIPLOMATIE': return 'Diplomatie';
+      case 'COMMERCE': return 'Commerce';
+      case 'CRISES': return 'Crises';
+      default: return 'Inconnue';
+    }
+  };
+
   return (
-    <Card className="mb-6 border-amber-200 bg-rome-parchment/30">
-      <CardHeader className="pb-2">
-        <CardTitle className="text-lg flex items-center gap-2 text-rome-navy">
-          <Calendar className="h-5 w-5 text-amber-700" />
-          Calendrier Romain
+    <Card>
+      <CardHeader>
+        <CardTitle className="text-lg flex items-center gap-2">
+          <Calendar className="h-5 w-5" />
+          Gestion du temps
         </CardTitle>
       </CardHeader>
-      <CardContent>
-        <div className="flex flex-col sm:flex-row justify-between items-center">
-          <div className="flex flex-col sm:flex-row items-center gap-4 mb-4 sm:mb-0">
-            <div className="flex items-center bg-white/70 rounded-md p-2 border border-amber-100">
-              <Clock className="h-5 w-5 text-amber-600 mr-2" />
-              <div>
-                <span className="text-sm text-muted-foreground">Année:</span>
-                <span className="ml-2 font-medium">{year} AUC</span>
-              </div>
-            </div>
-            
-            <div className="flex items-center bg-white/70 rounded-md p-2 border border-amber-100">
-              <Calendar className="h-5 w-5 text-amber-600 mr-2" />
-              <div>
-                <span className="text-sm text-muted-foreground">Saison:</span>
-                <span className="ml-2 font-medium">{formatRomanSeason(season)}</span>
-              </div>
-            </div>
-            
-            <div className="flex items-center bg-white/70 rounded-md p-2 border border-amber-100">
-              <FastForward className="h-5 w-5 text-amber-600 mr-2" />
-              <div>
-                <span className="text-sm text-muted-foreground">Phase:</span>
-                <span className="ml-2 font-medium">{gamePhase}</span>
-              </div>
-            </div>
-          </div>
-          
-          <div className="flex flex-wrap gap-2">
-            <ActionButton 
-              label="Phase suivante" 
-              icon={<FastForward className="h-4 w-4" />}
-              onClick={handleAdvancePhase}
-              variant="outline"
-              size="sm"
-            />
-            
-            <ActionButton 
-              label="Saison suivante" 
-              icon={<Calendar className="h-4 w-4" />}
-              onClick={handleAdvanceSeason}
-              variant="outline"
-              size="sm"
-            />
-            
-            <ActionButton 
-              label="Année suivante" 
-              icon={<Calendar className="h-4 w-4" />}
-              onClick={handleAdvanceYear}
-              variant="secondary"
-              size="sm"
-            />
-          </div>
+      
+      <CardContent className="space-y-4">
+        <div className="flex items-center gap-2 mb-1">
+          <h3 className="font-semibold">Année courante:</h3>
+          <span className="text-lg">{year} AUC</span>
         </div>
+        
+        <div className="flex items-center gap-2 mb-3">
+          <h3 className="font-semibold">Saison courante:</h3>
+          <span className={`px-2 py-1 rounded text-white ${getSeasonColor(season)}`}>
+            {getSeasonName(season)}
+          </span>
+        </div>
+        
+        <div className="mb-4">
+          <h3 className="font-semibold mb-2">Phase de jeu actuelle:</h3>
+          <Select value={phase} onValueChange={onPhaseChange}>
+            <SelectTrigger className="w-[280px]">
+              <SelectValue placeholder={getPhaseName(phase)} />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="VOTE_DES_LOIS">Vote des lois</SelectItem>
+              <SelectItem value="ÉLECTIONS">Élections</SelectItem>
+              <SelectItem value="ADMINISTRATION">Administration</SelectItem>
+              <SelectItem value="GUERRE">Guerre</SelectItem>
+              <SelectItem value="DIPLOMATIE">Diplomatie</SelectItem>
+              <SelectItem value="COMMERCE">Commerce</SelectItem>
+              <SelectItem value="CRISES">Crises</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+        
+        <Button onClick={onAdvance} className="roman-btn">
+          Avancer le temps
+        </Button>
       </CardContent>
     </Card>
   );

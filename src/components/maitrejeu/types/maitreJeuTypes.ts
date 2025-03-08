@@ -18,6 +18,17 @@ export type EvenementType =
   | 'religieux' 
   | 'social';
 
+// Ajoutez ces variantes pour compatibilité avec le code existant
+export const EVENEMENT_TYPES = {
+  POLITIQUE: 'politique' as EvenementType,
+  GUERRE: 'militaire' as EvenementType,
+  ÉCONOMIQUE: 'économique' as EvenementType,
+  RELIGION: 'religieux' as EvenementType,
+  SOCIAL: 'social' as EvenementType,
+  DIPLOMATIQUE: 'diplomatique' as EvenementType,
+  CRISE: 'crise' as EvenementType
+};
+
 export type ProvinceStatus = 
   | 'pacifiée' 
   | 'instable' 
@@ -31,6 +42,21 @@ export type MagistratureType =
   | 'ÉDILE' 
   | 'QUESTEUR' 
   | 'TRIBUN';
+
+// Pour les factions politiques
+export type FactionPolitique = 
+  | 'Optimates' 
+  | 'Populares' 
+  | 'Modérés' 
+  | 'Indépendant';
+
+// Action pour les événements
+export type EvenementAction = {
+  id: string;
+  titre: string;
+  description: string;
+  conséquences: string;
+};
 
 // État du jeu
 export interface GameState {
@@ -74,6 +100,7 @@ export interface Evenement {
       autre?: Record<string, number>;
     };
   }[];
+  actions?: EvenementAction[];
   résolu: boolean;
   optionChoisie?: string;
 }
@@ -89,6 +116,8 @@ export interface HistoireEntry {
     day: number;
   };
   catégorie: EvenementType;
+  type?: string; // Ajout pour compatibilité
+  personnagesImpliqués?: string[]; // Ajout pour compatibilité
   importance: 1 | 2 | 3; // 1 = majeur, 3 = mineur
 }
 
@@ -110,6 +139,16 @@ export interface Province {
     x: number;
     y: number;
   };
+  // Propriétés additionnelles pour compatibilité avec le code existant
+  revenuAnnuel?: number;
+  légions?: number;
+  ressourcesPrincipales?: string[];
+  coordonnées?: { x: number; y: number };
+  problèmes?: string[];
+  opportunités?: string[];
+  richesse?: number;
+  impôts?: number;
+  garnison?: number;
 }
 
 // Interface pour les sénateurs
@@ -131,6 +170,15 @@ export interface SenateurJouable {
   faction: string;
   richesse: number;
   influence: number;
+  // Propriétés additionnelles pour compatibilité avec le code existant
+  statut?: string;
+  fonctionActuelle?: string;
+  popularité?: number;
+  appartenance?: FactionPolitique;
+  compétences?: Record<string, number>;
+  relations?: Record<string, number>;
+  ambition?: string;
+  âge?: number;
 }
 
 // Interface pour les factions
@@ -190,6 +238,13 @@ export interface Equilibre {
   populaires: number;
   optimates: number;
   moderates: number;
+  // Propriétés additionnelles pour compatibilité avec le code existant
+  plebeiens: number;
+  patriciens: number;
+  armée: number;
+  économie: number;
+  religion: number;
+  diplomatie: number;
   historique: {
     année: number;
     saison: Season;
@@ -202,10 +257,12 @@ export interface Equilibre {
 // Props pour les composants
 export interface PoliticalEventsTimelineProps {
   events: Evenement[];
+  searchTerm?: string; // Ajout de searchTerm en option
 }
 
 export interface LoisTableProps {
-  lois: Loi[];
+  lois?: Loi[];
+  searchTerm?: string; // Ajout de searchTerm en option
   onVote?: (loiId: string, vote: 'pour' | 'contre' | 'abstention') => void;
 }
 
@@ -220,6 +277,7 @@ export interface ElectionPlannerProps {
 
 export interface ProvinceCardProps {
   province: Province;
+  onClick?: () => void; // Rendre onClick optionnel
 }
 
 export interface ProvincesDataProps {
@@ -231,10 +289,13 @@ export interface ProvinceModalProps {
   province: Province | null;
   onClose: () => void;
   onSave: (province: Province) => void;
+  mode?: 'add' | 'edit'; // Ajout du mode optionnel
 }
 
 export interface SenateurCardProps {
   senateur: SenateurJouable;
+  isAssigned?: boolean; // Rendre isAssigned optionnel
+  playerName?: string; // Rendre playerName optionnel
   onEdit?: () => void;
 }
 
@@ -242,6 +303,7 @@ export interface SenateurModalProps {
   senateur: SenateurJouable | null;
   onClose: () => void;
   onSave: (senateur: SenateurJouable) => void;
+  isOpen?: boolean; // Ajout de isOpen pour compatibilité
 }
 
 export interface AssignmentTableProps {
@@ -271,6 +333,11 @@ export interface MaitreJeuContextType {
   factions: Faction[];
   elections: Election[];
   lois: Loi[];
+  
+  // Propriétés additionnelles pour compatibilité avec le code existant
+  politicalEvents?: Evenement[];
+  senateursJouables?: SenateurJouable[];
+  senateursAssignes?: Record<string, string>;
   
   // Équilibre des pouvoirs
   equilibre: Equilibre;

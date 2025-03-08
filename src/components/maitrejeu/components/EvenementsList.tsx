@@ -1,142 +1,133 @@
-
 import React, { useState } from 'react';
-import { useMaitreJeu } from '../context/MaitreJeuContext';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { AlertTriangle, CheckCircle, Filter } from 'lucide-react';
-import { ActionButton } from '@/components/ui-custom/ActionButton';
-import { useToast } from '@/components/ui/use-toast';
-import { Evenement } from '../types/maitreJeuTypes';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
+import { DotsHorizontalIcon } from '@radix-ui/react-icons';
 
-export const EvenementsList: React.FC = () => {
-  const { evenements, resolveEvenement } = useMaitreJeu();
-  const { toast } = useToast();
-  const [filter, setFilter] = useState<'TOUS' | 'ACTIFS' | 'RÉSOLUS'>('TOUS');
-  
-  const handleResolveEvenement = (id: string) => {
-    resolveEvenement(id);
-    toast({
-      title: "Événement résolu",
-      description: "L'événement a été marqué comme résolu.",
-    });
+// Importer les constantes de type pour EvenementType
+import { EvenementType, EVENEMENT_TYPES } from '../types/maitreJeuTypes';
+
+export const EvenementsList = ({ evenements, onResolve, filteredType }) => {
+  const [showConfirmation, setShowConfirmation] = useState(false);
+  const [selectedEventId, setSelectedEventId] = useState(null);
+
+  const handleResolve = (eventId) => {
+    setSelectedEventId(eventId);
+    setShowConfirmation(true);
   };
-  
-  const getEvenementTypeColor = (type: Evenement['type']): string => {
-    switch (type) {
-      case 'CRISE': return 'bg-red-500 hover:bg-red-600';
-      case 'GUERRE': return 'bg-orange-500 hover:bg-orange-600';
-      case 'POLITIQUE': return 'bg-blue-500 hover:bg-blue-600';
-      case 'RELIGION': return 'bg-purple-500 hover:bg-purple-600';
-      case 'ÉCONOMIQUE': return 'bg-green-500 hover:bg-green-600';
-      case 'DIPLOMATIQUE': return 'bg-indigo-500 hover:bg-indigo-600';
-      case 'SOCIAL': return 'bg-yellow-500 hover:bg-yellow-600';
-      default: return 'bg-gray-500 hover:bg-gray-600';
+
+  const confirmResolve = () => {
+    if (selectedEventId && onResolve) {
+      onResolve(selectedEventId);
     }
+    setShowConfirmation(false);
+    setSelectedEventId(null);
   };
-  
-  const filteredEvenements = evenements.filter(e => {
-    if (filter === 'TOUS') return true;
-    if (filter === 'ACTIFS') return !e.résolu;
-    if (filter === 'RÉSOLUS') return e.résolu;
-    return true;
+
+  const cancelResolve = () => {
+    setShowConfirmation(false);
+    setSelectedEventId(null);
+  };
+
+  const getTypeColor = (type: EvenementType) => {
+    if (type === EVENEMENT_TYPES.CRISE) return 'bg-red-500';
+    if (type === EVENEMENT_TYPES.GUERRE) return 'bg-orange-500';
+    if (type === EVENEMENT_TYPES.POLITIQUE) return 'bg-blue-500';
+    if (type === EVENEMENT_TYPES.RELIGION) return 'bg-purple-500';
+    if (type === EVENEMENT_TYPES.ÉCONOMIQUE) return 'bg-green-500';
+    if (type === EVENEMENT_TYPES.DIPLOMATIQUE) return 'bg-cyan-500';
+    if (type === EVENEMENT_TYPES.SOCIAL) return 'bg-yellow-500';
+    return 'bg-gray-500';
+  };
+
+  const filteredEvenements = evenements.filter(evenement => {
+    return !filteredType || evenement.type === filteredType;
   });
   
+  // Corriger les références de 'title' à 'titre'
+  // Corriger les références à 'actions' avec vérifications nullables
+  // Corriger les comparaisons d'impact
   return (
-    <Card>
-      <CardHeader className="pb-2 flex flex-row justify-between items-center">
-        <CardTitle className="text-lg">Événements</CardTitle>
-        <div className="flex items-center space-x-2">
-          <Filter className="h-4 w-4 text-muted-foreground" />
-          <select 
-            className="text-sm border rounded-md p-1" 
-            value={filter}
-            onChange={(e) => setFilter(e.target.value as any)}
-          >
-            <option value="TOUS">Tous</option>
-            <option value="ACTIFS">Actifs</option>
-            <option value="RÉSOLUS">Résolus</option>
-          </select>
+    <div className="space-y-4">
+      {filteredEvenements.map(evenement => (
+        <div key={evenement.id} className="border rounded-lg p-4 bg-white shadow-sm">
+          <div className="flex items-center gap-2 mb-2">
+            <div className={`w-3 h-3 rounded-full ${getTypeColor(evenement.type)}`}></div>
+            <h3 className="font-bold">{evenement.titre}</h3>
+          </div>
+          
+          <p className="text-sm">{evenement.description}</p>
+          
+          {/* Gestion conditionnelle des actions */}
+          {evenement.actions && evenement.actions.length > 0 && (
+            <div className="mt-4 space-y-2">
+              <h4 className="font-semibold text-sm">Actions possibles :</h4>
+              {evenement.actions.map(action => (
+                <div key={action.id} className="p-2 border border-gray-200 rounded">
+                  <p className="text-sm font-medium">{action.titre}</p>
+                  <p className="text-xs">{action.description}</p>
+                  <p className="text-xs italic">Conséquences: {action.conséquences}</p>
+                </div>
+              ))}
+            </div>
+          )}
+          
+          {/* Correction du rendu de l'impact pour gérer les types corrects */}
+          {evenement.impact && (
+            <div className="mt-2 text-sm">
+              <p className="font-semibold">Impact :</p>
+              <ul className="list-disc pl-5">
+                {evenement.impact.stabilité !== undefined && (
+                  <li className={evenement.impact.stabilité > 0 ? 'text-green-600' : 'text-red-600'}>
+                    Stabilité: {evenement.impact.stabilité > 0 ? '+' : ''}{evenement.impact.stabilité}
+                  </li>
+                )}
+                {evenement.impact.trésorPublique !== undefined && (
+                  <li className={evenement.impact.trésorPublique > 0 ? 'text-green-600' : 'text-red-600'}>
+                    Trésor Publique: {evenement.impact.trésorPublique > 0 ? '+' : ''}{evenement.impact.trésorPublique}
+                  </li>
+                )}
+                {evenement.impact.prestigeRome !== undefined && (
+                  <li className={evenement.impact.prestigeRome > 0 ? 'text-green-600' : 'text-red-600'}>
+                    Prestige de Rome: {evenement.impact.prestigeRome > 0 ? '+' : ''}{evenement.impact.prestigeRome}
+                  </li>
+                )}
+                {evenement.impact.religion !== undefined && (
+                  <li className={evenement.impact.religion > 0 ? 'text-green-600' : 'text-red-600'}>
+                    Religion: {evenement.impact.religion > 0 ? '+' : ''}{evenement.impact.religion}
+                  </li>
+                )}
+                {evenement.impact.autre && Object.keys(evenement.impact.autre).map(key => (
+                  <li key={key} className="text-gray-600">
+                    {key}: {evenement.impact.autre[key]}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="ghost" className="ml-auto h-8 w-8 p-0">
+                <span className="sr-only">Ouvrir le menu</span>
+                <DotsHorizontalIcon className="h-4 w-4" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuLabel>Actions</DropdownMenuLabel>
+              <DropdownMenuItem onClick={() => handleResolve(evenement.id)}>
+                Marquer comme résolu
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
-      </CardHeader>
-      <CardContent>
-        {filteredEvenements.length === 0 ? (
-          <div className="text-center py-10 text-muted-foreground">
-            Aucun événement à afficher.
-          </div>
-        ) : (
-          <div className="space-y-4">
-            {filteredEvenements.map((evenement) => (
-              <Card key={evenement.id} className={`border-l-4 ${evenement.résolu ? 'border-l-green-500' : 'border-l-amber-500'}`}>
-                <CardContent className="p-4">
-                  <div className="flex items-start justify-between">
-                    <div>
-                      <div className="flex items-center mb-1">
-                        <h3 className="font-medium text-lg mr-2">{evenement.title}</h3>
-                        <Badge 
-                          className={`${getEvenementTypeColor(evenement.type)} text-white`}
-                        >
-                          {evenement.type}
-                        </Badge>
-                      </div>
-                      <p className="text-sm text-muted-foreground mb-2">
-                        {evenement.date.season}, {evenement.date.year} AUC
-                      </p>
-                      <p className="text-sm mb-3">{evenement.description}</p>
-                      
-                      {!evenement.résolu && evenement.actions && evenement.actions.length > 0 && (
-                        <div className="mt-2">
-                          <h4 className="text-sm font-medium mb-2">Actions possibles:</h4>
-                          <div className="flex flex-wrap gap-2">
-                            {evenement.actions.map(action => (
-                              <Button 
-                                key={action.id}
-                                variant="outline" 
-                                size="sm"
-                                className="text-xs"
-                              >
-                                {action.description} ({action.coût} as)
-                              </Button>
-                            ))}
-                          </div>
-                        </div>
-                      )}
-                    </div>
-                    
-                    {!evenement.résolu && (
-                      <ActionButton
-                        variant="outline"
-                        size="sm"
-                        icon={<CheckCircle className="h-4 w-4" />}
-                        label="Résoudre"
-                        onClick={() => handleResolveEvenement(evenement.id)}
-                      />
-                    )}
-                    
-                    {evenement.résolu && (
-                      <Badge variant="outline" className="text-green-500 border-green-500">
-                        Résolu
-                      </Badge>
-                    )}
-                  </div>
-                  
-                  {Object.entries(evenement.impact || {}).length > 0 && (
-                    <div className="mt-3 pt-3 border-t text-xs text-muted-foreground">
-                      <span className="font-medium">Impact:</span>{" "}
-                      {Object.entries(evenement.impact || {}).map(([key, value]) => (
-                        <span key={key} className="mr-3">
-                          {key}: {value > 0 ? `+${value}` : value}
-                        </span>
-                      ))}
-                    </div>
-                  )}
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-        )}
-      </CardContent>
-    </Card>
+      ))}
+    </div>
   );
 };

@@ -14,7 +14,7 @@ import { ElectionPlanner } from './components/ElectionPlanner';
 import { PoliticalEventsTimeline } from './components/PoliticalEventsTimeline';
 
 export const GestionPolitique: React.FC = () => {
-  const { politicalEvents } = useMaitreJeu();
+  const { evenements, senateurs, factions, scheduleElection } = useMaitreJeu();
   
   const [searchTerm, setSearchTerm] = useState('');
   
@@ -65,7 +65,7 @@ export const GestionPolitique: React.FC = () => {
                 <CardTitle className="text-lg">Chronologie politique</CardTitle>
               </CardHeader>
               <CardContent>
-                <PoliticalEventsTimeline events={politicalEvents} searchTerm={searchTerm} />
+                <PoliticalEventsTimeline events={evenements} searchTerm={searchTerm} />
               </CardContent>
             </Card>
           </TabsContent>
@@ -76,7 +76,10 @@ export const GestionPolitique: React.FC = () => {
                 <CardTitle className="text-lg">Planification des élections</CardTitle>
               </CardHeader>
               <CardContent>
-                <ElectionPlanner />
+                <ElectionPlanner 
+                  senateurs={senateurs || []} 
+                  onScheduleElection={scheduleElection} 
+                />
               </CardContent>
             </Card>
           </TabsContent>
@@ -98,7 +101,7 @@ export const GestionPolitique: React.FC = () => {
                 <CardTitle className="text-lg">Réseau des partis politiques</CardTitle>
               </CardHeader>
               <CardContent className="h-[500px]">
-                <PartisGraph />
+                <PartisGraph factions={factions || []} />
               </CardContent>
             </Card>
           </TabsContent>

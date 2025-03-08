@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useMaitreJeu } from '../context/MaitreJeuContext';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -31,7 +30,6 @@ export const CreateEvenementForm: React.FC = () => {
     impact: {} as any,
   });
   
-  // Impact sur les différents aspects de l'équilibre
   const [impact, setImpact] = useState({
     plebeiens: 0,
     patriciens: 0,
@@ -53,7 +51,6 @@ export const CreateEvenementForm: React.FC = () => {
       return;
     }
     
-    // Filtrer les impacts qui sont non-nuls
     const filteredImpact = Object.entries(impact).reduce((acc, [key, value]) => {
       if (value !== 0) {
         acc[key as keyof typeof impact] = value;
@@ -63,12 +60,13 @@ export const CreateEvenementForm: React.FC = () => {
     
     const newEvenement: Evenement = {
       id: uuidv4(),
-      title,
+      titre: title,
       description,
       type,
       date: {
         year,
         season,
+        day: 1,
       },
       impact: filteredImpact,
       sourcePersistante: isPersistant,
@@ -83,7 +81,6 @@ export const CreateEvenementForm: React.FC = () => {
       description: "L'événement a été ajouté avec succès.",
     });
     
-    // Réinitialiser le formulaire
     setTitle('');
     setDescription('');
     setType('POLITIQUE');

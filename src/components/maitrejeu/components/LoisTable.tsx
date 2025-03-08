@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
@@ -6,7 +5,13 @@ import { Button } from '@/components/ui/button';
 import { LoisTableProps } from '../types/maitreJeuTypes';
 import { formatRomanDate } from '@/utils/timeSystem';
 
-export const LoisTable: React.FC<LoisTableProps> = ({ lois, onVote }) => {
+export interface LoisTableProps {
+  lois?: Loi[];
+  searchTerm?: string;
+  onVote?: (loiId: string, vote: 'pour' | 'contre' | 'abstention') => void;
+}
+
+export const LoisTable: React.FC<LoisTableProps> = ({ lois = [], searchTerm = '', onVote }) => {
   const getEtatBadge = (etat: string) => {
     switch (etat) {
       case 'proposée':
@@ -38,6 +43,24 @@ export const LoisTable: React.FC<LoisTableProps> = ({ lois, onVote }) => {
         return <Badge className="bg-orange-100 text-orange-800">Social</Badge>;
       default:
         return <Badge>{category}</Badge>;
+    }
+  };
+  
+  const handleVoteFor = (loiId: string) => {
+    if (onVote) {
+      onVote(loiId, 'pour');
+    }
+  };
+  
+  const handleVoteAgainst = (loiId: string) => {
+    if (onVote) {
+      onVote(loiId, 'contre');
+    }
+  };
+  
+  const handleVoteAbstain = (loiId: string) => {
+    if (onVote) {
+      onVote(loiId, 'abstention');
     }
   };
   
@@ -82,7 +105,7 @@ export const LoisTable: React.FC<LoisTableProps> = ({ lois, onVote }) => {
                         variant="ghost" 
                         size="sm" 
                         className="h-7 text-green-600 hover:text-green-700 hover:bg-green-50"
-                        onClick={() => onVote(loi.id, 'pour', 1)}
+                        onClick={() => handleVoteFor(loi.id)}
                       >
                         Pour
                       </Button>
@@ -90,7 +113,7 @@ export const LoisTable: React.FC<LoisTableProps> = ({ lois, onVote }) => {
                         variant="ghost" 
                         size="sm" 
                         className="h-7 text-red-600 hover:text-red-700 hover:bg-red-50"
-                        onClick={() => onVote(loi.id, 'contre', 1)}
+                        onClick={() => handleVoteAgainst(loi.id)}
                       >
                         Contre
                       </Button>
@@ -98,7 +121,7 @@ export const LoisTable: React.FC<LoisTableProps> = ({ lois, onVote }) => {
                         variant="ghost" 
                         size="sm" 
                         className="h-7 text-gray-500 hover:text-gray-700 hover:bg-gray-50"
-                        onClick={() => onVote(loi.id, 'abstention', 1)}
+                        onClick={() => handleVoteAbstain(loi.id)}
                       >
                         Abstention
                       </Button>
