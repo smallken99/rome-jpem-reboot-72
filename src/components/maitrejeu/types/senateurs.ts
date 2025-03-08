@@ -1,36 +1,24 @@
 
-import { GameDate } from './common';
+import { MagistratureType } from './magistratures';
+
+export interface Competences {
+  diplomatie: number;
+  guerre: number;
+  administration: number;
+  eloquence: number;
+}
 
 export interface SenateurJouable {
   id: string;
   nom: string;
-  famille: string;
+  prenom: string;
+  gens: string;
+  statut: "Patricien" | "Plébéien";
   age: number;
-  popularite: number;
+  joueur: boolean;
+  roles: string[];
   richesse: number;
   influence: number;
-  fonction: string;
-  appartenance: string;
-  status: string;
-  magistrature: string;
-  playerId: string | null;
-  // Propriétés de compatibilité
-  âge?: number;
-  popularité?: number;
-  fonctionActuelle?: string;
-  statut?: string;
-  stats?: Record<string, number>;
-}
-
-export interface SenateurCardProps {
-  senateur: SenateurJouable;
-  onSelect?: (id: string) => void;
-  selected?: boolean;
-}
-
-export interface SenateurModalProps {
-  isOpen: boolean;
-  senateur: SenateurJouable | null;
-  onClose: () => void;
-  onUpdate: (senateur: SenateurJouable) => void;
+  competences: Competences;
+  magistrature?: MagistratureType;
 }

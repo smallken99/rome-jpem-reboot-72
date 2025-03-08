@@ -1,119 +1,143 @@
 
 import React, { useState } from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { Plus, Search, UserPlus } from 'lucide-react';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { useMaitreJeu } from './context';
+import { 
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
 import { SenateurCard } from './components/SenateurCard';
 import { SenateurModal } from './components/SenateurModal';
-import { SenateurJouable } from './types/senateurs';
+import { useMaitreJeu } from './context/MaitreJeuContext';
+import { SenateurJouable } from './types';
+import { Plus, Search } from 'lucide-react';
 
-export const GestionSenateurs = () => {
-  const { senateurs, updateSenateur, assignSenateurToPlayer } = useMaitreJeu();
+export const GestionSenateurs: React.FC = () => {
+  const { senateurs, setSenateurs } = useMaitreJeu();
   
-  const [searchTerm, setSearchTerm] = useState('');
-  const [filterType, setFilterType] = useState('all');
+  const [searchQuery, setSearchQuery] = useState('');
   const [selectedSenateur, setSelectedSenateur] = useState<SenateurJouable | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  
-  const handleOpenModal = (senateur: SenateurJouable) => {
+  const [isCreateMode, setIsCreateMode] = useState(false);
+  const [senateurToDelete, setSenateurToDelete] = useState<SenateurJouable | null>(null);
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+
+  // Filtrer les sénateurs en fonction de la recherche
+  const filteredSenateurs = senateurs.filter(
+    (senateur) => 
+      senateur.nom.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      senateur.prenom.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      senateur.gens.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
+  const handleCreateSenateur = () => {
+    setIsCreateMode(true);
+    setSelectedSenateur(null);
+    setIsModalOpen(true);
+  };
+
+  const handleEditSenateur = (senateur: SenateurJouable) => {
+    setIsCreateMode(false);
     setSelectedSenateur(senateur);
     setIsModalOpen(true);
   };
-  
-  const handleCloseModal = () => {
+
+  const handleDeleteSenateur = (senateur: SenateurJouable) => {
+    setSenateurToDelete(senateur);
+    setIsDeleteDialogOpen(true);
+  };
+
+  const confirmDeleteSenateur = () => {
+    if (senateurToDelete) {
+      setSenateurs(senateurs.filter(s => s.id !== senateurToDelete.id));
+      setIsDeleteDialogOpen(false);
+      setSenateurToDelete(null);
+    }
+  };
+
+  const handleSaveSenateurModal = (senateur: SenateurJouable) => {
+    if (isCreateMode) {
+      // Générer un ID unique pour le nouveau sénateur
+      const newSenateur = {
+        ...senateur,
+        id: Date.now().toString(),
+      };
+      setSenateurs([...senateurs, newSenateur]);
+    } else {
+      // Mettre à jour un sénateur existant
+      setSenateurs(senateurs.map(s => s.id === senateur.id ? senateur : s));
+    }
     setIsModalOpen(false);
-    setSelectedSenateur(null);
   };
-  
-  const handleSaveSenateur = (updatedSenateur: SenateurJouable) => {
-    updateSenateur(updatedSenateur);
-    handleCloseModal();
-  };
-  
-  // Filter senators based on search and filter
-  const filteredSenateurs = senateurs.filter(senateur => {
-    const matchesSearch = 
-      senateur.nom.toLowerCase().includes(searchTerm.toLowerCase()) || 
-      senateur.famille.toLowerCase().includes(searchTerm.toLowerCase());
-    
-    if (filterType === 'all') return matchesSearch;
-    if (filterType === 'optimates') return matchesSearch && senateur.appartenance === 'Optimates';
-    if (filterType === 'populares') return matchesSearch && senateur.appartenance === 'Populares';
-    if (filterType === 'neutral') return matchesSearch && senateur.appartenance === 'Neutral';
-    if (filterType === 'assigned') return matchesSearch && senateur.playerId !== null;
-    if (filterType === 'unassigned') return matchesSearch && senateur.playerId === null;
-    
-    return matchesSearch;
-  });
-  
+
   return (
     <div className="space-y-6">
-      <Card>
-        <CardHeader>
-          <CardTitle>Gestion des Sénateurs</CardTitle>
-          <CardDescription>
-            Créez, modifiez et assignez des sénateurs aux joueurs
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="flex flex-col sm:flex-row gap-4 mb-6">
-            <div className="relative flex-1">
-              <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-              <Input
-                placeholder="Rechercher un sénateur..."
-                className="pl-8"
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-              />
-            </div>
-            <Select value={filterType} onValueChange={setFilterType}>
-              <SelectTrigger className="w-[180px]">
-                <SelectValue placeholder="Filtrer par type" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">Tous les sénateurs</SelectItem>
-                <SelectItem value="optimates">Optimates</SelectItem>
-                <SelectItem value="populares">Populares</SelectItem>
-                <SelectItem value="neutral">Neutres</SelectItem>
-                <SelectItem value="assigned">Assignés</SelectItem>
-                <SelectItem value="unassigned">Non assignés</SelectItem>
-              </SelectContent>
-            </Select>
-            <Button>
-              <UserPlus className="h-4 w-4 mr-2" />
-              Nouveau Sénateur
-            </Button>
-          </div>
-          
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {filteredSenateurs.map((senateur) => (
-              <SenateurCard 
-                key={senateur.id} 
-                senateur={senateur} 
-                onEdit={() => handleOpenModal(senateur)}
-              />
-            ))}
-            
-            {filteredSenateurs.length === 0 && (
-              <div className="col-span-full text-center py-10 text-muted-foreground">
-                Aucun sénateur ne correspond à votre recherche.
-              </div>
-            )}
-          </div>
-        </CardContent>
-      </Card>
-      
-      {selectedSenateur && (
-        <SenateurModal 
-          senateur={selectedSenateur} 
+      <div className="flex flex-col sm:flex-row gap-4 justify-between items-center">
+        <div className="relative w-full sm:w-64">
+          <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
+          <Input
+            placeholder="Rechercher un sénateur..."
+            className="pl-8"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+          />
+        </div>
+        <Button onClick={handleCreateSenateur} className="w-full sm:w-auto">
+          <Plus className="h-4 w-4 mr-2" />
+          Nouveau Sénateur
+        </Button>
+      </div>
+
+      {filteredSenateurs.length === 0 ? (
+        <div className="text-center py-8 bg-white/50 rounded-lg border border-dashed">
+          <p className="text-muted-foreground">Aucun sénateur trouvé</p>
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          {filteredSenateurs.map((senateur) => (
+            <SenateurCard
+              key={senateur.id}
+              senateur={senateur}
+              onEdit={() => handleEditSenateur(senateur)}
+              onDelete={() => handleDeleteSenateur(senateur)}
+            />
+          ))}
+        </div>
+      )}
+
+      {isModalOpen && (
+        <SenateurModal
           isOpen={isModalOpen}
-          onClose={handleCloseModal} 
-          onSave={handleSaveSenateur}
+          onClose={() => setIsModalOpen(false)}
+          onSave={handleSaveSenateurModal}
+          senateur={selectedSenateur}
+          isCreateMode={isCreateMode}
         />
       )}
+
+      <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Confirmer la suppression</AlertDialogTitle>
+            <AlertDialogDescription>
+              Êtes-vous sûr de vouloir supprimer {senateurToDelete?.prenom} {senateurToDelete?.nom} ?
+              Cette action est irréversible.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Annuler</AlertDialogCancel>
+            <AlertDialogAction onClick={confirmDeleteSenateur} className="bg-destructive text-destructive-foreground">
+              Supprimer
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };
