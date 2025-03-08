@@ -1,59 +1,61 @@
 
 import React from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { useMaitreJeu } from './context/MaitreJeuContext';
 import { GestionEquilibre } from './GestionEquilibre';
 import { GestionHistoire } from './GestionHistoire';
 import { GestionPolitique } from './GestionPolitique';
 import { GestionProvinces } from './GestionProvinces';
 import { GestionSenateurs } from './GestionSenateurs';
 import { TimeManagement } from './components/TimeManagement';
+import { useMaitreJeu } from './context/MaitreJeuContext';
+import { GamePhase } from './types/maitreJeuTypes';
 
 export const MaitreJeuTabs: React.FC = () => {
   const { 
-    currentYear, 
-    currentSeason, 
-    currentPhase,
-    advanceTime,
+    gameState,
     changePhase
   } = useMaitreJeu();
-
+  
+  const { year, season, phase } = gameState;
+  
+  const handlePhaseChange = (newPhase: GamePhase) => {
+    changePhase(newPhase);
+  };
+  
   return (
     <div className="container mx-auto py-6 space-y-6">
-      <TimeManagement 
-        year={currentYear}
-        season={currentSeason}
-        phase={currentPhase}
-        onAdvance={advanceTime}
-        onPhaseChange={changePhase}
-      />
+      <div className="flex justify-between items-center mb-4">
+        <h1 className="text-3xl font-bold">Console du Maître de Jeu</h1>
+        
+        <TimeManagement 
+          year={year}
+          season={season}
+          currentPhase={phase}
+          onPhaseChange={handlePhaseChange}
+        />
+      </div>
       
-      <Tabs defaultValue="histoire" className="w-full">
-        <TabsList className="grid w-full grid-cols-2 md:grid-cols-5">
+      <Tabs defaultValue="equilibre">
+        <TabsList className="grid grid-cols-5 w-full">
+          <TabsTrigger value="equilibre">Équilibre</TabsTrigger>
           <TabsTrigger value="histoire">Histoire</TabsTrigger>
           <TabsTrigger value="politique">Politique</TabsTrigger>
           <TabsTrigger value="provinces">Provinces</TabsTrigger>
-          <TabsTrigger value="equilibre">Équilibre</TabsTrigger>
           <TabsTrigger value="senateurs">Sénateurs</TabsTrigger>
         </TabsList>
-        
-        <TabsContent value="histoire" className="mt-6">
-          <GestionHistoire />
-        </TabsContent>
-        
-        <TabsContent value="politique" className="mt-6">
-          <GestionPolitique />
-        </TabsContent>
-        
-        <TabsContent value="provinces" className="mt-6">
-          <GestionProvinces />
-        </TabsContent>
-        
-        <TabsContent value="equilibre" className="mt-6">
+        <TabsContent value="equilibre">
           <GestionEquilibre />
         </TabsContent>
-        
-        <TabsContent value="senateurs" className="mt-6">
+        <TabsContent value="histoire">
+          <GestionHistoire />
+        </TabsContent>
+        <TabsContent value="politique">
+          <GestionPolitique />
+        </TabsContent>
+        <TabsContent value="provinces">
+          <GestionProvinces />
+        </TabsContent>
+        <TabsContent value="senateurs">
           <GestionSenateurs />
         </TabsContent>
       </Tabs>

@@ -1,105 +1,96 @@
 
 import React from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Province } from '../types/maitreJeuTypes';
+import { Province, ProvincesMapProps } from '../types/maitreJeuTypes';
 
-interface ProvincesMapProps {
-  provinces: Province[];
-  onSelectProvince: (province: Province) => void;
-}
-
-export const ProvincesMap: React.FC<ProvincesMapProps> = ({ provinces, onSelectProvince }) => {
-  // Dans une application réelle, nous aurions une vraie carte interactive
-  // Pour l'instant, nous simulons avec une représentation simplifiée
-  
-  const getProvinceColor = (statut: string) => {
-    switch (statut) {
-      case 'pacifiée': return '#90be6d';
-      case 'instable': return '#f9c74f';
-      case 'en révolte': return '#f94144';
-      case 'en guerre': return '#800000';
-      default: return '#adb5bd';
+export const ProvincesMap: React.FC<ProvincesMapProps> = ({ 
+  provinces,
+  onProvinceSelect
+}) => {
+  // Fonction pour obtenir la couleur appropriée selon le statut
+  const getProvinceColor = (status: string) => {
+    switch(status) {
+      case 'pacifiée':
+        return '#4ade80'; // Vert
+      case 'instable':
+        return '#facc15'; // Jaune
+      case 'rebelle':
+        return '#ef4444'; // Rouge
+      case 'conquise':
+        return '#60a5fa'; // Bleu
+      default:
+        return '#94a3b8'; // Gris
     }
   };
   
+  const mapWidth = 600;
+  const mapHeight = 400;
+  
   return (
-    <Card className="h-full">
-      <CardHeader>
-        <CardTitle>Carte de l'Empire Romain</CardTitle>
-      </CardHeader>
-      <CardContent>
-        <div className="relative w-full h-[500px] bg-slate-100 border rounded-md overflow-hidden">
-          <div className="absolute inset-0 bg-rome-parchment opacity-30"></div>
-          
-          {/* Représentation simplifiée des provinces */}
-          <svg 
-            viewBox="0 0 800 600" 
-            className="w-full h-full"
-            style={{ filter: 'drop-shadow(0 1px 2px rgba(0, 0, 0, 0.1))' }}
-          >
-            {/* Fond de la mer Méditerranée */}
-            <rect x="50" y="100" width="700" height="400" fill="#8ecae6" rx="5" />
-            
-            {/* Contours stylisés de terres */}
-            <path d="M50,100 C150,150 250,180 350,170 C450,160 550,130 650,150 L750,100 L50,100 Z" fill="#dda15e" />
-            <path d="M50,500 C150,450 250,420 350,430 C450,440 550,470 650,450 L750,500 L50,500 Z" fill="#bc6c25" />
-            
-            {/* Placement des provinces basé sur leurs coordonnées */}
-            {provinces.map((province) => (
-              <g 
-                key={province.id} 
-                onClick={() => onSelectProvince(province)}
-                style={{ cursor: 'pointer' }}
-              >
-                <circle
-                  cx={province.coordonnées.x}
-                  cy={province.coordonnées.y}
-                  r={20 + Math.sqrt(province.population / 100000)}
-                  fill={getProvinceColor(province.statut)}
-                  opacity={0.7}
-                  stroke="#333"
-                  strokeWidth="1"
-                />
-                <text
-                  x={province.coordonnées.x}
-                  y={province.coordonnées.y}
-                  textAnchor="middle"
-                  dominantBaseline="middle"
-                  fontSize="10"
-                  fontWeight="bold"
-                  fill="#333"
-                >
-                  {province.nom}
-                </text>
-              </g>
-            ))}
-          </svg>
-          
-          <div className="absolute bottom-4 right-4 bg-white p-2 rounded-md shadow-md">
-            <div className="text-sm font-medium mb-1">Légende</div>
-            <div className="flex items-center gap-1 text-xs">
-              <div className="w-3 h-3 rounded-full" style={{ backgroundColor: '#90be6d' }}></div>
-              <span>Pacifiée</span>
-            </div>
-            <div className="flex items-center gap-1 text-xs">
-              <div className="w-3 h-3 rounded-full" style={{ backgroundColor: '#f9c74f' }}></div>
-              <span>Instable</span>
-            </div>
-            <div className="flex items-center gap-1 text-xs">
-              <div className="w-3 h-3 rounded-full" style={{ backgroundColor: '#f94144' }}></div>
-              <span>En révolte</span>
-            </div>
-            <div className="flex items-center gap-1 text-xs">
-              <div className="w-3 h-3 rounded-full" style={{ backgroundColor: '#800000' }}></div>
-              <span>En guerre</span>
-            </div>
-          </div>
-        </div>
+    <div className="bg-white p-4 rounded-md shadow overflow-x-auto">
+      <h3 className="text-lg font-semibold mb-4">Carte des Provinces</h3>
+      
+      <svg width={mapWidth} height={mapHeight} viewBox={`0 0 ${mapWidth} ${mapHeight}`} className="border border-gray-200 bg-blue-50">
+        {/* Mer Méditerranée (fond bleu clair) */}
+        <rect x="0" y="0" width={mapWidth} height={mapHeight} fill="#cfe2ff" />
         
-        <div className="mt-4 text-sm text-muted-foreground">
-          <p>Cliquez sur une province pour en voir les détails et la gérer.</p>
-        </div>
-      </CardContent>
-    </Card>
+        {/* Italie (masse terrestre centrale) */}
+        <path d="M250,100 L300,80 L320,150 L280,250 L230,280 L200,200 Z" fill="#e9d8a6" stroke="#bda77a" strokeWidth="1" />
+        
+        {/* Provinces */}
+        {provinces.map((province) => {
+          if (!province.coordonnées) return null;
+          
+          const { x, y } = province.coordonnées;
+          const radius = 20;
+          const color = getProvinceColor(province.status);
+          
+          return (
+            <g key={province.id} onClick={() => onProvinceSelect(province.id)} style={{ cursor: 'pointer' }}>
+              <circle 
+                cx={x} 
+                cy={y} 
+                r={radius} 
+                fill={color} 
+                stroke="#ffffff" 
+                strokeWidth="2"
+                opacity="0.8"
+              />
+              <text 
+                x={x} 
+                y={y} 
+                textAnchor="middle" 
+                dominantBaseline="middle" 
+                fill="#333333" 
+                fontSize="10"
+                fontWeight="bold"
+              >
+                {province.nom}
+              </text>
+            </g>
+          );
+        })}
+        
+        {/* Légende */}
+        <g transform="translate(20, 340)">
+          <text x="0" y="0" fontSize="12" fontWeight="bold">Statut des provinces:</text>
+          
+          <circle cx="10" cy="20" r="6" fill="#4ade80" />
+          <text x="20" y="23" fontSize="10">Pacifiée</text>
+          
+          <circle cx="10" cy="40" r="6" fill="#facc15" />
+          <text x="20" y="43" fontSize="10">Instable</text>
+          
+          <circle cx="10" cy="60" r="6" fill="#ef4444" />
+          <text x="20" y="63" fontSize="10">Rebelle</text>
+          
+          <circle cx="90" cy="20" r="6" fill="#60a5fa" />
+          <text x="100" y="23" fontSize="10">Conquise</text>
+        </g>
+      </svg>
+      
+      <div className="mt-4 text-sm text-gray-500 italic">
+        Cliquez sur une province pour voir ses détails ou la modifier.
+      </div>
+    </div>
   );
 };

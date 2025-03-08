@@ -1,255 +1,212 @@
 
 import React, { useState } from 'react';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { RomanCard } from '@/components/ui-custom/RomanCard';
-import { useMaitreJeu } from './context/MaitreJeuContext';
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { HistoireTimeline } from './components/HistoireTimeline';
-import { CreateEvenementForm } from './components/CreateEvenementForm';
+import { useMaitreJeu } from './context/MaitreJeuContext';
 import { HistoireEntry, Season } from './types/maitreJeuTypes';
+import { formatDate } from '@/utils/formatUtils';
 
 export const GestionHistoire: React.FC = () => {
-  const { histoireEntries, addHistoireEntry, updateHistoireEntry, deleteHistoireEntry, currentYear } = useMaitreJeu();
+  const { histoireEntries, addHistoireEntry, gameState } = useMaitreJeu();
+  const { year, season } = gameState;
   
-  const [activeTab, setActiveTab] = useState('timeline');
-  const [filterYear, setFilterYear] = useState(currentYear);
-  const [filterSeason, setFilterSeason] = useState<Season>('SPRING');
   const [searchTerm, setSearchTerm] = useState('');
-  
-  // Formulaire d'ajout d'entrée
-  const [newEntryTitle, setNewEntryTitle] = useState('');
-  const [newEntryType, setNewEntryType] = useState('événement');
-  const [newEntryDescription, setNewEntryDescription] = useState('');
-  const [newEntryPersonnages, setNewEntryPersonnages] = useState('');
-  const [newEntryImportance, setNewEntryImportance] = useState<'majeure' | 'mineure' | 'normale'>('normale');
-  
-  // Filtrage des entrées
-  const filteredEntries = histoireEntries.filter(entry => {
-    // Filtre par année et saison
-    if (entry.date.year !== filterYear) return false;
-    
-    // Filtre par saison si sélectionnée
-    if (filterSeason) {
-      if (entry.date.season !== filterSeason) return false;
-    }
-    
-    // Recherche textuelle
-    if (searchTerm) {
-      const searchLower = searchTerm.toLowerCase();
-      return (
-        entry.titre.toLowerCase().includes(searchLower) ||
-        entry.description.toLowerCase().includes(searchLower) ||
-        entry.personnagesImpliqués.some(p => p.toLowerCase().includes(searchLower))
-      );
-    }
-    
-    return true;
+  const [newEntry, setNewEntry] = useState<Omit<HistoireEntry, "id">>({
+    titre: '',
+    contenu: '',
+    date: {
+      year: year,
+      season: season,
+      day: 1
+    },
+    personnagesImpliqués: []
   });
   
-  // Gestion de la soumission du formulaire
+  const [personnage, setPersonnage] = useState('');
+  const [entryType, setEntryType] = useState<string>('POLITIQUE');
+  
+  const filteredEntries = histoireEntries.filter(entry => 
+    entry.titre.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    entry.contenu.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+  
+  const handleAddPersonnage = () => {
+    if (personnage.trim()) {
+      setNewEntry({
+        ...newEntry,
+        personnagesImpliqués: [...(newEntry.personnagesImpliqués || []), personnage.trim()]
+      });
+      setPersonnage('');
+    }
+  };
+  
+  const handleRemovePersonnage = (index: number) => {
+    setNewEntry({
+      ...newEntry,
+      personnagesImpliqués: newEntry.personnagesImpliqués?.filter((_, i) => i !== index)
+    });
+  };
+  
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    addHistoireEntry({
+      ...newEntry,
+      type: entryType
+    });
     
-    const newEntry: Omit<HistoireEntry, 'id'> = {
-      titre: newEntryTitle,
-      type: newEntryType,
-      description: newEntryDescription,
-      personnagesImpliqués: newEntryPersonnages.split(',').map(p => p.trim()).filter(p => p),
+    // Reset form
+    setNewEntry({
+      titre: '',
+      contenu: '',
       date: {
-        year: filterYear,
-        season: filterSeason,
-        day: 1 // default day
+        year: year,
+        season: season,
+        day: 1
       },
-      importance: newEntryImportance
-    };
-    
-    addHistoireEntry(newEntry);
-    
-    // Reset the form
-    setNewEntryTitle('');
-    setNewEntryType('événement');
-    setNewEntryDescription('');
-    setNewEntryPersonnages('');
-    setNewEntryImportance('normale');
+      personnagesImpliqués: []
+    });
+    setEntryType('POLITIQUE');
   };
   
   return (
     <div className="space-y-6">
-      <div className="flex flex-col md:flex-row md:justify-between md:items-center gap-4">
-        <div>
-          <h2 className="text-2xl font-bold tracking-tight">Gestion de l'Histoire</h2>
-          <p className="text-muted-foreground">
-            Gérez les événements historiques et créez le récit de la République
-          </p>
-        </div>
-        
-        <div className="flex flex-wrap gap-2">
-          <Select value={String(filterYear)} onValueChange={(value) => setFilterYear(Number(value))}>
-            <SelectTrigger className="w-[120px]">
-              <SelectValue placeholder="Année" />
-            </SelectTrigger>
-            <SelectContent>
-              {Array.from({ length: 10 }, (_, i) => currentYear - 5 + i).map(year => (
-                <SelectItem key={year} value={String(year)}>
-                  {year}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-          
-          <Select value={filterSeason} onValueChange={(value) => setFilterSeason(value as Season)}>
-            <SelectTrigger className="w-[120px]">
-              <SelectValue placeholder="Saison" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="SPRING">Printemps</SelectItem>
-              <SelectItem value="SUMMER">Été</SelectItem>
-              <SelectItem value="AUTUMN">Automne</SelectItem>
-              <SelectItem value="WINTER">Hiver</SelectItem>
-            </SelectContent>
-          </Select>
-          
-          <Input
-            className="w-full md:w-auto"
-            placeholder="Rechercher..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-          />
-        </div>
+      <div className="flex justify-between items-center">
+        <h2 className="text-2xl font-bold">Chroniques de la République</h2>
+        <Input 
+          placeholder="Rechercher dans l'histoire..." 
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+          className="max-w-sm"
+        />
       </div>
       
-      <Tabs value={activeTab} onValueChange={setActiveTab}>
-        <TabsList className="grid w-full grid-cols-2">
-          <TabsTrigger value="timeline">Frise Chronologique</TabsTrigger>
-          <TabsTrigger value="create">Créer un Événement</TabsTrigger>
-        </TabsList>
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div className="md:col-span-2">
+          <HistoireTimeline entries={filteredEntries} />
+        </div>
         
-        <TabsContent value="timeline" className="space-y-4 py-4">
-          {filteredEntries.length === 0 ? (
-            <Card>
-              <CardContent className="flex flex-col items-center justify-center py-10">
-                <p className="text-muted-foreground text-center">
-                  Aucune entrée historique pour cette période.
-                </p>
-                <Button 
-                  className="mt-4" 
-                  variant="outline"
-                  onClick={() => setActiveTab('create')}
-                >
-                  Créer une entrée
-                </Button>
-              </CardContent>
-            </Card>
-          ) : (
-            <HistoireTimeline 
-              histoireEntries={filteredEntries}
-              onUpdateEntry={updateHistoireEntry}
-              onDeleteEntry={deleteHistoireEntry}
-            />
-          )}
-        </TabsContent>
-        
-        <TabsContent value="create" className="space-y-4 py-4">
-          <RomanCard>
-            <RomanCard.Header>
-              <h3 className="text-lg font-medium">Ajouter une Entrée Historique</h3>
-            </RomanCard.Header>
-            <RomanCard.Content>
-              <form onSubmit={handleSubmit} className="space-y-4">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <label className="text-sm font-medium">Titre</label>
-                    <Input
-                      value={newEntryTitle}
-                      onChange={(e) => setNewEntryTitle(e.target.value)}
-                      placeholder="Titre de l'événement"
-                      required
-                    />
-                  </div>
-                  
-                  <div className="space-y-2">
-                    <label className="text-sm font-medium">Type</label>
-                    <Select value={newEntryType} onValueChange={setNewEntryType}>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Type d'événement" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="événement">Événement</SelectItem>
-                        <SelectItem value="décision">Décision</SelectItem>
-                        <SelectItem value="bataille">Bataille</SelectItem>
-                        <SelectItem value="politique">Politique</SelectItem>
-                        <SelectItem value="social">Social</SelectItem>
-                        <SelectItem value="religieux">Religieux</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                </div>
-                
-                <div className="space-y-2">
-                  <label className="text-sm font-medium">Description</label>
-                  <textarea
-                    className="w-full min-h-[100px] px-3 py-2 rounded-md border border-input bg-background focus:outline-none focus:ring-2 focus:ring-ring"
-                    value={newEntryDescription}
-                    onChange={(e) => setNewEntryDescription(e.target.value)}
-                    placeholder="Description détaillée de l'événement"
+        <div className="space-y-4">
+          <div className="p-4 bg-white rounded-md shadow">
+            <h3 className="text-lg font-semibold mb-4">Ajouter un événement historique</h3>
+            <form onSubmit={handleSubmit} className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium mb-1">Titre</label>
+                <Input 
+                  value={newEntry.titre}
+                  onChange={(e) => setNewEntry({...newEntry, titre: e.target.value})}
+                  placeholder="Titre de l'événement"
+                  required
+                />
+              </div>
+              
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-sm font-medium mb-1">Année</label>
+                  <Input 
+                    type="number"
+                    value={newEntry.date.year}
+                    onChange={(e) => setNewEntry({
+                      ...newEntry, 
+                      date: {...newEntry.date, year: parseInt(e.target.value)}
+                    })}
                     required
                   />
                 </div>
-                
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <label className="text-sm font-medium">Personnages Impliqués</label>
-                    <Input
-                      value={newEntryPersonnages}
-                      onChange={(e) => setNewEntryPersonnages(e.target.value)}
-                      placeholder="Séparés par des virgules"
-                    />
-                    <p className="text-xs text-muted-foreground">
-                      Séparez les noms par des virgules
-                    </p>
-                  </div>
-                  
-                  <div className="space-y-2">
-                    <label className="text-sm font-medium">Importance</label>
-                    <Select 
-                      value={newEntryImportance} 
-                      onValueChange={(value) => setNewEntryImportance(value as 'majeure' | 'mineure' | 'normale')}
-                    >
-                      <SelectTrigger>
-                        <SelectValue placeholder="Importance" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="majeure">Majeure</SelectItem>
-                        <SelectItem value="normale">Normale</SelectItem>
-                        <SelectItem value="mineure">Mineure</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
+                <div>
+                  <label className="block text-sm font-medium mb-1">Saison</label>
+                  <Select 
+                    value={newEntry.date.season} 
+                    onValueChange={(value: Season) => setNewEntry({
+                      ...newEntry, 
+                      date: {...newEntry.date, season: value}
+                    })}
+                  >
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="SPRING">Printemps</SelectItem>
+                      <SelectItem value="SUMMER">Été</SelectItem>
+                      <SelectItem value="AUTUMN">Automne</SelectItem>
+                      <SelectItem value="WINTER">Hiver</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+              
+              <div>
+                <label className="block text-sm font-medium mb-1">Type</label>
+                <Select 
+                  value={entryType} 
+                  onValueChange={setEntryType}
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="POLITIQUE">Politique</SelectItem>
+                    <SelectItem value="MILITAIRE">Militaire</SelectItem>
+                    <SelectItem value="SOCIAL">Social</SelectItem>
+                    <SelectItem value="RELIGIEUX">Religieux</SelectItem>
+                    <SelectItem value="ECONOMIQUE">Économique</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              
+              <div>
+                <label className="block text-sm font-medium mb-1">Contenu</label>
+                <Textarea 
+                  value={newEntry.contenu}
+                  onChange={(e) => setNewEntry({...newEntry, contenu: e.target.value})}
+                  placeholder="Détails de l'événement historique..."
+                  className="min-h-[150px]"
+                  required
+                />
+              </div>
+              
+              <div>
+                <label className="block text-sm font-medium mb-1">Personnages impliqués</label>
+                <div className="flex gap-2">
+                  <Input 
+                    value={personnage}
+                    onChange={(e) => setPersonnage(e.target.value)}
+                    placeholder="Nom du personnage"
+                  />
+                  <Button type="button" onClick={handleAddPersonnage} variant="outline">
+                    Ajouter
+                  </Button>
                 </div>
                 
-                <div className="pt-4 flex justify-end">
-                  <Button type="submit">Ajouter à l'Histoire</Button>
-                </div>
-              </form>
-            </RomanCard.Content>
-          </RomanCard>
-          
-          <Card>
-            <CardHeader>
-              <CardTitle>Créer un Événement avec Conséquences</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="text-sm text-muted-foreground mb-4">
-                Utilisez ce formulaire pour créer des événements plus complexes avec des actions et conséquences.
-              </p>
-              <CreateEvenementForm />
-            </CardContent>
-          </Card>
-        </TabsContent>
-      </Tabs>
+                {newEntry.personnagesImpliqués && newEntry.personnagesImpliqués.length > 0 && (
+                  <div className="mt-2 space-y-1">
+                    {newEntry.personnagesImpliqués.map((p, index) => (
+                      <div key={index} className="flex justify-between items-center bg-gray-100 p-2 rounded">
+                        <span>{p}</span>
+                        <Button 
+                          type="button" 
+                          onClick={() => handleRemovePersonnage(index)}
+                          variant="ghost" 
+                          size="sm" 
+                          className="h-7 text-red-600"
+                        >
+                          Retirer
+                        </Button>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+              
+              <Button type="submit" className="w-full">
+                Enregistrer l'événement
+              </Button>
+            </form>
+          </div>
+        </div>
+      </div>
     </div>
   );
 };

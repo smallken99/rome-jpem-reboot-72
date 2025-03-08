@@ -1,164 +1,97 @@
 
-import React, { useState } from 'react';
+import React from 'react';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { ArrowUpDown, ThumbsUp, ThumbsDown, Clock } from 'lucide-react';
-import { formatDate } from '@/utils/formatUtils';
+import { Badge } from '@/components/ui/badge';
 import { Loi, LoisTableProps } from '../types/maitreJeuTypes';
-import { useMaitreJeu } from '../context/MaitreJeuContext';
-import { toast } from 'sonner';
+import { formatDate } from '@/utils/formatUtils';
 
-export const LoisTable: React.FC<LoisTableProps> = ({ lois, searchTerm = '' }) => {
-  const { voteLoi, finalizeLoi } = useMaitreJeu();
-  const [sortColumn, setSortColumn] = useState<keyof Loi>('titre');
-  const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
+export const LoisTable: React.FC<LoisTableProps> = ({ 
+  lois = [],
+  searchTerm = ""
+}) => {
+  const filteredLois = searchTerm 
+    ? lois.filter(loi => 
+        loi.titre.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        loi.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        loi.proposeur.toLowerCase().includes(searchTerm.toLowerCase())
+      )
+    : lois;
   
-  // Filter lois based on search term
-  const filteredLois = lois.filter(loi => 
-    loi.titre.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    loi.description.toLowerCase().includes(searchTerm.toLowerCase())
-  );
-  
-  // Sort lois based on selected column and direction
-  const sortedLois = [...filteredLois].sort((a, b) => {
-    const aValue = a[sortColumn];
-    const bValue = b[sortColumn];
-    
-    if (typeof aValue === 'string' && typeof bValue === 'string') {
-      return sortDirection === 'asc' 
-        ? aValue.localeCompare(bValue) 
-        : bValue.localeCompare(aValue);
-    }
-    
-    if (typeof aValue === 'number' && typeof bValue === 'number') {
-      return sortDirection === 'asc' ? aValue - bValue : bValue - aValue;
-    }
-    
-    return 0;
-  });
-  
-  const handleSort = (column: keyof Loi) => {
-    if (sortColumn === column) {
-      setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc');
-    } else {
-      setSortColumn(column);
-      setSortDirection('asc');
-    }
-  };
-  
-  const handleVote = (loiId: string, vote: 'pour' | 'contre' | 'abstention') => {
-    voteLoi(loiId, vote, 1);
-    
-    if (vote === 'pour') {
-      toast.success('Vote POUR enregistré');
-    } else if (vote === 'contre') {
-      toast.error('Vote CONTRE enregistré');
-    } else {
-      toast.info('Abstention enregistrée');
-    }
-  };
-  
-  const getStatusColor = (status: string) => {
-    switch (status) {
+  // Fonction pour obtenir le badge de statut approprié
+  const getStatusBadge = (statut: string) => {
+    switch(statut) {
       case 'proposée':
-        return 'bg-yellow-500';
+        return <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200">Proposée</Badge>;
       case 'votée':
-        return 'bg-green-500';
+        return <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">Votée</Badge>;
       case 'rejetée':
-        return 'bg-red-500';
+        return <Badge variant="outline" className="bg-red-50 text-red-700 border-red-200">Rejetée</Badge>;
       case 'amendée':
-        return 'bg-blue-500';
+        return <Badge variant="outline" className="bg-amber-50 text-amber-700 border-amber-200">Amendée</Badge>;
       default:
-        return 'bg-gray-500';
+        return <Badge variant="outline">Inconnue</Badge>;
+    }
+  };
+  
+  // Fonction pour obtenir le badge de catégorie approprié
+  const getCategoryBadge = (category: string) => {
+    switch(category) {
+      case 'politique':
+        return <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200">Politique</Badge>;
+      case 'économique':
+        return <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">Économique</Badge>;
+      case 'militaire':
+        return <Badge variant="outline" className="bg-red-50 text-red-700 border-red-200">Militaire</Badge>;
+      case 'religieuse':
+        return <Badge variant="outline" className="bg-purple-50 text-purple-700 border-purple-200">Religieuse</Badge>;
+      case 'sociale':
+        return <Badge variant="outline" className="bg-amber-50 text-amber-700 border-amber-200">Sociale</Badge>;
+      default:
+        return <Badge variant="outline">{category}</Badge>;
     }
   };
   
   return (
-    <div className="relative overflow-x-auto">
+    <div className="bg-white rounded-md shadow">
       <Table>
         <TableHeader>
           <TableRow>
-            <TableHead 
-              className="cursor-pointer"
-              onClick={() => handleSort('titre')}
-            >
-              <div className="flex items-center gap-1">
-                <span>Titre</span>
-                <ArrowUpDown className="h-3 w-3" />
-              </div>
-            </TableHead>
+            <TableHead>Loi</TableHead>
             <TableHead>Proposée par</TableHead>
             <TableHead>Date</TableHead>
             <TableHead>Catégorie</TableHead>
             <TableHead>Statut</TableHead>
-            <TableHead>Votes</TableHead>
-            <TableHead className="text-right">Actions</TableHead>
+            <TableHead className="text-right">Votes</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
-          {sortedLois.map(loi => (
-            <TableRow key={loi.id}>
-              <TableCell className="font-medium">{loi.titre}</TableCell>
-              <TableCell>{loi.proposeur}</TableCell>
-              <TableCell>{loi.date.year} {loi.date.season}</TableCell>
-              <TableCell>{loi.catégorie || 'Générale'}</TableCell>
-              <TableCell>
-                <Badge className={getStatusColor(loi.état || '')}>
-                  {loi.état || 'N/A'}
-                </Badge>
-              </TableCell>
-              <TableCell>
-                <div className="flex items-center gap-2">
-                  <Badge variant="outline" className="bg-green-100">
-                    <ThumbsUp className="h-3 w-3 mr-1 text-green-600" /> 
-                    {loi.votesPositifs}
-                  </Badge>
-                  <Badge variant="outline" className="bg-red-100">
-                    <ThumbsDown className="h-3 w-3 mr-1 text-red-600" /> 
-                    {loi.votesNégatifs}
-                  </Badge>
-                </div>
-              </TableCell>
-              <TableCell className="text-right">
-                {loi.état === 'proposée' && (
-                  <div className="flex items-center justify-end gap-2">
-                    <Button 
-                      variant="ghost" 
-                      size="icon"
-                      className="text-green-600 hover:text-green-700 hover:bg-green-100"
-                      onClick={() => handleVote(loi.id, 'pour')}
-                    >
-                      <ThumbsUp className="h-4 w-4" />
-                    </Button>
-                    <Button 
-                      variant="ghost" 
-                      size="icon"
-                      className="text-red-600 hover:text-red-700 hover:bg-red-100"
-                      onClick={() => handleVote(loi.id, 'contre')}
-                    >
-                      <ThumbsDown className="h-4 w-4" />
-                    </Button>
-                    <Button 
-                      variant="ghost" 
-                      size="icon"
-                      className="text-gray-500 hover:text-gray-700 hover:bg-gray-100"
-                      onClick={() => handleVote(loi.id, 'abstention')}
-                    >
-                      <Clock className="h-4 w-4" />
-                    </Button>
-                  </div>
-                )}
-              </TableCell>
-            </TableRow>
-          ))}
-          
-          {filteredLois.length === 0 && (
+          {filteredLois.length === 0 ? (
             <TableRow>
-              <TableCell colSpan={7} className="text-center py-6 text-muted-foreground">
-                Aucune loi trouvée
+              <TableCell colSpan={6} className="text-center py-4 text-gray-500">
+                Aucune loi trouvée.
               </TableCell>
             </TableRow>
+          ) : (
+            filteredLois.map((loi) => (
+              <TableRow key={loi.id}>
+                <TableCell className="font-medium">{loi.titre}</TableCell>
+                <TableCell>{loi.proposeur}</TableCell>
+                <TableCell>{formatDate(loi.date.year, loi.date.season, loi.date.day)}</TableCell>
+                <TableCell>{getCategoryBadge(loi.catégorie)}</TableCell>
+                <TableCell>{getStatusBadge(loi.état)}</TableCell>
+                <TableCell className="text-right">
+                  <div className="flex items-center justify-end gap-2">
+                    <span className="text-green-600 text-sm">
+                      +{loi.votesPositifs}
+                    </span>
+                    <span className="text-red-600 text-sm">
+                      -{loi.votesNégatifs}
+                    </span>
+                  </div>
+                </TableCell>
+              </TableRow>
+            ))
           )}
         </TableBody>
       </Table>

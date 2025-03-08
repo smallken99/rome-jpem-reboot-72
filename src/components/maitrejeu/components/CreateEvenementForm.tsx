@@ -2,403 +2,307 @@
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
-import { Slider } from '@/components/ui/slider';
-import { Switch } from '@/components/ui/switch';
-import { Label } from '@/components/ui/label';
-import { Plus, Trash } from 'lucide-react';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useMaitreJeu } from '../context/MaitreJeuContext';
-import { 
-  Evenement, 
-  EvenementType, 
-  EvenementAction,
-  Season
+import {
+  EvenementType,
+  ImportanceType,
+  Season,
+  EvenementAction
 } from '../types/maitreJeuTypes';
 
-export const CreateEvenementForm: React.FC = () => {
-  const { currentYear, currentSeason, addEvenement } = useMaitreJeu();
+interface CreateEvenementFormProps {
+  onCreated?: () => void;
+}
+
+export const CreateEvenementForm: React.FC<CreateEvenementFormProps> = ({ onCreated }) => {
+  const { addEvenement, gameState } = useMaitreJeu();
+  const { year, season } = gameState;
   
-  // État du formulaire principal
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
-  const [eventType, setEventType] = useState<EvenementType>('POLITIQUE');
-  const [eventYear, setEventYear] = useState(currentYear);
-  const [eventSeason, setEventSeason] = useState<Season>(currentSeason);
-  const [isPersistent, setIsPersistent] = useState(false);
-  
-  // Impact de l'événement
-  const [influenceImpact, setInfluenceImpact] = useState(0);
-  const [financeImpact, setFinanceImpact] = useState(0);
-  const [militaryImpact, setMilitaryImpact] = useState(0);
-  const [religionImpact, setReligionImpact] = useState(0);
-  const [economyImpact, setEconomyImpact] = useState(0);
-  
-  // Actions possibles
+  const [type, setType] = useState<EvenementType>('POLITIQUE');
+  const [importance, setImportance] = useState<ImportanceType>('normale');
+  const [selectedDate, setSelectedDate] = useState({
+    year: year,
+    season: season,
+    day: 1
+  });
   const [actions, setActions] = useState<EvenementAction[]>([]);
-  const [newActionTitle, setNewActionTitle] = useState('');
-  const [newActionDescription, setNewActionDescription] = useState('');
-  const [newActionConsequences, setNewActionConsequences] = useState('');
-  const [newActionCost, setNewActionCost] = useState(0);
-  const [newActionRisk, setNewActionRisk] = useState(0);
+  const [newAction, setNewAction] = useState({
+    texte: '',
+    effets: {
+      stabilité: 0,
+      trésorPublique: 0,
+      prestigeRome: 0
+    }
+  });
   
-  // Réinitialiser le formulaire
-  const resetForm = () => {
-    setTitle('');
-    setDescription('');
-    setEventType('POLITIQUE');
-    setEventYear(currentYear);
-    setEventSeason(currentSeason);
-    setIsPersistent(false);
-    
-    setInfluenceImpact(0);
-    setFinanceImpact(0);
-    setMilitaryImpact(0);
-    setReligionImpact(0);
-    setEconomyImpact(0);
-    
-    setActions([]);
-    setNewActionTitle('');
-    setNewActionDescription('');
-    setNewActionConsequences('');
-    setNewActionCost(0);
-    setNewActionRisk(0);
-  };
-  
-  // Créer l'événement
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     
-    const newEvent: Omit<Evenement, 'id'> = {
+    const newEvenement = {
       titre: title,
       description,
-      type: eventType,
-      date: {
-        year: eventYear,
-        season: eventSeason,
-        day: 1 // default day
-      },
-      impact: {
-        influence: influenceImpact,
-        finance: financeImpact,
-        militaire: militaryImpact,
-        religion: religionImpact,
-        economie: economyImpact
-      },
-      actions: actions,
-      sourcePersistante: isPersistent
+      type,
+      date: selectedDate,
+      importance,
+      options: actions,
+      resolved: false
     };
     
-    addEvenement(newEvent);
-    resetForm();
+    addEvenement(newEvenement);
+    
+    // Reset form
+    setTitle('');
+    setDescription('');
+    setType('POLITIQUE');
+    setImportance('normale');
+    setActions([]);
+    
+    if (onCreated) {
+      onCreated();
+    }
   };
   
-  // Ajouter une action
   const handleAddAction = () => {
-    if (!newActionTitle || !newActionDescription || !newActionConsequences) return;
-    
-    const newAction: EvenementAction = {
-      id: `action-${Date.now()}-${Math.random().toString(36).substr(2, 5)}`,
-      titre: newActionTitle,
-      description: newActionDescription,
-      conséquences: newActionConsequences,
-      coût: newActionCost,
-      risque: newActionRisk,
-      impact: {
-        influence: influenceImpact / 2,
-        finance: financeImpact / 2,
-        militaire: militaryImpact / 2,
-        religion: religionImpact / 2,
-        economie: economyImpact / 2
-      }
-    };
-    
-    setActions([...actions, newAction]);
-    
-    // Réinitialiser le formulaire d'action
-    setNewActionTitle('');
-    setNewActionDescription('');
-    setNewActionConsequences('');
-    setNewActionCost(0);
-    setNewActionRisk(0);
+    if (newAction.texte.trim()) {
+      setActions([
+        ...actions,
+        {
+          id: `action-${Date.now()}`,
+          texte: newAction.texte,
+          effets: newAction.effets
+        }
+      ]);
+      
+      setNewAction({
+        texte: '',
+        effets: {
+          stabilité: 0,
+          trésorPublique: 0,
+          prestigeRome: 0
+        }
+      });
+    }
   };
   
-  // Supprimer une action
-  const handleRemoveAction = (id: string) => {
-    setActions(actions.filter(action => action.id !== id));
+  const handleRemoveAction = (index: number) => {
+    setActions(actions.filter((_, i) => i !== index));
+  };
+  
+  const handleEffectChange = (key: string, value: number) => {
+    setNewAction({
+      ...newAction,
+      effets: {
+        ...newAction.effets,
+        [key]: value
+      }
+    });
   };
   
   return (
-    <form onSubmit={handleSubmit} className="space-y-6">
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-        <div className="space-y-2">
-          <Label>Titre de l'événement</Label>
-          <Input 
-            value={title} 
+    <div className="space-y-4">
+      <form onSubmit={handleSubmit} className="space-y-4">
+        <div>
+          <label className="block text-sm font-medium mb-1">Titre</label>
+          <Input
+            value={title}
             onChange={(e) => setTitle(e.target.value)}
-            placeholder="Titre descriptif" 
+            placeholder="Titre de l'événement"
             required
           />
         </div>
         
-        <div className="space-y-2">
-          <Label>Type d'événement</Label>
-          <Select value={eventType} onValueChange={(value) => setEventType(value as EvenementType)}>
-            <SelectTrigger>
-              <SelectValue placeholder="Sélectionner un type" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="POLITIQUE">Politique</SelectItem>
-              <SelectItem value="SOCIAL">Social</SelectItem>
-              <SelectItem value="ÉCONOMIQUE">Économique</SelectItem>
-              <SelectItem value="GUERRE">Guerre</SelectItem>
-              <SelectItem value="RELIGION">Religion</SelectItem>
-              <SelectItem value="DIPLOMATIQUE">Diplomatique</SelectItem>
-              <SelectItem value="CRISE">Crise</SelectItem>
-            </SelectContent>
-          </Select>
+        <div className="grid grid-cols-2 gap-4">
+          <div>
+            <label className="block text-sm font-medium mb-1">Type</label>
+            <Select 
+              value={type} 
+              onValueChange={(value: EvenementType) => setType(value)}
+            >
+              <SelectTrigger>
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="POLITIQUE">Politique</SelectItem>
+                <SelectItem value="GUERRE">Guerre</SelectItem>
+                <SelectItem value="CRISE">Crise</SelectItem>
+                <SelectItem value="ECONOMIQUE">Économique</SelectItem>
+                <SelectItem value="RELIGION">Religion</SelectItem>
+                <SelectItem value="DIPLOMATIQUE">Diplomatique</SelectItem>
+                <SelectItem value="SOCIAL">Social</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+          
+          <div>
+            <label className="block text-sm font-medium mb-1">Importance</label>
+            <Select 
+              value={importance} 
+              onValueChange={(value: ImportanceType) => setImportance(value)}
+            >
+              <SelectTrigger>
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="mineure">Mineure</SelectItem>
+                <SelectItem value="normale">Normale</SelectItem>
+                <SelectItem value="majeure">Majeure</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
         </div>
-      </div>
-      
-      <div className="space-y-2">
-        <Label>Description</Label>
-        <Textarea 
-          value={description} 
-          onChange={(e) => setDescription(e.target.value)}
-          placeholder="Description détaillée de l'événement" 
-          className="min-h-[100px]"
-          required
-        />
-      </div>
-      
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-        <div className="space-y-2">
-          <Label>Année</Label>
-          <Input 
-            type="number" 
-            value={eventYear} 
-            onChange={(e) => setEventYear(parseInt(e.target.value))}
-            min={currentYear - 5}
-            max={currentYear + 5}
+        
+        <div>
+          <label className="block text-sm font-medium mb-1">Description</label>
+          <Textarea
+            value={description}
+            onChange={(e) => setDescription(e.target.value)}
+            placeholder="Description détaillée de l'événement..."
+            rows={4}
+            required
           />
         </div>
         
-        <div className="space-y-2">
-          <Label>Saison</Label>
-          <Select value={eventSeason} onValueChange={(value) => setEventSeason(value as Season)}>
-            <SelectTrigger>
-              <SelectValue placeholder="Saison" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="SPRING">Printemps</SelectItem>
-              <SelectItem value="SUMMER">Été</SelectItem>
-              <SelectItem value="AUTUMN">Automne</SelectItem>
-              <SelectItem value="WINTER">Hiver</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
-        
-        <div className="space-y-2 flex items-end">
-          <div className="flex items-center space-x-2">
-            <Switch 
-              id="persistent" 
-              checked={isPersistent} 
-              onCheckedChange={setIsPersistent} 
-            />
-            <Label htmlFor="persistent">Source persistante</Label>
-          </div>
-        </div>
-      </div>
-      
-      <div className="space-y-4">
-        <h3 className="font-semibold text-lg">Impact</h3>
-        
-        <div className="space-y-6">
-          <div className="space-y-2">
-            <div className="flex justify-between">
-              <Label>Influence politique ({influenceImpact})</Label>
-            </div>
-            <Slider 
-              value={[influenceImpact]} 
-              onValueChange={(value) => setInfluenceImpact(value[0])}
-              min={-50}
-              max={50}
-              step={1}
+        <div className="grid grid-cols-3 gap-3">
+          <div>
+            <label className="block text-sm font-medium mb-1">Année</label>
+            <Input
+              type="number"
+              value={selectedDate.year}
+              onChange={(e) => setSelectedDate({
+                ...selectedDate,
+                year: parseInt(e.target.value) || year
+              })}
             />
           </div>
-          
-          <div className="space-y-2">
-            <div className="flex justify-between">
-              <Label>Finances ({financeImpact})</Label>
-            </div>
-            <Slider 
-              value={[financeImpact]} 
-              onValueChange={(value) => setFinanceImpact(value[0])}
-              min={-50}
-              max={50}
-              step={1}
-            />
+          <div>
+            <label className="block text-sm font-medium mb-1">Saison</label>
+            <Select 
+              value={selectedDate.season} 
+              onValueChange={(value: Season) => setSelectedDate({
+                ...selectedDate,
+                season: value
+              })}
+            >
+              <SelectTrigger>
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="SPRING">Printemps</SelectItem>
+                <SelectItem value="SUMMER">Été</SelectItem>
+                <SelectItem value="AUTUMN">Automne</SelectItem>
+                <SelectItem value="WINTER">Hiver</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
-          
-          <div className="space-y-2">
-            <div className="flex justify-between">
-              <Label>Impact militaire ({militaryImpact})</Label>
-            </div>
-            <Slider 
-              value={[militaryImpact]} 
-              onValueChange={(value) => setMilitaryImpact(value[0])}
-              min={-50}
-              max={50}
-              step={1}
-            />
-          </div>
-          
-          <div className="space-y-2">
-            <div className="flex justify-between">
-              <Label>Religion ({religionImpact})</Label>
-            </div>
-            <Slider 
-              value={[religionImpact]} 
-              onValueChange={(value) => setReligionImpact(value[0])}
-              min={-50}
-              max={50}
-              step={1}
-            />
-          </div>
-          
-          <div className="space-y-2">
-            <div className="flex justify-between">
-              <Label>Économie ({economyImpact})</Label>
-            </div>
-            <Slider 
-              value={[economyImpact]} 
-              onValueChange={(value) => setEconomyImpact(value[0])}
-              min={-50}
-              max={50}
-              step={1}
+          <div>
+            <label className="block text-sm font-medium mb-1">Jour</label>
+            <Input
+              type="number"
+              value={selectedDate.day}
+              onChange={(e) => setSelectedDate({
+                ...selectedDate,
+                day: parseInt(e.target.value) || 1
+              })}
+              min="1"
+              max="30"
             />
           </div>
         </div>
-      </div>
-      
-      <div className="border-t pt-6 mt-6">
-        <h3 className="font-semibold text-lg mb-4">Actions possibles</h3>
         
-        {actions.length > 0 ? (
-          <div className="space-y-4 mb-6">
+        <div className="border-t pt-4 mt-4">
+          <h3 className="font-medium mb-2">Options de résolution</h3>
+          
+          <div className="space-y-4 mb-4">
             {actions.map((action, index) => (
-              <div 
-                key={action.id} 
-                className="p-4 border rounded-md bg-gray-50 relative"
-              >
-                <Button 
-                  variant="ghost" 
-                  size="icon" 
-                  className="absolute top-2 right-2"
-                  type="button"
-                  onClick={() => handleRemoveAction(action.id)}
-                >
-                  <Trash className="h-4 w-4" />
-                </Button>
-                
-                <div className="pr-8">
-                  <h4 className="font-medium">{action.titre}</h4>
-                  <p className="text-sm text-muted-foreground mt-1">{action.description}</p>
-                  
-                  <div className="mt-2 text-sm">
-                    <span className="font-medium">Conséquences:</span> {action.conséquences}
-                  </div>
-                  
-                  <div className="flex gap-4 mt-2 text-xs text-muted-foreground">
-                    <div>Coût: {action.coût}</div>
-                    <div>Risque: {action.risque}</div>
-                  </div>
+              <div key={index} className="p-3 bg-gray-50 rounded border">
+                <div className="flex justify-between items-start">
+                  <p className="font-medium">{action.texte}</p>
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => handleRemoveAction(index)}
+                    className="text-red-600 h-7"
+                  >
+                    Supprimer
+                  </Button>
+                </div>
+                <div className="mt-2 text-sm text-gray-600 space-y-1">
+                  {Object.entries(action.effets).map(([key, value]) => (
+                    value !== 0 && (
+                      <div key={key} className="flex items-center">
+                        <span>{key}:</span>
+                        <span className={value > 0 ? 'text-green-600 ml-1' : 'text-red-600 ml-1'}>
+                          {value > 0 ? `+${value}` : value}
+                        </span>
+                      </div>
+                    )
+                  ))}
                 </div>
               </div>
             ))}
           </div>
-        ) : (
-          <div className="text-center py-4 text-muted-foreground">
-            Aucune action définie
-          </div>
-        )}
-        
-        <div className="bg-gray-50 p-4 rounded-md border mt-4">
-          <h4 className="font-medium mb-3">Ajouter une action</h4>
           
           <div className="space-y-3">
-            <div className="space-y-2">
-              <Label>Titre de l'action</Label>
-              <Input 
-                value={newActionTitle} 
-                onChange={(e) => setNewActionTitle(e.target.value)}
-                placeholder="Titre de l'action" 
+            <div>
+              <label className="block text-sm font-medium mb-1">Texte de l'option</label>
+              <Input
+                value={newAction.texte}
+                onChange={(e) => setNewAction({...newAction, texte: e.target.value})}
+                placeholder="Description de cette option..."
               />
             </div>
             
-            <div className="space-y-2">
-              <Label>Description</Label>
-              <Input 
-                value={newActionDescription} 
-                onChange={(e) => setNewActionDescription(e.target.value)}
-                placeholder="Description de l'action" 
-              />
-            </div>
-            
-            <div className="space-y-2">
-              <Label>Conséquences</Label>
-              <Input 
-                value={newActionConsequences} 
-                onChange={(e) => setNewActionConsequences(e.target.value)}
-                placeholder="Conséquences de l'action" 
-              />
-            </div>
-            
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label>Coût ({newActionCost})</Label>
-                <Slider 
-                  value={[newActionCost]} 
-                  onValueChange={(value) => setNewActionCost(value[0])}
-                  min={0}
-                  max={100}
-                  step={1}
+            <div className="grid grid-cols-3 gap-2">
+              <div>
+                <label className="block text-xs mb-1">Effet: Stabilité</label>
+                <Input
+                  type="number"
+                  value={newAction.effets.stabilité}
+                  onChange={(e) => handleEffectChange('stabilité', parseInt(e.target.value) || 0)}
+                  className="text-sm"
                 />
               </div>
-              
-              <div className="space-y-2">
-                <Label>Risque ({newActionRisk})</Label>
-                <Slider 
-                  value={[newActionRisk]} 
-                  onValueChange={(value) => setNewActionRisk(value[0])}
-                  min={0}
-                  max={100}
-                  step={1}
+              <div>
+                <label className="block text-xs mb-1">Effet: Trésor</label>
+                <Input
+                  type="number"
+                  value={newAction.effets.trésorPublique}
+                  onChange={(e) => handleEffectChange('trésorPublique', parseInt(e.target.value) || 0)}
+                  className="text-sm"
+                />
+              </div>
+              <div>
+                <label className="block text-xs mb-1">Effet: Prestige</label>
+                <Input
+                  type="number"
+                  value={newAction.effets.prestigeRome}
+                  onChange={(e) => handleEffectChange('prestigeRome', parseInt(e.target.value) || 0)}
+                  className="text-sm"
                 />
               </div>
             </div>
             
             <Button 
               type="button" 
+              onClick={handleAddAction} 
               variant="outline" 
-              onClick={handleAddAction}
               className="w-full"
+              disabled={!newAction.texte.trim()}
             >
-              <Plus className="h-4 w-4 mr-2" />
-              Ajouter l'action
+              Ajouter cette option
             </Button>
           </div>
         </div>
-      </div>
-      
-      <div className="flex justify-end gap-2 pt-4 border-t">
-        <Button type="button" variant="outline" onClick={resetForm}>
-          Réinitialiser
-        </Button>
-        <Button type="submit">
+        
+        <Button type="submit" className="w-full" disabled={title === '' || description === '' || actions.length === 0}>
           Créer l'événement
         </Button>
-      </div>
-    </form>
+      </form>
+    </div>
   );
 };

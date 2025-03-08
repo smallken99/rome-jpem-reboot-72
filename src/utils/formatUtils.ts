@@ -1,37 +1,22 @@
 
-/**
- * Formats a number as currency (denarii/as)
- * @param amount The amount to format
- * @returns Formatted string with Roman currency symbol
- */
-export const formatMoney = (amount: number): string => {
-  return `${amount.toLocaleString()} ₳`;
+import { Season } from "@/components/maitrejeu/types/maitreJeuTypes";
+
+// Fonction pour convertir une saison en nom français
+export const seasonToFrench = (season: Season): string => {
+  const seasonMap: Record<Season, string> = {
+    'SPRING': 'Printemps',
+    'SUMMER': 'Été',
+    'AUTUMN': 'Automne',
+    'WINTER': 'Hiver'
+  };
+  return seasonMap[season];
 };
 
-/**
- * Formats a date in Roman calendar (AUC - Ab Urbe Condita)
- * @param year Year in AUC format
- * @returns Formatted year string
- */
-export const formatRomanYear = (year: number): string => {
-  return `${year} AUC`;
-};
-
-/**
- * Formats uptime in a human-readable format
- * @param seconds Uptime in seconds
- * @returns Formatted uptime string
- */
-export const formatUptime = (seconds: number): string => {
-  const days = Math.floor(seconds / 86400);
-  const hours = Math.floor((seconds % 86400) / 3600);
-  const minutes = Math.floor((seconds % 3600) / 60);
-  
-  if (days > 0) {
-    return `${days}d ${hours}h ${minutes}m`;
-  } else if (hours > 0) {
-    return `${hours}h ${minutes}m`;
-  } else {
-    return `${minutes}m`;
+// Fonction pour formater une date romaine
+export const formatDate = (year: number, season: Season, day?: number): string => {
+  const seasonName = seasonToFrench(season);
+  if (day) {
+    return `Jour ${day}, ${seasonName} ${year} AUC`;
   }
+  return `${seasonName} ${year} AUC`;
 };
