@@ -3,9 +3,12 @@
 export type Season = 'SPRING' | 'SUMMER' | 'AUTUMN' | 'WINTER';
 export type PhaseType = 'ADMINISTRATIVE' | 'POLITIQUE' | 'ACTIONS' | 'RESOLUTION';
 export type EvenementType = 'CRISE' | 'GUERRE' | 'POLITIQUE' | 'RELIGION' | 'ÉCONOMIQUE' | 'DIPLOMATIQUE' | 'SOCIAL';
+export type GamePhase = 'ADMINISTRATION' | 'POLITIQUE' | 'MILITAIRE' | 'DIPLOMATIQUE';
+export type MagistratureType = 'CONSUL' | 'PRÉTEUR' | 'ÉDILE' | 'QUESTEUR' | 'CENSEUR' | 'TRIBUN';
+export type ImportanceType = 'majeure' | 'mineure' | 'normale';
 
 // Faction politique
-export type FactionPolitique = {
+export interface FactionPolitique {
   id: string;
   nom: string;
   description?: string;
@@ -13,9 +16,39 @@ export type FactionPolitique = {
   dirigeant?: string;
   membres?: number;
   influence?: number;
-};
+}
+
+export interface Faction {
+  id: string;
+  nom: string;
+  description: string;
+  leader: string | null;
+  membres: string[];
+  influence: number;
+  couleur: string;
+  objectifs: string[];
+}
 
 // Interface pour les événements
+export interface EvenementAction {
+  id: string;
+  titre: string;
+  description: string;
+  conséquences: string;
+  coût?: number;
+  risque?: number;
+  impact?: {
+    stabilité?: number;
+    trésorPublique?: number;
+    prestigeRome?: number;
+    religion?: number;
+    influence?: number;
+    finance?: number;
+    militaire?: number;
+    economie?: number;
+  };
+}
+
 export interface Evenement {
   id: string;
   titre: string;
@@ -27,46 +60,35 @@ export interface Evenement {
     day: number;
   };
   impact: {
+    stabilité?: number;
+    trésorPublique?: number;
+    prestigeRome?: number;
+    religion?: number;
     influence?: number;
     finance?: number;
     militaire?: number;
-    religion?: number;
     economie?: number;
   };
-  actions: EvenementAction[];
-  resolved?: boolean;
+  options?: EvenementAction[];
+  optionChoisie?: string;
+  actions?: EvenementAction[];
+  résolu?: boolean;
   sourcePersistante?: boolean;
-}
-
-export interface EvenementAction {
-  id: string;
-  titre: string;
-  description: string;
-  conséquences: string;
-  coût?: number;
-  risque?: number;
-  impact?: {
-    influence?: number;
-    finance?: number;
-    militaire?: number;
-    religion?: number;
-    economie?: number;
-  };
 }
 
 // Entrée historique
 export interface HistoireEntry {
   id: string;
   titre: string;
-  type: string;
+  catégorie: string;
   description: string;
-  personnagesImpliqués: string[];
+  personnagesImpliqués?: string[];
   date: {
     year: number;
     season: Season;
     day: number;
   };
-  importance: 'majeure' | 'mineure' | 'normale';
+  importance: ImportanceType;
 }
 
 // Province
@@ -85,10 +107,17 @@ export interface Province {
   richesse?: number;
   garnison?: number;
   légions?: number;
+  loyauté?: number;
+  armée?: number;
+  ressources?: string[];
   ressourcesPrincipales?: string[];
   problèmes?: string[];
   opportunités?: string[];
   coordonnées?: {
+    x: number;
+    y: number;
+  };
+  position?: {
     x: number;
     y: number;
   };
@@ -100,14 +129,78 @@ export interface SenateurJouable {
   nom: string;
   famille: string;
   âge: number;
-  statut: string;
-  fonctionActuelle: string | null;
-  appartenance: string;
-  ambition: string;
-  popularité: number;
-  compétences: Record<string, number>;
-  relations: Record<string, number>;
+  age?: number;
+  statut?: string;
+  fonctionActuelle?: string | null;
+  magistrature?: MagistratureType | null;
+  appartenance?: string;
+  faction?: string;
+  province?: string | null;
+  ambition?: string;
+  popularité?: number;
+  influence?: number;
+  richesse?: number;
+  joueurId?: string | null;
   assignedToPlayer?: string | null;
+  compétences?: Record<string, number>;
+  stats?: {
+    éloquence: number;
+    administration: number;
+    militaire: number;
+    intrigue: number;
+    charisme: number;
+  };
+  relations?: Record<string, number>;
+}
+
+// Élection
+export interface Election {
+  id: string;
+  année: number;
+  saison: Season;
+  magistrature: MagistratureType;
+  candidats: {
+    senateurId: string;
+    votes: number;
+    soutiens: string[];
+  }[];
+  élu: string | null;
+  terminée: boolean;
+}
+
+// Loi
+export interface Loi {
+  id: string;
+  titre: string;
+  description: string;
+  proposeur: string;
+  date: {
+    year: number;
+    season: Season;
+    day?: number;
+  };
+  état?: 'proposée' | 'votée' | 'rejetée' | 'amendée';
+  status?: 'proposée' | 'votée' | 'rejetée' | 'amendée';
+  votesPositifs: number;
+  votesNégatifs: number;
+  votesAbstention: number;
+  votes?: {
+    pour: number;
+    contre: number;
+    abstention: number;
+  };
+  catégorie?: string;
+  impact: {
+    stabilité?: number;
+    trésorPublique?: number;
+    prestigeRome?: number;
+    plebeiens?: number;
+    patriciens?: number;
+    militaire?: number;
+    economie?: number;
+    religion?: number;
+    diplomatie?: number;
+  };
 }
 
 // Équilibre des forces
@@ -118,6 +211,9 @@ export interface Equilibre {
   économie: number;
   religion: number;
   diplomatie: number;
+  populaires?: number;
+  optimates?: number;
+  moderates?: number;
   historique: {
     année: number;
     saison: Season;
@@ -130,36 +226,10 @@ export interface Equilibre {
   }[];
 }
 
-// Loi
-export interface Loi {
-  id: string;
-  titre: string;
-  description: string;
-  proposéPar: string;
-  date: {
-    year: number;
-    season: Season;
-  };
-  status: 'proposée' | 'votée' | 'rejetée' | 'amendée';
-  votes: {
-    pour: number;
-    contre: number;
-    abstention: number;
-  };
-  impact: {
-    plebeiens?: number;
-    patriciens?: number;
-    militaire?: number;
-    economie?: number;
-    religion?: number;
-    diplomatie?: number;
-  };
-}
-
 // Props for components
 export interface HistoireTimelineProps {
   histoireEntries: HistoireEntry[];
-  onUpdateEntry: (entryId: string, updates: HistoireEntry) => void;
+  onUpdateEntry: (entryId: string, updates: Partial<HistoireEntry>) => void;
   onDeleteEntry: (entryId: string) => void;
 }
 
@@ -173,9 +243,14 @@ export interface ProvincesDataProps {
   onViewProvince: (province: Province) => void;
 }
 
+export interface ProvincesMapProps {
+  provinces: Province[];
+  onProvinceSelect?: (provinceId: string) => void;
+}
+
 export interface ProvinceModalProps {
   province: Province;
-  onClose: () => void;
+  onClose?: () => void;
   onSave: (province: Province) => void;
   open?: boolean;
 }
@@ -189,8 +264,9 @@ export interface SenateurCardProps {
 
 export interface SenateurModalProps {
   senateur: SenateurJouable;
-  open: boolean;
-  onClose: () => void;
+  open?: boolean;
+  isOpen?: boolean;
+  onClose?: () => void;
   onSave: (senateur: SenateurJouable) => void;
 }
 
@@ -205,6 +281,7 @@ export interface TimeManagementProps {
 export interface LoisTableProps {
   lois: Loi[];
   searchTerm?: string;
+  onVote?: (loiId: string, vote: 'pour' | 'contre' | 'abstention', count: number) => void;
 }
 
 export interface EquilibreChartProps {
@@ -213,7 +290,7 @@ export interface EquilibreChartProps {
 
 export interface EvenementsListProps {
   evenements: Evenement[];
-  onResolve: (evenementId: string) => void;
+  onResolve: (evenementId: string, optionId?: string) => void;
   filteredType: EvenementType | 'ALL';
 }
 
@@ -228,7 +305,7 @@ export interface ElectionPlannerProps {
 }
 
 export interface PartisGraphProps {
-  factions: any[];
+  factions: Faction[];
 }
 
 export interface AssignmentTableProps {
@@ -240,46 +317,64 @@ export interface AssignmentTableProps {
 // Main context type
 export interface MaitreJeuContextType {
   // Time management
-  currentYear: number;
-  currentSeason: Season;
-  currentPhase: PhaseType;
-  advanceTime: () => void;
-  changePhase: (newPhase: PhaseType) => void;
+  year: number;
+  season: Season;
+  gamePhase: GamePhase;
   
-  // Histoire
+  // Indicateurs
+  stabilityIndex: number;
+  publicTreasury: number;
+  romePrestige: number;
+  religionIndex: number;
+  
+  // Données
+  evenements: Evenement[];
   histoireEntries: HistoireEntry[];
-  addHistoireEntry: (entry: Omit<HistoireEntry, 'id'>) => void;
+  provinces: Province[];
+  senateurs: SenateurJouable[];
+  factions: Faction[];
+  elections: Election[];
+  lois: Loi[];
+  
+  // Équilibre des pouvoirs
+  equilibre: Equilibre;
+  
+  // Gestion du temps
+  advanceTime: () => void;
+  setGamePhase: (phase: GamePhase) => void;
+  
+  // Gestion des événements
+  addEvenement: (evenement: Omit<Evenement, 'id' | 'résolu'>) => string;
+  resolveEvenement: (evenementId: string, optionId?: string) => void;
+  
+  // Gestion de l'histoire
+  addHistoireEntry: (entry: Omit<HistoireEntry, 'id'>) => string;
   updateHistoireEntry: (entryId: string, updates: Partial<HistoireEntry>) => void;
   deleteHistoireEntry: (entryId: string) => void;
   
-  // Provinces
-  provinces: Province[];
-  addProvince: (province: Omit<Province, 'id'>) => void;
+  // Gestion des provinces
+  addProvince: (province: Omit<Province, 'id'>) => string;
   updateProvince: (provinceId: string, updates: Partial<Province>) => void;
   deleteProvince: (provinceId: string) => void;
+  assignGovernor: (provinceId: string, senateurId: string | null) => void;
   
-  // Equilibre
-  equilibre: Equilibre;
-  updateEquilibre: (updates: Partial<Equilibre>) => void;
-  
-  // Evenements
-  evenements: Evenement[];
-  addEvenement: (evenement: Omit<Evenement, 'id'>) => void;
-  resolveEvenement: (evenementId: string) => void;
-  
-  // Senateurs
-  senateursJouables: SenateurJouable[];
-  senateursAssignes: Record<string, string>;
-  addSenateur: (senateur: Omit<SenateurJouable, 'id'>) => void;
+  // Gestion des sénateurs
+  addSenateur: (senateur: Omit<SenateurJouable, 'id'>) => string;
   updateSenateur: (senateurId: string, updates: Partial<SenateurJouable>) => void;
-  assignSenateur: (senateurId: string, playerId: string) => void;
+  deleteSenateur: (senateurId: string) => void;
+  assignSenateur: (senateurId: string, joueurId: string | null) => void;
   
-  // Lois
-  lois: Loi[];
-  addLoi: (loi: Omit<Loi, 'id'>) => void;
-  updateLoi: (loiId: string, updates: Partial<Loi>) => void;
+  // Gestion des élections
+  scheduleElection: (magistrature: string, year: number, season: Season) => string;
+  addCandidate: (electionId: string, senateurId: string) => void;
+  voteForCandidate: (electionId: string, senateurId: string, votes: number) => void;
+  finalizeElection: (electionId: string) => void;
   
-  // Politique
-  politicalEvents: any[];
-  factions: FactionPolitique[];
+  // Gestion des lois
+  proposeLoi: (loi: Omit<Loi, 'id' | 'état' | 'votesPositifs' | 'votesNégatifs' | 'votesAbstention'>) => string;
+  voteLoi: (loiId: string, vote: 'pour' | 'contre' | 'abstention', count: number) => void;
+  finalizeLoi: (loiId: string) => void;
+  
+  // Équilibre des pouvoirs
+  updateEquilibre: (updates: Partial<Equilibre>) => void;
 }

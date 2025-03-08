@@ -1,153 +1,185 @@
+
 import React, { useState } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useMaitreJeu } from './context/MaitreJeuContext';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { 
+  UserPlus, Search, Filter, SlidersHorizontal
+} from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { 
-  Search, Plus, UserPlus, UserMinus 
-} from 'lucide-react';
+  DropdownMenu, 
+  DropdownMenuContent, 
+  DropdownMenuItem, 
+  DropdownMenuTrigger 
+} from '@/components/ui/dropdown-menu';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { SenateurCard } from './components/SenateurCard';
-import { AssignmentTable } from './components/AssignmentTable';
 import { SenateurModal } from './components/SenateurModal';
+import { AssignmentTable } from './components/AssignmentTable';
 
 export const GestionSenateurs: React.FC = () => {
-  // Utilisation des propriétés renommées
-  const { senateurs: senateursJouables, assignSenateur } = useMaitreJeu();
-  const [senateursAssignes, setSenateursAssignes] = useState<Record<string, string>>({});
+  const { senateurs, factions, addSenateur, updateSenateur, deleteSenateur, assignSenateur } = useMaitreJeu();
   
   const [searchTerm, setSearchTerm] = useState('');
-  const [selectedSenateurId, setSelectedSenateurId] = useState<string | null>(null);
-  const [isSenateurModalOpen, setIsSenateurModalOpen] = useState(false);
-  const [isEditingProvince, setIsEditingProvince] = useState(false);
+  const [filter, setFilter] = useState('all');
+  const [sortBy, setSortBy] = useState('nom');
+  const [activeTab, setActiveTab] = useState('senateurs');
+  const [modalOpen, setModalOpen] = useState(false);
+  const [selectedSenateurId, setSelectedSenateurId] = useState<string>('');
   
-  // Filtrer les sénateurs en fonction du terme de recherche
-  const filteredSenateurs = senateursJouables?.filter(senateur =>
-    senateur.nom.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    senateur.famille.toLowerCase().includes(searchTerm.toLowerCase())
-  ) || [];
+  const senateurAssignments = senateurs.reduce((acc, senateur) => {
+    if (senateur.joueurId) {
+      acc[senateur.id] = senateur.joueurId;
+    }
+    return acc;
+  }, {} as Record<string, string>);
   
-  // Gestion de l'ouverture et de la fermeture de la modale
+  const handleAddSenateur = () => {
+    setSelectedSenateurId('');
+    setModalOpen(true);
+  };
+  
   const handleEditSenateur = (senateurId: string) => {
     setSelectedSenateurId(senateurId);
-    setIsSenateurModalOpen(true);
-    setIsEditingProvince(true);
+    setModalOpen(true);
   };
   
-  const handleCloseSenateurModal = () => {
-    setSelectedSenateurId(null);
-    setIsSenateurModalOpen(false);
-    setIsEditingProvince(false);
-  };
-  
-  // Gestion de la sauvegarde d'un sénateur
   const handleSaveSenateur = (senateur: any) => {
-    // Ici, vous devrez implémenter la logique pour sauvegarder les modifications
-    // ou ajouter un nouveau sénateur.
-    console.log('Sénateur sauvegardé:', senateur);
-    handleCloseSenateurModal();
+    if (!selectedSenateurId) {
+      addSenateur(senateur);
+    } else {
+      updateSenateur(selectedSenateurId, senateur);
+    }
+    setModalOpen(false);
   };
   
-  // Gestion de l'assignation d'un sénateur à une province
-  const handleAssignSenateur = (senateurId: string, provinceId: string) => {
-    assignSenateur(provinceId, senateurId);
-    setSenateursAssignes(prev => ({ ...prev, [senateurId]: provinceId }));
+  const handleAssignSenateur = (senateurId: string, playerId: string) => {
+    assignSenateur(senateurId, playerId);
   };
   
-  const selectedSenateur = selectedSenateurId
-    ? senateursJouables?.find(s => s.id === selectedSenateurId)
-    : null;
+  const filteredSenateurs = senateurs.filter(senateur => {
+    const matchesSearch = senateur.nom.toLowerCase().includes(searchTerm.toLowerCase()) 
+      || senateur.famille.toLowerCase().includes(searchTerm.toLowerCase());
+      
+    if (filter === 'all') return matchesSearch;
+    if (filter === 'assigned') return matchesSearch && !!senateur.joueurId;
+    if (filter === 'unassigned') return matchesSearch && !senateur.joueurId;
+    if (filter === 'magistrature') return matchesSearch && !!senateur.magistrature;
+    if (filter === 'faction' && senateur.faction) {
+      return matchesSearch && senateur.faction.toLowerCase() === filter.toLowerCase();
+    }
+    
+    return matchesSearch;
+  });
   
-  // Dans le rendu, mettre à jour les propriétés des composants
+  const sortedSenateurs = [...filteredSenateurs].sort((a, b) => {
+    if (sortBy === 'nom') return a.nom.localeCompare(b.nom);
+    if (sortBy === 'famille') return a.famille.localeCompare(b.famille);
+    if (sortBy === 'age' && a.âge && b.âge) return b.âge - a.âge;
+    return 0;
+  });
+  
+  const selectedSenateur = selectedSenateurId 
+    ? senateurs.find(s => s.id === selectedSenateurId) 
+    : undefined;
+  
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
-        <Tabs defaultValue="senateurs" className="w-full">
-          <TabsList>
-            <TabsTrigger value="senateurs" className="flex items-center gap-2">
-              <UserPlus className="h-4 w-4" />
-              <span>Sénateurs</span>
-            </TabsTrigger>
-            <TabsTrigger value="assignations" className="flex items-center gap-2">
-              <UserMinus className="h-4 w-4" />
-              <span>Assignations</span>
-            </TabsTrigger>
-          </TabsList>
-          
-          <div className="flex justify-between items-center mt-4">
-            <div className="relative">
-              <Search className="absolute left-2 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-              <Input 
-                placeholder="Rechercher..." 
-                value={searchTerm} 
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-8 w-[250px]" 
-              />
-            </div>
-            <Button 
-              className="flex items-center gap-2"
-              onClick={() => {
-                setSelectedSenateurId(null);
-                setIsSenateurModalOpen(true);
-              }}
-            >
-              <Plus className="h-4 w-4" />
-              <span>Ajouter</span>
-            </Button>
-          </div>
-          
-          <TabsContent value="senateurs" className="pt-4">
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-lg">Liste des sénateurs</CardTitle>
-              </CardHeader>
-              <CardContent>
-                {/* Mise à jour des cartes de sénateurs pour gérer isAssigned et playerName */}
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                  {filteredSenateurs.map(senateur => {
-                    const isAssigned = Object.keys(senateursAssignes).includes(senateur.id);
-                    const playerName = isAssigned ? senateursAssignes[senateur.id] : null;
-                    
-                    return (
-                      <SenateurCard
-                        key={senateur.id}
-                        senateur={senateur}
-                        isAssigned={isAssigned}
-                        playerName={playerName}
-                        onEdit={() => handleEditSenateur(senateur.id)}
-                      />
-                    );
-                  })}
-                </div>
-              </CardContent>
-            </Card>
-          </TabsContent>
-          
-          <TabsContent value="assignations" className="pt-4">
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-lg">Assignations des sénateurs</CardTitle>
-              </CardHeader>
-              <CardContent>
-                {/* Mise à jour de la table d'assignation pour inclure onAssign */}
-                <AssignmentTable
-                  senateurs={filteredSenateurs}
-                  assignments={senateursAssignes}
-                  onAssign={handleAssignSenateur}
-                />
-              </CardContent>
-            </Card>
-          </TabsContent>
-        </Tabs>
+        <h2 className="text-2xl font-bold">Gestion des Sénateurs</h2>
+        <Button 
+          className="flex items-center gap-2"
+          onClick={handleAddSenateur}
+        >
+          <UserPlus className="h-4 w-4" />
+          <span>Nouveau Sénateur</span>
+        </Button>
       </div>
       
-      {/* Mise à jour de la modale de sénateur pour utiliser isOpen au lieu de open */}
-      {selectedSenateurId && (
+      <Tabs value={activeTab} onValueChange={setActiveTab}>
+        <TabsList>
+          <TabsTrigger value="senateurs">Sénateurs</TabsTrigger>
+          <TabsTrigger value="assignments">Assignation aux joueurs</TabsTrigger>
+        </TabsList>
+        
+        <div className="my-4 flex flex-col md:flex-row gap-4">
+          <div className="relative w-full md:w-64">
+            <Search className="absolute left-2 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+            <Input 
+              placeholder="Rechercher..." 
+              value={searchTerm} 
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="pl-8" 
+            />
+          </div>
+          
+          <Select value={filter} onValueChange={setFilter}>
+            <SelectTrigger className="w-full md:w-48">
+              <SelectValue placeholder="Filtrer" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">Tous les sénateurs</SelectItem>
+              <SelectItem value="assigned">Assignés</SelectItem>
+              <SelectItem value="unassigned">Non-assignés</SelectItem>
+              <SelectItem value="magistrature">Avec magistrature</SelectItem>
+              {factions?.map(faction => (
+                <SelectItem key={faction.id} value={faction.nom.toLowerCase()}>
+                  {faction.nom}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          
+          <Select value={sortBy} onValueChange={setSortBy}>
+            <SelectTrigger className="w-full md:w-48">
+              <SelectValue placeholder="Trier par" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="nom">Par nom</SelectItem>
+              <SelectItem value="famille">Par famille</SelectItem>
+              <SelectItem value="age">Par âge</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+        
+        <TabsContent value="senateurs">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {sortedSenateurs.map(senateur => (
+              <SenateurCard 
+                key={senateur.id}
+                senateur={senateur}
+                playerName={senateur.joueurId || ""}
+                isAssigned={!!senateur.joueurId}
+                onEdit={() => handleEditSenateur(senateur.id)}
+              />
+            ))}
+          </div>
+        </TabsContent>
+        
+        <TabsContent value="assignments">
+          <Card>
+            <CardHeader>
+              <CardTitle>Assignation des Sénateurs aux Joueurs</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <AssignmentTable 
+                senateurs={senateurs}
+                assignments={senateurAssignments}
+                onAssign={handleAssignSenateur}
+              />
+            </CardContent>
+          </Card>
+        </TabsContent>
+      </Tabs>
+      
+      {selectedSenateur && (
         <SenateurModal
           senateur={selectedSenateur}
-          onClose={handleCloseSenateurModal}
+          isOpen={modalOpen}
+          onClose={() => setModalOpen(false)}
           onSave={handleSaveSenateur}
-          isOpen={isSenateurModalOpen}
         />
       )}
     </div>

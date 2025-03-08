@@ -1,177 +1,157 @@
 
 import React, { useState } from 'react';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { ChevronsUpDown, FileSearch, Globe, MapPin, Plus, Search } from 'lucide-react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useMaitreJeu } from './context/MaitreJeuContext';
-import { ProvincesMap } from './components/ProvincesMap';
-import { ProvincesData } from './components/ProvincesData';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { 
+  MapPin, Plus, Search, Filter, SlidersHorizontal
+} from 'lucide-react';
+import { Input } from '@/components/ui/input';
+import { 
+  DropdownMenu, 
+  DropdownMenuContent, 
+  DropdownMenuItem, 
+  DropdownMenuTrigger 
+} from '@/components/ui/dropdown-menu';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { ProvinceCard } from './components/ProvinceCard';
+import { ProvincesData } from './components/ProvincesData';
+import { ProvincesMap } from './components/ProvincesMap';
 import { ProvinceModal } from './components/ProvinceModal';
 import { Province } from './types/maitreJeuTypes';
 
 export const GestionProvinces: React.FC = () => {
-  const { provinces, addProvince, updateProvince, deleteProvince } = useMaitreJeu();
+  const { provinces, addProvince, updateProvince, deleteProvince, assignGovernor } = useMaitreJeu();
   
   const [searchTerm, setSearchTerm] = useState('');
-  const [activeTab, setActiveTab] = useState('map');
-  const [isSortedByRevenue, setIsSortedByRevenue] = useState(false);
-  const [selectedProvinceId, setSelectedProvinceId] = useState<string | null>(null);
-  const [isAddingProvince, setIsAddingProvince] = useState(false);
-  const [isEditingProvince, setIsEditingProvince] = useState(false);
+  const [filter, setFilter] = useState('all');
+  const [sortBy, setSortBy] = useState('nom');
+  const [selectedProvinceId, setSelectedProvinceId] = useState<string>('');
+  const [modalOpen, setModalOpen] = useState(false);
+  const [modalMode, setModalMode] = useState<'add' | 'edit'>('add');
+  const [activeTab, setActiveTab] = useState('liste');
   
-  // Filter and sort provinces
-  const filteredProvinces = provinces.filter(province => 
-    province.nom.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    province.gouverneur?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    province.région.toLowerCase().includes(searchTerm.toLowerCase())
-  );
-  
-  const sortedProvinces = [...filteredProvinces].sort((a, b) => {
-    if (isSortedByRevenue) {
-      return (b.revenu || 0) - (a.revenu || 0);
-    }
-    return a.nom.localeCompare(b.nom);
-  });
-  
-  // Get the selected province
-  const selectedProvince = selectedProvinceId 
-    ? provinces.find(p => p.id === selectedProvinceId) || null
-    : null;
-  
-  // Handlers
   const handleAddProvince = () => {
-    setSelectedProvinceId(null);
-    setIsAddingProvince(true);
-    setIsEditingProvince(false);
+    setModalMode('add');
+    setSelectedProvinceId('');
+    setModalOpen(true);
   };
   
   const handleEditProvince = (provinceId: string) => {
+    setModalMode('edit');
     setSelectedProvinceId(provinceId);
-    setIsEditingProvince(true);
-    setIsAddingProvince(false);
+    setModalOpen(true);
   };
   
   const handleSaveProvince = (province: Province) => {
-    if (isAddingProvince) {
-      // @ts-ignore - We're passing a province with an id but the type expects it without
+    if (modalMode === 'add') {
       addProvince(province);
-    } else if (isEditingProvince && selectedProvinceId) {
-      updateProvince(selectedProvinceId, province);
+    } else {
+      updateProvince(province.id, province);
     }
-    
-    setIsAddingProvince(false);
-    setIsEditingProvince(false);
+    setModalOpen(false);
   };
   
-  // Calculate key stats
-  const totalProvinces = provinces.length;
-  const totalRevenue = provinces.reduce((sum, province) => sum + (province.revenu || 0), 0);
-  const totalExpenses = provinces.reduce((sum, province) => sum + (province.dépense || 0), 0);
-  const romanProvinces = provinces.filter(province => province.status === 'province').length;
-  const clientKingdoms = provinces.filter(province => province.status === 'client').length;
-  const unconquered = provinces.filter(province => province.status === 'unconquered').length;
+  const filteredProvinces = provinces.filter(province => {
+    const matchesSearch = province.nom.toLowerCase().includes(searchTerm.toLowerCase()) 
+      || province.description.toLowerCase().includes(searchTerm.toLowerCase());
+      
+    if (filter === 'all') return matchesSearch;
+    if (filter === 'pacifiees') return matchesSearch && province.status === 'pacifiée';
+    if (filter === 'instables') return matchesSearch && province.status === 'instable';
+    if (filter === 'revoltes') return matchesSearch && province.status === 'en révolte';
+    if (filter === 'sans-gouverneur') return matchesSearch && !province.gouverneur;
+    
+    return matchesSearch;
+  });
+  
+  const sortedProvinces = [...filteredProvinces].sort((a, b) => {
+    if (sortBy === 'nom') return a.nom.localeCompare(b.nom);
+    if (sortBy === 'region') return a.région.localeCompare(b.région);
+    if (sortBy === 'population') return b.population - a.population;
+    if (sortBy === 'revenu') return b.revenu - a.revenu;
+    if (sortBy === 'depense') return b.dépense - a.dépense;
+    if (sortBy === 'status') {
+      const order = { 'pacifiée': 0, 'instable': 1, 'en révolte': 2 };
+      return (order[a.status as keyof typeof order] || 0) - (order[b.status as keyof typeof order] || 0);
+    }
+    return 0;
+  });
+  
+  const selectedProvince = provinces.find(p => p.id === selectedProvinceId);
   
   return (
     <div className="space-y-6">
-      <div className="flex flex-col md:flex-row md:justify-between md:items-center gap-4">
-        <div>
-          <h2 className="text-2xl font-bold tracking-tight">Gestion des Provinces</h2>
-          <p className="text-muted-foreground">
-            Gérez les territoires de la République
-          </p>
-        </div>
-        
-        <div className="flex items-center gap-2">
-          <div className="relative">
-            <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
-            <Input
-              placeholder="Rechercher..."
-              className="pl-8"
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-            />
-          </div>
-          <Button onClick={handleAddProvince}>
-            <Plus className="h-4 w-4 mr-2" />
-            Nouvelle province
-          </Button>
-        </div>
+      <div className="flex justify-between items-center">
+        <h2 className="text-2xl font-bold">Gestion des Provinces</h2>
+        <Button 
+          className="flex items-center gap-2"
+          onClick={handleAddProvince}
+        >
+          <Plus className="h-4 w-4" />
+          <span>Nouvelle Province</span>
+        </Button>
       </div>
       
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <Card className="md:col-span-1">
-          <CardHeader className="pb-2">
-            <CardTitle className="text-lg">Statistiques</CardTitle>
+      <div className="grid grid-cols-1 md:grid-cols-[250px_1fr] gap-6">
+        <Card className="h-fit">
+          <CardHeader>
+            <CardTitle className="text-lg">Filtres</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
-            <div className="flex justify-between">
-              <span className="text-muted-foreground">Total provinces:</span>
-              <span className="font-medium">{totalProvinces}</span>
+            <div className="relative">
+              <Search className="absolute left-2 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+              <Input 
+                placeholder="Rechercher..." 
+                value={searchTerm} 
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="pl-8" 
+              />
             </div>
-            <div className="flex justify-between">
-              <span className="text-muted-foreground">Revenus annuels:</span>
-              <span className="font-medium">{totalRevenue} denarii</span>
-            </div>
-            <div className="flex justify-between">
-              <span className="text-muted-foreground">Dépenses annuelles:</span>
-              <span className="font-medium">{totalExpenses} denarii</span>
-            </div>
-            <div className="flex justify-between">
-              <span className="text-muted-foreground">Provinces romaines:</span>
-              <span className="font-medium">{romanProvinces}</span>
-            </div>
-            <div className="flex justify-between">
-              <span className="text-muted-foreground">Royaumes clients:</span>
-              <span className="font-medium">{clientKingdoms}</span>
-            </div>
-            <div className="flex justify-between">
-              <span className="text-muted-foreground">Non conquis:</span>
-              <span className="font-medium">{unconquered}</span>
-            </div>
+            
+            <Select value={filter} onValueChange={setFilter}>
+              <SelectTrigger>
+                <SelectValue placeholder="Filtrer par statut" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">Toutes les provinces</SelectItem>
+                <SelectItem value="pacifiees">Provinces pacifiées</SelectItem>
+                <SelectItem value="instables">Provinces instables</SelectItem>
+                <SelectItem value="revoltes">Provinces en révolte</SelectItem>
+                <SelectItem value="sans-gouverneur">Sans gouverneur</SelectItem>
+              </SelectContent>
+            </Select>
+            
+            <Select value={sortBy} onValueChange={setSortBy}>
+              <SelectTrigger>
+                <SelectValue placeholder="Trier par" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="nom">Par nom</SelectItem>
+                <SelectItem value="region">Par région</SelectItem>
+                <SelectItem value="population">Par population</SelectItem>
+                <SelectItem value="revenu">Par revenu</SelectItem>
+                <SelectItem value="depense">Par dépense</SelectItem>
+                <SelectItem value="status">Par statut</SelectItem>
+              </SelectContent>
+            </Select>
           </CardContent>
         </Card>
         
-        <div className="md:col-span-3">
-          <Tabs value={activeTab} onValueChange={setActiveTab}>
-            <TabsList className="grid w-full grid-cols-3">
-              <TabsTrigger value="map">
-                <Globe className="h-4 w-4 mr-2" />
-                Carte
-              </TabsTrigger>
-              <TabsTrigger value="list">
-                <FileSearch className="h-4 w-4 mr-2" />
-                Liste
-              </TabsTrigger>
-              <TabsTrigger value="details">
-                <MapPin className="h-4 w-4 mr-2" />
-                Détails
-              </TabsTrigger>
-            </TabsList>
-            
-            <TabsContent value="map" className="pt-4">
-              <ProvincesMap 
-                provinces={provinces} 
-                onProvinceSelect={setSelectedProvinceId} 
-              />
-            </TabsContent>
-            
-            <TabsContent value="list" className="pt-4">
-              <div className="mb-4 flex justify-between items-center">
-                <h3 className="text-lg font-medium">Liste des Provinces</h3>
-                <Button 
-                  variant="outline" 
-                  size="sm"
-                  onClick={() => setIsSortedByRevenue(!isSortedByRevenue)}
-                >
-                  <ChevronsUpDown className="h-4 w-4 mr-2" />
-                  {isSortedByRevenue ? 'Tri par revenu' : 'Tri par nom'}
-                </Button>
-              </div>
-              
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <Card>
+          <CardHeader className="pb-0">
+            <Tabs value={activeTab} onValueChange={setActiveTab}>
+              <TabsList>
+                <TabsTrigger value="liste">Liste</TabsTrigger>
+                <TabsTrigger value="carte">Carte</TabsTrigger>
+                <TabsTrigger value="donnees">Données</TabsTrigger>
+              </TabsList>
+            </Tabs>
+          </CardHeader>
+          <CardContent className="pt-6">
+            <TabsContent value="liste" className="m-0">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                 {sortedProvinces.map(province => (
                   <ProvinceCard 
                     key={province.id} 
@@ -182,35 +162,29 @@ export const GestionProvinces: React.FC = () => {
               </div>
             </TabsContent>
             
-            <TabsContent value="details" className="pt-4">
-              <ProvincesData 
-                provinces={provinces} 
-                onViewProvince={(province) => handleEditProvince(province.id)} 
+            <TabsContent value="carte" className="m-0">
+              <ProvincesMap
+                provinces={provinces}
+                onProvinceSelect={setSelectedProvinceId}
               />
             </TabsContent>
-          </Tabs>
-        </div>
+            
+            <TabsContent value="donnees" className="m-0">
+              <ProvincesData
+                provinces={sortedProvinces}
+                onViewProvince={(province) => handleEditProvince(province.id)}
+              />
+            </TabsContent>
+          </CardContent>
+        </Card>
       </div>
       
-      {/* Modal for adding or editing a province */}
-      {(isAddingProvince || (isEditingProvince && selectedProvince)) && (
+      {selectedProvince && (
         <ProvinceModal
-          province={isAddingProvince ? {
-            id: '',
-            nom: '',
-            région: '',
-            status: 'unconquered',
-            gouverneur: null,
-            description: '',
-            population: 0,
-            revenu: 0,
-            dépense: 0
-          } : selectedProvince!}
-          onClose={() => {
-            setIsAddingProvince(false);
-            setIsEditingProvince(false);
-          }}
+          province={selectedProvince}
+          onClose={() => setModalOpen(false)}
           onSave={handleSaveProvince}
+          open={modalOpen}
         />
       )}
     </div>

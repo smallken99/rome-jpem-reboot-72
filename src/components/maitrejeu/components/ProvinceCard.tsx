@@ -1,95 +1,101 @@
 
 import React from 'react';
-import { Card, CardContent, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
+import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Edit, User, CoinsIcon, Building, ShieldAlert } from 'lucide-react';
-import { Province } from '../types/maitreJeuTypes';
+import { 
+  MapPin, Users, TrendingUp, Coins, Shield, Construction, 
+  BarChart4, DollarSign, Info
+} from 'lucide-react';
+import { ProvinceCardProps } from '../types/maitreJeuTypes';
 
-interface ProvinceCardProps {
-  province: Province;
-  onEdit: (province: Province) => void;
-}
-
-export const ProvinceCard: React.FC<ProvinceCardProps> = ({ province, onEdit }) => {
-  const getStatusColor = (statut: string) => {
-    switch (statut) {
-      case 'pacifiée': return 'bg-green-100 text-green-800 border-green-300';
-      case 'instable': return 'bg-amber-100 text-amber-800 border-amber-300';
-      case 'en révolte': return 'bg-red-100 text-red-800 border-red-300';
-      case 'en guerre': return 'bg-red-800 text-white border-red-700';
-      default: return 'bg-gray-100 text-gray-800 border-gray-300';
+export const ProvinceCard: React.FC<ProvinceCardProps> = ({ 
+  province, 
+  onViewProvince 
+}) => {
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case 'pacifiée':
+        return 'bg-green-500 hover:bg-green-600';
+      case 'instable':
+        return 'bg-yellow-500 hover:bg-yellow-600';
+      case 'en révolte':
+        return 'bg-red-500 hover:bg-red-600';
+      default:
+        return 'bg-gray-500 hover:bg-gray-600';
     }
   };
-
+  
   return (
-    <Card className="h-full">
+    <Card className="overflow-hidden">
       <CardHeader className="pb-2">
         <div className="flex justify-between items-start">
-          <CardTitle className="text-lg font-cinzel">{province.nom}</CardTitle>
-          <Badge variant="outline" className={getStatusColor(province.statut)}>
-            {province.statut}
+          <CardTitle className="text-lg">{province.nom}</CardTitle>
+          <Badge className={getStatusColor(province.status)}>
+            {province.status}
           </Badge>
         </div>
-        <p className="text-sm text-muted-foreground">{province.region}</p>
+        <div className="flex items-center gap-1 text-muted-foreground text-sm">
+          <MapPin className="h-3 w-3" />
+          <span>{province.région}</span>
+        </div>
       </CardHeader>
-      
       <CardContent className="pb-2">
-        <div className="space-y-2">
-          <div className="flex justify-between items-center">
-            <span className="text-sm text-muted-foreground flex items-center">
-              <User className="w-4 h-4 mr-1" />
-              Population:
-            </span>
-            <span className="font-medium">{province.population.toLocaleString()}</span>
+        <p className="text-sm line-clamp-3 mb-4">{province.description}</p>
+        
+        <div className="grid grid-cols-2 gap-x-4 gap-y-2 text-sm">
+          <div className="flex items-center gap-1">
+            <Users className="h-3 w-3 text-muted-foreground" />
+            <span>{province.population.toLocaleString()}</span>
           </div>
           
-          <div className="flex justify-between items-center">
-            <span className="text-sm text-muted-foreground flex items-center">
-              <CoinsIcon className="w-4 h-4 mr-1" />
-              Revenu:
-            </span>
-            <span className="font-medium">{province.revenuAnnuel.toLocaleString()} As/an</span>
+          <div className="flex items-center gap-1">
+            <Coins className="h-3 w-3 text-muted-foreground" />
+            <span>{province.revenu.toLocaleString()}</span>
           </div>
           
-          <div className="flex justify-between items-center">
-            <span className="text-sm text-muted-foreground flex items-center">
-              <Building className="w-4 h-4 mr-1" />
-              Gouverneur:
-            </span>
-            <span className="font-medium">{province.gouverneur || "Vacant"}</span>
+          <div className="flex items-center gap-1">
+            <TrendingUp className="h-3 w-3 text-muted-foreground" />
+            <span>{province.revenuAnnuel?.toLocaleString() || 'N/A'}</span>
           </div>
           
-          <div className="flex justify-between items-center">
-            <span className="text-sm text-muted-foreground flex items-center">
-              <ShieldAlert className="w-4 h-4 mr-1" />
-              Légions:
-            </span>
-            <span className="font-medium">{province.légions}</span>
+          <div className="flex items-center gap-1">
+            <DollarSign className="h-3 w-3 text-muted-foreground" />
+            <span>{province.dépense.toLocaleString()}</span>
+          </div>
+          
+          <div className="flex items-center gap-1">
+            <Shield className="h-3 w-3 text-muted-foreground" />
+            <span>{province.légions || 0} légions</span>
+          </div>
+          
+          <div className="flex items-center gap-1">
+            <Construction className="h-3 w-3 text-muted-foreground" />
+            <span>{province.gouverneur ? 'Gouvernée' : 'Sans gouverneur'}</span>
           </div>
         </div>
         
-        <div className="mt-3">
-          <h4 className="text-sm font-medium mb-1">Ressources principales:</h4>
-          <div className="flex flex-wrap gap-1">
-            {province.ressourcesPrincipales.map((ressource, index) => (
-              <Badge key={index} variant="secondary" className="text-xs">
-                {ressource}
-              </Badge>
-            ))}
+        {province.ressourcesPrincipales && province.ressourcesPrincipales.length > 0 && (
+          <div className="mt-3">
+            <div className="text-xs font-medium mb-1">Ressources principales:</div>
+            <div className="flex flex-wrap gap-1">
+              {province.ressourcesPrincipales.map((ressource, index) => (
+                <Badge key={index} variant="outline" className="text-xs">
+                  {ressource}
+                </Badge>
+              ))}
+            </div>
           </div>
-        </div>
+        )}
       </CardContent>
-      
       <CardFooter>
         <Button 
-          variant="outline" 
-          size="sm" 
-          className="w-full flex items-center gap-2"
-          onClick={() => onEdit(province)}
+          className="w-full"
+          variant="outline"
+          onClick={() => onViewProvince && onViewProvince(province)}
         >
-          <Edit className="h-4 w-4" />
-          Gérer la province
+          <Info className="h-4 w-4 mr-2" />
+          Détails
         </Button>
       </CardFooter>
     </Card>
