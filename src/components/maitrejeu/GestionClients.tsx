@@ -22,7 +22,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { Dialog, DialogContent, DialogTrigger } from '@/components/ui/dialog';
 import { useMaitreJeu } from './context/MaitreJeuContext';
-import { ClientModal } from './components/ClientModal';
+import { ClientModal } from './components/client-modal';
 import { AdvancedClientModal } from './components/AdvancedClientModal';
 import { ClientCompetenceManager } from './components/ClientCompetenceManager';
 import { ClientFilter, ClientSort, Client } from './types/clients';
