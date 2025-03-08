@@ -2,20 +2,22 @@
 import React from 'react';
 import { useMaitreJeu } from '../context/MaitreJeuContext';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
 import { ActionButton } from '@/components/ui-custom/ActionButton';
 import { Clock, Calendar, FastForward } from 'lucide-react';
-import { useToast } from '@/components/ui/use-toast';
-import { useTimeStore, Season } from '@/utils/timeSystem';
+import { toast } from 'sonner';
+import { formatRomanSeason } from '@/utils/timeSystem';
 
 export const TimeManagement: React.FC = () => {
-  const { gameState, advanceTime, setGameState } = useMaitreJeu();
-  const { toast } = useToast();
-  const timeStore = useTimeStore();
+  const { year, season, gamePhase, advanceTime, setGamePhase } = useMaitreJeu();
   
   const handleAdvancePhase = () => {
-    // L'ordre des phases
-    const phases: Array<typeof gameState.gamePhase> = [
+    // Avancer à la phase suivante
+    advanceTime();
+  };
+  
+  const handleAdvanceSeason = () => {
+    // Avancer d'une saison complète (toutes les phases)
+    const phases = [
       'VOTE_DES_LOIS',
       'ÉLECTIONS',
       'ADMINISTRATION',
@@ -25,65 +27,28 @@ export const TimeManagement: React.FC = () => {
       'CRISES'
     ];
     
-    // Trouver l'index de la phase actuelle
-    const currentPhaseIndex = phases.indexOf(gameState.gamePhase);
-    
-    // Déterminer la phase suivante
-    const nextPhaseIndex = (currentPhaseIndex + 1) % phases.length;
-    const nextPhase = phases[nextPhaseIndex];
-    
-    // Si on revient à la première phase, avancer le temps (nouvelle saison)
-    if (nextPhaseIndex === 0) {
+    // Avancer pour chaque phase jusqu'à revenir à la première
+    const currentPhaseIndex = phases.indexOf(gamePhase);
+    for (let i = 0; i < phases.length; i++) {
       advanceTime();
-      toast({
-        title: "Nouvelle saison",
-        description: `Nous sommes maintenant en ${gameState.season}, ${gameState.year} AUC`,
-      });
     }
-    
-    // Mettre à jour la phase
-    setGameState({
-      ...gameState,
-      gamePhase: nextPhase
-    });
-    
-    toast({
-      title: "Phase de jeu modifiée",
-      description: `Nouvelle phase: ${nextPhase}`,
-    });
-  };
-  
-  const handleAdvanceSeason = () => {
-    // Avancer d'une saison complète (toutes les phases)
-    advanceTime();
     
     toast({
       title: "Nouvelle saison",
-      description: `Nous sommes maintenant en ${gameState.season}, ${gameState.year} AUC`,
+      description: `Nous sommes maintenant en ${formatRomanSeason(season)}, ${year} AUC`,
     });
   };
   
   const handleAdvanceYear = () => {
     // Avancer d'une année complète (4 saisons)
     for (let i = 0; i < 4; i++) {
-      advanceTime();
+      handleAdvanceSeason();
     }
     
     toast({
       title: "Nouvelle année",
-      description: `Nous sommes maintenant en l'an ${gameState.year} AUC`,
+      description: `Nous sommes maintenant en l'an ${year} AUC`,
     });
-  };
-  
-  const formatSeason = (season: Season): string => {
-    const seasonMap: Record<Season, string> = {
-      'Ver': 'Printemps',
-      'Aestas': 'Été',
-      'Autumnus': 'Automne',
-      'Hiems': 'Hiver'
-    };
-    
-    return seasonMap[season] || season;
   };
   
   return (
@@ -101,7 +66,7 @@ export const TimeManagement: React.FC = () => {
               <Clock className="h-5 w-5 text-amber-600 mr-2" />
               <div>
                 <span className="text-sm text-muted-foreground">Année:</span>
-                <span className="ml-2 font-medium">{gameState.year} AUC</span>
+                <span className="ml-2 font-medium">{year} AUC</span>
               </div>
             </div>
             
@@ -109,7 +74,7 @@ export const TimeManagement: React.FC = () => {
               <Calendar className="h-5 w-5 text-amber-600 mr-2" />
               <div>
                 <span className="text-sm text-muted-foreground">Saison:</span>
-                <span className="ml-2 font-medium">{formatSeason(gameState.season)}</span>
+                <span className="ml-2 font-medium">{formatRomanSeason(season)}</span>
               </div>
             </div>
             
@@ -117,7 +82,7 @@ export const TimeManagement: React.FC = () => {
               <FastForward className="h-5 w-5 text-amber-600 mr-2" />
               <div>
                 <span className="text-sm text-muted-foreground">Phase:</span>
-                <span className="ml-2 font-medium">{gameState.gamePhase}</span>
+                <span className="ml-2 font-medium">{gamePhase}</span>
               </div>
             </div>
           </div>

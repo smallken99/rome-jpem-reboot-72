@@ -1,7 +1,7 @@
 
 import React, { useEffect, useState } from 'react';
 import { Calendar, Clock, SunDim, Hourglass } from 'lucide-react';
-import { useTimeStore, useTimeEvents } from '@/utils/timeSystem';
+import { useTimeStore, useTimeEvents, formatRomanSeason } from '@/utils/timeSystem';
 
 interface TimePanelProps {
   minimal?: boolean;
@@ -23,7 +23,7 @@ export const TimePanel: React.FC<TimePanelProps> = ({ minimal = false }) => {
     },
     // Season change
     (newSeason) => {
-      setTimeMessage(`Nouvelle saison: ${newSeason}`);
+      setTimeMessage(`Nouvelle saison: ${formatRomanSeason(newSeason)}`);
     },
     // Year change
     (newYear) => {
@@ -54,7 +54,7 @@ export const TimePanel: React.FC<TimePanelProps> = ({ minimal = false }) => {
       <div className="flex items-center space-x-2 text-sm">
         <div className={`px-1.5 py-0.5 rounded-md flex items-center gap-1 ${color}`}>
           {icon}
-          <span className="text-xs font-medium">{season}</span>
+          <span className="text-xs font-medium">{formatRomanSeason(season)}</span>
         </div>
         <span className="text-xs text-muted-foreground">{year} AUC</span>
       </div>
@@ -71,7 +71,7 @@ export const TimePanel: React.FC<TimePanelProps> = ({ minimal = false }) => {
         
         <button
           onClick={() => advanceTime()}
-          className="p-1 rounded-full bg-muted/50 hover:bg-muted transition-colors"
+          className="p-1.5 rounded-full bg-muted/50 hover:bg-muted transition-colors"
           title="Avancer le temps (pour démonstration)"
         >
           <Hourglass className="h-4 w-4 text-muted-foreground" />
@@ -81,7 +81,7 @@ export const TimePanel: React.FC<TimePanelProps> = ({ minimal = false }) => {
       <div className="flex items-center gap-4 mt-2">
         <div className={`px-2 py-1 rounded-md flex items-center gap-1 ${color}`}>
           {icon}
-          <span className="text-xs font-medium">{season}</span>
+          <span className="text-xs font-medium">{formatRomanSeason(season)}</span>
         </div>
       </div>
       

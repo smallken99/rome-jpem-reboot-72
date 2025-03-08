@@ -1,81 +1,115 @@
 
 import React from 'react';
-import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Button } from '@/components/ui/button';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
-import { Edit, FileText, Vote } from 'lucide-react';
-import { Loi } from '../types/maitreJeuTypes';
-import { formatDate } from '@/utils/timeSystem';
+import { Button } from '@/components/ui/button';
+import { LoisTableProps } from '../types/maitreJeuTypes';
+import { formatRomanDate } from '@/utils/timeSystem';
 
-interface LoisTableProps {
-  lois: Loi[];
-  onEdit: (loi: Loi) => void;
-  onVote: (loi: Loi) => void;
-}
-
-export const LoisTable: React.FC<LoisTableProps> = ({ lois, onEdit, onVote }) => {
-  // Fonction pour obtenir la couleur du badge selon le statut
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'promulguée': return 'bg-green-100 text-green-800 border-green-300';
-      case 'en préparation': return 'bg-blue-100 text-blue-800 border-blue-300';
-      case 'présentée': return 'bg-amber-100 text-amber-800 border-amber-300';
-      case 'débattue': return 'bg-purple-100 text-purple-800 border-purple-300';
-      case 'votée': return 'bg-teal-100 text-teal-800 border-teal-300';
-      case 'abrogée': return 'bg-red-100 text-red-800 border-red-300';
-      default: return 'bg-gray-100 text-gray-800 border-gray-300';
+export const LoisTable: React.FC<LoisTableProps> = ({ lois, onVote }) => {
+  const getEtatBadge = (etat: string) => {
+    switch (etat) {
+      case 'proposée':
+        return <Badge variant="outline" className="bg-blue-50 text-blue-600 border-blue-200">Proposée</Badge>;
+      case 'votée':
+        return <Badge variant="outline" className="bg-green-50 text-green-600 border-green-200">Votée</Badge>;
+      case 'rejetée':
+        return <Badge variant="outline" className="bg-red-50 text-red-600 border-red-200">Rejetée</Badge>;
+      case 'en vigueur':
+        return <Badge variant="outline" className="bg-purple-50 text-purple-600 border-purple-200">En vigueur</Badge>;
+      case 'abrogée':
+        return <Badge variant="outline" className="bg-gray-50 text-gray-600 border-gray-200">Abrogée</Badge>;
+      default:
+        return <Badge variant="outline">{etat}</Badge>;
     }
   };
-
-  // Fonction pour formatter les résultats de vote si disponibles
-  const formatVoteResults = (loi: Loi) => {
-    if (loi.résultat === 'en attente' || !loi.résultat) return 'En attente';
-    return `${loi.votePour} pour, ${loi.voteContre} contre, ${loi.abstentions} abstentions`;
+  
+  const getCategoryBadge = (category: string) => {
+    switch (category) {
+      case 'politique':
+        return <Badge className="bg-blue-100 text-blue-800">Politique</Badge>;
+      case 'militaire':
+        return <Badge className="bg-red-100 text-red-800">Militaire</Badge>;
+      case 'économique':
+        return <Badge className="bg-green-100 text-green-800">Économique</Badge>;
+      case 'religieux':
+        return <Badge className="bg-purple-100 text-purple-800">Religieux</Badge>;
+      case 'social':
+        return <Badge className="bg-orange-100 text-orange-800">Social</Badge>;
+      default:
+        return <Badge>{category}</Badge>;
+    }
   };
-
+  
   return (
-    <Table>
-      <TableCaption>Liste des lois de la République</TableCaption>
-      <TableHeader>
-        <TableRow>
-          <TableHead className="w-[150px]">Nom</TableHead>
-          <TableHead>Proposé par</TableHead>
-          <TableHead>Date</TableHead>
-          <TableHead>Statut</TableHead>
-          <TableHead>Résultat</TableHead>
-          <TableHead className="text-right">Actions</TableHead>
-        </TableRow>
-      </TableHeader>
-      <TableBody>
-        {lois.map((loi) => (
-          <TableRow key={loi.id}>
-            <TableCell className="font-medium">{loi.nom}</TableCell>
-            <TableCell>{loi.proposéPar}</TableCell>
-            <TableCell>{formatDate(loi.datePrésentation)}</TableCell>
-            <TableCell>
-              <Badge variant="outline" className={getStatusColor(loi.statusActuel)}>
-                {loi.statusActuel}
-              </Badge>
-            </TableCell>
-            <TableCell>{formatVoteResults(loi)}</TableCell>
-            <TableCell className="text-right">
-              <div className="flex justify-end gap-2">
-                <Button variant="ghost" size="icon" onClick={() => onEdit(loi)}>
-                  <Edit className="h-4 w-4" />
-                </Button>
-                <Button 
-                  variant="ghost" 
-                  size="icon" 
-                  onClick={() => onVote(loi)}
-                  disabled={loi.statusActuel !== 'débattue'}
-                >
-                  <Vote className="h-4 w-4" />
-                </Button>
-              </div>
-            </TableCell>
+    <div className="rounded-md border">
+      <Table>
+        <TableHeader>
+          <TableRow>
+            <TableHead>Titre</TableHead>
+            <TableHead>Proposeur</TableHead>
+            <TableHead>Date</TableHead>
+            <TableHead>Catégorie</TableHead>
+            <TableHead>État</TableHead>
+            <TableHead className="text-right">Votes Pour/Contre</TableHead>
+            <TableHead className="text-right">Actions</TableHead>
           </TableRow>
-        ))}
-      </TableBody>
-    </Table>
+        </TableHeader>
+        <TableBody>
+          {lois.length === 0 ? (
+            <TableRow>
+              <TableCell colSpan={7} className="text-center py-4 text-muted-foreground">
+                Aucune loi proposée
+              </TableCell>
+            </TableRow>
+          ) : (
+            lois.map((loi) => (
+              <TableRow key={loi.id}>
+                <TableCell className="font-medium">{loi.titre}</TableCell>
+                <TableCell>{loi.proposeur}</TableCell>
+                <TableCell>{formatRomanDate(loi.date.year, loi.date.season, loi.date.day)}</TableCell>
+                <TableCell>{getCategoryBadge(loi.catégorie)}</TableCell>
+                <TableCell>{getEtatBadge(loi.état)}</TableCell>
+                <TableCell className="text-right">
+                  <span className="text-green-600 font-medium">{loi.votesPositifs}</span>
+                  <span className="mx-1">/</span>
+                  <span className="text-red-600 font-medium">{loi.votesNégatifs}</span>
+                </TableCell>
+                <TableCell className="text-right">
+                  {loi.état === 'proposée' && onVote && (
+                    <div className="flex items-center justify-end gap-1">
+                      <Button 
+                        variant="ghost" 
+                        size="sm" 
+                        className="h-7 text-green-600 hover:text-green-700 hover:bg-green-50"
+                        onClick={() => onVote(loi.id, 'pour', 1)}
+                      >
+                        Pour
+                      </Button>
+                      <Button 
+                        variant="ghost" 
+                        size="sm" 
+                        className="h-7 text-red-600 hover:text-red-700 hover:bg-red-50"
+                        onClick={() => onVote(loi.id, 'contre', 1)}
+                      >
+                        Contre
+                      </Button>
+                      <Button 
+                        variant="ghost" 
+                        size="sm" 
+                        className="h-7 text-gray-500 hover:text-gray-700 hover:bg-gray-50"
+                        onClick={() => onVote(loi.id, 'abstention', 1)}
+                      >
+                        Abstention
+                      </Button>
+                    </div>
+                  )}
+                </TableCell>
+              </TableRow>
+            ))
+          )}
+        </TableBody>
+      </Table>
+    </div>
   );
 };

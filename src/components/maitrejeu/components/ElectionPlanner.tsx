@@ -1,107 +1,123 @@
 
 import React, { useState } from 'react';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Input } from '@/components/ui/input';
-import { Calendar, CalendarCheck, Users } from 'lucide-react';
-import { useTimeStore } from '@/utils/timeSystem';
-import { SenateurJouable } from '../types/maitreJeuTypes';
+import { useTimeStore, Season } from '@/utils/timeSystem';
+import { ElectionPlannerProps, MagistratureType } from '../types/maitreJeuTypes';
+import { Calendar, User, Check } from 'lucide-react';
 
-interface ElectionPlannerProps {
-  senateurs: SenateurJouable[];
-  onScheduleElection: (poste: string, date: { year: number; month: number; day: number }) => void;
-}
-
-export const ElectionPlanner: React.FC<ElectionPlannerProps> = ({ senateurs, onScheduleElection }) => {
-  const { year, month } = useTimeStore();
+export const ElectionPlanner: React.FC<ElectionPlannerProps> = ({ 
+  senateurs, 
+  onScheduleElection 
+}) => {
+  const { year, season } = useTimeStore();
+  const [selectedMagistrature, setSelectedMagistrature] = useState<MagistratureType>('CONSUL');
+  const [selectedYear, setSelectedYear] = useState<number>(year);
+  const [selectedSeason, setSelectedSeason] = useState<Season>(season);
   
-  const [poste, setPoste] = useState('');
-  const [electionYear, setElectionYear] = useState(year);
-  const [electionMonth, setElectionMonth] = useState(month + 1 > 12 ? 1 : month + 1);
-  const [electionDay, setElectionDay] = useState(15);
-  
-  const postes = [
-    "Consul",
-    "Préteur",
-    "Édile",
-    "Questeur",
-    "Tribun de la plèbe",
-    "Censeur"
-  ];
-  
-  const handleSchedule = () => {
-    onScheduleElection(poste, {
-      year: electionYear,
-      month: electionMonth,
-      day: electionDay
-    });
+  const handleScheduleElection = () => {
+    onScheduleElection(selectedMagistrature, selectedYear, selectedSeason);
   };
   
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Planificateur d'élections</CardTitle>
-        <CardDescription>
-          Organisez les prochaines élections pour les postes magistraux
-        </CardDescription>
+        <CardTitle className="text-lg">Planifier une élection</CardTitle>
       </CardHeader>
-      <CardContent className="space-y-4">
-        <div className="space-y-2">
-          <label className="text-sm font-medium">Poste à pourvoir</label>
-          <Select onValueChange={setPoste} value={poste}>
-            <SelectTrigger>
-              <SelectValue placeholder="Sélectionner un poste" />
-            </SelectTrigger>
-            <SelectContent>
-              {postes.map(p => (
-                <SelectItem key={p} value={p}>{p}</SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
-        
-        <div className="grid grid-cols-3 gap-3">
-          <div className="space-y-2">
-            <label className="text-sm font-medium">Année</label>
-            <Input 
-              type="number"
-              value={electionYear}
-              onChange={e => setElectionYear(parseInt(e.target.value))}
-              min={year}
-            />
+      <CardContent>
+        <div className="space-y-4">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <div className="space-y-2">
+              <label className="text-sm font-medium">Magistrature</label>
+              <Select 
+                value={selectedMagistrature} 
+                onValueChange={(value) => setSelectedMagistrature(value as MagistratureType)}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Sélectionner une magistrature" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="CONSUL">Consul</SelectItem>
+                  <SelectItem value="CENSEUR">Censeur</SelectItem>
+                  <SelectItem value="PRÉTEUR">Préteur</SelectItem>
+                  <SelectItem value="ÉDILE">Édile</SelectItem>
+                  <SelectItem value="QUESTEUR">Questeur</SelectItem>
+                  <SelectItem value="TRIBUN">Tribun</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            
+            <div className="space-y-2">
+              <label className="text-sm font-medium">Année</label>
+              <Select 
+                value={selectedYear.toString()} 
+                onValueChange={(value) => setSelectedYear(parseInt(value))}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Sélectionner une année" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value={year.toString()}>{year} AUC</SelectItem>
+                  <SelectItem value={(year + 1).toString()}>{year + 1} AUC</SelectItem>
+                  <SelectItem value={(year + 2).toString()}>{year + 2} AUC</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            
+            <div className="space-y-2">
+              <label className="text-sm font-medium">Saison</label>
+              <Select 
+                value={selectedSeason} 
+                onValueChange={(value) => setSelectedSeason(value as Season)}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Sélectionner une saison" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="Ver">Printemps (Ver)</SelectItem>
+                  <SelectItem value="Aestas">Été (Aestas)</SelectItem>
+                  <SelectItem value="Autumnus">Automne (Autumnus)</SelectItem>
+                  <SelectItem value="Hiems">Hiver (Hiems)</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
           </div>
-          <div className="space-y-2">
-            <label className="text-sm font-medium">Mois</label>
-            <Input 
-              type="number"
-              value={electionMonth}
-              onChange={e => setElectionMonth(parseInt(e.target.value))}
-              min={1}
-              max={12}
-            />
+          
+          <div className="bg-muted/20 p-3 rounded-md">
+            <h4 className="text-sm font-medium mb-2 flex items-center">
+              <User className="h-4 w-4 mr-1 text-muted-foreground" />
+              Sénateurs éligibles
+            </h4>
+            
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2">
+              {senateurs
+                .filter(s => !s.magistrature)
+                .map(senateur => (
+                  <div key={senateur.id} className="text-xs p-2 border rounded bg-white">
+                    <div className="font-medium">{senateur.nom}</div>
+                    <div className="text-muted-foreground">{senateur.faction}</div>
+                  </div>
+                ))}
+              
+              {senateurs.filter(s => !s.magistrature).length === 0 && (
+                <div className="text-xs text-muted-foreground col-span-full">
+                  Tous les sénateurs ont déjà une magistrature
+                </div>
+              )}
+            </div>
           </div>
-          <div className="space-y-2">
-            <label className="text-sm font-medium">Jour</label>
-            <Input 
-              type="number"
-              value={electionDay}
-              onChange={e => setElectionDay(parseInt(e.target.value))}
-              min={1}
-              max={30}
-            />
+          
+          <div className="flex justify-end">
+            <Button
+              onClick={handleScheduleElection}
+              disabled={senateurs.filter(s => !s.magistrature).length === 0}
+              className="flex items-center"
+            >
+              <Calendar className="h-4 w-4 mr-2" />
+              Planifier l'élection
+            </Button>
           </div>
-        </div>
-        
-        <div className="flex justify-between items-center pt-4">
-          <div className="text-sm text-muted-foreground flex items-center">
-            <Users className="h-4 w-4 mr-1" />
-            <span>{senateurs.filter(s => s.statut === 'actif').length} candidats potentiels</span>
-          </div>
-          <Button onClick={handleSchedule} className="flex items-center gap-2">
-            <CalendarCheck className="h-4 w-4" />
-            Planifier l'élection
-          </Button>
         </div>
       </CardContent>
     </Card>
