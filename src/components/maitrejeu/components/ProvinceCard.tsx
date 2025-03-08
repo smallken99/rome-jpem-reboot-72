@@ -1,4 +1,4 @@
-<lov-codelov-code>
+
 import React from 'react';
 import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -48,13 +48,14 @@ export const ProvinceCard: React.FC<ProvinceCardProps> = ({ province, onProvince
           )}
         </div>
       </CardContent>
-      <CardFooter className="text-xs text-gray-600">
-        Dernier événement: {formatDate(province.dernierEvenement.year, province.dernierEvenement.season)}
+      <CardFooter className="flex justify-between items-center">
+        <span className="text-xs text-gray-600">
+          Dernier événement: {formatDate(province.dernierEvenement.year, province.dernierEvenement.season)}
+        </span>
+        <Button onClick={handleProvinceClick} size="sm">
+          Voir détails
+        </Button>
       </CardFooter>
-      <Button onClick={handleProvinceClick}>
-        Voir les détails
-      </Button>
     </Card>
   );
 };
-</lov-code>

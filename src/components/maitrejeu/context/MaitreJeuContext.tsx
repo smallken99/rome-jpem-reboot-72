@@ -1,6 +1,6 @@
-<lov-codelov-code>
+
 import React, { createContext, useContext, useState, ReactNode, useEffect } from 'react';
-import { useTimeStore, getCurrentSeason, getCurrentYear, getCurrentDay } from '@/utils/timeSystem';
+import { useTimeStore } from '@/utils/timeSystem';
 import { convertTimeSeasonToMaitreJeuSeason } from '@/components/maitrejeu/types/common';
 import { 
   Faction, 
@@ -132,14 +132,16 @@ export const useMaitreJeu = () => useContext(MaitreJeuContext);
 
 // Définition du provider MaitreJeu
 export const MaitreJeuProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
-  // Récupérer la saison actuelle depuis timeSystem
-  const currentSystemSeason = getCurrentSeason();
-  // La convertir au format attendu par ce contexte
+  // Récupérer les données actuelles depuis timeSystem
+  const timeSystem = useTimeStore();
+  const currentSystemSeason = timeSystem.season;
+  
+  // Conversion du format de saison attendu par ce contexte
   const initialSeason = convertTimeSeasonToMaitreJeuSeason(currentSystemSeason);
   
-  // Use initialSeason instead of a hardcoded value
+  // Utilisez initialSeason au lieu d'une valeur codée en dur
   const [season, setSeason] = useState<Season>(initialSeason);
-  const [year, setYear] = useState(getCurrentYear());
+  const [year, setYear] = useState(timeSystem.year);
   const [phase, setPhase] = useState<GamePhase>('ADMINISTRATION');
   
   const [factions, setFactions] = useState<Faction[]>([]);
@@ -176,7 +178,9 @@ export const MaitreJeuProvider: React.FC<{ children: ReactNode }> = ({ children 
   };
   
   const updateFactionPolitique = (id: string, updates: Partial<FactionPolitique>) => {
-    setFactionsPolitiques(factionsPolitiques.map(factionPolitique => factionPolitique.id === id ? { ...factionPolitique, ...updates } : factionPolitique));
+    setFactionsPolitiques(factionsPolitiques.map(factionPolitique => 
+      factionPolitique.id === id ? { ...factionPolitique, ...updates } : factionPolitique
+    ));
   };
   
   const removeFactionPolitique = (id: string) => {
@@ -255,7 +259,9 @@ export const MaitreJeuProvider: React.FC<{ children: ReactNode }> = ({ children 
   };
   
   const updateHistoireEntry = (id: string, updates: Partial<HistoireEntry>) => {
-    setHistoireEntries(histoireEntries.map(histoireEntry => histoireEntry.id === id ? { ...histoireEntry, ...updates } : histoireEntry));
+    setHistoireEntries(histoireEntries.map(histoireEntry => 
+      histoireEntry.id === id ? { ...histoireEntry, ...updates } : histoireEntry
+    ));
   };
   
   const removeHistoireEntry = (id: string) => {
@@ -275,7 +281,15 @@ export const MaitreJeuProvider: React.FC<{ children: ReactNode }> = ({ children 
     }
   };
 
-  // Assurez-vous que les mises à jour de saison utilisent initialSeason ou le convertissent
+  // Synchronisation avec le système de temps global
+  useEffect(() => {
+    const systemSeason = timeSystem.season;
+    const convertedSeason = convertTimeSeasonToMaitreJeuSeason(systemSeason);
+    setSeason(convertedSeason);
+    setYear(timeSystem.year);
+  }, [timeSystem.season, timeSystem.year]);
+
+  // Fonctions de réinitialisation
   const resetGameSeason = () => {
     setSeason(initialSeason);
   };
@@ -338,4 +352,3 @@ export const MaitreJeuProvider: React.FC<{ children: ReactNode }> = ({ children 
 
 // Export du contexte et du provider
 export default MaitreJeuContext;
-</lov-code>
