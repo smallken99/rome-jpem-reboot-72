@@ -1,0 +1,2 @@
+
+export { SenateurModal } from './SenateurModal';

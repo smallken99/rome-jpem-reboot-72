@@ -13,7 +13,7 @@ import {
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
 import { SenateurCard } from './components/SenateurCard';
-import { SenateurModal } from './components/SenateurModal';
+import { SenateurModal } from './components/senateur-modal';
 import { useMaitreJeu } from './context/MaitreJeuContext';
 import { SenateurJouable } from './types';
 import { Plus, Search } from 'lucide-react';
