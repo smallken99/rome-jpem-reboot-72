@@ -5,7 +5,8 @@ import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, Tabl
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
-import { Users, ShieldPlus, Eye } from 'lucide-react';
+import { Users, ShieldPlus, Eye, Wheat, Tractor, Grape, GlassWater } from 'lucide-react';
+import { ruralProperties } from '@/components/proprietes/data/buildings';
 
 interface AgerPublicusTableProps {
   parcels: LandParcel[];
@@ -44,22 +45,40 @@ export const AgerPublicusTable: React.FC<AgerPublicusTableProps> = ({
     return 'bg-red-500';
   };
   
-  // Fonction pour obtenir le badge du type de parcelle
-  const getTypeLabel = (type: LandParcel['type']) => {
-    switch (type) {
-      case 'cultivable':
-        return <Badge className="bg-green-100 text-green-800 hover:bg-green-100">Cultivable</Badge>;
-      case 'pastoral':
-        return <Badge className="bg-amber-100 text-amber-800 hover:bg-amber-100">Pâturage</Badge>;
-      case 'forest':
-        return <Badge className="bg-emerald-100 text-emerald-800 hover:bg-emerald-100">Forêt</Badge>;
-      case 'wetland':
-        return <Badge className="bg-blue-100 text-blue-800 hover:bg-blue-100">Zone humide</Badge>;
-      case 'rocky':
-        return <Badge className="bg-gray-100 text-gray-800 hover:bg-gray-100">Rocailleuse</Badge>;
-      default:
-        return <Badge variant="outline">Autre</Badge>;
+  // Fonction pour obtenir l'icône et le badge du type de bâtiment
+  const getBuildingTypeInfo = (buildingType: string) => {
+    const buildingInfo = ruralProperties[buildingType];
+    let icon = <Tractor className="h-4 w-4 mr-1" />;
+    let badgeClass = "bg-gray-100 text-gray-800 hover:bg-gray-100";
+    let label = buildingInfo?.name || buildingType;
+    
+    switch (buildingType) {
+      case 'domaine_cereales':
+        icon = <Wheat className="h-4 w-4 mr-1 text-amber-600" />;
+        badgeClass = "bg-amber-100 text-amber-800 hover:bg-amber-100";
+        break;
+      case 'domaine_vignoble':
+        icon = <Grape className="h-4 w-4 mr-1 text-purple-600" />;
+        badgeClass = "bg-purple-100 text-purple-800 hover:bg-purple-100";
+        break;
+      case 'domaine_oliviers':
+        icon = <GlassWater className="h-4 w-4 mr-1 text-green-600" />;
+        badgeClass = "bg-green-100 text-green-800 hover:bg-green-100";
+        break;
+      case 'paturage_equides':
+      case 'paturage_bovins':
+      case 'paturage_moutons':
+        icon = <Tractor className="h-4 w-4 mr-1 text-emerald-700" />;
+        badgeClass = "bg-emerald-100 text-emerald-800 hover:bg-emerald-100";
+        break;
     }
+    
+    return (
+      <Badge className={`flex items-center ${badgeClass}`}>
+        {icon}
+        {label}
+      </Badge>
+    );
   };
   
   if (isLoading) {
@@ -73,7 +92,7 @@ export const AgerPublicusTable: React.FC<AgerPublicusTableProps> = ({
   return (
     <Table>
       <TableCaption>
-        Liste des parcelles de l'Ager Publicus - {parcels.length} parcelles enregistrées
+        Liste des domaines ruraux publics - {parcels.length} domaines enregistrés
       </TableCaption>
       <TableHeader>
         <TableRow>
@@ -90,7 +109,7 @@ export const AgerPublicusTable: React.FC<AgerPublicusTableProps> = ({
         {parcels.length === 0 ? (
           <TableRow>
             <TableCell colSpan={7} className="text-center py-4">
-              Aucune parcelle trouvée
+              Aucun domaine rural trouvé
             </TableCell>
           </TableRow>
         ) : (
@@ -98,7 +117,7 @@ export const AgerPublicusTable: React.FC<AgerPublicusTableProps> = ({
             <TableRow key={parcel.id}>
               <TableCell className="font-medium">{parcel.name}</TableCell>
               <TableCell>{parcel.location}</TableCell>
-              <TableCell>{getTypeLabel(parcel.type)}</TableCell>
+              <TableCell>{getBuildingTypeInfo(parcel.buildingType)}</TableCell>
               <TableCell>{parcel.size.toLocaleString()} iugera</TableCell>
               <TableCell>
                 {getStatusBadge(parcel.status)}

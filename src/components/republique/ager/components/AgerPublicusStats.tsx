@@ -2,7 +2,8 @@
 import React from 'react';
 import { LandParcel } from '../types';
 import { StatBox } from '@/components/ui-custom/StatBox';
-import { Map, Leaf, CircleDollarSign, Users, UserCog, Warehouse } from 'lucide-react';
+import { Map, Wheat, CircleDollarSign, Users, UserCog, Warehouse, Tractor, GlassWater, Grape } from 'lucide-react';
+import { ruralProperties } from '@/components/proprietes/data/buildings';
 
 interface AgerPublicusStatsProps {
   parcels: LandParcel[];
@@ -19,7 +20,15 @@ export const AgerPublicusStats: React.FC<AgerPublicusStatsProps> = ({ parcels, i
     ? Math.round((allocatedParcels / totalParcels) * 100) 
     : 0;
   
-  // Nouvelles statistiques pour la main d'œuvre
+  // Statistiques par type de domaine
+  const domainesCereales = parcels.filter(p => p.buildingType === 'domaine_cereales').length;
+  const domainesVignobles = parcels.filter(p => p.buildingType === 'domaine_vignoble').length;
+  const domainesOliviers = parcels.filter(p => p.buildingType === 'domaine_oliviers').length;
+  const elevagesEquides = parcels.filter(p => p.buildingType === 'paturage_equides').length;
+  const elevagesBovins = parcels.filter(p => p.buildingType === 'paturage_bovins').length;
+  const elevagesMoutons = parcels.filter(p => p.buildingType === 'paturage_moutons').length;
+  
+  // Statistiques pour la main d'œuvre
   const totalMagistrates = parcels.reduce((sum, parcel) => sum + (parcel.workforce?.magistrates || 0), 0);
   const totalOverseers = parcels.reduce((sum, parcel) => sum + (parcel.workforce?.overseers || 0), 0);
   const totalPublicSlaves = parcels.reduce((sum, parcel) => sum + (parcel.workforce?.publicSlaves || 0), 0);
@@ -32,22 +41,44 @@ export const AgerPublicusStats: React.FC<AgerPublicusStatsProps> = ({ parcels, i
   
   // Estimation de la production
   const totalProduction = parcels.reduce((sum, parcel) => sum + (parcel.production?.amount || 0), 0);
+  
+  // Calcul des revenus par type de bâtiment
+  const calculateBuildingTypeRevenue = (buildingType: string) => {
+    const buildingDetails = ruralProperties[buildingType];
+    if (!buildingDetails) return 0;
+    
+    const buildings = parcels.filter(p => p.buildingType === buildingType);
+    return buildings.reduce((sum, building) => {
+      const efficiency = building.workforce?.efficiency || 0;
+      const baseIncome = buildingDetails.income || 0;
+      return sum + (baseIncome * efficiency / 100);
+    }, 0);
+  };
+  
+  const cerealIncome = calculateBuildingTypeRevenue('domaine_cereales');
+  const vineIncome = calculateBuildingTypeRevenue('domaine_vignoble');
+  const oliveIncome = calculateBuildingTypeRevenue('domaine_oliviers');
+  const equideIncome = calculateBuildingTypeRevenue('paturage_equides');
+  const bovinIncome = calculateBuildingTypeRevenue('paturage_bovins');
+  const moutonIncome = calculateBuildingTypeRevenue('paturage_moutons');
+  
+  const totalIncome = cerealIncome + vineIncome + oliveIncome + equideIncome + bovinIncome + moutonIncome;
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
       <StatBox
-        title="Parcelles totales"
+        title="Domaines publics"
         value={isLoading ? '...' : totalParcels.toString()}
-        icon={<Map className="h-5 w-5 text-rome-gold" />}
+        icon={<Tractor className="h-5 w-5 text-rome-gold" />}
         trend="neutral"
         trendValue="—"
-        description="Nombre total de parcelles"
+        description="Nombre total de domaines"
       />
       
       <StatBox
         title="Surface totale"
         value={isLoading ? '...' : `${totalArea.toLocaleString()} iugera`}
-        icon={<Leaf className="h-5 w-5 text-green-600" />}
+        icon={<Map className="h-5 w-5 text-green-600" />}
         trend="neutral"
         trendValue="—"
         description="Surface totale des terres publiques"
@@ -68,10 +99,47 @@ export const AgerPublicusStats: React.FC<AgerPublicusStatsProps> = ({ parcels, i
         icon={<Users className="h-5 w-5 text-blue-600" />}
         trend={allocationPercentage > 50 ? "up" : "neutral"}
         trendValue={`${allocatedParcels}/${totalParcels}`}
-        description={`${allocatedParcels} parcelles attribuées`}
+        description={`${allocatedParcels} domaines attribués`}
       />
       
-      {/* Nouvelles statistiques pour la main d'œuvre */}
+      {/* Types de domaines */}
+      <StatBox
+        title="Domaines céréaliers"
+        value={isLoading ? '...' : `${domainesCereales}`}
+        icon={<Wheat className="h-5 w-5 text-amber-600" />}
+        trend="neutral"
+        trendValue={`${Math.round(cerealIncome).toLocaleString()} as`}
+        description="Revenus annuels estimés"
+      />
+      
+      <StatBox
+        title="Vignobles"
+        value={isLoading ? '...' : `${domainesVignobles}`}
+        icon={<Grape className="h-5 w-5 text-purple-600" />}
+        trend="up"
+        trendValue={`${Math.round(vineIncome).toLocaleString()} as`}
+        description="Revenus annuels estimés"
+      />
+      
+      <StatBox
+        title="Oliveraies"
+        value={isLoading ? '...' : `${domainesOliviers}`}
+        icon={<GlassWater className="h-5 w-5 text-green-600" />}
+        trend="neutral"
+        trendValue={`${Math.round(oliveIncome).toLocaleString()} as`}
+        description="Revenus annuels estimés"
+      />
+      
+      <StatBox
+        title="Pâturages"
+        value={isLoading ? '...' : `${elevagesEquides + elevagesBovins + elevagesMoutons}`}
+        icon={<Users className="h-5 w-5 text-emerald-600" />}
+        trend="up"
+        trendValue={`${Math.round(equideIncome + bovinIncome + moutonIncome).toLocaleString()} as`}
+        description="Revenus annuels estimés"
+      />
+      
+      {/* Statistiques pour la main d'œuvre */}
       <StatBox
         title="Fonctionnaires"
         value={isLoading ? '...' : `${totalMagistrates + totalOverseers}`}
@@ -86,7 +154,7 @@ export const AgerPublicusStats: React.FC<AgerPublicusStatsProps> = ({ parcels, i
         value={isLoading ? '...' : totalPublicSlaves.toString()}
         icon={<Users className="h-5 w-5 text-amber-700" />}
         trend={totalPublicSlaves > 100 ? "up" : "neutral"}
-        trendValue={totalPublicSlaves > 0 ? `~${Math.round(totalPublicSlaves/totalParcels)} par parcelle` : "—"}
+        trendValue={totalPublicSlaves > 0 ? `~${Math.round(totalPublicSlaves/totalParcels)} par domaine` : "—"}
         description="Servi publici affectés aux terres"
       />
       
@@ -100,12 +168,12 @@ export const AgerPublicusStats: React.FC<AgerPublicusStatsProps> = ({ parcels, i
       />
       
       <StatBox
-        title="Production"
-        value={isLoading ? '...' : `${totalProduction.toLocaleString()}`}
+        title="Revenu total"
+        value={isLoading ? '...' : `${totalIncome.toLocaleString()} as`}
         icon={<Warehouse className="h-5 w-5 text-orange-600" />}
         trend="up"
         trendValue="+5% cette année"
-        description="Production totale estimée"
+        description="Revenus annuels estimés"
       />
     </div>
   );

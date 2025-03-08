@@ -4,7 +4,7 @@ export interface LandParcel {
   name: string;
   location: string;
   size: number;
-  type: 'cultivable' | 'pastoral' | 'forest' | 'wetland' | 'rocky';
+  buildingType: 'domaine_cereales' | 'domaine_vignoble' | 'domaine_oliviers' | 'paturage_equides' | 'paturage_bovins' | 'paturage_moutons';
   status: 'available' | 'allocated' | 'disputed' | 'protected';
   value: number;
   allocation?: {
@@ -17,12 +17,6 @@ export interface LandParcel {
     x: number;
     y: number;
   };
-  resources?: {
-    fertility?: number;
-    water?: number;
-    minerals?: number;
-  };
-  description?: string;
   // Nouveaux champs pour la gestion des fonctionnaires et esclaves
   workforce?: {
     magistrates?: number; // Fonctionnaires romains supervisant la parcelle
@@ -75,4 +69,3 @@ export interface PublicWorkforceStatistics {
   };
   productivityByRegion: Record<string, number>;
 }
-

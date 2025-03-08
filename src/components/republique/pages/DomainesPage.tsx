@@ -7,7 +7,7 @@ import { AttributionTerres } from '@/components/republique/domaines/AttributionT
 import { Separator } from '@/components/ui/separator';
 import { Button } from '@/components/ui/button';
 import { Link } from 'react-router-dom';
-import { MapPin, Users, Newspaper } from 'lucide-react';
+import { MapPin, Users, Wheat, Tractor } from 'lucide-react';
 
 export const DomainesPage: React.FC = () => {
   return (
@@ -38,22 +38,26 @@ export const DomainesPage: React.FC = () => {
               <Link to="/republique/ager">
                 <Button variant="outline" className="w-full h-auto py-4 flex flex-col items-center justify-center gap-2">
                   <MapPin className="h-6 w-6 text-rome-navy" />
-                  <span className="font-medium">Parcelles de l'Ager</span>
+                  <span className="font-medium">Domaines Publics</span>
                   <span className="text-xs text-muted-foreground">Gérer les terres publiques</span>
                 </Button>
               </Link>
               
-              <Button variant="outline" className="w-full h-auto py-4 flex flex-col items-center justify-center gap-2">
-                <Users className="h-6 w-6 text-amber-700" />
-                <span className="font-medium">Main d'œuvre publique</span>
-                <span className="text-xs text-muted-foreground">Fonctionnaires et esclaves publics</span>
-              </Button>
+              <Link to="/republique/ager">
+                <Button variant="outline" className="w-full h-auto py-4 flex flex-col items-center justify-center gap-2">
+                  <Users className="h-6 w-6 text-amber-700" />
+                  <span className="font-medium">Main d'œuvre publique</span>
+                  <span className="text-xs text-muted-foreground">Fonctionnaires et esclaves publics</span>
+                </Button>
+              </Link>
               
-              <Button variant="outline" className="w-full h-auto py-4 flex flex-col items-center justify-center gap-2">
-                <Newspaper className="h-6 w-6 text-green-700" />
-                <span className="font-medium">Récoltes et production</span>
-                <span className="text-xs text-muted-foreground">Suivi des rendements agricoles</span>
-              </Button>
+              <Link to="/republique/ager">
+                <Button variant="outline" className="w-full h-auto py-4 flex flex-col items-center justify-center gap-2">
+                  <Tractor className="h-6 w-6 text-green-700" />
+                  <span className="font-medium">Types de domaines</span>
+                  <span className="text-xs text-muted-foreground">Céréales, vignobles, pâturages</span>
+                </Button>
+              </Link>
             </div>
             
             <p className="text-sm text-muted-foreground mt-4">

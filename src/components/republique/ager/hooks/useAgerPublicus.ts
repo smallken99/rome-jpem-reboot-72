@@ -1,21 +1,19 @@
-
 import { useState, useEffect } from 'react';
 import { LandParcel, AgerPublicusOverseer, PublicWorkforceStatistics } from '../types';
 import { toast } from 'sonner';
+import { ruralProperties } from '@/components/proprietes/data/buildings';
 
 // Sample data for mockup purposes
 const mockParcels: LandParcel[] = [
   {
     id: "1",
-    name: "Campus Martius",
+    name: "Domaine céréalier du Campus Martius",
     location: "Rome",
     size: 1200,
-    type: "cultivable",
+    buildingType: "domaine_cereales",
     status: "protected",
     value: 120000,
     coordinates: { x: 150, y: 120 },
-    resources: { fertility: 8, water: 9, minerals: 2 },
-    description: "Terres sacrées dédiées à Mars, utilisées principalement pour les cérémonies religieuses et l'entraînement militaire.",
     workforce: {
       magistrates: 2,
       overseers: 3,
@@ -38,10 +36,10 @@ const mockParcels: LandParcel[] = [
   },
   {
     id: "2", 
-    name: "Ager Latinus",
+    name: "Oliveraie de l'Ager Latinus",
     location: "Latium",
     size: 5000,
-    type: "cultivable",
+    buildingType: "domaine_oliviers",
     status: "allocated",
     value: 450000,
     allocation: {
@@ -51,8 +49,6 @@ const mockParcels: LandParcel[] = [
       until: "613 AUC"
     },
     coordinates: { x: 200, y: 150 },
-    resources: { fertility: 7, water: 6, minerals: 3 },
-    description: "Vastes terres fertiles idéales pour la culture du blé et des oliviers.",
     workforce: {
       magistrates: 1,
       overseers: 5,
@@ -61,9 +57,9 @@ const mockParcels: LandParcel[] = [
       efficiency: 75
     },
     production: {
-      type: "blé et olives",
+      type: "huile d'olive",
       amount: 4500,
-      unit: "modii",
+      unit: "amphores",
       potentialYield: 6000,
       lastHarvest: "704 AUC"
     },
@@ -75,10 +71,10 @@ const mockParcels: LandParcel[] = [
   },
   {
     id: "3",
-    name: "Saltus Vescinus",
+    name: "Élevage bovin du Saltus Vescinus",
     location: "Campanie",
     size: 3000,
-    type: "pastoral",
+    buildingType: "paturage_bovins",
     status: "allocated",
     value: 250000,
     allocation: {
@@ -87,8 +83,6 @@ const mockParcels: LandParcel[] = [
       since: "601 AUC"
     },
     coordinates: { x: 250, y: 180 },
-    resources: { fertility: 6, water: 8, minerals: 1 },
-    description: "Pâturages de haute qualité, parfaits pour l'élevage de moutons et de bétail.",
     workforce: {
       magistrates: 1,
       overseers: 4,
@@ -97,7 +91,7 @@ const mockParcels: LandParcel[] = [
       efficiency: 92
     },
     production: {
-      type: "laine et viande",
+      type: "viande et cuir",
       amount: 2800,
       unit: "unités",
       potentialYield: 3000,
@@ -111,15 +105,13 @@ const mockParcels: LandParcel[] = [
   },
   {
     id: "4",
-    name: "Sylva Ciminia",
+    name: "Vignoble de la Sylva Ciminia",
     location: "Étrurie",
     size: 4000,
-    type: "forest",
+    buildingType: "domaine_vignoble",
     status: "available",
     value: 300000,
     coordinates: { x: 180, y: 100 },
-    resources: { fertility: 5, water: 7, minerals: 4 },
-    description: "Forêt dense riche en bois de construction et en gibier.",
     workforce: {
       magistrates: 0,
       overseers: 1,
@@ -128,9 +120,9 @@ const mockParcels: LandParcel[] = [
       efficiency: 35
     },
     production: {
-      type: "bois",
+      type: "vin",
       amount: 1200,
-      unit: "charretées",
+      unit: "amphores",
       potentialYield: 3500,
       lastHarvest: "703 AUC"
     },
@@ -142,15 +134,13 @@ const mockParcels: LandParcel[] = [
   },
   {
     id: "5",
-    name: "Colles Albani",
+    name: "Élevage équin des Colles Albani",
     location: "Latium",
     size: 2500,
-    type: "rocky",
+    buildingType: "paturage_equides",
     status: "available",
-    value: 100000,
+    value: 350000,
     coordinates: { x: 190, y: 140 },
-    resources: { fertility: 2, water: 4, minerals: 8 },
-    description: "Terrain rocheux contenant des gisements de pierre de qualité pour la construction.",
     workforce: {
       magistrates: 0,
       overseers: 2,
@@ -159,29 +149,27 @@ const mockParcels: LandParcel[] = [
       efficiency: 60
     },
     production: {
-      type: "pierre",
-      amount: 1800,
-      unit: "blocs",
-      potentialYield: 2200,
+      type: "chevaux et mules",
+      amount: 80,
+      unit: "têtes",
+      potentialYield: 100,
       lastHarvest: "704 AUC"
     },
     expenses: {
-      maintenance: 10000,
+      maintenance: 20000,
       salaries: 5000,
       supplies: 8000
     }
   },
   {
     id: "6",
-    name: "Lacus Trasimenus",
+    name: "Domaine ovins du Lacus Trasimenus",
     location: "Ombrie",
     size: 1800,
-    type: "wetland",
+    buildingType: "paturage_moutons",
     status: "disputed",
     value: 150000,
     coordinates: { x: 220, y: 90 },
-    resources: { fertility: 4, water: 10, minerals: 1 },
-    description: "Zone humide riche en poissons et en roseaux, son attribution est contestée par plusieurs familles.",
     workforce: {
       magistrates: 1,
       overseers: 0,
@@ -190,9 +178,9 @@ const mockParcels: LandParcel[] = [
       efficiency: 40
     },
     production: {
-      type: "poisson",
+      type: "laine",
       amount: 900,
-      unit: "amphores",
+      unit: "balles",
       potentialYield: 1500,
       lastHarvest: "704 AUC"
     },
@@ -209,7 +197,7 @@ const mockOverseers: AgerPublicusOverseer[] = [
   {
     id: "ov-1",
     name: "Marcus Tullius",
-    title: "Contremaître principal",
+    title: "Contremaître agricole",
     salary: 5000,
     experience: 8,
     specialization: "agriculture",
@@ -224,22 +212,22 @@ const mockOverseers: AgerPublicusOverseer[] = [
   {
     id: "ov-2",
     name: "Gaius Petronius",
-    title: "Maître forestier",
+    title: "Maître vigneron",
     salary: 4000,
     experience: 6,
-    specialization: "forestry",
+    specialization: "agriculture",
     assignedParcelId: "4",
     loyalty: 8,
     skills: {
       management: 6,
-      agriculture: 4,
+      agriculture: 9,
       logistics: 7
     }
   },
   {
     id: "ov-3",
     name: "Lucius Papinius",
-    title: "Contremaître agricole",
+    title: "Maître oléiculteur",
     salary: 3500,
     experience: 5,
     specialization: "agriculture",
@@ -269,10 +257,10 @@ const mockOverseers: AgerPublicusOverseer[] = [
   {
     id: "ov-5",
     name: "Titus Aemilius",
-    title: "Maître des carrières",
+    title: "Maître équestre",
     salary: 4200,
     experience: 6,
-    specialization: "mining",
+    specialization: "livestock",
     assignedParcelId: "5",
     loyalty: 5,
     skills: {
@@ -515,6 +503,11 @@ export const useAgerPublicus = () => {
     return overseers.filter(o => !o.assignedParcelId || o.assignedParcelId === parcelId);
   };
 
+  // Obtenir les détails des bâtiments ruraux
+  const getRuralBuildingDetails = (buildingType: string) => {
+    return ruralProperties[buildingType] || null;
+  };
+
   return { 
     landParcels, 
     overseers,
@@ -522,6 +515,7 @@ export const useAgerPublicus = () => {
     workforceStats,
     isLoading, 
     error,
+    getRuralBuildingDetails,
     addOfficialToParcel,
     addSlavesToParcel,
     assignOverseerToParcel,
