@@ -20,6 +20,7 @@ export interface Client {
   relationshipLevel: number;
   lastInteraction: string;
   senateurId?: string | null;
+  assignedToSenateurId?: string | null; // Adding this to resolve build errors
 }
 
 export type ClientCreationData = Omit<Client, 'id'>;
@@ -31,6 +32,8 @@ export interface ClientFilter {
   status?: string;
   location?: string;
   assignedTo?: string | null;
+  assignedOnly?: boolean; // Adding this to resolve build errors
+  searchTerm?: string; // Adding this to resolve build errors
 }
 
 // Types pour le tri des clients
@@ -38,3 +41,6 @@ export type ClientSort = {
   field: keyof Client | '';
   direction: 'asc' | 'desc';
 };
+
+// Export clientType to be used in components
+export type ClientType = string;
