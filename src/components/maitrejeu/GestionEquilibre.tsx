@@ -1,417 +1,208 @@
 
 import React, { useState } from 'react';
-import { Button } from '@/components/ui/button';
-import { Label } from '@/components/ui/label';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Slider } from '@/components/ui/slider';
-import { Input } from '@/components/ui/input';
-import { 
-  Select, 
-  SelectContent, 
-  SelectItem, 
-  SelectTrigger, 
-  SelectValue 
-} from '@/components/ui/select';
-import { useToast } from '@/components/ui/use-toast';
-import { Scale, RefreshCw, TrendingUp, TrendingDown, ArrowRightLeft, Save } from 'lucide-react';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { formatMoney, formatSignedMoney, formatSignedPercent } from '@/utils/formatUtils';
+import { Button } from '@/components/ui/button';
+import { AlertTriangle, History, RotateCw } from 'lucide-react';
+import { useMaitreJeu } from './context/MaitreJeuContext';
+import { EquilibreBarChart } from './components/EquilibreBarChart';
 import { AlertMessage } from '@/components/ui-custom/AlertMessage';
-import { StatBox } from '@/components/ui-custom/StatBox';
+import { EvenementsList } from './components/EvenementsList';
+import { CreateEvenementForm } from './components/CreateEvenementForm';
 
 export const GestionEquilibre: React.FC = () => {
-  const [activeTab, setActiveTab] = useState<string>('economic');
-  const { toast } = useToast();
-
-  const handleSaveBalancing = () => {
-    toast({
-      title: "Paramètres sauvegardés",
-      description: "Les ajustements d'équilibrage ont été appliqués",
-    });
+  const { 
+    stabiliteSenat, 
+    stabilitePopulaire, 
+    stabiliteMilitaire,
+    updateEquilibre,
+    evenements,
+    triggerRandomEvent
+  } = useMaitreJeu();
+  
+  const [ajustementSenat, setAjustementSenat] = useState(0);
+  const [ajustementPopulaire, setAjustementPopulaire] = useState(0);
+  const [ajustementMilitaire, setAjustementMilitaire] = useState(0);
+  
+  const handleResetAdjustments = () => {
+    setAjustementSenat(0);
+    setAjustementPopulaire(0);
+    setAjustementMilitaire(0);
   };
-
+  
+  const handleApplyAdjustments = () => {
+    if (ajustementSenat !== 0) updateEquilibre('senat', ajustementSenat);
+    if (ajustementPopulaire !== 0) updateEquilibre('populaire', ajustementPopulaire);
+    if (ajustementMilitaire !== 0) updateEquilibre('militaire', ajustementMilitaire);
+    handleResetAdjustments();
+  };
+  
+  // Vérifier les niveaux critiques de stabilité
+  const isSenatCritical = stabiliteSenat < 20 || stabiliteSenat > 80;
+  const isPopulaireCritical = stabilitePopulaire < 20 || stabilitePopulaire > 80;
+  const isMilitaireCritical = stabiliteMilitaire < 20 || stabiliteMilitaire > 80;
+  
   return (
     <div className="space-y-6">
-      <Tabs defaultValue="economic" value={activeTab} onValueChange={setActiveTab} className="w-full">
-        <TabsList className="grid w-full grid-cols-3">
-          <TabsTrigger value="economic" className="flex items-center gap-1">
-            <TrendingUp className="h-4 w-4" />
-            Économie
-          </TabsTrigger>
-          <TabsTrigger value="political" className="flex items-center gap-1">
-            <ArrowRightLeft className="h-4 w-4" />
-            Politique
-          </TabsTrigger>
-          <TabsTrigger value="military" className="flex items-center gap-1">
-            <TrendingDown className="h-4 w-4" />
-            Militaire
-          </TabsTrigger>
-        </TabsList>
-
-        {/* Économie */}
-        <TabsContent value="economic" className="space-y-4 pt-4">
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-            <StatBox
-              title="Prix des céréales"
-              value="120 As"
-              description="Par modius"
-              trend="up"
-              trendValue="15%"
-            />
-            
-            <StatBox
-              title="Impôts collectés"
-              value="1.2M As"
-              description="Dernier trimestre"
-              trend="neutral"
-              trendValue="2%"
-            />
-            
-            <StatBox
-              title="Déficit public"
-              value="450K As"
-              description="Tendance annuelle"
-              trend="down"
-              trendValue="8%"
-            />
-          </div>
-
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
-            <div className="bg-white p-5 rounded-md border border-rome-gold/30">
-              <h3 className="font-cinzel text-lg mb-4">Ajustement des prix</h3>
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {/* Graphique d'équilibre */}
+        <Card className="lg:col-span-2">
+          <CardHeader>
+            <CardTitle className="text-lg">Équilibre de la République</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="h-72">
+              <EquilibreBarChart 
+                senat={stabiliteSenat}
+                populaire={stabilitePopulaire}
+                militaire={stabiliteMilitaire}
+              />
+            </div>
+          </CardContent>
+        </Card>
+        
+        {/* Ajustements manuels */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-lg">Ajustements manuels</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-6">
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <div className="flex justify-between items-center">
+                  <span className="text-sm font-medium">Sénat ({ajustementSenat > 0 ? '+' : ''}{ajustementSenat})</span>
+                  <span className={`text-sm font-semibold ${isSenatCritical ? 'text-amber-500' : 'text-green-500'}`}>
+                    {stabiliteSenat}%
+                  </span>
+                </div>
+                <Slider 
+                  value={[ajustementSenat]} 
+                  min={-20} 
+                  max={20} 
+                  step={1} 
+                  onValueChange={(val) => setAjustementSenat(val[0])}
+                />
+              </div>
               
-              <div className="space-y-4">
-                <div className="space-y-2">
-                  <div className="flex justify-between">
-                    <Label htmlFor="grain-price">Prix des céréales</Label>
-                    <span className="text-sm font-medium">120 As</span>
-                  </div>
-                  <Slider defaultValue={[120]} max={250} min={50} step={5} />
-                  <div className="flex justify-between text-xs text-muted-foreground">
-                    <span>50 As</span>
-                    <span>250 As</span>
-                  </div>
+              <div className="space-y-2">
+                <div className="flex justify-between items-center">
+                  <span className="text-sm font-medium">Populaire ({ajustementPopulaire > 0 ? '+' : ''}{ajustementPopulaire})</span>
+                  <span className={`text-sm font-semibold ${isPopulaireCritical ? 'text-amber-500' : 'text-green-500'}`}>
+                    {stabilitePopulaire}%
+                  </span>
                 </div>
-                
-                <div className="space-y-2">
-                  <div className="flex justify-between">
-                    <Label htmlFor="luxury-price">Prix des biens de luxe</Label>
-                    <span className="text-sm font-medium">1,500 As</span>
-                  </div>
-                  <Slider defaultValue={[1500]} max={3000} min={500} step={100} />
-                  <div className="flex justify-between text-xs text-muted-foreground">
-                    <span>500 As</span>
-                    <span>3,000 As</span>
-                  </div>
+                <Slider 
+                  value={[ajustementPopulaire]} 
+                  min={-20} 
+                  max={20} 
+                  step={1} 
+                  onValueChange={(val) => setAjustementPopulaire(val[0])}
+                />
+              </div>
+              
+              <div className="space-y-2">
+                <div className="flex justify-between items-center">
+                  <span className="text-sm font-medium">Militaire ({ajustementMilitaire > 0 ? '+' : ''}{ajustementMilitaire})</span>
+                  <span className={`text-sm font-semibold ${isMilitaireCritical ? 'text-amber-500' : 'text-green-500'}`}>
+                    {stabiliteMilitaire}%
+                  </span>
                 </div>
-                
-                <div className="space-y-2">
-                  <div className="flex justify-between">
-                    <Label htmlFor="land-value">Valeur des terres</Label>
-                    <span className="text-sm font-medium">5,000 As/jugère</span>
-                  </div>
-                  <Slider defaultValue={[5000]} max={10000} min={1000} step={500} />
-                  <div className="flex justify-between text-xs text-muted-foreground">
-                    <span>1,000 As</span>
-                    <span>10,000 As</span>
-                  </div>
-                </div>
+                <Slider 
+                  value={[ajustementMilitaire]} 
+                  min={-20} 
+                  max={20} 
+                  step={1} 
+                  onValueChange={(val) => setAjustementMilitaire(val[0])}
+                />
               </div>
             </div>
             
-            <div className="bg-white p-5 rounded-md border border-rome-gold/30">
-              <h3 className="font-cinzel text-lg mb-4">Taux d'imposition</h3>
-              
-              <div className="space-y-4">
-                <div className="space-y-2">
-                  <div className="flex justify-between">
-                    <Label htmlFor="tributum">Tributum (impôt sur le patrimoine)</Label>
-                    <span className="text-sm font-medium">3%</span>
-                  </div>
-                  <Slider defaultValue={[3]} max={10} min={1} step={0.5} />
-                  <div className="flex justify-between text-xs text-muted-foreground">
-                    <span>1%</span>
-                    <span>10%</span>
-                  </div>
-                </div>
-                
-                <div className="space-y-2">
-                  <div className="flex justify-between">
-                    <Label htmlFor="portorium">Portorium (douanes)</Label>
-                    <span className="text-sm font-medium">5%</span>
-                  </div>
-                  <Slider defaultValue={[5]} max={15} min={2} step={1} />
-                  <div className="flex justify-between text-xs text-muted-foreground">
-                    <span>2%</span>
-                    <span>15%</span>
-                  </div>
-                </div>
-                
-                <div className="space-y-2">
-                  <div className="flex justify-between">
-                    <Label htmlFor="vicesima">Vicesima libertatis (affranchissement)</Label>
-                    <span className="text-sm font-medium">5%</span>
-                  </div>
-                  <Slider defaultValue={[5]} max={10} min={1} step={1} />
-                  <div className="flex justify-between text-xs text-muted-foreground">
-                    <span>1%</span>
-                    <span>10%</span>
-                  </div>
-                </div>
-              </div>
+            <div className="flex gap-2">
+              <Button
+                variant="outline"
+                onClick={handleResetAdjustments}
+                className="flex-1"
+              >
+                <RotateCw className="h-4 w-4 mr-2" />
+                Réinitialiser
+              </Button>
+              <Button
+                onClick={handleApplyAdjustments}
+                className="flex-1"
+                disabled={ajustementSenat === 0 && ajustementPopulaire === 0 && ajustementMilitaire === 0}
+              >
+                Appliquer
+              </Button>
             </div>
-          </div>
-        </TabsContent>
-
-        {/* Politique */}
-        <TabsContent value="political" className="space-y-4 pt-4">
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-            <StatBox
-              title="Stabilité du Sénat"
-              value="68%"
-              description="Consensus politique"
-              trend="down"
-              trendValue="7%"
-            />
-            
-            <StatBox
-              title="Popularité du Consul"
-              value="72%"
-              description="Auprès du peuple"
-              trend="up"
-              trendValue="5%"
-            />
-            
-            <StatBox
-              title="Équilibre des factions"
-              value="3:2:1"
-              description="Populares:Optimates:Neutres"
-              trend="neutral"
-              trendValue="stable"
-            />
-          </div>
-
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
-            <div className="bg-white p-5 rounded-md border border-rome-gold/30">
-              <h3 className="font-cinzel text-lg mb-4">Influence des factions</h3>
-              
-              <div className="space-y-4">
-                <div className="space-y-2">
-                  <div className="flex justify-between">
-                    <Label htmlFor="populares">Influence des Populares</Label>
-                    <span className="text-sm font-medium">45%</span>
-                  </div>
-                  <Slider defaultValue={[45]} max={80} min={20} step={5} />
-                  <div className="flex justify-between text-xs text-muted-foreground">
-                    <span>Faible (20%)</span>
-                    <span>Dominante (80%)</span>
-                  </div>
-                </div>
-                
-                <div className="space-y-2">
-                  <div className="flex justify-between">
-                    <Label htmlFor="optimates">Influence des Optimates</Label>
-                    <span className="text-sm font-medium">35%</span>
-                  </div>
-                  <Slider defaultValue={[35]} max={80} min={20} step={5} />
-                  <div className="flex justify-between text-xs text-muted-foreground">
-                    <span>Faible (20%)</span>
-                    <span>Dominante (80%)</span>
-                  </div>
-                </div>
-                
-                <div className="space-y-2">
-                  <div className="flex justify-between">
-                    <Label htmlFor="neutrals">Influence des Modérés</Label>
-                    <span className="text-sm font-medium">20%</span>
-                  </div>
-                  <Slider defaultValue={[20]} max={50} min={5} step={5} />
-                  <div className="flex justify-between text-xs text-muted-foreground">
-                    <span>Minoritaire (5%)</span>
-                    <span>Équilibrée (50%)</span>
-                  </div>
-                </div>
-              </div>
-            </div>
-            
-            <div className="bg-white p-5 rounded-md border border-rome-gold/30">
-              <h3 className="font-cinzel text-lg mb-4">Équilibre des pouvoirs</h3>
-              
-              <div className="space-y-4">
-                <div className="space-y-2">
-                  <div className="flex justify-between">
-                    <Label htmlFor="senate-power">Pouvoir du Sénat</Label>
-                    <span className="text-sm font-medium">65%</span>
-                  </div>
-                  <Slider defaultValue={[65]} max={90} min={30} step={5} />
-                  <div className="flex justify-between text-xs text-muted-foreground">
-                    <span>Faible</span>
-                    <span>Absolu</span>
-                  </div>
-                </div>
-                
-                <div className="space-y-2">
-                  <div className="flex justify-between">
-                    <Label htmlFor="tribunes-power">Pouvoir des Tribuns</Label>
-                    <span className="text-sm font-medium">40%</span>
-                  </div>
-                  <Slider defaultValue={[40]} max={70} min={10} step={5} />
-                  <div className="flex justify-between text-xs text-muted-foreground">
-                    <span>Symbolique</span>
-                    <span>Prépondérant</span>
-                  </div>
-                </div>
-                
-                <div className="space-y-2">
-                  <div className="flex justify-between">
-                    <Label htmlFor="equites-influence">Influence des Chevaliers</Label>
-                    <span className="text-sm font-medium">35%</span>
-                  </div>
-                  <Slider defaultValue={[35]} max={60} min={10} step={5} />
-                  <div className="flex justify-between text-xs text-muted-foreground">
-                    <span>Marginale</span>
-                    <span>Décisive</span>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </TabsContent>
-
-        {/* Militaire */}
-        <TabsContent value="military" className="space-y-4 pt-4">
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-            <StatBox
-              title="Force militaire"
-              value="8 légions"
-              description="Effectifs actifs"
-              trend="up"
-              trendValue="+1"
-            />
-            
-            <StatBox
-              title="Budget militaire"
-              value="2.4M As"
-              description="Annuel"
-              trend="up"
-              trendValue="12%"
-            />
-            
-            <StatBox
-              title="Victoires militaires"
-              value="3"
-              description="Année en cours"
-              trend="neutral"
-              trendValue="=0"
-            />
-          </div>
-
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
-            <div className="bg-white p-5 rounded-md border border-rome-gold/30">
-              <h3 className="font-cinzel text-lg mb-4">Forces militaires</h3>
-              
-              <div className="space-y-4">
-                <div className="space-y-2">
-                  <div className="flex justify-between">
-                    <Label htmlFor="legions-number">Nombre de légions</Label>
-                    <span className="text-sm font-medium">8</span>
-                  </div>
-                  <Slider defaultValue={[8]} max={15} min={4} step={1} />
-                  <div className="flex justify-between text-xs text-muted-foreground">
-                    <span>4 légions</span>
-                    <span>15 légions</span>
-                  </div>
-                </div>
-                
-                <div className="space-y-2">
-                  <div className="flex justify-between">
-                    <Label htmlFor="auxiliaries">Troupes auxiliaires</Label>
-                    <span className="text-sm font-medium">15,000 hommes</span>
-                  </div>
-                  <Slider defaultValue={[15]} max={30} min={5} step={1} />
-                  <div className="flex justify-between text-xs text-muted-foreground">
-                    <span>5,000</span>
-                    <span>30,000</span>
-                  </div>
-                </div>
-                
-                <div className="space-y-2">
-                  <div className="flex justify-between">
-                    <Label htmlFor="naval-power">Puissance navale</Label>
-                    <span className="text-sm font-medium">120 navires</span>
-                  </div>
-                  <Slider defaultValue={[120]} max={200} min={50} step={10} />
-                  <div className="flex justify-between text-xs text-muted-foreground">
-                    <span>50 navires</span>
-                    <span>200 navires</span>
-                  </div>
-                </div>
-              </div>
-            </div>
-            
-            <div className="bg-white p-5 rounded-md border border-rome-gold/30">
-              <h3 className="font-cinzel text-lg mb-4">Difficultés des campagnes</h3>
-              
-              <div className="space-y-4">
-                <div className="space-y-2">
-                  <Label htmlFor="campaign-difficulty">Difficulté moyenne</Label>
-                  <Select defaultValue="medium">
-                    <SelectTrigger>
-                      <SelectValue placeholder="Sélectionner la difficulté" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="very-easy">Très facile</SelectItem>
-                      <SelectItem value="easy">Facile</SelectItem>
-                      <SelectItem value="medium">Moyenne</SelectItem>
-                      <SelectItem value="hard">Difficile</SelectItem>
-                      <SelectItem value="very-hard">Très difficile</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-                
-                <div className="space-y-2">
-                  <div className="flex justify-between">
-                    <Label htmlFor="enemy-strength">Force des ennemis</Label>
-                    <span className="text-sm font-medium">65%</span>
-                  </div>
-                  <Slider defaultValue={[65]} max={100} min={30} step={5} />
-                  <div className="flex justify-between text-xs text-muted-foreground">
-                    <span>Faible</span>
-                    <span>Maximale</span>
-                  </div>
-                </div>
-                
-                <div className="space-y-2">
-                  <div className="flex justify-between">
-                    <Label htmlFor="triumph-threshold">Seuil de triomphe</Label>
-                    <span className="text-sm font-medium">5,000 ennemis</span>
-                  </div>
-                  <Slider defaultValue={[5]} max={10} min={1} step={1} />
-                  <div className="flex justify-between text-xs text-muted-foreground">
-                    <span>1,000</span>
-                    <span>10,000</span>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </TabsContent>
-      </Tabs>
-
-      <div className="flex justify-end pt-4 border-t border-muted">
-        <Button 
-          className="gap-2"
-          onClick={handleSaveBalancing}
-        >
-          <Save className="h-4 w-4" />
-          Enregistrer les ajustements
-        </Button>
+          </CardContent>
+        </Card>
       </div>
-
-      <AlertMessage
-        type="warning"
-        title="Impact sur l'équilibre du jeu"
-        message="Ces ajustements peuvent avoir un impact significatif sur l'expérience des joueurs. Utilisez-les avec précaution."
-      />
+      
+      {/* Alertes de stabilité */}
+      {(isSenatCritical || isPopulaireCritical || isMilitaireCritical) && (
+        <div className="space-y-3">
+          {isSenatCritical && (
+            <AlertMessage
+              type="warning"
+              title="Instabilité du Sénat"
+              message={stabiliteSenat < 20 
+                ? "Le Sénat manque de stabilité et pourrait céder à des pressions extérieures."
+                : "Le Sénat est trop puissant et pourrait provoquer des réactions populaires."}
+            />
+          )}
+          
+          {isPopulaireCritical && (
+            <AlertMessage
+              type="warning"
+              title="Instabilité populaire"
+              message={stabilitePopulaire < 20 
+                ? "Le peuple est mécontent et des troubles civils risquent d'éclater."
+                : "Le peuple devient trop puissant, ce qui inquiète les élites."}
+            />
+          )}
+          
+          {isMilitaireCritical && (
+            <AlertMessage
+              type="warning"
+              title="Instabilité militaire"
+              message={stabiliteMilitaire < 20 
+                ? "L'armée est affaiblie et Rome est vulnérable aux attaques extérieures."
+                : "Les généraux ont trop de pouvoir et pourraient menacer l'autorité civile."}
+            />
+          )}
+        </div>
+      )}
+      
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* Liste des événements */}
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between">
+            <CardTitle className="text-lg">Événements en cours</CardTitle>
+            <Button 
+              variant="outline" 
+              size="sm" 
+              onClick={triggerRandomEvent}
+              className="text-xs"
+            >
+              <History className="h-4 w-4 mr-1" /> 
+              Événement aléatoire
+            </Button>
+          </CardHeader>
+          <CardContent>
+            <EvenementsList events={evenements} />
+          </CardContent>
+        </Card>
+        
+        {/* Création d'événement */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-lg">Créer un événement</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <CreateEvenementForm />
+          </CardContent>
+        </Card>
+      </div>
     </div>
   );
 };

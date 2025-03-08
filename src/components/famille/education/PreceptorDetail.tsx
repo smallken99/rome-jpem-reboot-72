@@ -1,166 +1,141 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useParams, useSearchParams } from 'react-router-dom';
-import { ActionButton } from '@/components/ui-custom/ActionButton';
-import { Card, CardContent } from '@/components/ui/card';
-import { ArrowLeft } from 'lucide-react';
 import { PreceptorHeader } from './components/PreceptorHeader';
+import { PreceptorQualityStars } from './components/PreceptorQualityStars';
 import { PreceptorSpeciality } from './components/PreceptorSpeciality';
-import { PreceptorCostInfo } from './components/PreceptorCostInfo';
 import { PreceptorBiography } from './components/PreceptorBiography';
+import { PreceptorCostInfo } from './components/PreceptorCostInfo';
 import { PreceptorActions } from './components/PreceptorActions';
-import { PreceptorLoading } from './components/PreceptorLoading';
 import { PreceptorNotFound } from './components/PreceptorNotFound';
+import { PreceptorLoading } from './components/PreceptorLoading';
 import { useEducation } from './context/EducationContext';
-import { Preceptor } from './types/educationTypes';
 import { useNavigate } from 'react-router-dom';
+import { Preceptor } from './types/educationTypes';
 
 export const PreceptorDetail: React.FC = () => {
   const { preceptorId } = useParams<{ preceptorId: string }>();
   const [searchParams] = useSearchParams();
   const childId = searchParams.get('childId');
-  const educationType = searchParams.get('type');
   const navigate = useNavigate();
   
-  const {
-    preceptors,
+  const { 
+    preceptors, 
     hirePreceptor,
-    assignPreceptorToChild,
-    hiringInProgress
+    hiredPreceptors,
+    refreshPreceptors 
   } = useEducation();
   
+  // État pour le précepteur sélectionné
   const [preceptor, setPreceptor] = useState<Preceptor | null>(null);
   const [loading, setLoading] = useState(true);
+  const [hiring, setHiring] = useState(false);
   
-  // Find preceptor from all preceptors by id or from URL parameters
   useEffect(() => {
-    setLoading(true);
-    
-    // Create a flat array of all preceptors
-    const allPreceptors: Preceptor[] = [];
-    
-    // Look through all education types
-    Object.entries(preceptors).forEach(([type, typePreceptors]) => {
-      // Only include preceptors of the requested education type if specified
-      if (!educationType || type === educationType) {
-        allPreceptors.push(...typePreceptors);
-      }
-    });
-    
-    // Find the preceptor by ID
-    const foundPreceptor = preceptorId 
-      ? allPreceptors.find(p => p.id === preceptorId)
-      : null;
-    
-    if (foundPreceptor) {
-      // Create a more detailed preceptor object for display
-      setPreceptor({
-        ...foundPreceptor,
-        // Add additional fields for the UI
-        type: educationType || determineEducationType(foundPreceptor.speciality),
-        cost: foundPreceptor.fee,
-        available: true, // Assume available by default
-        background: `Précepteur expérimenté spécialisé en ${foundPreceptor.speciality}. ${
-          foundPreceptor.reputation === 'Excellent' 
-            ? 'Reconnu comme l\'un des meilleurs dans son domaine.'
-            : foundPreceptor.reputation === 'Bon'
-            ? 'Jouissant d\'une bonne réputation parmi ses pairs.'
-            : 'De réputation correcte dans sa discipline.'
-        }`
-      });
+    // Assurons-nous que les précepteurs sont chargés
+    if (Object.keys(preceptors).length === 0) {
+      refreshPreceptors();
     }
     
-    setLoading(false);
-  }, [preceptorId, preceptors, educationType]);
+    // Simulons un chargement
+    const timer = setTimeout(() => setLoading(false), 800);
+    return () => clearTimeout(timer);
+  }, [preceptors, refreshPreceptors]);
   
-  // Helper to determine education type from specialty
-  const determineEducationType = (specialty: string): string => {
-    const specialty_lower = specialty.toLowerCase();
-    
-    if (specialty_lower.includes('tactique') || specialty_lower.includes('militaire')) 
-      return 'military';
-    if (specialty_lower.includes('rhétorique') || specialty_lower.includes('politique')) 
-      return 'political';
-    if (specialty_lower.includes('rituel') || specialty_lower.includes('religieux')) 
-      return 'religious';
-    if (specialty_lower.includes('commerce') || specialty_lower.includes('économie')) 
-      return 'commercial';
-    
-    return 'political'; // Default to political education
-  };
+  useEffect(() => {
+    if (!loading && preceptorId) {
+      // Cherchons d'abord parmi les précepteurs embauchés
+      const hiredPreceptor = hiredPreceptors.find(p => p.id === preceptorId);
+      if (hiredPreceptor) {
+        setPreceptor(hiredPreceptor);
+        return;
+      }
+      
+      // Sinon, chercher dans tous les types de précepteurs disponibles
+      let foundPreceptor: Preceptor | null = null;
+      
+      Object.values(preceptors).forEach(preceptorList => {
+        const found = preceptorList.find(p => p.id === preceptorId);
+        if (found) {
+          foundPreceptor = found;
+        }
+      });
+      
+      setPreceptor(foundPreceptor);
+    }
+  }, [preceptorId, preceptors, hiredPreceptors, loading]);
   
-  // Handle hiring the preceptor
+  // Gérer l'embauche du précepteur
   const handleHire = () => {
     if (!preceptor) return;
     
+    setHiring(true);
+    
     const success = hirePreceptor(preceptor, childId || undefined);
     
-    // If we have a child ID, also assign the preceptor to that child
-    if (success && childId) {
-      assignPreceptorToChild(preceptor.id, childId);
-      
-      // Navigate back to child education page
+    if (success) {
+      // Rediriger après un court délai pour donner l'impression d'un processus
       setTimeout(() => {
-        navigate(`/famille/education/child/${childId}`);
+        setHiring(false);
+        
+        // Rediriger vers la page de détail de l'enfant si un enfant était spécifié
+        if (childId) {
+          navigate(`/famille/education/child/${childId}`);
+        } else {
+          navigate('/famille/education');
+        }
       }, 1500);
-    } else if (success) {
-      // Navigate back to preceptors list
-      setTimeout(() => {
-        navigate('/famille/education/preceptors');
-      }, 1500);
+    } else {
+      setHiring(false);
     }
   };
   
-  // Afficher un message de chargement pendant la recherche
+  // Afficher un chargement pendant la recherche du précepteur
   if (loading) {
     return <PreceptorLoading />;
   }
   
-  // Si aucun précepteur n'est trouvé
+  // Si le précepteur n'a pas été trouvé
   if (!preceptor) {
     return <PreceptorNotFound />;
   }
   
   return (
-    <div className="space-y-6">
-      <div className="flex justify-between items-center">
-        <h2 className="text-2xl font-cinzel font-medium">Détails du Précepteur</h2>
-        <ActionButton 
-          label="Retour aux précepteurs" 
-          to="/famille/education/preceptors"
-          variant="outline"
-          icon={<ArrowLeft className="h-4 w-4" />}
-        />
-      </div>
+    <div className="preceptor-detail space-y-6">
+      {/* En-tête avec le nom du précepteur */}
+      <PreceptorHeader 
+        name={preceptor.name} 
+        reputation={preceptor.reputation}
+      />
       
-      <Card className="border-rome-gold/30">
-        <PreceptorHeader preceptor={preceptor} />
-        
-        <CardContent className="p-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-            <PreceptorSpeciality 
-              type={preceptor.type} 
-              specialty={preceptor.speciality} 
-            />
-            
-            <PreceptorCostInfo 
-              cost={preceptor.cost} 
-              available={preceptor.available} 
-            />
-          </div>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="space-y-6">
+          {/* Qualité du précepteur (étoiles) */}
+          <PreceptorQualityStars quality={preceptor.quality} />
           
+          {/* Spécialité du précepteur */}
+          <PreceptorSpeciality speciality={preceptor.speciality} />
+          
+          {/* Biographie du précepteur */}
           <PreceptorBiography background={preceptor.background} />
-          
-          <PreceptorActions 
+        </div>
+        
+        <div className="space-y-6">
+          {/* Informations sur le coût */}
+          <PreceptorCostInfo 
             cost={preceptor.cost} 
-            available={preceptor.available && !hiringInProgress} 
-            onHire={handleHire}
-            isHiring={hiringInProgress}
+            available={preceptor.available}
           />
-        </CardContent>
-      </Card>
+          
+          {/* Actions (embaucher, retour) */}
+          <PreceptorActions 
+            cost={preceptor.cost}
+            available={preceptor.available}
+            onHire={handleHire}
+            isHiring={hiring}
+          />
+        </div>
+      </div>
     </div>
   );
 };
-
-export default PreceptorDetail;

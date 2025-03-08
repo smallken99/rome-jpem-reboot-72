@@ -1,69 +1,66 @@
+
 import React, { useState } from 'react';
-import { Tabs, TabsContent } from '@/components/ui/tabs';
-import PropertyManagementHeader from './property-management/PropertyManagementHeader';
-import { RuralPropertiesTab } from './property-management/RuralPropertiesTab';
-// Fix import by importing default export
-import UrbanPropertiesTab from './property-management/UrbanPropertiesTab';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { PropertyManagementHeader } from './property-management/PropertyManagementHeader';
 import { MonetaryManagementTab } from './property-management/MonetaryManagementTab';
-import { MaintenanceTab } from './property-management/MaintenanceTab';
-import { SlaveManagementTab } from './property-management/SlaveManagementTab';
+import { RuralPropertiesTab } from './property-management/RuralPropertiesTab';
+import { UrbanPropertiesTab } from './property-management/UrbanPropertiesTab';
 import { ProfitabilityTab } from './property-management/profitability/ProfitabilityTab';
+import { SlaveManagementTab } from './property-management/SlaveManagementTab';
+import { MaintenanceTab } from './property-management/MaintenanceTab';
 
-const PropertyManagement = () => {
-  const [activeTab, setActiveTab] = useState("urban");
-
+const PropertyManagement: React.FC = () => {
+  const [activeTab, setActiveTab] = useState('urbain');
+  
   return (
-    <div className="property-management">
+    <div className="space-y-6">
       <PropertyManagementHeader />
       
-      <Tabs value={activeTab} onValueChange={setActiveTab} className="mt-6">
-        <div className="overflow-x-auto">
-          <div className="w-full flex items-center justify-start space-x-4 py-2 border-b">
-            <button
-              className={`px-4 py-2 rounded-md text-sm font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 data-[state=active]:bg-secondary data-[state=active]:text-secondary-foreground ${activeTab === 'urban' ? 'bg-secondary text-secondary-foreground' : 'hover:bg-muted'}`}
-              onClick={() => setActiveTab("urban")}
-            >
-              Propriétés Urbaines
-            </button>
-            <button
-              className={`px-4 py-2 rounded-md text-sm font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 data-[state=active]:bg-secondary data-[state=active]:text-secondary-foreground ${activeTab === 'rural' ? 'bg-secondary text-secondary-foreground' : 'hover:bg-muted'}`}
-              onClick={() => setActiveTab("rural")}
-            >
-              Propriétés Rurales
-            </button>
-            <button
-              className={`px-4 py-2 rounded-md text-sm font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 data-[state=active]:bg-secondary data-[state=active]:text-secondary-foreground ${activeTab === 'monetary' ? 'bg-secondary text-secondary-foreground' : 'hover:bg-muted'}`}
-              onClick={() => setActiveTab("monetary")}
-            >
-              Gestion Monétaire
-            </button>
-            <button
-              className={`px-4 py-2 rounded-md text-sm font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 data-[state=active]:bg-secondary data-[state=active]:text-secondary-foreground ${activeTab === 'maintenance' ? 'bg-secondary text-secondary-foreground' : 'hover:bg-muted'}`}
-              onClick={() => setActiveTab("maintenance")}
-            >
-              Maintenance
-            </button>
-            <button
-              className={`px-4 py-2 rounded-md text-sm font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 data-[state=active]:bg-secondary data-[state=active]:text-secondary-foreground ${activeTab === 'slaves' ? 'bg-secondary text-secondary-foreground' : 'hover:bg-muted'}`}
-              onClick={() => setActiveTab("slaves")}
-            >
-              Esclaves
-            </button>
-            <button
-              className={`px-4 py-2 rounded-md text-sm font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 data-[state=active]:bg-secondary data-[state=active]:text-secondary-foreground ${activeTab === 'profitability' ? 'bg-secondary text-secondary-foreground' : 'hover:bg-muted'}`}
-              onClick={() => setActiveTab("profitability")}
-            >
-              Rentabilité
-            </button>
+      <Tabs 
+        defaultValue="urbain" 
+        value={activeTab} 
+        onValueChange={setActiveTab}
+        className="w-full"
+      >
+        <TabsList className="grid grid-cols-3 md:grid-cols-7 w-full mb-8">
+          <TabsTrigger value="urbain" className="text-xs md:text-sm">Propriétés urbaines</TabsTrigger>
+          <TabsTrigger value="rural" className="text-xs md:text-sm">Propriétés rurales</TabsTrigger>
+          <TabsTrigger value="esclaves" className="text-xs md:text-sm">Esclaves</TabsTrigger>
+          <TabsTrigger value="monetaire" className="text-xs md:text-sm">Gestion monétaire</TabsTrigger>
+          <TabsTrigger value="entretien" className="text-xs md:text-sm">Entretien</TabsTrigger>
+          <TabsTrigger value="profitabilite" className="text-xs md:text-sm">Profitabilité</TabsTrigger>
+          <TabsTrigger value="expansion" className="text-xs md:text-sm">Expansion</TabsTrigger>
+        </TabsList>
+        
+        <TabsContent value="urbain">
+          <UrbanPropertiesTab />
+        </TabsContent>
+        
+        <TabsContent value="rural">
+          <RuralPropertiesTab />
+        </TabsContent>
+        
+        <TabsContent value="esclaves">
+          <SlaveManagementTab />
+        </TabsContent>
+        
+        <TabsContent value="monetaire">
+          <MonetaryManagementTab />
+        </TabsContent>
+        
+        <TabsContent value="entretien">
+          <MaintenanceTab />
+        </TabsContent>
+        
+        <TabsContent value="profitabilite">
+          <ProfitabilityTab />
+        </TabsContent>
+        
+        <TabsContent value="expansion">
+          <div className="text-center py-12 text-muted-foreground italic">
+            Module d'expansion en cours de développement
           </div>
-        </div>
-
-        <UrbanPropertiesTab />
-        <RuralPropertiesTab />
-        <MonetaryManagementTab />
-        <MaintenanceTab />
-        <SlaveManagementTab />
-        <ProfitabilityTab />
+        </TabsContent>
       </Tabs>
     </div>
   );

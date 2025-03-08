@@ -1,119 +1,137 @@
 
 import React from 'react';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
+import { DotsHorizontalIcon } from '@radix-ui/react-icons';
+import { 
+  DropdownMenu, 
+  DropdownMenuContent, 
+  DropdownMenuItem, 
+  DropdownMenuSeparator, 
+  DropdownMenuTrigger 
 } from '@/components/ui/dropdown-menu';
 import { Button } from '@/components/ui/button';
-import { MoreHorizontal, Shield, ShieldOff, UserCheck, UserX, Trash2, Mail } from 'lucide-react';
-import { useAdmin } from '../../context/AdminContext';
 import { User } from '../../types/adminTypes';
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from '@/components/ui/alert-dialog';
+import { Edit, Trash2, ShieldAlert, ShieldCheck, User as UserIcon, UserX } from 'lucide-react';
+import { toast } from 'sonner';
+import { useAdmin } from '../../context/AdminContext';
 
 interface UserActionsMenuProps {
   user: User;
 }
 
 export const UserActionsMenu: React.FC<UserActionsMenuProps> = ({ user }) => {
-  const [showDeleteDialog, setShowDeleteDialog] = React.useState(false);
   const { deleteUser, toggleUserStatus, promoteDemoteUser } = useAdmin();
   
-  const handleDelete = async () => {
-    await deleteUser(user.id);
-    setShowDeleteDialog(false);
+  const handleDeleteUser = async () => {
+    if (window.confirm(`Êtes-vous sûr de vouloir supprimer l'utilisateur ${user.name} ?`)) {
+      const success = await deleteUser(user.id);
+      if (success) {
+        toast.success(`L'utilisateur ${user.name} a été supprimé.`);
+      } else {
+        toast.error(`Impossible de supprimer l'utilisateur ${user.name}.`);
+      }
+    }
   };
   
   const handleToggleStatus = async () => {
-    await toggleUserStatus(user.id, user.status !== 'active');
+    const newStatus = user.status === 'active' ? 'inactive' : 'active';
+    const success = await toggleUserStatus(user.id, newStatus === 'active');
+    if (success) {
+      toast.success(`Le statut de ${user.name} a été changé en "${newStatus}".`);
+    } else {
+      toast.error(`Impossible de changer le statut de ${user.name}.`);
+    }
   };
   
-  const handlePromoteDemote = async (role: string) => {
-    await promoteDemoteUser(user.id, role);
+  const handleChangeRole = async (newRole: string) => {
+    // On ne veut pas que l'utilisateur puisse changer son propre rôle
+    if (user.id === 'current-user-id') { // Remplacez par la logique pour détecter l'utilisateur actuel
+      toast.error("Vous ne pouvez pas changer votre propre rôle.");
+      return;
+    }
+    
+    const success = await promoteDemoteUser(user.id, newRole);
+    if (success) {
+      toast.success(`Le rôle de ${user.name} a été changé en "${newRole}".`);
+    } else {
+      toast.error(`Impossible de changer le rôle de ${user.name}.`);
+    }
   };
   
   return (
-    <>
-      <DropdownMenu>
-        <DropdownMenuTrigger asChild>
-          <Button variant="ghost" size="icon">
-            <MoreHorizontal className="h-4 w-4" />
-            <span className="sr-only">Menu</span>
-          </Button>
-        </DropdownMenuTrigger>
-        <DropdownMenuContent align="end">
-          <DropdownMenuItem onClick={() => console.log('Voir le profil')}>
-            <User className="h-4 w-4 mr-2" />
-            Voir le profil
-          </DropdownMenuItem>
-          <DropdownMenuItem onClick={() => console.log('Envoyer un message')}>
-            <Mail className="h-4 w-4 mr-2" />
-            Envoyer un message
-          </DropdownMenuItem>
-          <DropdownMenuSeparator />
-          
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <Button variant="ghost" className="h-8 w-8 p-0">
+          <DotsHorizontalIcon className="h-4 w-4" />
+          <span className="sr-only">Ouvrir le menu</span>
+        </Button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="end" className="w-[200px]">
+        <DropdownMenuItem className="flex items-center gap-2 cursor-pointer">
+          <Edit className="h-4 w-4" />
+          <span>Modifier</span>
+        </DropdownMenuItem>
+        
+        <DropdownMenuSeparator />
+        
+        {/* Rôles */}
+        <DropdownMenuItem 
+          className="flex items-center gap-2 cursor-pointer"
+          onClick={() => handleChangeRole('user')}
+          disabled={user.role === 'user'}
+        >
+          <UserIcon className="h-4 w-4" />
+          <span>Définir comme Utilisateur</span>
+        </DropdownMenuItem>
+        
+        <DropdownMenuItem 
+          className="flex items-center gap-2 cursor-pointer"
+          onClick={() => handleChangeRole('moderator')}
+          disabled={user.role === 'moderator'}
+        >
+          <ShieldCheck className="h-4 w-4" />
+          <span>Définir comme Modérateur</span>
+        </DropdownMenuItem>
+        
+        <DropdownMenuItem 
+          className="flex items-center gap-2 cursor-pointer"
+          onClick={() => handleChangeRole('admin')}
+          disabled={user.role === 'admin'}
+        >
+          <ShieldAlert className="h-4 w-4" />
+          <span>Définir comme Admin</span>
+        </DropdownMenuItem>
+        
+        <DropdownMenuSeparator />
+        
+        {/* Activer/Désactiver */}
+        <DropdownMenuItem 
+          className="flex items-center gap-2 cursor-pointer"
+          onClick={handleToggleStatus}
+        >
           {user.status === 'active' ? (
-            <DropdownMenuItem onClick={handleToggleStatus}>
-              <UserX className="h-4 w-4 mr-2" />
-              Désactiver
-            </DropdownMenuItem>
+            <>
+              <UserX className="h-4 w-4" />
+              <span>Désactiver</span>
+            </>
           ) : (
-            <DropdownMenuItem onClick={handleToggleStatus}>
-              <UserCheck className="h-4 w-4 mr-2" />
-              Activer
-            </DropdownMenuItem>
+            <>
+              <UserIcon className="h-4 w-4" />
+              <span>Activer</span>
+            </>
           )}
-          
-          {user.role === 'user' ? (
-            <DropdownMenuItem onClick={() => handlePromoteDemote('moderator')}>
-              <Shield className="h-4 w-4 mr-2" />
-              Promouvoir modérateur
-            </DropdownMenuItem>
-          ) : (
-            <DropdownMenuItem onClick={() => handlePromoteDemote('user')}>
-              <ShieldOff className="h-4 w-4 mr-2" />
-              Rétrograder
-            </DropdownMenuItem>
-          )}
-          
-          <DropdownMenuSeparator />
-          <DropdownMenuItem 
-            onClick={() => setShowDeleteDialog(true)}
-            className="text-red-500 focus:text-red-500 focus:bg-red-50"
-          >
-            <Trash2 className="h-4 w-4 mr-2" />
-            Supprimer
-          </DropdownMenuItem>
-        </DropdownMenuContent>
-      </DropdownMenu>
-      
-      <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Supprimer l'utilisateur ?</AlertDialogTitle>
-            <AlertDialogDescription>
-              Êtes-vous sûr de vouloir supprimer l'utilisateur {user.name} ? Cette action est irréversible.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Annuler</AlertDialogCancel>
-            <AlertDialogAction onClick={handleDelete} className="bg-red-500 hover:bg-red-600">
-              Supprimer
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
-    </>
+        </DropdownMenuItem>
+        
+        <DropdownMenuSeparator />
+        
+        {/* Supprimer */}
+        <DropdownMenuItem 
+          className="flex items-center gap-2 cursor-pointer text-red-600 focus:text-red-600"
+          onClick={handleDeleteUser}
+        >
+          <Trash2 className="h-4 w-4" />
+          <span>Supprimer</span>
+        </DropdownMenuItem>
+      </DropdownMenuContent>
+    </DropdownMenu>
   );
 };

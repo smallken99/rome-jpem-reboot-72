@@ -2,111 +2,121 @@
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
-import { Check, AlertTriangle, AlertCircle } from 'lucide-react';
+import { Cpu, HardDrive, Memory, Clock } from 'lucide-react';
 import { useAdmin } from '../../context/AdminContext';
+import { formatUptime } from '@/utils/formatUtils';
 
 export const SystemStatusCard: React.FC = () => {
   const { stats } = useAdmin();
   
-  if (!stats) {
+  // Vérifie si les statistiques sont disponibles
+  if (!stats || !stats.serverStats) {
     return (
-      <Card>
+      <Card className="h-full">
         <CardHeader>
-          <CardTitle>État du Système</CardTitle>
+          <CardTitle className="text-lg">État du Système</CardTitle>
         </CardHeader>
         <CardContent>
-          <p className="text-muted-foreground">Chargement des données...</p>
+          <div className="space-y-4">
+            <p className="text-muted-foreground text-sm italic">Chargement des statistiques...</p>
+          </div>
         </CardContent>
       </Card>
     );
   }
+
+  const { cpuUsage, memoryUsage, diskUsage, uptime } = stats.serverStats;
   
-  const getCpuStatus = (usage: number) => {
-    if (usage < 50) return { icon: <Check className="h-4 w-4 text-green-500" />, text: 'Normal', color: 'bg-green-500' };
-    if (usage < 80) return { icon: <AlertTriangle className="h-4 w-4 text-amber-500" />, text: 'Élevé', color: 'bg-amber-500' };
-    return { icon: <AlertCircle className="h-4 w-4 text-red-500" />, text: 'Critique', color: 'bg-red-500' };
+  const getStatusColor = (value: number) => {
+    if (value > 90) return "text-red-500";
+    if (value > 70) return "text-amber-500";
+    return "text-green-500";
   };
   
-  const getMemoryStatus = (usage: number) => {
-    if (usage < 60) return { icon: <Check className="h-4 w-4 text-green-500" />, text: 'Normal', color: 'bg-green-500' };
-    if (usage < 85) return { icon: <AlertTriangle className="h-4 w-4 text-amber-500" />, text: 'Élevé', color: 'bg-amber-500' };
-    return { icon: <AlertCircle className="h-4 w-4 text-red-500" />, text: 'Critique', color: 'bg-red-500' };
+  const getStatusClass = (value: number) => {
+    if (value > 90) return "bg-red-500";
+    if (value > 70) return "bg-amber-500";
+    return "bg-green-500";
   };
-  
-  const getDiskStatus = (usage: number) => {
-    if (usage < 70) return { icon: <Check className="h-4 w-4 text-green-500" />, text: 'Normal', color: 'bg-green-500' };
-    if (usage < 90) return { icon: <AlertTriangle className="h-4 w-4 text-amber-500" />, text: 'Attention', color: 'bg-amber-500' };
-    return { icon: <AlertCircle className="h-4 w-4 text-red-500" />, text: 'Critique', color: 'bg-red-500' };
-  };
-  
-  const formatUptime = (seconds: number) => {
-    const days = Math.floor(seconds / (24 * 3600));
-    const hours = Math.floor((seconds % (24 * 3600)) / 3600);
-    return `${days}j ${hours}h`;
-  };
-  
-  const cpuStatus = getCpuStatus(stats.serverStats.cpuUsage);
-  const memoryStatus = getMemoryStatus(stats.serverStats.memoryUsage);
-  const diskStatus = getDiskStatus(stats.serverStats.diskUsage);
-  
+
   return (
-    <Card>
+    <Card className="h-full">
       <CardHeader>
-        <CardTitle>État du Système</CardTitle>
+        <CardTitle className="text-lg">État du Système</CardTitle>
       </CardHeader>
-      <CardContent className="space-y-4">
-        <div className="space-y-2">
-          <div className="flex justify-between">
-            <div className="flex items-center">
-              <span className="text-sm font-medium">CPU</span>
+      <CardContent>
+        <div className="space-y-6">
+          {/* CPU Usage */}
+          <div className="space-y-2">
+            <div className="flex justify-between items-center">
+              <div className="flex items-center gap-2">
+                <Cpu className="h-4 w-4 text-muted-foreground" />
+                <span className="text-sm font-medium">CPU</span>
+              </div>
+              <span className={`text-sm font-medium ${getStatusColor(cpuUsage)}`}>
+                {cpuUsage.toFixed(1)}%
+              </span>
             </div>
-            <div className="flex items-center gap-2">
-              {cpuStatus.icon}
-              <span className="text-xs">{cpuStatus.text}</span>
-            </div>
+            <Progress 
+              value={cpuUsage} 
+              className="h-2 bg-muted"
+              // Utilisons une propriété compatible avec notre composant Progress
+              // Sans utiliser indicatorClassName qui n'existe pas
+              style={{ 
+                '--progress-indicator-color': getStatusClass(cpuUsage).replace('bg-', '')
+              } as React.CSSProperties}
+            />
           </div>
-          <Progress value={stats.serverStats.cpuUsage} className="h-2" indicatorClassName={cpuStatus.color} />
-          <p className="text-xs text-muted-foreground text-right">
-            {stats.serverStats.cpuUsage.toFixed(1)}%
-          </p>
-        </div>
-        
-        <div className="space-y-2">
-          <div className="flex justify-between">
-            <div className="flex items-center">
-              <span className="text-sm font-medium">Mémoire</span>
+
+          {/* Memory Usage */}
+          <div className="space-y-2">
+            <div className="flex justify-between items-center">
+              <div className="flex items-center gap-2">
+                <Memory className="h-4 w-4 text-muted-foreground" />
+                <span className="text-sm font-medium">Mémoire</span>
+              </div>
+              <span className={`text-sm font-medium ${getStatusColor(memoryUsage)}`}>
+                {memoryUsage.toFixed(1)}%
+              </span>
             </div>
-            <div className="flex items-center gap-2">
-              {memoryStatus.icon}
-              <span className="text-xs">{memoryStatus.text}</span>
-            </div>
+            <Progress 
+              value={memoryUsage} 
+              className="h-2 bg-muted"
+              style={{ 
+                '--progress-indicator-color': getStatusClass(memoryUsage).replace('bg-', '')
+              } as React.CSSProperties}
+            />
           </div>
-          <Progress value={stats.serverStats.memoryUsage} className="h-2" indicatorClassName={memoryStatus.color} />
-          <p className="text-xs text-muted-foreground text-right">
-            {stats.serverStats.memoryUsage.toFixed(1)}%
-          </p>
-        </div>
-        
-        <div className="space-y-2">
-          <div className="flex justify-between">
-            <div className="flex items-center">
-              <span className="text-sm font-medium">Stockage</span>
+
+          {/* Disk Usage */}
+          <div className="space-y-2">
+            <div className="flex justify-between items-center">
+              <div className="flex items-center gap-2">
+                <HardDrive className="h-4 w-4 text-muted-foreground" />
+                <span className="text-sm font-medium">Disque</span>
+              </div>
+              <span className={`text-sm font-medium ${getStatusColor(diskUsage)}`}>
+                {diskUsage.toFixed(1)}%
+              </span>
             </div>
-            <div className="flex items-center gap-2">
-              {diskStatus.icon}
-              <span className="text-xs">{diskStatus.text}</span>
-            </div>
+            <Progress 
+              value={diskUsage} 
+              className="h-2 bg-muted"
+              style={{ 
+                '--progress-indicator-color': getStatusClass(diskUsage).replace('bg-', '')
+              } as React.CSSProperties}
+            />
           </div>
-          <Progress value={stats.serverStats.diskUsage} className="h-2" indicatorClassName={diskStatus.color} />
-          <p className="text-xs text-muted-foreground text-right">
-            {stats.serverStats.diskUsage.toFixed(1)}%
-          </p>
-        </div>
-        
-        <div className="mt-4 pt-4 border-t">
-          <div className="flex justify-between items-center">
-            <span className="text-sm font-medium">Temps de fonctionnement</span>
-            <span className="text-sm">{formatUptime(stats.serverStats.uptime)}</span>
+
+          {/* Uptime */}
+          <div className="flex justify-between items-center pt-2 border-t">
+            <div className="flex items-center gap-2">
+              <Clock className="h-4 w-4 text-muted-foreground" />
+              <span className="text-sm font-medium">Temps de fonctionnement</span>
+            </div>
+            <span className="text-sm font-medium">
+              {formatUptime(uptime)}
+            </span>
           </div>
         </div>
       </CardContent>
