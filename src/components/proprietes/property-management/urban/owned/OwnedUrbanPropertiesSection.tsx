@@ -3,12 +3,12 @@ import React from 'react';
 import { Button } from '@/components/ui/button';
 import { PlusCircle } from 'lucide-react';
 import { PropertyCard } from '../../PropertyCard';
-import { OwnedBuilding } from '../../../hooks/useBuildingManagement';
+import { OwnedBuilding } from '../../../hooks/building/types';
 import { BuildingDescription } from '../../../data/types/buildingTypes';
 import { urbanResidentialBuildings, religiousBuildings, publicBuildings } from '../../../data/buildings';
 
 interface OwnedUrbanPropertiesSectionProps {
-  selectedBuildingType: 'residential' | 'religious' | 'public';
+  selectedBuildingType: 'residential' | 'religious' | 'public' | 'military';
   filteredOwnedBuildings: OwnedBuilding[];
   balance: number;
   availableSlaves: number;
@@ -38,6 +38,7 @@ export const OwnedUrbanPropertiesSection: React.FC<OwnedUrbanPropertiesSectionPr
       case 'residential': return 'Résidentielles';
       case 'religious': return 'Religieuses';
       case 'public': return 'Publiques';
+      case 'military': return 'Militaires';
       default: return '';
     }
   };

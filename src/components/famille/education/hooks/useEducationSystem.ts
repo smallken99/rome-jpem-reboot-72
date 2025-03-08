@@ -30,12 +30,12 @@ export const useEducationSystem = () => {
       preceptors.push({
         id: `preceptor-${i}`,
         name: generateRomanName(),
-        speciality: generateSpeciality(educationType),
+        speciality: generateSpeciality(),
         reputation: reputation,
         quality: reputation === "Excellent" ? 5 : reputation === "Bon" ? 4 : 3,
-        cost: generateFee(reputation),
+        cost: generateFee(),
         available: true,
-        background: `Un éducateur expérimenté, spécialisé en ${generateSpeciality(educationType)}.`,
+        background: `Un éducateur expérimenté, spécialisé en ${generateSpeciality()}.`,
         childId: null
       });
     }
@@ -62,12 +62,12 @@ export const useEducationSystem = () => {
     return {
       id: `preceptor-${Date.now()}`,
       name: generateRomanName(),
-      speciality: generateSpeciality(educationType),
+      speciality: generateSpeciality(),
       reputation: reputation,
       quality: reputation === "Excellent" ? 5 : reputation === "Bon" ? 4 : 3,
-      cost: generateFee(reputation),
+      cost: generateFee(),
       available: true,
-      background: `Un éducateur expérimenté, spécialisé en ${generateSpeciality(educationType)}.`,
+      background: `Un éducateur expérimenté, spécialisé en ${generateSpeciality()}.`,
       childId: null
     };
   };

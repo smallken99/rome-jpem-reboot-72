@@ -46,16 +46,19 @@ export const generateRomanName = (): string => {
 
 /**
  * Generates a random speciality for a preceptor
- * @param educationType The type of education
  * @returns A speciality
  */
-export const generateSpeciality = (educationType: string): string => {
-  if (!educationSpecialties[educationType]) {
+export const generateSpeciality = (): string => {
+  // Get a random education type
+  const educationTypes = Object.keys(educationSpecialties);
+  const randomType = educationTypes[Math.floor(Math.random() * educationTypes.length)];
+  
+  if (!educationSpecialties[randomType]) {
     return "Général";
   }
   
-  const specialtyIndex = Math.floor(Math.random() * educationSpecialties[educationType].length);
-  return educationSpecialties[educationType][specialtyIndex];
+  const specialtyIndex = Math.floor(Math.random() * educationSpecialties[randomType].length);
+  return educationSpecialties[randomType][specialtyIndex];
 };
 
 /**
@@ -71,10 +74,10 @@ export const generateReputation = (): "Excellent" | "Bon" | "Moyen" => {
 
 /**
  * Generates a random fee based on reputation
- * @param reputation The reputation of the preceptor
  * @returns A fee amount
  */
-export const generateFee = (reputation: "Excellent" | "Bon" | "Moyen"): number => {
+export const generateFee = (): number => {
+  const reputation = generateReputation();
   switch (reputation) {
     case "Excellent": return 8000 + Math.floor(Math.random() * 4000);
     case "Bon": return 5000 + Math.floor(Math.random() * 3000);
@@ -85,10 +88,10 @@ export const generateFee = (reputation: "Excellent" | "Bon" | "Moyen"): number =
 
 /**
  * Generates a title for a preceptor
- * @param reputation The reputation of the preceptor
  * @returns A title
  */
-export const generateTitle = (reputation: "Excellent" | "Bon" | "Moyen"): string => {
+export const generateTitle = (): string => {
+  const reputation = generateReputation();
   switch (reputation) {
     case "Excellent": return "le Sage";
     case "Bon": return "l'Érudit";
