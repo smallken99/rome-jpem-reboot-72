@@ -22,6 +22,23 @@ interface RomanCardFooterProps {
   className?: string;
 }
 
+interface RomanCardTitleProps {
+  children: React.ReactNode;
+  className?: string;
+}
+
+interface RomanCardDescriptionProps {
+  children: React.ReactNode;
+  className?: string;
+}
+
+interface RomanCardDialogProps {
+  children: React.ReactNode;
+  className?: string;
+  open?: boolean;
+  onOpenChange?: (open: boolean) => void;
+}
+
 const RomanCardHeader: React.FC<RomanCardHeaderProps> = ({ 
   children, 
   className 
@@ -55,6 +72,46 @@ const RomanCardFooter: React.FC<RomanCardFooterProps> = ({
   );
 };
 
+const RomanCardTitle: React.FC<RomanCardTitleProps> = ({
+  children,
+  className
+}) => {
+  return (
+    <h3 className={cn("text-lg font-semibold leading-none tracking-tight", className)}>
+      {children}
+    </h3>
+  );
+};
+
+const RomanCardDescription: React.FC<RomanCardDescriptionProps> = ({
+  children,
+  className
+}) => {
+  return (
+    <p className={cn("text-sm text-muted-foreground", className)}>
+      {children}
+    </p>
+  );
+};
+
+const RomanCardDialog: React.FC<RomanCardDialogProps> = ({
+  children,
+  className,
+  open,
+  onOpenChange
+}) => {
+  return (
+    <div className={cn("fixed inset-0 z-50 flex items-center justify-center bg-black/50", 
+      open ? "block" : "hidden", 
+      className
+    )}>
+      <div className="bg-white rounded-lg shadow-lg overflow-hidden max-w-md w-full max-h-[90vh] overflow-y-auto">
+        {children}
+      </div>
+    </div>
+  );
+};
+
 const RomanCard = ({ 
   children, 
   className,
@@ -69,5 +126,8 @@ const RomanCard = ({
 RomanCard.Header = RomanCardHeader;
 RomanCard.Content = RomanCardContent;
 RomanCard.Footer = RomanCardFooter;
+RomanCard.Title = RomanCardTitle;
+RomanCard.Description = RomanCardDescription;
+RomanCard.Dialog = RomanCardDialog;
 
 export { RomanCard };

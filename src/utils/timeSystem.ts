@@ -175,3 +175,16 @@ export const formatRomanSeason = (season: Season): string => {
   
   return seasonMap[season] || season;
 };
+
+// Get current time state functions
+export const getCurrentSeason = (): Season => {
+  return useTimeStore.getState().season;
+};
+
+export const getCurrentYear = (): number => {
+  return useTimeStore.getState().year;
+};
+
+export const getCurrentDay = (): number => {
+  return useTimeStore.getState().dayInSeason;
+};
