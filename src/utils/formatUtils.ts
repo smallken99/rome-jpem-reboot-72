@@ -21,7 +21,7 @@ export const formatDate = (year: number, season: Season, day?: number): string =
   return `${seasonName} ${year} AUC`;
 };
 
-// Fonction pour formater un montant d'argent en sesterces
+// Fonction pour formater un montant d'argent en As
 export const formatMoney = (amount: number): string => {
   return new Intl.NumberFormat('fr-FR').format(amount) + " As";
 };
@@ -41,7 +41,7 @@ export const formatUptime = (seconds: number): string => {
   }
 };
 
-// Update the conversion functions to handle types better
+// Conversion entre système de saisons du MaitreJeu et le système de temps
 export const convertTimeSeasonToMaitreJeuSeason = (season: import('@/utils/timeSystem').Season): Season => {
   const seasonMap: Record<import('@/utils/timeSystem').Season, Season> = {
     'Ver': 'SPRING',
