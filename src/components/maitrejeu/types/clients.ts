@@ -1,35 +1,40 @@
 
-import { ClientType, ClientInfluence } from '@/components/clientele/ClientCard';
+// TYPES DE CLIENTS
 
 export interface Client {
   id: string;
   name: string;
-  type: ClientType;
+  type: string;
   subType: string;
   location: string;
   loyalty: string;
-  influences: ClientInfluence;
-  assignedToSenateurId?: string | null;
-  competencePoints?: number;
-  specialAbilities?: string[];
-  backstory?: string;
-  activeStatus?: 'active' | 'inactive' | 'probation';
-  relationshipLevel?: number;
-  lastInteraction?: string;
+  influences: {
+    political: number;
+    popular: number;
+    religious: number;
+  };
+  specialAbilities: string[];
+  competencePoints: number;
+  backstory: string;
+  activeStatus: 'active' | 'inactive' | 'probation';
+  relationshipLevel: number;
+  lastInteraction: string;
+  senateurId?: string | null;
 }
 
 export type ClientCreationData = Omit<Client, 'id'>;
 
-// Types utilitaires pour la gestion des clients
+// Types pour le filtrage des clients
 export interface ClientFilter {
-  type?: ClientType;
-  location?: string;
+  type?: string;
   loyalty?: string;
-  assignedOnly?: boolean;
-  searchTerm?: string;
+  status?: string;
+  location?: string;
+  assignedTo?: string | null;
 }
 
-export interface ClientSort {
-  field: keyof Client;
+// Types pour le tri des clients
+export type ClientSort = {
+  field: keyof Client | '';
   direction: 'asc' | 'desc';
-}
+};
