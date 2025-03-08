@@ -1,91 +1,60 @@
-
+<lov-codelov-code>
 import React from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import { Users, TrendingUp, Activity, Map } from 'lucide-react';
-import { Province } from '../types/maitreJeuTypes';
+import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { AlertCircle, ArrowUp, ArrowDown } from "lucide-react";
+import { formatDate } from '@/utils/formatUtils';
+import { Province, ProvinceCardProps } from '../types/compatibilityAdapter';
 
-interface ProvinceCardProps {
-  province: Province;
-  onViewProvince: (provinceId: string) => void;
-}
-
-export const ProvinceCard: React.FC<ProvinceCardProps> = ({ province, onViewProvince }) => {
+export const ProvinceCard: React.FC<ProvinceCardProps> = ({ province, onProvinceSelected }) => {
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'pacifiée':
-        return 'bg-green-500 hover:bg-green-600';
-      case 'instable':
-        return 'bg-amber-500 hover:bg-amber-600';
-      case 'rebelle':
-      case 'en révolte':
-        return 'bg-red-500 hover:bg-red-600';
-      case 'conquise':
-        return 'bg-blue-500 hover:bg-blue-600';
-      default:
-        return 'bg-slate-500 hover:bg-slate-600';
+      case 'pacifiée': return 'bg-green-100 text-green-800 border-green-200';
+      case 'instable': return 'bg-yellow-100 text-yellow-800 border-yellow-200';
+      case 'rebelle': return 'bg-red-100 text-red-800 border-red-200';
+      case 'conquise': return 'bg-blue-100 text-blue-800 border-blue-200';
+      default: return 'bg-gray-100 text-gray-800 border-gray-200';
     }
   };
-
-  const getStatusText = (status: string) => {
-    switch (status) {
-      case 'pacifiée':
-        return 'Pacifiée';
-      case 'instable':
-        return 'Instable';
-      case 'rebelle':
-      case 'en révolte':
-        return 'En révolte';
-      case 'conquise':
-        return 'Conquise récemment';
-      default:
-        return status;
-    }
+  
+  const handleProvinceClick = () => {
+    onProvinceSelected(province);
   };
-
+  
   return (
-    <Card className="h-full flex flex-col transition-all duration-300 hover:shadow-lg">
-      <CardHeader className="pb-2">
-        <div className="flex justify-between items-start">
-          <CardTitle className="text-lg font-cinzel">{province.nom}</CardTitle>
-          <Badge 
-            className={`${getStatusColor(province.status || province.statut || '')} text-white`}
-          >
-            {getStatusText(province.status || province.statut || '')}
+    <Card className="cursor-pointer hover:shadow-md transition-shadow">
+      <CardHeader>
+        <div className="flex items-center justify-between">
+          <h3 className="text-lg font-semibold">{province.nom}</h3>
+          <Badge variant="secondary" className={getStatusColor(province.status)}>
+            {province.status}
           </Badge>
         </div>
-        <p className="text-sm text-muted-foreground">{province.région || province.region}</p>
       </CardHeader>
-      <CardContent className="pt-0 flex-grow flex flex-col justify-between">
-        <div className="space-y-3">
-          <div className="flex items-center text-sm">
-            <Users className="h-4 w-4 mr-2 text-muted-foreground" />
-            <span>Population: {province.population.toLocaleString()}</span>
-          </div>
-          
-          <div className="flex items-center text-sm">
-            <TrendingUp className="h-4 w-4 mr-2 text-muted-foreground" />
-            <span>Revenu annuel: {province.revenuAnnuel.toLocaleString()} As</span>
-          </div>
-          
-          <div className="flex items-center text-sm">
-            <Activity className="h-4 w-4 mr-2 text-muted-foreground" />
-            <span>Loyauté: {province.loyauté}/100</span>
-          </div>
-        </div>
-        
-        <div className="pt-4">
-          <Button 
-            variant="outline" 
-            className="w-full" 
-            onClick={() => onViewProvince(province.id)}
-          >
-            <Map className="h-4 w-4 mr-2" />
-            Détails de la province
-          </Button>
+      <CardContent className="space-y-2">
+        <p className="text-sm text-gray-500">
+          <AlertCircle className="h-4 w-4 inline-block mr-1 align-middle" />
+          {province.description}
+        </p>
+        <div className="flex items-center text-xs">
+          <span className="mr-2">Loyauté:</span>
+          <span className="font-medium">{province.loyaute}%</span>
+          {province.loyauteVariation && (
+            <span className={`ml-1 ${province.loyauteVariation > 0 ? 'text-green-600' : 'text-red-600'}`}>
+              {province.loyauteVariation > 0 ? <ArrowUp className="h-3 w-3 inline-block align-middle" /> : <ArrowDown className="h-3 w-3 inline-block align-middle" />}
+              {Math.abs(province.loyauteVariation)}
+            </span>
+          )}
         </div>
       </CardContent>
+      <CardFooter className="text-xs text-gray-600">
+        Dernier événement: {formatDate(province.dernierEvenement.year, province.dernierEvenement.season)}
+      </CardFooter>
+      <Button onClick={handleProvinceClick}>
+        Voir les détails
+      </Button>
     </Card>
   );
 };
+</lov-code>

@@ -1,10 +1,9 @@
-
 import React from 'react';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { Loi, LoisTableProps } from '../types/maitreJeuTypes';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import { formatDate } from '@/utils/formatUtils';
+import { Loi, LoisTableProps } from '../types/compatibilityAdapter';
 
 export const LoisTable: React.FC<LoisTableProps> = ({ 
   lois = [],
@@ -18,7 +17,6 @@ export const LoisTable: React.FC<LoisTableProps> = ({
       )
     : lois;
   
-  // Fonction pour obtenir le badge de statut approprié
   const getStatusBadge = (statut: string) => {
     switch(statut) {
       case 'proposée':
@@ -34,7 +32,6 @@ export const LoisTable: React.FC<LoisTableProps> = ({
     }
   };
   
-  // Fonction pour obtenir le badge de catégorie approprié
   const getCategoryBadge = (category: string) => {
     switch(category) {
       case 'politique':

@@ -1,8 +1,7 @@
-
 import React from 'react';
+import { Timeline, TimelineItem, TimelineHeader, TimelineIcon, TimelineTitle, TimelineBody } from "@/components/ui/timeline";
 import { formatDate } from '@/utils/formatUtils';
-import { HistoireEntry } from '../types/maitreJeuTypes';
-import { Scroll, User, Award, CalendarDays } from 'lucide-react';
+import { HistoireEntry } from '../types/compatibilityAdapter';
 
 interface HistoireTimelineProps {
   entries: HistoireEntry[];

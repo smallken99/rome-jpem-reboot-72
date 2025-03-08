@@ -1,19 +1,21 @@
-// Mise à jour des imports pour GestionPolitique
-import { useContext, useState } from 'react';
-import { MaitreJeuContext } from './context/MaitreJeuContext';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { Label } from '@/components/ui/label';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Slider } from '@/components/ui/slider';
-import { PlusCircle } from 'lucide-react';
-import { LoisTable } from './components/LoisTable';
-import { ElectionPlanner } from './components/ElectionPlanner';
+import React, { useState } from 'react';
+import { 
+  Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle 
+} from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { 
+  Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger
+} from "@/components/ui/dialog";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Separator } from "@/components/ui/separator";
+import { RomanCard } from "@/components/ui-custom/RomanCard";
 import { PartisGraph } from './components/PartisGraph';
+import { LoisTable } from './components/LoisTable';
+import { PoliticalEventsTimeline } from './components/PoliticalEventsTimeline';
+import { ElectionPlanner } from './components/ElectionPlanner';
+import { useMaitreJeu } from './context/MaitreJeuContext';
 
 export const GestionPolitique = () => {
   const { 
@@ -24,7 +26,7 @@ export const GestionPolitique = () => {
     voteLoi, 
     senateurs, 
     scheduleElection 
-  } = useContext(MaitreJeuContext);
+  } = useMaitreJeu();
   
   const [populaires, setPopulaires] = useState(equilibre.populaires || 35);
   const [optimates, setOptimates] = useState(equilibre.optimates || 40);

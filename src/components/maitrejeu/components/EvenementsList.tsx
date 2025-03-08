@@ -1,13 +1,14 @@
+
 import React, { useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { AlertCircle, AlertTriangle, FileText, Filter } from "lucide-react";
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { AlertCircle, AlertTriangle, FileText, Filter, Calendar, Check, Info } from "lucide-react";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { formatDate } from '@/utils/formatUtils';
-import { Evenement, EvenementAction, EvenementType, EvenementsListProps } from '../types/evenements';
+import { Evenement, EvenementAction, EvenementType } from '../types/compatibilityAdapter';
 
 interface EvenementsListProps {
   evenements: Evenement[];

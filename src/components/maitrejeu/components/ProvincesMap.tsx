@@ -1,6 +1,6 @@
-
-import React from 'react';
-import { Province, ProvincesMapProps } from '../types/maitreJeuTypes';
+import React, { useState } from 'react';
+import { Button } from "@/components/ui/button";
+import { Province, ProvincesMapProps } from '../types/compatibilityAdapter';
 
 export const ProvincesMap: React.FC<ProvincesMapProps> = ({ 
   provinces,

@@ -1,25 +1,14 @@
-
 import React, { useState } from 'react';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Button } from "@/components/ui/button";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogTrigger } from "@/components/ui/dialog";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Input } from "@/components/ui/input";
 import { 
-  Table, 
-  TableBody, 
-  TableCell, 
-  TableHead, 
-  TableHeader, 
-  TableRow 
-} from '@/components/ui/table';
-import { 
-  Select, 
-  SelectContent, 
-  SelectItem, 
-  SelectTrigger, 
-  SelectValue 
-} from '@/components/ui/select';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { Input } from '@/components/ui/input';
-import { Search, Save, User, AlertCircle } from 'lucide-react';
-import { AssignmentTableProps, SenateurJouable } from '../types/maitreJeuTypes';
+  SenateurJouable, 
+  Province, 
+  AssignmentTableProps 
+} from '../types/compatibilityAdapter';
 import { toast } from 'sonner';
 
 export const AssignmentTable: React.FC<AssignmentTableProps> = ({ 
@@ -31,7 +20,6 @@ export const AssignmentTable: React.FC<AssignmentTableProps> = ({
   const [playerNames, setPlayerNames] = useState<Record<string, string>>({});
   const [currentAssignments, setCurrentAssignments] = useState<Record<string, string>>(assignments);
   
-  // Sample players (should come from a database in a real app)
   const players = [
     { id: 'player1', name: 'Jules César' },
     { id: 'player2', name: 'Marcus Brutus' },

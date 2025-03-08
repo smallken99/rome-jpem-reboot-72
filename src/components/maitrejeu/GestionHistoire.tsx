@@ -6,7 +6,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { HistoireTimeline } from './components/HistoireTimeline';
 import { useMaitreJeu } from './context/MaitreJeuContext';
-import { HistoireEntry, Season } from './types/maitreJeuTypes';
+import { HistoireEntry, Season } from './types/compatibilityAdapter';
 import { formatDate } from '@/utils/formatUtils';
 
 export const GestionHistoire: React.FC = () => {
@@ -22,7 +22,8 @@ export const GestionHistoire: React.FC = () => {
       season: season,
       day: 1
     },
-    personnagesImpliqués: []
+    personnagesImpliqués: [],
+    type: 'POLITIQUE'
   });
   
   const [personnage, setPersonnage] = useState('');
@@ -52,6 +53,8 @@ export const GestionHistoire: React.FC = () => {
   
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    
+    // S'assurer que tous les champs requis sont présents
     addHistoireEntry({
       ...newEntry,
       type: entryType
@@ -66,7 +69,8 @@ export const GestionHistoire: React.FC = () => {
         season: season,
         day: 1
       },
-      personnagesImpliqués: []
+      personnagesImpliqués: [],
+      type: 'POLITIQUE'
     });
     setEntryType('POLITIQUE');
   };

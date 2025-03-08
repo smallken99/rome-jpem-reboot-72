@@ -1,81 +1,73 @@
-
 import React from 'react';
-import {
-  BarChart,
-  Bar,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  Legend,
-  ResponsiveContainer,
-} from 'recharts';
-import { EquilibreChartProps } from '../types/maitreJeuTypes';
+import { ResponsiveBar } from '@nivo/bar';
+import { Equilibre, EquilibreChartProps } from '../types/compatibilityAdapter';
 
-export const EquilibreBarChart: React.FC<EquilibreChartProps> = ({ equilibre }) => {
-  // Format data for use in the chart
+const EquilibreBarChart: React.FC<EquilibreChartProps> = ({ data }) => {
   const chartData = [
     {
-      name: 'Plébéiens',
-      value: equilibre.plebeiens,
-      fill: '#f59e0b', // amber
+      "parti": "Optimates",
+      "valeur": data.optimates,
+      "color": "hsl(62, 70%, 50%)"
     },
     {
-      name: 'Patriciens',
-      value: equilibre.patriciens,
-      fill: '#9333ea', // purple
+      "parti": "Populares",
+      "valeur": data.populares,
+      "color": "hsl(179, 70%, 50%)"
     },
     {
-      name: 'Armée',
-      value: equilibre.armée,
-      fill: '#ef4444', // red
+      "parti": "Equites",
+      "valeur": data.equites,
+      "color": "hsl(344, 70%, 50%)"
     },
     {
-      name: 'Religion',
-      value: equilibre.religion,
-      fill: '#3b82f6', // blue
-    },
-    {
-      name: 'Économie',
-      value: equilibre.économie,
-      fill: '#22c55e', // green
-    },
-    {
-      name: 'Diplomatie',
-      value: equilibre.diplomatie,
-      fill: '#14b8a6', // teal
-    },
+      "parti": "Senat",
+      "valeur": data.senat,
+      "color": "hsl(122, 70%, 50%)"
+    }
   ];
 
   return (
-    <div className="h-96 w-full">
-      <ResponsiveContainer width="100%" height="100%">
-        <BarChart
-          data={chartData}
-          margin={{
-            top: 20,
-            right: 30,
-            left: 20,
-            bottom: 5,
-          }}
-        >
-          <CartesianGrid strokeDasharray="3 3" />
-          <XAxis dataKey="name" />
-          <YAxis domain={[0, 100]} />
-          <Tooltip
-            formatter={(value: number) => [`${value}%`, 'Influence']}
-            labelStyle={{ color: '#18181b' }}
-            contentStyle={{
-              backgroundColor: '#ffffff',
-              border: '1px solid #e2e8f0',
-              borderRadius: '0.375rem',
-              padding: '0.5rem',
-            }}
-          />
-          <Legend />
-          <Bar dataKey="value" name="Influence %" />
-        </BarChart>
-      </ResponsiveContainer>
+    <div style={{ height: '300px' }}>
+      <ResponsiveBar
+        data={chartData}
+        keys={['valeur']}
+        indexBy="parti"
+        margin={{ top: 20, right: 20, bottom: 50, left: 60 }}
+        padding={0.3}
+        colors={({ data }) => data.color}
+        axisTop={null}
+        axisRight={null}
+        axisBottom={{
+          tickSize: 5,
+          tickPadding: 5,
+          tickRotation: 0,
+          legend: 'Partis',
+          legendPosition: 'middle',
+          legendOffset: 32
+        }}
+        axisLeft={{
+          tickSize: 5,
+          tickPadding: 5,
+          tickRotation: 0,
+          legend: 'Valeur',
+          legendPosition: 'middle',
+          legendOffset: -40
+        }}
+        labelSkipWidth={12}
+        labelSkipHeight={12}
+        labelTextColor={{ from: 'color', modifiers: [['darker', 1.6]] }}
+        legends={[]}
+        tooltip={({ data, indexValue }) => (
+          <div>
+            <strong>{indexValue}</strong>: {data.valeur}
+          </div>
+        )}
+        role="application"
+        ariaLabel="Equilibre des Partis"
+        barAriaLabel={e => `${e.id}: ${e.formattedValue} `}
+      />
     </div>
   );
 };
+
+export { EquilibreBarChart };
