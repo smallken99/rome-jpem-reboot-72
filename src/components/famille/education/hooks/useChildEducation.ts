@@ -1,8 +1,8 @@
 
 import { useState, useEffect } from 'react';
 import { Child } from '../types/educationTypes';
-// Import preceptors but access children differently - this might need to be adjusted based on actual data structure
-import { preceptors } from '../data';
+// Import preceptors from data/index
+import { preceptors } from '../data/index';
 
 // Mock children data - replace with actual implementation if there's a real source
 const mockChildren: Child[] = [

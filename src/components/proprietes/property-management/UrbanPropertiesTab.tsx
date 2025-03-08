@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { TabsContent } from '@/components/ui/tabs';
 import { UrbanPropertySelector } from './urban/UrbanPropertySelector';
 import { UrbanPropertyDetails } from './urban/UrbanPropertyDetails';
@@ -14,13 +14,29 @@ type UrbanBuildingCategory = 'religious' | 'public' | 'urban' | 'rural';
 const UrbanPropertiesTab = () => {
   const {
     selectedBuildingType,
-    selectedBuilding,
-    filteredBuildings,
-    handleBuildingTypeChange,
-    handleBuildingSelect,
-    isViewingCatalogue,
-    setIsViewingCatalogue,
+    selectedBuildingId,
+    selectedBuildingDetails: selectedBuilding,
+    purchaseDialogOpen,
+    setPurchaseDialogOpen,
+    balance,
+    availableSlaves,
+    filteredOwnedBuildings: filteredBuildings,
+    sellBuilding,
+    calculateBuildingValue,
+    toggleMaintenance,
+    performMaintenance,
+    assignSlaves,
   } = useUrbanPropertiesTab();
+
+  const [isViewingCatalogue, setIsViewingCatalogue] = useState(false);
+
+  const handleBuildingTypeChange = (type: AllowedBuildingType) => {
+    // This would be implemented in your hook
+  };
+
+  const handleBuildingSelect = (id: string) => {
+    // This would be implemented in your hook
+  };
 
   return (
     <TabsContent value="urban" className="space-y-6">
@@ -28,22 +44,35 @@ const UrbanPropertiesTab = () => {
         {/* Left panel: Building selector */}
         <div className="lg:col-span-1 space-y-6">
           <UrbanPropertySelector
-            selectedBuildingType={selectedBuildingType as AllowedBuildingType}
-            onBuildingTypeChange={handleBuildingTypeChange}
+            buildingType={selectedBuildingType}
+            selectedId={selectedBuildingId || ''}
+            onSelect={handleBuildingSelect}
             isViewingCatalogue={isViewingCatalogue}
             setIsViewingCatalogue={setIsViewingCatalogue}
           />
           
           {isViewingCatalogue ? (
             <UrbanCatalogueSection 
-              buildingType={selectedBuildingType as AllowedBuildingType} 
-              onBuildingSelect={handleBuildingSelect}
+              selectedBuildingType={selectedBuildingType as AllowedBuildingType}
+              setSelectedBuildingType={handleBuildingTypeChange}
+              selectedBuildingId={selectedBuildingId}
+              setSelectedBuildingId={handleBuildingSelect}
+              selectedBuildingDetails={selectedBuilding}
+              purchaseDialogOpen={purchaseDialogOpen}
+              setPurchaseDialogOpen={setPurchaseDialogOpen}
             />
           ) : (
             <OwnedUrbanPropertiesSection
-              buildingType={selectedBuildingType as AllowedBuildingType}
-              onBuildingSelect={handleBuildingSelect}
-              selectedBuildingId={selectedBuilding?.id}
+              selectedBuildingType={selectedBuildingType as AllowedBuildingType}
+              filteredOwnedBuildings={filteredBuildings || []}
+              balance={balance}
+              availableSlaves={availableSlaves}
+              setPurchaseDialogOpen={setPurchaseDialogOpen}
+              toggleMaintenance={toggleMaintenance}
+              performMaintenance={performMaintenance}
+              assignSlaves={assignSlaves}
+              sellBuilding={sellBuilding}
+              calculateBuildingValue={calculateBuildingValue}
             />
           )}
         </div>
@@ -52,8 +81,7 @@ const UrbanPropertiesTab = () => {
         <div className="lg:col-span-2">
           {selectedBuilding ? (
             <UrbanPropertyDetails 
-              building={selectedBuilding} 
-              buildingCategory={selectedBuildingType as UrbanBuildingCategory}
+              buildingDetails={selectedBuilding}
             />
           ) : (
             <div className="border rounded-lg p-6 bg-card text-center text-muted-foreground">
