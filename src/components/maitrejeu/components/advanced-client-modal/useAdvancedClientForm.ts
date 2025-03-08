@@ -1,52 +1,35 @@
 
-import { useState, useEffect } from 'react';
-import { ClientCreationData, Client } from '../../types/clients';
+import { useState } from 'react';
+import { Client, ClientType } from '../../types/clients';
+import { ClientInfluence } from '@/components/clientele/ClientCard';
+
+const defaultFormData: Partial<Client> = {
+  name: '',
+  type: 'artisan_commercant',
+  subType: '',
+  location: '',
+  loyalty: 'moyenne',
+  influences: {
+    political: 0,
+    popular: 0,
+    religious: 0
+  },
+  competencePoints: 3,
+  specialAbilities: [],
+  backstory: '',
+  activeStatus: 'active',
+  relationshipLevel: 1,
+  lastInteraction: new Date().toISOString()
+};
 
 export const useAdvancedClientForm = (client: Client | null) => {
-  const isEditMode = !!client;
-  
-  const [formData, setFormData] = useState<ClientCreationData>({
-    name: '',
-    type: 'artisan_commercant',
-    subType: '',
-    location: 'Forum',
-    loyalty: 'moyenne',
-    influences: {
-      political: 1,
-      popular: 1,
-      religious: 1
-    },
-    competencePoints: 3,
-    specialAbilities: [],
-    backstory: '',
-    activeStatus: 'active',
-    relationshipLevel: 1
-  });
+  const [formData, setFormData] = useState<Partial<Client>>(
+    client ? { ...client } : defaultFormData
+  );
   
   const [newAbility, setNewAbility] = useState('');
   
-  useEffect(() => {
-    // Initialize form with client data in edit mode
-    if (client) {
-      setFormData({
-        name: client.name,
-        type: client.type,
-        subType: client.subType,
-        location: client.location,
-        loyalty: client.loyalty,
-        influences: { ...client.influences },
-        assignedToSenateurId: client.assignedToSenateurId,
-        competencePoints: client.competencePoints || 3,
-        specialAbilities: client.specialAbilities || [],
-        backstory: client.backstory || '',
-        activeStatus: client.activeStatus || 'active',
-        relationshipLevel: client.relationshipLevel || 1,
-        lastInteraction: client.lastInteraction
-      });
-    }
-  }, [client]);
-  
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
     setFormData(prev => ({
       ...prev,
@@ -54,19 +37,19 @@ export const useAdvancedClientForm = (client: Client | null) => {
     }));
   };
   
-  const handleSelectChange = (name: string, value: string) => {
+  const handleSelectChange = (field: string, value: string) => {
     setFormData(prev => ({
       ...prev,
-      [name]: value
+      [field]: value
     }));
   };
   
-  const handleInfluenceChange = (type: keyof ClientCreationData['influences'], value: string) => {
+  const handleInfluenceChange = (type: keyof ClientInfluence, value: number) => {
     setFormData(prev => ({
       ...prev,
       influences: {
-        ...prev.influences,
-        [type]: parseInt(value) || 1
+        ...(prev.influences || { political: 0, popular: 0, religious: 0 }),
+        [type]: value
       }
     }));
   };
@@ -75,7 +58,10 @@ export const useAdvancedClientForm = (client: Client | null) => {
     if (newAbility.trim() && !formData.specialAbilities?.includes(newAbility.trim())) {
       setFormData(prev => ({
         ...prev,
-        specialAbilities: [...(prev.specialAbilities || []), newAbility.trim()]
+        specialAbilities: [
+          ...(prev.specialAbilities || []),
+          newAbility.trim()
+        ]
       }));
       setNewAbility('');
     }
@@ -88,15 +74,14 @@ export const useAdvancedClientForm = (client: Client | null) => {
     }));
   };
   
-  const handleRelationshipChange = (value: number[]) => {
+  const handleRelationshipChange = (level: number) => {
     setFormData(prev => ({
       ...prev,
-      relationshipLevel: value[0]
+      relationshipLevel: level
     }));
   };
   
   return {
-    isEditMode,
     formData,
     newAbility,
     setNewAbility,

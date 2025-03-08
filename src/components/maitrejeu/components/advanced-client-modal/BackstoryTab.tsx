@@ -1,44 +1,38 @@
 
 import React from 'react';
 import { Label } from '@/components/ui/label';
-import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
-import { ClientCreationData } from '../../types/clients';
+import { Client } from '../../types/clients';
 
 interface BackstoryTabProps {
-  formData: ClientCreationData;
-  handleChange: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => void;
+  formData: Partial<Client>;
+  handleChange: (e: React.ChangeEvent<HTMLTextAreaElement>) => void;
 }
 
-export const BackstoryTab: React.FC<BackstoryTabProps> = ({
-  formData,
-  handleChange
-}) => {
+export const BackstoryTab: React.FC<BackstoryTabProps> = ({ formData, handleChange }) => {
   return (
-    <div className="space-y-4 mt-4">
-      <div className="grid grid-cols-4 items-start gap-4">
-        <Label htmlFor="backstory" className="text-right pt-2">Histoire personnelle</Label>
+    <div className="space-y-4 py-2">
+      <div className="space-y-2">
+        <Label htmlFor="backstory">Histoire du client</Label>
         <Textarea
           id="backstory"
           name="backstory"
           value={formData.backstory || ''}
           onChange={handleChange}
-          className="col-span-3"
-          rows={8}
-          placeholder="Écrivez l'histoire du client ici..."
+          placeholder="Entrez l'histoire et le contexte de ce client..."
+          className="min-h-[200px]"
         />
       </div>
-      
-      <div className="grid grid-cols-4 items-center gap-4">
-        <Label htmlFor="lastInteraction" className="text-right">Dernière interaction</Label>
-        <Input
-          id="lastInteraction"
-          name="lastInteraction"
-          type="date"
-          value={formData.lastInteraction ? new Date(formData.lastInteraction).toISOString().split('T')[0] : ''}
-          onChange={handleChange}
-          className="col-span-3"
-        />
+
+      <div className="p-3 border rounded-md bg-muted/50">
+        <h4 className="text-sm font-medium mb-2">Conseils pour une bonne histoire:</h4>
+        <ul className="text-sm text-muted-foreground space-y-1 list-disc pl-4">
+          <li>Incluez des détails sur l'origine du client</li>
+          <li>Expliquez sa motivation à servir un sénateur</li>
+          <li>Ajoutez des événements importants de sa vie</li>
+          <li>Mentionnez ses ambitions personnelles</li>
+          <li>Décrivez ses relations avec d'autres personnages</li>
+        </ul>
       </div>
     </div>
   );

@@ -28,8 +28,8 @@ export const ClientFilters: React.FC<ClientFiltersProps> = ({
   onAddClient,
   onAddAdvancedClient
 }) => {
-  // Available client types
-  const clientTypes: ClientType[] = ['plebeien', 'noble', 'marchand', 'etranger', 'militaire'];
+  // Available client types (using the correct ClientType from the import)
+  const clientTypes: ClientType[] = ['artisan_commercant', 'politicien', 'religieux', 'proprietaire', 'pegre'];
   
   // Function to handle type filter change
   const handleTypeFilterChange = (value: string) => {

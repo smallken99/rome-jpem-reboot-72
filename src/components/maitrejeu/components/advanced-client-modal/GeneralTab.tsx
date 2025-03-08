@@ -1,17 +1,18 @@
 
 import React from 'react';
-import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Slider } from '@/components/ui/slider';
-import { ClientCreationData } from '../../types/clients';
+import { Client } from '../../types/clients';
+import { ClientType } from '@/components/clientele/ClientCard';
 
 interface GeneralTabProps {
-  formData: ClientCreationData;
+  formData: Partial<Client>;
   handleChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
-  handleSelectChange: (name: string, value: string) => void;
-  handleInfluenceChange: (type: keyof ClientCreationData['influences'], value: string) => void;
-  handleRelationshipChange: (value: number[]) => void;
+  handleSelectChange: (field: string, value: string) => void;
+  handleInfluenceChange: (type: 'political' | 'popular' | 'religious', value: number) => void;
+  handleRelationshipChange: (level: number) => void;
 }
 
 export const GeneralTab: React.FC<GeneralTabProps> = ({
@@ -21,160 +22,162 @@ export const GeneralTab: React.FC<GeneralTabProps> = ({
   handleInfluenceChange,
   handleRelationshipChange
 }) => {
+  const clientTypes: ClientType[] = ['artisan_commercant', 'politicien', 'religieux', 'proprietaire', 'pegre'];
+  const locations = ['Rome', 'Italia', 'Gallia', 'Hispania', 'Graecia', 'Asia', 'Africa', 'Aegyptus'];
+  const loyaltyLevels = ['faible', 'moyenne', 'forte'];
+  
   return (
-    <div className="space-y-4 mt-4">
-      <div className="grid grid-cols-4 items-center gap-4">
-        <Label htmlFor="name" className="text-right">Nom</Label>
-        <Input
-          id="name"
-          name="name"
-          value={formData.name}
+    <div className="space-y-4 py-2">
+      <div className="space-y-2">
+        <Label htmlFor="name">Nom du client</Label>
+        <Input 
+          id="name" 
+          name="name" 
+          value={formData.name || ''} 
           onChange={handleChange}
-          className="col-span-3"
-          placeholder="Nom complet"
+          placeholder="Entrez le nom du client"
         />
       </div>
       
-      <div className="grid grid-cols-4 items-center gap-4">
-        <Label htmlFor="type" className="text-right">Type</Label>
-        <div className="col-span-3">
-          <Select value={formData.type} onValueChange={(value) => handleSelectChange('type', value)}>
-            <SelectTrigger>
-              <SelectValue placeholder="Type de client" />
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="space-y-2">
+          <Label htmlFor="type">Type de client</Label>
+          <Select 
+            value={formData.type || 'artisan_commercant'} 
+            onValueChange={(value) => handleSelectChange('type', value)}
+          >
+            <SelectTrigger id="type">
+              <SelectValue placeholder="Sélectionnez un type" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="artisan_commercant">Artisan & Commerçant</SelectItem>
-              <SelectItem value="politicien">Politicien</SelectItem>
-              <SelectItem value="religieux">Religieux</SelectItem>
-              <SelectItem value="proprietaire">Propriétaire Terrien</SelectItem>
-              <SelectItem value="pegre">Pègre</SelectItem>
+              {clientTypes.map(type => (
+                <SelectItem key={type} value={type}>
+                  {type}
+                </SelectItem>
+              ))}
             </SelectContent>
           </Select>
         </div>
-      </div>
-      
-      <div className="grid grid-cols-4 items-center gap-4">
-        <Label htmlFor="subType" className="text-right">Spécialité</Label>
-        <Input
-          id="subType"
-          name="subType"
-          value={formData.subType}
-          onChange={handleChange}
-          className="col-span-3"
-          placeholder="Ex: Forgeron, Boulanger..."
-        />
-      </div>
-      
-      <div className="grid grid-cols-4 items-center gap-4">
-        <Label htmlFor="location" className="text-right">Quartier</Label>
-        <div className="col-span-3">
-          <Select value={formData.location} onValueChange={(value) => handleSelectChange('location', value)}>
-            <SelectTrigger>
-              <SelectValue placeholder="Quartier/Localisation" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="Forum">Forum</SelectItem>
-              <SelectItem value="Subure">Subure</SelectItem>
-              <SelectItem value="Palatin">Palatin</SelectItem>
-              <SelectItem value="Aventin">Aventin</SelectItem>
-              <SelectItem value="Esquilin">Esquilin</SelectItem>
-              <SelectItem value="Capitole">Capitole</SelectItem>
-              <SelectItem value="Quirinal">Quirinal</SelectItem>
-            </SelectContent>
-          </Select>
+        
+        <div className="space-y-2">
+          <Label htmlFor="subType">Sous-type / Profession</Label>
+          <Input 
+            id="subType" 
+            name="subType" 
+            value={formData.subType || ''} 
+            onChange={handleChange}
+            placeholder="Ex: Forgeron, Prêtre, etc."
+          />
         </div>
       </div>
       
-      <div className="grid grid-cols-4 items-center gap-4">
-        <Label htmlFor="loyalty" className="text-right">Loyauté</Label>
-        <div className="col-span-3">
-          <Select value={formData.loyalty} onValueChange={(value) => handleSelectChange('loyalty', value)}>
-            <SelectTrigger>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="space-y-2">
+          <Label htmlFor="location">Localisation</Label>
+          <Select 
+            value={formData.location || locations[0]} 
+            onValueChange={(value) => handleSelectChange('location', value)}
+          >
+            <SelectTrigger id="location">
+              <SelectValue placeholder="Sélectionnez une région" />
+            </SelectTrigger>
+            <SelectContent>
+              {locations.map(location => (
+                <SelectItem key={location} value={location}>
+                  {location}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+        
+        <div className="space-y-2">
+          <Label htmlFor="loyalty">Loyauté</Label>
+          <Select 
+            value={formData.loyalty || loyaltyLevels[1]} 
+            onValueChange={(value) => handleSelectChange('loyalty', value)}
+          >
+            <SelectTrigger id="loyalty">
               <SelectValue placeholder="Niveau de loyauté" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="faible">Faible</SelectItem>
-              <SelectItem value="moyenne">Moyenne</SelectItem>
-              <SelectItem value="forte">Forte</SelectItem>
+              {loyaltyLevels.map(level => (
+                <SelectItem key={level} value={level}>
+                  {level.charAt(0).toUpperCase() + level.slice(1)}
+                </SelectItem>
+              ))}
             </SelectContent>
           </Select>
         </div>
       </div>
       
-      <div className="grid grid-cols-4 items-center gap-4">
-        <Label htmlFor="activeStatus" className="text-right">Statut</Label>
-        <div className="col-span-3">
-          <Select 
-            value={formData.activeStatus || 'active'} 
-            onValueChange={(value: 'active' | 'inactive' | 'probation') => handleSelectChange('activeStatus', value)}
-          >
-            <SelectTrigger>
-              <SelectValue placeholder="Statut actuel" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="active">Actif</SelectItem>
-              <SelectItem value="inactive">Inactif</SelectItem>
-              <SelectItem value="probation">Probation</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
-      </div>
-      
-      <div className="grid grid-cols-4 items-center gap-4">
-        <Label className="text-right">Influences</Label>
-        <div className="col-span-3 grid grid-cols-3 gap-2">
-          <div>
-            <Label htmlFor="political" className="text-xs">Politique</Label>
-            <Input
+      <div className="space-y-4 pt-2">
+        <Label>Niveaux d'influence</Label>
+        
+        <div className="space-y-6">
+          <div className="space-y-2">
+            <div className="flex justify-between items-center">
+              <Label htmlFor="political">Politique</Label>
+              <span className="text-sm">{formData.influences?.political || 0}</span>
+            </div>
+            <Slider 
               id="political"
-              type="number"
-              min="1"
-              max="10"
-              value={formData.influences.political}
-              onChange={(e) => handleInfluenceChange('political', e.target.value)}
+              min={0}
+              max={10}
+              step={1}
+              value={[formData.influences?.political || 0]}
+              onValueChange={(value) => handleInfluenceChange('political', value[0])}
             />
           </div>
-          <div>
-            <Label htmlFor="popular" className="text-xs">Populaire</Label>
-            <Input
+          
+          <div className="space-y-2">
+            <div className="flex justify-between items-center">
+              <Label htmlFor="popular">Populaire</Label>
+              <span className="text-sm">{formData.influences?.popular || 0}</span>
+            </div>
+            <Slider 
               id="popular"
-              type="number"
-              min="1"
-              max="10"
-              value={formData.influences.popular}
-              onChange={(e) => handleInfluenceChange('popular', e.target.value)}
+              min={0}
+              max={10}
+              step={1}
+              value={[formData.influences?.popular || 0]}
+              onValueChange={(value) => handleInfluenceChange('popular', value[0])}
             />
           </div>
-          <div>
-            <Label htmlFor="religious" className="text-xs">Religieuse</Label>
-            <Input
+          
+          <div className="space-y-2">
+            <div className="flex justify-between items-center">
+              <Label htmlFor="religious">Religieuse</Label>
+              <span className="text-sm">{formData.influences?.religious || 0}</span>
+            </div>
+            <Slider 
               id="religious"
-              type="number"
-              min="1"
-              max="10"
-              value={formData.influences.religious}
-              onChange={(e) => handleInfluenceChange('religious', e.target.value)}
+              min={0}
+              max={10}
+              step={1}
+              value={[formData.influences?.religious || 0]}
+              onValueChange={(value) => handleInfluenceChange('religious', value[0])}
             />
           </div>
         </div>
       </div>
       
-      <div className="grid grid-cols-4 items-center gap-4">
-        <Label htmlFor="relationshipLevel" className="text-right">Niveau de relation</Label>
-        <div className="col-span-3">
-          <Slider 
-            defaultValue={[formData.relationshipLevel || 1]} 
-            max={10} 
-            min={1}
-            step={1}
-            onValueChange={handleRelationshipChange}
-          />
-          <div className="flex justify-between mt-2 text-xs text-muted-foreground">
-            <span>Faible</span>
-            <span>Moyenne</span>
-            <span>Forte</span>
-          </div>
+      <div className="space-y-2 pt-2">
+        <div className="flex justify-between items-center">
+          <Label htmlFor="relationshipLevel">Niveau de relation</Label>
+          <span className="text-sm">{formData.relationshipLevel || 1}</span>
         </div>
+        <Slider 
+          id="relationshipLevel"
+          min={1}
+          max={5}
+          step={1}
+          value={[formData.relationshipLevel || 1]}
+          onValueChange={(value) => handleRelationshipChange(value[0])}
+        />
+        <p className="text-xs text-muted-foreground pt-1">
+          Définit la proximité entre le client et son sénateur de 1 (simple connaissance) à 5 (très proche).
+        </p>
       </div>
     </div>
   );
