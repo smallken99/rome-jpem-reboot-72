@@ -1,69 +1,53 @@
-
 import React from 'react';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { 
-  Eye, 
-  ArrowRight, 
-  Check, 
-  X, 
-  HelpCircle, 
-  ShieldAlert,
-  Building,
-  Scale,
-  Users,
-  Sword,
-  CircleDollarSign,
-  Landmark
-} from 'lucide-react';
-import { Loi, LoiStatus, LoiCategory } from './hooks/useLoisManagement';
+import { Eye, ThumbsUp, ThumbsDown } from 'lucide-react';
+import { formatRomanDate } from '@/utils/formatUtils';
+import { StatusBadge } from '../../batiments/components/StatusBadge';
+
+export interface Law {
+  id: string;
+  title: string;
+  proposedBy: string;
+  proposedDate: {
+    year: number;
+    season: string;
+    day: number;
+  };
+  status: string;
+  category: string;
+  votes?: {
+    for: number;
+    against: number;
+  };
+}
 
 interface LoisTableProps {
-  lois: Loi[];
-  onViewLoi?: (loi: Loi) => void;
-  onAdvanceLoi?: (loiId: string) => void;
-  onVetoLoi?: (loiId: string) => void;
-  isEditable?: boolean;
+  laws: Law[];
+  onViewDetails?: (law: Law) => void;
+  onVote?: (lawId: string, vote: 'for' | 'against') => void;
 }
 
 export const LoisTable: React.FC<LoisTableProps> = ({
-  lois,
-  onViewLoi,
-  onAdvanceLoi,
-  onVetoLoi,
-  isEditable = false
+  laws = [],
+  onViewDetails,
+  onVote
 }) => {
-  // Obtenir l'icône pour une catégorie de loi
-  const getCategoryIcon = (category: LoiCategory) => {
-    switch(category) {
-      case 'politique': return <Building className="h-4 w-4" />;
-      case 'judiciaire': return <Scale className="h-4 w-4" />;
-      case 'sociale': return <Users className="h-4 w-4" />;
-      case 'militaire': return <Sword className="h-4 w-4" />;
-      case 'economique': return <CircleDollarSign className="h-4 w-4" />;
-      case 'religieuse': return <Landmark className="h-4 w-4" />;
-      default: return <HelpCircle className="h-4 w-4" />;
-    }
+  const canVoteOnLaw = (status: string) => {
+    return status === 'pending' || status === 'voting';
   };
 
-  // Obtenir le badge pour un statut de loi
-  const getStatusBadge = (status: LoiStatus) => {
+  const getStatusLabel = (status: string) => {
     switch(status) {
-      case 'proposed':
-        return <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200">Proposée</Badge>;
-      case 'debate':
-        return <Badge variant="outline" className="bg-amber-50 text-amber-700 border-amber-200">En débat</Badge>;
-      case 'voting':
-        return <Badge variant="outline" className="bg-purple-50 text-purple-700 border-purple-200">En vote</Badge>;
       case 'approved':
-        return <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">Approuvée</Badge>;
+        return 'approved';
       case 'rejected':
-        return <Badge variant="outline" className="bg-red-50 text-red-700 border-red-200">Rejetée</Badge>;
-      case 'vetoed':
-        return <Badge variant="outline" className="bg-gray-50 text-gray-700 border-gray-200">Veto</Badge>;
+        return 'abandoned';
+      case 'pending':
+      case 'voting':
+        return 'in_progress';
       default:
-        return <Badge variant="outline">Inconnu</Badge>;
+        return status;
     }
   };
 
@@ -72,85 +56,82 @@ export const LoisTable: React.FC<LoisTableProps> = ({
       <Table>
         <TableHeader>
           <TableRow>
-            <TableHead className="w-[250px]">Nom</TableHead>
-            <TableHead>Catégorie</TableHead>
+            <TableHead className="w-[300px]">Titre</TableHead>
             <TableHead>Proposée par</TableHead>
             <TableHead>Date</TableHead>
             <TableHead>Statut</TableHead>
+            <TableHead>Votes</TableHead>
             <TableHead className="text-right">Actions</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
-          {lois.length === 0 ? (
+          {laws.length === 0 ? (
             <TableRow>
               <TableCell colSpan={6} className="h-24 text-center">
                 Aucune loi trouvée.
               </TableCell>
             </TableRow>
           ) : (
-            lois.map((loi) => (
-              <TableRow key={loi.id}>
-                <TableCell className="font-medium">{loi.name}</TableCell>
+            laws.map((law) => (
+              <TableRow key={law.id}>
+                <TableCell className="font-medium">{law.title}</TableCell>
+                <TableCell>{law.proposedBy}</TableCell>
                 <TableCell>
-                  <div className="flex items-center gap-1">
-                    {getCategoryIcon(loi.category)}
-                    <span className="capitalize">{loi.category}</span>
-                  </div>
+                  {formatRomanDate(
+                    law.proposedDate.year,
+                    law.proposedDate.season,
+                    law.proposedDate.day
+                  )}
                 </TableCell>
-                <TableCell>{loi.proposedBy}</TableCell>
-                <TableCell>{loi.proposedDate}</TableCell>
-                <TableCell>{getStatusBadge(loi.status)}</TableCell>
+                <TableCell>
+                  <StatusBadge status={getStatusLabel(law.status)} />
+                </TableCell>
+                <TableCell>
+                  {law.votes ? (
+                    <div className="flex items-center gap-2">
+                      <div className="flex items-center">
+                        <ThumbsUp className="h-4 w-4 text-green-600 mr-1" />
+                        <span>{law.votes.for}</span>
+                      </div>
+                      <div className="flex items-center">
+                        <ThumbsDown className="h-4 w-4 text-red-600 mr-1" />
+                        <span>{law.votes.against}</span>
+                      </div>
+                    </div>
+                  ) : (
+                    <span className="text-muted-foreground">Pas de vote</span>
+                  )}
+                </TableCell>
                 <TableCell className="text-right">
                   <div className="flex justify-end gap-2">
-                    <Button 
-                      variant="outline" 
+                    <Button
+                      variant="outline"
                       size="sm"
-                      onClick={() => onViewLoi && onViewLoi(loi)}
+                      onClick={() => onViewDetails && onViewDetails(law)}
                     >
                       <Eye className="h-4 w-4" />
                     </Button>
                     
-                    {isEditable && loi.status !== 'approved' && loi.status !== 'rejected' && loi.status !== 'vetoed' && (
+                    {canVoteOnLaw(law.status) && onVote && (
                       <>
-                        <Button 
-                          variant="outline" 
-                          size="sm" 
-                          onClick={() => onAdvanceLoi && onAdvanceLoi(loi.id)}
-                          disabled={loi.status === 'approved' || loi.status === 'rejected' || loi.status === 'vetoed'}
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="border-green-300 bg-green-50"
+                          onClick={() => onVote(law.id, 'for')}
                         >
-                          <ArrowRight className="h-4 w-4" />
+                          <ThumbsUp className="h-4 w-4 text-green-600" />
                         </Button>
                         
-                        <Button 
-                          variant="outline" 
+                        <Button
+                          variant="outline"
                           size="sm"
-                          onClick={() => onVetoLoi && onVetoLoi(loi.id)}
-                          disabled={loi.status === 'approved' || loi.status === 'rejected' || loi.status === 'vetoed'}
+                          className="border-red-300 bg-red-50"
+                          onClick={() => onVote(law.id, 'against')}
                         >
-                          <ShieldAlert className="h-4 w-4" />
+                          <ThumbsDown className="h-4 w-4 text-red-600" />
                         </Button>
                       </>
-                    )}
-                    
-                    {loi.status === 'voting' && (
-                      <div className="flex gap-1">
-                        <Button 
-                          variant="outline" 
-                          size="icon" 
-                          className="h-8 w-8 bg-green-50 hover:bg-green-100"
-                          title="Voter pour"
-                        >
-                          <Check className="h-4 w-4 text-green-600" />
-                        </Button>
-                        <Button 
-                          variant="outline" 
-                          size="icon" 
-                          className="h-8 w-8 bg-red-50 hover:bg-red-100"
-                          title="Voter contre"
-                        >
-                          <X className="h-4 w-4 text-red-600" />
-                        </Button>
-                      </div>
                     )}
                   </div>
                 </TableCell>

@@ -1,121 +1,99 @@
 
 import React from 'react';
-import { Character } from '@/types/character';
+import { Character, CharacterStat } from '@/types/character';
+import { Card, CardContent, CardFooter, CardHeader } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Flame, Info } from 'lucide-react';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { Badge } from '@/components/ui/badge';
+import { StatBar } from '@/components/famille/StatBar';
 
 interface VestaleCandidateProps {
-  candidate: Character;
-  onPropose: (candidateId: string) => void;
+  character: Character;
+  onSelect: (characterId: string) => void;
 }
 
-export const VestaleCandidate: React.FC<VestaleCandidateProps> = ({ candidate, onPropose }) => {
-  // Obtenir les initiales pour l'avatar fallback
-  const getInitials = (name: string) => {
-    return name
-      .split(' ')
-      .map(part => part[0])
-      .join('')
-      .toUpperCase();
+export const VestaleCandidate: React.FC<VestaleCandidateProps> = ({ 
+  character, 
+  onSelect 
+}) => {
+  // Fonction pour vérifier si un stat est supérieur à une valeur
+  const isStatHigherThan = (stat: number | CharacterStat, value: number): boolean => {
+    if (typeof stat === 'number') {
+      return stat > value;
+    }
+    return false;
   };
 
-  // Qualités pertinentes pour une vestale
-  const qualities = [
-    { name: 'Piété', value: candidate.stats.piety || 0 },
-    { name: 'Éloquence', value: candidate.stats.oratory || 0 },
-  ];
-
-  // Calculer si la candidate est particulièrement prometteuse (piété élevée)
-  const isPromising = (candidate.stats.piety || 0) > 70;
+  // Fonction pour transformer un stat en string lisible
+  const formatStat = (stat: number | CharacterStat): string => {
+    if (typeof stat === 'number') {
+      return stat.toString();
+    }
+    return '0';
+  };
 
   return (
-    <div className="border border-rome-gold/30 rounded-md p-4 bg-white hover:border-rome-gold/60 transition-all">
-      <div className="flex items-start gap-3">
-        <Avatar className="h-12 w-12">
-          <AvatarImage src={candidate.portrait} alt={candidate.name} />
-          <AvatarFallback className="bg-rome-terracotta/20">{getInitials(candidate.name)}</AvatarFallback>
-        </Avatar>
-        
-        <div className="flex-1">
-          <div className="flex justify-between items-start">
-            <div>
-              <h4 className="font-cinzel font-medium">{candidate.name}</h4>
-              <p className="text-xs text-muted-foreground">{candidate.age} ans</p>
-            </div>
-            {isPromising && (
-              <Badge className="bg-rome-gold text-white border-none">Prometteuse</Badge>
-            )}
+    <Card className="border border-amber-200 bg-amber-50/50">
+      <CardHeader className="bg-amber-100">
+        <div className="text-center">
+          <h3 className="font-cinzel text-lg">{character.firstName} {character.lastName}</h3>
+          <p className="text-sm text-muted-foreground">Âge: {character.age} ans</p>
+        </div>
+      </CardHeader>
+      <CardContent className="pt-4 space-y-4">
+        <div className="grid grid-cols-2 gap-2">
+          <div>
+            <p className="text-sm font-medium mb-1">Piété:</p>
+            <StatBar 
+              value={typeof character.stats.piety === 'number' ? character.stats.piety : 0} 
+              maxValue={100} 
+              className={isStatHigherThan(character.stats.piety, 70) ? "bg-green-500" : "bg-amber-500"}
+            />
           </div>
-          
-          <div className="mt-3 space-y-2">
-            {qualities.map(quality => (
-              <div key={quality.name} className="flex items-center gap-2">
-                <span className="text-xs font-medium w-20">{quality.name}:</span>
-                <div className="h-2 flex-1 bg-rome-parchment/50 rounded-full overflow-hidden">
-                  <div 
-                    className="h-full bg-rome-gold rounded-full"
-                    style={{ width: `${quality.value}%` }}
-                  />
-                </div>
-                <span className="text-xs">{quality.value}%</span>
-              </div>
+          <div>
+            <p className="text-sm font-medium mb-1">Discipline:</p>
+            <StatBar 
+              value={typeof character.stats.discipline === 'number' ? character.stats.discipline : 0} 
+              maxValue={100} 
+              className={isStatHigherThan(character.stats.discipline, 60) ? "bg-green-500" : "bg-amber-500"}
+            />
+          </div>
+        </div>
+
+        <div>
+          <h4 className="text-sm font-medium mb-1">Traits:</h4>
+          <div className="flex flex-wrap gap-1">
+            {character.traits && character.traits.map((trait, index) => (
+              <span key={index} className="text-xs bg-white px-2 py-1 rounded border">
+                {trait}
+              </span>
             ))}
           </div>
         </div>
-      </div>
-      
-      <div className="mt-4 flex justify-between">
-        <Dialog>
-          <DialogTrigger asChild>
-            <Button variant="outline" size="sm" className="text-xs">
-              <Info className="h-3 w-3 mr-1" />
-              Détails
-            </Button>
-          </DialogTrigger>
-          <DialogContent className="bg-white">
-            <DialogHeader>
-              <DialogTitle className="font-cinzel text-lg">{candidate.name}</DialogTitle>
-            </DialogHeader>
-            <div className="space-y-4">
-              <div>
-                <h4 className="font-medium mb-1">Informations</h4>
-                <p className="text-sm text-muted-foreground">
-                  Âge: {candidate.age} ans<br />
-                  Éducation: {candidate.education?.type || 'Non débutée'}<br />
-                  Personnalité: {candidate.traits?.join(', ') || 'Douce et pieuse'}
-                </p>
-              </div>
-              
-              <div>
-                <h4 className="font-medium mb-1">Qualités pour le service de Vesta</h4>
-                <p className="text-sm text-muted-foreground">
-                  La jeune {candidate.name} montre une piété exemplaire et un respect profond des traditions. 
-                  Son tempérament calme et sa capacité à apprendre rapidement en font une excellente candidate pour servir Vesta.
-                </p>
-              </div>
-              
-              <div className="bg-rose-50 p-3 rounded-md">
-                <h4 className="font-medium text-rose-800 mb-1">Important</h4>
-                <p className="text-sm text-rose-700">
-                  Une fois proposée comme vestale, la jeune fille devra passer par une sélection rigoureuse. 
-                  Si elle est choisie, elle sera retirée de votre famille pour 30 ans de service au temple de Vesta.
-                </p>
-              </div>
-            </div>
-          </DialogContent>
-        </Dialog>
-        
+
+        <div>
+          <h4 className="text-sm font-medium mb-1">Éligibilité:</h4>
+          <p className="text-sm">
+            {character.spouse ? (
+              <span className="text-red-600">Non éligible - Déjà mariée</span>
+            ) : (
+              isStatHigherThan(character.stats.piety, 70) && isStatHigherThan(character.stats.discipline, 60) ? (
+                <span className="text-green-600">Excellente candidate</span>
+              ) : (
+                <span className="text-amber-600">Candidate acceptable</span>
+              )
+            )}
+          </p>
+        </div>
+      </CardContent>
+      <CardFooter>
         <Button 
-          className="bg-rome-navy hover:bg-rome-navy/90"
-          onClick={() => onPropose(candidate.id)}
+          variant="outline" 
+          className="w-full border-amber-300 hover:bg-amber-100"
+          onClick={() => onSelect(character.id)}
+          disabled={character.spouse !== undefined}
         >
-          <Flame className="h-4 w-4 mr-2" />
-          Proposer comme vestale
+          Sélectionner comme Vestale
         </Button>
-      </div>
-    </div>
+      </CardFooter>
+    </Card>
   );
 };
