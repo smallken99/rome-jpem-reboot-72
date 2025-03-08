@@ -3,14 +3,15 @@ import React from 'react';
 import { Card, CardContent, CardFooter, CardHeader } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { SenateurJouable } from '../types/senateurs';
-import { Edit, User, UserCheck } from 'lucide-react';
+import { Edit, User, UserCheck, Trash } from 'lucide-react';
 
 export interface SenateurCardProps {
   senateur: SenateurJouable;
-  onEdit?: () => void; // Make onEdit optional
+  onEdit?: () => void; 
+  onDelete?: () => void; // Ajout de la propriété onDelete
 }
 
-export const SenateurCard: React.FC<SenateurCardProps> = ({ senateur, onEdit }) => {
+export const SenateurCard: React.FC<SenateurCardProps> = ({ senateur, onEdit, onDelete }) => {
   const isAssigned = !!senateur.playerId;
   
   return (
@@ -31,10 +32,10 @@ export const SenateurCard: React.FC<SenateurCardProps> = ({ senateur, onEdit }) 
             senateur.appartenance === 'Populares' ? 'bg-red-100 text-red-700' : 
             'bg-purple-100 text-purple-700'
           }`}>
-            {senateur.appartenance}
+            {senateur.appartenance || 'Neutre'}
           </span>
         </div>
-        <p className="text-sm text-muted-foreground">Famille {senateur.famille}</p>
+        <p className="text-sm text-muted-foreground">Famille {senateur.famille || senateur.gens}</p>
       </CardHeader>
       
       <CardContent className="p-4">
@@ -45,11 +46,11 @@ export const SenateurCard: React.FC<SenateurCardProps> = ({ senateur, onEdit }) 
           </div>
           <div className="flex flex-col">
             <span className="text-muted-foreground">Fonction</span>
-            <span>{senateur.fonction}</span>
+            <span>{senateur.fonction || 'Aucune'}</span>
           </div>
           <div className="flex flex-col">
             <span className="text-muted-foreground">Popularité</span>
-            <span>{senateur.popularite}/100</span>
+            <span>{senateur.popularite || '0'}/100</span>
           </div>
           <div className="flex flex-col">
             <span className="text-muted-foreground">Influence</span>
@@ -73,13 +74,21 @@ export const SenateurCard: React.FC<SenateurCardProps> = ({ senateur, onEdit }) 
           )}
         </div>
         
-        {/* Only render the Edit button if onEdit is provided */}
-        {onEdit && (
-          <Button variant="ghost" size="sm" onClick={onEdit}>
-            <Edit className="h-4 w-4 mr-1" />
-            Modifier
-          </Button>
-        )}
+        <div className="flex space-x-2">
+          {onEdit && (
+            <Button variant="ghost" size="sm" onClick={onEdit}>
+              <Edit className="h-4 w-4 mr-1" />
+              Modifier
+            </Button>
+          )}
+          
+          {onDelete && (
+            <Button variant="ghost" size="sm" onClick={onDelete} className="text-red-500 hover:text-red-700">
+              <Trash className="h-4 w-4 mr-1" />
+              Supprimer
+            </Button>
+          )}
+        </div>
       </CardFooter>
     </Card>
   );

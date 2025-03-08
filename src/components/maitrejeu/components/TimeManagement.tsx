@@ -1,118 +1,102 @@
 
-import React, { useState } from 'react';
+import React from 'react';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { GamePhase } from '../types/common';
-import { ArrowRight, Calendar, Clock } from 'lucide-react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useMaitreJeu } from '../context';
+import { GamePhase, Season } from '../types/common';
+import { ArrowRight, SkipForward } from 'lucide-react';
 
-export const TimeManagement: React.FC = () => {
-  const { currentYear, currentSeason, currentPhase, advanceTime, changePhase } = useMaitreJeu();
-  const [selectedPhase, setSelectedPhase] = useState<GamePhase>(currentPhase as GamePhase);
+export const TimeManagement = () => {
+  const { currentYear, currentSeason, currentPhase, changePhase, advanceTime } = useMaitreJeu();
   
-  const seasonName = {
-    'SPRING': 'Ver (Printemps)',
-    'SUMMER': 'Aestas (Été)',
-    'AUTUMN': 'Autumnus (Automne)',
-    'WINTER': 'Hiems (Hiver)'
+  const handlePhaseChange = (newPhase: GamePhase) => {
+    changePhase(newPhase);
   };
   
-  const handlePhaseChange = () => {
-    if (selectedPhase) {
-      changePhase(selectedPhase);
+  const handleAdvanceTime = () => {
+    advanceTime();
+  };
+  
+  const handleAdvanceToSeason = (season: Season) => {
+    advanceTime(season);
+  };
+  
+  const getSeasonInFrench = (season: Season) => {
+    switch (season) {
+      case 'SPRING': return 'Printemps';
+      case 'SUMMER': return 'Été';
+      case 'AUTUMN': return 'Automne';
+      case 'WINTER': return 'Hiver';
+      default: return season;
+    }
+  };
+  
+  const getPhaseInFrench = (phase: GamePhase) => {
+    switch (phase) {
+      case 'POLITIQUE': return 'Politique';
+      case 'ECONOMIE': return 'Économie';
+      case 'MILITAIRE': return 'Militaire';
+      case 'RELIGION': return 'Religion';
+      case 'SOCIAL': return 'Social';
+      default: return phase;
     }
   };
   
   return (
-    <div className="space-y-6">
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center">
-            <Calendar className="h-5 w-5 mr-2" />
-            Date et Phase Actuelle
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div className="bg-blue-50 p-4 rounded-md">
-              <div className="text-blue-800 text-sm font-medium">Année</div>
-              <div className="text-2xl font-bold mt-1">{currentYear} AUC</div>
-            </div>
-            <div className="bg-green-50 p-4 rounded-md">
-              <div className="text-green-800 text-sm font-medium">Saison</div>
-              <div className="text-2xl font-bold mt-1">{seasonName[currentSeason]}</div>
-            </div>
-            <div className="bg-amber-50 p-4 rounded-md">
-              <div className="text-amber-800 text-sm font-medium">Phase</div>
-              <div className="text-2xl font-bold mt-1">{currentPhase}</div>
+    <Card>
+      <CardHeader>
+        <CardTitle>Gestion du Temps</CardTitle>
+      </CardHeader>
+      <CardContent>
+        <div className="space-y-4">
+          <div>
+            <h3 className="font-semibold mb-2">Période Actuelle</h3>
+            <div className="bg-gray-100 p-3 rounded-md">
+              <div className="font-medium text-lg">Année {currentYear} AUC, {getSeasonInFrench(currentSeason)}</div>
+              <div className="text-sm text-muted-foreground">Phase actuelle: {getPhaseInFrench(currentPhase)}</div>
             </div>
           </div>
-        </CardContent>
-      </Card>
-      
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center">
-              <Clock className="h-5 w-5 mr-2" />
-              Avancer le Temps
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-4">
-              <p className="text-sm text-muted-foreground">
-                Avancez le temps à la saison suivante. Cela déclenchera les événements programmés pour la prochaine saison.
-              </p>
-              <Button 
-                className="w-full"
-                onClick={advanceTime}
-              >
-                Avancer à la saison suivante
-                <ArrowRight className="h-4 w-4 ml-2" />
+          
+          <div>
+            <h3 className="font-semibold mb-2">Changer de Phase</h3>
+            <Select value={currentPhase} onValueChange={(value) => handlePhaseChange(value as GamePhase)}>
+              <SelectTrigger>
+                <SelectValue placeholder="Sélectionner une phase" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="POLITIQUE">Politique</SelectItem>
+                <SelectItem value="ECONOMIE">Économie</SelectItem>
+                <SelectItem value="MILITAIRE">Militaire</SelectItem>
+                <SelectItem value="RELIGION">Religion</SelectItem>
+                <SelectItem value="SOCIAL">Social</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+          
+          <div>
+            <h3 className="font-semibold mb-2">Avancer le Temps</h3>
+            <div className="grid grid-cols-2 gap-2">
+              <Button onClick={() => handleAdvanceTime()} className="w-full">
+                <ArrowRight className="h-4 w-4 mr-2" />
+                Saison Suivante
               </Button>
+              
+              <Select onValueChange={(value) => handleAdvanceToSeason(value as Season)}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Avancer jusqu'à..." />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="SPRING">Printemps</SelectItem>
+                  <SelectItem value="SUMMER">Été</SelectItem>
+                  <SelectItem value="AUTUMN">Automne</SelectItem>
+                  <SelectItem value="WINTER">Hiver</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
-          </CardContent>
-        </Card>
-        
-        <Card>
-          <CardHeader>
-            <CardTitle>Changer de Phase</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-4">
-              <div>
-                <Select
-                  value={selectedPhase}
-                  onValueChange={(value) => setSelectedPhase(value as GamePhase)}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Sélectionner une phase" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="SETUP">Configuration</SelectItem>
-                    <SelectItem value="ELECTION">Élections</SelectItem>
-                    <SelectItem value="SENAT">Sénat</SelectItem>
-                    <SelectItem value="ACTION">Actions</SelectItem>
-                    <SelectItem value="EVENEMENT">Événements</SelectItem>
-                    <SelectItem value="ADMINISTRATION">Administration</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              <Button 
-                variant="outline" 
-                className="w-full"
-                onClick={handlePhaseChange}
-                disabled={selectedPhase === currentPhase}
-              >
-                Passer à la phase {selectedPhase}
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-    </div>
+          </div>
+        </div>
+      </CardContent>
+    </Card>
   );
 };
-
-export default TimeManagement;

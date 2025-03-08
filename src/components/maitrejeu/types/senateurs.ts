@@ -21,4 +21,11 @@ export interface SenateurJouable {
   influence: number;
   competences: Competences;
   magistrature?: MagistratureType;
+  
+  // Propriétés additionnelles requises par les composants
+  famille?: string;
+  fonction?: string;
+  popularite?: number;
+  appartenance?: "Optimates" | "Populares" | "Neutral";
+  playerId?: string;
 }
