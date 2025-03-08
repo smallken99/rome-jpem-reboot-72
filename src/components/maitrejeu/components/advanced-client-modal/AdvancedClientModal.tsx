@@ -38,12 +38,14 @@ export const AdvancedClientModal: React.FC<AdvancedClientModalProps> = ({
   
   const handleSubmit = () => {
     if (isEditMode && client) {
+      // For edit mode, we need to ensure the id is preserved
       onSave({
         ...client,
         ...formData
-      });
+      } as Client);
     } else {
-      onSave(formData);
+      // For creation mode, we pass formData as ClientCreationData
+      onSave(formData as ClientCreationData);
     }
   };
   

@@ -1,7 +1,7 @@
 
 import { useState } from 'react';
-import { Client, ClientType } from '../../types/clients';
-import { ClientInfluence } from '@/components/clientele/ClientCard';
+import { Client } from '../../types/clients';
+import { ClientInfluence, ClientType } from '@/components/clientele/ClientCard';
 
 const defaultFormData: Partial<Client> = {
   name: '',
