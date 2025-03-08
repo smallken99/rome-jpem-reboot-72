@@ -1,6 +1,5 @@
 
 // Re-export all types
-export * from './equilibre';
 export * from './faction';
 export * from './evenements';
 export * from './lois';
@@ -15,3 +14,9 @@ export * from './timeManagement';
 export type { GamePhase, Season, ImportanceType, PhaseType } from './common';
 export type { GameDate } from './common';
 export { generateId, adaptLegacyData, convertTimeSeasonToMaitreJeuSeason, convertMaitreJeuSeasonToTimeSeason, createGameDate } from './common';
+
+// Re-export equilibre types, but handle PoliticalEvent with a specific export to avoid ambiguity
+export type { Equilibre } from './equilibre';
+// Explicitly re-export PoliticalEvent with a namespace to avoid conflict
+import * as EquilibreTypes from './equilibre';
+export { EquilibreTypes };

@@ -1,3 +1,4 @@
+
 import React, { createContext, useState, useContext, useEffect, ReactNode } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 import { generateId } from '../types/common';
@@ -37,16 +38,16 @@ export interface MaitreJeuContextType {
   updateProvince: (updatedProvince: Province) => void;
   addEvenement: (newEvenement: Omit<Evenement, 'id'>) => void;
   resolveEvenement: (evenementId: string, optionId: string) => void;
-  planifierElection: (magistrature: string, year: number, season: Season) => void;
+  scheduleElection: (magistrature: string, year: number, season: Season) => string;
   addCandidateToElection: (electionId: string, candidateId: string) => void;
-  proposerLoi: (nouvelleLoi: Omit<Loi, 'id'>) => void;
-  voterLoi: (loiId: string, type: 'pour' | 'contre' | 'abstention', nombre: number) => void;
+  addLoi: (nouvelleLoi: Omit<Loi, 'id'>) => void;
+  voteLoi: (loiId: string, type: 'pour' | 'contre' | 'abstention', nombre: number) => void;
   addHistoireEntry: (entry: Omit<HistoireEntry, 'id'>) => void;
   updateEquilibre: (newValues: Partial<Equilibre>) => void;
 }
 
 // Contexte pour le maître du jeu
-export const MaitreJeuContext = createContext<MaitreJeuContextType>({} as MaitreJeuContextType);
+const MaitreJeuContext = createContext<MaitreJeuContextType>({} as MaitreJeuContextType);
 
 // Hook pour utiliser le contexte
 export const useMaitreJeu = () => useContext(MaitreJeuContext);
@@ -148,7 +149,8 @@ export const MaitreJeuProvider: React.FC<MaitreJeuProviderProps> = ({ children }
     plébéiens: 60,
     populares: 45,
     optimates: 55,
-    neutrales: 50
+    neutrales: 50,
+    moderates: 25
   });
   
   const [evenements, setEvenements] = useState<Evenement[]>([
@@ -327,9 +329,10 @@ export const MaitreJeuProvider: React.FC<MaitreJeuProviderProps> = ({ children }
   };
   
   // Fonctions pour les élections
-  const planifierElection = (magistrature: string, year: number, season: Season) => {
+  const scheduleElection = (magistrature: string, year: number, season: Season): string => {
+    const newElectionId = uuidv4();
     const nouvelleElection: Election = {
-      id: generateId(),
+      id: newElectionId,
       magistrature,
       annee: year,
       saison: season,
@@ -343,6 +346,7 @@ export const MaitreJeuProvider: React.FC<MaitreJeuProviderProps> = ({ children }
     };
     
     setElections(prev => [...prev, nouvelleElection]);
+    return newElectionId;
   };
   
   const addCandidateToElection = (electionId: string, candidateId: string) => {
@@ -351,7 +355,7 @@ export const MaitreJeuProvider: React.FC<MaitreJeuProviderProps> = ({ children }
         return {
           ...e,
           candidats: [...e.candidats, candidateId],
-          candidates: [...e.candidates || [], candidateId]
+          candidates: [...(e.candidates || []), candidateId]
         };
       }
       return e;
@@ -359,16 +363,25 @@ export const MaitreJeuProvider: React.FC<MaitreJeuProviderProps> = ({ children }
   };
   
   // Fonctions pour les lois
-  const proposerLoi = (nouvelleLoi: Omit<Loi, 'id'>) => {
+  const addLoi = (nouvelleLoi: Omit<Loi, 'id'>) => {
     const loiAvecId: Loi = {
       ...nouvelleLoi,
-      id: uuidv4()
+      id: uuidv4(),
+      votesPositifs: 0,
+      votesNégatifs: 0,
+      votesAbstention: 0,
+      état: 'proposée',
+      date: {
+        year: currentYear,
+        season: currentSeason
+      },
+      effets: nouvelleLoi.effets || {}
     };
     
     setLois(prev => [...prev, loiAvecId]);
   };
   
-  const voterLoi = (loiId: string, type: 'pour' | 'contre' | 'abstention', nombre: number) => {
+  const voteLoi = (loiId: string, type: 'pour' | 'contre' | 'abstention', nombre: number) => {
     setLois(prev => prev.map(l => {
       if (l.id === loiId) {
         const updatedLoi = { ...l };
@@ -444,13 +457,13 @@ export const MaitreJeuProvider: React.FC<MaitreJeuProviderProps> = ({ children }
     
     // Élections
     elections,
-    planifierElection,
+    scheduleElection, // Updated from planifierElection to match interface
     addCandidateToElection,
     
     // Lois
     lois,
-    proposerLoi,
-    voterLoi,
+    addLoi, // Updated from proposerLoi to match interface
+    voteLoi,
     
     // Histoire
     histoireEntries,

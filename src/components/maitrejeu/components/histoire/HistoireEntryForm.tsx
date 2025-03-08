@@ -1,200 +1,222 @@
 
-import React, { useState } from 'react';
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { HistoireEntry } from '../../types/histoire';
-import { Season } from '../../types/common';
+import { useHistoireEntries } from "./useHistoireEntries";
+import { Season } from "../../types/common";
+import { HistoireEntry } from "../../types/histoire";
 
-interface HistoireEntryFormProps {
-  year: number;
-  season: Season;
-  onSubmit: (entry: Omit<HistoireEntry, "id">) => void;
+// Extend the HistoireEntry type to include the additional fields we need
+interface ExtendedHistoireEntry extends Omit<HistoireEntry, "id"> {
+  personnagesImpliqués?: string[];
+  type?: string;
 }
 
-export const HistoireEntryForm: React.FC<HistoireEntryFormProps> = ({ 
-  year, 
-  season, 
-  onSubmit 
-}) => {
-  const [newEntry, setNewEntry] = useState<Omit<HistoireEntry, "id">>({
-    titre: '',
-    contenu: '',
+export function HistoireEntryForm() {
+  const { createHistoireEntry, currentYear, currentSeason } = useHistoireEntries();
+
+  const [entry, setEntry] = useState<ExtendedHistoireEntry>({
+    titre: "",
+    contenu: "",
     date: {
-      year: year,
-      season: season,
-      day: 1
+      year: currentYear,
+      season: currentSeason
     },
-    catégorie: 'POLITIQUE',
-    importance: 'normale',
+    catégorie: "POLITIQUE",
+    importance: "normale",
+    auteur: "Système",
     visible: true,
-    personnagesImpliqués: [],
-    type: 'POLITIQUE'
+    personnagesImpliqués: []
   });
-  
-  const [personnage, setPersonnage] = useState('');
-  const [entryType, setEntryType] = useState<string>('POLITIQUE');
-  
-  const handleAddPersonnage = () => {
-    if (personnage.trim()) {
-      setNewEntry({
-        ...newEntry,
-        personnagesImpliqués: [...(newEntry.personnagesImpliqués || []), personnage.trim()]
-      });
-      setPersonnage('');
-    }
-  };
-  
-  const handleRemovePersonnage = (index: number) => {
-    setNewEntry({
-      ...newEntry,
-      personnagesImpliqués: newEntry.personnagesImpliqués?.filter((_, i) => i !== index)
+
+  const handlePersonnageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const personnages = e.target.value.split(",").map(p => p.trim());
+    setEntry({
+      ...entry,
+      personnagesImpliqués: personnages
     });
   };
-  
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    setEntry({
+      ...entry,
+      [e.target.name]: e.target.value
+    });
+  };
+
+  const handleSelectChange = (field: keyof ExtendedHistoireEntry, value: string) => {
+    setEntry({
+      ...entry,
+      [field]: value
+    });
+  };
+
+  const handleSeasonChange = (value: Season) => {
+    setEntry({
+      ...entry,
+      date: { ...entry.date, season: value }
+    });
+  };
+
+  const handleYearChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setEntry({
+      ...entry,
+      date: { ...entry.date, year: parseInt(e.target.value, 10) }
+    });
+  };
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    // Prepare the data to match the expected HistoireEntry type
+    // Remove any extended properties before submitting
+    const { personnagesImpliqués, type, ...standardEntry } = entry;
     
-    onSubmit({
-      ...newEntry,
-      type: entryType
-    });
+    // Add the entry to the histoire records
+    createHistoireEntry(standardEntry);
     
-    // Reset form
-    setNewEntry({
-      titre: '',
-      contenu: '',
+    // Reset the form
+    setEntry({
+      titre: "",
+      contenu: "",
       date: {
-        year: year,
-        season: season,
-        day: 1
+        year: currentYear,
+        season: currentSeason
       },
-      catégorie: 'POLITIQUE',
-      importance: 'normale',
+      catégorie: "POLITIQUE",
+      importance: "normale",
+      auteur: "Système",
       visible: true,
-      personnagesImpliqués: [],
-      type: 'POLITIQUE'
+      personnagesImpliqués: []
     });
-    setEntryType('POLITIQUE');
   };
 
   return (
-    <div className="p-4 bg-white rounded-md shadow">
-      <h3 className="text-lg font-semibold mb-4">Ajouter un événement historique</h3>
-      <form onSubmit={handleSubmit} className="space-y-4">
-        <div>
-          <label className="block text-sm font-medium mb-1">Titre</label>
-          <Input 
-            value={newEntry.titre}
-            onChange={(e) => setNewEntry({...newEntry, titre: e.target.value})}
-            placeholder="Titre de l'événement"
+    <form onSubmit={handleSubmit} className="space-y-6">
+      <div className="space-y-2">
+        <Label htmlFor="titre">Titre</Label>
+        <Input
+          id="titre"
+          name="titre"
+          value={entry.titre}
+          onChange={handleInputChange}
+          placeholder="Titre de l'entrée historique"
+          required
+        />
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="space-y-2">
+          <Label htmlFor="year">Année</Label>
+          <Input
+            id="year"
+            name="year"
+            type="number"
+            value={entry.date.year}
+            onChange={handleYearChange}
             required
           />
         </div>
-        
-        <div className="grid grid-cols-2 gap-3">
-          <div>
-            <label className="block text-sm font-medium mb-1">Année</label>
-            <Input 
-              type="number"
-              value={newEntry.date.year}
-              onChange={(e) => setNewEntry({
-                ...newEntry, 
-                date: {...newEntry.date, year: parseInt(e.target.value)}
-              })}
-              required
-            />
-          </div>
-          <div>
-            <label className="block text-sm font-medium mb-1">Saison</label>
-            <Select 
-              value={newEntry.date.season} 
-              onValueChange={(value: Season) => setNewEntry({
-                ...newEntry, 
-                date: {...newEntry.date, season: value}
-              })}
-            >
-              <SelectTrigger>
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="SPRING">Printemps</SelectItem>
-                <SelectItem value="SUMMER">Été</SelectItem>
-                <SelectItem value="AUTUMN">Automne</SelectItem>
-                <SelectItem value="WINTER">Hiver</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-        </div>
-        
-        <div>
-          <label className="block text-sm font-medium mb-1">Type</label>
-          <Select 
-            value={entryType} 
-            onValueChange={setEntryType}
+
+        <div className="space-y-2">
+          <Label htmlFor="season">Saison</Label>
+          <Select
+            value={entry.date.season}
+            onValueChange={(value) => handleSeasonChange(value as Season)}
           >
             <SelectTrigger>
-              <SelectValue />
+              <SelectValue placeholder="Choisir la saison" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="SPRING">Printemps</SelectItem>
+              <SelectItem value="SUMMER">Été</SelectItem>
+              <SelectItem value="AUTUMN">Automne</SelectItem>
+              <SelectItem value="WINTER">Hiver</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="space-y-2">
+          <Label htmlFor="catégorie">Catégorie</Label>
+          <Select
+            value={entry.catégorie}
+            onValueChange={(value) => handleSelectChange("catégorie", value)}
+          >
+            <SelectTrigger>
+              <SelectValue placeholder="Choisir une catégorie" />
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="POLITIQUE">Politique</SelectItem>
               <SelectItem value="MILITAIRE">Militaire</SelectItem>
-              <SelectItem value="SOCIAL">Social</SelectItem>
-              <SelectItem value="RELIGIEUX">Religieux</SelectItem>
               <SelectItem value="ECONOMIQUE">Économique</SelectItem>
+              <SelectItem value="SOCIAL">Social</SelectItem>
+              <SelectItem value="RELIGION">Religion</SelectItem>
+              <SelectItem value="CULTURE">Culture</SelectItem>
             </SelectContent>
           </Select>
         </div>
-        
-        <div>
-          <label className="block text-sm font-medium mb-1">Contenu</label>
-          <Textarea 
-            value={newEntry.contenu}
-            onChange={(e) => setNewEntry({...newEntry, contenu: e.target.value})}
-            placeholder="Détails de l'événement historique..."
-            className="min-h-[150px]"
-            required
-          />
+
+        <div className="space-y-2">
+          <Label htmlFor="importance">Importance</Label>
+          <Select
+            value={entry.importance}
+            onValueChange={(value) => handleSelectChange("importance", value as any)}
+          >
+            <SelectTrigger>
+              <SelectValue placeholder="Choisir l'importance" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="majeure">Majeure</SelectItem>
+              <SelectItem value="normale">Normale</SelectItem>
+              <SelectItem value="mineure">Mineure</SelectItem>
+            </SelectContent>
+          </Select>
         </div>
-        
-        <div>
-          <label className="block text-sm font-medium mb-1">Personnages impliqués</label>
-          <div className="flex gap-2">
-            <Input 
-              value={personnage}
-              onChange={(e) => setPersonnage(e.target.value)}
-              placeholder="Nom du personnage"
-            />
-            <Button type="button" onClick={handleAddPersonnage} variant="outline">
-              Ajouter
-            </Button>
-          </div>
-          
-          {newEntry.personnagesImpliqués && newEntry.personnagesImpliqués.length > 0 && (
-            <div className="mt-2 space-y-1">
-              {newEntry.personnagesImpliqués.map((p, index) => (
-                <div key={index} className="flex justify-between items-center bg-gray-100 p-2 rounded">
-                  <span>{p}</span>
-                  <Button 
-                    type="button" 
-                    onClick={() => handleRemovePersonnage(index)}
-                    variant="ghost" 
-                    size="sm" 
-                    className="h-7 text-red-600"
-                  >
-                    Retirer
-                  </Button>
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
-        
-        <Button type="submit" className="w-full">
-          Enregistrer l'événement
-        </Button>
-      </form>
-    </div>
+      </div>
+
+      <div className="space-y-2">
+        <Label htmlFor="personnagesImpliqués">Personnages impliqués (séparés par des virgules)</Label>
+        <Input
+          id="personnagesImpliqués"
+          name="personnagesImpliqués"
+          value={entry.personnagesImpliqués?.join(", ") || ""}
+          onChange={handlePersonnageChange}
+          placeholder="Personnages impliqués"
+        />
+      </div>
+
+      <div className="space-y-2">
+        <Label htmlFor="contenu">Contenu</Label>
+        <Textarea
+          id="contenu"
+          name="contenu"
+          value={entry.contenu}
+          onChange={handleInputChange}
+          placeholder="Détails de l'événement historique"
+          rows={6}
+          required
+        />
+      </div>
+
+      <div className="space-y-2">
+        <Label htmlFor="auteur">Auteur</Label>
+        <Input
+          id="auteur"
+          name="auteur"
+          value={entry.auteur}
+          onChange={handleInputChange}
+          placeholder="Auteur de l'entrée"
+          required
+        />
+      </div>
+
+      <div className="flex justify-end">
+        <Button type="submit">Enregistrer l'entrée historique</Button>
+      </div>
+    </form>
   );
-};
+}

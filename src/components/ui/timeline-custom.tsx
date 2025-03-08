@@ -119,14 +119,27 @@ const TimelineContent = React.forwardRef<HTMLDivElement, TimelineContentProps>(
 );
 TimelineContent.displayName = "TimelineContent";
 
-Timeline.Item = TimelineItem;
-Timeline.Header = TimelineHeader;
-Timeline.Title = TimelineTitle;
-Timeline.Badge = TimelineBadge;
-Timeline.Content = TimelineContent;
+// Fix: Explicitly add component properties instead of using assignment
+type TimelineCompoundComponent = React.ForwardRefExoticComponent<
+  TimelineProps & React.RefAttributes<HTMLDivElement>
+> & {
+  Item: typeof TimelineItem;
+  Header: typeof TimelineHeader;
+  Title: typeof TimelineTitle;
+  Badge: typeof TimelineBadge;
+  Content: typeof TimelineContent;
+};
+
+// Cast Timeline to the compound component type
+const TimelineWithComponents = Timeline as TimelineCompoundComponent;
+TimelineWithComponents.Item = TimelineItem;
+TimelineWithComponents.Header = TimelineHeader;
+TimelineWithComponents.Title = TimelineTitle;
+TimelineWithComponents.Badge = TimelineBadge;
+TimelineWithComponents.Content = TimelineContent;
 
 export {
-  Timeline,
+  TimelineWithComponents as Timeline,
   TimelineItem,
   TimelineHeader,
   TimelineTitle,

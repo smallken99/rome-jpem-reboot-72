@@ -11,17 +11,18 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { PlusCircle, RefreshCw } from 'lucide-react';
+import { PlusCircle } from 'lucide-react';
 import { EvenementType } from './types/evenements';
 import { v4 as uuidv4 } from 'uuid';
-import { PoliticalEvent } from './types/equilibre';
+import { EquilibreTypes } from './types';
 
 export const GestionEquilibre = () => {
   const { equilibre, updateEquilibre, evenements, resolveEvenement } = useMaitreJeu();
   const [showCreateEvent, setShowCreateEvent] = useState(false);
   const [filteredType, setFilteredType] = useState<EvenementType | 'ALL'>('ALL');
   
-  const [populaires, setPopulaires] = useState(equilibre.populaires || 35);
+  // Fix: Changed 'populaires' to 'populares' to match the Equilibre type
+  const [populares, setPopulares] = useState(equilibre.populares || 35);
   const [optimates, setOptimates] = useState(equilibre.optimates || 40);
   const [moderates, setModerates] = useState(equilibre.moderates || 25);
   
@@ -35,7 +36,8 @@ export const GestionEquilibre = () => {
   
   const handleSaveFactionBalance = () => {
     updateEquilibre({
-      populaires: populaires,
+      // Fix: Changed 'populaires' to 'populares' to match the Equilibre type
+      populares: populares,
       optimates: optimates,
       moderates: moderates
     });
@@ -62,7 +64,7 @@ export const GestionEquilibre = () => {
             
             <PartisGraph 
               factions={[
-                { name: 'Populares', value: populaires, color: '#ef4444' },
+                { name: 'Populares', value: populares, color: '#ef4444' },
                 { name: 'Optimates', value: optimates, color: '#3b82f6' },
                 { name: 'Moderates', value: moderates, color: '#a855f7' },
               ]}
@@ -71,31 +73,37 @@ export const GestionEquilibre = () => {
         </TabsContent>
         <TabsContent value="historique">
           {equilibre.historique && (
-            <PoliticalEventsTimeline events={Array.isArray(equilibre.historique) ? equilibre.historique.map(event => {
-              // If the event is in the old format, convert it to the new format
-              if (event.année !== undefined && event.saison !== undefined) {
-                return {
-                  id: uuidv4(),
-                  date: {
-                    year: event.année,
-                    season: event.saison
-                  },
-                  title: `Année ${event.année}, ${event.saison}`,
-                  description: '',
-                  type: 'POLITIQUE',
-                  populaires: event.populaires,
-                  optimates: event.optimates,
-                  moderates: event.moderates,
-                  plebeiens: event.plebeiens,
-                  patriciens: event.patriciens,
-                  armée: event.armée,
-                  économie: event.économie,
-                  religion: event.religion,
-                  diplomatie: event.diplomatie
-                } as PoliticalEvent;
+            <PoliticalEventsTimeline 
+              politicalEvents={Array.isArray(equilibre.historique) 
+                ? equilibre.historique.map(event => {
+                    // If the event is in the old format, convert it to the new format
+                    if (event.année !== undefined && event.saison !== undefined) {
+                      return {
+                        id: uuidv4(),
+                        date: {
+                          year: event.année,
+                          season: event.saison
+                        },
+                        title: `Année ${event.année}, ${event.saison}`,
+                        description: '',
+                        type: 'POLITIQUE',
+                        importance: 'normale', // Add the required importance property
+                        populares: event.populaires,
+                        optimates: event.optimates,
+                        moderates: event.moderates,
+                        plebeiens: event.plebeiens,
+                        patriciens: event.patriciens,
+                        armée: event.armée,
+                        économie: event.économie,
+                        religion: event.religion,
+                        diplomatie: event.diplomatie
+                      } as EquilibreTypes.PoliticalEvent;
+                    }
+                    return event;
+                  }) 
+                : []
               }
-              return event;
-            }) : []} />
+            />
           )}
         </TabsContent>
       </Tabs>
