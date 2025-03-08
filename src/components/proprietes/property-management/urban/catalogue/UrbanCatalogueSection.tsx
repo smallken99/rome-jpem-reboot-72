@@ -7,8 +7,8 @@ import { UrbanPropertyDetails } from '../UrbanPropertyDetails';
 import { BuildingDescription } from '../../../data/types/buildingTypes';
 
 interface UrbanCatalogueSectionProps {
-  selectedBuildingType: 'residential' | 'religious' | 'public';
-  setSelectedBuildingType: (value: 'residential' | 'religious' | 'public') => void;
+  selectedBuildingType: 'residential' | 'religious' | 'public' | 'military';
+  setSelectedBuildingType: (value: 'residential' | 'religious' | 'public' | 'military') => void;
   selectedBuildingId: string | null;
   setSelectedBuildingId: (id: string | null) => void;
   selectedBuildingDetails: BuildingDescription | null;
@@ -29,13 +29,14 @@ export const UrbanCatalogueSection: React.FC<UrbanCatalogueSectionProps> = ({
     <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
       <div className="lg:col-span-1">
         <Tabs value={selectedBuildingType} onValueChange={(value) => {
-          setSelectedBuildingType(value as 'residential' | 'religious' | 'public');
+          setSelectedBuildingType(value as 'residential' | 'religious' | 'public' | 'military');
           setSelectedBuildingId(null);
         }}>
           <TabsList className="w-full justify-start border border-rome-gold/30 bg-white mb-4">
             <TabsTrigger value="residential">Résidences</TabsTrigger>
             <TabsTrigger value="religious">Religieux</TabsTrigger>
             <TabsTrigger value="public">Publics</TabsTrigger>
+            <TabsTrigger value="military">Militaires</TabsTrigger>
           </TabsList>
           
           <div className="border border-rome-gold/30 rounded-md p-4 bg-white">

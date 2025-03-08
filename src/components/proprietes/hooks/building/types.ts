@@ -3,7 +3,7 @@
 export interface OwnedBuilding {
   id: number;
   buildingId: string;
-  buildingType: 'urban' | 'rural' | 'religious' | 'public';
+  buildingType: 'urban' | 'rural' | 'religious' | 'public' | 'military';
   name: string;
   location: string;
   maintenanceEnabled: boolean;

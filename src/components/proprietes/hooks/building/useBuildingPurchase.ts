@@ -16,7 +16,7 @@ export function useBuildingPurchase() {
   const purchaseBuilding = (
     building: BuildingDescription, 
     buildingId: string,
-    buildingType: 'urban' | 'rural' | 'religious' | 'public',
+    buildingType: 'urban' | 'rural' | 'religious' | 'public' | 'military',
     location: string,
     customName?: string
   ) => {

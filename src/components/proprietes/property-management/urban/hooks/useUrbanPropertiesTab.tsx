@@ -1,12 +1,12 @@
 
 import { useState } from 'react';
-import { urbanResidentialBuildings, religiousBuildings, publicBuildings } from '../../../data/buildings';
+import { urbanResidentialBuildings, religiousBuildings, publicBuildings, militaryBuildings } from '../../../data/buildings';
 import { useBuildingManagement } from '../../../hooks/useBuildingManagement';
 import { usePatrimoine } from '@/hooks/usePatrimoine';
 import { BuildingDescription } from '../../../data/types/buildingTypes';
 
 export const useUrbanPropertiesTab = () => {
-  const [selectedBuildingType, setSelectedBuildingType] = useState<'residential' | 'religious' | 'public'>('residential');
+  const [selectedBuildingType, setSelectedBuildingType] = useState<'residential' | 'religious' | 'public' | 'military'>('residential');
   const [selectedBuildingId, setSelectedBuildingId] = useState<string | null>(null);
   const [purchaseDialogOpen, setPurchaseDialogOpen] = useState(false);
   
@@ -33,6 +33,8 @@ export const useUrbanPropertiesTab = () => {
         return religiousBuildings[selectedBuildingId] || null;
       case 'public':
         return publicBuildings[selectedBuildingId] || null;
+      case 'military':
+        return militaryBuildings[selectedBuildingId] || null;
       default:
         return null;
     }
@@ -49,6 +51,8 @@ export const useUrbanPropertiesTab = () => {
         return building.buildingType === 'religious';
       case 'public':
         return building.buildingType === 'public';
+      case 'military':
+        return building.buildingType === 'military';
       default:
         return false;
     }
@@ -57,7 +61,7 @@ export const useUrbanPropertiesTab = () => {
   // Fonction pour traiter l'achat
   const handlePurchase = (
     buildingId: string, 
-    buildingType: 'urban' | 'rural' | 'religious' | 'public', 
+    buildingType: 'urban' | 'rural' | 'religious' | 'public' | 'military', 
     location: string, 
     customName?: string
   ) => {

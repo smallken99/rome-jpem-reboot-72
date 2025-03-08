@@ -1,3 +1,4 @@
+
 import React from 'react';
 import {
   Card,
@@ -10,7 +11,7 @@ import { Building } from 'lucide-react';
 import { allBuildingTypes } from '../../data/buildings';
 
 export interface UrbanPropertySelectorProps {
-  buildingType: 'residential' | 'religious' | 'public';
+  buildingType: 'residential' | 'religious' | 'public' | 'military';
   selectedId: string;
   onSelect: (id: string) => void;
 }
