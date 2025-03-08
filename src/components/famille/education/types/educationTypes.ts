@@ -42,6 +42,19 @@ export interface Child {
   };
 }
 
+export interface ChildEducation {
+  type: string;
+  mentor: string | null;
+  skills: string[];
+  progress: number;
+  speciality?: string;
+  yearsCompleted?: number;
+  totalYears?: number;
+  pityBonus?: number;
+  statBonus?: string;
+  educationHistory?: EducationHistory[];
+}
+
 export interface EducationHistory {
   type: string;
   startYear: number;
@@ -49,6 +62,9 @@ export interface EducationHistory {
   completed: boolean;
   mentor?: string;
   skills: string[];
+  speciality?: string;
+  statBonus?: string;
+  completedAt?: number;
 }
 
 export interface Preceptor {
@@ -134,4 +150,46 @@ export interface PreceptorActionsProps {
   onCancel?: () => void;
   isAvailable: boolean;
   isLoading?: boolean;
+}
+
+export interface UrbanPropertySelectorProps {
+  selectedBuildingType: string;
+  onBuildingTypeChange: (type: string) => void;
+  isViewingCatalogue: boolean;
+  setIsViewingCatalogue: (value: boolean) => void;
+}
+
+export interface UrbanCatalogueSectionProps {
+  buildingType: string;
+  onBuildingSelect: (building: any) => void;
+}
+
+export interface OwnedUrbanPropertiesSectionProps {
+  buildingType: string;
+  onBuildingSelect: (building: any) => void;
+  selectedBuildingId: string;
+}
+
+export interface UrbanPropertyDetailsProps {
+  building: any;
+  buildingCategory: string;
+}
+
+export interface EducationContextType {
+  children: Child[];
+  preceptorsByType: PreceptorsByType;
+  availablePreceptors: Preceptor[];
+  selectedChild: Child | null;
+  selectedPreceptor: Preceptor | null;
+  isLoading: boolean;
+  isHiringPreceptor: boolean;
+  setSelectedChild: (child: Child | null) => void;
+  setSelectedPreceptor: (preceptor: Preceptor | null) => void;
+  loadPreceptorsByType: (speciality: string) => Preceptor[];
+  hirePreceptor: (childId: string, preceptorId: string) => Promise<void>;
+  changeChildEducation: (childId: string, educationType: string, preceptorId: string | null, speciality?: string) => void;
+  getEducationProgress: (childId: string) => number;
+  advanceEducation: (childId: string) => void;
+  completeEducation: (childId: string) => void;
+  refreshPreceptors: () => void;
 }
