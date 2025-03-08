@@ -14,7 +14,7 @@ import {
   getResourceTypes, 
   marketPrices,
   getTransactionsByPropertyId
-} from './data/inventoryData';
+} from './data';
 
 export const PropertyInventory: React.FC = () => {
   const { propertyId } = useParams<{ propertyId: string }>();

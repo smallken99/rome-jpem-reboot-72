@@ -5,7 +5,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { ArrowUp, ArrowDown, Minus } from 'lucide-react';
-import { MarketPrice } from './data/inventoryData';
+import { MarketPrice } from './data/types';
 
 interface MarketPricesProps {
   prices: MarketPrice[];
