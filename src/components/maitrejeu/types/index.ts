@@ -4,7 +4,7 @@ import * as EquilibreTypes from './equilibre';
 import * as ProvinceTypes from './provinces';
 import * as EventTypes from './evenements';
 import * as LoisTypes from './lois';
-export { MagistratureType } from './magistratures'; 
+export type { MagistratureType } from './magistratures'; 
 export type { GamePhase, Season, GameDate, ImportanceType } from './common';
 
 // Resolve ambiguous exports

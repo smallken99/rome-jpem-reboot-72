@@ -8,8 +8,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { PlusCircle, Calendar, Book } from 'lucide-react';
 import { Loi } from './types';
 import { useMaitreJeu } from './context';
-import { MagistratureTypes } from './types/index';
 import { Season } from './types/common';
+import { MagistratureType } from './types/index';
 import { v4 as uuidv4 } from 'uuid';
 
 export const GestionPolitique = () => {
