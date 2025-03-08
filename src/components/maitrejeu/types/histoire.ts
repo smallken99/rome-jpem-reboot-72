@@ -15,3 +15,6 @@ export interface HistoireEntry {
 
 // Définir ImportanceType si ce n'est pas déjà fait ailleurs
 type ImportanceType = 'majeure' | 'mineure' | 'normale';
+
+// Réexporter Season pour faciliter l'utilisation
+export type { Season } from './common';
