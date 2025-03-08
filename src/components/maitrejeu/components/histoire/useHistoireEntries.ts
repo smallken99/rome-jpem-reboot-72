@@ -1,56 +1,40 @@
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useMaitreJeu } from '../../context';
 import { HistoireEntry } from '../../types/histoire';
 
 export const useHistoireEntries = () => {
   const { histoireEntries, addHistoireEntry, currentYear, currentSeason } = useMaitreJeu();
-  const [filteredEntries, setFilteredEntries] = useState<HistoireEntry[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
-  const [categoryFilter, setCategoryFilter] = useState<string | null>(null);
-  
-  useEffect(() => {
-    let filtered = [...histoireEntries];
-    
-    // Filter by search term
-    if (searchTerm) {
-      filtered = filtered.filter(entry => 
-        entry.titre.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        entry.contenu.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        entry.auteur.toLowerCase().includes(searchTerm.toLowerCase())
-      );
-    }
-    
-    // Filter by category
-    if (categoryFilter) {
-      filtered = filtered.filter(entry => entry.catégorie === categoryFilter);
-    }
-    
-    // Sort by date, newest first
-    filtered.sort((a, b) => {
-      if (a.date.year !== b.date.year) {
-        return b.date.year - a.date.year;
-      }
+  const [categoryFilter, setCategoryFilter] = useState('ALL');
+
+  // Filter entries based on search term and category
+  const filteredEntries = useMemo(() => {
+    return histoireEntries.filter(entry => {
+      const matchesSearch = entry.titre.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                           (entry.contenu && entry.contenu.toLowerCase().includes(searchTerm.toLowerCase()));
       
-      const seasonOrder = { 'SPRING': 0, 'SUMMER': 1, 'AUTUMN': 2, 'WINTER': 3 };
-      return seasonOrder[b.date.season] - seasonOrder[a.date.season];
+      const matchesCategory = categoryFilter === 'ALL' || entry.catégorie === categoryFilter;
+      
+      return matchesSearch && matchesCategory;
     });
-    
-    setFilteredEntries(filtered);
   }, [histoireEntries, searchTerm, categoryFilter]);
-  
-  const createHistoireEntry = (entry: Omit<HistoireEntry, 'id'>) => {
+
+  // Alias for addHistoireEntry for better naming
+  const createHistoireEntry = (entry: Omit<HistoireEntry, "id">) => {
     addHistoireEntry(entry);
   };
-  
+
   return {
-    histoireEntries: filteredEntries,
+    histoireEntries,
+    filteredEntries,
     searchTerm,
     setSearchTerm,
     categoryFilter,
     setCategoryFilter,
+    addHistoireEntry,
     createHistoireEntry,
     currentYear,
-    currentSeason,
+    currentSeason
   };
 };

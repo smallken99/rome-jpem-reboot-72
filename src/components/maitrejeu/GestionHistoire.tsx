@@ -10,8 +10,9 @@ export const GestionHistoire: React.FC = () => {
     filteredEntries, 
     searchTerm, 
     setSearchTerm, 
-    addHistoireEntry, 
-    gameState 
+    createHistoireEntry,
+    currentYear,
+    currentSeason
   } = useHistoireEntries();
   
   return (
@@ -31,9 +32,9 @@ export const GestionHistoire: React.FC = () => {
         
         <div className="space-y-4">
           <HistoireEntryForm
-            year={gameState.year}
-            season={gameState.season}
-            onSubmit={addHistoireEntry}
+            year={currentYear}
+            season={currentSeason}
+            onSubmit={createHistoireEntry}
           />
         </div>
       </div>

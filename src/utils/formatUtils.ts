@@ -1,4 +1,3 @@
-
 import { Season } from "@/components/maitrejeu/types/common";
 
 // Fonction pour convertir une saison en nom français
@@ -41,7 +40,7 @@ export const formatUptime = (seconds: number): string => {
   }
 };
 
-// Fonction pour convertir entre les types de saisons
+// Update the conversion functions to handle types better
 export const convertTimeSeasonToMaitreJeuSeason = (season: import('@/utils/timeSystem').Season): Season => {
   const seasonMap: Record<import('@/utils/timeSystem').Season, Season> = {
     'Ver': 'SPRING',

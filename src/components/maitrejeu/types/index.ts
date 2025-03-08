@@ -1,22 +1,23 @@
 
-// Re-export all types
-export * from './faction';
-export * from './evenements';
-export * from './lois';
-export * from './provinces';
-export * from './senateurs';
-export * from './elections';
-export * from './magistratures';
-export * from './histoire';
-export * from './timeManagement';
-
-// Explicitly re-export types with correct syntax
-export type { GamePhase, Season, ImportanceType, PhaseType } from './common';
-export type { GameDate } from './common';
-export { generateId, adaptLegacyData, convertTimeSeasonToMaitreJeuSeason, convertMaitreJeuSeasonToTimeSeason, createGameDate } from './common';
-
-// Re-export equilibre types, but handle PoliticalEvent with a specific export to avoid ambiguity
-export type { Equilibre } from './equilibre';
-// Explicitly re-export PoliticalEvent with a namespace to avoid conflict
+// Re-export all types for easier importing
 import * as EquilibreTypes from './equilibre';
+import * as ProvinceTypes from './provinces';
+import * as EventTypes from './evenements';
+import * as LoisTypes from './lois';
+export { default as MagistratureTypes } from './magistratures';
+export type { GamePhase, Season, GameDate, ImportanceType } from './common';
+
+// Resolve ambiguous exports
 export { EquilibreTypes };
+export { ProvinceTypes };
+export { EventTypes };
+export { LoisTypes };
+
+// Re-export individual types that aren't conflicting
+export type { HistoireEntry } from './histoire';
+export type { Election } from './elections';
+export type { Equilibre } from './equilibre';
+export type { SenateurJouable } from './senateurs';
+export type { Province } from './provinces';
+export type { Evenement, EvenementAction, EvenementOption } from './evenements';
+export type { Loi } from './lois';

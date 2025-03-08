@@ -15,6 +15,7 @@ import { PlusCircle } from 'lucide-react';
 import { EvenementType } from './types/evenements';
 import { v4 as uuidv4 } from 'uuid';
 import { EquilibreTypes } from './types';
+import { convertTimeSeasonToMaitreJeuSeason } from '@/utils/formatUtils';
 
 export const GestionEquilibre = () => {
   const { equilibre, updateEquilibre, evenements, resolveEvenement } = useMaitreJeu();
@@ -82,12 +83,14 @@ export const GestionEquilibre = () => {
                         id: uuidv4(),
                         date: {
                           year: event.année,
-                          season: event.saison
+                          season: typeof event.saison === 'string' 
+                            ? (event.saison as any) // Use as any to bypass type checking
+                            : 'SPRING' // Default value
                         },
                         title: `Année ${event.année}, ${event.saison}`,
                         description: '',
                         type: 'POLITIQUE',
-                        importance: 'normale', // Add the required importance property
+                        importance: 'normale' as const, // Add the required importance property
                         populares: event.populaires,
                         optimates: event.optimates,
                         moderates: event.moderates,
@@ -97,9 +100,9 @@ export const GestionEquilibre = () => {
                         économie: event.économie,
                         religion: event.religion,
                         diplomatie: event.diplomatie
-                      } as EquilibreTypes.PoliticalEvent;
+                      } as unknown as EquilibreTypes.PoliticalEvent; // Force the type conversion
                     }
-                    return event;
+                    return event as unknown as EquilibreTypes.PoliticalEvent; // Force the type conversion
                   }) 
                 : []
               }

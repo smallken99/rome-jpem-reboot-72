@@ -10,7 +10,7 @@ import { format } from 'date-fns';
 import { useMaitreJeu } from '../context';
 
 const ElectionPlanner = () => {
-  const { currentYear, currentSeason, elections, planifierElection } = useMaitreJeu();
+  const { currentYear, currentSeason, elections, scheduleElection } = useMaitreJeu();
   
   const [magistrature, setMagistrature] = useState('CONSUL');
   const [date, setDate] = useState<Date | undefined>(new Date());
@@ -21,7 +21,7 @@ const ElectionPlanner = () => {
     
     if (date) {
       const year = date.getFullYear();
-      planifierElection(magistrature, year, season as any);
+      scheduleElection(magistrature, year, season as any);
     }
   };
   
