@@ -15,7 +15,13 @@ export const useClientForm = (client: Client | null) => {
       political: 1,
       popular: 1,
       religious: 1
-    }
+    },
+    specialAbilities: [],
+    competencePoints: 3,
+    backstory: '',
+    activeStatus: 'active',
+    relationshipLevel: 1,
+    lastInteraction: new Date().toISOString()
   });
   
   useEffect(() => {
@@ -28,6 +34,12 @@ export const useClientForm = (client: Client | null) => {
         location: client.location,
         loyalty: client.loyalty,
         influences: { ...client.influences },
+        specialAbilities: client.specialAbilities || [],
+        competencePoints: client.competencePoints || 3,
+        backstory: client.backstory || '',
+        activeStatus: client.activeStatus || 'active',
+        relationshipLevel: client.relationshipLevel || 1,
+        lastInteraction: client.lastInteraction,
         assignedToSenateurId: client.assignedToSenateurId
       });
     }

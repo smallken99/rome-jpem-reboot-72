@@ -20,7 +20,7 @@ export interface Client {
   relationshipLevel: number;
   lastInteraction: string;
   senateurId?: string | null;
-  assignedToSenateurId?: string | null; // Adding this to resolve build errors
+  assignedToSenateurId?: string | null;
 }
 
 export type ClientCreationData = Omit<Client, 'id'>;
@@ -32,8 +32,8 @@ export interface ClientFilter {
   status?: string;
   location?: string;
   assignedTo?: string | null;
-  assignedOnly?: boolean; // Adding this to resolve build errors
-  searchTerm?: string; // Adding this to resolve build errors
+  assignedOnly?: boolean;
+  searchTerm?: string;
 }
 
 // Types pour le tri des clients

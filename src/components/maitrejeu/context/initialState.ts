@@ -151,7 +151,8 @@ export const initialClients: Client[] = [
     specialAbilities: ["Commerce agricole", "Réseau d'approvisionnement"],
     activeStatus: "active",
     relationshipLevel: 5,
-    backstory: "Grand propriétaire terrien qui possède des domaines en Campanie. Fournit du grain à la Ville."
+    backstory: "Grand propriétaire terrien qui possède des domaines en Campanie. Fournit du grain à la Ville.",
+    lastInteraction: new Date().toISOString()
   },
   {
     id: uuidv4(),
@@ -170,6 +171,7 @@ export const initialClients: Client[] = [
     activeStatus: "probation",
     relationshipLevel: 6,
     backstory: "Contrôle les rues de la Subure. Utile pour influencer les votes ou faire taire des opposants.",
+    lastInteraction: new Date().toISOString(),
     assignedToSenateurId: "3"
   }
 ];
