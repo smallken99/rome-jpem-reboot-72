@@ -1,12 +1,12 @@
 
 import React, { useState } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
-import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
+import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Province } from '../types';
+import { Province } from '../types/provinces';
 
 export interface ProvinceModalProps {
   province: Province;
@@ -16,139 +16,115 @@ export interface ProvinceModalProps {
 }
 
 export const ProvinceModal: React.FC<ProvinceModalProps> = ({ province, open, onClose, onSave }) => {
-  const [editedProvince, setEditedProvince] = useState<Province>({
-    ...province
-  });
-
-  const handleSave = () => {
-    onSave(editedProvince);
-    onClose();
-  };
-
+  const [editedProvince, setEditedProvince] = useState<Province>(province);
+  
   const handleChange = (field: keyof Province, value: any) => {
     setEditedProvince(prev => ({ ...prev, [field]: value }));
+  };
+  
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    onSave(editedProvince);
   };
 
   return (
     <Dialog open={open} onOpenChange={onClose}>
-      <DialogContent className="max-w-md">
+      <DialogContent className="sm:max-w-[600px]">
         <DialogHeader>
-          <DialogTitle>Modifier la province: {province.nom}</DialogTitle>
+          <DialogTitle>Détails de la province: {province.nom}</DialogTitle>
         </DialogHeader>
-        <div className="grid gap-4 py-4">
-          <div className="grid grid-cols-4 items-center gap-4">
-            <Label htmlFor="name" className="text-right">
-              Nom
-            </Label>
-            <Input
-              id="name"
-              value={editedProvince.nom}
-              onChange={(e) => handleChange('nom', e.target.value)}
-              className="col-span-3"
-            />
+        
+        <form onSubmit={handleSubmit} className="space-y-4 mt-4">
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="nom">Nom</Label>
+              <Input
+                id="nom"
+                value={editedProvince.nom}
+                onChange={(e) => handleChange('nom', e.target.value)}
+              />
+            </div>
+            
+            <div className="space-y-2">
+              <Label htmlFor="gouverneur">Gouverneur</Label>
+              <Input
+                id="gouverneur"
+                value={editedProvince.gouverneur}
+                onChange={(e) => handleChange('gouverneur', e.target.value)}
+              />
+            </div>
           </div>
           
-          <div className="grid grid-cols-4 items-center gap-4">
-            <Label htmlFor="ruler" className="text-right">
-              Gouverneur
-            </Label>
-            <Input
-              id="ruler"
-              value={editedProvince.gouverneur}
-              onChange={(e) => handleChange('gouverneur', e.target.value)}
-              className="col-span-3"
-            />
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="population">Population</Label>
+              <Input
+                id="population"
+                type="number"
+                value={editedProvince.population}
+                onChange={(e) => handleChange('population', parseInt(e.target.value))}
+              />
+            </div>
+            
+            <div className="space-y-2">
+              <Label htmlFor="richesse">Richesse (en as)</Label>
+              <Input
+                id="richesse"
+                type="number"
+                value={editedProvince.richesse || 0}
+                onChange={(e) => handleChange('richesse', parseInt(e.target.value))}
+              />
+            </div>
           </div>
           
-          <div className="grid grid-cols-4 items-center gap-4">
-            <Label htmlFor="region" className="text-right">
-              Région
-            </Label>
-            <Input
-              id="region"
-              value={editedProvince.région}
-              onChange={(e) => handleChange('région', e.target.value)}
-              className="col-span-3"
-            />
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="loyauté">Loyauté (%)</Label>
+              <Input
+                id="loyauté"
+                type="number"
+                value={editedProvince.loyauté || 0}
+                onChange={(e) => handleChange('loyauté', parseInt(e.target.value))}
+                min={0}
+                max={100}
+              />
+            </div>
+            
+            <div className="space-y-2">
+              <Label htmlFor="status">Statut</Label>
+              <Select 
+                value={editedProvince.status} 
+                onValueChange={(value) => handleChange('status', value as any)}
+              >
+                <SelectTrigger id="status">
+                  <SelectValue placeholder="Sélectionner un statut" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="pacifiée">Pacifiée</SelectItem>
+                  <SelectItem value="instable">Instable</SelectItem>
+                  <SelectItem value="rebelle">Rebelle</SelectItem>
+                  <SelectItem value="conquise">Conquise</SelectItem>
+                  <SelectItem value="en révolte">En révolte</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
           </div>
           
-          <div className="grid grid-cols-4 items-center gap-4">
-            <Label htmlFor="richesse" className="text-right">
-              Richesse
-            </Label>
-            <Input
-              id="richesse"
-              type="number"
-              value={editedProvince.richesse || 0}
-              onChange={(e) => handleChange('richesse', parseInt(e.target.value))}
-              className="col-span-3"
-            />
-          </div>
-          
-          <div className="grid grid-cols-4 items-center gap-4">
-            <Label htmlFor="loyaute" className="text-right">
-              Loyauté
-            </Label>
-            <Input
-              id="loyaute"
-              type="number"
-              value={editedProvince.loyaute || 0}
-              onChange={(e) => handleChange('loyaute', parseInt(e.target.value))}
-              className="col-span-3"
-            />
-          </div>
-          
-          <div className="grid grid-cols-4 items-center gap-4">
-            <Label htmlFor="status" className="text-right">
-              Statut
-            </Label>
-            <Select 
-              value={editedProvince.status} 
-              onValueChange={(value) => handleChange('status', value as "pacifiée" | "instable" | "rebelle" | "conquise" | "en révolte")}
-            >
-              <SelectTrigger className="col-span-3">
-                <SelectValue placeholder="Statut" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="pacifiée">Pacifiée</SelectItem>
-                <SelectItem value="instable">Instable</SelectItem>
-                <SelectItem value="rebelle">Rebelle</SelectItem>
-                <SelectItem value="conquise">Conquise</SelectItem>
-                <SelectItem value="en révolte">En Révolte</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-          
-          <div className="grid grid-cols-4 items-center gap-4">
-            <Label htmlFor="population" className="text-right">
-              Population
-            </Label>
-            <Input
-              id="population"
-              type="number"
-              value={editedProvince.population}
-              onChange={(e) => handleChange('population', parseInt(e.target.value))}
-              className="col-span-3"
-            />
-          </div>
-          
-          <div className="grid grid-cols-4 items-center gap-4">
-            <Label htmlFor="description" className="text-right">
-              Description
-            </Label>
+          <div className="space-y-2">
+            <Label htmlFor="description">Description</Label>
             <Textarea
               id="description"
               value={editedProvince.description}
               onChange={(e) => handleChange('description', e.target.value)}
-              className="col-span-3"
-              rows={3}
+              rows={4}
             />
           </div>
-        </div>
-        <DialogFooter>
-          <Button type="button" variant="outline" onClick={onClose}>Annuler</Button>
-          <Button type="button" onClick={handleSave}>Enregistrer</Button>
-        </DialogFooter>
+          
+          <DialogFooter>
+            <Button type="button" variant="outline" onClick={onClose}>Annuler</Button>
+            <Button type="submit">Enregistrer</Button>
+          </DialogFooter>
+        </form>
       </DialogContent>
     </Dialog>
   );

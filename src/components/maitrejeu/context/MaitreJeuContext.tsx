@@ -1,4 +1,3 @@
-
 import React, { createContext, useContext, useState, ReactNode, useEffect } from 'react';
 import { useTimeStore } from '@/utils/timeSystem';
 import { convertTimeSeasonToMaitreJeuSeason } from '@/components/maitrejeu/types/common';
@@ -98,8 +97,8 @@ export const MaitreJeuContext = createContext<MaitreJeuContextType>({
   removeFactionPolitique: () => {},
   
   equilibre: {
-    moral: 50,
-    loyaute: 50,
+    morale: 50,
+    loyauté: 50,
     populaires: 35,
     optimates: 40,
     moderates: 25,
@@ -178,8 +177,8 @@ export const MaitreJeuProvider: React.FC<{ children: ReactNode }> = ({ children 
   const [factions, setFactions] = useState<Faction[]>([]);
   const [factionsPolitiques, setFactionsPolitiques] = useState<FactionPolitique[]>([]);
   const [equilibre, setEquilibre] = useState<Equilibre>({
-    moral: 50,
-    loyaute: 50,
+    morale: 50,
+    loyauté: 50,
     populaires: 35,
     optimates: 40,
     moderates: 25,
@@ -267,9 +266,9 @@ export const MaitreJeuProvider: React.FC<{ children: ReactNode }> = ({ children 
   
   // Fonctions de gestion des événements
   const addEvenement = (evenement: Evenement) => {
-    const eventWithId = {
+    const eventWithId = evenement.id ? evenement : {
       ...evenement,
-      id: evenement.id || uuidv4()
+      id: uuidv4()
     };
     setEvenements([...evenements, eventWithId]);
   };
@@ -365,8 +364,8 @@ export const MaitreJeuProvider: React.FC<{ children: ReactNode }> = ({ children 
   
   const updateFactionBalance = (populaires: number, optimates: number, moderates: number) => {
     updateEquilibre({ 
-      moral: equilibre.moral,
-      loyaute: equilibre.loyaute,
+      morale: equilibre.morale,
+      loyauté: equilibre.loyauté,
       armée: equilibre.armée,
       populaires, 
       optimates, 

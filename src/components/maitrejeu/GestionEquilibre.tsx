@@ -1,4 +1,3 @@
-
 import { Tab } from '@headlessui/react';
 import { useState } from 'react';
 import { useMaitreJeu } from './context';
@@ -13,6 +12,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { PlusCircle, RefreshCw } from 'lucide-react';
 import { EvenementType } from './types/evenements';
+import { v4 as uuidv4 } from 'uuid';
+import { PoliticalEvent } from './types/equilibre';
 
 export const GestionEquilibre = () => {
   const { equilibre, updateEquilibre, evenements, resolveEvenement } = useMaitreJeu();
@@ -68,15 +69,32 @@ export const GestionEquilibre = () => {
           </div>
         </TabsContent>
         <TabsContent value="historique">
-          <Card>
-            <CardHeader>
-              <CardTitle>Historique de l'Équilibre</CardTitle>
-              <CardDescription>Évolution des forces au fil du temps.</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <PoliticalEventsTimeline events={equilibre.historique || []} />
-            </CardContent>
-          </Card>
+          {equilibre.historique && (
+            <PoliticalEventsTimeline events={Array.isArray(equilibre.historique) ? equilibre.historique.map(event => {
+              if (!('id' in event)) {
+                return {
+                  id: uuidv4(),
+                  date: {
+                    year: event.année || 0,
+                    season: event.saison || 'SPRING'
+                  },
+                  title: `Année ${event.année}, ${event.saison}`,
+                  description: '',
+                  type: 'POLITIQUE',
+                  populaires: event.populaires,
+                  optimates: event.optimates,
+                  moderates: event.moderates,
+                  plebeiens: event.plebeiens,
+                  patriciens: event.patriciens,
+                  armée: event.armée,
+                  économie: event.économie,
+                  religion: event.religion,
+                  diplomatie: event.diplomatie
+                } as PoliticalEvent;
+              }
+              return event as PoliticalEvent;
+            }) : []} />
+          )}
         </TabsContent>
       </Tabs>
       

@@ -1,57 +1,38 @@
 
 import React from 'react';
-import { Timeline, TimelineItem, TimelineHeader, TimelineIcon, TimelineTitle, TimelineBody } from '@/components/ui/timeline';
-import { CalendarIcon, FlagIcon, ScrollIcon } from 'lucide-react';
-
-export interface PoliticalEvent {
-  id: string;
-  date: string;
-  title: string;
-  description: string;
-  type: 'election' | 'crisis' | 'law' | 'other';
-}
+import { Timeline, TimelineItem } from '@/components/ui/timeline';
+import { PoliticalEvent } from '../types/equilibre';
 
 export interface PoliticalEventsTimelineProps {
   events: PoliticalEvent[];
 }
 
 export const PoliticalEventsTimeline: React.FC<PoliticalEventsTimelineProps> = ({ events }) => {
-  const getEventIcon = (type: string) => {
-    switch (type) {
-      case 'election':
-        return <FlagIcon className="h-4 w-4" />;
-      case 'law':
-        return <ScrollIcon className="h-4 w-4" />;
-      default:
-        return <CalendarIcon className="h-4 w-4" />;
-    }
-  };
+  if (!events || events.length === 0) {
+    return <div className="text-muted-foreground italic">Aucun événement politique enregistré.</div>;
+  }
 
   return (
     <Timeline>
-      {events && events.map((event) => (
-        <TimelineItem key={event.id}>
-          <TimelineHeader>
-            <TimelineIcon icon={getEventIcon(event.type)} />
-            <TimelineTitle>{event.title}</TimelineTitle>
-          </TimelineHeader>
-          <TimelineBody>
-            <p className="text-xs text-muted-foreground mb-1">{event.date}</p>
-            <p>{event.description}</p>
-          </TimelineBody>
+      {events.map((event, index) => (
+        <TimelineItem key={event.id || index}>
+          <div className="flex flex-col">
+            <div className="font-bold">{event.title || `Année ${event.date.year}, ${event.date.season}`}</div>
+            {event.description && <p className="text-sm text-muted-foreground">{event.description}</p>}
+            <div className="grid grid-cols-3 gap-2 mt-2">
+              {event.populaires !== undefined && (
+                <div className="text-xs">Populares: <span className="font-medium">{event.populaires}%</span></div>
+              )}
+              {event.optimates !== undefined && (
+                <div className="text-xs">Optimates: <span className="font-medium">{event.optimates}%</span></div>
+              )}
+              {event.moderates !== undefined && (
+                <div className="text-xs">Moderates: <span className="font-medium">{event.moderates}%</span></div>
+              )}
+            </div>
+          </div>
         </TimelineItem>
       ))}
-      {(!events || events.length === 0) && (
-        <TimelineItem>
-          <TimelineHeader>
-            <TimelineIcon icon={<CalendarIcon className="h-4 w-4" />} />
-            <TimelineTitle>Aucun événement enregistré</TimelineTitle>
-          </TimelineHeader>
-          <TimelineBody>
-            <p>Les événements politiques apparaîtront ici.</p>
-          </TimelineBody>
-        </TimelineItem>
-      )}
     </Timeline>
   );
 };

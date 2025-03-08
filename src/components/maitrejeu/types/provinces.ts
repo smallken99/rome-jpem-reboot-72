@@ -1,53 +1,42 @@
 
+import { GameDate, Season } from './common';
+
+export type ProvinceStatus = 'pacifiée' | 'instable' | 'rebelle' | 'conquise' | 'en révolte';
+
 export interface Province {
   id: string;
   nom: string;
-  gouverneur: string | null;
   région: string;
-  region?: string; // Pour compatibilité avec le code existant
+  region?: string; // Pour compatibilité
+  gouverneur: string;
   population: number;
-  status: 'pacifiée' | 'instable' | 'rebelle' | 'conquise' | 'en révolte';
-  statut?: string; // Pour compatibilité avec le code existant
+  status: ProvinceStatus;
+  statut?: string; // Pour compatibilité
   description: string;
-  revenu: number;
-  dépense: number;
-  loyauté: number;
-  légions: number;
-  garnison: number;
-  richesse: number;
-  revenuAnnuel: number;
-  impôts: number;
-  ressourcesPrincipales: string[];
-  problèmes: string[];
-  opportunités: string[];
-  coordonnées: {
-    x: number;
-    y: number;
-  };
-  armée?: number; // Pour compatibilité avec le code existant
-  ressources?: string[]; // Pour compatibilité avec le code existant
-  position?: any; // Pour compatibilité avec le code existant
+  resources: string[];
+  richesse?: number;
+  loyauté?: number;
+  variationLoyauté?: number; // Remplace loyauteVariation
+  territoire?: number;
+  armée?: number;
+  impôts?: number;
+  dernierEvénement?: string; // Remplace lastEvent et dernierEvenement
+  historiqueEvenements?: string[];
+  dateConquete?: GameDate;
+  position?: any; // Pour la carte
 }
 
-// Props interfaces pour les composants de province
-export interface ProvincesMapProps {
-  provinces: Province[];
-  onProvinceSelect: (provinceId: string) => void;
-}
-
-export interface ProvinceModalProps {
-  province: Province;
-  open: boolean;
-  onClose?: () => void;
-  onSave: (province: Province) => void;
-}
-
-export interface ProvinceCardProps {
-  province: Province;
-  onViewProvince: (provinceId: string) => void;
-}
-
-export interface ProvincesDataProps {
-  provinces: Province[];
-  onViewProvince: (provinceId: string) => void;
+export interface ProvinceData {
+  id: string;
+  name: string;
+  governor: string;
+  region: string;
+  population: number;
+  status: ProvinceStatus;
+  description: string;
+  wealth?: number;
+  loyalty?: number;
+  territory?: number;
+  army?: number;
+  taxes?: number;
 }

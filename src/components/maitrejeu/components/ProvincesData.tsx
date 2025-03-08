@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Input } from '@/components/ui/input';
@@ -163,9 +162,9 @@ export const ProvincesData: React.FC<ProvincesDataProps> = ({ provinces, onViewP
                   Population {renderSortIndicator('population')}
                 </div>
               </TableHead>
-              <TableHead className="cursor-pointer text-right" onClick={() => handleSort('loyaute')}>
+              <TableHead className="cursor-pointer text-right" onClick={() => handleSort('loyauté')}>
                 <div className="flex items-center justify-end gap-1">
-                  Loyauté {renderSortIndicator('loyaute')}
+                  Loyauté {renderSortIndicator('loyauté')}
                 </div>
               </TableHead>
               <TableHead className="cursor-pointer text-right" onClick={() => handleSort('richesse')}>
@@ -188,7 +187,7 @@ export const ProvincesData: React.FC<ProvincesDataProps> = ({ provinces, onViewP
                 <TableCell>{province.région}</TableCell>
                 <TableCell>{province.gouverneur || 'Aucun'}</TableCell>
                 <TableCell className="text-right">{province.population.toLocaleString()}</TableCell>
-                <TableCell className="text-right">{province.loyaute !== undefined ? `${province.loyaute}%` : '-'}</TableCell>
+                <TableCell className="text-right">{province.loyauté !== undefined ? `${province.loyauté}%` : 'N/A'}</TableCell>
                 <TableCell className="text-right">{province.richesse !== undefined ? `${province.richesse.toLocaleString()} as` : '-'}</TableCell>
                 <TableCell>
                   <span className={`px-2 py-1 rounded-full text-xs font-medium

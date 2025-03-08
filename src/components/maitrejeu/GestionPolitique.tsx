@@ -1,239 +1,201 @@
 import React, { useState } from 'react';
-import { 
-  Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle 
-} from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { 
-  Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger
-} from "@/components/ui/dialog";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Separator } from "@/components/ui/separator";
-import { RomanCard } from "@/components/ui-custom/RomanCard";
-import { PartisGraph } from './components/PartisGraph';
-import { LoisTable } from './components/LoisTable';
-import { PoliticalEventsTimeline } from './components/PoliticalEventsTimeline';
-import { ElectionPlanner } from './components/ElectionPlanner';
-import { useMaitreJeu } from './context/MaitreJeuContext';
-import { PlusCircle } from 'lucide-react';
-import { Label } from '@/components/ui/label';
-import { Slider } from '@/components/ui/slider';
-import { Textarea } from '@/components/ui/textarea';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { PlusCircle, Calendar, Book } from 'lucide-react';
+import { Loi } from './types';
+import { useMaitreJeu } from './context';
+import { MagistratureType, Season } from './types/index';
+import { v4 as uuidv4 } from 'uuid';
 
 export const GestionPolitique = () => {
-  const { 
-    equilibre, 
-    updateFactionBalance, 
-    lois, 
-    addLoi, 
-    voteLoi, 
-    senateurs, 
-    scheduleElection 
-  } = useMaitreJeu();
+  const { lois, addLoi, currentYear, currentSeason, scheduleElection } = useMaitreJeu();
+  const [selectedTab, setSelectedTab] = useState('lois');
+  const [showAddLoi, setShowAddLoi] = useState(false);
+  const [newLoi, setNewLoi] = useState<Omit<Loi, 'id' | 'date' | 'état' | 'votesPositifs' | 'votesNégatifs' | 'votesAbstention' | 'effets'>>({
+    titre: '',
+    description: '',
+    proposeur: '',
+    catégorie: 'politique',
+    importance: 'normale'
+  });
   
-  const [populaires, setPopulaires] = useState(equilibre.populaires || 35);
-  const [optimates, setOptimates] = useState(equilibre.optimates || 40);
-  const [moderates, setModerates] = useState(equilibre.moderates || 25);
-  
-  const [showNewLawModal, setShowNewLawModal] = useState(false);
-  const [newLawTitle, setNewLawTitle] = useState('');
-  const [newLawDescription, setNewLawDescription] = useState('');
-  const [newLawCategory, setNewLawCategory] = useState('');
-  const [newLawImportance, setNewLawImportance] = useState<'majeure' | 'mineure' | 'normale'>('normale');
-  
-  const handleSaveFactionBalance = () => {
-    updateFactionBalance(populaires, optimates, moderates);
-  };
-  
-  const handleCreateLaw = () => {
-    addLoi({
-      titre: newLawTitle,
-      description: newLawDescription,
-      proposeur: 'Sénat',
-      catégorie: newLawCategory,
-      date: {
-        year: 1,
-        season: 'SPRING'
-      },
-      état: 'proposée',
-      importance: newLawImportance,
+  const handleAddLoi = () => {
+    if (!newLoi.titre || !newLoi.description) return;
+    
+    // Ajouter ID à la nouvelle loi
+    const loiWithId = {
+      ...newLoi,
+      id: uuidv4(), // Utiliser UUID pour générer un ID unique
+      date: { year: currentYear, season: currentSeason },
+      état: "proposée" as const,
       votesPositifs: 0,
       votesNégatifs: 0,
       votesAbstention: 0,
       effets: {}
+    };
+    
+    addLoi(loiWithId);
+    setNewLoi({
+      titre: '',
+      description: '',
+      proposeur: '',
+      catégorie: 'politique',
+      importance: 'normale'
     });
-    setShowNewLawModal(false);
+    setShowAddLoi(false);
+  };
+  
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>, field: keyof Omit<Loi, 'id' | 'date' | 'état' | 'votesPositifs' | 'votesNégatifs' | 'votesAbstention' | 'effets'>) => {
+    setNewLoi({ ...newLoi, [field]: e.target.value });
+  };
+  
+  const handleSelectChange = (value: string, field: keyof Omit<Loi, 'id' | 'date' | 'état' | 'votesPositifs' | 'votesNégatifs' | 'votesAbstention' | 'effets'>) => {
+    setNewLoi({ ...newLoi, [field]: value });
+  };
+  
+  // Remplacer la fonction handleScheduleElection par une version compatible
+  const handleScheduleElection = (magistrature: MagistratureType, year: number, season: Season) => {
+    scheduleElection(magistrature, year, season);
   };
   
   return (
     <div className="p-4">
-      <div className="grid grid-cols-2 gap-6">
-        <div>
-          <Card className="mb-6">
-            <CardHeader>
-              <CardTitle>Équilibre des factions</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="flex items-center justify-between mb-4">
-                <div>
-                  <div className="mb-2">
-                    <Label>Populares: {populaires}%</Label>
-                    <Slider 
-                      value={[populaires]}
-                      onValueChange={(value) => setPopulaires(value[0])}
-                      max={100}
-                      step={1}
-                      className="w-64"
-                    />
-                  </div>
-                  <div className="mb-2">
-                    <Label>Optimates: {optimates}%</Label>
-                    <Slider 
-                      value={[optimates]}
-                      onValueChange={(value) => setOptimates(value[0])}
-                      max={100}
-                      step={1}
-                      className="w-64"
-                    />
-                  </div>
-                  <div className="mb-2">
-                    <Label>Modérés: {moderates}%</Label>
-                    <Slider 
-                      value={[moderates]}
-                      onValueChange={(value) => setModerates(value[0])}
-                      max={100}
-                      step={1}
-                      className="w-64"
-                    />
-                  </div>
-                  
-                  <div className="mt-4">
-                    <Button onClick={handleSaveFactionBalance}>
-                      Mettre à jour l'équilibre
-                    </Button>
-                  </div>
-                </div>
-                
-                <PartisGraph 
-                  factions={[
-                    { name: 'Populares', value: populaires, color: '#ef4444' },
-                    { name: 'Optimates', value: optimates, color: '#3b82f6' },
-                    { name: 'Moderates', value: moderates, color: '#a855f7' },
-                  ]}
-                />
-              </div>
-            </CardContent>
-          </Card>
-          
+      <Tabs value={selectedTab} onValueChange={setSelectedTab} className="mb-6">
+        <TabsList>
+          <TabsTrigger value="lois">Gestion des Lois</TabsTrigger>
+          <TabsTrigger value="élections">Planification des Élections</TabsTrigger>
+        </TabsList>
+        
+        <TabsContent value="lois">
           <Card>
             <CardHeader>
-              <CardTitle>Nouvelles lois</CardTitle>
+              <CardTitle>Lois en vigueur</CardTitle>
+              <CardDescription>Liste des lois actuellement en discussion au Sénat.</CardDescription>
             </CardHeader>
             <CardContent>
-              <Button onClick={() => setShowNewLawModal(true)}>
+              <ul className="list-none pl-0">
+                {lois.map(loi => (
+                  <li key={loi.id} className="py-2 border-b border-gray-200 last:border-b-0">
+                    <div className="flex justify-between items-center">
+                      <div>
+                        <h3 className="font-semibold">{loi.titre}</h3>
+                        <p className="text-sm text-gray-500">{loi.description}</p>
+                      </div>
+                      <div className="space-x-2">
+                        <Button variant="outline" size="sm">
+                          <Book className="h-4 w-4 mr-2" />
+                          Voir détails
+                        </Button>
+                      </div>
+                    </div>
+                  </li>
+                ))}
+              </ul>
+              
+              <Button variant="secondary" className="mt-4" onClick={() => setShowAddLoi(true)}>
                 <PlusCircle className="h-4 w-4 mr-2" />
                 Proposer une nouvelle loi
               </Button>
             </CardContent>
           </Card>
-        </div>
+          
+          {showAddLoi && (
+            <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full">
+              <div className="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
+                <div className="mt-3 text-center">
+                  <h3 className="text-lg leading-6 font-medium text-gray-900">Proposer une nouvelle loi</h3>
+                  <div className="mt-2">
+                    <Input
+                      placeholder="Titre de la loi"
+                      value={newLoi.titre}
+                      onChange={(e) => handleInputChange(e, 'titre')}
+                      className="mb-2"
+                    />
+                    <Input
+                      placeholder="Proposeur"
+                      value={newLoi.proposeur}
+                      onChange={(e) => handleInputChange(e, 'proposeur')}
+                      className="mb-2"
+                    />
+                    <Select onValueChange={(value) => handleSelectChange(value, 'catégorie')}>
+                      <SelectTrigger className="w-full mb-2">
+                        <SelectValue placeholder="Catégorie" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="politique">Politique</SelectItem>
+                        <SelectItem value="social">Social</SelectItem>
+                        <SelectItem value="économique">Économique</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <Select onValueChange={(value) => handleSelectChange(value, 'importance')}>
+                      <SelectTrigger className="w-full mb-2">
+                        <SelectValue placeholder="Importance" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="majeure">Majeure</SelectItem>
+                        <SelectItem value="mineure">Mineure</SelectItem>
+                        <SelectItem value="normale">Normale</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <Input
+                      placeholder="Description"
+                      value={newLoi.description}
+                      onChange={(e) => handleInputChange(e, 'description')}
+                      className="mb-2"
+                    />
+                  </div>
+                  <div className="items-center px-4 py-3">
+                    <Button variant="secondary" onClick={handleAddLoi} className="mr-2">
+                      Proposer
+                    </Button>
+                    <Button variant="ghost" onClick={() => setShowAddLoi(false)}>
+                      Annuler
+                    </Button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+        </TabsContent>
         
-        <div>
+        <TabsContent value="élections">
           <Card>
             <CardHeader>
-              <CardTitle>Prochaines élections</CardTitle>
+              <CardTitle>Planification des élections</CardTitle>
+              <CardDescription>Sélectionnez une magistrature et une date pour planifier une élection.</CardDescription>
             </CardHeader>
             <CardContent>
-              <ElectionPlanner 
-                senateurs={senateurs}
-                onScheduleElection={scheduleElection}
-              />
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <Select>
+                    <SelectTrigger className="w-full">
+                      <SelectValue placeholder="Magistrature" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="consul">Consul</SelectItem>
+                      <SelectItem value="préteur">Préteur</SelectItem>
+                      <SelectItem value="édile">Édile</SelectItem>
+                      <SelectItem value="questeur">Questeur</SelectItem>
+                      <SelectItem value="censeur">Censeur</SelectItem>
+                      <SelectItem value="tribun">Tribun</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div>
+                  <Input type="number" placeholder="Année" />
+                </div>
+              </div>
+              <Button variant="secondary" className="mt-4">
+                <Calendar className="h-4 w-4 mr-2" />
+                Planifier l'élection
+              </Button>
             </CardContent>
           </Card>
-          
-          <Card className="mt-6">
-            <CardHeader>
-              <CardTitle>Lois en vigueur</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <LoisTable lois={lois} onVote={voteLoi} />
-            </CardContent>
-          </Card>
-        </div>
-      </div>
-      
-      <Dialog open={showNewLawModal} onOpenChange={setShowNewLawModal}>
-        <DialogContent className="sm:max-w-[425px]">
-          <DialogHeader>
-            <DialogTitle>Proposer une nouvelle loi</DialogTitle>
-            <DialogDescription>
-              Remplissez le formulaire ci-dessous pour proposer une nouvelle loi au sénat.
-            </DialogDescription>
-          </DialogHeader>
-          
-          <div className="grid gap-4 py-4">
-            <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="title" className="text-right">
-                Titre
-              </Label>
-              <Input 
-                id="title" 
-                value={newLawTitle} 
-                onChange={(e) => setNewLawTitle(e.target.value)} 
-                className="col-span-3" 
-              />
-            </div>
-            
-            <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="description" className="text-right">
-                Description
-              </Label>
-              <Textarea
-                id="description"
-                value={newLawDescription}
-                onChange={(e) => setNewLawDescription(e.target.value)}
-                className="col-span-3"
-              />
-            </div>
-            
-            <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="category" className="text-right">
-                Catégorie
-              </Label>
-              <Input
-                id="category"
-                value={newLawCategory}
-                onChange={(e) => setNewLawCategory(e.target.value)}
-                className="col-span-3"
-              />
-            </div>
-            
-            <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="importance" className="text-right">
-                Importance
-              </Label>
-              <Select onValueChange={(value) => setNewLawImportance(value as 'majeure' | 'mineure' | 'normale')}>
-                <SelectTrigger className="col-span-3">
-                  <SelectValue placeholder="Sélectionner l'importance" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="majeure">Majeure</SelectItem>
-                  <SelectItem value="normale">Normale</SelectItem>
-                  <SelectItem value="mineure">Mineure</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
-          
-          <DialogFooter>
-            <Button variant="secondary" onClick={() => setShowNewLawModal(false)}>
-              Annuler
-            </Button>
-            <Button onClick={handleCreateLaw}>Proposer la loi</Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+        </TabsContent>
+      </Tabs>
     </div>
   );
 };

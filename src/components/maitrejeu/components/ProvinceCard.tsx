@@ -3,8 +3,8 @@ import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { EyeIcon, Edit2Icon, TrendingUpIcon, TrendingDownIcon } from 'lucide-react';
-import { Province } from '../types';
+import { EyeIcon, TrendingUpIcon, TrendingDownIcon } from 'lucide-react';
+import { Province } from '../types/provinces';
 
 export interface ProvinceCardProps {
   province: Province;
@@ -47,15 +47,15 @@ export const ProvinceCard: React.FC<ProvinceCardProps> = ({ province, onViewProv
             <span className="font-medium">{province.population.toLocaleString()}</span>
           </div>
           
-          {province.loyaute !== undefined && (
+          {province.loyauté !== undefined && (
             <div className="flex justify-between items-center text-sm">
               <span>Loyauté:</span>
               <div className="flex items-center">
-                <span className="font-medium mr-1">{province.loyaute}%</span>
-                {province.loyauteVariation && province.loyauteVariation > 0 && (
+                <span className="font-medium mr-1">{province.loyauté}%</span>
+                {province.variationLoyauté && province.variationLoyauté > 0 && (
                   <TrendingUpIcon className="h-4 w-4 text-green-500" />
                 )}
-                {province.loyauteVariation && province.loyauteVariation < 0 && (
+                {province.variationLoyauté && province.variationLoyauté < 0 && (
                   <TrendingDownIcon className="h-4 w-4 text-red-500" />
                 )}
               </div>
@@ -69,9 +69,9 @@ export const ProvinceCard: React.FC<ProvinceCardProps> = ({ province, onViewProv
             </div>
           )}
           
-          {province.dernierEvenement && (
+          {province.dernierEvénement && (
             <div className="text-sm mt-2 pt-2 border-t border-gray-200">
-              <p className="text-muted-foreground">Dernier événement: {province.dernierEvenement}</p>
+              <p className="text-muted-foreground">Dernier événement: {province.dernierEvénement}</p>
             </div>
           )}
           
