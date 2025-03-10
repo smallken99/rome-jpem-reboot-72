@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
@@ -147,14 +148,14 @@ export const SenatComposition: React.FC<{ role?: 'mj' | 'player' }> = ({ role = 
             <TableBody>
               {senateurs.map(senator => (
                 <TableRow key={senator.id}>
-                  <TableCell className="font-medium">{senator.name}</TableCell>
+                  <TableCell className="font-medium">{senator.prenom} {senator.nom}</TableCell>
                   <TableCell>
                     <Badge className={
-                      senator.faction === 'Optimates' ? 'bg-blue-100 text-blue-800 hover:bg-blue-200' :
-                      senator.faction === 'Populares' ? 'bg-red-100 text-red-800 hover:bg-red-200' :
+                      senator.appartenance === 'Optimates' ? 'bg-blue-100 text-blue-800 hover:bg-blue-200' :
+                      senator.appartenance === 'Populares' ? 'bg-red-100 text-red-800 hover:bg-red-200' :
                       'bg-purple-100 text-purple-800 hover:bg-purple-200'
                     }>
-                      {senator.faction}
+                      {senator.appartenance}
                     </Badge>
                   </TableCell>
                   <TableCell>
@@ -170,7 +171,7 @@ export const SenatComposition: React.FC<{ role?: 'mj' | 'player' }> = ({ role = 
                     </div>
                     <span className="text-xs text-gray-500 mt-1">{senator.influence}/100</span>
                   </TableCell>
-                  <TableCell>{senator.role}</TableCell>
+                  <TableCell>{senator.fonction || senator.roles[0] || "Sénateur"}</TableCell>
                   <TableCell className="text-right">
                     <Button variant="ghost" size="sm">
                       Détails
