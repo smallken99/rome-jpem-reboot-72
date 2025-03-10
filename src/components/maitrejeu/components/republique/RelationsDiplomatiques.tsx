@@ -4,9 +4,9 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Globe, HandshakeIcon, ShieldAlert, TrendingUp, TrendingDown } from 'lucide-react';
+import { Globe, ShieldAlert, TrendingUp, TrendingDown } from 'lucide-react';
 
-// Create HandshakeIcon component since it's not in lucide-react
+// Create custom Handshake icon since it's not in lucide-react
 const HandshakeIcon = (props: React.SVGProps<SVGSVGElement>) => (
   <svg
     {...props}

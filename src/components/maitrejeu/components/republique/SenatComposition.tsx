@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { PieChart } from '@nivo/pie';
+import { ResponsivePie } from '@nivo/pie';
 import { Users, User, Users2, UserPlus } from 'lucide-react';
 
 export const SenatComposition: React.FC = () => {
@@ -35,7 +35,7 @@ export const SenatComposition: React.FC = () => {
           </CardHeader>
           <CardContent>
             <div className="h-80">
-              <PieChart
+              <ResponsivePie
                 data={factions}
                 margin={{ top: 40, right: 80, bottom: 80, left: 80 }}
                 innerRadius={0.5}
