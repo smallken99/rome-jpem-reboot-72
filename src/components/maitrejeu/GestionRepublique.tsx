@@ -1,9 +1,12 @@
 
 import React, { useState } from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Landmark, Users, Scale, Globe, Scroll } from 'lucide-react';
 import { MagistraturesList } from './components/republique/MagistraturesList';
+import { SenatComposition } from './components/republique/SenatComposition';
+import { ProcessusLegislatif } from './components/republique/ProcessusLegislatif';
+import { SystemeJudiciaire } from './components/republique/SystemeJudiciaire';
+import { RelationsDiplomatiques } from './components/republique/RelationsDiplomatiques';
 
 export const GestionRepublique: React.FC = () => {
   const [activeTab, setActiveTab] = useState('institutions');
@@ -48,67 +51,19 @@ export const GestionRepublique: React.FC = () => {
         </TabsContent>
         
         <TabsContent value="senat" className="space-y-4">
-          <Card>
-            <CardHeader>
-              <CardTitle>Composition du Sénat</CardTitle>
-              <CardDescription>
-                Répartition des factions et influence des sénateurs
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <p className="text-center text-muted-foreground py-8">
-                Contenu à développer: composition du Sénat, répartition des pouvoirs...
-              </p>
-            </CardContent>
-          </Card>
+          <SenatComposition />
         </TabsContent>
         
         <TabsContent value="lois" className="space-y-4">
-          <Card>
-            <CardHeader>
-              <CardTitle>Processus Législatif</CardTitle>
-              <CardDescription>
-                Suivi des propositions et votes de lois
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <p className="text-center text-muted-foreground py-8">
-                Contenu à développer: processus législatif, votes en cours...
-              </p>
-            </CardContent>
-          </Card>
+          <ProcessusLegislatif />
         </TabsContent>
         
         <TabsContent value="justice" className="space-y-4">
-          <Card>
-            <CardHeader>
-              <CardTitle>Système Judiciaire</CardTitle>
-              <CardDescription>
-                Affaires judiciaires et tribunaux
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <p className="text-center text-muted-foreground py-8">
-                Contenu à développer: tribunaux, procès en cours...
-              </p>
-            </CardContent>
-          </Card>
+          <SystemeJudiciaire />
         </TabsContent>
         
         <TabsContent value="diplomatic" className="space-y-4">
-          <Card>
-            <CardHeader>
-              <CardTitle>Relations Diplomatiques</CardTitle>
-              <CardDescription>
-                Traités, alliances et relations avec les peuples étrangers
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <p className="text-center text-muted-foreground py-8">
-                Contenu à développer: relations avec d'autres peuples, traités existants...
-              </p>
-            </CardContent>
-          </Card>
+          <RelationsDiplomatiques />
         </TabsContent>
       </Tabs>
     </div>
