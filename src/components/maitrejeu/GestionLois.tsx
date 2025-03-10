@@ -1,58 +1,68 @@
-import React from 'react';
+
+import React, { useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { ScrollText, FileCheck, FileX, History, Filter } from 'lucide-react';
+import { ScrollText, FileCheck, FileX, History, Filter, PlusCircle, Search } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Loi } from './types/lois';
+import { useMaitreJeu } from './context';
+import { LoiModal } from './components/lois/LoiModal';
+import { Season } from './types/common';
 
-// Données factices pour démonstration
-const MOCK_LOIS: Loi[] = [
-  {
-    id: "1",
-    titre: "Lex Sempronia Agraria",
-    description: "Loi sur la redistribution des terres publiques",
-    proposeur: "Tiberius Sempronius Gracchus",
-    catégorie: "Agraire",
-    date: { year: -133, season: "SPRING" },
-    état: "Promulguée",
-    importance: "majeure",
-    votesPositifs: 18,
-    votesNégatifs: 10,
-    votesAbstention: 2,
-    effets: { "stabilité": -10, "popularité": 15 }
-  },
-  {
-    id: "2",
-    titre: "Lex Tullia de Ambitu",
-    description: "Interdiction de distribuer des dons lors des élections",
-    proposeur: "Marcus Tullius Cicero",
-    catégorie: "Électorale",
-    date: { year: -63, season: "SUMMER" },
-    état: "Promulguée",
-    importance: "mineure",
-    votesPositifs: 23,
-    votesNégatifs: 7,
-    votesAbstention: 0,
-    effets: { "corruption": -5 }
-  },
-  {
-    id: "3",
-    titre: "Lex Julia Municipalis",
-    description: "Réorganisation de l'administration municipale",
-    proposeur: "Gaius Julius Caesar",
-    catégorie: "Administrative",
-    date: { year: -45, season: "AUTUMN" },
-    état: "En délibération",
-    importance: "mineure",
-    votesPositifs: 15,
-    votesNégatifs: 12,
-    votesAbstention: 3,
-    effets: { "efficacité": 8 }
-  }
-];
-
+// Créons un composant pour le modal de loi
 export const GestionLois: React.FC = () => {
+  const { lois, addLoi } = useMaitreJeu();
+  const [searchTerm, setSearchTerm] = useState('');
+  const [activeTab, setActiveTab] = useState('actives');
+  const [showLoiModal, setShowLoiModal] = useState(false);
+  const [loiToEdit, setLoiToEdit] = useState<Loi | null>(null);
+
+  // Filtrer les lois en fonction du terme de recherche
+  const filteredLois = lois.filter(loi => 
+    loi.titre.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    loi.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    loi.proposeur.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    loi.catégorie.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
+  // Filtrer les lois en fonction de l'onglet actif
+  const getFilteredLoisByTab = () => {
+    switch(activeTab) {
+      case 'actives':
+        return filteredLois.filter(loi => loi.état === "Promulguée");
+      case 'proposees':
+        return filteredLois.filter(loi => loi.état === "En délibération");
+      case 'rejetees': 
+        return filteredLois.filter(loi => loi.état === "Rejetée");
+      case 'historique':
+        return filteredLois; // Afficher toutes les lois dans l'onglet historique
+      default:
+        return filteredLois;
+    }
+  };
+
+  const handleAddLoi = (loi: Loi) => {
+    addLoi(loi);
+    setShowLoiModal(false);
+    setLoiToEdit(null);
+  };
+
+  const handleEditLoi = (loi: Loi) => {
+    setLoiToEdit(loi);
+    setShowLoiModal(true);
+  };
+
+  // Fonction pour traduire la saison en français
+  const formatSeason = (season: Season): string => {
+    switch(season) {
+      case "SPRING": return "Printemps";
+      case "SUMMER": return "Été";
+      case "AUTUMN": return "Automne";
+      case "WINTER": return "Hiver";
+    }
+  };
+
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
@@ -62,20 +72,28 @@ export const GestionLois: React.FC = () => {
             Gérez les lois de la République, leur promulgation et leurs effets
           </p>
         </div>
-        <Button>
-          <ScrollText className="mr-2 h-4 w-4" />
+        <Button onClick={() => setShowLoiModal(true)}>
+          <PlusCircle className="mr-2 h-4 w-4" />
           Nouvelle Loi
         </Button>
       </div>
 
       <div className="flex items-center space-x-2 mb-4">
-        <Input placeholder="Rechercher une loi..." className="max-w-sm" />
+        <div className="relative flex-1">
+          <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+          <Input 
+            placeholder="Rechercher une loi..." 
+            className="pl-8"
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+          />
+        </div>
         <Button variant="outline" size="icon">
           <Filter className="h-4 w-4" />
         </Button>
       </div>
 
-      <Tabs defaultValue="actives" className="space-y-4">
+      <Tabs defaultValue="actives" value={activeTab} onValueChange={setActiveTab} className="space-y-4">
         <TabsList>
           <TabsTrigger value="actives" className="flex items-center gap-2">
             <FileCheck className="h-4 w-4" />
@@ -105,30 +123,34 @@ export const GestionLois: React.FC = () => {
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
-                {MOCK_LOIS.filter(loi => loi.état === "Promulguée").map(loi => (
-                  <Card key={loi.id} className="p-4">
-                    <div className="flex justify-between items-start">
-                      <div>
-                        <h3 className="font-medium text-lg">{loi.titre}</h3>
-                        <p className="text-sm text-muted-foreground">{loi.description}</p>
-                        <div className="flex gap-2 mt-2">
-                          <span className="text-xs bg-secondary px-2 py-1 rounded-full">
-                            {loi.catégorie}
-                          </span>
-                          <span className="text-xs bg-secondary px-2 py-1 rounded-full">
-                            {`${loi.date.season === "SPRING" ? "Printemps" : 
-                               loi.date.season === "SUMMER" ? "Été" : 
-                               loi.date.season === "AUTUMN" ? "Automne" : "Hiver"} ${Math.abs(loi.date.year)} ${loi.date.year < 0 ? 'av. J.-C.' : 'ap. J.-C.'}`}
-                          </span>
+                {getFilteredLoisByTab().length === 0 ? (
+                  <p className="text-center text-muted-foreground py-8">
+                    Aucune loi active trouvée
+                  </p>
+                ) : (
+                  getFilteredLoisByTab().map(loi => (
+                    <Card key={loi.id} className="p-4">
+                      <div className="flex justify-between items-start">
+                        <div>
+                          <h3 className="font-medium text-lg">{loi.titre}</h3>
+                          <p className="text-sm text-muted-foreground">{loi.description}</p>
+                          <div className="flex gap-2 mt-2">
+                            <span className="text-xs bg-secondary px-2 py-1 rounded-full">
+                              {loi.catégorie}
+                            </span>
+                            <span className="text-xs bg-secondary px-2 py-1 rounded-full">
+                              {`${formatSeason(loi.date.season)} ${Math.abs(loi.date.year)} ${loi.date.year < 0 ? 'av. J.-C.' : 'ap. J.-C.'}`}
+                            </span>
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <Button variant="outline" size="sm" onClick={() => handleEditLoi(loi)}>Modifier</Button>
+                          <Button variant="destructive" size="sm">Abroger</Button>
                         </div>
                       </div>
-                      <div className="flex items-center gap-2">
-                        <Button variant="outline" size="sm">Modifier</Button>
-                        <Button variant="destructive" size="sm">Abroger</Button>
-                      </div>
-                    </div>
-                  </Card>
-                ))}
+                    </Card>
+                  ))
+                )}
               </div>
             </CardContent>
           </Card>
@@ -144,21 +166,27 @@ export const GestionLois: React.FC = () => {
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
-                {MOCK_LOIS.filter(loi => loi.état === "En délibération").map(loi => (
-                  <Card key={loi.id} className="p-4">
-                    <div className="flex justify-between items-start">
-                      <div>
-                        <h3 className="font-medium text-lg">{loi.titre}</h3>
-                        <p className="text-sm text-muted-foreground">{loi.description}</p>
-                        <p className="text-sm mt-1">Proposeur: <span className="font-medium">{loi.proposeur}</span></p>
+                {getFilteredLoisByTab().length === 0 ? (
+                  <p className="text-center text-muted-foreground py-8">
+                    Aucune loi proposée trouvée
+                  </p>
+                ) : (
+                  getFilteredLoisByTab().map(loi => (
+                    <Card key={loi.id} className="p-4">
+                      <div className="flex justify-between items-start">
+                        <div>
+                          <h3 className="font-medium text-lg">{loi.titre}</h3>
+                          <p className="text-sm text-muted-foreground">{loi.description}</p>
+                          <p className="text-sm mt-1">Proposeur: <span className="font-medium">{loi.proposeur}</span></p>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <Button variant="default" size="sm">Organiser le vote</Button>
+                          <Button variant="outline" size="sm" onClick={() => handleEditLoi(loi)}>Détails</Button>
+                        </div>
                       </div>
-                      <div className="flex items-center gap-2">
-                        <Button variant="default" size="sm">Organiser le vote</Button>
-                        <Button variant="outline" size="sm">Détails</Button>
-                      </div>
-                    </div>
-                  </Card>
-                ))}
+                    </Card>
+                  ))
+                )}
               </div>
             </CardContent>
           </Card>
@@ -173,9 +201,33 @@ export const GestionLois: React.FC = () => {
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <p className="text-center text-muted-foreground py-8">
-                Aucune loi rejetée récemment
-              </p>
+              {getFilteredLoisByTab().length === 0 ? (
+                <p className="text-center text-muted-foreground py-8">
+                  Aucune loi rejetée trouvée
+                </p>
+              ) : (
+                <div className="space-y-4">
+                  {getFilteredLoisByTab().map(loi => (
+                    <Card key={loi.id} className="p-4">
+                      <div className="flex justify-between items-start">
+                        <div>
+                          <h3 className="font-medium text-lg">{loi.titre}</h3>
+                          <p className="text-sm text-muted-foreground">{loi.description}</p>
+                          <div className="flex gap-2 mt-2">
+                            <span className="text-xs bg-secondary px-2 py-1 rounded-full">
+                              {loi.catégorie}
+                            </span>
+                            <span className="text-xs bg-secondary px-2 py-1 rounded-full">
+                              {`${formatSeason(loi.date.season)} ${Math.abs(loi.date.year)} ${loi.date.year < 0 ? 'av. J.-C.' : 'ap. J.-C.'}`}
+                            </span>
+                          </div>
+                        </div>
+                        <Button variant="outline" size="sm" onClick={() => handleEditLoi(loi)}>Détails</Button>
+                      </div>
+                    </Card>
+                  ))}
+                </div>
+              )}
             </CardContent>
           </Card>
         </TabsContent>
@@ -189,13 +241,64 @@ export const GestionLois: React.FC = () => {
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <p className="text-center text-muted-foreground py-8">
-                Contenu à développer: timeline des législations passées...
-              </p>
+              {getFilteredLoisByTab().length === 0 ? (
+                <p className="text-center text-muted-foreground py-8">
+                  Aucune loi dans l'historique
+                </p>
+              ) : (
+                <div className="space-y-6">
+                  {getFilteredLoisByTab().map(loi => (
+                    <div key={loi.id} className="border-l-4 pl-4 pb-6 relative">
+                      <div className="absolute w-3 h-3 bg-primary rounded-full -left-[6.5px] top-2"></div>
+                      <div className="flex justify-between">
+                        <div>
+                          <h3 className="font-medium text-lg">{loi.titre}</h3>
+                          <p className="text-sm text-muted-foreground">
+                            {formatSeason(loi.date.season)} {Math.abs(loi.date.year)} {loi.date.year < 0 ? 'av. J.-C.' : 'ap. J.-C.'}
+                          </p>
+                        </div>
+                        <div className="self-start">
+                          <span className={`text-xs px-2 py-1 rounded-full ${
+                            loi.état === "Promulguée" ? "bg-green-100 text-green-800" : 
+                            loi.état === "Rejetée" ? "bg-red-100 text-red-800" : 
+                            "bg-yellow-100 text-yellow-800"
+                          }`}>
+                            {loi.état}
+                          </span>
+                        </div>
+                      </div>
+                      <p className="text-sm mt-1">{loi.description}</p>
+                      <div className="flex gap-2 mt-2">
+                        <span className="text-xs bg-secondary px-2 py-1 rounded-full">
+                          {loi.catégorie}
+                        </span>
+                        <span className="text-xs bg-secondary px-2 py-1 rounded-full">
+                          Importance: {loi.importance}
+                        </span>
+                      </div>
+                      <Button variant="ghost" size="sm" className="mt-2" onClick={() => handleEditLoi(loi)}>
+                        Voir les détails
+                      </Button>
+                    </div>
+                  ))}
+                </div>
+              )}
             </CardContent>
           </Card>
         </TabsContent>
       </Tabs>
+      
+      {showLoiModal && (
+        <LoiModal 
+          isOpen={showLoiModal}
+          onClose={() => {
+            setShowLoiModal(false);
+            setLoiToEdit(null);
+          }}
+          onSave={handleAddLoi}
+          editLoi={loiToEdit}
+        />
+      )}
     </div>
   );
 };

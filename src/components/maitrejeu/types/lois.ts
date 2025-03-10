@@ -8,15 +8,10 @@ export interface Loi {
   proposeur: string;
   catégorie: string;
   date: GameDate;
-  état: string;
+  état: "En délibération" | "Promulguée" | "Rejetée";
   importance: ImportanceType;
   votesPositifs: number;
   votesNégatifs: number;
   votesAbstention: number;
   effets: Record<string, number>;
-}
-
-export interface LoisTableProps {
-  lois: Loi[];
-  onUpdate?: (loi: Loi) => void;
 }

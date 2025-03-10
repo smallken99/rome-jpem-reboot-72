@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
@@ -11,7 +12,7 @@ import { MembreFamille, FamilleInfo, GenreFamille, StatutFamilial, StatutMatrimo
 export interface MembreFamilleModalProps {
   isOpen: boolean;
   onClose: () => void;
-  familleId: string;
+  familleId: string | null;
   editMembre?: MembreFamille;
   familles: FamilleInfo[];
 }
@@ -37,17 +38,17 @@ export const MembreFamilleModal: React.FC<MembreFamilleModalProps> = ({
     description: string;
     pere?: string;
     mere?: string;
-    dateNaissance?: string;
-    dateDeces?: string;
-    titres?: string[];
-    competences?: string[];
+    education?: string;
+    popularite?: number;
+    piete?: number;
+    joueur?: boolean;
     senateurId?: string;
   }>({
     nom: '',
     prenom: '',
     age: 25,
     genre: 'male',
-    statut: 'Vivant',
+    statut: 'Patricien',
     statutMatrimonial: 'Célibataire',
     role: '',
     description: '',
@@ -68,17 +69,17 @@ export const MembreFamilleModal: React.FC<MembreFamilleModalProps> = ({
         description: editMembre.description || '',  // Valeur par défaut si undefined
         pere: editMembre.pere,
         mere: editMembre.mere,
-        dateNaissance: editMembre.dateNaissance,
-        dateDeces: editMembre.dateDeces,
-        titres: editMembre.titres,
-        competences: editMembre.competences,
+        education: editMembre.education,
+        popularite: editMembre.popularite,
+        piete: editMembre.piete, 
+        joueur: editMembre.joueur,
         senateurId: editMembre.senateurId
       });
     }
   }, [editMembre]);
   
   // Les membres de famille disponibles pour les relations parentales
-  const membresFamille = getMembresByFamille(familleId);
+  const membresFamille = familleId ? getMembresByFamille(familleId) : [];
   
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
@@ -93,7 +94,7 @@ export const MembreFamilleModal: React.FC<MembreFamilleModalProps> = ({
     if (editMembre) {
       // Mise à jour d'un membre existant
       updateMembreFamille(editMembre.id, formData);
-    } else {
+    } else if (familleId) {
       // Création d'un nouveau membre
       addMembreFamille({
         ...formData,
@@ -141,13 +142,13 @@ export const MembreFamilleModal: React.FC<MembreFamilleModalProps> = ({
           
           <div className="grid grid-cols-4 items-center gap-4">
             <Label htmlFor="statut" className="text-right">Statut</Label>
-            <Select value={formData.statut} onValueChange={(value) => handleSelectChange('statut', value)}>
+            <Select value={formData.statut} onValueChange={(value) => handleSelectChange('statut', value as StatutFamilial)}>
               <SelectTrigger className="col-span-3">
                 <SelectValue placeholder="Sélectionner un statut" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="Vivant">Vivant</SelectItem>
-                <SelectItem value="Décédé">Décédé</SelectItem>
+                <SelectItem value="Patricien">Patricien</SelectItem>
+                <SelectItem value="Plébéien">Plébéien</SelectItem>
               </SelectContent>
             </Select>
           </div>
