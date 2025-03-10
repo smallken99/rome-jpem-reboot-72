@@ -13,7 +13,10 @@ import {
   BarChart2,
   Hourglass,
   Coins,
-  Users2
+  Users2,
+  Building,
+  ScrollText,
+  Landmark
 } from 'lucide-react';
 import { useMaitreJeu } from '@/components/maitrejeu/context';
 import { formatDate } from '@/utils/formatUtils';
@@ -37,7 +40,10 @@ export const MaitreJeuSidebar: React.FC<MaitreJeuSidebarProps> = ({
     { id: 'equilibre', label: 'Équilibre', icon: <Scale className="h-4 w-4" /> },
     { id: 'provinces', label: 'Provinces', icon: <Globe className="h-4 w-4" /> },
     { id: 'histoire', label: 'Histoire', icon: <BookText className="h-4 w-4" /> },
-    { id: 'economie', label: 'Économie', icon: <Coins className="h-4 w-4" /> }
+    { id: 'economie', label: 'Économie', icon: <Coins className="h-4 w-4" /> },
+    { id: 'republique', label: 'République', icon: <Landmark className="h-4 w-4" /> },
+    { id: 'batiments', label: 'Bâtiments', icon: <Building className="h-4 w-4" /> },
+    { id: 'lois', label: 'Lois', icon: <ScrollText className="h-4 w-4" /> }
   ];
   
   return (
@@ -67,7 +73,7 @@ export const MaitreJeuSidebar: React.FC<MaitreJeuSidebarProps> = ({
       
       <Separator />
       
-      <nav className="flex-1 p-2">
+      <nav className="flex-1 p-2 overflow-y-auto">
         <ul className="space-y-1">
           {navItems.map(item => (
             <li key={item.id}>

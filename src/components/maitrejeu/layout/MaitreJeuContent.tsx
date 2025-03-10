@@ -8,6 +8,9 @@ import { GestionHistoire } from '../GestionHistoire';
 import { GestionClients } from '../GestionClients';
 import { GestionEconomie } from '../GestionEconomie';
 import { GestionFamilles } from '../GestionFamilles';
+import { GestionRepublique } from '../GestionRepublique';
+import { GestionBatiments } from '../GestionBatiments';
+import { GestionLois } from '../GestionLois';
 
 interface MaitreJeuContentProps {
   activeTab: string;
@@ -25,6 +28,9 @@ export const MaitreJeuContent: React.FC<MaitreJeuContentProps> = ({ activeTab })
       {activeTab === 'clients' && <GestionClients />}
       {activeTab === 'economie' && <GestionEconomie />}
       {activeTab === 'familles' && <GestionFamilles />}
+      {activeTab === 'republique' && <GestionRepublique />}
+      {activeTab === 'batiments' && <GestionBatiments />}
+      {activeTab === 'lois' && <GestionLois />}
     </div>
   );
 };
