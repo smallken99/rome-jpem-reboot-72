@@ -1,21 +1,22 @@
 
 import React, { useState } from 'react';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { PlusCircle, Calendar, Book } from 'lucide-react';
+import { PlusCircle } from 'lucide-react';
 import { Loi } from './types';
 import { useMaitreJeu } from './context';
 import { Season } from './types/common';
 import { MagistratureType } from './types/magistratures';
 import { v4 as uuidv4 } from 'uuid';
+import { LoisList } from './components/lois/LoisList';
+import { LoiForm } from './components/lois/LoiForm';
+import { ElectionPlanner } from './components/elections/ElectionPlanner';
+import { LoiDetail } from './components/lois/LoiDetail';
 
 export const GestionPolitique = () => {
-  const { lois, addLoi, currentYear, currentSeason, scheduleElection } = useMaitreJeu();
+  const { lois, addLoi, currentYear, currentSeason } = useMaitreJeu();
   const [selectedTab, setSelectedTab] = useState('lois');
   const [showAddLoi, setShowAddLoi] = useState(false);
+  const [selectedLoi, setSelectedLoi] = useState<Loi | null>(null);
   const [newLoi, setNewLoi] = useState<Omit<Loi, 'id' | 'date' | 'état' | 'votesPositifs' | 'votesNégatifs' | 'votesAbstention' | 'effets'>>({
     titre: '',
     description: '',
@@ -50,17 +51,20 @@ export const GestionPolitique = () => {
     setShowAddLoi(false);
   };
   
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>, field: keyof Omit<Loi, 'id' | 'date' | 'état' | 'votesPositifs' | 'votesNégatifs' | 'votesAbstention' | 'effets'>) => {
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>, field: keyof typeof newLoi) => {
     setNewLoi({ ...newLoi, [field]: e.target.value });
   };
   
-  const handleSelectChange = (value: string, field: keyof Omit<Loi, 'id' | 'date' | 'état' | 'votesPositifs' | 'votesNégatifs' | 'votesAbstention' | 'effets'>) => {
+  const handleSelectChange = (value: string, field: keyof typeof newLoi) => {
     setNewLoi({ ...newLoi, [field]: value });
   };
   
-  // Remplacer la fonction handleScheduleElection par une version compatible
-  const handleScheduleElection = (magistrature: MagistratureType, year: number, season: Season) => {
-    scheduleElection(magistrature, year, season);
+  const handleViewLoi = (loi: Loi) => {
+    setSelectedLoi(loi);
+  };
+  
+  const handleCloseLoi = () => {
+    setSelectedLoi(null);
   };
   
   return (
@@ -72,130 +76,32 @@ export const GestionPolitique = () => {
         </TabsList>
         
         <TabsContent value="lois">
-          <Card>
-            <CardHeader>
-              <CardTitle>Lois en vigueur</CardTitle>
-              <CardDescription>Liste des lois actuellement en discussion au Sénat.</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <ul className="list-none pl-0">
-                {lois.map(loi => (
-                  <li key={loi.id} className="py-2 border-b border-gray-200 last:border-b-0">
-                    <div className="flex justify-between items-center">
-                      <div>
-                        <h3 className="font-semibold">{loi.titre}</h3>
-                        <p className="text-sm text-gray-500">{loi.description}</p>
-                      </div>
-                      <div className="space-x-2">
-                        <Button variant="outline" size="sm">
-                          <Book className="h-4 w-4 mr-2" />
-                          Voir détails
-                        </Button>
-                      </div>
-                    </div>
-                  </li>
-                ))}
-              </ul>
-              
-              <Button variant="secondary" className="mt-4" onClick={() => setShowAddLoi(true)}>
-                <PlusCircle className="h-4 w-4 mr-2" />
-                Proposer une nouvelle loi
-              </Button>
-            </CardContent>
-          </Card>
+          <LoisList 
+            lois={lois} 
+            onCreateLoi={() => setShowAddLoi(true)} 
+            onViewLoi={handleViewLoi} 
+          />
           
           {showAddLoi && (
-            <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full">
-              <div className="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
-                <div className="mt-3 text-center">
-                  <h3 className="text-lg leading-6 font-medium text-gray-900">Proposer une nouvelle loi</h3>
-                  <div className="mt-2">
-                    <Input
-                      placeholder="Titre de la loi"
-                      value={newLoi.titre}
-                      onChange={(e) => handleInputChange(e, 'titre')}
-                      className="mb-2"
-                    />
-                    <Input
-                      placeholder="Proposeur"
-                      value={newLoi.proposeur}
-                      onChange={(e) => handleInputChange(e, 'proposeur')}
-                      className="mb-2"
-                    />
-                    <Select onValueChange={(value) => handleSelectChange(value, 'catégorie')}>
-                      <SelectTrigger className="w-full mb-2">
-                        <SelectValue placeholder="Catégorie" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="politique">Politique</SelectItem>
-                        <SelectItem value="social">Social</SelectItem>
-                        <SelectItem value="économique">Économique</SelectItem>
-                      </SelectContent>
-                    </Select>
-                    <Select onValueChange={(value) => handleSelectChange(value, 'importance')}>
-                      <SelectTrigger className="w-full mb-2">
-                        <SelectValue placeholder="Importance" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="majeure">Majeure</SelectItem>
-                        <SelectItem value="mineure">Mineure</SelectItem>
-                        <SelectItem value="normale">Normale</SelectItem>
-                      </SelectContent>
-                    </Select>
-                    <Input
-                      placeholder="Description"
-                      value={newLoi.description}
-                      onChange={(e) => handleInputChange(e, 'description')}
-                      className="mb-2"
-                    />
-                  </div>
-                  <div className="items-center px-4 py-3">
-                    <Button variant="secondary" onClick={handleAddLoi} className="mr-2">
-                      Proposer
-                    </Button>
-                    <Button variant="ghost" onClick={() => setShowAddLoi(false)}>
-                      Annuler
-                    </Button>
-                  </div>
-                </div>
-              </div>
-            </div>
+            <LoiForm 
+              newLoi={newLoi}
+              handleInputChange={handleInputChange}
+              handleSelectChange={handleSelectChange}
+              handleAddLoi={handleAddLoi}
+              onCancel={() => setShowAddLoi(false)}
+            />
+          )}
+          
+          {selectedLoi && (
+            <LoiDetail 
+              loi={selectedLoi}
+              onClose={handleCloseLoi}
+            />
           )}
         </TabsContent>
         
         <TabsContent value="élections">
-          <Card>
-            <CardHeader>
-              <CardTitle>Planification des élections</CardTitle>
-              <CardDescription>Sélectionnez une magistrature et une date pour planifier une élection.</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <Select>
-                    <SelectTrigger className="w-full">
-                      <SelectValue placeholder="Magistrature" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="CONSUL">Consul</SelectItem>
-                      <SelectItem value="PRETEUR">Préteur</SelectItem>
-                      <SelectItem value="EDILE">Édile</SelectItem>
-                      <SelectItem value="QUESTEUR">Questeur</SelectItem>
-                      <SelectItem value="CENSEUR">Censeur</SelectItem>
-                      <SelectItem value="TRIBUN">Tribun</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div>
-                  <Input type="number" placeholder="Année" />
-                </div>
-              </div>
-              <Button variant="secondary" className="mt-4">
-                <Calendar className="h-4 w-4 mr-2" />
-                Planifier l'élection
-              </Button>
-            </CardContent>
-          </Card>
+          <ElectionPlanner />
         </TabsContent>
       </Tabs>
     </div>
