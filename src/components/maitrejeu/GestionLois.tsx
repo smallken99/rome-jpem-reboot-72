@@ -2,21 +2,24 @@
 import React, { useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { ScrollText, FileCheck, FileX, History, Filter, PlusCircle, Search } from 'lucide-react';
+import { FileCheck, FileX, History, Filter, PlusCircle, Search, ScrollText } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Loi } from './types/lois';
 import { useMaitreJeu } from './context';
-import { LoiModal } from './components/lois/LoiModal';
 import { Season } from './types/common';
+import { LoisList } from './components/lois/LoisList';
+import { LoiDetail } from './components/lois/LoiDetail';
+import { LoiModal } from './components/lois/LoiModal';
+import { HistoriqueLois } from './components/lois/HistoriqueLois';
 
-// Créons un composant pour le modal de loi
 export const GestionLois: React.FC = () => {
   const { lois, addLoi } = useMaitreJeu();
   const [searchTerm, setSearchTerm] = useState('');
   const [activeTab, setActiveTab] = useState('actives');
   const [showLoiModal, setShowLoiModal] = useState(false);
   const [loiToEdit, setLoiToEdit] = useState<Loi | null>(null);
+  const [selectedLoi, setSelectedLoi] = useState<Loi | null>(null);
 
   // Filtrer les lois en fonction du terme de recherche
   const filteredLois = lois.filter(loi => 
@@ -51,6 +54,14 @@ export const GestionLois: React.FC = () => {
   const handleEditLoi = (loi: Loi) => {
     setLoiToEdit(loi);
     setShowLoiModal(true);
+  };
+
+  const handleViewLoi = (loi: Loi) => {
+    setSelectedLoi(loi);
+  };
+
+  const handleCloseLoi = () => {
+    setSelectedLoi(null);
   };
 
   // Fonction pour traduire la saison en français
@@ -122,36 +133,20 @@ export const GestionLois: React.FC = () => {
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="space-y-4">
-                {getFilteredLoisByTab().length === 0 ? (
-                  <p className="text-center text-muted-foreground py-8">
-                    Aucune loi active trouvée
-                  </p>
-                ) : (
-                  getFilteredLoisByTab().map(loi => (
-                    <Card key={loi.id} className="p-4">
-                      <div className="flex justify-between items-start">
-                        <div>
-                          <h3 className="font-medium text-lg">{loi.titre}</h3>
-                          <p className="text-sm text-muted-foreground">{loi.description}</p>
-                          <div className="flex gap-2 mt-2">
-                            <span className="text-xs bg-secondary px-2 py-1 rounded-full">
-                              {loi.catégorie}
-                            </span>
-                            <span className="text-xs bg-secondary px-2 py-1 rounded-full">
-                              {`${formatSeason(loi.date.season)} ${Math.abs(loi.date.year)} ${loi.date.year < 0 ? 'av. J.-C.' : 'ap. J.-C.'}`}
-                            </span>
-                          </div>
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <Button variant="outline" size="sm" onClick={() => handleEditLoi(loi)}>Modifier</Button>
-                          <Button variant="destructive" size="sm">Abroger</Button>
-                        </div>
-                      </div>
-                    </Card>
-                  ))
-                )}
-              </div>
+              {getFilteredLoisByTab().length === 0 ? (
+                <p className="text-center text-muted-foreground py-8">
+                  Aucune loi active trouvée
+                </p>
+              ) : (
+                <LoisList 
+                  lois={getFilteredLoisByTab()} 
+                  onViewLoi={handleViewLoi}
+                  onEditLoi={handleEditLoi}
+                  showAdditionalActions
+                  actionLabel="Abroger"
+                  formatSeason={formatSeason}
+                />
+              )}
             </CardContent>
           </Card>
         </TabsContent>
@@ -165,29 +160,21 @@ export const GestionLois: React.FC = () => {
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="space-y-4">
-                {getFilteredLoisByTab().length === 0 ? (
-                  <p className="text-center text-muted-foreground py-8">
-                    Aucune loi proposée trouvée
-                  </p>
-                ) : (
-                  getFilteredLoisByTab().map(loi => (
-                    <Card key={loi.id} className="p-4">
-                      <div className="flex justify-between items-start">
-                        <div>
-                          <h3 className="font-medium text-lg">{loi.titre}</h3>
-                          <p className="text-sm text-muted-foreground">{loi.description}</p>
-                          <p className="text-sm mt-1">Proposeur: <span className="font-medium">{loi.proposeur}</span></p>
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <Button variant="default" size="sm">Organiser le vote</Button>
-                          <Button variant="outline" size="sm" onClick={() => handleEditLoi(loi)}>Détails</Button>
-                        </div>
-                      </div>
-                    </Card>
-                  ))
-                )}
-              </div>
+              {getFilteredLoisByTab().length === 0 ? (
+                <p className="text-center text-muted-foreground py-8">
+                  Aucune loi proposée trouvée
+                </p>
+              ) : (
+                <LoisList 
+                  lois={getFilteredLoisByTab()} 
+                  onViewLoi={handleViewLoi}
+                  onEditLoi={handleEditLoi}
+                  showAdditionalActions
+                  actionLabel="Organiser le vote"
+                  primaryAction
+                  formatSeason={formatSeason}
+                />
+              )}
             </CardContent>
           </Card>
         </TabsContent>
@@ -206,27 +193,12 @@ export const GestionLois: React.FC = () => {
                   Aucune loi rejetée trouvée
                 </p>
               ) : (
-                <div className="space-y-4">
-                  {getFilteredLoisByTab().map(loi => (
-                    <Card key={loi.id} className="p-4">
-                      <div className="flex justify-between items-start">
-                        <div>
-                          <h3 className="font-medium text-lg">{loi.titre}</h3>
-                          <p className="text-sm text-muted-foreground">{loi.description}</p>
-                          <div className="flex gap-2 mt-2">
-                            <span className="text-xs bg-secondary px-2 py-1 rounded-full">
-                              {loi.catégorie}
-                            </span>
-                            <span className="text-xs bg-secondary px-2 py-1 rounded-full">
-                              {`${formatSeason(loi.date.season)} ${Math.abs(loi.date.year)} ${loi.date.year < 0 ? 'av. J.-C.' : 'ap. J.-C.'}`}
-                            </span>
-                          </div>
-                        </div>
-                        <Button variant="outline" size="sm" onClick={() => handleEditLoi(loi)}>Détails</Button>
-                      </div>
-                    </Card>
-                  ))}
-                </div>
+                <LoisList 
+                  lois={getFilteredLoisByTab()} 
+                  onViewLoi={handleViewLoi}
+                  onEditLoi={handleEditLoi}
+                  formatSeason={formatSeason}
+                />
               )}
             </CardContent>
           </Card>
@@ -246,42 +218,11 @@ export const GestionLois: React.FC = () => {
                   Aucune loi dans l'historique
                 </p>
               ) : (
-                <div className="space-y-6">
-                  {getFilteredLoisByTab().map(loi => (
-                    <div key={loi.id} className="border-l-4 pl-4 pb-6 relative">
-                      <div className="absolute w-3 h-3 bg-primary rounded-full -left-[6.5px] top-2"></div>
-                      <div className="flex justify-between">
-                        <div>
-                          <h3 className="font-medium text-lg">{loi.titre}</h3>
-                          <p className="text-sm text-muted-foreground">
-                            {formatSeason(loi.date.season)} {Math.abs(loi.date.year)} {loi.date.year < 0 ? 'av. J.-C.' : 'ap. J.-C.'}
-                          </p>
-                        </div>
-                        <div className="self-start">
-                          <span className={`text-xs px-2 py-1 rounded-full ${
-                            loi.état === "Promulguée" ? "bg-green-100 text-green-800" : 
-                            loi.état === "Rejetée" ? "bg-red-100 text-red-800" : 
-                            "bg-yellow-100 text-yellow-800"
-                          }`}>
-                            {loi.état}
-                          </span>
-                        </div>
-                      </div>
-                      <p className="text-sm mt-1">{loi.description}</p>
-                      <div className="flex gap-2 mt-2">
-                        <span className="text-xs bg-secondary px-2 py-1 rounded-full">
-                          {loi.catégorie}
-                        </span>
-                        <span className="text-xs bg-secondary px-2 py-1 rounded-full">
-                          Importance: {loi.importance}
-                        </span>
-                      </div>
-                      <Button variant="ghost" size="sm" className="mt-2" onClick={() => handleEditLoi(loi)}>
-                        Voir les détails
-                      </Button>
-                    </div>
-                  ))}
-                </div>
+                <HistoriqueLois 
+                  lois={getFilteredLoisByTab()}
+                  onViewLoi={handleViewLoi}
+                  formatSeason={formatSeason}
+                />
               )}
             </CardContent>
           </Card>
@@ -297,6 +238,13 @@ export const GestionLois: React.FC = () => {
           }}
           onSave={handleAddLoi}
           editLoi={loiToEdit}
+        />
+      )}
+      
+      {selectedLoi && (
+        <LoiDetail 
+          loi={selectedLoi}
+          onClose={handleCloseLoi}
         />
       )}
     </div>
