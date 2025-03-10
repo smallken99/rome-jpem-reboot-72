@@ -1,17 +1,18 @@
 
 import React, { useState } from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { TabsContent } from '@/components/ui/tabs';
 import { PlusCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Loi } from './types/lois';
 import { useMaitreJeu } from './context';
 import { Season } from './types/common';
-import { LoisList } from './components/lois/LoisList';
 import { LoiDetail } from './components/lois/LoiDetail';
 import { LoiModal } from './components/lois/LoiModal';
-import { HistoriqueLois } from './components/lois/HistoriqueLois';
 import { LoisSearchAndFilters } from './components/lois/LoisSearchAndFilters';
+import { LoisActivesTab } from './components/lois/tabs/LoisActivesTab';
+import { LoisProposeesTab } from './components/lois/tabs/LoisProposeesTab';
+import { LoisRejeteesTab } from './components/lois/tabs/LoisRejeteesTab';
+import { HistoriqueLoiTab } from './components/lois/tabs/HistoriqueLoiTab';
 
 export const GestionLois: React.FC = () => {
   const { lois, addLoi } = useMaitreJeu();
@@ -97,107 +98,38 @@ export const GestionLois: React.FC = () => {
       />
 
       <TabsContent value="actives">
-        <Card>
-          <CardHeader>
-            <CardTitle>Lois en vigueur</CardTitle>
-            <CardDescription>
-              Lois promulguées et actuellement en application
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            {getFilteredLoisByTab().length === 0 ? (
-              <p className="text-center text-muted-foreground py-8">
-                Aucune loi active trouvée
-              </p>
-            ) : (
-              <LoisList 
-                lois={getFilteredLoisByTab()} 
-                onViewLoi={handleViewLoi}
-                onEditLoi={handleEditLoi}
-                showAdditionalActions
-                actionLabel="Abroger"
-                formatSeason={formatSeason}
-              />
-            )}
-          </CardContent>
-        </Card>
+        <LoisActivesTab 
+          lois={getFilteredLoisByTab()}
+          onViewLoi={handleViewLoi}
+          onEditLoi={handleEditLoi}
+          formatSeason={formatSeason}
+        />
       </TabsContent>
       
       <TabsContent value="proposees">
-        <Card>
-          <CardHeader>
-            <CardTitle>Lois proposées</CardTitle>
-            <CardDescription>
-              Projets de loi en attente de vote
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            {getFilteredLoisByTab().length === 0 ? (
-              <p className="text-center text-muted-foreground py-8">
-                Aucune loi proposée trouvée
-              </p>
-            ) : (
-              <LoisList 
-                lois={getFilteredLoisByTab()} 
-                onViewLoi={handleViewLoi}
-                onEditLoi={handleEditLoi}
-                showAdditionalActions
-                actionLabel="Organiser le vote"
-                primaryAction
-                formatSeason={formatSeason}
-              />
-            )}
-          </CardContent>
-        </Card>
+        <LoisProposeesTab 
+          lois={getFilteredLoisByTab()}
+          onViewLoi={handleViewLoi}
+          onEditLoi={handleEditLoi}
+          formatSeason={formatSeason}
+        />
       </TabsContent>
       
       <TabsContent value="rejetees">
-        <Card>
-          <CardHeader>
-            <CardTitle>Lois rejetées</CardTitle>
-            <CardDescription>
-              Projets de loi qui n'ont pas été adoptés
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            {getFilteredLoisByTab().length === 0 ? (
-              <p className="text-center text-muted-foreground py-8">
-                Aucune loi rejetée trouvée
-              </p>
-            ) : (
-              <LoisList 
-                lois={getFilteredLoisByTab()} 
-                onViewLoi={handleViewLoi}
-                onEditLoi={handleEditLoi}
-                formatSeason={formatSeason}
-              />
-            )}
-          </CardContent>
-        </Card>
+        <LoisRejeteesTab 
+          lois={getFilteredLoisByTab()}
+          onViewLoi={handleViewLoi}
+          onEditLoi={handleEditLoi}
+          formatSeason={formatSeason}
+        />
       </TabsContent>
       
       <TabsContent value="historique">
-        <Card>
-          <CardHeader>
-            <CardTitle>Historique législatif</CardTitle>
-            <CardDescription>
-              Archives des lois et des votes passés
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            {getFilteredLoisByTab().length === 0 ? (
-              <p className="text-center text-muted-foreground py-8">
-                Aucune loi dans l'historique
-              </p>
-            ) : (
-              <HistoriqueLois 
-                lois={getFilteredLoisByTab()}
-                onViewLoi={handleViewLoi}
-                formatSeason={formatSeason}
-              />
-            )}
-          </CardContent>
-        </Card>
+        <HistoriqueLoiTab 
+          lois={getFilteredLoisByTab()}
+          onViewLoi={handleViewLoi}
+          formatSeason={formatSeason}
+        />
       </TabsContent>
       
       {showLoiModal && (

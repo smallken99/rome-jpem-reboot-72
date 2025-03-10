@@ -9,7 +9,7 @@ import { Loi } from '../../types/lois';
 interface LoiFormProps {
   newLoi: Omit<Loi, 'id' | 'date' | 'état' | 'votesPositifs' | 'votesNégatifs' | 'votesAbstention' | 'effets'>;
   handleInputChange: (e: React.ChangeEvent<HTMLInputElement>, field: keyof typeof newLoi) => void;
-  handleSelectChange: (value: string, field: keyof typeof newLoi) => void;
+  handleSelectChange: (value: string, field: keyof Omit<Loi, 'id' | 'date' | 'état' | 'votesPositifs' | 'votesNégatifs' | 'votesAbstention' | 'effets'>) => void;
   handleAddLoi: () => void;
   onCancel: () => void;
 }
