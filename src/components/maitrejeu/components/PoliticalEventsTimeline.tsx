@@ -1,10 +1,10 @@
 
 import React from 'react';
-import { Timeline, TimelineItem, TimelineHeader, TimelineTitle, TimelineBadge, TimelineContent } from '@/components/ui/timeline-custom';
-import { EquilibreTypes } from '../types';
+import { Timeline } from '@/components/ui/timeline-custom';
+import { PoliticalEvent } from '../types/equilibre';
 
 export interface PoliticalEventsTimelineProps {
-  politicalEvents: EquilibreTypes.PoliticalEvent[];
+  politicalEvents: PoliticalEvent[];
 }
 
 export const PoliticalEventsTimeline: React.FC<PoliticalEventsTimelineProps> = ({
@@ -45,8 +45,8 @@ export const PoliticalEventsTimeline: React.FC<PoliticalEventsTimelineProps> = (
                 {Object.entries(event.impact).map(([key, value]) => (
                   <div key={key} className="flex items-center justify-between">
                     <span className="capitalize">{key}:</span>
-                    <span className={value > 0 ? 'text-green-600' : 'text-red-600'}>
-                      {value > 0 ? `+${value}` : value}
+                    <span className={typeof value === 'number' && value > 0 ? 'text-green-600' : 'text-red-600'}>
+                      {typeof value === 'number' && value > 0 ? `+${value}` : value}
                     </span>
                   </div>
                 ))}

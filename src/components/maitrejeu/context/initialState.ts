@@ -1,4 +1,10 @@
+
 import { SenateurJouable, Province, Evenement, Election, HistoireEntry, Loi, Equilibre } from '../types';
+import { 
+  EconomieRecord, 
+  TreasuryStatus, 
+  EconomicFactors 
+} from '../types/economie';
 import { GameDate, Season, GamePhase } from '../types/common';
 import { Client } from '../types/clients';
 import { v4 as uuidv4 } from 'uuid';

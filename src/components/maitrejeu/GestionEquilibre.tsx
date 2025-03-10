@@ -13,8 +13,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { PlusCircle } from 'lucide-react';
 import { EvenementType } from './types/evenements';
+import { PoliticalEvent } from './types/equilibre';
 import { v4 as uuidv4 } from 'uuid';
-import { EquilibreTypes } from './types';
 import { convertTimeSeasonToMaitreJeuSeason } from '@/utils/formatUtils';
 
 export const GestionEquilibre = () => {
@@ -100,9 +100,9 @@ export const GestionEquilibre = () => {
                         économie: event.économie,
                         religion: event.religion,
                         diplomatie: event.diplomatie
-                      } as unknown as EquilibreTypes.PoliticalEvent; // Force the type conversion
+                      } as PoliticalEvent;
                     }
-                    return event as unknown as EquilibreTypes.PoliticalEvent; // Force the type conversion
+                    return event as PoliticalEvent;
                   }) 
                 : []
               }

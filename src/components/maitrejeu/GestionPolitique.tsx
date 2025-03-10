@@ -9,7 +9,7 @@ import { PlusCircle, Calendar, Book } from 'lucide-react';
 import { Loi } from './types';
 import { useMaitreJeu } from './context';
 import { Season } from './types/common';
-import { MagistratureType } from './types/index';
+import { MagistratureType } from './types/magistratures';
 import { v4 as uuidv4 } from 'uuid';
 
 export const GestionPolitique = () => {
@@ -177,12 +177,12 @@ export const GestionPolitique = () => {
                       <SelectValue placeholder="Magistrature" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="consul">Consul</SelectItem>
-                      <SelectItem value="préteur">Préteur</SelectItem>
-                      <SelectItem value="édile">Édile</SelectItem>
-                      <SelectItem value="questeur">Questeur</SelectItem>
-                      <SelectItem value="censeur">Censeur</SelectItem>
-                      <SelectItem value="tribun">Tribun</SelectItem>
+                      <SelectItem value="CONSUL">Consul</SelectItem>
+                      <SelectItem value="PRETEUR">Préteur</SelectItem>
+                      <SelectItem value="EDILE">Édile</SelectItem>
+                      <SelectItem value="QUESTEUR">Questeur</SelectItem>
+                      <SelectItem value="CENSEUR">Censeur</SelectItem>
+                      <SelectItem value="TRIBUN">Tribun</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>

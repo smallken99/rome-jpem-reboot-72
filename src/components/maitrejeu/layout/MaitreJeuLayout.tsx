@@ -9,6 +9,12 @@ interface MaitreJeuLayoutProps {
   setActiveTab: (tab: string) => void;
 }
 
+// Mettons à jour l'interface pour MaitreJeuSidebarProps pour inclure setActiveTab
+interface MaitreJeuSidebarProps {
+  activeTab: string;
+  setActiveTab: (tab: string) => void;
+}
+
 export const MaitreJeuLayout: React.FC<MaitreJeuLayoutProps> = ({
   activeTab,
   setActiveTab
