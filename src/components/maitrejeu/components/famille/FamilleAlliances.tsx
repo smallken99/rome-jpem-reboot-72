@@ -7,7 +7,6 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
 import { Handshake, User, Calendar, ScrollText, AlertCircle } from 'lucide-react';
 import { useMaitreJeu } from '../../context';
-import { formatDate } from '@/utils/formatUtils';
 
 interface FamilleAlliancesProps {
   alliances: FamilleAlliance[];
@@ -56,6 +55,14 @@ export const FamilleAlliances: React.FC<FamilleAlliancesProps> = ({
     updateAlliance(allianceId, { statut: newStatus });
   };
 
+  // Fonction pour formater la date (correction de l'erreur)
+  const formatDate = (date: { year: number, season: string }) => {
+    const seasonFr = date.season === "SPRING" ? "Printemps" :
+                     date.season === "SUMMER" ? "Été" :
+                     date.season === "AUTUMN" ? "Automne" : "Hiver";
+    return `${seasonFr} ${Math.abs(date.year)} ${date.year < 0 ? 'av. J.-C.' : 'ap. J.-C.'}`;
+  };
+
   return (
     <div className="space-y-4">
       <Tabs value={activeTab} onValueChange={(value) => setActiveTab(value as any)}>
@@ -90,7 +97,7 @@ export const FamilleAlliances: React.FC<FamilleAlliancesProps> = ({
                     <div className="flex items-center space-x-2">
                       <Calendar className="h-4 w-4 text-muted-foreground" />
                       <span className="text-sm text-muted-foreground">
-                        Depuis {formatDate({ year: parseInt(alliance.dateDebut.split('-')[0]), season: 'SPRING' })}
+                        Depuis {formatDate({ year: parseInt(alliance.dateDebut.split('-')[0]), season: "SPRING" })}
                       </span>
                     </div>
                   </div>

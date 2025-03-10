@@ -18,7 +18,7 @@ export const FamilleMembres: React.FC<FamilleMembresProps> = ({
   membres,
   familleId
 }) => {
-  const { deleteMembreFamille, getFamille, updateMembreFamille } = useMaitreJeu();
+  const { deleteMembreFamille, getFamille, updateMembreFamille, familles } = useMaitreJeu();
   const [membreToDelete, setMembreToDelete] = useState<string | null>(null);
   const [membreToEdit, setMembreToEdit] = useState<MembreFamille | null>(null);
   const [filter, setFilter] = useState<{
@@ -153,12 +153,15 @@ export const FamilleMembres: React.FC<FamilleMembresProps> = ({
         </AlertDialogContent>
       </AlertDialog>
       
-      <MembreFamilleModal
-        isOpen={!!membreToEdit}
-        onClose={() => setMembreToEdit(null)}
-        familleId={familleId}
-        editMembre={membreToEdit}
-      />
+      {membreToEdit && (
+        <MembreFamilleModal
+          isOpen={!!membreToEdit}
+          onClose={() => setMembreToEdit(null)}
+          familleId={familleId}
+          editMembre={membreToEdit}
+          familles={familles}
+        />
+      )}
     </div>
   );
 };

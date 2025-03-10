@@ -79,8 +79,23 @@ export const MembreFamilleModal: React.FC<MembreFamilleModalProps> = ({
     if (isOpen) {
       if (editMembre) {
         setFormData({
-          ...editMembre,
+          ...formData,
+          nom: editMembre.nom || '',
+          prenom: editMembre.prenom || '',
+          age: editMembre.age || 25,
+          genre: editMembre.genre || 'male',
+          statut: editMembre.statut || 'Patricien',
+          statutMatrimonial: editMembre.statutMatrimonial || 'Célibataire',
+          role: editMembre.role || '',
+          education: editMembre.education || '',
+          popularite: editMembre.popularite || 50,
+          piete: editMembre.piete || 50,
+          joueur: editMembre.joueur || false,
+          description: editMembre.description || '',
           familleId: familleId || '',
+          pere: editMembre.pere || '',
+          mere: editMembre.mere || '',
+          senateurId: editMembre.senateurId || '',
         });
       } else {
         setFormData({
@@ -97,6 +112,8 @@ export const MembreFamilleModal: React.FC<MembreFamilleModalProps> = ({
           joueur: false,
           description: '',
           familleId: familleId || '',
+          pere: '',
+          mere: '',
         });
       }
     }

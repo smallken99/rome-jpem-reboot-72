@@ -15,7 +15,7 @@ const MOCK_LOIS: Loi[] = [
     description: "Loi sur la redistribution des terres publiques",
     proposeur: "Tiberius Sempronius Gracchus",
     catégorie: "Agraire",
-    date: { year: -133, season: "Printemps" },
+    date: { year: -133, season: "SPRING" },
     état: "Promulguée",
     importance: "majeure",
     votesPositifs: 18,
@@ -29,9 +29,9 @@ const MOCK_LOIS: Loi[] = [
     description: "Interdiction de distribuer des dons lors des élections",
     proposeur: "Marcus Tullius Cicero",
     catégorie: "Électorale",
-    date: { year: -63, season: "Été" },
+    date: { year: -63, season: "SUMMER" },
     état: "Promulguée",
-    importance: "moyenne",
+    importance: "mineure",
     votesPositifs: 23,
     votesNégatifs: 7,
     votesAbstention: 0,
@@ -43,7 +43,7 @@ const MOCK_LOIS: Loi[] = [
     description: "Réorganisation de l'administration municipale",
     proposeur: "Gaius Julius Caesar",
     catégorie: "Administrative",
-    date: { year: -45, season: "Automne" },
+    date: { year: -45, season: "AUTUMN" },
     état: "En délibération",
     importance: "mineure",
     votesPositifs: 15,
@@ -117,7 +117,9 @@ export const GestionLois: React.FC = () => {
                             {loi.catégorie}
                           </span>
                           <span className="text-xs bg-secondary px-2 py-1 rounded-full">
-                            {`${loi.date.season} ${Math.abs(loi.date.year)} ${loi.date.year < 0 ? 'av. J.-C.' : 'ap. J.-C.'}`}
+                            {`${loi.date.season === "SPRING" ? "Printemps" : 
+                               loi.date.season === "SUMMER" ? "Été" : 
+                               loi.date.season === "AUTUMN" ? "Automne" : "Hiver"} ${Math.abs(loi.date.year)} ${loi.date.year < 0 ? 'av. J.-C.' : 'ap. J.-C.'}`}
                           </span>
                         </div>
                       </div>
