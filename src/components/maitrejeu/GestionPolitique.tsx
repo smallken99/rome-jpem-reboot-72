@@ -1,19 +1,15 @@
 
 import React, { useState } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { PlusCircle } from 'lucide-react';
-import { Loi } from './types';
 import { useMaitreJeu } from './context';
-import { Season } from './types/common';
-import { MagistratureType } from './types/magistratures';
-import { v4 as uuidv4 } from 'uuid';
+import { Loi } from './types';
 import { LoisList } from './components/lois/LoisList';
 import { LoiForm } from './components/lois/LoiForm';
 import { ElectionPlanner } from './components/elections/ElectionPlanner';
 import { LoiDetail } from './components/lois/LoiDetail';
 
 export const GestionPolitique = () => {
-  const { lois, addLoi, currentYear, currentSeason } = useMaitreJeu();
+  const { lois } = useMaitreJeu();
   const [selectedTab, setSelectedTab] = useState('lois');
   const [showAddLoi, setShowAddLoi] = useState(false);
   const [selectedLoi, setSelectedLoi] = useState<Loi | null>(null);
@@ -25,13 +21,16 @@ export const GestionPolitique = () => {
     importance: 'normale'
   });
   
+  // Handler functions
   const handleAddLoi = () => {
     if (!newLoi.titre || !newLoi.description) return;
+    
+    const { addLoi, currentYear, currentSeason } = useMaitreJeu();
     
     // Ajouter ID à la nouvelle loi
     const loiWithId = {
       ...newLoi,
-      id: uuidv4(), // Utiliser UUID pour générer un ID unique
+      id: crypto.randomUUID(), 
       date: { year: currentYear, season: currentSeason },
       état: "En délibération" as const,
       votesPositifs: 0,
