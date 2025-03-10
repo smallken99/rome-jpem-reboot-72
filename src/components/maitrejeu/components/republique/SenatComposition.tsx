@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
@@ -6,26 +5,33 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { ResponsivePie } from '@nivo/pie';
 import { Users, User, Users2, UserPlus } from 'lucide-react';
+import { useGameData } from '@/hooks/useGameData';
 
-export const SenatComposition: React.FC = () => {
-  // Mock data for Senate composition
+export const SenatComposition: React.FC<{ role?: 'mj' | 'player' }> = ({ role = 'player' }) => {
+  const { senateurs, canEdit } = useGameData(role);
+  
+  // Calculer les factions basées sur les sénateurs
   const factions = [
-    { id: 'optimates', label: 'Optimates', value: 45, color: '#3b82f6' },
-    { id: 'populares', label: 'Populares', value: 32, color: '#ef4444' },
-    { id: 'neutral', label: 'Neutres', value: 23, color: '#a855f7' }
+    { 
+      id: 'optimates', 
+      label: 'Optimates', 
+      value: senateurs.filter(s => s.appartenance === 'Optimates').length,
+      color: '#3b82f6' 
+    },
+    { 
+      id: 'populares', 
+      label: 'Populares', 
+      value: senateurs.filter(s => s.appartenance === 'Populares').length,
+      color: '#ef4444' 
+    },
+    { 
+      id: 'neutral', 
+      label: 'Neutres', 
+      value: senateurs.filter(s => s.appartenance === 'Neutral').length,
+      color: '#a855f7' 
+    }
   ];
-  
-  const senators = [
-    { id: 1, name: 'Marcus Tullius Cicero', faction: 'Optimates', influence: 85, role: 'Consul' },
-    { id: 2, name: 'Gaius Julius Caesar', faction: 'Populares', influence: 92, role: 'Proconsul' },
-    { id: 3, name: 'Marcus Porcius Cato', faction: 'Optimates', influence: 78, role: 'Sénateur' },
-    { id: 4, name: 'Lucius Cornelius Sulla', faction: 'Optimates', influence: 75, role: 'Sénateur' },
-    { id: 5, name: 'Gnaeus Pompeius Magnus', faction: 'Optimates', influence: 89, role: 'Proconsul' },
-    { id: 6, name: 'Marcus Licinius Crassus', faction: 'Populares', influence: 86, role: 'Sénateur' },
-    { id: 7, name: 'Quintus Sertorius', faction: 'Populares', influence: 72, role: 'Sénateur' },
-    { id: 8, name: 'Lucius Licinius Lucullus', faction: 'Neutral', influence: 68, role: 'Sénateur' }
-  ];
-  
+
   return (
     <div className="space-y-6">
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -85,7 +91,7 @@ export const SenatComposition: React.FC = () => {
                 </div>
                 <div>
                   <p className="text-sm text-muted-foreground">Sénateurs totaux</p>
-                  <p className="text-2xl font-bold">100</p>
+                  <p className="text-2xl font-bold">{senateurs.length}</p>
                 </div>
               </div>
               
@@ -139,7 +145,7 @@ export const SenatComposition: React.FC = () => {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {senators.map(senator => (
+              {senateurs.map(senator => (
                 <TableRow key={senator.id}>
                   <TableCell className="font-medium">{senator.name}</TableCell>
                   <TableCell>
