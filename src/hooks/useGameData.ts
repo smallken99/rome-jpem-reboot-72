@@ -26,7 +26,7 @@ export const useGameData = (role: UserRole = 'player') => {
   // Filtrer les données sensibles pour les joueurs
   const getFilteredData = () => {
     if (role === 'mj') return senateurs;
-    return senateurs.filter(s => s.joueur || s.fonction === 'Consul');
+    return senateurs.filter(s => s.joueur || s.fonction === 'Consul' || s.fonction === 'Préteur' || s.fonction === 'Édile');
   };
 
   const getFilteredProvinces = () => {
@@ -39,11 +39,16 @@ export const useGameData = (role: UserRole = 'player') => {
     return evenements.filter(e => e.resolved || !e.importance.includes('secret'));
   };
 
+  const getFilteredLois = () => {
+    if (role === 'mj') return lois;
+    return lois.filter(l => l.status !== 'draft' || l.author === 'player');
+  };
+
   return {
     senateurs: getFilteredData(),
     provinces: getFilteredProvinces(),
     evenements: getFilteredEvenements(),
-    lois,
+    lois: getFilteredLois(),
     equilibre,
     currentDate,
     currentPhase,
