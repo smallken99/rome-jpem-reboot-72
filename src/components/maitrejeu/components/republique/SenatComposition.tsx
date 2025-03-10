@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button';
 import { ResponsivePie } from '@nivo/pie';
 import { Users, User, Users2, UserPlus } from 'lucide-react';
 import { useGameData } from '@/hooks/useGameData';
+import { SenateurJouable } from '../../types/senateurs';
 
 export const SenatComposition: React.FC<{ role?: 'mj' | 'player' }> = ({ role = 'player' }) => {
   const { senateurs, canEdit } = useGameData(role);
@@ -146,7 +147,7 @@ export const SenatComposition: React.FC<{ role?: 'mj' | 'player' }> = ({ role = 
               </TableRow>
             </TableHeader>
             <TableBody>
-              {senateurs.map(senator => (
+              {senateurs.map((senator: SenateurJouable) => (
                 <TableRow key={senator.id}>
                   <TableCell className="font-medium">{senator.prenom} {senator.nom}</TableCell>
                   <TableCell>
