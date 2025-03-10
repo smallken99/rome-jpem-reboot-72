@@ -6,10 +6,18 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { ImportanceType } from '../../types/common';
 import { Loi } from '../../types/lois';
 
+interface LoiFormData {
+  titre: string;
+  proposeur: string;
+  catégorie: string;
+  importance: ImportanceType;
+  description: string;
+}
+
 interface LoiFormProps {
-  newLoi: Omit<Loi, 'id' | 'date' | 'état' | 'votesPositifs' | 'votesNégatifs' | 'votesAbstention' | 'effets'>;
-  handleInputChange: (e: React.ChangeEvent<HTMLInputElement>, field: keyof typeof newLoi) => void;
-  handleSelectChange: (value: string, field: keyof Omit<Loi, 'id' | 'date' | 'état' | 'votesPositifs' | 'votesNégatifs' | 'votesAbstention' | 'effets'>) => void;
+  newLoi: LoiFormData;
+  handleInputChange: (e: React.ChangeEvent<HTMLInputElement>, field: keyof LoiFormData) => void;
+  handleSelectChange: (value: string, field: keyof LoiFormData) => void;
   handleAddLoi: () => void;
   onCancel: () => void;
 }
@@ -86,3 +94,4 @@ export const LoiForm: React.FC<LoiFormProps> = ({
     </div>
   );
 };
+
