@@ -11,7 +11,10 @@ import {
   initialEquilibre,
   initialDate,
   initialPhase,
-  initialClients
+  initialClients,
+  initialEconomieRecords,
+  initialTreasury,
+  initialEconomicFactors
 } from './initialState';
 import { createSenateurOperations } from './senateurOperations';
 import { createProvinceOperations } from './provinceOperations';
@@ -22,6 +25,7 @@ import { createLoiOperations } from './loiOperations';
 import { createEquilibreOperations } from './equilibreOperations';
 import { createTimeOperations } from './timeOperations';
 import { createClientOperations } from './clientOperations';
+import { createEconomieOperations } from './economieOperations';
 
 // Création du contexte avec une valeur par défaut
 const MaitreJeuContext = createContext<MaitreJeuContextType>({} as MaitreJeuContextType);
@@ -39,6 +43,9 @@ export const MaitreJeuProvider: React.FC<{ children: React.ReactNode }> = ({ chi
   const [currentDate, setCurrentDate] = useState(initialDate);
   const [currentPhase, setCurrentPhase] = useState(initialPhase);
   const [clients, setClients] = useState(initialClients);
+  const [economieRecords, setEconomieRecords] = useState(initialEconomieRecords);
+  const [treasury, setTreasury] = useState(initialTreasury);
+  const [economicFactors, setEconomicFactors] = useState(initialEconomicFactors);
 
   // Calcul des valeurs dérivées
   const currentYear = currentDate.year;
@@ -54,6 +61,7 @@ export const MaitreJeuProvider: React.FC<{ children: React.ReactNode }> = ({ chi
   const equilibreOps = createEquilibreOperations(setEquilibre);
   const timeOps = createTimeOperations(setCurrentDate, setCurrentPhase);
   const clientOps = createClientOperations(setClients);
+  const economieOps = createEconomieOperations(setEconomieRecords);
 
   const contextValue: MaitreJeuContextType = {
     // Sénateurs
@@ -95,6 +103,15 @@ export const MaitreJeuProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     clients,
     setClients,
     ...clientOps,
+    
+    // Économie
+    economieRecords,
+    setEconomieRecords,
+    treasury,
+    setTreasury,
+    economicFactors,
+    setEconomicFactors,
+    ...economieOps,
     
     // Date et phases
     currentDate,

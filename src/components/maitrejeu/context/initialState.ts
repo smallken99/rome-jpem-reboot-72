@@ -1,4 +1,3 @@
-
 import { SenateurJouable, Province, Evenement, Election, HistoireEntry, Loi, Equilibre } from '../types';
 import { GameDate, Season, GamePhase } from '../types/common';
 import { Client } from '../types/clients';
@@ -175,6 +174,87 @@ export const initialClients: Client[] = [
     assignedToSenateurId: "3"
   }
 ];
+
+// État initial pour l'économie
+export const initialEconomieRecords: EconomieRecord[] = [
+  {
+    id: "econ-1",
+    date: { year: 700, season: "SPRING" },
+    source: "Impôts",
+    category: "Impôts",
+    amount: 500000,
+    description: "Collecte d'impôts trimestrielle",
+    type: "income",
+    isRecurring: true,
+    recurringInterval: "seasonal",
+    tags: ["impôts", "revenus réguliers"],
+    createdAt: new Date(),
+    updatedAt: new Date()
+  },
+  {
+    id: "econ-2",
+    date: { year: 700, season: "SPRING" },
+    source: "Armée",
+    category: "Armée",
+    amount: 300000,
+    description: "Financement de la campagne militaire en Hispanie",
+    type: "expense",
+    isRecurring: false,
+    tags: ["militaire", "campagne"],
+    createdAt: new Date(),
+    updatedAt: new Date()
+  },
+  {
+    id: "econ-3",
+    date: { year: 700, season: "SUMMER" },
+    source: "Commerce extérieur",
+    category: "Commerce",
+    amount: 150000,
+    description: "Revenus des taxes douanières",
+    type: "income",
+    isRecurring: true,
+    recurringInterval: "seasonal",
+    tags: ["commerce", "taxes"],
+    createdAt: new Date(),
+    updatedAt: new Date()
+  },
+  {
+    id: "econ-4",
+    date: { year: 700, season: "SUMMER" },
+    source: "Construction",
+    category: "Construction",
+    amount: 200000,
+    description: "Construction d'un nouveau temple de Jupiter",
+    type: "expense",
+    isRecurring: false,
+    tags: ["religion", "construction"],
+    createdAt: new Date(),
+    updatedAt: new Date()
+  }
+];
+
+export const initialTreasury: TreasuryStatus = {
+  id: "treasury-1",
+  balance: 2000000,
+  lastUpdated: { year: 700, season: "SUMMER" },
+  inflationRate: 2.5,
+  taxRate: 8.0,
+  comments: "Finances saines, mais vigilance requise sur les dépenses militaires croissantes."
+};
+
+export const initialEconomicFactors: EconomicFactors = {
+  id: "factors-1",
+  tradeStability: 85,
+  militaryExpense: 450000,
+  publicWorksExpense: 200000,
+  religiousCeremonyExpense: 75000,
+  adminExpense: 120000,
+  taxCollection: 600000,
+  provinceRevenue: 350000,
+  tradeRevenue: 280000,
+  warSpoilsRevenue: 100000,
+  loanInterestRate: 5.0
+};
 
 // Données initiales
 export const initialProvinces: Province[] = [];

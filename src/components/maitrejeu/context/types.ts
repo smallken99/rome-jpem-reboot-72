@@ -11,6 +11,7 @@ import {
 import { GameDate, Season, GamePhase } from '../types/common';
 import { MagistratureType } from '../types/magistratures';
 import { Client, ClientCreationData, ClientFilter, ClientSort } from '../types/clients';
+import { EconomieRecord, EconomieCreationData, TreasuryStatus, EconomicFactors } from '../types/economie';
 
 // Type du contexte
 export interface MaitreJeuContextType {
@@ -65,6 +66,17 @@ export interface MaitreJeuContextType {
   filterClients: (clients: Client[], filter: ClientFilter) => Client[];
   sortClients: (clients: Client[], sort: ClientSort) => Client[];
   changeClientStatus: (clientId: string, status: 'active' | 'inactive' | 'probation') => void;
+  
+  // Contexte de l'économie
+  economieRecords: EconomieRecord[];
+  setEconomieRecords: React.Dispatch<React.SetStateAction<EconomieRecord[]>>;
+  treasury: TreasuryStatus;
+  setTreasury: React.Dispatch<React.SetStateAction<TreasuryStatus>>;
+  economicFactors: EconomicFactors;
+  setEconomicFactors: React.Dispatch<React.SetStateAction<EconomicFactors>>;
+  addEconomieRecord: (data: EconomieCreationData) => string;
+  updateEconomieRecord: (id: string, updates: Partial<EconomieCreationData>) => void;
+  deleteEconomieRecord: (id: string) => void;
   
   // Contexte de date
   currentDate: GameDate;

@@ -1,84 +1,46 @@
 
-import React, { useState } from 'react';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { GestionEquilibre } from './GestionEquilibre';
-import { GestionPolitique } from './GestionPolitique';
-import { GestionProvinces } from './GestionProvinces';
-import { GestionSenateurs } from './GestionSenateurs';
-import { GestionHistoire } from './GestionHistoire';
-import { TimeManagement } from './components/TimeManagement';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { useMaitreJeu } from './context';
+import React from 'react';
+import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Users, UserPlus, Gavel, Scale, Globe, BookText, Coins } from 'lucide-react';
 
-export const MaitreJeuTabs = () => {
-  const [activeTab, setActiveTab] = useState('time');
-  const { 
-    currentYear, 
-    currentSeason, 
-    currentPhase, 
-    advanceTime, 
-    changePhase 
-  } = useMaitreJeu();
-  
+interface MaitreJeuTabsProps {
+  activeTab: string;
+  onTabChange: (tab: string) => void;
+}
+
+export const MaitreJeuTabs: React.FC<MaitreJeuTabsProps> = ({ activeTab, onTabChange }) => {
   return (
-    <div className="p-4">
-      <div className="mb-6">
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle>Console Maître de Jeu</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="flex justify-between items-center">
-              <div>
-                <p className="text-sm text-muted-foreground">
-                  Année: <span className="font-medium">{currentYear} AUC</span> | 
-                  Saison: <span className="font-medium">
-                    {currentSeason === 'SPRING' ? 'Printemps' : 
-                     currentSeason === 'SUMMER' ? 'Été' : 
-                     currentSeason === 'AUTUMN' ? 'Automne' : 'Hiver'}
-                  </span> | 
-                  Phase: <span className="font-medium">{currentPhase}</span>
-                </p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-      
-      <Tabs value={activeTab} onValueChange={setActiveTab}>
-        <TabsList className="mb-4">
-          <TabsTrigger value="time">Temps</TabsTrigger>
-          <TabsTrigger value="equilibre">Équilibre</TabsTrigger>
-          <TabsTrigger value="politique">Politique</TabsTrigger>
-          <TabsTrigger value="provinces">Provinces</TabsTrigger>
-          <TabsTrigger value="senateurs">Sénateurs</TabsTrigger>
-          <TabsTrigger value="histoire">Histoire</TabsTrigger>
-        </TabsList>
-        
-        <TabsContent value="time">
-          <TimeManagement />
-        </TabsContent>
-        
-        <TabsContent value="equilibre">
-          <GestionEquilibre />
-        </TabsContent>
-        
-        <TabsContent value="politique">
-          <GestionPolitique />
-        </TabsContent>
-        
-        <TabsContent value="provinces">
-          <GestionProvinces />
-        </TabsContent>
-        
-        <TabsContent value="senateurs">
-          <GestionSenateurs />
-        </TabsContent>
-        
-        <TabsContent value="histoire">
-          <GestionHistoire />
-        </TabsContent>
-      </Tabs>
-    </div>
+    <Tabs value={activeTab} onValueChange={onTabChange} className="w-full">
+      <TabsList className="grid grid-cols-3 md:grid-cols-7 w-full">
+        <TabsTrigger value="senateurs" className="flex items-center gap-2">
+          <Users className="h-4 w-4" />
+          <span className="hidden md:inline">Sénateurs</span>
+        </TabsTrigger>
+        <TabsTrigger value="clients" className="flex items-center gap-2">
+          <UserPlus className="h-4 w-4" />
+          <span className="hidden md:inline">Clients</span>
+        </TabsTrigger>
+        <TabsTrigger value="politique" className="flex items-center gap-2">
+          <Gavel className="h-4 w-4" />
+          <span className="hidden md:inline">Politique</span>
+        </TabsTrigger>
+        <TabsTrigger value="equilibre" className="flex items-center gap-2">
+          <Scale className="h-4 w-4" />
+          <span className="hidden md:inline">Équilibre</span>
+        </TabsTrigger>
+        <TabsTrigger value="provinces" className="flex items-center gap-2">
+          <Globe className="h-4 w-4" />
+          <span className="hidden md:inline">Provinces</span>
+        </TabsTrigger>
+        <TabsTrigger value="histoire" className="flex items-center gap-2">
+          <BookText className="h-4 w-4" />
+          <span className="hidden md:inline">Histoire</span>
+        </TabsTrigger>
+        <TabsTrigger value="economie" className="flex items-center gap-2">
+          <Coins className="h-4 w-4" />
+          <span className="hidden md:inline">Économie</span>
+        </TabsTrigger>
+      </TabsList>
+    </Tabs>
   );
 };

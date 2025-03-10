@@ -3,7 +3,7 @@ import React from 'react';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { useNavigate } from 'react-router-dom';
-import { Users, UserPlus, Gavel, Scale, Globe, BookText } from 'lucide-react';
+import { Users, UserPlus, Gavel, Scale, Globe, BookText, Coins } from 'lucide-react';
 
 // Sections du Maître du Jeu
 import { GestionSenateurs } from '@/components/maitrejeu/GestionSenateurs';
@@ -12,6 +12,7 @@ import { GestionEquilibre } from '@/components/maitrejeu/GestionEquilibre';
 import { GestionProvinces } from '@/components/maitrejeu/GestionProvinces';
 import { GestionHistoire } from '@/components/maitrejeu/GestionHistoire';
 import { GestionClients } from '@/components/maitrejeu/GestionClients';
+import { GestionEconomie } from '@/components/maitrejeu/GestionEconomie';
 
 interface MaitreJeuContentProps {
   activeTab: string;
@@ -30,6 +31,7 @@ export const MaitreJeuContent: React.FC<MaitreJeuContentProps> = ({ activeTab })
           {activeTab === 'equilibre' && <Scale className="h-5 w-5" />}
           {activeTab === 'provinces' && <Globe className="h-5 w-5" />}
           {activeTab === 'histoire' && <BookText className="h-5 w-5" />}
+          {activeTab === 'economie' && <Coins className="h-5 w-5" />}
           
           {activeTab === 'senateurs' && 'Gestion des Sénateurs'}
           {activeTab === 'clients' && 'Gestion des Clients'}
@@ -37,6 +39,7 @@ export const MaitreJeuContent: React.FC<MaitreJeuContentProps> = ({ activeTab })
           {activeTab === 'equilibre' && 'Équilibrage du Jeu'}
           {activeTab === 'provinces' && 'Provinces & Guerres'}
           {activeTab === 'histoire' && 'Édition de l\'Histoire'}
+          {activeTab === 'economie' && 'Économie & Finances'}
         </CardTitle>
         
         <CardDescription>
@@ -46,6 +49,7 @@ export const MaitreJeuContent: React.FC<MaitreJeuContentProps> = ({ activeTab })
           {activeTab === 'equilibre' && 'Ajustez les richesses, relations et autres paramètres pour équilibrer le jeu.'}
           {activeTab === 'provinces' && 'Gérez les provinces et lancez des campagnes militaires.'}
           {activeTab === 'histoire' && 'Enregistrez et modifiez les événements historiques du jeu.'}
+          {activeTab === 'economie' && 'Gérez les finances de la République, ajustez les impôts et contrôlez le trésor public.'}
         </CardDescription>
       </CardHeader>
       
@@ -56,6 +60,7 @@ export const MaitreJeuContent: React.FC<MaitreJeuContentProps> = ({ activeTab })
         {activeTab === 'equilibre' && <GestionEquilibre />}
         {activeTab === 'provinces' && <GestionProvinces />}
         {activeTab === 'histoire' && <GestionHistoire />}
+        {activeTab === 'economie' && <GestionEconomie />}
       </CardContent>
       
       <CardFooter className="border-t p-4 flex justify-between">
