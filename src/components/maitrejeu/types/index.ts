@@ -17,6 +17,21 @@ export type {
   EconomicFactors
 } from './economie';
 export type { MagistratureType } from './magistratures';
+export type {
+  FamilleInfo,
+  MembreFamille,
+  FamilleAlliance,
+  MariageInfo,
+  FamilleFilter,
+  MembreFamilleFilter,
+  FamilleCreationData,
+  MembreFamilleCreationData,
+  FamilleRelation,
+  StatutFamilial,
+  StatutMatrimonial,
+  GenreFamille,
+  RelationType
+} from './familles';
 
 // Créer un namespace pour les types liés à l'équilibre
 import * as EquilibreTypesNamespace from './equilibre';

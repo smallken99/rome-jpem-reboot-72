@@ -1,4 +1,3 @@
-
 import { SenateurJouable, Province, Evenement, Election, HistoireEntry, Loi, Equilibre } from '../types';
 import { 
   EconomieRecord, 
@@ -76,6 +75,192 @@ export const initialSenateurs: SenateurJouable[] = [
     fonction: "Préteur",
     popularite: 55,
     appartenance: "Optimates"
+  }
+];
+
+// Données initiales pour les familles
+export const initialFamilles = [
+  {
+    id: "f1",
+    nom: "Julii",
+    gens: "Julia",
+    statut: "Patricien" as const,
+    prestige: 70,
+    influence: 65,
+    richesse: 50000,
+    description: "Ancienne et prestigieuse famille patricienne qui se réclame d'Énée et de Vénus.",
+    devise: "Fortune favors the bold",
+    membres: ["mf1", "mf2", "mf3"],
+    alliances: ["a1"],
+    chefId: "mf1",
+    matrone: "mf2",
+    couleurPrimaire: "#B22234",
+    couleurSecondaire: "#D4AF37"
+  },
+  {
+    id: "f2",
+    nom: "Claudii",
+    gens: "Claudia",
+    statut: "Patricien" as const,
+    prestige: 65,
+    influence: 60,
+    richesse: 45000,
+    description: "Une des plus anciennes familles patriciennes, connue pour son conservatisme.",
+    devise: "Through tradition, power",
+    membres: ["mf4", "mf5"],
+    alliances: ["a1"],
+    chefId: "mf4",
+    matrone: "mf5",
+    couleurPrimaire: "#3C3B6E",
+    couleurSecondaire: "#D4AF37"
+  }
+];
+
+// Données initiales pour les membres des familles
+export const initialMembres = [
+  {
+    id: "mf1",
+    nom: "Julius",
+    prenom: "Gaius",
+    age: 45,
+    genre: "male" as const,
+    statut: "Patricien" as const,
+    statutMatrimonial: "Marié" as const,
+    role: "Pater Familias",
+    education: "Rhétorique, Droit",
+    popularite: 60,
+    piete: 55,
+    joueur: false,
+    description: "Chef de la famille Julii, il est respecté au Sénat pour son éloquence."
+  },
+  {
+    id: "mf2",
+    nom: "Julia",
+    prenom: "Cornelia",
+    age: 40,
+    genre: "female" as const,
+    statut: "Patricien" as const,
+    statutMatrimonial: "Marié" as const,
+    role: "Mater Familias",
+    education: "Arts, Littérature",
+    popularite: 45,
+    piete: 70,
+    joueur: false,
+    description: "Épouse de Gaius Julius, elle est connue pour ses dons dans l'organisation de banquets."
+  },
+  {
+    id: "mf3",
+    nom: "Julius",
+    prenom: "Marcus",
+    age: 18,
+    genre: "male" as const,
+    statut: "Patricien" as const,
+    statutMatrimonial: "Célibataire" as const,
+    role: "Fils aîné",
+    pere: "mf1",
+    mere: "mf2",
+    education: "Militaire, Rhétorique",
+    popularite: 35,
+    piete: 40,
+    joueur: false,
+    description: "Fils prometteur des Julii, il commence sa carrière dans l'armée."
+  },
+  {
+    id: "mf4",
+    nom: "Claudius",
+    prenom: "Tiberius",
+    age: 50,
+    genre: "male" as const,
+    statut: "Patricien" as const,
+    statutMatrimonial: "Marié" as const,
+    role: "Pater Familias",
+    education: "Philosophie, Droit",
+    popularite: 50,
+    piete: 65,
+    joueur: false,
+    description: "Chef de la famille Claudii, connu pour son conservatisme et son respect des traditions."
+  },
+  {
+    id: "mf5",
+    nom: "Claudia",
+    prenom: "Livia",
+    age: 45,
+    genre: "female" as const,
+    statut: "Patricien" as const,
+    statutMatrimonial: "Marié" as const,
+    role: "Mater Familias",
+    education: "Musique, Poésie",
+    popularite: 55,
+    piete: 75,
+    joueur: false,
+    description: "Épouse de Tiberius Claudius, très respectée pour sa piété."
+  }
+];
+
+// Données initiales pour les alliances
+export const initialAlliances = [
+  {
+    id: "a1",
+    famille1Id: "f1",
+    famille2Id: "f2",
+    type: "politique" as const,
+    dateDebut: "710-01-01",
+    termes: "Alliance politique entre les Julii et les Claudii pour soutenir mutuellement leurs candidats au Sénat.",
+    benefices: ["Soutien politique", "Partage d'informations"],
+    statut: "active" as const,
+    membres: ["mf1", "mf4"]
+  }
+];
+
+// Données initiales pour les mariages
+export const initialMariages = [
+  {
+    id: "m1",
+    epoux: "mf1",
+    epouse: "mf2",
+    familleEpoux: "f1",
+    familleEpouse: "f1", // Même famille dans ce cas
+    dot: 10000,
+    date: "695-05-15",
+    statut: "actif" as const
+  },
+  {
+    id: "m2",
+    epoux: "mf4",
+    epouse: "mf5",
+    familleEpoux: "f2",
+    familleEpouse: "f2", // Même famille dans ce cas
+    dot: 8000,
+    date: "690-07-20",
+    statut: "actif" as const
+  }
+];
+
+// Données initiales pour les relations familiales
+export const initialRelations = [
+  {
+    id: "r1",
+    membre1Id: "mf1",
+    membre2Id: "mf3",
+    type: "Père" as const
+  },
+  {
+    id: "r2",
+    membre1Id: "mf2",
+    membre2Id: "mf3",
+    type: "Mère" as const
+  },
+  {
+    id: "r3",
+    membre1Id: "mf1",
+    membre2Id: "mf2",
+    type: "Époux" as const
+  },
+  {
+    id: "r4",
+    membre1Id: "mf4",
+    membre2Id: "mf5",
+    type: "Époux" as const
   }
 ];
 

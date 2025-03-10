@@ -14,7 +14,12 @@ import {
   initialClients,
   initialEconomieRecords,
   initialTreasury,
-  initialEconomicFactors
+  initialEconomicFactors,
+  initialFamilles,
+  initialMembres,
+  initialAlliances,
+  initialMariages,
+  initialRelations
 } from './initialState';
 import { createSenateurOperations } from './senateurOperations';
 import { createProvinceOperations } from './provinceOperations';
@@ -26,6 +31,7 @@ import { createEquilibreOperations } from './equilibreOperations';
 import { createTimeOperations } from './timeOperations';
 import { createClientOperations } from './clientOperations';
 import { createEconomieOperations } from './economieOperations';
+import { createFamilleOperations } from './familleOperations';
 
 // Création du contexte avec une valeur par défaut
 const MaitreJeuContext = createContext<MaitreJeuContextType>({} as MaitreJeuContextType);
@@ -46,6 +52,13 @@ export const MaitreJeuProvider: React.FC<{ children: React.ReactNode }> = ({ chi
   const [economieRecords, setEconomieRecords] = useState(initialEconomieRecords);
   const [treasury, setTreasury] = useState(initialTreasury);
   const [economicFactors, setEconomicFactors] = useState(initialEconomicFactors);
+  
+  // États pour les familles
+  const [familles, setFamilles] = useState(initialFamilles);
+  const [membres, setMembres] = useState(initialMembres);
+  const [alliances, setAlliances] = useState(initialAlliances);
+  const [mariages, setMariages] = useState(initialMariages);
+  const [relations, setRelations] = useState(initialRelations);
 
   // Calcul des valeurs dérivées
   const currentYear = currentDate.year;
@@ -62,6 +75,13 @@ export const MaitreJeuProvider: React.FC<{ children: React.ReactNode }> = ({ chi
   const timeOps = createTimeOperations(setCurrentDate, setCurrentPhase);
   const clientOps = createClientOperations(setClients);
   const economieOps = createEconomieOperations(setEconomieRecords);
+  const familleOps = createFamilleOperations(
+    setFamilles,
+    setMembres,
+    setAlliances,
+    setMariages,
+    setRelations
+  );
 
   const contextValue: MaitreJeuContextType = {
     // Sénateurs
@@ -112,6 +132,19 @@ export const MaitreJeuProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     economicFactors,
     setEconomicFactors,
     ...economieOps,
+    
+    // Familles
+    familles,
+    setFamilles,
+    membres,
+    setMembres,
+    alliances,
+    setAlliances,
+    mariages,
+    setMariages,
+    relations,
+    setRelations,
+    ...familleOps,
     
     // Date et phases
     currentDate,

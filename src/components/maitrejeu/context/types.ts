@@ -6,7 +6,16 @@ import {
   Election, 
   HistoireEntry,
   Loi,
-  Equilibre
+  Equilibre,
+  FamilleInfo,
+  MembreFamille,
+  FamilleAlliance,
+  MariageInfo,
+  FamilleRelation,
+  FamilleFilter,
+  MembreFamilleFilter,
+  FamilleCreationData,
+  MembreFamilleCreationData
 } from '../types';
 import { GameDate, Season, GamePhase } from '../types/common';
 import { MagistratureType } from '../types/magistratures';
@@ -77,6 +86,53 @@ export interface MaitreJeuContextType {
   addEconomieRecord: (data: EconomieCreationData) => string;
   updateEconomieRecord: (id: string, updates: Partial<EconomieCreationData>) => void;
   deleteEconomieRecord: (id: string) => void;
+  
+  // Contexte des familles
+  familles: FamilleInfo[];
+  setFamilles: React.Dispatch<React.SetStateAction<FamilleInfo[]>>;
+  membres: MembreFamille[];
+  setMembres: React.Dispatch<React.SetStateAction<MembreFamille[]>>;
+  alliances: FamilleAlliance[];
+  setAlliances: React.Dispatch<React.SetStateAction<FamilleAlliance[]>>;
+  mariages: MariageInfo[];
+  setMariages: React.Dispatch<React.SetStateAction<MariageInfo[]>>;
+  relations: FamilleRelation[];
+  setRelations: React.Dispatch<React.SetStateAction<FamilleRelation[]>>;
+  
+  // Opérations sur les familles
+  addFamille: (familleData: FamilleCreationData) => string;
+  updateFamille: (id: string, updates: Partial<FamilleInfo>) => void;
+  deleteFamille: (id: string) => void;
+  getFamille: (id: string) => FamilleInfo | undefined;
+  getFamilles: () => FamilleInfo[];
+  filterFamilles: (filter: FamilleFilter) => FamilleInfo[];
+  
+  // Opérations sur les membres
+  addMembreFamille: (membreData: MembreFamilleCreationData) => string;
+  updateMembreFamille: (id: string, updates: Partial<MembreFamille>) => void;
+  deleteMembreFamille: (id: string) => void;
+  getMembre: (id: string) => MembreFamille | undefined;
+  getMembres: () => MembreFamille[];
+  filterMembres: (filter: MembreFamilleFilter) => MembreFamille[];
+  getFamilleOfMembre: (membreId: string) => FamilleInfo | undefined;
+  getMembresByFamille: (familleId: string) => MembreFamille[];
+  
+  // Opérations sur les alliances
+  createAlliance: (famille1Id: string, famille2Id: string, type: FamilleAlliance['type'], termes: string, benefices: string[]) => string;
+  updateAlliance: (id: string, updates: Partial<FamilleAlliance>) => void;
+  getAlliancesByFamille: (familleId: string) => FamilleAlliance[];
+  getAlliances: () => FamilleAlliance[];
+  
+  // Opérations sur les mariages
+  createMariage: (epouxId: string, epouseId: string, familleEpouxId: string, familleEpouseId: string, dot: number) => string;
+  updateMariage: (id: string, updates: Partial<MariageInfo>) => void;
+  getMariages: () => MariageInfo[];
+  getMariagesByMembre: (membreId: string) => MariageInfo[];
+  
+  // Opérations sur les relations
+  addRelation: (membre1Id: string, membre2Id: string, type: import('../types/familles').RelationType) => string;
+  getRelations: () => FamilleRelation[];
+  getRelationsByMembre: (membreId: string) => FamilleRelation[];
   
   // Contexte de date
   currentDate: GameDate;

@@ -10,7 +10,7 @@ interface MaitreJeuLayoutProps {
 }
 
 // Mettons à jour l'interface pour MaitreJeuSidebarProps pour inclure setActiveTab
-interface MaitreJeuSidebarProps {
+export interface MaitreJeuSidebarProps {
   activeTab: string;
   setActiveTab: (tab: string) => void;
 }
