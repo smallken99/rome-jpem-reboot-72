@@ -32,7 +32,7 @@ export const GestionPolitique = () => {
       ...newLoi,
       id: uuidv4(), // Utiliser UUID pour générer un ID unique
       date: { year: currentYear, season: currentSeason },
-      état: "proposée" as const,
+      état: "En délibération" as const,
       votesPositifs: 0,
       votesNégatifs: 0,
       votesAbstention: 0,

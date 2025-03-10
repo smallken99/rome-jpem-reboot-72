@@ -468,4 +468,4 @@ export const initialEquilibre: Equilibre | null = {
   historique: []
 };
 export const initialDate: GameDate = { year: 632, season: "SPRING" };
-export const initialPhase: GamePhase = "POLITIQUE";
+export const initialPhase: GamePhase = "SENATE";

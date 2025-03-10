@@ -7,7 +7,24 @@ export interface GameDate {
   season: Season;
 }
 
-export type GamePhase = "SENATE" | "ACTIONS" | "ECONOMY" | "EVENTS" | "DIPLOMACY" | "MILITARY";
+export type GamePhase = 
+  | "SENATE" 
+  | "ACTIONS" 
+  | "ECONOMY" 
+  | "EVENTS" 
+  | "DIPLOMACY" 
+  | "MILITARY" 
+  | "POLITIQUE" 
+  | "ECONOMIE" 
+  | "MILITAIRE" 
+  | "RELIGION" 
+  | "SOCIAL" 
+  | "SETUP" 
+  | "ELECTION" 
+  | "ACTION" 
+  | "SENAT" 
+  | "EVENEMENT" 
+  | "ADMINISTRATION";
 
 export const generateId = (): string => {
   return Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);

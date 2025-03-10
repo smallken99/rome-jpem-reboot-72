@@ -8,7 +8,7 @@ export interface Loi {
   proposeur: string;
   catégorie: string;
   date: GameDate;
-  état: "En délibération" | "Promulguée" | "Rejetée";
+  état: "En délibération" | "Promulguée" | "Rejetée" | "proposée" | "adoptée";
   importance: ImportanceType;
   votesPositifs: number;
   votesNégatifs: number;

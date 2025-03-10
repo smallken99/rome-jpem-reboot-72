@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
@@ -157,6 +156,8 @@ export const LoiModal: React.FC<LoiModalProps> = ({
                   <SelectItem value="En délibération">En délibération</SelectItem>
                   <SelectItem value="Promulguée">Promulguée</SelectItem>
                   <SelectItem value="Rejetée">Rejetée</SelectItem>
+                  <SelectItem value="proposée">Proposée</SelectItem>
+                  <SelectItem value="adoptée">Adoptée</SelectItem>
                 </SelectContent>
               </Select>
             </div>
