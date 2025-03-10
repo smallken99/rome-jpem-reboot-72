@@ -12,25 +12,27 @@ import {
   CalendarClock,
   BarChart2,
   Hourglass,
-  Coins
+  Coins,
+  Users2
 } from 'lucide-react';
 import { useMaitreJeu } from '@/components/maitrejeu/context';
 import { formatDate } from '@/utils/formatUtils';
 
-interface MaitreJeuSidebarProps {
+export interface MaitreJeuSidebarProps {
   activeTab: string;
-  onTabClick: (tab: string) => void;
+  setActiveTab: (tab: string) => void;
 }
 
 export const MaitreJeuSidebar: React.FC<MaitreJeuSidebarProps> = ({ 
   activeTab,
-  onTabClick
+  setActiveTab
 }) => {
   const { currentDate, currentPhase, advanceTime, changePhase } = useMaitreJeu();
   
   const navItems = [
     { id: 'senateurs', label: 'Sénateurs', icon: <Users className="h-4 w-4" /> },
     { id: 'clients', label: 'Clients', icon: <UserPlus className="h-4 w-4" /> },
+    { id: 'familles', label: 'Familles', icon: <Users2 className="h-4 w-4" /> },
     { id: 'politique', label: 'Politique', icon: <Gavel className="h-4 w-4" /> },
     { id: 'equilibre', label: 'Équilibre', icon: <Scale className="h-4 w-4" /> },
     { id: 'provinces', label: 'Provinces', icon: <Globe className="h-4 w-4" /> },
@@ -72,7 +74,7 @@ export const MaitreJeuSidebar: React.FC<MaitreJeuSidebarProps> = ({
               <Button
                 variant={activeTab === item.id ? "default" : "ghost"}
                 className={`w-full justify-start ${activeTab === item.id ? "" : "text-muted-foreground"}`}
-                onClick={() => onTabClick(item.id)}
+                onClick={() => setActiveTab(item.id)}
               >
                 {item.icon}
                 <span className="ml-2">{item.label}</span>

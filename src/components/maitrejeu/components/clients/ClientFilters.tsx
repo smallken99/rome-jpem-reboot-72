@@ -10,7 +10,8 @@ import {
   CLIENT_LOYALTIES, 
   CLIENT_STATUSES,
   ClientFilter,
-  ClientSort 
+  ClientSort,
+  Client
 } from '../../types/clients';
 
 interface ClientFiltersProps {
@@ -142,7 +143,7 @@ export const ClientFilters: React.FC<ClientFiltersProps> = ({
         
         <Select 
           value={currentSort.field} 
-          onValueChange={(value) => setCurrentSort({...currentSort, field: value as keyof ClientSort['field']})}
+          onValueChange={(value) => setCurrentSort({...currentSort, field: value as keyof Client})}
         >
           <SelectTrigger className="w-[150px]">
             <SelectValue placeholder="Trier par" />
