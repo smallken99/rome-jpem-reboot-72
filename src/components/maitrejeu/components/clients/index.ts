@@ -1,5 +1,5 @@
 
-export * from './ClientFilters';
-export * from './ClientsTable';
-export * from './ClientActions';
-export * from './useClientManagement';
+export { ClientFilters } from './ClientFilters';
+export { ClientsTable } from './ClientsTable';
+export { ClientActions } from './ClientActions';
+export { useClientManagement } from './useClientManagement';

@@ -1,17 +1,16 @@
 
 import React from 'react';
 import { Input } from '@/components/ui/input';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Label } from '@/components/ui/label';
-import { Select } from '@/components/ui/select';
 import { Slider } from '@/components/ui/slider';
-import { Client } from '../../types/clients';
-import { ClientInfluence, ClientType } from '@/components/clientele/ClientCard';
+import { Client, CLIENT_TYPES, CLIENT_LOCATIONS, CLIENT_LOYALTIES, CLIENT_STATUSES } from '../../types/clients';
 
 interface GeneralTabProps {
   formData: Partial<Client>;
-  handleChange: (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => void;
+  handleChange: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => void;
   handleSelectChange: (field: string, value: string) => void;
-  handleInfluenceChange: (type: keyof ClientInfluence, value: number) => void;
+  handleInfluenceChange: (type: 'political' | 'popular' | 'religious', value: number) => void;
   handleRelationshipChange: (level: number) => void;
 }
 
@@ -22,182 +21,168 @@ export const GeneralTab: React.FC<GeneralTabProps> = ({
   handleInfluenceChange,
   handleRelationshipChange
 }) => {
-  const clientTypes = [
-    { value: 'artisan_commercant', label: 'Artisan / Commerçant' },
-    { value: 'politicien', label: 'Politicien' },
-    { value: 'religieux', label: 'Religieux' },
-    { value: 'proprietaire', label: 'Propriétaire terrien' },
-    { value: 'pegre', label: 'Pègre / Criminel' }
-  ];
-
-  const loyaltyOptions = [
-    { value: 'faible', label: 'Faible' },
-    { value: 'moyenne', label: 'Moyenne' },
-    { value: 'forte', label: 'Forte' },
-    { value: 'exceptionnelle', label: 'Exceptionnelle' }
-  ];
-
-  const statusOptions = [
-    { value: 'active', label: 'Actif' },
-    { value: 'inactive', label: 'Inactif' },
-    { value: 'probation', label: 'En probation' }
-  ];
-
   return (
     <div className="space-y-4 py-2">
-      <div className="space-y-2">
-        <Label htmlFor="name">Nom du client</Label>
+      <div>
+        <Label htmlFor="name">Nom</Label>
         <Input
           id="name"
           name="name"
           value={formData.name || ''}
           onChange={handleChange}
-          placeholder="Nom complet du client"
         />
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div className="space-y-2">
-          <Label htmlFor="type">Type de client</Label>
-          <select
-            id="type"
-            name="type"
-            value={formData.type || 'artisan_commercant'}
-            onChange={handleChange}
-            className="w-full p-2 rounded-md border border-input bg-background"
+      <div className="grid grid-cols-2 gap-4">
+        <div>
+          <Label htmlFor="type">Type</Label>
+          <Select
+            value={formData.type || ''}
+            onValueChange={(value) => handleSelectChange('type', value)}
           >
-            {clientTypes.map(type => (
-              <option key={type.value} value={type.value}>{type.label}</option>
-            ))}
-          </select>
+            <SelectTrigger>
+              <SelectValue placeholder="Type de client" />
+            </SelectTrigger>
+            <SelectContent>
+              {CLIENT_TYPES.map((type) => (
+                <SelectItem key={type} value={type}>
+                  {type.charAt(0).toUpperCase() + type.slice(1).replace('_', ' ')}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </div>
-        
-        <div className="space-y-2">
-          <Label htmlFor="subType">Spécialisation</Label>
+
+        <div>
+          <Label htmlFor="subType">Sous-type</Label>
           <Input
             id="subType"
             name="subType"
             value={formData.subType || ''}
             onChange={handleChange}
-            placeholder="Ex: Forgeron, Prêtre de Jupiter..."
+            placeholder="Ex: Forgeron, Augure, etc."
           />
         </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div className="space-y-2">
-          <Label htmlFor="location">Localisation</Label>
-          <Input
-            id="location"
-            name="location"
+      <div className="grid grid-cols-2 gap-4">
+        <div>
+          <Label htmlFor="location">Emplacement</Label>
+          <Select
             value={formData.location || ''}
-            onChange={handleChange}
-            placeholder="Quartier, ville, région..."
-          />
-        </div>
-        
-        <div className="space-y-2">
-          <Label htmlFor="loyalty">Loyauté</Label>
-          <select
-            id="loyalty"
-            name="loyalty"
-            value={formData.loyalty || 'moyenne'}
-            onChange={handleChange}
-            className="w-full p-2 rounded-md border border-input bg-background"
+            onValueChange={(value) => handleSelectChange('location', value)}
           >
-            {loyaltyOptions.map(option => (
-              <option key={option.value} value={option.value}>{option.label}</option>
-            ))}
-          </select>
+            <SelectTrigger>
+              <SelectValue placeholder="Lieu de résidence" />
+            </SelectTrigger>
+            <SelectContent>
+              {CLIENT_LOCATIONS.map((location) => (
+                <SelectItem key={location} value={location}>
+                  {location}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+
+        <div>
+          <Label htmlFor="loyalty">Loyauté</Label>
+          <Select
+            value={formData.loyalty || ''}
+            onValueChange={(value) => handleSelectChange('loyalty', value)}
+          >
+            <SelectTrigger>
+              <SelectValue placeholder="Niveau de loyauté" />
+            </SelectTrigger>
+            <SelectContent>
+              {CLIENT_LOYALTIES.map((loyalty) => (
+                <SelectItem key={loyalty} value={loyalty}>
+                  {loyalty.charAt(0).toUpperCase() + loyalty.slice(1)}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </div>
       </div>
 
-      <div className="space-y-2">
-        <Label htmlFor="activeStatus">Statut</Label>
-        <select
-          id="activeStatus"
-          name="activeStatus"
+      <div>
+        <Label htmlFor="status">Statut</Label>
+        <Select
           value={formData.activeStatus || 'active'}
-          onChange={handleChange}
-          className="w-full p-2 rounded-md border border-input bg-background"
+          onValueChange={(value) => handleSelectChange('activeStatus', value as 'active' | 'inactive' | 'probation')}
         >
-          {statusOptions.map(option => (
-            <option key={option.value} value={option.value}>{option.label}</option>
-          ))}
-        </select>
+          <SelectTrigger>
+            <SelectValue placeholder="Statut" />
+          </SelectTrigger>
+          <SelectContent>
+            {CLIENT_STATUSES.map((status) => (
+              <SelectItem key={status} value={status}>
+                {status === 'active' ? 'Actif' : status === 'inactive' ? 'Inactif' : 'Probation'}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
       </div>
 
-      <div className="space-y-4 mt-6">
-        <h3 className="text-lg font-medium">Sphères d'influence</h3>
-        
-        <div className="space-y-6">
-          <div className="space-y-2">
-            <div className="flex justify-between">
-              <Label htmlFor="political-influence">Influence Politique</Label>
-              <span className="text-sm font-medium">{formData.influences?.political || 0}</span>
+      <div>
+        <h3 className="text-sm font-medium mb-2">Influences</h3>
+        <div className="space-y-4">
+          <div>
+            <div className="flex justify-between mb-1">
+              <Label htmlFor="politicalInfluence">Politique: {formData.influences?.political || 0}</Label>
             </div>
-            <Slider 
-              id="political-influence"
-              min={0} 
-              max={10} 
-              step={1}
+            <Slider
+              id="politicalInfluence"
               value={[formData.influences?.political || 0]}
+              min={0}
+              max={10}
+              step={1}
               onValueChange={(value) => handleInfluenceChange('political', value[0])}
             />
           </div>
           
-          <div className="space-y-2">
-            <div className="flex justify-between">
-              <Label htmlFor="popular-influence">Influence Populaire</Label>
-              <span className="text-sm font-medium">{formData.influences?.popular || 0}</span>
+          <div>
+            <div className="flex justify-between mb-1">
+              <Label htmlFor="popularInfluence">Populaire: {formData.influences?.popular || 0}</Label>
             </div>
-            <Slider 
-              id="popular-influence"
-              min={0} 
-              max={10} 
-              step={1}
+            <Slider
+              id="popularInfluence"
               value={[formData.influences?.popular || 0]}
+              min={0}
+              max={10}
+              step={1}
               onValueChange={(value) => handleInfluenceChange('popular', value[0])}
             />
           </div>
           
-          <div className="space-y-2">
-            <div className="flex justify-between">
-              <Label htmlFor="religious-influence">Influence Religieuse</Label>
-              <span className="text-sm font-medium">{formData.influences?.religious || 0}</span>
+          <div>
+            <div className="flex justify-between mb-1">
+              <Label htmlFor="religiousInfluence">Religieuse: {formData.influences?.religious || 0}</Label>
             </div>
-            <Slider 
-              id="religious-influence"
-              min={0} 
-              max={10} 
-              step={1}
+            <Slider
+              id="religiousInfluence"
               value={[formData.influences?.religious || 0]}
+              min={0}
+              max={10}
+              step={1}
               onValueChange={(value) => handleInfluenceChange('religious', value[0])}
             />
           </div>
         </div>
       </div>
 
-      <div className="space-y-4 mt-6">
-        <div className="flex justify-between items-center">
-          <Label htmlFor="relationship-level">Niveau de relation</Label>
-          <span className="text-sm font-medium">{formData.relationshipLevel || 1}</span>
+      <div>
+        <div className="flex justify-between mb-1">
+          <Label htmlFor="relationshipLevel">Niveau de relation: {formData.relationshipLevel || 1}</Label>
         </div>
-        <Slider 
-          id="relationship-level"
-          min={1} 
-          max={5} 
-          step={1}
+        <Slider
+          id="relationshipLevel"
           value={[formData.relationshipLevel || 1]}
+          min={1}
+          max={10}
+          step={1}
           onValueChange={(value) => handleRelationshipChange(value[0])}
         />
-        <div className="flex justify-between text-xs text-muted-foreground">
-          <span>Connaissances</span>
-          <span>Ami proche</span>
-          <span>Allié</span>
-          <span>Confident</span>
-          <span>Dévoué</span>
-        </div>
       </div>
     </div>
   );

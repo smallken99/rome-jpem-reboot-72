@@ -5,7 +5,10 @@ import { ClientFilter, ClientSort } from '../../../types/clients';
 export const useClientSearch = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [currentClientFilter, setCurrentClientFilter] = useState<ClientFilter>({});
-  const [currentSort, setCurrentSort] = useState<ClientSort>({ field: 'name', direction: 'asc' });
+  const [currentSort, setCurrentSort] = useState<ClientSort>({ 
+    field: 'name',
+    direction: 'asc'
+  });
 
   return {
     searchTerm,
@@ -13,6 +16,6 @@ export const useClientSearch = () => {
     currentClientFilter,
     setCurrentClientFilter,
     currentSort,
-    setCurrentSort,
+    setCurrentSort
   };
 };

@@ -1,11 +1,17 @@
 
 import React from 'react';
-import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Plus, Search, SlidersHorizontal, FileSpreadsheet, ArrowUpDown } from 'lucide-react';
-import { ClientFilter, ClientSort } from '../../types/clients';
-import { ClientType } from '@/components/clientele/ClientCard';
+import { Search, Plus, Filter, RefreshCcw } from 'lucide-react';
+import { 
+  CLIENT_TYPES, 
+  CLIENT_LOCATIONS, 
+  CLIENT_LOYALTIES, 
+  CLIENT_STATUSES,
+  ClientFilter,
+  ClientSort 
+} from '../../types/clients';
 
 interface ClientFiltersProps {
   searchTerm: string;
@@ -28,123 +34,155 @@ export const ClientFilters: React.FC<ClientFiltersProps> = ({
   onAddClient,
   onAddAdvancedClient
 }) => {
-  // Available client types (using the correct ClientType from the import)
-  const clientTypes: ClientType[] = ['artisan_commercant', 'politicien', 'religieux', 'proprietaire', 'pegre'];
-  
-  // Function to handle type filter change
-  const handleTypeFilterChange = (value: string) => {
-    if (value === 'all') {
-      const { type, ...rest } = currentClientFilter;
-      setCurrentClientFilter(rest);
-    } else {
-      setCurrentClientFilter({
-        ...currentClientFilter,
-        type: value as ClientType
-      });
-    }
-  };
-  
-  // Function to handle assigned filter change
-  const handleAssignedFilterChange = (value: string) => {
-    setCurrentClientFilter({
-      ...currentClientFilter,
-      assignedOnly: value === 'assigned'
-    });
-  };
-  
-  // Function to handle sort change
-  const handleSortChange = (value: string) => {
-    const [field, direction] = value.split('-');
-    setCurrentSort({
-      field: field as keyof import('../../types/clients').Client,
-      direction: direction as 'asc' | 'desc'
-    });
+  const resetFilters = () => {
+    setCurrentClientFilter({});
+    setSearchTerm('');
   };
   
   return (
-    <div className="flex flex-col gap-4">
-      <div className="flex flex-col sm:flex-row gap-2 items-start sm:items-center">
-        <div className="relative flex-1">
-          <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-          <Input
-            type="search"
-            placeholder="Rechercher un client..."
-            className="pl-8"
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-          />
+    <div className="space-y-4">
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          <div className="relative">
+            <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+            <Input
+              placeholder="Rechercher un client..."
+              className="pl-8 w-[300px]"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+            />
+          </div>
+          
+          <Select 
+            value={currentClientFilter.type || ""} 
+            onValueChange={(value) => setCurrentClientFilter({...currentClientFilter, type: value || undefined})}
+          >
+            <SelectTrigger className="w-[180px]">
+              <SelectValue placeholder="Type de client" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="">Tous les types</SelectItem>
+              {CLIENT_TYPES.map(type => (
+                <SelectItem key={type} value={type}>
+                  {type.charAt(0).toUpperCase() + type.slice(1).replace('_', ' ')}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          
+          <Select 
+            value={currentClientFilter.location || ""} 
+            onValueChange={(value) => setCurrentClientFilter({...currentClientFilter, location: value || undefined})}
+          >
+            <SelectTrigger className="w-[180px]">
+              <SelectValue placeholder="Emplacement" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="">Tous les emplacements</SelectItem>
+              {CLIENT_LOCATIONS.map(location => (
+                <SelectItem key={location} value={location}>{location}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          
+          <Button variant="ghost" size="sm" onClick={resetFilters}>
+            <RefreshCcw className="h-4 w-4 mr-1" />
+            Réinitialiser
+          </Button>
         </div>
         
-        <div className="flex gap-2">
-          <Button onClick={onAddClient} className="whitespace-nowrap">
-            <Plus className="w-4 h-4 mr-2" />
-            Ajouter
+        <div className="flex items-center gap-2">
+          <Button variant="outline" onClick={onAddClient}>
+            <Plus className="h-4 w-4 mr-1" />
+            Ajouter client
           </Button>
-          
-          <Button onClick={onAddAdvancedClient} variant="outline" className="whitespace-nowrap">
-            <FileSpreadsheet className="w-4 h-4 mr-2" />
-            Avancé
+          <Button onClick={onAddAdvancedClient}>
+            <Plus className="h-4 w-4 mr-1" />
+            Client avancé
           </Button>
         </div>
       </div>
       
-      <div className="flex flex-wrap gap-2 bg-muted/50 p-2 rounded-md">
-        <div className="flex items-center gap-1.5">
-          <SlidersHorizontal className="h-4 w-4 text-muted-foreground" />
-          <span className="text-sm font-medium">Filtres:</span>
-        </div>
+      <div className="flex items-center gap-2">
+        <div className="text-sm text-muted-foreground">Filtres avancés:</div>
         
-        <Select
-          value={currentClientFilter.type || 'all'}
-          onValueChange={handleTypeFilterChange}
+        <Select 
+          value={currentClientFilter.loyalty || ""} 
+          onValueChange={(value) => setCurrentClientFilter({...currentClientFilter, loyalty: value || undefined})}
         >
-          <SelectTrigger className="h-8 w-[120px] bg-white">
-            <SelectValue placeholder="Type" />
+          <SelectTrigger className="w-[150px]">
+            <SelectValue placeholder="Loyauté" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="all">Tous</SelectItem>
-            {clientTypes.map(type => (
-              <SelectItem key={type} value={type}>{type}</SelectItem>
+            <SelectItem value="">Toutes loyautés</SelectItem>
+            {CLIENT_LOYALTIES.map(loyalty => (
+              <SelectItem key={loyalty} value={loyalty}>
+                {loyalty.charAt(0).toUpperCase() + loyalty.slice(1)}
+              </SelectItem>
             ))}
           </SelectContent>
         </Select>
         
-        <Select
-          value={currentClientFilter.assignedOnly ? 'assigned' : 'all'}
-          onValueChange={handleAssignedFilterChange}
+        <Select 
+          value={currentClientFilter.status || ""} 
+          onValueChange={(value) => setCurrentClientFilter({...currentClientFilter, status: value || undefined})}
         >
-          <SelectTrigger className="h-8 w-[120px] bg-white">
-            <SelectValue placeholder="Assignation" />
+          <SelectTrigger className="w-[150px]">
+            <SelectValue placeholder="Statut" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="all">Tous</SelectItem>
-            <SelectItem value="assigned">Assignés</SelectItem>
+            <SelectItem value="">Tous statuts</SelectItem>
+            {CLIENT_STATUSES.map(status => (
+              <SelectItem key={status} value={status}>
+                {status === 'active' ? 'Actif' : status === 'inactive' ? 'Inactif' : 'Probation'}
+              </SelectItem>
+            ))}
           </SelectContent>
         </Select>
         
-        <div className="ml-auto flex items-center gap-1.5">
-          <ArrowUpDown className="h-4 w-4 text-muted-foreground" />
-          <span className="text-sm font-medium">Trier par:</span>
-        </div>
-        
-        <Select
-          value={`${currentSort.field}-${currentSort.direction}`}
-          onValueChange={handleSortChange}
+        <Select 
+          value={currentSort.field} 
+          onValueChange={(value) => setCurrentSort({...currentSort, field: value as keyof ClientSort['field']})}
         >
-          <SelectTrigger className="h-8 w-[140px] bg-white">
+          <SelectTrigger className="w-[150px]">
             <SelectValue placeholder="Trier par" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="name-asc">Nom (A-Z)</SelectItem>
-            <SelectItem value="name-desc">Nom (Z-A)</SelectItem>
-            <SelectItem value="type-asc">Type (A-Z)</SelectItem>
-            <SelectItem value="type-desc">Type (Z-A)</SelectItem>
-            <SelectItem value="location-asc">Lieu (A-Z)</SelectItem>
-            <SelectItem value="location-desc">Lieu (Z-A)</SelectItem>
-            <SelectItem value="loyalty-asc">Loyauté (A-Z)</SelectItem>
-            <SelectItem value="loyalty-desc">Loyauté (Z-A)</SelectItem>
+            <SelectItem value="">Pas de tri</SelectItem>
+            <SelectItem value="name">Nom</SelectItem>
+            <SelectItem value="type">Type</SelectItem>
+            <SelectItem value="location">Emplacement</SelectItem>
+            <SelectItem value="loyalty">Loyauté</SelectItem>
+            <SelectItem value="relationshipLevel">Niveau de relation</SelectItem>
+            <SelectItem value="competencePoints">Points de compétence</SelectItem>
           </SelectContent>
         </Select>
+        
+        <Select 
+          value={currentSort.direction} 
+          onValueChange={(value) => setCurrentSort({...currentSort, direction: value as 'asc' | 'desc'})}
+        >
+          <SelectTrigger className="w-[150px]">
+            <SelectValue placeholder="Ordre" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="asc">Ascendant</SelectItem>
+            <SelectItem value="desc">Descendant</SelectItem>
+          </SelectContent>
+        </Select>
+        
+        <Button 
+          variant="outline" 
+          size="sm" 
+          onClick={() => setCurrentClientFilter({
+            ...currentClientFilter, 
+            assignedOnly: !currentClientFilter.assignedOnly
+          })}
+          className={currentClientFilter.assignedOnly ? "bg-primary/20" : ""}
+        >
+          <Filter className="h-4 w-4 mr-1" />
+          Assignés uniquement
+        </Button>
       </div>
     </div>
   );

@@ -1,9 +1,9 @@
 
 import React from 'react';
-import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { ClientCreationData } from '../../types/clients';
+import { Label } from '@/components/ui/label';
+import { CLIENT_TYPES, CLIENT_LOCATIONS, CLIENT_LOYALTIES, CLIENT_STATUSES, ClientCreationData } from '../../types/clients';
 
 interface FormFieldsProps {
   formData: ClientCreationData;
@@ -21,134 +21,132 @@ export const FormFields: React.FC<FormFieldsProps> = ({
   return (
     <div className="grid gap-4 py-4">
       <div className="grid grid-cols-4 items-center gap-4">
-        <Label htmlFor="name" className="text-right">Nom</Label>
+        <Label htmlFor="name" className="text-right">
+          Nom
+        </Label>
         <Input
           id="name"
           name="name"
           value={formData.name}
           onChange={handleChange}
           className="col-span-3"
-          placeholder="Nom complet"
         />
       </div>
       
       <div className="grid grid-cols-4 items-center gap-4">
-        <Label htmlFor="type" className="text-right">Type</Label>
-        <div className="col-span-3">
-          <Select value={formData.type} onValueChange={(value) => handleSelectChange('type', value)}>
-            <SelectTrigger>
-              <SelectValue placeholder="Type de client" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="artisan_commercant">Artisan & Commerçant</SelectItem>
-              <SelectItem value="politicien">Politicien</SelectItem>
-              <SelectItem value="religieux">Religieux</SelectItem>
-              <SelectItem value="proprietaire">Propriétaire Terrien</SelectItem>
-              <SelectItem value="pegre">Pègre</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
+        <Label htmlFor="type" className="text-right">
+          Type
+        </Label>
+        <Select
+          value={formData.type}
+          onValueChange={(value) => handleSelectChange('type', value)}
+        >
+          <SelectTrigger className="col-span-3">
+            <SelectValue placeholder="Type de client" />
+          </SelectTrigger>
+          <SelectContent>
+            {CLIENT_TYPES.map(type => (
+              <SelectItem key={type} value={type}>
+                {type.charAt(0).toUpperCase() + type.slice(1).replace('_', ' ')}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
       </div>
       
       <div className="grid grid-cols-4 items-center gap-4">
-        <Label htmlFor="subType" className="text-right">Spécialité</Label>
+        <Label htmlFor="subType" className="text-right">
+          Sous-type
+        </Label>
         <Input
           id="subType"
           name="subType"
           value={formData.subType}
           onChange={handleChange}
           className="col-span-3"
-          placeholder="Ex: Forgeron, Boulanger..."
+          placeholder="Ex: Forgeron, Augure, etc."
         />
       </div>
       
       <div className="grid grid-cols-4 items-center gap-4">
-        <Label htmlFor="location" className="text-right">Quartier</Label>
-        <div className="col-span-3">
-          <Select value={formData.location} onValueChange={(value) => handleSelectChange('location', value)}>
-            <SelectTrigger>
-              <SelectValue placeholder="Quartier/Localisation" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="Forum">Forum</SelectItem>
-              <SelectItem value="Subure">Subure</SelectItem>
-              <SelectItem value="Palatin">Palatin</SelectItem>
-              <SelectItem value="Aventin">Aventin</SelectItem>
-              <SelectItem value="Esquilin">Esquilin</SelectItem>
-              <SelectItem value="Capitole">Capitole</SelectItem>
-              <SelectItem value="Quirinal">Quirinal</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
+        <Label htmlFor="location" className="text-right">
+          Lieu
+        </Label>
+        <Select
+          value={formData.location}
+          onValueChange={(value) => handleSelectChange('location', value)}
+        >
+          <SelectTrigger className="col-span-3">
+            <SelectValue placeholder="Lieu de résidence" />
+          </SelectTrigger>
+          <SelectContent>
+            {CLIENT_LOCATIONS.map(location => (
+              <SelectItem key={location} value={location}>
+                {location}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
       </div>
       
       <div className="grid grid-cols-4 items-center gap-4">
-        <Label htmlFor="loyalty" className="text-right">Loyauté</Label>
-        <div className="col-span-3">
-          <Select value={formData.loyalty} onValueChange={(value) => handleSelectChange('loyalty', value)}>
-            <SelectTrigger>
-              <SelectValue placeholder="Niveau de loyauté" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="faible">Faible</SelectItem>
-              <SelectItem value="moyenne">Moyenne</SelectItem>
-              <SelectItem value="forte">Forte</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
+        <Label htmlFor="loyalty" className="text-right">
+          Loyauté
+        </Label>
+        <Select
+          value={formData.loyalty}
+          onValueChange={(value) => handleSelectChange('loyalty', value)}
+        >
+          <SelectTrigger className="col-span-3">
+            <SelectValue placeholder="Niveau de loyauté" />
+          </SelectTrigger>
+          <SelectContent>
+            {CLIENT_LOYALTIES.map(loyalty => (
+              <SelectItem key={loyalty} value={loyalty}>
+                {loyalty.charAt(0).toUpperCase() + loyalty.slice(1)}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
       </div>
       
-      <InfluenceFields 
-        influences={formData.influences} 
-        handleInfluenceChange={handleInfluenceChange} 
-      />
-    </div>
-  );
-};
-
-interface InfluenceFieldsProps {
-  influences: ClientCreationData['influences'];
-  handleInfluenceChange: (type: keyof ClientCreationData['influences'], value: string) => void;
-}
-
-const InfluenceFields: React.FC<InfluenceFieldsProps> = ({ influences, handleInfluenceChange }) => {
-  return (
-    <div className="grid grid-cols-4 items-center gap-4">
-      <Label className="text-right">Influences</Label>
-      <div className="col-span-3 grid grid-cols-3 gap-2">
-        <div>
-          <Label htmlFor="political" className="text-xs">Politique</Label>
-          <Input
-            id="political"
-            type="number"
-            min="1"
-            max="10"
-            value={influences.political}
-            onChange={(e) => handleInfluenceChange('political', e.target.value)}
-          />
-        </div>
-        <div>
-          <Label htmlFor="popular" className="text-xs">Populaire</Label>
-          <Input
-            id="popular"
-            type="number"
-            min="1"
-            max="10"
-            value={influences.popular}
-            onChange={(e) => handleInfluenceChange('popular', e.target.value)}
-          />
-        </div>
-        <div>
-          <Label htmlFor="religious" className="text-xs">Religieuse</Label>
-          <Input
-            id="religious"
-            type="number"
-            min="1"
-            max="10"
-            value={influences.religious}
-            onChange={(e) => handleInfluenceChange('religious', e.target.value)}
-          />
-        </div>
+      <div className="grid grid-cols-4 items-center gap-4">
+        <Label className="text-right">Influence politique</Label>
+        <Input
+          type="range"
+          min="0"
+          max="10"
+          value={formData.influences.political}
+          onChange={(e) => handleInfluenceChange('political', e.target.value)}
+          className="col-span-2"
+        />
+        <span>{formData.influences.political}</span>
+      </div>
+      
+      <div className="grid grid-cols-4 items-center gap-4">
+        <Label className="text-right">Influence populaire</Label>
+        <Input
+          type="range"
+          min="0"
+          max="10"
+          value={formData.influences.popular}
+          onChange={(e) => handleInfluenceChange('popular', e.target.value)}
+          className="col-span-2"
+        />
+        <span>{formData.influences.popular}</span>
+      </div>
+      
+      <div className="grid grid-cols-4 items-center gap-4">
+        <Label className="text-right">Influence religieuse</Label>
+        <Input
+          type="range"
+          min="0"
+          max="10"
+          value={formData.influences.religious}
+          onChange={(e) => handleInfluenceChange('religious', e.target.value)}
+          className="col-span-2"
+        />
+        <span>{formData.influences.religious}</span>
       </div>
     </div>
   );

@@ -1,22 +1,17 @@
 
 import React from 'react';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Badge } from '@/components/ui/badge';
-import { 
-  Select, 
-  SelectContent, 
-  SelectItem, 
-  SelectTrigger, 
-  SelectValue 
-} from '@/components/ui/select';
-import { ScrollArea } from '@/components/ui/scroll-area';
-import { Shield } from 'lucide-react';
 import { Client } from '../../types/clients';
+import { SenateurJouable } from '../../types';
 import { ClientActions } from './ClientActions';
+import { Badge } from '@/components/ui/badge';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
+import { Button } from '@/components/ui/button';
+import { CheckCircle2, XCircle, AlertTriangle, ChevronsUpDown } from 'lucide-react';
 
 interface ClientsTableProps {
   clients: Client[];
-  senateurs: any[];
+  senateurs: SenateurJouable[];
   onEdit: (client: Client) => void;
   onAdvancedEdit: (client: Client) => void;
   onManageCompetences: (client: Client) => void;
@@ -35,159 +30,123 @@ export const ClientsTable: React.FC<ClientsTableProps> = ({
   onDelete,
   onAssign
 }) => {
-  // Fonction pour générer le badge de type de client
-  const getTypeBadge = (type: string) => {
-    const typeColors: Record<string, string> = {
-      'artisan_commercant': 'bg-blue-100 text-blue-800',
-      'politicien': 'bg-purple-100 text-purple-800',
-      'religieux': 'bg-amber-100 text-amber-800',
-      'proprietaire': 'bg-green-100 text-green-800',
-      'pegre': 'bg-rose-100 text-rose-800'
-    };
-    
-    const typeLabels: Record<string, string> = {
-      'artisan_commercant': 'Artisan/Commerçant',
-      'politicien': 'Politicien',
-      'religieux': 'Religieux',
-      'proprietaire': 'Propriétaire',
-      'pegre': 'Pègre'
-    };
-    
-    return (
-      <Badge variant="outline" className={typeColors[type] || 'bg-gray-100 text-gray-800'}>
-        {typeLabels[type] || type}
-      </Badge>
-    );
+  const getStatusIcon = (status: string) => {
+    switch (status) {
+      case 'active':
+        return <CheckCircle2 className="h-5 w-5 text-green-500" />;
+      case 'inactive':
+        return <XCircle className="h-5 w-5 text-red-500" />;
+      case 'probation':
+        return <AlertTriangle className="h-5 w-5 text-amber-500" />;
+      default:
+        return null;
+    }
   };
   
-  // Fonction pour générer le badge de loyauté
-  const getLoyaltyBadge = (loyalty: string) => {
-    const loyaltyColors: Record<string, string> = {
-      'faible': 'bg-red-100 text-red-800',
-      'moyenne': 'bg-amber-100 text-amber-800',
-      'forte': 'bg-green-100 text-green-800'
-    };
-    
-    return (
-      <Badge variant="outline" className={loyaltyColors[loyalty] || 'bg-gray-100 text-gray-800'}>
-        {loyalty}
-      </Badge>
-    );
+  const getLoyaltyColor = (loyalty: string) => {
+    switch (loyalty) {
+      case 'faible':
+        return 'bg-red-100 text-red-800';
+      case 'moyenne':
+        return 'bg-yellow-100 text-yellow-800';
+      case 'forte':
+        return 'bg-green-100 text-green-800';
+      case 'totale':
+        return 'bg-blue-100 text-blue-800';
+      default:
+        return 'bg-gray-100 text-gray-800';
+    }
   };
   
-  // Fonction pour obtenir le badge de statut
-  const getStatusBadge = (status: string) => {
-    const statusColors: Record<string, string> = {
-      'active': 'bg-green-100 text-green-800',
-      'inactive': 'bg-gray-100 text-gray-800',
-      'probation': 'bg-amber-100 text-amber-800'
-    };
-    
-    const statusLabels: Record<string, string> = {
-      'active': 'Actif',
-      'inactive': 'Inactif',
-      'probation': 'Probation'
-    };
-    
-    return (
-      <Badge variant="outline" className={statusColors[status] || 'bg-gray-100 text-gray-800'}>
-        {statusLabels[status] || status}
-      </Badge>
-    );
+  const formatType = (type: string) => {
+    return type.charAt(0).toUpperCase() + type.slice(1).replace('_', ' ');
   };
-
+  
   return (
-    <ScrollArea className="h-[500px]">
-      <Table>
-        <TableHeader>
+    <Table className="border">
+      <TableHeader className="bg-muted/50">
+        <TableRow>
+          <TableHead>Nom</TableHead>
+          <TableHead>Type</TableHead>
+          <TableHead>Lieu</TableHead>
+          <TableHead>Loyauté</TableHead>
+          <TableHead>Niveau</TableHead>
+          <TableHead>Statut</TableHead>
+          <TableHead>Assigné à</TableHead>
+          <TableHead className="text-right">Actions</TableHead>
+        </TableRow>
+      </TableHeader>
+      <TableBody>
+        {clients.length === 0 && (
           <TableRow>
-            <TableHead>Nom</TableHead>
-            <TableHead>Type</TableHead>
-            <TableHead>Localisation</TableHead>
-            <TableHead>Loyauté</TableHead>
-            <TableHead>Statut</TableHead>
-            <TableHead>Influence</TableHead>
-            <TableHead>Assigné à</TableHead>
-            <TableHead className="text-right">Actions</TableHead>
+            <TableCell colSpan={8} className="text-center h-24 text-muted-foreground">
+              Aucun client trouvé
+            </TableCell>
           </TableRow>
-        </TableHeader>
-        <TableBody>
-          {clients.length === 0 ? (
-            <TableRow>
-              <TableCell colSpan={8} className="text-center py-4">
-                Aucun client trouvé
-              </TableCell>
-            </TableRow>
-          ) : (
-            clients.map(client => (
-              <TableRow key={client.id}>
-                <TableCell className="font-medium">{client.name}</TableCell>
-                <TableCell>{getTypeBadge(client.type)}</TableCell>
-                <TableCell>{client.location}</TableCell>
-                <TableCell>{getLoyaltyBadge(client.loyalty)}</TableCell>
-                <TableCell>
-                  {client.activeStatus ? getStatusBadge(client.activeStatus) : getStatusBadge('active')}
-                </TableCell>
-                <TableCell>
-                  <div className="flex items-center gap-1">
-                    <Shield className="h-4 w-4 text-blue-500" />
-                    <span>
-                      {client.influences.political + client.influences.popular + client.influences.religious}
+        )}
+        
+        {clients.map((client) => (
+          <TableRow key={client.id}>
+            <TableCell className="font-medium">{client.name}</TableCell>
+            <TableCell>
+              <div className="flex flex-col">
+                <span>{formatType(client.type)}</span>
+                <span className="text-xs text-muted-foreground">{client.subType}</span>
+              </div>
+            </TableCell>
+            <TableCell>{client.location}</TableCell>
+            <TableCell>
+              <Badge variant="outline" className={`${getLoyaltyColor(client.loyalty)}`}>
+                {client.loyalty.charAt(0).toUpperCase() + client.loyalty.slice(1)}
+              </Badge>
+            </TableCell>
+            <TableCell>
+              <div className="flex items-center">
+                <span className="font-medium">{client.relationshipLevel}</span>
+                <span className="text-xs text-muted-foreground ml-1">/ 10</span>
+              </div>
+            </TableCell>
+            <TableCell>{getStatusIcon(client.activeStatus)}</TableCell>
+            <TableCell>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="ghost" className="flex justify-between items-center h-8 py-1 px-2 w-full">
+                    <span className="truncate max-w-[120px]">
+                      {client.assignedToSenateurId 
+                        ? senateurs.find(s => s.id === client.assignedToSenateurId)?.nom || 'Inconnu'
+                        : 'Non assigné'}
                     </span>
-                  </div>
-                </TableCell>
-                <TableCell>
-                  {client.assignedToSenateurId ? (
-                    <Select 
-                      value={client.assignedToSenateurId} 
-                      onValueChange={(value) => onAssign(client.id, value || null)}
+                    <ChevronsUpDown className="h-4 w-4 opacity-50" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                  <DropdownMenuItem onClick={() => onAssign(client.id, null)}>
+                    Non assigné
+                  </DropdownMenuItem>
+                  {senateurs.map(senateur => (
+                    <DropdownMenuItem 
+                      key={senateur.id}
+                      onClick={() => onAssign(client.id, senateur.id)}
                     >
-                      <SelectTrigger className="w-32 h-8">
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="">Non assigné</SelectItem>
-                        {senateurs.map(senateur => (
-                          <SelectItem key={senateur.id} value={senateur.id}>
-                            {senateur.nom}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  ) : (
-                    <Select 
-                      value="" 
-                      onValueChange={(value) => onAssign(client.id, value || null)}
-                    >
-                      <SelectTrigger className="w-32 h-8">
-                        <SelectValue placeholder="Non assigné" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="">Non assigné</SelectItem>
-                        {senateurs.map(senateur => (
-                          <SelectItem key={senateur.id} value={senateur.id}>
-                            {senateur.nom}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  )}
-                </TableCell>
-                <TableCell className="text-right">
-                  <ClientActions 
-                    client={client}
-                    onEdit={onEdit}
-                    onAdvancedEdit={onAdvancedEdit}
-                    onManageCompetences={onManageCompetences}
-                    onStatusChange={onStatusChange}
-                    onDelete={onDelete}
-                  />
-                </TableCell>
-              </TableRow>
-            ))
-          )}
-        </TableBody>
-      </Table>
-    </ScrollArea>
+                      {senateur.prenom} {senateur.nom}
+                    </DropdownMenuItem>
+                  ))}
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </TableCell>
+            <TableCell className="text-right">
+              <ClientActions 
+                client={client}
+                onEdit={() => onEdit(client)}
+                onAdvancedEdit={() => onAdvancedEdit(client)}
+                onManageCompetences={() => onManageCompetences(client)}
+                onStatusChange={(status) => onStatusChange(client.id, status)}
+                onDelete={() => onDelete(client.id)}
+              />
+            </TableCell>
+          </TableRow>
+        ))}
+      </TableBody>
+    </Table>
   );
 };

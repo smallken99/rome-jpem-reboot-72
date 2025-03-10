@@ -1,23 +1,32 @@
 
 import React from 'react';
-import { Button } from '@/components/ui/button';
-import { 
-  DropdownMenu, 
-  DropdownMenuContent, 
-  DropdownMenuItem, 
-  DropdownMenuSeparator, 
-  DropdownMenuTrigger 
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { MoreVertical, Edit, Star, Shield, UserCheck, Trash2 } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import {
+  MoreHorizontal,
+  Pencil,
+  Trash2,
+  Star,
+  CheckCircle2,
+  XCircle,
+  AlertTriangle,
+  Sliders
+} from 'lucide-react';
 import { Client } from '../../types/clients';
 
 interface ClientActionsProps {
   client: Client;
-  onEdit: (client: Client) => void;
-  onAdvancedEdit: (client: Client) => void;
-  onManageCompetences: (client: Client) => void;
-  onStatusChange: (id: string, status: 'active' | 'inactive' | 'probation') => void;
-  onDelete: (id: string) => void;
+  onEdit: () => void;
+  onAdvancedEdit: () => void;
+  onManageCompetences: () => void;
+  onStatusChange: (status: 'active' | 'inactive' | 'probation') => void;
+  onDelete: () => void;
 }
 
 export const ClientActions: React.FC<ClientActionsProps> = ({
@@ -31,35 +40,47 @@ export const ClientActions: React.FC<ClientActionsProps> = ({
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="ghost" className="h-8 w-8 p-0" title="Actions">
-          <MoreVertical className="h-4 w-4" />
+        <Button variant="ghost" className="h-8 w-8 p-0">
+          <span className="sr-only">Ouvrir le menu</span>
+          <MoreHorizontal className="h-4 w-4" />
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">
-        <DropdownMenuItem onClick={() => onEdit(client)}>
-          <Edit className="mr-2 h-4 w-4" />
+        <DropdownMenuItem onClick={onEdit}>
+          <Pencil className="h-4 w-4 mr-2" />
           Modifier
         </DropdownMenuItem>
-        <DropdownMenuItem onClick={() => onAdvancedEdit(client)}>
-          <Star className="mr-2 h-4 w-4" />
-          Édition avancée
+        <DropdownMenuItem onClick={onAdvancedEdit}>
+          <Sliders className="h-4 w-4 mr-2" />
+          Modification avancée
         </DropdownMenuItem>
-        <DropdownMenuItem onClick={() => onManageCompetences(client)}>
-          <Shield className="mr-2 h-4 w-4" />
+        <DropdownMenuItem onClick={onManageCompetences}>
+          <Star className="h-4 w-4 mr-2" />
           Gérer les compétences
         </DropdownMenuItem>
+        
         <DropdownMenuSeparator />
-        <DropdownMenuItem onClick={() => onStatusChange(client.id, 'active')}>
-          <UserCheck className="mr-2 h-4 w-4" />
+        
+        <DropdownMenuItem onClick={() => onStatusChange('active')}>
+          <CheckCircle2 className="h-4 w-4 mr-2 text-green-500" />
           Marquer comme actif
         </DropdownMenuItem>
-        <DropdownMenuItem onClick={() => onStatusChange(client.id, 'inactive')}>
-          <UserCheck className="mr-2 h-4 w-4" />
+        <DropdownMenuItem onClick={() => onStatusChange('inactive')}>
+          <XCircle className="h-4 w-4 mr-2 text-red-500" />
           Marquer comme inactif
         </DropdownMenuItem>
+        <DropdownMenuItem onClick={() => onStatusChange('probation')}>
+          <AlertTriangle className="h-4 w-4 mr-2 text-amber-500" />
+          Mettre en probation
+        </DropdownMenuItem>
+        
         <DropdownMenuSeparator />
-        <DropdownMenuItem onClick={() => onDelete(client.id)}>
-          <Trash2 className="mr-2 h-4 w-4" />
+        
+        <DropdownMenuItem 
+          onClick={onDelete}
+          className="text-red-600 focus:text-red-600"
+        >
+          <Trash2 className="h-4 w-4 mr-2" />
           Supprimer
         </DropdownMenuItem>
       </DropdownMenuContent>

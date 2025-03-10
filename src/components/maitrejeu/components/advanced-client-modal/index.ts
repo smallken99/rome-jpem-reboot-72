@@ -1,6 +1,6 @@
 
-export * from './AdvancedClientModal';
-export * from './useAdvancedClientForm';
-export * from './BackstoryTab';
-export * from './GeneralTab';
-export * from './AbilitiesTab';
+export { AdvancedClientModal } from './AdvancedClientModal';
+export { GeneralTab } from './GeneralTab';
+export { AbilitiesTab } from './AbilitiesTab';
+export { BackstoryTab } from './BackstoryTab';
+export { useAdvancedClientForm } from './useAdvancedClientForm';

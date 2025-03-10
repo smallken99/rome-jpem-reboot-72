@@ -42,5 +42,46 @@ export type ClientSort = {
   direction: 'asc' | 'desc';
 };
 
-// Export clientType to be used in components
-export type ClientType = string;
+// Export types constants
+export const CLIENT_TYPES = [
+  'artisan_commercant',
+  'religieux',
+  'politicien',
+  'proprietaire',
+  'pegre',
+  'militaire',
+  'etranger'
+] as const;
+
+export type ClientType = typeof CLIENT_TYPES[number];
+
+export const CLIENT_LOCATIONS = [
+  'Forum',
+  'Capitole',
+  'Palatin',
+  'Subure',
+  'Champs de Mars',
+  'Velia',
+  'Quirinal',
+  'Aventin',
+  'Port d\'Ostie'
+] as const;
+
+export type ClientLocation = typeof CLIENT_LOCATIONS[number];
+
+export const CLIENT_LOYALTIES = [
+  'faible',
+  'moyenne',
+  'forte',
+  'totale'
+] as const;
+
+export type ClientLoyalty = typeof CLIENT_LOYALTIES[number];
+
+export const CLIENT_STATUSES = [
+  'active',
+  'inactive',
+  'probation'
+] as const;
+
+export type ClientStatus = typeof CLIENT_STATUSES[number];
