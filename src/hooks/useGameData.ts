@@ -41,7 +41,8 @@ export const useGameData = (role: UserRole = 'player') => {
 
   const getFilteredLois = () => {
     if (role === 'mj') return lois;
-    return lois.filter(l => l.état === 'Public' || l.proposeur === 'player');
+    // Modifié pour utiliser les états valides selon le type Loi
+    return lois.filter(l => l.état === 'Promulguée' || l.état === 'adoptée' || l.proposeur === 'player');
   };
 
   return {
