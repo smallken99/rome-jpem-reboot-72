@@ -41,7 +41,7 @@ export const useGameData = (role: UserRole = 'player') => {
 
   const getFilteredLois = () => {
     if (role === 'mj') return lois;
-    return lois.filter(l => l.status !== 'draft' || l.author === 'player');
+    return lois.filter(l => l.état === 'Public' || l.proposeur === 'player');
   };
 
   return {
