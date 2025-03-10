@@ -155,7 +155,7 @@ export const SenatComposition: React.FC<{ role?: 'mj' | 'player' }> = ({ role = 
                       senator.appartenance === 'Populares' ? 'bg-red-100 text-red-800 hover:bg-red-200' :
                       'bg-purple-100 text-purple-800 hover:bg-purple-200'
                     }>
-                      {senator.appartenance}
+                      {senator.appartenance || 'Neutral'}
                     </Badge>
                   </TableCell>
                   <TableCell>
@@ -171,7 +171,7 @@ export const SenatComposition: React.FC<{ role?: 'mj' | 'player' }> = ({ role = 
                     </div>
                     <span className="text-xs text-gray-500 mt-1">{senator.influence}/100</span>
                   </TableCell>
-                  <TableCell>{senator.fonction || senator.roles[0] || "Sénateur"}</TableCell>
+                  <TableCell>{senator.fonction || (senator.roles && senator.roles.length > 0 ? senator.roles[0] : "Sénateur")}</TableCell>
                   <TableCell className="text-right">
                     <Button variant="ghost" size="sm">
                       Détails
