@@ -3,7 +3,7 @@ import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Swords } from 'lucide-react';
-import { alliancesMock, AllianceMilitaire } from './data';
+import { alliancesMock, Alliance } from './data';
 
 interface AlliancesMilitairesProps {
   searchTerm: string;
@@ -33,7 +33,7 @@ export const AlliancesMilitaires: React.FC<AlliancesMilitairesProps> = ({ search
 };
 
 interface AllianceItemProps {
-  alliance: AllianceMilitaire;
+  alliance: Alliance;
 }
 
 const AllianceItem: React.FC<AllianceItemProps> = ({ alliance }) => {
