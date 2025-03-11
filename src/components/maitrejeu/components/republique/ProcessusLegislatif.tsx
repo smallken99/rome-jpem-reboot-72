@@ -203,7 +203,7 @@ const VotesEnCours: React.FC<{ searchTerm: string }> = ({ searchTerm }) => {
 const HistoriqueLois: React.FC<{ searchTerm: string }> = ({ searchTerm }) => {
   // Données fictives
   const lois = [
-    { id: '1', titre: 'Lex Porcia', auteur: 'Cato l'Ancien', date: '12/03/230 av. J.-C.', resultat: 'Adoptée', votes: '95/15/5' },
+    { id: '1', titre: 'Lex Porcia', auteur: "Cato l'Ancien", date: '12/03/230 av. J.-C.', resultat: 'Adoptée', votes: '95/15/5' },
     { id: '2', titre: 'Lex Publilia', auteur: 'Publilius Philo', date: '05/04/230 av. J.-C.', resultat: 'Rejetée', votes: '35/75/5' },
     { id: '3', titre: 'Lex Hortensia', auteur: 'Quintus Hortensius', date: '27/06/230 av. J.-C.', resultat: 'Adoptée', votes: '85/25/5' }
   ];

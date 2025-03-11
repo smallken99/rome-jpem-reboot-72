@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -109,8 +108,8 @@ const TraitesList: React.FC<{ searchTerm: string }> = ({ searchTerm }) => {
       duree: '10 ans',
       statut: 'En vigueur',
       clauses: [
-        'Défense mutuelle en cas d'attaque',
-        'Échange d'informations militaires'
+        "Défense mutuelle en cas d'attaque",
+        "Échange d'informations militaires"
       ]
     }
   ];
@@ -200,7 +199,7 @@ const NationsList: React.FC<{ searchTerm: string }> = ({ searchTerm }) => {
       relationLevel: 'Allié',
       commerceLevel: 4,
       militaryThreat: 2,
-      notes: 'Dynastie Antigonide, héritière d\'Alexandre'
+      notes: "Dynastie Antigonide, héritière d'Alexandre"
     },
     { 
       id: '3', 
