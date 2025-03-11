@@ -1,5 +1,6 @@
+
 import { useState, useEffect } from 'react';
-import { Loi, LoiType, Impact } from '../../../types/lois';
+import { Loi, LoiType, Impact, LoiState } from '../../../types/lois';
 import { v4 as uuidv4 } from 'uuid';
 import { useMaitreJeu } from '../../../context';
 
@@ -12,7 +13,7 @@ export interface LoiFormData {
   catégorie: string;
   date: any;
   dateProposition: any;
-  état: string;
+  état: LoiState;
   importance: 'mineure' | 'normale' | 'majeure';
   votesPositifs: number;
   votesNégatifs: number;

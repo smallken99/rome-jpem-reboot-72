@@ -3,7 +3,7 @@ import React from 'react';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
-import { Loi } from '../../../types/lois';
+import { Loi, LoiState } from '../../../types/lois';
 import { ImportanceType } from '../../../types/common';
 
 interface LoiStatusSectionProps {
@@ -43,7 +43,7 @@ export const LoiStatusSection: React.FC<LoiStatusSectionProps> = ({
         <Label htmlFor="état">État</Label>
         <Select
           value={formData.état}
-          onValueChange={(value) => handleSelectChange('état', value)}
+          onValueChange={(value) => handleSelectChange('état', value as LoiState)}
         >
           <SelectTrigger id="état">
             <SelectValue placeholder="Sélectionner un état" />
