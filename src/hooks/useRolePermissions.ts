@@ -1,17 +1,73 @@
 
-import { useMaitreJeu } from '@/components/maitrejeu/context';
+import { useState, useEffect } from 'react';
 
-export type UserRole = 'mj' | 'player';
+export type UserRole = 'player' | 'mj' | 'admin' | 'viewer';
 
-export const useRolePermissions = (role: UserRole = 'player') => {
-  const context = useMaitreJeu();
+interface RolePermissions {
+  canEdit: boolean;
+  canDelete: boolean;
+  canCreate: boolean;
+  canView: boolean;
+  canManage: boolean;
+}
 
-  const canEdit = role === 'mj';
-  const canView = true;
+export const useRolePermissions = (role: UserRole): RolePermissions => {
+  const [permissions, setPermissions] = useState<RolePermissions>({
+    canEdit: false,
+    canDelete: false,
+    canCreate: false,
+    canView: false,
+    canManage: false,
+  });
 
-  return {
-    canEdit,
-    canView,
-    context,
-  };
+  useEffect(() => {
+    switch (role) {
+      case 'mj':
+        setPermissions({
+          canEdit: true,
+          canDelete: true,
+          canCreate: true,
+          canView: true,
+          canManage: true,
+        });
+        break;
+      case 'admin':
+        setPermissions({
+          canEdit: true,
+          canDelete: true,
+          canCreate: true,
+          canView: true,
+          canManage: true,
+        });
+        break;
+      case 'player':
+        setPermissions({
+          canEdit: false,
+          canDelete: false,
+          canCreate: true,
+          canView: true,
+          canManage: false,
+        });
+        break;
+      case 'viewer':
+        setPermissions({
+          canEdit: false,
+          canDelete: false,
+          canCreate: false,
+          canView: true,
+          canManage: false,
+        });
+        break;
+      default:
+        setPermissions({
+          canEdit: false,
+          canDelete: false,
+          canCreate: false,
+          canView: true,
+          canManage: false,
+        });
+    }
+  }, [role]);
+
+  return permissions;
 };
