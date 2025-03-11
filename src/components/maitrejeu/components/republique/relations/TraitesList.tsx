@@ -13,7 +13,7 @@ export const TraitesList: React.FC<TraitesListProps> = ({ searchTerm = '' }) => 
   // Filter traites based on searchTerm if provided
   const filteredTraites = searchTerm
     ? traitesMock.filter(traite => 
-        traite.nom.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        traite.titre.toLowerCase().includes(searchTerm.toLowerCase()) ||
         traite.parties.some(party => party.toLowerCase().includes(searchTerm.toLowerCase())) ||
         traite.type.toLowerCase().includes(searchTerm.toLowerCase())
       )
@@ -34,11 +34,11 @@ export const TraitesList: React.FC<TraitesListProps> = ({ searchTerm = '' }) => 
       <TableBody>
         {filteredTraites.map(traite => (
           <TableRow key={traite.id}>
-            <TableCell className="font-medium">{traite.nom}</TableCell>
+            <TableCell className="font-medium">{traite.titre}</TableCell>
             <TableCell>{traite.type}</TableCell>
             <TableCell>{traite.parties.join(', ')}</TableCell>
-            <TableCell>{traite.dateRatification}</TableCell>
-            <TableCell>{traite.dateExpiration || 'Indéterminée'}</TableCell>
+            <TableCell>{traite.dateSignature}</TableCell>
+            <TableCell>{traite.duree || 'Indéterminée'}</TableCell>
             <TableCell>
               <Badge className={
                 traite.statut === "Actif" ? "bg-green-500" : 
