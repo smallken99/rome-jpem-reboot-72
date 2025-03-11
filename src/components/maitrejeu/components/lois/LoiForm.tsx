@@ -4,8 +4,8 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { ImportanceType } from '../../types/common';
-import { Loi } from '../../types/lois';
 
+// Type spécifique pour le formulaire de loi qui est un sous-ensemble de Loi
 interface LoiFormData {
   titre: string;
   proposeur: string;
@@ -94,4 +94,3 @@ export const LoiForm: React.FC<LoiFormProps> = ({
     </div>
   );
 };
-

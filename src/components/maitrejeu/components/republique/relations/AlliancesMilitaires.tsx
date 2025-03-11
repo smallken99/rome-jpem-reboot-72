@@ -3,7 +3,8 @@ import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Swords } from 'lucide-react';
-import { alliancesMock, Alliance } from './data';
+import { alliancesMock } from './data';
+import { Alliance } from './types';
 
 interface AlliancesMilitairesProps {
   searchTerm: string;

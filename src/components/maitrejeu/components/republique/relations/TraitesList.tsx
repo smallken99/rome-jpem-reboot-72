@@ -3,7 +3,8 @@ import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Handshake } from 'lucide-react';
-import { traitesMock, Traite } from './data';
+import { traitesMock } from './data';
+import { Traite } from './types';
 
 interface TraitesListProps {
   searchTerm: string;

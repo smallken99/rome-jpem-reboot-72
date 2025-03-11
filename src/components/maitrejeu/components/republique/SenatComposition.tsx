@@ -9,12 +9,15 @@ import { Info, Search, UserPlus } from 'lucide-react';
 import { SenateurInfluenceBar } from './SenateurInfluenceBar';
 import { SenateurStatusBadge } from './SenateurStatusBadge';
 
+// Définir un type pour le statut du sénateur
+type SenateurStatus = 'Actif' | 'Inactif' | 'Décédé' | 'Exilé' | 'Déchu';
+
 interface Senateur {
   id: string;
   nom: string;
   famille: string;
   age: number;
-  statut: string;
+  statut: SenateurStatus;
   estPatricien: boolean;
   dateNaissance: string;
   influence: number;

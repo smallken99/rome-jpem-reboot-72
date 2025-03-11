@@ -9,15 +9,20 @@ export const useLoiForm = (editLoi: Loi | null | undefined, onSave: (loi: Loi) =
   
   const initialFormState: Omit<Loi, 'id'> = {
     titre: '',
+    nom: '',
     description: '',
     proposeur: '',
+    type: 'civile',
     catégorie: 'Agraire',
     date: currentDate,
+    dateProposition: currentDate,
     état: 'En délibération',
     importance: 'normale',
     votesPositifs: 0,
     votesNégatifs: 0,
     votesAbstention: 0,
+    clauses: [],
+    impacts: [],
     effets: {}
   };
   

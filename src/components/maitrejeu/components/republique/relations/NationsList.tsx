@@ -3,7 +3,8 @@ import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Globe } from 'lucide-react';
-import { nationsMock, Nation } from './data';
+import { nationsMock } from './data';
+import { Nation } from './types';
 
 interface NationsListProps {
   searchTerm: string;

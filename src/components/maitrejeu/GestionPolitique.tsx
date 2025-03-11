@@ -8,12 +8,21 @@ import { LoiForm } from './components/lois/LoiForm';
 import { ElectionPlanner } from './components/elections/ElectionPlanner';
 import { LoiDetail } from './components/lois/LoiDetail';
 
+// Type spécifique pour le formulaire de loi qui est un sous-ensemble de Loi
+interface LoiFormData {
+  titre: string;
+  description: string;
+  proposeur: string;
+  catégorie: string;
+  importance: 'majeure' | 'normale' | 'mineure';
+}
+
 export const GestionPolitique = () => {
   const { lois } = useMaitreJeu();
   const [selectedTab, setSelectedTab] = useState('lois');
   const [showAddLoi, setShowAddLoi] = useState(false);
   const [selectedLoi, setSelectedLoi] = useState<Loi | null>(null);
-  const [newLoi, setNewLoi] = useState<Omit<Loi, 'id' | 'date' | 'état' | 'votesPositifs' | 'votesNégatifs' | 'votesAbstention' | 'effets'>>({
+  const [newLoi, setNewLoi] = useState<LoiFormData>({
     titre: '',
     description: '',
     proposeur: '',
@@ -28,14 +37,19 @@ export const GestionPolitique = () => {
     const { addLoi, currentYear, currentSeason } = useMaitreJeu();
     
     // Ajouter ID à la nouvelle loi
-    const loiWithId = {
+    const loiWithId: Loi = {
       ...newLoi,
-      id: crypto.randomUUID(), 
+      id: crypto.randomUUID(),
+      nom: newLoi.titre, // Utiliser le titre comme nom par défaut
+      type: 'civile', // Valeur par défaut
       date: { year: currentYear, season: currentSeason },
+      dateProposition: { year: currentYear, season: currentSeason },
       état: "En délibération" as const,
       votesPositifs: 0,
       votesNégatifs: 0,
       votesAbstention: 0,
+      clauses: [],
+      impacts: [],
       effets: {}
     };
     
@@ -50,11 +64,11 @@ export const GestionPolitique = () => {
     setShowAddLoi(false);
   };
   
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>, field: keyof typeof newLoi) => {
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>, field: keyof LoiFormData) => {
     setNewLoi({ ...newLoi, [field]: e.target.value });
   };
   
-  const handleSelectChange = (value: string, field: keyof typeof newLoi) => {
+  const handleSelectChange = (value: string, field: keyof LoiFormData) => {
     setNewLoi({ ...newLoi, [field]: value });
   };
   
