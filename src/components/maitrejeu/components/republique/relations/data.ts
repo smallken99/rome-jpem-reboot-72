@@ -1,36 +1,7 @@
+import { Nation, Alliance, Traite } from './types';
 
 // Export all the types that are used in other components
-export interface Nation {
-  id: string;
-  nom: string;
-  région: string;
-  statut: "Allié" | "Neutre" | "Ennemi" | "Soumis";
-  puissanceMilitaire: number;
-  richesse: number;
-  relationAvecRome: number;
-  dateDernierTraité?: string;
-}
-
-export interface Traite {
-  id: string;
-  titre: string;
-  parties: string[];
-  type: string;
-  dateSignature: string;
-  duree: string;
-  clauses: string[];
-  statut: "Actif" | "Expiré" | "Rompu" | "En négociation";
-}
-
-export interface Alliance {
-  id: string;
-  nom: string;
-  membres: string[];
-  dateFormation: string;
-  objectif: string;
-  puissanceCombiné: number;
-  traitésAssociés: string[];
-}
+export type { Nation, Alliance, Traite };
 
 // Mock data for nations
 export const nationsMock: Nation[] = [

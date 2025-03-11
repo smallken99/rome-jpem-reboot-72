@@ -1,25 +1,24 @@
-
 import { useState, useEffect } from 'react';
-import { Loi } from '../../../types/lois';
+import { Loi, LoiType, Impact } from '../../../types/lois';
 import { v4 as uuidv4 } from 'uuid';
 import { useMaitreJeu } from '../../../context';
 
-export interface LoiFormData extends Omit<Loi, 'id'> {
+export interface LoiFormData {
   titre: string;
   nom: string;
   description: string;
   proposeur: string;
-  type: 'civile' | 'militaire' | 'religieuse' | 'administrative';
+  type: LoiType;
   catégorie: string;
-  date: any; // Using GameDate type from context
-  dateProposition: any; // Using GameDate type from context
+  date: any;
+  dateProposition: any;
   état: string;
   importance: 'mineure' | 'normale' | 'majeure';
   votesPositifs: number;
   votesNégatifs: number;
   votesAbstention: number;
   clauses: string[];
-  impacts: string[];
+  impacts: Impact[];
   effets: Record<string, number>;
 }
 
@@ -49,7 +48,6 @@ export const useLoiForm = (editLoi: Loi | null | undefined, onSave: (loi: Loi) =
   
   useEffect(() => {
     if (editLoi) {
-      // Pré-remplir le formulaire avec les données de la loi à éditer
       const { id, ...loiData } = editLoi;
       setFormData(loiData as LoiFormData);
     } else {

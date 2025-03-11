@@ -1,25 +1,15 @@
 
-export interface Traite {
-  id: string;
-  titre: string;
-  parties: string[];
-  type: string;
-  dateSignature: string;
-  duree: string;
-  statut: string;
-  clauses: string[];
-}
-
 export interface Nation {
   id: string;
   nom: string;
-  region: string;
+  région: string;
+  statut: "Allié" | "Neutre" | "Ennemi" | "Soumis";
+  puissanceMilitaire: number;
+  richesse: number;
+  relationAvecRome: number;
+  dateDernierTraité?: string;
   capitale: string;
   gouvernement: string;
-  relation: string;
-  relationLevel: string;
-  commerceLevel: number;
-  militaryThreat: number;
   notes: string;
 }
 
@@ -28,6 +18,10 @@ export interface Alliance {
   nom: string;
   membres: string[];
   type: string;
+  dateFormation: string;
+  objectif: string;
+  puissanceCombiné: number;
+  traitésAssociés: string[];
   dateCreation: string;
   commandement: string;
   forces: {
@@ -36,4 +30,15 @@ export interface Alliance {
     navires: number;
   };
   statut: string;
+}
+
+export interface Traite {
+  id: string;
+  titre: string;
+  parties: string[];
+  type: string;
+  dateSignature: string;
+  duree: string;
+  clauses: string[];
+  statut: "Actif" | "Expiré" | "Rompu" | "En négociation";
 }
