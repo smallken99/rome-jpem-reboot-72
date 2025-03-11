@@ -6,7 +6,19 @@ import { Badge } from '@/components/ui/badge';
 import { Nation } from './types';
 import { nationsMock } from './data';
 
-export const NationsList: React.FC = () => {
+interface NationsListProps {
+  searchTerm?: string;
+}
+
+export const NationsList: React.FC<NationsListProps> = ({ searchTerm = '' }) => {
+  // Filter nations based on searchTerm if provided
+  const filteredNations = searchTerm
+    ? nationsMock.filter(nation => 
+        nation.nom.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        nation.région.toLowerCase().includes(searchTerm.toLowerCase())
+      )
+    : nationsMock;
+
   return (
     <Card className="w-full">
       <CardHeader>
@@ -24,7 +36,7 @@ export const NationsList: React.FC = () => {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {nationsMock.map(nation => (
+            {filteredNations.map(nation => (
               <TableRow key={nation.id}>
                 <TableCell className="font-medium">{nation.nom}</TableCell>
                 <TableCell>{nation.région}</TableCell>
