@@ -9,8 +9,8 @@ import { Info, Search, UserPlus } from 'lucide-react';
 import { SenateurInfluenceBar } from './SenateurInfluenceBar';
 import { SenateurStatusBadge } from './SenateurStatusBadge';
 
-// Définir un type pour le statut du sénateur
-type SenateurStatus = 'Actif' | 'Inactif' | 'Décédé' | 'Exilé' | 'Déchu';
+// Définir un type pour le statut du sénateur qui correspond à celui de SenateurStatusBadge
+type SenateurStatus = 'actif' | 'inactif' | 'retraité' | 'décédé' | 'disgracié';
 
 interface Senateur {
   id: string;
@@ -32,27 +32,27 @@ export const SenatComposition: React.FC<{ role: 'mj' | 'player' }> = ({ role }) 
   // Données fictives des sénateurs
   const senateurs: Senateur[] = [
     { 
-      id: '1', nom: 'Marcus Valerius Maximus', famille: 'Valeria', age: 45, statut: 'Actif', 
+      id: '1', nom: 'Marcus Valerius Maximus', famille: 'Valeria', age: 45, statut: 'actif', 
       estPatricien: true, dateNaissance: '275 av. J.-C.', influence: 75, faction: 'Optimates', 
       magistrature: 'Consul' 
     },
     { 
-      id: '2', nom: 'Gaius Flaminius', famille: 'Flaminia', age: 42, statut: 'Actif', 
+      id: '2', nom: 'Gaius Flaminius', famille: 'Flaminia', age: 42, statut: 'actif', 
       estPatricien: false, dateNaissance: '278 av. J.-C.', influence: 60, faction: 'Populares', 
       magistrature: 'Préteur' 
     },
     { 
-      id: '3', nom: 'Quintus Fabius Maximus', famille: 'Fabia', age: 57, statut: 'Actif', 
+      id: '3', nom: 'Quintus Fabius Maximus', famille: 'Fabia', age: 57, statut: 'actif', 
       estPatricien: true, dateNaissance: '263 av. J.-C.', influence: 90, faction: 'Optimates', 
       magistrature: null 
     },
     { 
-      id: '4', nom: 'Tiberius Sempronius Gracchus', famille: 'Sempronia', age: 38, statut: 'Actif', 
+      id: '4', nom: 'Tiberius Sempronius Gracchus', famille: 'Sempronia', age: 38, statut: 'actif', 
       estPatricien: false, dateNaissance: '282 av. J.-C.', influence: 50, faction: 'Populares', 
       magistrature: 'Édile' 
     },
     { 
-      id: '5', nom: 'Lucius Aemilius Paullus', famille: 'Aemilia', age: 52, statut: 'Actif', 
+      id: '5', nom: 'Lucius Aemilius Paullus', famille: 'Aemilia', age: 52, statut: 'actif', 
       estPatricien: true, dateNaissance: '268 av. J.-C.', influence: 85, faction: 'Optimates', 
       magistrature: null 
     }

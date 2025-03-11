@@ -4,10 +4,29 @@ import { Loi } from '../../../types/lois';
 import { v4 as uuidv4 } from 'uuid';
 import { useMaitreJeu } from '../../../context';
 
+export interface LoiFormData extends Omit<Loi, 'id'> {
+  titre: string;
+  nom: string;
+  description: string;
+  proposeur: string;
+  type: 'civile' | 'militaire' | 'religieuse' | 'administrative';
+  catégorie: string;
+  date: any; // Using GameDate type from context
+  dateProposition: any; // Using GameDate type from context
+  état: string;
+  importance: 'mineure' | 'normale' | 'majeure';
+  votesPositifs: number;
+  votesNégatifs: number;
+  votesAbstention: number;
+  clauses: string[];
+  impacts: string[];
+  effets: Record<string, number>;
+}
+
 export const useLoiForm = (editLoi: Loi | null | undefined, onSave: (loi: Loi) => void) => {
   const { currentDate } = useMaitreJeu();
   
-  const initialFormState: Omit<Loi, 'id'> = {
+  const initialFormState: LoiFormData = {
     titre: '',
     nom: '',
     description: '',
@@ -26,13 +45,13 @@ export const useLoiForm = (editLoi: Loi | null | undefined, onSave: (loi: Loi) =
     effets: {}
   };
   
-  const [formData, setFormData] = useState<Omit<Loi, 'id'>>(initialFormState);
+  const [formData, setFormData] = useState<LoiFormData>(initialFormState);
   
   useEffect(() => {
     if (editLoi) {
       // Pré-remplir le formulaire avec les données de la loi à éditer
       const { id, ...loiData } = editLoi;
-      setFormData(loiData);
+      setFormData(loiData as LoiFormData);
     } else {
       setFormData(initialFormState);
     }
