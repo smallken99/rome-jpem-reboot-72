@@ -1,267 +1,252 @@
 
-import React from 'react';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Badge } from '@/components/ui/badge';
+import React, { useState } from 'react';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
-import { Separator } from '@/components/ui/separator';
-import { Scroll, FileText, Check, X, Clock, BarChart } from 'lucide-react';
+import { Plus, FileText, Vote, History, Search } from 'lucide-react';
+import { ActionButton } from '@/components/ui-custom/ActionButton';
 
 export const ProcessusLegislatif: React.FC = () => {
-  // Mock data for pending laws
-  const pendingLaws = [
+  const [currentTab, setCurrentTab] = useState('projets');
+  const [searchTerm, setSearchTerm] = useState('');
+
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle>Processus Législatif</CardTitle>
+        <CardDescription>
+          Gérez les propositions de loi et le processus de vote
+        </CardDescription>
+      </CardHeader>
+      <CardContent>
+        {/* Filtres et recherche */}
+        <div className="flex flex-col md:flex-row justify-between gap-4 mb-6">
+          <div className="flex items-center gap-2">
+            <div className="relative">
+              <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+              <input
+                type="text"
+                placeholder="Rechercher une loi..."
+                className="pl-8 px-3 py-2 border rounded-md w-full md:w-64"
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+              />
+            </div>
+          </div>
+          
+          <div className="flex gap-2">
+            <ActionButton 
+              variant="default"
+              label="Nouvelle proposition"
+              icon={<Plus className="h-4 w-4" />}
+              onClick={() => console.log('Nouvelle proposition')}
+            />
+          </div>
+        </div>
+
+        {/* Onglets */}
+        <Tabs value={currentTab} onValueChange={setCurrentTab} className="mb-6">
+          <TabsList className="grid grid-cols-3 w-full">
+            <TabsTrigger value="projets">Projets de loi</TabsTrigger>
+            <TabsTrigger value="votes">Votes en cours</TabsTrigger>
+            <TabsTrigger value="historique">Historique</TabsTrigger>
+          </TabsList>
+          
+          <TabsContent value="projets" className="pt-6">
+            <ProjetsDeLoi searchTerm={searchTerm} />
+          </TabsContent>
+          
+          <TabsContent value="votes" className="pt-6">
+            <VotesEnCours searchTerm={searchTerm} />
+          </TabsContent>
+          
+          <TabsContent value="historique" className="pt-6">
+            <HistoriqueLois searchTerm={searchTerm} />
+          </TabsContent>
+        </Tabs>
+      </CardContent>
+    </Card>
+  );
+};
+
+// Composant pour les projets de loi
+const ProjetsDeLoi: React.FC<{ searchTerm: string }> = ({ searchTerm }) => {
+  // Données fictives
+  const projets = [
+    { id: '1', titre: 'Lex Agraria', auteur: 'Gaius Gracchus', date: '05/06/230 av. J.-C.', statut: 'En rédaction' },
+    { id: '2', titre: 'Lex de Maiestate', auteur: 'Julius Caesar', date: '12/08/230 av. J.-C.', statut: 'En examen' },
+    { id: '3', titre: 'Lex Frumentaria', auteur: 'Marcus Aurelius', date: '23/09/230 av. J.-C.', statut: 'Prêt pour vote' }
+  ];
+
+  // Filtrer les projets selon le terme de recherche
+  const filteredProjets = projets.filter(projet => 
+    projet.titre.toLowerCase().includes(searchTerm.toLowerCase()) || 
+    projet.auteur.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
+  return (
+    <div className="space-y-4">
+      {filteredProjets.length === 0 ? (
+        <div className="text-center py-12 text-muted-foreground">
+          Aucun projet de loi ne correspond à vos critères
+        </div>
+      ) : (
+        filteredProjets.map(projet => (
+          <div key={projet.id} className="flex items-center justify-between p-4 border rounded-lg hover:bg-muted/20">
+            <div className="flex items-start gap-4">
+              <div className="p-2 rounded-full bg-amber-100">
+                <FileText className="h-6 w-6 text-amber-600" />
+              </div>
+              <div>
+                <h3 className="font-medium">{projet.titre}</h3>
+                <p className="text-sm text-muted-foreground">Proposé par {projet.auteur} le {projet.date}</p>
+                <div className="mt-1">
+                  <span className="text-xs px-2 py-0.5 bg-blue-100 text-blue-800 rounded-full">
+                    {projet.statut}
+                  </span>
+                </div>
+              </div>
+            </div>
+            <div className="flex gap-2">
+              <Button variant="outline" size="sm">Modifier</Button>
+              <Button variant="default" size="sm">
+                {projet.statut === 'Prêt pour vote' ? 'Soumettre au vote' : 'Voir détails'}
+              </Button>
+            </div>
+          </div>
+        ))
+      )}
+    </div>
+  );
+};
+
+// Composant pour les votes en cours
+const VotesEnCours: React.FC<{ searchTerm: string }> = ({ searchTerm }) => {
+  // Données fictives
+  const votes = [
     { 
-      id: 1, 
-      title: 'Lex Agraria', 
-      proposer: 'Tiberius Gracchus', 
-      category: 'Agraire', 
-      phase: 'Débat', 
-      votesFor: 42, 
-      votesAgainst: 35, 
-      abstentions: 23,
-      daysLeft: 8
+      id: '1', 
+      titre: 'Lex Militaris', 
+      auteur: 'Lucius Quinctius Cincinnatus', 
+      dateDebut: '01/10/230 av. J.-C.', 
+      dateFin: '08/10/230 av. J.-C.',
+      pour: 65,
+      contre: 35,
+      abstention: 10
     },
     { 
-      id: 2, 
-      title: 'Lex de Bello Indicendo', 
-      proposer: 'Gaius Julius Caesar', 
-      category: 'Militaire', 
-      phase: 'Vote', 
-      votesFor: 56, 
-      votesAgainst: 12, 
-      abstentions: 8,
-      daysLeft: 2
-    },
-    { 
-      id: 3, 
-      title: 'Lex de Vectigalibus', 
-      proposer: 'Marcus Licinius Crassus', 
-      category: 'Fiscale', 
-      phase: 'Proposition', 
-      votesFor: 0, 
-      votesAgainst: 0, 
-      abstentions: 0,
-      daysLeft: 14
-    },
-    { 
-      id: 4, 
-      title: 'Lex Judiciaria', 
-      proposer: 'Marcus Tullius Cicero', 
-      category: 'Judiciaire', 
-      phase: 'Délibération', 
-      votesFor: 28, 
-      votesAgainst: 21, 
-      abstentions: 15,
-      daysLeft: 5
+      id: '2', 
+      titre: 'Lex Justitiae', 
+      auteur: 'Cicero', 
+      dateDebut: '03/10/230 av. J.-C.', 
+      dateFin: '10/10/230 av. J.-C.',
+      pour: 45,
+      contre: 55,
+      abstention: 5
     }
   ];
 
-  // Render a badge with appropriate color based on the phase of the law
-  const renderPhaseBadge = (phase: string) => {
-    switch (phase) {
-      case 'Proposition':
-        return <Badge variant="outline" className="border-blue-500 text-blue-700">Proposition</Badge>;
-      case 'Débat':
-        return <Badge variant="outline" className="border-orange-500 text-orange-700">Débat</Badge>;
-      case 'Délibération':
-        return <Badge variant="outline" className="border-purple-500 text-purple-700">Délibération</Badge>;
-      case 'Vote':
-        return <Badge variant="outline" className="border-green-500 text-green-700">Vote</Badge>;
-      default:
-        return <Badge variant="outline">{phase}</Badge>;
-    }
-  };
+  // Filtrer les votes selon le terme de recherche
+  const filteredVotes = votes.filter(vote => 
+    vote.titre.toLowerCase().includes(searchTerm.toLowerCase()) || 
+    vote.auteur.toLowerCase().includes(searchTerm.toLowerCase())
+  );
 
   return (
-    <div className="space-y-6">
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <Card>
-          <CardHeader>
-            <CardTitle>Processus Législatif</CardTitle>
-            <CardDescription>
-              Les étapes de création d'une loi dans la République romaine
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-6">
+    <div className="space-y-4">
+      {filteredVotes.length === 0 ? (
+        <div className="text-center py-12 text-muted-foreground">
+          Aucun vote en cours ne correspond à vos critères
+        </div>
+      ) : (
+        filteredVotes.map(vote => (
+          <div key={vote.id} className="flex flex-col p-4 border rounded-lg hover:bg-muted/20">
+            <div className="flex items-start justify-between">
               <div className="flex items-start gap-4">
-                <div className="bg-blue-100 p-2 rounded-full">
-                  <Scroll className="h-5 w-5 text-blue-600" />
+                <div className="p-2 rounded-full bg-green-100">
+                  <Vote className="h-6 w-6 text-green-600" />
                 </div>
                 <div>
-                  <h3 className="font-medium text-blue-800">1. Proposition</h3>
+                  <h3 className="font-medium">{vote.titre}</h3>
                   <p className="text-sm text-muted-foreground">
-                    Un magistrat ou un sénateur propose une nouvelle loi au Sénat
+                    Proposé par {vote.auteur} • Vote du {vote.dateDebut} au {vote.dateFin}
                   </p>
                 </div>
               </div>
-
-              <Separator />
-
-              <div className="flex items-start gap-4">
-                <div className="bg-orange-100 p-2 rounded-full">
-                  <FileText className="h-5 w-5 text-orange-600" />
-                </div>
-                <div>
-                  <h3 className="font-medium text-orange-800">2. Débat</h3>
-                  <p className="text-sm text-muted-foreground">
-                    La proposition est débattue lors de sessions publiques
-                  </p>
-                </div>
+              <div>
+                <Button variant="default" size="sm">Gérer le vote</Button>
               </div>
-
-              <Separator />
-
-              <div className="flex items-start gap-4">
-                <div className="bg-purple-100 p-2 rounded-full">
-                  <BarChart className="h-5 w-5 text-purple-600" />
-                </div>
-                <div>
-                  <h3 className="font-medium text-purple-800">3. Délibération</h3>
-                  <p className="text-sm text-muted-foreground">
-                    Les sénateurs délibèrent et proposent des amendements
-                  </p>
-                </div>
+            </div>
+            
+            <div className="mt-4 grid grid-cols-3 gap-4">
+              <div className="text-center p-2 bg-green-50 rounded-md">
+                <div className="text-lg font-bold text-green-600">{vote.pour}</div>
+                <div className="text-xs text-muted-foreground">Pour</div>
               </div>
+              <div className="text-center p-2 bg-red-50 rounded-md">
+                <div className="text-lg font-bold text-red-600">{vote.contre}</div>
+                <div className="text-xs text-muted-foreground">Contre</div>
+              </div>
+              <div className="text-center p-2 bg-gray-50 rounded-md">
+                <div className="text-lg font-bold text-gray-600">{vote.abstention}</div>
+                <div className="text-xs text-muted-foreground">Abstention</div>
+              </div>
+            </div>
+          </div>
+        ))
+      )}
+    </div>
+  );
+};
 
-              <Separator />
+// Composant pour l'historique des lois
+const HistoriqueLois: React.FC<{ searchTerm: string }> = ({ searchTerm }) => {
+  // Données fictives
+  const lois = [
+    { id: '1', titre: 'Lex Porcia', auteur: 'Cato l'Ancien', date: '12/03/230 av. J.-C.', resultat: 'Adoptée', votes: '95/15/5' },
+    { id: '2', titre: 'Lex Publilia', auteur: 'Publilius Philo', date: '05/04/230 av. J.-C.', resultat: 'Rejetée', votes: '35/75/5' },
+    { id: '3', titre: 'Lex Hortensia', auteur: 'Quintus Hortensius', date: '27/06/230 av. J.-C.', resultat: 'Adoptée', votes: '85/25/5' }
+  ];
 
-              <div className="flex items-start gap-4">
-                <div className="bg-green-100 p-2 rounded-full">
-                  <Clock className="h-5 w-5 text-green-600" />
-                </div>
-                <div>
-                  <h3 className="font-medium text-green-800">4. Vote</h3>
-                  <p className="text-sm text-muted-foreground">
-                    Le Sénat vote la proposition de loi
-                  </p>
+  // Filtrer les lois selon le terme de recherche
+  const filteredLois = lois.filter(loi => 
+    loi.titre.toLowerCase().includes(searchTerm.toLowerCase()) || 
+    loi.auteur.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
+  return (
+    <div className="space-y-4">
+      {filteredLois.length === 0 ? (
+        <div className="text-center py-12 text-muted-foreground">
+          Aucune loi dans l'historique ne correspond à vos critères
+        </div>
+      ) : (
+        filteredLois.map(loi => (
+          <div key={loi.id} className="flex items-center justify-between p-4 border rounded-lg hover:bg-muted/20">
+            <div className="flex items-start gap-4">
+              <div className="p-2 rounded-full bg-purple-100">
+                <History className="h-6 w-6 text-purple-600" />
+              </div>
+              <div>
+                <h3 className="font-medium">{loi.titre}</h3>
+                <p className="text-sm text-muted-foreground">Proposé par {loi.auteur} le {loi.date}</p>
+                <div className="mt-1">
+                  <span className={`text-xs px-2 py-0.5 rounded-full ${
+                    loi.resultat === 'Adoptée' 
+                      ? 'bg-green-100 text-green-800' 
+                      : 'bg-red-100 text-red-800'
+                  }`}>
+                    {loi.resultat} ({loi.votes})
+                  </span>
                 </div>
               </div>
             </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader>
-            <CardTitle>Votes en cours</CardTitle>
-            <CardDescription>
-              Répartition par catégorie des lois en attente de vote
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-4">
-              <div className="space-y-2">
-                <div className="flex justify-between text-sm">
-                  <span className="text-muted-foreground">Agraires</span>
-                  <span className="font-medium">35%</span>
-                </div>
-                <div className="h-2 bg-gray-100 rounded-full">
-                  <div className="h-2 bg-amber-500 rounded-full" style={{ width: '35%' }}></div>
-                </div>
-              </div>
-
-              <div className="space-y-2">
-                <div className="flex justify-between text-sm">
-                  <span className="text-muted-foreground">Militaires</span>
-                  <span className="font-medium">20%</span>
-                </div>
-                <div className="h-2 bg-gray-100 rounded-full">
-                  <div className="h-2 bg-red-500 rounded-full" style={{ width: '20%' }}></div>
-                </div>
-              </div>
-
-              <div className="space-y-2">
-                <div className="flex justify-between text-sm">
-                  <span className="text-muted-foreground">Fiscales</span>
-                  <span className="font-medium">25%</span>
-                </div>
-                <div className="h-2 bg-gray-100 rounded-full">
-                  <div className="h-2 bg-blue-500 rounded-full" style={{ width: '25%' }}></div>
-                </div>
-              </div>
-
-              <div className="space-y-2">
-                <div className="flex justify-between text-sm">
-                  <span className="text-muted-foreground">Judiciaires</span>
-                  <span className="font-medium">15%</span>
-                </div>
-                <div className="h-2 bg-gray-100 rounded-full">
-                  <div className="h-2 bg-purple-500 rounded-full" style={{ width: '15%' }}></div>
-                </div>
-              </div>
-
-              <div className="space-y-2">
-                <div className="flex justify-between text-sm">
-                  <span className="text-muted-foreground">Autres</span>
-                  <span className="font-medium">5%</span>
-                </div>
-                <div className="h-2 bg-gray-100 rounded-full">
-                  <div className="h-2 bg-gray-500 rounded-full" style={{ width: '5%' }}></div>
-                </div>
-              </div>
+            <div>
+              <Button variant="outline" size="sm">Consulter</Button>
             </div>
-          </CardContent>
-        </Card>
-      </div>
-
-      <Card>
-        <CardHeader>
-          <CardTitle>Lois en attente de vote</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Titre</TableHead>
-                <TableHead>Proposeur</TableHead>
-                <TableHead>Catégorie</TableHead>
-                <TableHead>Phase</TableHead>
-                <TableHead>Votes pour/contre</TableHead>
-                <TableHead>Jours restants</TableHead>
-                <TableHead className="text-right">Actions</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {pendingLaws.map(law => (
-                <TableRow key={law.id}>
-                  <TableCell className="font-medium">{law.title}</TableCell>
-                  <TableCell>{law.proposer}</TableCell>
-                  <TableCell>
-                    <Badge variant="secondary">{law.category}</Badge>
-                  </TableCell>
-                  <TableCell>{renderPhaseBadge(law.phase)}</TableCell>
-                  <TableCell>
-                    <div className="flex items-center gap-2 text-sm">
-                      <span className="flex items-center text-green-600">
-                        <Check className="h-3 w-3 mr-1" /> {law.votesFor}
-                      </span>
-                      <span>/</span>
-                      <span className="flex items-center text-red-600">
-                        <X className="h-3 w-3 mr-1" /> {law.votesAgainst}
-                      </span>
-                      <span className="text-gray-400 text-xs">({law.abstentions} abst.)</span>
-                    </div>
-                  </TableCell>
-                  <TableCell>
-                    <span className={`px-2 py-1 rounded-full text-xs ${
-                      law.daysLeft <= 3 ? 'bg-red-100 text-red-800' : 
-                      law.daysLeft <= 7 ? 'bg-amber-100 text-amber-800' : 
-                      'bg-green-100 text-green-800'
-                    }`}>
-                      {law.daysLeft} jours
-                    </span>
-                  </TableCell>
-                  <TableCell className="text-right">
-                    <Button variant="ghost" size="sm">
-                      Détails
-                    </Button>
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </CardContent>
-      </Card>
+          </div>
+        ))
+      )}
     </div>
   );
 };

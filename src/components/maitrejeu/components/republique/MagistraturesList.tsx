@@ -1,183 +1,265 @@
 
-import React from 'react';
+import React, { useState } from 'react';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Edit, UserPlus, History } from 'lucide-react';
+import { Plus, Award, Calendar, User, Search, Filter } from 'lucide-react';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { ActionButton } from '@/components/ui-custom/ActionButton';
 
-const MAGISTRATURES_DATA = [
-  {
-    id: '1',
-    nom: 'Consul',
-    titulaires: [
-      { id: 's1', nom: 'Gaius Julius Caesar', faction: 'populares' },
-      { id: 's2', nom: 'Marcus Calpurnius Bibulus', faction: 'optimates' },
-    ],
-    pouvoir: 'Imperium Maius',
-    duree: '1 an',
-    statut: 'actif'
-  },
-  {
-    id: '2',
-    nom: 'Préteur',
-    titulaires: [
-      { id: 's3', nom: 'Quintus Caecilius Metellus', faction: 'optimates' },
-      { id: 's4', nom: 'Publius Cornelius Lentulus', faction: 'optimates' },
-      { id: 's5', nom: 'Lucius Roscius Fabatus', faction: 'populares' },
-      { id: 's6', nom: 'Gnaeus Tremellius Scrofa', faction: 'modérés' },
-    ],
-    pouvoir: 'Imperium',
-    duree: '1 an',
-    statut: 'actif'
-  },
-  {
-    id: '3',
-    nom: 'Édile',
-    titulaires: [
-      { id: 's7', nom: 'Marcus Aemilius Scaurus', faction: 'optimates' },
-      { id: 's8', nom: 'Publius Plautius Hypsaeus', faction: 'populares' },
-      { id: 's9', nom: 'Gaius Scribonius Curio', faction: 'modérés' },
-      { id: 's10', nom: 'Lucius Vinicius', faction: 'populares' },
-    ],
-    pouvoir: 'Ius Edicendi',
-    duree: '1 an',
-    statut: 'actif'
-  },
-  {
-    id: '4',
-    nom: 'Tribun de la Plèbe',
-    titulaires: [
-      { id: 's11', nom: 'Publius Servilius Rullus', faction: 'populares' },
-      { id: 's12', nom: 'Gaius Manilius', faction: 'populares' },
-      { id: 's13', nom: 'Lucius Caecilius Rufus', faction: 'optimates' },
-      { id: 's14', nom: 'Titus Ampius Balbus', faction: 'populares' },
-      { id: 's15', nom: 'Gaius Helvius Cinna', faction: 'populares' },
-      { id: 's16', nom: 'Quintus Ancharius', faction: 'optimates' },
-      { id: 's17', nom: 'Publius Sestius', faction: 'modérés' },
-      { id: 's18', nom: 'Gaius Lucilius Hirrus', faction: 'optimates' },
-      { id: 's19', nom: 'Marcus Juventius Laterensis', faction: 'modérés' },
-      { id: 's20', nom: 'Lucius Caesetius Flavus', faction: 'populares' },
-    ],
-    pouvoir: 'Intercessio',
-    duree: '1 an',
-    statut: 'actif'
-  },
-  {
-    id: '5',
-    nom: 'Questeur',
-    titulaires: [
-      { id: 's21', nom: 'Marcus Tullius Cicero Minor', faction: 'optimates' },
-      { id: 's22', nom: 'Decimus Junius Silanus', faction: 'optimates' },
-      { id: 's23', nom: 'Gnaeus Plancius', faction: 'modérés' },
-      { id: 's24', nom: 'Publius Licinius Crassus', faction: 'populares' },
-      { id: 's25', nom: 'Lucius Antistius Vetus', faction: 'modérés' },
-      { id: 's26', nom: 'Gaius Curio', faction: 'populares' },
-      { id: 's27', nom: 'Marcus Nonius Sufenas', faction: 'optimates' },
-      { id: 's28', nom: 'Lucius Minucius Basilus', faction: 'optimates' },
-    ],
-    pouvoir: 'Administration financière',
-    duree: '1 an',
-    statut: 'actif'
-  },
-  {
-    id: '6',
-    nom: 'Censeur',
-    titulaires: [
-      { id: 's29', nom: 'Appius Claudius Pulcher', faction: 'optimates' },
-      { id: 's30', nom: 'Lucius Calpurnius Piso', faction: 'modérés' },
-    ],
-    pouvoir: 'Regimen Morum',
-    duree: '5 ans',
-    statut: 'inactif',
-    notes: 'La dernière censure remonte à 3 ans'
-  },
-  {
-    id: '7',
-    nom: 'Dictateur',
-    titulaires: [],
-    pouvoir: 'Imperium Summum',
-    duree: '6 mois',
-    statut: 'inactif',
-    notes: 'Nommé uniquement en cas d\'urgence extrême'
-  }
-];
+type Magistrature = {
+  id: string;
+  titre: string;
+  titulaire: string;
+  dateDebut: string;
+  dateFin: string;
+  type: 'ordinaire' | 'extraordinaire' | 'prorogée';
+  statut: 'en cours' | 'terminée' | 'à venir';
+};
 
 export const MagistraturesList: React.FC = () => {
+  const [currentTab, setCurrentTab] = useState('actives');
+  const [searchTerm, setSearchTerm] = useState('');
+
+  // Données fictives pour les magistratures
+  const magistratures: Magistrature[] = [
+    {
+      id: '1',
+      titre: 'Consul',
+      titulaire: 'Marcus Aurelius',
+      dateDebut: '01/01/230 av. J.-C.',
+      dateFin: '31/12/230 av. J.-C.',
+      type: 'ordinaire',
+      statut: 'en cours'
+    },
+    {
+      id: '2',
+      titre: 'Préteur',
+      titulaire: 'Julius Caesar',
+      dateDebut: '01/01/230 av. J.-C.',
+      dateFin: '31/12/230 av. J.-C.',
+      type: 'ordinaire',
+      statut: 'en cours'
+    },
+    {
+      id: '3',
+      titre: 'Édile Curule',
+      titulaire: 'Gaius Gracchus',
+      dateDebut: '01/01/230 av. J.-C.',
+      dateFin: '31/12/230 av. J.-C.',
+      type: 'ordinaire',
+      statut: 'en cours'
+    },
+    {
+      id: '4',
+      titre: 'Dictateur',
+      titulaire: 'Lucius Quinctius Cincinnatus',
+      dateDebut: '15/05/231 av. J.-C.',
+      dateFin: '15/11/231 av. J.-C.',
+      type: 'extraordinaire',
+      statut: 'terminée'
+    },
+    {
+      id: '5',
+      titre: 'Questeur',
+      titulaire: 'À déterminer',
+      dateDebut: '01/01/229 av. J.-C.',
+      dateFin: '31/12/229 av. J.-C.',
+      type: 'ordinaire',
+      statut: 'à venir'
+    }
+  ];
+
+  // Filtrer les magistratures selon l'onglet actif et le terme de recherche
+  const filteredMagistratures = magistratures.filter(mag => {
+    const matchesSearch = 
+      mag.titre.toLowerCase().includes(searchTerm.toLowerCase()) || 
+      mag.titulaire.toLowerCase().includes(searchTerm.toLowerCase());
+    
+    if (currentTab === 'toutes') return matchesSearch;
+    if (currentTab === 'actives') return matchesSearch && mag.statut === 'en cours';
+    if (currentTab === 'futures') return matchesSearch && mag.statut === 'à venir';
+    if (currentTab === 'passees') return matchesSearch && mag.statut === 'terminée';
+    
+    return matchesSearch;
+  });
+
   return (
-    <div className="space-y-6">
-      <div className="flex justify-between items-center">
-        <div>
-          <h3 className="text-lg font-medium">Liste des magistrats en fonction</h3>
-          <p className="text-sm text-muted-foreground">Organisation politique de la République</p>
+    <Card>
+      <CardHeader>
+        <CardTitle>Magistratures</CardTitle>
+        <CardDescription>
+          Gestion des postes officiels de la République
+        </CardDescription>
+      </CardHeader>
+      <CardContent>
+        {/* Filtres et recherche */}
+        <div className="flex flex-col md:flex-row justify-between gap-4 mb-6">
+          <div className="flex items-center gap-2">
+            <div className="relative">
+              <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+              <input
+                type="text"
+                placeholder="Rechercher..."
+                className="pl-8 px-3 py-2 border rounded-md w-full md:w-64"
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+              />
+            </div>
+          </div>
+          
+          <div className="flex gap-2">
+            <ActionButton 
+              variant="default"
+              label="Ajouter une magistrature"
+              icon={<Plus className="h-4 w-4" />}
+              onClick={() => console.log('Ajouter magistrature')}
+            />
+          </div>
         </div>
-        <div className="flex gap-2">
-          <Button variant="outline" size="sm">
-            <History className="h-4 w-4 mr-2" />
-            Historique
-          </Button>
-          <Button size="sm">
-            <UserPlus className="h-4 w-4 mr-2" />
-            Nommer
-          </Button>
-        </div>
-      </div>
-      
-      <Table>
-        <TableHeader>
-          <TableRow>
-            <TableHead className="w-[200px]">Magistrature</TableHead>
-            <TableHead>Titulaires</TableHead>
-            <TableHead>Pouvoirs</TableHead>
-            <TableHead>Mandat</TableHead>
-            <TableHead>Statut</TableHead>
-            <TableHead className="text-right">Actions</TableHead>
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {MAGISTRATURES_DATA.map(magistrature => (
-            <TableRow key={magistrature.id}>
-              <TableCell className="font-medium">{magistrature.nom}</TableCell>
-              <TableCell>
-                <div className="space-y-1">
-                  {magistrature.titulaires.length > 0 ? (
-                    magistrature.titulaires.map(titulaire => (
-                      <div key={titulaire.id} className="flex items-center">
-                        <span>{titulaire.nom}</span>
-                        <Badge className="ml-2" variant={
-                          titulaire.faction === 'optimates' ? 'default' :
-                          titulaire.faction === 'populares' ? 'destructive' :
-                          'secondary'
-                        }>
-                          {titulaire.faction}
-                        </Badge>
+
+        {/* Onglets */}
+        <Tabs value={currentTab} onValueChange={setCurrentTab} className="mb-6">
+          <TabsList className="grid grid-cols-4 w-full">
+            <TabsTrigger value="toutes">Toutes</TabsTrigger>
+            <TabsTrigger value="actives">Actives</TabsTrigger>
+            <TabsTrigger value="futures">À venir</TabsTrigger>
+            <TabsTrigger value="passees">Passées</TabsTrigger>
+          </TabsList>
+        </Tabs>
+
+        {/* Table des magistratures */}
+        <div className="border rounded-md overflow-hidden">
+          <Table>
+            <TableHeader className="bg-muted/50">
+              <TableRow>
+                <TableHead>Titre</TableHead>
+                <TableHead>Titulaire</TableHead>
+                <TableHead>Période</TableHead>
+                <TableHead className="text-center">Type</TableHead>
+                <TableHead className="text-center">Statut</TableHead>
+                <TableHead className="text-right">Actions</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {filteredMagistratures.length === 0 ? (
+                <TableRow>
+                  <TableCell colSpan={6} className="text-center h-24 text-muted-foreground">
+                    Aucune magistrature ne correspond à vos critères
+                  </TableCell>
+                </TableRow>
+              ) : (
+                filteredMagistratures.map((mag) => (
+                  <TableRow key={mag.id}>
+                    <TableCell className="font-medium">
+                      <div className="flex items-center gap-2">
+                        <Award className="h-4 w-4 text-amber-500" />
+                        {mag.titre}
                       </div>
-                    ))
-                  ) : (
-                    <span className="text-muted-foreground italic">Aucun titulaire</span>
-                  )}
-                </div>
-              </TableCell>
-              <TableCell>{magistrature.pouvoir}</TableCell>
-              <TableCell>{magistrature.duree}</TableCell>
-              <TableCell>
-                <Badge variant={magistrature.statut === 'actif' ? 'outline' : 'secondary'}>
-                  {magistrature.statut === 'actif' ? 'En fonction' : 'Inactif'}
-                </Badge>
-                {magistrature.notes && (
-                  <div className="text-xs text-muted-foreground mt-1">
-                    {magistrature.notes}
-                  </div>
-                )}
-              </TableCell>
-              <TableCell className="text-right">
-                <Button variant="ghost" size="icon">
-                  <Edit className="h-4 w-4" />
-                </Button>
-              </TableCell>
-            </TableRow>
-          ))}
-        </TableBody>
-      </Table>
-    </div>
+                    </TableCell>
+                    <TableCell>
+                      <div className="flex items-center gap-2">
+                        <User className="h-4 w-4 text-blue-500" />
+                        {mag.titulaire}
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      <div className="flex items-center gap-2">
+                        <Calendar className="h-4 w-4 text-purple-500" />
+                        <span>{mag.dateDebut} à {mag.dateFin}</span>
+                      </div>
+                    </TableCell>
+                    <TableCell className="text-center">
+                      <MagistratureTypeBadge type={mag.type} />
+                    </TableCell>
+                    <TableCell className="text-center">
+                      <MagistratureStatusBadge status={mag.statut} />
+                    </TableCell>
+                    <TableCell className="text-right">
+                      <Button variant="ghost" size="sm">
+                        Détails
+                      </Button>
+                    </TableCell>
+                  </TableRow>
+                ))
+              )}
+            </TableBody>
+          </Table>
+        </div>
+      </CardContent>
+    </Card>
+  );
+};
+
+// Composant Badge pour le type de magistrature
+const MagistratureTypeBadge: React.FC<{ type: 'ordinaire' | 'extraordinaire' | 'prorogée' }> = ({ type }) => {
+  const getTypeConfig = () => {
+    switch (type) {
+      case 'ordinaire':
+        return {
+          variant: 'outline' as const,
+          className: 'bg-blue-100 text-blue-800 border-blue-200'
+        };
+      case 'extraordinaire':
+        return {
+          variant: 'outline' as const,
+          className: 'bg-purple-100 text-purple-800 border-purple-200'
+        };
+      case 'prorogée':
+        return {
+          variant: 'outline' as const,
+          className: 'bg-amber-100 text-amber-800 border-amber-200'
+        };
+      default:
+        return {
+          variant: 'outline' as const,
+          className: 'bg-gray-100 text-gray-800 border-gray-200'
+        };
+    }
+  };
+
+  const config = getTypeConfig();
+
+  return (
+    <Badge variant={config.variant} className={config.className}>
+      {type.charAt(0).toUpperCase() + type.slice(1)}
+    </Badge>
+  );
+};
+
+// Composant Badge pour le statut de magistrature
+const MagistratureStatusBadge: React.FC<{ status: 'en cours' | 'terminée' | 'à venir' }> = ({ status }) => {
+  const getStatusConfig = () => {
+    switch (status) {
+      case 'en cours':
+        return {
+          variant: 'outline' as const,
+          className: 'bg-green-100 text-green-800 border-green-200'
+        };
+      case 'terminée':
+        return {
+          variant: 'outline' as const,
+          className: 'bg-gray-100 text-gray-800 border-gray-200'
+        };
+      case 'à venir':
+        return {
+          variant: 'outline' as const,
+          className: 'bg-indigo-100 text-indigo-800 border-indigo-200'
+        };
+      default:
+        return {
+          variant: 'outline' as const,
+          className: 'bg-gray-100 text-gray-800 border-gray-200'
+        };
+    }
+  };
+
+  const config = getStatusConfig();
+
+  return (
+    <Badge variant={config.variant} className={config.className}>
+      {status.charAt(0).toUpperCase() + status.slice(1)}
+    </Badge>
   );
 };
