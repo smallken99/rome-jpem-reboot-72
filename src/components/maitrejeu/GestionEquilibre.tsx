@@ -6,7 +6,7 @@ import { EvenementsList } from './components/EvenementsList';
 import { EquilibreBarChart } from './components/EquilibreBarChart';
 import { PoliticalEventsTimeline } from './components/PoliticalEventsTimeline';
 import { PartisGraph } from './components/PartisGraph';
-import { CreateEvenementForm } from './components/CreateEvenementForm';
+import { CreateEvenementForm } from './components/evenements/CreateEvenementForm';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
