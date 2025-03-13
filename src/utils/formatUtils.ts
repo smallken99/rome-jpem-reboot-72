@@ -1,66 +1,56 @@
 
-/**
- * Format a number as currency (As)
- */
-export const formatMoney = (amount: number): string => {
-  if (amount === undefined || amount === null) return '0 As';
-  
-  // Format with spaces as thousands separator
-  const formattedNumber = amount.toLocaleString('fr-FR').replace(/,/g, ' ');
-  
-  return `${formattedNumber} As`;
-};
+import { GameDate } from '@/components/maitrejeu/types/common';
 
-/**
- * Format a number as a percentage
- */
-export const formatPercent = (value: number, decimals = 1): string => {
-  if (value === undefined || value === null) return '0%';
-  
-  return `${value.toFixed(decimals)}%`;
-};
-
-/**
- * Format a number with a given unit
- */
-export const formatWithUnit = (value: number, unit: string): string => {
-  if (value === undefined || value === null) return `0 ${unit}`;
-  
-  return `${value.toLocaleString('fr-FR')} ${unit}`;
-};
-
-/**
- * Format system uptime
- */
-export const formatUptime = (seconds: number): string => {
-  const days = Math.floor(seconds / 86400);
-  const hours = Math.floor((seconds % 86400) / 3600);
-  const minutes = Math.floor((seconds % 3600) / 60);
-  
-  let result = '';
-  if (days > 0) result += `${days}j `;
-  if (hours > 0 || days > 0) result += `${hours}h `;
-  result += `${minutes}m`;
-  
-  return result;
-};
-
-/**
- * Use this instead of the date-specific functions from dateUtils when only formatting is needed
- */
-export const formatDate = (date: Date | string): string => {
-  if (!date) return '';
-  
-  const dateObj = typeof date === 'string' ? new Date(date) : date;
-  
-  // Check if date is valid
-  if (isNaN(dateObj.getTime())) {
-    return 'Date invalide';
+// Fonction pour formatter l'argent en format romain
+export const formatCurrency = (amount: number): string => {
+  if (amount >= 1000000) {
+    return `${(amount / 1000000).toFixed(2)} M as`;
+  } else if (amount >= 1000) {
+    return `${(amount / 1000).toFixed(2)} K as`;
+  } else {
+    return `${amount} as`;
   }
+};
+
+// Fonction pour formater une date de jeu
+export const formatDate = (date: GameDate): string => {
+  return `${date.year} AUC, ${formatSeason(date.season)}`;
+};
+
+// Fonction pour formater une saison
+export const formatSeason = (season: string): string => {
+  switch (season) {
+    case 'Ver':
+      return 'Printemps (Ver)';
+    case 'Aestas':
+      return 'Été (Aestas)';
+    case 'Autumnus':
+      return 'Automne (Autumnus)';
+    case 'Hiems':
+      return 'Hiver (Hiems)';
+    default:
+      return season;
+  }
+};
+
+// Fonction pour formatter un nombre avec des séparateurs de milliers
+export const formatNumber = (num: number): string => {
+  return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, " ");
+};
+
+// Fonction pour formatter un pourcentage
+export const formatPercent = (value: number): string => {
+  return `${value.toFixed(1)}%`;
+};
+
+// Fonction pour formatter une date au format court
+export const formatShortDate = (date: GameDate): string => {
+  const seasonMap: Record<string, string> = {
+    'Ver': 'P',
+    'Aestas': 'É',
+    'Autumnus': 'A',
+    'Hiems': 'H'
+  };
   
-  return dateObj.toLocaleDateString('fr-FR', {
-    day: 'numeric',
-    month: 'long',
-    year: 'numeric'
-  });
+  return `${date.year} ${seasonMap[date.season as string] || date.season}`;
 };

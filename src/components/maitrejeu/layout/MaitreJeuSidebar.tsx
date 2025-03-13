@@ -60,7 +60,7 @@ export const MaitreJeuSidebar: React.FC<MaitreJeuSidebarProps> = ({
           <CalendarClock className="h-4 w-4 text-muted-foreground" />
           <span>Date:</span>
           <span className="font-medium">
-            {formatDate(currentDate.year, currentDate.season)}
+            {formatDate(currentDate)}
           </span>
         </div>
         

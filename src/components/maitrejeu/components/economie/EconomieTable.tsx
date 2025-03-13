@@ -1,160 +1,95 @@
 
 import React from 'react';
-import { 
-  Table, 
-  TableBody, 
-  TableCell, 
-  TableHead, 
-  TableHeader, 
-  TableRow 
-} from '@/components/ui/table';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
-import { formatDate, formatMoney } from '@/utils/formatUtils';
-import { EconomieRecord, EconomieFilter, EconomieSort } from '@/components/maitrejeu/types/economie';
-import { useMaitreJeu } from '@/components/maitrejeu/context';
-import { ArrowUpDown } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { GameDate } from '@/components/maitrejeu/types/common';
+import { Pencil, Trash2 } from 'lucide-react';
+import { EconomieRecord } from '../../types/economie';
+import { formatCurrency } from '@/utils/formatUtils';
 
 interface EconomieTableProps {
   records: EconomieRecord[];
   onEdit: (id: string) => void;
   onDelete: (id: string) => void;
-  sort: EconomieSort;
-  onSortChange: (field: keyof EconomieRecord) => void;
 }
 
-export const EconomieTable: React.FC<EconomieTableProps> = ({
-  records,
-  onEdit,
-  onDelete,
-  sort,
-  onSortChange
+export const EconomieTable: React.FC<EconomieTableProps> = ({ 
+  records, 
+  onEdit, 
+  onDelete 
 }) => {
-  const { senateurs, provinces } = useMaitreJeu();
-  
-  const getSenateurName = (id?: string) => {
-    if (!id) return '-';
-    const senateur = senateurs.find(s => s.id === id);
-    return senateur ? senateur.nom : 'Inconnu';
-  };
-  
-  const getProvinceName = (id?: string) => {
-    if (!id) return '-';
-    const province = provinces.find(p => p.id === id);
-    return province ? province.nom : 'Inconnue';
-  };
-  
-  const renderSortIcon = (field: keyof EconomieRecord) => {
-    if (sort.field !== field) return <ArrowUpDown className="ml-2 h-4 w-4" />;
-    return sort.direction === 'asc' ? 
-      <ArrowUpDown className="ml-2 h-4 w-4 text-primary" /> : 
-      <ArrowUpDown className="ml-2 h-4 w-4 text-primary rotate-180" />;
-  };
-
-  const formatRecordDate = (recordDate: GameDate | string) => {
-    if (typeof recordDate === 'string') {
-      try {
-        const parsedDate = JSON.parse(recordDate) as GameDate;
-        return formatDate(parsedDate.year, String(parsedDate.season));
-      } catch (e) {
-        return recordDate; // Fallback if can't parse
-      }
-    } else {
-      return formatDate(recordDate.year, String(recordDate.season));
+  const getStatusBadge = (status: string) => {
+    switch(status) {
+      case 'income':
+        return <Badge className="bg-green-500">Revenu</Badge>;
+      case 'expense':
+        return <Badge className="bg-red-500">Dépense</Badge>;
+      case 'transfer':
+        return <Badge className="bg-blue-500">Transfert</Badge>;
+      case 'tax':
+        return <Badge className="bg-purple-500">Impôt</Badge>;
+      default:
+        return <Badge>Autre</Badge>;
     }
   };
-
+  
+  const getSourceDisplay = (source: string) => {
+    switch(source) {
+      case 'treasury':
+        return 'Trésor Public';
+      case 'province':
+        return 'Province';
+      case 'trade':
+        return 'Commerce';
+      case 'tax':
+        return 'Taxation';
+      default:
+        return source;
+    }
+  };
+  
   return (
     <div className="rounded-md border">
       <Table>
         <TableHeader>
           <TableRow>
-            <TableHead className="w-[180px]">
-              <Button 
-                variant="ghost" 
-                onClick={() => onSortChange('date')}
-                className="flex items-center font-semibold"
-              >
-                Date {renderSortIcon('date')}
-              </Button>
-            </TableHead>
-            <TableHead>
-              <Button 
-                variant="ghost" 
-                onClick={() => onSortChange('source')}
-                className="flex items-center font-semibold"
-              >
-                Source {renderSortIcon('source')}
-              </Button>
-            </TableHead>
-            <TableHead>
-              <Button 
-                variant="ghost" 
-                onClick={() => onSortChange('category')}
-                className="flex items-center font-semibold"
-              >
-                Catégorie {renderSortIcon('category')}
-              </Button>
-            </TableHead>
-            <TableHead className="text-right">
-              <Button 
-                variant="ghost" 
-                onClick={() => onSortChange('amount')}
-                className="flex items-center font-semibold ml-auto"
-              >
-                Montant {renderSortIcon('amount')}
-              </Button>
-            </TableHead>
-            <TableHead>Entité affectée</TableHead>
+            <TableHead>Description</TableHead>
             <TableHead>Type</TableHead>
+            <TableHead>Source</TableHead>
+            <TableHead>Montant</TableHead>
+            <TableHead>Date</TableHead>
             <TableHead className="text-right">Actions</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
           {records.length === 0 ? (
             <TableRow>
-              <TableCell colSpan={7} className="h-24 text-center">
-                Aucune transaction économique trouvée.
+              <TableCell colSpan={6} className="text-center h-24 text-muted-foreground">
+                Aucun enregistrement économique trouvé.
               </TableCell>
             </TableRow>
           ) : (
-            records.map(record => (
+            records.map((record) => (
               <TableRow key={record.id}>
-                <TableCell className="font-medium">
-                  {formatRecordDate(record.date)}
-                  {record.isRecurring && (
-                    <Badge variant="outline" className="ml-2">Récurrent</Badge>
-                  )}
-                </TableCell>
-                <TableCell>{record.source}</TableCell>
-                <TableCell>{record.category}</TableCell>
-                <TableCell className={`text-right font-semibold ${record.type === 'income' ? 'text-green-600' : 'text-red-600'}`}>
-                  {record.type === 'income' ? '+' : '-'}{formatMoney(record.amount)}
-                </TableCell>
-                <TableCell>
-                  {record.affectedSenateurId ? getSenateurName(record.affectedSenateurId) : 
-                   record.affectedProvinceId ? getProvinceName(record.affectedProvinceId) : 'Trésor public'}
-                </TableCell>
-                <TableCell>
-                  <Badge variant={record.type === 'income' ? 'default' : 'destructive'}>
-                    {record.type === 'income' ? 'Revenu' : 'Dépense'}
-                  </Badge>
-                </TableCell>
-                <TableCell className="flex justify-end gap-2">
-                  <Button 
-                    variant="outline" 
-                    size="sm" 
+                <TableCell className="font-medium">{record.description}</TableCell>
+                <TableCell>{getStatusBadge(record.type)}</TableCell>
+                <TableCell>{getSourceDisplay(record.source)}</TableCell>
+                <TableCell>{formatCurrency(record.amount)}</TableCell>
+                <TableCell>{record.date}</TableCell>
+                <TableCell className="text-right space-x-2">
+                  <Button
+                    variant="ghost"
+                    size="icon"
                     onClick={() => onEdit(record.id)}
                   >
-                    Modifier
+                    <Pencil className="h-4 w-4" />
                   </Button>
-                  <Button 
-                    variant="destructive" 
-                    size="sm" 
+                  <Button
+                    variant="ghost"
+                    size="icon"
                     onClick={() => onDelete(record.id)}
                   >
-                    Supprimer
+                    <Trash2 className="h-4 w-4" />
                   </Button>
                 </TableCell>
               </TableRow>

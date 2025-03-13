@@ -1,23 +1,16 @@
 
-import React from 'react';
+import React, { ReactNode } from 'react';
 import { MaitreJeuHeader } from './MaitreJeuHeader';
-import { MaitreJeuSidebar } from './MaitreJeuSidebar';
-import { MaitreJeuContent } from './MaitreJeuContent';
+import { MaitreJeuSidebar, MaitreJeuSidebarProps } from './MaitreJeuSidebar';
 
-interface MaitreJeuLayoutProps {
-  activeTab: string;
-  setActiveTab: (tab: string) => void;
-}
-
-// Mettons à jour l'interface pour MaitreJeuSidebarProps pour inclure setActiveTab
-export interface MaitreJeuSidebarProps {
-  activeTab: string;
-  setActiveTab: (tab: string) => void;
+interface MaitreJeuLayoutProps extends MaitreJeuSidebarProps {
+  children: ReactNode;
 }
 
 export const MaitreJeuLayout: React.FC<MaitreJeuLayoutProps> = ({
   activeTab,
-  setActiveTab
+  setActiveTab,
+  children
 }) => {
   return (
     <div className="min-h-screen bg-roman-pattern">
@@ -28,7 +21,7 @@ export const MaitreJeuLayout: React.FC<MaitreJeuLayoutProps> = ({
           <MaitreJeuSidebar activeTab={activeTab} setActiveTab={setActiveTab} />
           
           <div className="flex-1 bg-white rounded-lg shadow-md overflow-hidden">
-            <MaitreJeuContent activeTab={activeTab} />
+            {children}
           </div>
         </div>
       </main>
