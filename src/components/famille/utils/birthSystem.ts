@@ -1,82 +1,18 @@
 
-import { Character, CharacterStat } from '@/types/character';
-import { romanNames } from '@/components/famille/education/data/romanNames';
+import { Character } from '@/types/character';
 import { Season } from '@/utils/timeSystem';
-import { getStatValue } from '@/utils/characterUtils';
-
-// Constants for birth system
-const BASE_BIRTH_CHANCE_PER_YEAR = 0.2; // Base chance par an (20%)
-const MIN_MATERNAL_AGE = 16;
-const MAX_MATERNAL_AGE = 40;
-const MIN_PATERNAL_AGE = 16;
-const MAX_PATERNAL_AGE = 60;
-
-// Gender distribution (slightly more males due to Roman preference)
-const MALE_CHANCE = 0.55;
-
-// Seasonal birth rate modifiers
-const SEASONAL_BIRTH_MODIFIERS: Record<Season, number> = {
-  'Ver': 0.05,      // Printemps: +5% (saison de fertilité)
-  'Aestas': 0.02,   // Été: +2%
-  'Autumnus': -0.02, // Automne: -2%
-  'Hiems': -0.05    // Hiver: -5% (conditions difficiles)
-};
-
-// Facteurs de fécondité
-interface FertilityFactors {
-  maternalHealth: number;   // Santé de la mère (0-1)
-  paternalHealth: number;   // Santé du père (0-1)
-  previousBirths: number;   // Nombre de naissances précédentes
-  miscarriageChance: number; // Risque de fausse couche (0-1)
-  familyFertility: number;  // Fertilité familiale héréditaire (0.5-1.5)
-}
-
-// Cache pour stocker les facteurs de fertilité par famille
-const familyFertilityCache: Record<string, number> = {};
-
-const romanNamePrefixes = romanNames.map(name => name.split(' ')[0]);
-const romanNameSuffixes = romanNames.map(name => name.split(' ')[1]);
-
-/**
- * Génère des facteurs de fertilité pour un couple
- */
-const generateFertilityFactors = (wife: Character, husband: Character): FertilityFactors => {
-  // Extraire le nom de famille du mari pour la fertilitéa familiale
-  const familyName = husband.name.split(' ')[1] || husband.name;
-  
-  // Créer ou récupérer la fertilité familiale héréditaire
-  if (!familyFertilityCache[familyName]) {
-    // Fertilité familiale entre 0.5 et 1.5 (certaines familles sont naturellement plus fertiles)
-    familyFertilityCache[familyName] = 0.5 + Math.random();
-  }
-  
-  // Santé maternelle basée sur l'âge et les statistiques
-  const maternalHealthBase = wife.age >= 20 && wife.age <= 30 ? 0.9 : 0.7;
-  const maternalHealthMod = Math.min(getStatValue(wife.stats.piety) / 200, 0.5); // La piété influence la santé
-  const maternalHealth = Math.min(maternalHealthBase + maternalHealthMod, 1);
-  
-  // Santé paternelle
-  const paternalHealthBase = husband.age >= 25 && husband.age <= 45 ? 0.9 : 0.7;
-  const paternalHealthMod = Math.min(getStatValue(husband.stats.piety) / 200, 0.5);
-  const paternalHealth = Math.min(paternalHealthBase + paternalHealthMod, 1);
-  
-  // Nombre de naissances précédentes (estimation)
-  const previousBirths = Math.min(wife.age - MIN_MATERNAL_AGE, 0) / 3;
-  
-  // Risque de fausse couche augmente avec l'âge
-  let miscarriageChance = 0.05; // 5% de base
-  if (wife.age > 35) {
-    miscarriageChance += (wife.age - 35) * 0.02; // +2% par an après 35 ans
-  }
-  
-  return {
-    maternalHealth,
-    paternalHealth,
-    previousBirths,
-    miscarriageChance,
-    familyFertility: familyFertilityCache[familyName]
-  };
-};
+import { generateRomanName } from './naming/romanNameGenerator';
+import { generateBaseStat } from './inheritance/statInheritance';
+import { 
+  BASE_BIRTH_CHANCE_PER_YEAR, 
+  MIN_MATERNAL_AGE, 
+  MAX_MATERNAL_AGE,
+  MIN_PATERNAL_AGE,
+  MAX_PATERNAL_AGE,
+  MALE_CHANCE,
+  SEASONAL_BIRTH_MODIFIERS 
+} from './fertility/birthConstants';
+import { generateFertilityFactors } from './fertility/fertilityFactors';
 
 /**
  * Determines if a birth occurs for a married couple
@@ -136,30 +72,6 @@ export const checkForBirth = (wife: Character, husband?: Character, season: Seas
 };
 
 /**
- * Generate a random Roman name
- */
-export const generateRomanName = (gender: 'male' | 'female', familyName: string): string => {
-  // For males, use praenomen + family name
-  if (gender === 'male') {
-    const randomPrefix = romanNamePrefixes[Math.floor(Math.random() * romanNamePrefixes.length)];
-    return `${randomPrefix} ${familyName}`;
-  } 
-  // For females, use feminized family name + possibly "Minor" for younger daughters
-  else {
-    // Roman women often took the feminine form of the family name
-    const femaleName = familyName.endsWith('us') 
-      ? familyName.replace(/us$/, 'a') 
-      : familyName.endsWith('ius') 
-        ? familyName.replace(/ius$/, 'ia')
-        : familyName;
-        
-    // Add "Minor" for younger daughters sometimes
-    const isMinor = Math.random() > 0.7;
-    return isMinor ? `${femaleName} Minor` : femaleName;
-  }
-};
-
-/**
  * Generate a new child character
  */
 export const generateChild = (
@@ -176,14 +88,6 @@ export const generateChild = (
   // Generate name
   const name = generateRomanName(gender, familyName);
   
-  // Generate base stats influenced by parents
-  const generateBaseStat = (fatherStat: number | CharacterStat, motherStat: number | CharacterStat) => {
-    // 70% influence from parents, 30% random
-    const baseValue = (getStatValue(fatherStat) + getStatValue(motherStat)) / 2;
-    const randomVariation = Math.floor(Math.random() * 40) - 20; // -20 to +20
-    return Math.max(50, Math.min(100, Math.floor(baseValue * 0.7) + randomVariation));
-  };
-
   // Create the child character
   return {
     id: `child-${Date.now()}`,

@@ -10,20 +10,17 @@ export const calculateBonusMalus = (registrationData: RegistrationData): Registr
   
   // Reset stats to base values
   if (familyHead.stats) {
-    if (typeof familyHead.stats.popularity === 'object') {
-      // Use type guard to ensure TypeScript knows we're dealing with objects with a value property
-      if ('value' in familyHead.stats.popularity) {
-        familyHead.stats.popularity.value = 20;
-      }
-      if ('value' in familyHead.stats.oratory) {
-        familyHead.stats.oratory.value = 20;
-      }
-      if ('value' in familyHead.stats.piety) {
-        familyHead.stats.piety.value = 20;
-      }
-      if ('value' in familyHead.stats.martialEducation) {
-        familyHead.stats.martialEducation.value = 20;
-      }
+    if (typeof familyHead.stats.popularity === 'object' && 'value' in familyHead.stats.popularity) {
+      familyHead.stats.popularity.value = 20;
+    }
+    if (typeof familyHead.stats.oratory === 'object' && 'value' in familyHead.stats.oratory) {
+      familyHead.stats.oratory.value = 20;
+    }
+    if (typeof familyHead.stats.piety === 'object' && 'value' in familyHead.stats.piety) {
+      familyHead.stats.piety.value = 20;
+    }
+    if (typeof familyHead.stats.martialEducation === 'object' && 'value' in familyHead.stats.martialEducation) {
+      familyHead.stats.martialEducation.value = 20;
     }
   }
   
