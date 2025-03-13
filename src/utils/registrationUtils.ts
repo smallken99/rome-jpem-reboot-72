@@ -1,5 +1,6 @@
 
 import { RegistrationData } from '@/types/registration';
+import { getStatValue } from '@/utils/characterUtils';
 
 /**
  * Calculate bonuses and maluses based on registration choices
@@ -10,10 +11,12 @@ export const calculateBonusMalus = (registrationData: RegistrationData): Registr
   
   // Reset stats to base values
   if (familyHead.stats) {
-    familyHead.stats.popularity.value = 20;
-    familyHead.stats.oratory.value = 20;
-    familyHead.stats.piety.value = 20;
-    familyHead.stats.martialEducation.value = 20;
+    if (typeof familyHead.stats.popularity === 'object') {
+      familyHead.stats.popularity.value = 20;
+      familyHead.stats.oratory.value = 20;
+      familyHead.stats.piety.value = 20;
+      familyHead.stats.martialEducation.value = 20;
+    }
   }
   
   // Reset wealth to base value
@@ -22,42 +25,78 @@ export const calculateBonusMalus = (registrationData: RegistrationData): Registr
   // Apply origin bonuses/maluses
   if (gens.origin === 'aristocrate') {
     gens.wealth += 75000;
-    if (familyHead.stats) familyHead.stats.popularity.value -= 5;
+    if (familyHead.stats) {
+      if (typeof familyHead.stats.popularity === 'object') {
+        familyHead.stats.popularity.value -= 5;
+      }
+    }
   } else if (gens.origin === 'agricole') {
     // Assume different property quality will be handled elsewhere
-    if (familyHead.stats) familyHead.stats.piety.value -= 5;
+    if (familyHead.stats) {
+      if (typeof familyHead.stats.piety === 'object') {
+        familyHead.stats.piety.value -= 5;
+      }
+    }
   } else if (gens.origin === 'populaire') {
-    if (familyHead.stats) familyHead.stats.popularity.value += 10;
+    if (familyHead.stats) {
+      if (typeof familyHead.stats.popularity === 'object') {
+        familyHead.stats.popularity.value += 10;
+      }
+    }
     gens.reputation -= 5;
   }
   
   // Apply education bonuses/maluses
   if (headEducation === 'rome') {
-    if (familyHead.stats) familyHead.stats.oratory.value += 10;
+    if (familyHead.stats) {
+      if (typeof familyHead.stats.oratory === 'object') {
+        familyHead.stats.oratory.value += 10;
+      }
+    }
     gens.wealth -= 20000;
   } else if (headEducation === 'armee') {
     if (familyHead.stats) {
-      familyHead.stats.martialEducation.value += 10;
-      familyHead.stats.oratory.value -= 5;
+      if (typeof familyHead.stats.martialEducation === 'object') {
+        familyHead.stats.martialEducation.value += 10;
+      }
+      if (typeof familyHead.stats.oratory === 'object') {
+        familyHead.stats.oratory.value -= 5;
+      }
     }
   } else if (headEducation === 'religieux') {
     if (familyHead.stats) {
-      familyHead.stats.piety.value += 10;
-      familyHead.stats.popularity.value -= 5;
+      if (typeof familyHead.stats.piety === 'object') {
+        familyHead.stats.piety.value += 10;
+      }
+      if (typeof familyHead.stats.popularity === 'object') {
+        familyHead.stats.popularity.value -= 5;
+      }
     }
   }
   
   // Apply philosophy bonuses/maluses
   if (gens.philosophy === 'traditionaliste') {
     gens.reputation += 10;
-    if (familyHead.stats) familyHead.stats.oratory.value -= 5;
+    if (familyHead.stats) {
+      if (typeof familyHead.stats.oratory === 'object') {
+        familyHead.stats.oratory.value -= 5;
+      }
+    }
   } else if (gens.philosophy === 'pragmatique') {
     if (familyHead.stats) {
-      familyHead.stats.oratory.value += 10;
-      familyHead.stats.martialEducation.value -= 5;
+      if (typeof familyHead.stats.oratory === 'object') {
+        familyHead.stats.oratory.value += 10;
+      }
+      if (typeof familyHead.stats.martialEducation === 'object') {
+        familyHead.stats.martialEducation.value -= 5;
+      }
     }
   } else if (gens.philosophy === 'opportuniste') {
-    if (familyHead.stats) familyHead.stats.popularity.value += 10;
+    if (familyHead.stats) {
+      if (typeof familyHead.stats.popularity === 'object') {
+        familyHead.stats.popularity.value += 10;
+      }
+    }
     gens.reputation -= 5;
   }
   

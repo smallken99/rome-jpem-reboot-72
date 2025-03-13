@@ -1,6 +1,8 @@
+
 import { Character } from '@/types/character';
 import { romanNames } from '@/components/famille/education/data/romanNames';
 import { Season } from '@/utils/timeSystem';
+import { getStatValue } from '@/utils/characterUtils';
 
 // Constants for birth system
 const BIRTH_CHANCE_PER_YEAR = 0.2; // 20% chance per year for a birth
@@ -90,9 +92,9 @@ export const generateChild = (
   const name = generateRomanName(gender, familyName);
   
   // Generate base stats influenced by parents
-  const generateBaseStat = (fatherStat: number, motherStat: number) => {
+  const generateBaseStat = (fatherStat: number | CharacterStat, motherStat: number | CharacterStat) => {
     // 70% influence from parents, 30% random
-    const baseValue = (fatherStat + motherStat) / 2;
+    const baseValue = (getStatValue(fatherStat) + getStatValue(motherStat)) / 2;
     const randomVariation = Math.floor(Math.random() * 40) - 20; // -20 to +20
     return Math.max(50, Math.min(100, Math.floor(baseValue * 0.7) + randomVariation));
   };
@@ -108,7 +110,7 @@ export const generateChild = (
     stats: {
       popularity: {
         name: 'Popularité',
-        value: generateBaseStat(father.stats.popularity.value, mother.stats.popularity.value),
+        value: generateBaseStat(father.stats.popularity, mother.stats.popularity),
         maxValue: 200,
         icon: 'popularity',
         description: 'Influence naissante dans les cercles sociaux',
@@ -116,7 +118,7 @@ export const generateChild = (
       },
       oratory: {
         name: 'Éloquence',
-        value: generateBaseStat(father.stats.oratory.value, mother.stats.oratory.value),
+        value: generateBaseStat(father.stats.oratory, mother.stats.oratory),
         maxValue: 200,
         icon: 'oratory',
         description: 'Aptitude naturelle à la communication',
@@ -124,7 +126,7 @@ export const generateChild = (
       },
       piety: {
         name: 'Piété',
-        value: generateBaseStat(father.stats.piety.value, mother.stats.piety.value),
+        value: generateBaseStat(father.stats.piety, mother.stats.piety),
         maxValue: 200,
         icon: 'piety',
         description: 'Connexion aux traditions religieuses familiales',
@@ -133,7 +135,7 @@ export const generateChild = (
       martialEducation: {
         name: 'Éducation Martiale',
         value: gender === 'male' ? 
-          generateBaseStat(father.stats.martialEducation.value, 0) : 0,
+          generateBaseStat(father.stats.martialEducation, mother.stats.martialEducation) : 0,
         maxValue: 200,
         icon: 'martialEducation',
         description: gender === 'male' ? 

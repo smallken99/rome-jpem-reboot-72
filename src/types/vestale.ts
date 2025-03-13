@@ -1,5 +1,6 @@
 
 import { Character } from './character';
+import { getStatValue } from '@/utils/characterUtils';
 
 export type VestaleCandidate = {
   id: string;
@@ -25,10 +26,10 @@ export const characterToVestaleCandidate = (character: Character): VestaleCandid
     firstName: firstName || character.name,
     lastName: lastName || "",
     stats: {
-      piety: character.stats.piety?.value || 0,
-      discipline: character.stats.martialEducation?.value || 0,
-      intelligence: character.stats.oratory?.value || 0,
-      charisma: character.stats.popularity?.value || 0
+      piety: getStatValue(character.stats.piety),
+      discipline: getStatValue(character.stats.martialEducation),
+      intelligence: getStatValue(character.stats.oratory),
+      charisma: getStatValue(character.stats.popularity)
     },
     avatar: character.portrait,
     traits: []

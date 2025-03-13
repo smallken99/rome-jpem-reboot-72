@@ -7,6 +7,7 @@ import { Slider } from '@/components/ui/slider';
 import { useRegistration } from '@/context/RegistrationContext';
 import { FamilyHeadEducation } from '@/types/registration';
 import { User, GraduationCap, BookOpen, ShieldCheck } from 'lucide-react';
+import { isCharacterStat, getStatValue, getStatMaxValue, getStatName, getStatColor } from '@/utils/characterUtils';
 
 export const FamilyHeadCreationForm: React.FC = () => {
   const { registrationData, updateRegistrationData } = useRegistration();
@@ -146,13 +147,15 @@ export const FamilyHeadCreationForm: React.FC = () => {
             {registrationData.familyHead.stats && Object.entries(registrationData.familyHead.stats).map(([key, stat]) => (
               <div key={key} className="space-y-1">
                 <div className="flex justify-between items-center">
-                  <Label className="text-sm font-medium">{stat.name}</Label>
-                  <span className="text-sm text-muted-foreground">{stat.value}/{stat.maxValue}</span>
+                  <Label className="text-sm font-medium">{isCharacterStat(stat) ? stat.name : key}</Label>
+                  <span className="text-sm text-muted-foreground">
+                    {getStatValue(stat)}/{getStatMaxValue(stat)}
+                  </span>
                 </div>
                 <div className="h-2.5 w-full bg-muted rounded-full overflow-hidden">
                   <div 
-                    className={`h-full ${stat.color}`} 
-                    style={{ width: `${(stat.value / stat.maxValue) * 100}%` }}
+                    className={`h-full ${getStatColor(stat)}`} 
+                    style={{ width: `${(getStatValue(stat) / getStatMaxValue(stat)) * 100}%` }}
                   />
                 </div>
               </div>
