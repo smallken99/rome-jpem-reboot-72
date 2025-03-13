@@ -32,3 +32,13 @@ export interface Character {
     statBonus?: number;
   };
 }
+
+// Type pour les statistiques de personnage pour la rétrocompatibilité
+export interface CharacterStat {
+  name: string;
+  value: number;
+  maxValue: number;
+  icon: string;
+  description: string;
+  color: string;
+}

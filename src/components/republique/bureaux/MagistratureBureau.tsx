@@ -6,6 +6,7 @@ import { Separator } from '@/components/ui/separator';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
 import { Card } from '@/components/ui/card';
+import { BureauReports } from '../pages/BureauReports';
 
 interface MagistratureBureauProps {
   magistrate: Magistrate;
@@ -69,16 +70,7 @@ export const MagistratureBureau: React.FC<MagistratureBureauProps> = ({
           {children}
         </TabsContent>
         <TabsContent value="rapports" className="mt-4">
-          <RomanCard>
-            <RomanCard.Header>
-              <h3 className="font-cinzel">Rapports du Bureau</h3>
-            </RomanCard.Header>
-            <RomanCard.Content>
-              <p className="text-muted-foreground">
-                Les rapports concernant votre magistrature seront affichés ici.
-              </p>
-            </RomanCard.Content>
-          </RomanCard>
+          <BureauReports magistratureId={magistrate.id} />
         </TabsContent>
         <TabsContent value="decisions" className="mt-4">
           <RomanCard>
