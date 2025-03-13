@@ -5,7 +5,14 @@ import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Calendar, Clock } from 'lucide-react';
 import { useMaitreJeu } from '../context';
-import { GamePhase, Season, PlayerSeason, formatSeasonDisplay, convertSeason } from '../types/common';
+import { 
+  GamePhase, 
+  Season, 
+  PlayerSeason, 
+  formatSeasonDisplay,
+  convertSeason 
+} from '../types/common';
+import { convertSeasonBetweenSystems, areSeasonsEqual } from '@/utils/timeSystem';
 
 export const TimeManagement = () => {
   const { 
@@ -21,14 +28,16 @@ export const TimeManagement = () => {
   const [selectedPhase, setSelectedPhase] = useState<GamePhase>(currentPhase);
   
   const handleAdvanceTime = () => {
-    advanceTime(selectedSeason);
+    // Conversion de PlayerSeason vers Season pour l'appel à advanceTime
+    const mjSeason = convertSeasonBetweenSystems(selectedSeason, 'mj') as Season;
+    advanceTime(mjSeason);
   };
   
   const handleChangePhase = () => {
     changePhase(selectedPhase);
   };
   
-  // Extract available game phases from the GamePhase type
+  // Extraire les phases de jeu disponibles à partir du type GamePhase
   const gamePhases: GamePhase[] = [
     "SENATE", 
     "ACTIONS", 
@@ -49,7 +58,7 @@ export const TimeManagement = () => {
     "ADMINISTRATION"
   ];
   
-  // Get the formatted display for the current season
+  // Obtenir l'affichage formaté pour la saison actuelle
   const getFormattedCurrentSeason = () => {
     const season = typeof currentSeason === 'string' ? currentSeason : 'Ver';
     return formatSeasonDisplay(season);

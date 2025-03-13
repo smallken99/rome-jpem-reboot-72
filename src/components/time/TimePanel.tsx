@@ -1,7 +1,7 @@
 
 import React, { useState } from 'react';
 import { Calendar, Hourglass, SunDim } from 'lucide-react';
-import { useTimeStore } from '@/utils/timeSystem';
+import { useTimeStore, formatRomanSeason, areSeasonsEqual } from '@/utils/timeSystem';
 import { formatSeasonDisplay } from '@/components/maitrejeu/types/common';
 
 interface TimePanelProps {
@@ -12,35 +12,35 @@ export const TimePanel: React.FC<TimePanelProps> = ({ minimal = false }) => {
   const { year, season, advanceTime, getSeason, getYear } = useTimeStore();
   const [timeMessage, setTimeMessage] = useState<string | null>(null);
   
-  // Function to advance time
+  // Fonction pour faire avancer le temps
   const handleAdvanceTime = () => {
-    // Save current state for comparison
+    // Sauvegarder l'état actuel pour comparaison
     const currentSeason = getSeason();
     const currentYear = getYear();
     
-    // Advance time
+    // Faire avancer le temps
     advanceTime();
     
-    // Get the new season after advancing
+    // Obtenir la nouvelle saison après avancement
     const newSeason = getSeason();
     const newYear = getYear();
     
-    // If season changed
+    // Si la saison a changé
     if (currentSeason !== newSeason) {
-      // Display a new season message
+      // Afficher un message de nouvelle saison
       setTimeMessage(`Nouvelle saison: ${formatSeasonDisplay(newSeason)}`);
       
-      // If we've completed a full year
+      // Si nous avons complété une année complète
       if (newYear > currentYear) {
         setTimeMessage(`Nouvelle année: ${newYear} AUC`);
       }
       
-      // Clear the message after 3 seconds
+      // Effacer le message après 3 secondes
       setTimeout(() => setTimeMessage(null), 3000);
     }
   };
   
-  // Get the icon and color for the season
+  // Obtenir l'icône et la couleur pour la saison
   const getSeasonInfo = () => {
     const currentSeason = getSeason();
     

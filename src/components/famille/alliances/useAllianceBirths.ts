@@ -2,7 +2,7 @@
 import { useState, useEffect } from 'react';
 import { useToast } from '@/components/ui/use-toast';
 import { Character } from '@/types/character';
-import { useTimeStore } from '@/utils/timeSystem';
+import { useTimeStore, type Season } from '@/utils/timeSystem';
 import { checkAllianceForBirths } from './birthUtils';
 import { familyAlliances } from '@/data/alliances';
 
@@ -13,17 +13,17 @@ export const useAllianceBirths = (
   const [lastBirthYear, setLastBirthYear] = useState<number>(0);
   const { toast } = useToast();
   
-  // Get current time from the store
+  // Obtenir l'heure actuelle depuis le store
   const timeStore = useTimeStore();
   const { season } = timeStore;
   const year = timeStore.getYear();
   
-  // Filter alliances to only show active ones
+  // Filtrer les alliances pour n'afficher que les actives
   const activeAlliances = familyAlliances.filter(alliance => alliance.status === 'actif');
   
-  // Function to check for births
+  // Fonction pour vérifier les naissances
   const checkForBirths = () => {
-    // Check each active alliance for potential births
+    // Vérifier chaque alliance active pour des naissances potentielles
     activeAlliances.forEach(alliance => {
       const birthOccurred = checkAllianceForBirths(
         alliance,
@@ -31,12 +31,12 @@ export const useAllianceBirths = (
         season,
         year,
         (newChild) => {
-          // Update the parent component about the new child
+          // Mettre à jour le composant parent à propos du nouvel enfant
           if (onChildBirth) {
             onChildBirth(newChild);
           }
           
-          // Show a toast notification
+          // Afficher une notification toast
           toast({
             title: "Une naissance dans la famille!",
             description: `${alliance.spouse} a donné naissance à ${newChild.name}.`,
@@ -44,22 +44,22 @@ export const useAllianceBirths = (
           });
         },
         (birthYear) => {
-          // Update the last birth year
+          // Mettre à jour l'année de dernière naissance
           setLastBirthYear(birthYear);
         }
       );
     });
   };
 
-  // Set up time advancement (for demonstration)
+  // Configurer l'avancement du temps (pour démonstration)
   useEffect(() => {
-    // For demo purposes, we're advancing time every 15 seconds
-    // In a real game, this might be tied to game actions or a play/pause system
+    // À des fins de démonstration, nous avançons le temps toutes les 15 secondes
+    // Dans un vrai jeu, cela pourrait être lié aux actions du jeu ou à un système de lecture/pause
     const timeAdvanceInterval = setInterval(() => {
       timeStore.advanceTime();
-      // Check for births when a year changes
+      // Vérifier les naissances lorsqu'une année change
       checkForBirths();
-    }, 15000); // Advance time every 15 seconds
+    }, 15000); // Faire avancer le temps toutes les 15 secondes
     
     return () => clearInterval(timeAdvanceInterval);
   }, [timeStore]);
