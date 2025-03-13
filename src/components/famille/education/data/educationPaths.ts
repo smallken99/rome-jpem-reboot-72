@@ -1,4 +1,3 @@
-
 import { EducationPath } from '../types/educationTypes';
 import { 
   BookOpen, 
@@ -304,4 +303,66 @@ export const getEducationPathById = (id: string) => {
 export const getSpecialtiesByPath = (pathId: string): string[] => {
   const path = getEducationPathById(pathId);
   return path && path.specialties ? path.specialties : [];
+};
+
+// Fonction pour obtenir les spécialités en fonction du type d'éducation
+export const getSpecialtiesByPath = (educationType: string): string[] => {
+  switch (educationType) {
+    case 'militaire':
+      return [
+        'Combat au corps à corps',
+        'Stratégie militaire',
+        'Commandement',
+        'Équitation de guerre',
+        'Tactiques légionnaires',
+        'Siège et fortifications'
+      ];
+    case 'politique':
+      return [
+        'Rhétorique',
+        'Droit romain',
+        'Négociation',
+        'Gestion administrative',
+        'Diplomatie',
+        'Histoire politique'
+      ];
+    case 'religieuse':
+      return [
+        'Rituels sacrés',
+        'Interprétation des présages',
+        'Droit pontifical',
+        'Mythologie',
+        'Tradition ancestrale',
+        'Cérémonies officielles'
+      ];
+    case 'philosophique':
+      return [
+        'Stoïcisme',
+        'Épicurisme',
+        'Logique',
+        'Éthique',
+        'Métaphysique',
+        'Rhétorique philosophique'
+      ];
+    case 'artistique':
+      return [
+        'Poésie',
+        'Sculpture',
+        'Musique',
+        'Théâtre',
+        'Littérature',
+        'Calligraphie'
+      ];
+    case 'économique':
+      return [
+        'Gestion agricole',
+        'Commerce maritime',
+        'Négociation commerciale',
+        'Comptabilité',
+        'Exploitation minière',
+        'Investissements immobiliers'
+      ];
+    default:
+      return [];
+  }
 };
