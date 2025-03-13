@@ -16,8 +16,8 @@ export const checkAllianceForBirths = (
   const wife = characters.find(char => char.name === alliance.spouse);
   
   if (husband && wife) {
-    // Check if a birth occurs, passing the current season
-    if (checkForBirth(wife, season)) {
+    // Check if a birth occurs, passing both husband and wife plus the current season
+    if (checkForBirth(wife, husband, season)) {
       // Generate a child
       const newChild = generateChild(husband, wife);
       
