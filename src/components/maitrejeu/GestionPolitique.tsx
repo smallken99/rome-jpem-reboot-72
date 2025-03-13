@@ -3,7 +3,6 @@ import React, { useState } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useMaitreJeu } from './context';
 import { Loi } from './types/lois';
-import { LoiType } from './types/lois';
 import { LoisList } from './components/lois/LoisList';
 import { LoiForm } from './components/lois/LoiForm';
 import { ElectionPlanner } from './components/elections/ElectionPlanner';
@@ -15,7 +14,7 @@ interface LoiFormData {
   titre: string;
   description: string;
   proposeur: string;
-  type: LoiType;
+  type: string;
   catégorie: string;
   importance: 'majeure' | 'normale' | 'mineure';
 }
@@ -71,7 +70,7 @@ export const GestionPolitique = () => {
     setShowAddLoi(false);
   };
   
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>, field: keyof LoiFormData) => {
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>, field: keyof LoiFormData) => {
     setNewLoi({ ...newLoi, [field]: e.target.value });
   };
   

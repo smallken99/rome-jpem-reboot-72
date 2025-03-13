@@ -15,15 +15,21 @@ export const TresorTable: React.FC = () => {
   const economicTransactions = economy.transactions.slice(0, 5);
   
   // Créer une structure de données formatée pour l'affichage
-  const transactions = economicTransactions.map((transaction, index) => ({
-    id: transaction.id,
-    date: formatRomanDate(transaction.date),
-    description: transaction.description,
-    montant: `${transaction.type === 'income' ? '+' : '-'}${transaction.amount.toLocaleString()} As`,
-    categorie: transaction.category,
-    type: transaction.type === 'income' ? 'revenu' : 'depense',
-    approuvePar: "Quintus Fabius Maximus"
-  })) || [
+  const transactions = economicTransactions.map((transaction, index) => {
+    const transactionDate = transaction.date instanceof Date ? 
+      transaction.date : 
+      new Date(transaction.date);
+      
+    return {
+      id: transaction.id,
+      date: formatRomanDate(transactionDate),
+      description: transaction.description,
+      montant: `${transaction.type === 'income' ? '+' : '-'}${transaction.amount.toLocaleString()} As`,
+      categorie: transaction.category,
+      type: transaction.type === 'income' ? 'revenu' : 'depense',
+      approuvePar: "Quintus Fabius Maximus"
+    };
+  }) || [
     { 
       id: 1,
       date: "XV Kal. Mar.",

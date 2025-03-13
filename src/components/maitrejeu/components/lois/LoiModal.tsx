@@ -23,6 +23,16 @@ export const LoiModal: React.FC<LoiModalProps> = ({
     onClose();
   };
   
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>, field: string) => {
+    // This is now just a placeholder as the state is managed in parent components
+    console.log('Input changed', field, e.target.value);
+  };
+
+  const handleSelectChange = (value: string, field: string) => {
+    // This is now just a placeholder as the state is managed in parent components
+    console.log('Select changed', field, value);
+  };
+  
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="max-w-lg">
@@ -40,11 +50,12 @@ export const LoiModal: React.FC<LoiModalProps> = ({
             type: 'politique',
             importance: 'normale'
           }}
-          onSubmit={handleSave}
           onChange={{
-            handleInputChange: (e, field) => {},
-            handleSelectChange: (value, field) => {}
+            handleInputChange,
+            handleSelectChange
           }}
+          onSubmit={handleSave}
+          onCancel={onClose}
         />
         
         <DialogFooter>

@@ -16,26 +16,29 @@ export interface LoiFormProps {
     catégorie?: string;
     importance?: 'mineure' | 'normale' | 'majeure';
   };
-  handleInputChange: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>, field: string) => void;
-  handleSelectChange: (value: string, field: string) => void;
-  handleAddLoi: () => void;
+  onChange: {
+    handleInputChange: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>, field: string) => void;
+    handleSelectChange: (value: string, field: string) => void;
+  };
+  onSubmit: (data: any) => void;
   onCancel: () => void;
 }
 
 export const LoiForm: React.FC<LoiFormProps> = ({
   loi,
-  handleInputChange,
-  handleSelectChange,
-  handleAddLoi,
+  onChange,
+  onSubmit,
   onCancel
 }) => {
+  const { handleInputChange, handleSelectChange } = onChange;
+  
   return (
     <Card className="my-4">
       <CardHeader>
         <CardTitle>Proposer une nouvelle loi</CardTitle>
       </CardHeader>
       <CardContent>
-        <form onSubmit={(e) => { e.preventDefault(); handleAddLoi(); }} className="space-y-4">
+        <form onSubmit={(e) => { e.preventDefault(); onSubmit(loi); }} className="space-y-4">
           <div>
             <label htmlFor="titre" className="block text-sm font-medium mb-1">Titre</label>
             <Input

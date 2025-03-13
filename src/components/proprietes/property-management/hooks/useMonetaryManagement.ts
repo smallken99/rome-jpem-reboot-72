@@ -55,7 +55,7 @@ export const useMonetaryManagement = () => {
     // Convertir les transactions économiques au format attendu par ce hook
     const formattedTransactions: Transaction[] = economicTransactions.map(et => ({
       id: et.id,
-      date: et.date,
+      date: new Date(et.date instanceof Date ? et.date : new Date()),
       amount: et.amount,
       recipient: et.description.split(':')[0] || 'Inconnu',
       description: et.description.split(':')[1]?.trim() || et.description,
@@ -96,15 +96,13 @@ export const useMonetaryManagement = () => {
       return economy.receivePayment(
         transaction.amount,
         transaction.recipient,
-        transaction.category,
-        transaction.description
+        transaction.category
       );
     } else {
       return economy.makePayment(
         transaction.amount,
         transaction.recipient,
-        transaction.category,
-        transaction.description
+        transaction.category
       );
     }
   };
@@ -127,12 +125,13 @@ export const useMonetaryManagement = () => {
       throw new Error('Destinataire non trouvé');
     }
     
-    return economy.makePayment(
+    const success = economy.makePayment(
       amount,
       recipient.name,
-      category,
-      description
+      category
     );
+    
+    return success;
   };
   
   return {

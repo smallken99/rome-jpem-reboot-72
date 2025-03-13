@@ -49,7 +49,7 @@ export function useBuildingMaintenance() {
       updateBuildingProperty(buildingId, 'lastMaintenance', new Date());
       
       // Deduct maintenance cost using economy system
-      economy.makePayment(
+      const success = economy.makePayment(
         building.maintenanceCost,
         "Service d'entretien",
         "Maintenance",

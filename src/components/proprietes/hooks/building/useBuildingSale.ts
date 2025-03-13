@@ -43,7 +43,7 @@ export function useBuildingSale() {
       removeBuilding(buildingId);
       
       // Add sale amount via economy system
-      economy.receivePayment(
+      const success = economy.receivePayment(
         estimatedValue,
         "Marché immobilier",
         "Immobilier",
