@@ -1,137 +1,115 @@
 
 import React, { useState, useEffect } from 'react';
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogFooter,
-} from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
-import { 
-  MembreFamille, 
-  FamilleInfo, 
-  StatutFamilial, 
-  StatutMatrimonial, 
-  GenreFamille 
-} from '../../types';
+import { Label } from '@/components/ui/label';
+import { MembreFamille, GenreFamille, StatutFamilial, StatutMatrimonial, FamilleInfo } from '../../types/familles';
 
 export interface MembreFamilleModalProps {
   isOpen: boolean;
   onClose: () => void;
-  initialData?: MembreFamille;
+  selectedFamilleId: string;
   familles: FamilleInfo[];
-  selectedFamilleId?: string;
   onSave: (data: any) => void;
+  membre?: MembreFamille;
 }
 
 export const MembreFamilleModal: React.FC<MembreFamilleModalProps> = ({
   isOpen,
   onClose,
-  initialData,
-  familles,
   selectedFamilleId,
+  familles,
   onSave,
+  membre
 }) => {
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<MembreFamille>({
     id: '',
     nom: '',
     prenom: '',
     age: 30,
-    genre: 'male' as GenreFamille,
-    statut: 'Patricien' as StatutFamilial,
-    statutMatrimonial: 'Célibataire' as StatutMatrimonial,
-    familleId: selectedFamilleId || '',
-    role: '',
+    genre: 'male',
+    statut: 'Patricien',
+    statutMatrimonial: 'Célibataire',
+    familleId: selectedFamilleId,
+    role: 'Membre',
     education: '',
-    popularite: 50,
-    piete: 50,
+    popularite: 0,
+    piete: 0,
     joueur: false,
-    description: '',
+    description: ''
   });
 
   useEffect(() => {
-    if (initialData) {
+    if (membre) {
       setFormData({
-        ...initialData,
-        familleId: initialData.familleId || selectedFamilleId || '',
+        ...membre,
+        familleId: selectedFamilleId || membre.familleId || ''
       });
-    } else if (selectedFamilleId) {
-      setFormData((prev) => ({
+    } else {
+      setFormData(prev => ({
         ...prev,
-        familleId: selectedFamilleId,
-        // Si une famille est sélectionnée, récupérer son statut pour le membre
-        statut: familles.find((f) => f.id === selectedFamilleId)?.statut || 'Patricien',
+        familleId: selectedFamilleId
       }));
     }
-  }, [initialData, selectedFamilleId, familles]);
+  }, [membre, selectedFamilleId]);
 
   const handleChange = (field: string, value: any) => {
-    setFormData((prev) => ({ ...prev, [field]: value }));
+    setFormData(prev => ({
+      ...prev,
+      [field]: value
+    }));
   };
 
   const handleSubmit = () => {
     onSave(formData);
+    onClose();
   };
 
   return (
-    <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-[600px]">
+    <Dialog open={isOpen} onOpenChange={isOpen => !isOpen && onClose()}>
+      <DialogContent className="sm:max-w-[500px] max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>
-            {initialData ? 'Modifier un membre' : 'Ajouter un membre'}
-          </DialogTitle>
+          <DialogTitle>{membre ? 'Modifier un membre' : 'Ajouter un membre'}</DialogTitle>
         </DialogHeader>
 
         <div className="grid gap-4 py-4">
-          <div className="grid grid-cols-2 gap-4">
-            <div className="flex flex-col gap-2">
+          <div className="grid grid-cols-2 gap-3">
+            <div className="space-y-2">
               <Label htmlFor="prenom">Prénom</Label>
               <Input
                 id="prenom"
                 value={formData.prenom}
-                onChange={(e) => handleChange('prenom', e.target.value)}
-                placeholder="Ex: Marcus"
+                onChange={e => handleChange('prenom', e.target.value)}
               />
             </div>
-            <div className="flex flex-col gap-2">
+            <div className="space-y-2">
               <Label htmlFor="nom">Nom</Label>
               <Input
                 id="nom"
                 value={formData.nom}
-                onChange={(e) => handleChange('nom', e.target.value)}
-                placeholder="Ex: Aurelius"
+                onChange={e => handleChange('nom', e.target.value)}
               />
             </div>
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
-            <div className="flex flex-col gap-2">
+          <div className="grid grid-cols-2 gap-3">
+            <div className="space-y-2">
               <Label htmlFor="age">Âge</Label>
               <Input
                 id="age"
                 type="number"
                 value={formData.age}
-                onChange={(e) => handleChange('age', parseInt(e.target.value))}
-                min="0"
-                max="100"
+                onChange={e => handleChange('age', parseInt(e.target.value))}
               />
             </div>
-            <div className="flex flex-col gap-2">
+            <div className="space-y-2">
               <Label htmlFor="genre">Genre</Label>
               <Select
                 value={formData.genre}
-                onValueChange={(value) => handleChange('genre', value as GenreFamille)}
+                onValueChange={value => handleChange('genre', value)}
               >
                 <SelectTrigger id="genre">
                   <SelectValue placeholder="Sélectionner un genre" />
@@ -144,12 +122,12 @@ export const MembreFamilleModal: React.FC<MembreFamilleModalProps> = ({
             </div>
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
-            <div className="flex flex-col gap-2">
+          <div className="grid grid-cols-2 gap-3">
+            <div className="space-y-2">
               <Label htmlFor="statut">Statut</Label>
               <Select
                 value={formData.statut}
-                onValueChange={(value) => handleChange('statut', value as StatutFamilial)}
+                onValueChange={value => handleChange('statut', value)}
               >
                 <SelectTrigger id="statut">
                   <SelectValue placeholder="Sélectionner un statut" />
@@ -160,11 +138,11 @@ export const MembreFamilleModal: React.FC<MembreFamilleModalProps> = ({
                 </SelectContent>
               </Select>
             </div>
-            <div className="flex flex-col gap-2">
-              <Label htmlFor="statutMatrimonial">Statut matrimonial</Label>
+            <div className="space-y-2">
+              <Label htmlFor="statutMatrimonial">Statut Matrimonial</Label>
               <Select
                 value={formData.statutMatrimonial}
-                onValueChange={(value) => handleChange('statutMatrimonial', value as StatutMatrimonial)}
+                onValueChange={value => handleChange('statutMatrimonial', value)}
               >
                 <SelectTrigger id="statutMatrimonial">
                   <SelectValue placeholder="Sélectionner un statut" />
@@ -172,98 +150,79 @@ export const MembreFamilleModal: React.FC<MembreFamilleModalProps> = ({
                 <SelectContent>
                   <SelectItem value="Célibataire">Célibataire</SelectItem>
                   <SelectItem value="Marié">Marié</SelectItem>
-                  <SelectItem value="Veuf">Veuf</SelectItem>
+                  <SelectItem value="Veuf">Veuf/Veuve</SelectItem>
                   <SelectItem value="Divorcé">Divorcé</SelectItem>
                 </SelectContent>
               </Select>
             </div>
           </div>
 
-          <div className="flex flex-col gap-2">
-            <Label htmlFor="familleId">Famille</Label>
+          <div className="space-y-2">
+            <Label htmlFor="role">Rôle</Label>
+            <Input
+              id="role"
+              value={formData.role}
+              onChange={e => handleChange('role', e.target.value)}
+            />
+          </div>
+
+          <div className="grid grid-cols-2 gap-3">
+            <div className="space-y-2">
+              <Label htmlFor="popularite">Popularité</Label>
+              <Input
+                id="popularite"
+                type="number"
+                value={formData.popularite}
+                onChange={e => handleChange('popularite', parseInt(e.target.value))}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="piete">Piété</Label>
+              <Input
+                id="piete"
+                type="number"
+                value={formData.piete}
+                onChange={e => handleChange('piete', parseInt(e.target.value))}
+              />
+            </div>
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="education">Éducation</Label>
+            <Input
+              id="education"
+              value={formData.education}
+              onChange={e => handleChange('education', e.target.value)}
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="description">Description</Label>
+            <Textarea
+              id="description"
+              value={formData.description}
+              onChange={e => handleChange('description', e.target.value)}
+              rows={3}
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="famille">Famille</Label>
             <Select
               value={formData.familleId}
-              onValueChange={(value) => handleChange('familleId', value)}
-              disabled={!!selectedFamilleId}
+              onValueChange={value => handleChange('familleId', value)}
             >
-              <SelectTrigger id="familleId">
+              <SelectTrigger id="famille">
                 <SelectValue placeholder="Sélectionner une famille" />
               </SelectTrigger>
               <SelectContent>
-                {familles.map((famille) => (
+                {familles.map(famille => (
                   <SelectItem key={famille.id} value={famille.id}>
                     {famille.nom}
                   </SelectItem>
                 ))}
               </SelectContent>
             </Select>
-          </div>
-
-          <div className="flex flex-col gap-2">
-            <Label htmlFor="role">Rôle</Label>
-            <Input
-              id="role"
-              value={formData.role}
-              onChange={(e) => handleChange('role', e.target.value)}
-              placeholder="Ex: Pater Familias, Fils aîné..."
-            />
-          </div>
-
-          <div className="flex flex-col gap-2">
-            <Label htmlFor="education">Éducation</Label>
-            <Input
-              id="education"
-              value={formData.education}
-              onChange={(e) => handleChange('education', e.target.value)}
-              placeholder="Ex: Rhétorique, Droit..."
-            />
-          </div>
-
-          <div className="grid grid-cols-2 gap-4">
-            <div className="flex flex-col gap-2">
-              <Label htmlFor="popularite">Popularité ({formData.popularite})</Label>
-              <Input
-                id="popularite"
-                type="range"
-                min="0"
-                max="100"
-                value={formData.popularite}
-                onChange={(e) => handleChange('popularite', parseInt(e.target.value))}
-              />
-            </div>
-            <div className="flex flex-col gap-2">
-              <Label htmlFor="piete">Piété ({formData.piete})</Label>
-              <Input
-                id="piete"
-                type="range"
-                min="0"
-                max="100"
-                value={formData.piete}
-                onChange={(e) => handleChange('piete', parseInt(e.target.value))}
-              />
-            </div>
-          </div>
-
-          <div className="flex items-center gap-2">
-            <Input
-              id="joueur"
-              type="checkbox"
-              checked={formData.joueur}
-              onChange={(e) => handleChange('joueur', e.target.checked)}
-              className="w-4 h-4"
-            />
-            <Label htmlFor="joueur">Personnage joueur</Label>
-          </div>
-
-          <div className="flex flex-col gap-2">
-            <Label htmlFor="description">Description</Label>
-            <Textarea
-              id="description"
-              value={formData.description}
-              onChange={(e) => handleChange('description', e.target.value)}
-              placeholder="Description du membre..."
-              rows={4}
-            />
           </div>
         </div>
 
@@ -272,7 +231,7 @@ export const MembreFamilleModal: React.FC<MembreFamilleModalProps> = ({
             Annuler
           </Button>
           <Button onClick={handleSubmit}>
-            {initialData ? 'Mettre à jour' : 'Ajouter'}
+            {membre ? 'Mettre à jour' : 'Ajouter'}
           </Button>
         </DialogFooter>
       </DialogContent>

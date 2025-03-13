@@ -57,3 +57,22 @@ export interface Loi {
   commentaires?: string;
   nom?: string;
 }
+
+// Interface pour le formulaire de création/édition d'une loi
+export interface LoiFormData {
+  titre: string;
+  nom?: string;
+  description: string;
+  type: LoiType;
+  catégorie?: string;
+  proposeur: string;
+  état: LoiStatut;
+  importance: 'mineure' | 'normale' | 'majeure';
+  effets: Record<string, any> | string[];
+  clauses?: Clause[];
+  impacts?: Impact[];
+  votesPositifs: number;
+  votesNégatifs: number;
+  votesAbstention: number;
+  commentaires?: string;
+}

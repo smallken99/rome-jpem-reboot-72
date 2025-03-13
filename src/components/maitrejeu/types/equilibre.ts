@@ -14,16 +14,16 @@ export interface Equilibre {
   optimates: number;             // Pourcentage (0-100)
   moderates: number;             // Pourcentage (0-100)
   
-  // Autres propriétés
-  population: number;            // Compatibilité
-  armée: number;                 // Compatibilité
-  économie: number;              // Compatibilité
-  morale: number;                // Compatibilité
-  loyauté: number;               // Compatibilité
-  patriciens: number;            // Compatibilité
-  plébéiens: number;             // Compatibilité
-  populares: number;             // Alias pour populaires (compatibilité)
-  neutrales: number;             // Compatibilité
+  // Autres propriétés pour compatibilité
+  population: number;            
+  armée: number;                 
+  économie: number;              
+  morale: number;                
+  loyauté: number;               
+  patriciens: number;            
+  plébéiens: number;             
+  populares: number;             // Alias pour populaires
+  neutrales: number;             
   historique?: any[];            // Historique des changements
   
   notes?: string;                // Notes sur l'état actuel
@@ -42,4 +42,3 @@ export interface PoliticalEvent {
   year?: number;        // Pour compatibilité avec certains composants
   season?: string;      // Pour compatibilité avec certains composants
 }
-

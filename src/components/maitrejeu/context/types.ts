@@ -1,4 +1,3 @@
-
 import { 
   SenateurJouable, 
   Province, 
@@ -62,6 +61,7 @@ export interface MaitreJeuContextType {
   equilibre: Equilibre | null;
   setEquilibre: React.Dispatch<React.SetStateAction<Equilibre | null>>;
   updateEquilibre: (updates: Partial<Equilibre>) => void;
+  updateFactionBalance: (populaires: number, optimates: number, moderates: number) => void;
   
   // Contexte des clients
   clients: Client[];

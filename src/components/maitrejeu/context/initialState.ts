@@ -471,7 +471,7 @@ export const initialEquilibre: Equilibre | null = {
   loyauté: 75,
   patriciens: 40,
   plébéiens: 60,
-  populaires: 35,
+  populares: 35, // Même valeur que populaires
   neutrales: 25,
   historique: []
 };

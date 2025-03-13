@@ -1,44 +1,65 @@
 
 import React from 'react';
-import { useTimeStore } from '@/utils/timeSystem';
-import { formatSeasonDisplay } from '@/components/maitrejeu/types/common';
-import { Card, CardContent } from '@/components/ui/card';
-import { CalendarDays } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { useGameTime } from '@/hooks/useGameTime';
+import { formatSeasonDisplay } from '@/utils/timeSystem';
+import { CalendarIcon, ArrowRightIcon, ClockIcon } from 'lucide-react';
 
 interface TimePanelProps {
   minimal?: boolean;
 }
 
 export const TimePanel: React.FC<TimePanelProps> = ({ minimal = false }) => {
-  const timeStore = useTimeStore();
-  // Extraire les propriétés de manière sécurisée
-  const year = timeStore.year || timeStore.currentDate?.year;
-  const season = timeStore.season || timeStore.currentDate?.season;
-  // Ces propriétés peuvent ne pas exister dans toutes les implémentations
-  const day = timeStore.day || timeStore.currentDate?.day || 1;
-  const phase = timeStore.phase || timeStore.currentPhase || "SENAT";
-  
+  const { 
+    currentYear, 
+    currentSeason,
+    currentPhase,
+    advanceTime
+  } = useGameTime();
+
+  // Format phase display
+  const formatPhase = (phase: string) => {
+    return phase.charAt(0).toUpperCase() + phase.slice(1).toLowerCase();
+  };
+
   if (minimal) {
     return (
-      <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
-        <CalendarDays className="h-3.5 w-3.5" />
-        <span>An {year} - {formatSeasonDisplay(season)}</span>
+      <div className="flex items-center space-x-2 text-sm">
+        <CalendarIcon className="h-4 w-4" />
+        <span className="font-medium">An {currentYear} - {formatSeasonDisplay(currentSeason)}</span>
       </div>
     );
   }
-  
+
   return (
-    <Card className="border-muted/30">
-      <CardContent className="p-4 flex items-center justify-between">
-        <div className="flex flex-col">
-          <span className="text-xs text-muted-foreground">Date actuelle</span>
-          <span className="font-medium">An {year} - {formatSeasonDisplay(season)}</span>
-          <span className="text-xs text-muted-foreground mt-1">Jour {day}</span>
-        </div>
-        
-        <div className="flex flex-col items-end">
-          <span className="text-xs text-muted-foreground">Phase</span>
-          <span className="font-medium">{phase}</span>
+    <Card>
+      <CardHeader className="pb-2">
+        <CardTitle className="text-lg">Calendrier Romain</CardTitle>
+      </CardHeader>
+      <CardContent>
+        <div className="space-y-3">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-2">
+              <CalendarIcon className="h-5 w-5 text-muted-foreground" />
+              <span className="font-medium">An {currentYear}</span>
+            </div>
+            <div className="bg-primary/10 px-2 py-1 rounded text-primary font-medium">
+              {formatSeasonDisplay(currentSeason)}
+            </div>
+          </div>
+          
+          <div className="flex items-center space-x-2">
+            <ClockIcon className="h-5 w-5 text-muted-foreground" />
+            <span className="font-medium">Phase: {formatPhase(currentPhase)}</span>
+          </div>
+          
+          <Button 
+            onClick={() => advanceTime()} 
+            className="w-full flex items-center justify-center gap-1"
+          >
+            Avancer <ArrowRightIcon className="h-4 w-4" />
+          </Button>
         </div>
       </CardContent>
     </Card>

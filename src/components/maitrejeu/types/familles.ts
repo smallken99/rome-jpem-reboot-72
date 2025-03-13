@@ -1,61 +1,12 @@
 
 // Types pour la gestion des familles
 
-export type StatutFamilial = "Patricien" | "Plébéien";
-export type StatutMatrimonial = "Célibataire" | "Marié" | "Veuf" | "Divorcé";
-export type GenreFamille = "male" | "female";
-export type RelationType = "Père" | "Mère" | "Fils" | "Fille" | "Frère" | "Soeur" | "Époux" | "Épouse" | "Oncle" | "Tante" | "Cousin" | "Cousine" | "Neveu" | "Nièce" | "Grand-père" | "Grand-mère";
+export type StatutFamilial = 'Patricien' | 'Plébéien';
+export type StatutMatrimonial = 'Célibataire' | 'Marié' | 'Veuf' | 'Divorcé';
+export type GenreFamille = 'male' | 'female';
+export type RelationType = 'Père' | 'Mère' | 'Fils' | 'Fille' | 'Frère' | 'Soeur' | 'Époux' | 'Épouse' | 'Cousin' | 'Oncle' | 'Tante' | 'Neveu' | 'Nièce';
 
-// Interface pour un membre de la famille
-export interface MembreFamille {
-  id: string;
-  nom: string;
-  prenom: string;
-  age: number;
-  genre: GenreFamille;
-  statut: StatutFamilial;
-  statutMatrimonial: StatutMatrimonial;
-  familleId?: string;     // ID de la famille à laquelle appartient le membre
-  role?: string;
-  pere?: string;          // ID du père
-  mere?: string;          // ID de la mère
-  senateurId?: string;    // Référence à un sénateur si applicable
-  education?: string;
-  popularite?: number;
-  piete?: number;
-  joueur?: boolean;
-  description?: string;
-  portrait?: string;
-}
-
-// Interface pour une alliance entre familles
-export interface FamilleAlliance {
-  id: string;
-  famille1Id: string;
-  famille2Id: string;
-  type: "matrimoniale" | "politique" | "commerciale" | "militaire";
-  dateDebut: string;
-  dateFin?: string;
-  termes: string;
-  benefices: string[];
-  statut: "active" | "inactive" | "en négociation" | "rompue";
-  membres: string[]; // IDs des membres impliqués
-}
-
-// Interface pour un mariage
-export interface MariageInfo {
-  id: string;
-  epoux: string; // ID du membre masculin
-  epouse: string; // ID du membre féminin
-  familleEpoux: string; // ID de la famille de l'époux
-  familleEpouse: string; // ID de la famille de l'épouse
-  dot: number;
-  date: string;
-  statut: "prévu" | "actif" | "rompu" | "veuvage";
-  contrat?: string;
-}
-
-// Interface principale pour une famille
+// Interface pour les informations d'une famille
 export interface FamilleInfo {
   id: string;
   nom: string;
@@ -64,19 +15,74 @@ export interface FamilleInfo {
   prestige: number;
   influence: number;
   richesse: number;
-  description?: string;
+  description: string;
   devise?: string;
   blason?: string;
-  chefId?: string; // ID du pater familias
-  matrone?: string; // ID de la mater familias
-  membres: string[]; // IDs des membres
-  alliances: string[]; // IDs des alliances
-  histoireId?: string; // Référence à l'histoire de la famille
+  membres: string[];
+  alliances: string[];
+  chefId?: string;
+  matrone?: string;
   couleurPrimaire?: string;
   couleurSecondaire?: string;
 }
 
-// Types pour les opérations CRUD
+// Interface pour un membre de famille
+export interface MembreFamille {
+  id: string;
+  nom: string;
+  prenom: string;
+  age: number;
+  genre: GenreFamille;
+  statut: StatutFamilial;
+  statutMatrimonial: StatutMatrimonial;
+  familleId?: string;
+  role: string;
+  pere?: string;
+  mere?: string;
+  senateurId?: string;
+  education: string;
+  popularite: number;
+  piete: number;
+  joueur: boolean;
+  description: string;
+  portrait?: string;
+}
+
+// Interface pour une alliance entre familles
+export interface FamilleAlliance {
+  id: string;
+  famille1Id: string;
+  famille2Id: string;
+  type: 'politique' | 'matrimoniale' | 'commerciale' | 'militaire';
+  dateDebut: string;
+  dateFin?: string;
+  termes: string;
+  benefices: string[];
+  statut: 'active' | 'inactive' | 'en négociation' | 'rompue';
+  membres: string[];
+}
+
+// Interface pour les informations d'un mariage
+export interface MariageInfo {
+  id: string;
+  epoux: string;
+  epouse: string;
+  familleEpoux: string;
+  familleEpouse: string;
+  dot: number;
+  date: string;
+  statut: 'actif' | 'rompu' | 'veuvage' | 'prévu';
+}
+
+// Interface pour les relations familiales
+export interface FamilleRelation {
+  id: string;
+  membre1Id: string;
+  membre2Id: string;
+  type: RelationType;
+}
+
+// Interface pour le filtrage des familles
 export interface FamilleFilter {
   nom?: string;
   statut?: StatutFamilial;
@@ -84,28 +90,53 @@ export interface FamilleFilter {
   prestigeMax?: number;
 }
 
+// Interface pour le filtrage des membres
 export interface MembreFamilleFilter {
   nom?: string;
-  age?: {min?: number, max?: number};
   genre?: GenreFamille;
   statut?: StatutFamilial;
   statutMatrimonial?: StatutMatrimonial;
+  age?: {
+    min?: number;
+    max?: number;
+  };
   familleId?: string;
 }
 
-export interface FamilleCreationData extends Omit<FamilleInfo, "id" | "membres" | "alliances"> {
-  chefInitial?: Omit<MembreFamille, "id" | "pere" | "mere" | "senateurId">;
-  matroneInitiale?: Omit<MembreFamille, "id" | "pere" | "mere" | "senateurId">;
+// Interface pour la création d'une famille
+export interface FamilleCreationData {
+  nom: string;
+  gens: string;
+  statut: StatutFamilial;
+  prestige: number;
+  influence: number;
+  richesse: number;
+  description: string;
+  devise?: string;
+  blason?: string;
+  couleurPrimaire?: string;
+  couleurSecondaire?: string;
+  chefInitial?: Omit<MembreFamilleCreationData, 'familleId'>;
+  matroneInitiale?: Omit<MembreFamilleCreationData, 'familleId'>;
 }
 
-export interface MembreFamilleCreationData extends Omit<MembreFamille, "id"> {
-  familleId: string;
-}
-
-export interface FamilleRelation {
-  id: string;
-  membre1Id: string;
-  membre2Id: string;
-  type: RelationType;
+// Interface pour la création d'un membre
+export interface MembreFamilleCreationData {
+  nom: string;
+  prenom: string;
+  age: number;
+  genre: GenreFamille;
+  statut: StatutFamilial;
+  statutMatrimonial: StatutMatrimonial;
+  familleId?: string;
+  role?: string;
+  pere?: string;
+  mere?: string;
+  senateurId?: string;
+  education?: string;
+  popularite?: number;
+  piete?: number;
+  joueur?: boolean;
   description?: string;
+  portrait?: string;
 }
