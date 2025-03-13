@@ -9,6 +9,7 @@ import { NationsList } from './NationsList';
 import { AlliancesMilitaires } from './AlliancesMilitaires';
 import { ActionButton } from '@/components/ui-custom/ActionButton';
 import { ActionsPanel, ActionItem } from '@/components/ui-custom/ActionsPanel';
+import { DiplomaticFilters } from './DiplomaticFilters';
 import { 
   Dialog, 
   DialogContent, 
@@ -25,6 +26,14 @@ export const RelationsDiplomatiques: React.FC = () => {
   const [activeTab, setActiveTab] = useState('nations');
   const [searchTerm, setSearchTerm] = useState('');
   
+  // États pour les filtres avancés
+  const [filters, setFilters] = useState({
+    status: '',
+    region: '',
+    dateFrom: '',
+    dateTo: ''
+  });
+  
   // États pour les modales d'ajout
   const [isAddNationOpen, setIsAddNationOpen] = useState(false);
   const [isAddTraiteOpen, setIsAddTraiteOpen] = useState(false);
@@ -32,6 +41,22 @@ export const RelationsDiplomatiques: React.FC = () => {
   
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchTerm(e.target.value);
+  };
+  
+  // Fonctions pour la gestion des filtres
+  const handleFilterChange = (newFilters: any) => {
+    setFilters(newFilters);
+    toast.success("Filtres appliqués");
+  };
+  
+  const resetFilters = () => {
+    setFilters({
+      status: '',
+      region: '',
+      dateFrom: '',
+      dateTo: ''
+    });
+    toast.info("Filtres réinitialisés");
   };
   
   // Fonctions pour ouvrir les modales d'ajout
@@ -126,15 +151,32 @@ export const RelationsDiplomatiques: React.FC = () => {
           )}
         </div>
         
-        <div className="relative mt-4">
-          <Search className="absolute left-2 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-          <Input
-            placeholder="Rechercher par nom, région, type..."
-            className="pl-8"
-            value={searchTerm}
-            onChange={handleSearchChange}
+        <div className="flex items-center gap-2 mt-4">
+          <div className="relative flex-1">
+            <Search className="absolute left-2 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+            <Input
+              placeholder="Rechercher par nom, région, type..."
+              className="pl-8"
+              value={searchTerm}
+              onChange={handleSearchChange}
+            />
+          </div>
+          <DiplomaticFilters 
+            activeTab={activeTab}
+            onFilterChange={handleFilterChange}
+            onReset={resetFilters}
           />
         </div>
+
+        {Object.values(filters).some(value => value !== '') && (
+          <div className="mt-2 text-sm">
+            <span className="font-medium">Filtres actifs: </span>
+            {filters.status && <span className="mr-2">Statut: {filters.status}</span>}
+            {filters.region && <span className="mr-2">Région: {filters.region}</span>}
+            {filters.dateFrom && <span className="mr-2">De: {filters.dateFrom}</span>}
+            {filters.dateTo && <span>À: {filters.dateTo}</span>}
+          </div>
+        )}
       </CardHeader>
       
       <CardContent>
@@ -152,7 +194,7 @@ export const RelationsDiplomatiques: React.FC = () => {
               actions={getTabActions()}
               className="mb-4"
             />
-            <NationsList searchTerm={searchTerm} />
+            <NationsList searchTerm={searchTerm} filters={filters} />
           </TabsContent>
           
           <TabsContent value="traites" className="mt-4">
@@ -162,7 +204,7 @@ export const RelationsDiplomatiques: React.FC = () => {
               actions={getTabActions()}
               className="mb-4"
             />
-            <TraitesList searchTerm={searchTerm} />
+            <TraitesList searchTerm={searchTerm} filters={filters} />
           </TabsContent>
           
           <TabsContent value="alliances" className="mt-4">
@@ -172,7 +214,7 @@ export const RelationsDiplomatiques: React.FC = () => {
               actions={getTabActions()}
               className="mb-4"
             />
-            <AlliancesMilitaires searchTerm={searchTerm} />
+            <AlliancesMilitaires searchTerm={searchTerm} filters={filters} />
           </TabsContent>
         </Tabs>
       </CardContent>

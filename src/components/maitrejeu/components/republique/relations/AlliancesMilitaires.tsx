@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
@@ -18,21 +17,50 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } f
 
 interface AlliancesMilitairesProps {
   searchTerm?: string;
+  filters?: {
+    status: string;
+    region: string;
+    dateFrom: string;
+    dateTo: string;
+  };
 }
 
-export const AlliancesMilitaires: React.FC<AlliancesMilitairesProps> = ({ searchTerm = '' }) => {
+export const AlliancesMilitaires: React.FC<AlliancesMilitairesProps> = ({ 
+  searchTerm = '',
+  filters = {
+    status: '',
+    region: '',
+    dateFrom: '',
+    dateTo: ''
+  }
+}) => {
   const [isViewOpen, setIsViewOpen] = useState(false);
   const [isDeleteConfirmOpen, setIsDeleteConfirmOpen] = useState(false);
   const [selectedAlliance, setSelectedAlliance] = useState<Alliance | null>(null);
   
-  // Filter alliances based on searchTerm if provided
-  const filteredAlliances = searchTerm
-    ? alliancesMock.filter(alliance => 
-        alliance.nom.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        alliance.type?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        alliance.membres.some(member => member.toLowerCase().includes(searchTerm.toLowerCase()))
-      )
-    : alliancesMock;
+  // Filter alliances based on searchTerm and filters
+  const filteredAlliances = alliancesMock.filter(alliance => {
+    // Search filter
+    const matchesSearch = searchTerm === '' || 
+      alliance.nom.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      alliance.type?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      alliance.membres.some(member => member.toLowerCase().includes(searchTerm.toLowerCase()));
+      
+    // Status filter
+    const matchesStatus = !filters.status || alliance.statut === filters.status;
+    
+    // Region filter - Not applicable for alliances unless we have region data for each alliance
+    const matchesRegion = !filters.region || true; // Placeholder
+    
+    // Date filters
+    const matchesDateFrom = !filters.dateFrom || 
+      (alliance.dateFormation && alliance.dateFormation >= filters.dateFrom);
+      
+    const matchesDateTo = !filters.dateTo || 
+      (alliance.dateFormation && alliance.dateFormation <= filters.dateTo);
+    
+    return matchesSearch && matchesStatus && matchesRegion && matchesDateFrom && matchesDateTo;
+  });
   
   const handleViewAlliance = (alliance: Alliance) => {
     setSelectedAlliance(alliance);
@@ -74,74 +102,80 @@ export const AlliancesMilitaires: React.FC<AlliancesMilitairesProps> = ({ search
           <CardTitle>Alliances Militaires</CardTitle>
         </CardHeader>
         <CardContent>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Nom</TableHead>
-                <TableHead>Type</TableHead>
-                <TableHead>Membres</TableHead>
-                <TableHead>Formation</TableHead>
-                <TableHead>Forces</TableHead>
-                <TableHead>Statut</TableHead>
-                <TableHead>Actions</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {filteredAlliances.map(alliance => (
-                <TableRow key={alliance.id}>
-                  <TableCell className="font-medium">{alliance.nom}</TableCell>
-                  <TableCell>
-                    <Badge variant="outline">{alliance.type}</Badge>
-                  </TableCell>
-                  <TableCell>{alliance.membres.join(', ')}</TableCell>
-                  <TableCell>{alliance.dateFormation}</TableCell>
-                  <TableCell>
-                    <div className="flex flex-col">
-                      <span>{alliance.forces?.legions || 0} légions</span>
-                      <span className="text-xs text-muted-foreground">{alliance.forces?.auxiliaires || 0} auxiliaires</span>
-                    </div>
-                  </TableCell>
-                  <TableCell>
-                    <Badge className={getStatusColor(alliance.statut)}>
-                      {alliance.statut}
-                    </Badge>
-                  </TableCell>
-                  <TableCell>
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" className="h-8 w-8 p-0">
-                          <span className="sr-only">Ouvrir menu</span>
-                          <MoreHorizontal className="h-4 w-4" />
-                        </Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end">
-                        <DropdownMenuItem onClick={() => handleViewAlliance(alliance)}>
-                          <Eye className="mr-2 h-4 w-4" /> Voir détails
-                        </DropdownMenuItem>
-                        <DropdownMenuItem onClick={() => handleEditAlliance(alliance)}>
-                          <Edit className="mr-2 h-4 w-4" /> Modifier
-                        </DropdownMenuItem>
-                        <DropdownMenuSeparator />
-                        <DropdownMenuItem>
-                          <Users className="mr-2 h-4 w-4" /> Gérer membres
-                        </DropdownMenuItem>
-                        <DropdownMenuItem>
-                          <SwordIcon className="mr-2 h-4 w-4" /> Opérations militaires
-                        </DropdownMenuItem>
-                        <DropdownMenuSeparator />
-                        <DropdownMenuItem 
-                          onClick={() => handleDeletePrompt(alliance)}
-                          className="text-red-600 hover:text-red-800 focus:text-red-800"
-                        >
-                          <Trash className="mr-2 h-4 w-4" /> Supprimer
-                        </DropdownMenuItem>
-                      </DropdownMenuContent>
-                    </DropdownMenu>
-                  </TableCell>
+          {filteredAlliances.length === 0 ? (
+            <div className="text-center py-8 text-muted-foreground">
+              Aucune alliance ne correspond aux critères de recherche ou aux filtres appliqués.
+            </div>
+          ) : (
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Nom</TableHead>
+                  <TableHead>Type</TableHead>
+                  <TableHead>Membres</TableHead>
+                  <TableHead>Formation</TableHead>
+                  <TableHead>Forces</TableHead>
+                  <TableHead>Statut</TableHead>
+                  <TableHead>Actions</TableHead>
                 </TableRow>
-              ))}
-            </TableBody>
-          </Table>
+              </TableHeader>
+              <TableBody>
+                {filteredAlliances.map(alliance => (
+                  <TableRow key={alliance.id}>
+                    <TableCell className="font-medium">{alliance.nom}</TableCell>
+                    <TableCell>
+                      <Badge variant="outline">{alliance.type}</Badge>
+                    </TableCell>
+                    <TableCell>{alliance.membres.join(', ')}</TableCell>
+                    <TableCell>{alliance.dateFormation}</TableCell>
+                    <TableCell>
+                      <div className="flex flex-col">
+                        <span>{alliance.forces?.legions || 0} légions</span>
+                        <span className="text-xs text-muted-foreground">{alliance.forces?.auxiliaires || 0} auxiliaires</span>
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      <Badge className={getStatusColor(alliance.statut)}>
+                        {alliance.statut}
+                      </Badge>
+                    </TableCell>
+                    <TableCell>
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button variant="ghost" className="h-8 w-8 p-0">
+                            <span className="sr-only">Ouvrir menu</span>
+                            <MoreHorizontal className="h-4 w-4" />
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end">
+                          <DropdownMenuItem onClick={() => handleViewAlliance(alliance)}>
+                            <Eye className="mr-2 h-4 w-4" /> Voir détails
+                          </DropdownMenuItem>
+                          <DropdownMenuItem onClick={() => handleEditAlliance(alliance)}>
+                            <Edit className="mr-2 h-4 w-4" /> Modifier
+                          </DropdownMenuItem>
+                          <DropdownMenuSeparator />
+                          <DropdownMenuItem>
+                            <Users className="mr-2 h-4 w-4" /> Gérer membres
+                          </DropdownMenuItem>
+                          <DropdownMenuItem>
+                            <SwordIcon className="mr-2 h-4 w-4" /> Opérations militaires
+                          </DropdownMenuItem>
+                          <DropdownMenuSeparator />
+                          <DropdownMenuItem 
+                            onClick={() => handleDeletePrompt(alliance)}
+                            className="text-red-600 hover:text-red-800 focus:text-red-800"
+                          >
+                            <Trash className="mr-2 h-4 w-4" /> Supprimer
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          )}
         </CardContent>
       </Card>
       

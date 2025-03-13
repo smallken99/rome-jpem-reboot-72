@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
@@ -17,21 +16,51 @@ import { AlertMessage } from '@/components/ui-custom/AlertMessage';
 
 interface TraitesListProps {
   searchTerm?: string;
+  filters?: {
+    status: string;
+    region: string;
+    dateFrom: string;
+    dateTo: string;
+  };
 }
 
-export const TraitesList: React.FC<TraitesListProps> = ({ searchTerm = '' }) => {
+export const TraitesList: React.FC<TraitesListProps> = ({ 
+  searchTerm = '',
+  filters = {
+    status: '',
+    region: '',
+    dateFrom: '',
+    dateTo: ''
+  }
+}) => {
   const [isViewOpen, setIsViewOpen] = useState(false);
   const [isDeleteConfirmOpen, setIsDeleteConfirmOpen] = useState(false);
   const [selectedTraite, setSelectedTraite] = useState<Traite | null>(null);
   
-  // Filter traites based on searchTerm if provided
-  const filteredTraites = searchTerm
-    ? traitesMock.filter(traite => 
-        traite.titre.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        traite.parties.some(party => party.toLowerCase().includes(searchTerm.toLowerCase())) ||
-        traite.type.toLowerCase().includes(searchTerm.toLowerCase())
-      )
-    : traitesMock;
+  // Filter traites based on searchTerm and filters
+  const filteredTraites = traitesMock.filter(traite => {
+    // Search filter
+    const matchesSearch = searchTerm === '' || 
+      traite.titre.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      traite.parties.some(party => party.toLowerCase().includes(searchTerm.toLowerCase())) ||
+      traite.type.toLowerCase().includes(searchTerm.toLowerCase());
+      
+    // Status filter
+    const matchesStatus = !filters.status || traite.statut === filters.status;
+    
+    // Region filter - Check if any party is from the filtered region
+    // This would require additional data linking parties to regions
+    const matchesRegion = !filters.region || true; // Placeholder - would need region data for parties
+    
+    // Date filters
+    const matchesDateFrom = !filters.dateFrom || 
+      (traite.dateSignature && traite.dateSignature >= filters.dateFrom);
+      
+    const matchesDateTo = !filters.dateTo || 
+      (traite.dateSignature && traite.dateSignature <= filters.dateTo);
+    
+    return matchesSearch && matchesStatus && matchesRegion && matchesDateFrom && matchesDateTo;
+  });
     
   const handleViewTraite = (traite: Traite) => {
     setSelectedTraite(traite);
@@ -58,64 +87,70 @@ export const TraitesList: React.FC<TraitesListProps> = ({ searchTerm = '' }) => 
     
   return (
     <>
-      <Table>
-        <TableHeader>
-          <TableRow>
-            <TableHead>Nom</TableHead>
-            <TableHead>Type</TableHead>
-            <TableHead>Parties</TableHead>
-            <TableHead>Ratification</TableHead>
-            <TableHead>Expiration</TableHead>
-            <TableHead>Statut</TableHead>
-            <TableHead>Actions</TableHead>
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {filteredTraites.map(traite => (
-            <TableRow key={traite.id}>
-              <TableCell className="font-medium">{traite.titre}</TableCell>
-              <TableCell>{traite.type}</TableCell>
-              <TableCell>{traite.parties.join(', ')}</TableCell>
-              <TableCell>{traite.dateSignature}</TableCell>
-              <TableCell>{traite.duree || 'Indéterminée'}</TableCell>
-              <TableCell>
-                <Badge className={
-                  traite.statut === "Actif" ? "bg-green-500" : 
-                  traite.statut === "Expiré" ? "bg-gray-500" : 
-                  traite.statut === "En négociation" ? "bg-yellow-500" : 
-                  "bg-red-500"
-                }>
-                  {traite.statut}
-                </Badge>
-              </TableCell>
-              <TableCell>
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button variant="ghost" className="h-8 w-8 p-0">
-                      <span className="sr-only">Ouvrir menu</span>
-                      <MoreHorizontal className="h-4 w-4" />
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end">
-                    <DropdownMenuItem onClick={() => handleViewTraite(traite)}>
-                      <Eye className="mr-2 h-4 w-4" /> Voir détails
-                    </DropdownMenuItem>
-                    <DropdownMenuItem onClick={() => handleEditTraite(traite)}>
-                      <Edit className="mr-2 h-4 w-4" /> Modifier
-                    </DropdownMenuItem>
-                    <DropdownMenuItem 
-                      onClick={() => handleDeletePrompt(traite)}
-                      className="text-red-600 hover:text-red-800 focus:text-red-800"
-                    >
-                      <Trash className="mr-2 h-4 w-4" /> Supprimer
-                    </DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
-              </TableCell>
+      {filteredTraites.length === 0 ? (
+        <div className="text-center py-8 text-muted-foreground">
+          Aucun traité ne correspond aux critères de recherche ou aux filtres appliqués.
+        </div>
+      ) : (
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead>Nom</TableHead>
+              <TableHead>Type</TableHead>
+              <TableHead>Parties</TableHead>
+              <TableHead>Ratification</TableHead>
+              <TableHead>Expiration</TableHead>
+              <TableHead>Statut</TableHead>
+              <TableHead>Actions</TableHead>
             </TableRow>
-          ))}
-        </TableBody>
-      </Table>
+          </TableHeader>
+          <TableBody>
+            {filteredTraites.map(traite => (
+              <TableRow key={traite.id}>
+                <TableCell className="font-medium">{traite.titre}</TableCell>
+                <TableCell>{traite.type}</TableCell>
+                <TableCell>{traite.parties.join(', ')}</TableCell>
+                <TableCell>{traite.dateSignature}</TableCell>
+                <TableCell>{traite.duree || 'Indéterminée'}</TableCell>
+                <TableCell>
+                  <Badge className={
+                    traite.statut === "Actif" ? "bg-green-500" : 
+                    traite.statut === "Expiré" ? "bg-gray-500" : 
+                    traite.statut === "En négociation" ? "bg-yellow-500" : 
+                    "bg-red-500"
+                  }>
+                    {traite.statut}
+                  </Badge>
+                </TableCell>
+                <TableCell>
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button variant="ghost" className="h-8 w-8 p-0">
+                        <span className="sr-only">Ouvrir menu</span>
+                        <MoreHorizontal className="h-4 w-4" />
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end">
+                      <DropdownMenuItem onClick={() => handleViewTraite(traite)}>
+                        <Eye className="mr-2 h-4 w-4" /> Voir détails
+                      </DropdownMenuItem>
+                      <DropdownMenuItem onClick={() => handleEditTraite(traite)}>
+                        <Edit className="mr-2 h-4 w-4" /> Modifier
+                      </DropdownMenuItem>
+                      <DropdownMenuItem 
+                        onClick={() => handleDeletePrompt(traite)}
+                        className="text-red-600 hover:text-red-800 focus:text-red-800"
+                      >
+                        <Trash className="mr-2 h-4 w-4" /> Supprimer
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      )}
       
       {/* Modal détails du traité */}
       <Dialog open={isViewOpen} onOpenChange={setIsViewOpen}>
