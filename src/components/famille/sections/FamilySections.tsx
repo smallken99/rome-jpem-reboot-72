@@ -44,7 +44,7 @@ export const FamilySections: React.FC<FamilySectionsProps> = ({
         
         <RomanCard className="h-full">
           <RomanCard.Header>
-            <h3 className="font-cinzel text-lg text-rome-navy">Héritage et Testaments</h3>
+            <h3 className="font-cinzel text-lg text-rome-navy">Héritage Familial</h3>
           </RomanCard.Header>
           <RomanCard.Content>
             <Inheritance />

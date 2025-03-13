@@ -1,5 +1,4 @@
 
-// Uniquement mise à jour des imports et des routes - en supprimant la référence à DowryManagementPage
 import React from 'react';
 import { Routes, Route } from 'react-router-dom';
 import { FamilleMain } from '../pages/FamilleMain';
