@@ -23,15 +23,24 @@ export const EconomieStats: React.FC = () => {
     };
   };
   
+  // Function to safely parse GameDate from string or use directly
+  const parseGameDate = (date: GameDate | string): GameDate => {
+    if (typeof date === 'string') {
+      try {
+        return JSON.parse(date) as GameDate;
+      } catch (e) {
+        // Default fallback if parsing fails
+        return { year: 700, season: "SPRING" };
+      }
+    }
+    return date;
+  };
+  
   // Calculate income and expenses for the last 2 seasons for trends
   const currentIncome = economieRecords
     .filter(record => {
-      const recordDate = typeof record.date === 'string' 
-        ? JSON.parse(record.date) as GameDate 
-        : record.date;
-      const treasuryDate = typeof treasury.lastUpdated === 'string'
-        ? JSON.parse(treasury.lastUpdated) as GameDate
-        : treasury.lastUpdated;
+      const recordDate = parseGameDate(record.date);
+      const treasuryDate = parseGameDate(treasury.lastUpdated);
       
       return record.type === 'income' && 
         recordDate.year === treasuryDate.year && 
@@ -41,12 +50,8 @@ export const EconomieStats: React.FC = () => {
     
   const currentExpenses = economieRecords
     .filter(record => {
-      const recordDate = typeof record.date === 'string'
-        ? JSON.parse(record.date) as GameDate
-        : record.date;
-      const treasuryDate = typeof treasury.lastUpdated === 'string'
-        ? JSON.parse(treasury.lastUpdated) as GameDate
-        : treasury.lastUpdated;
+      const recordDate = parseGameDate(record.date);
+      const treasuryDate = parseGameDate(treasury.lastUpdated);
       
       return record.type === 'expense' && 
         recordDate.year === treasuryDate.year && 
@@ -55,43 +60,34 @@ export const EconomieStats: React.FC = () => {
     .reduce((sum, record) => sum + record.amount, 0);
   
   // Get the previous season
-  const getSeasonAndYear = (year: number, season: string): {year: number, season: string} => {
+  const getSeasonAndYear = (date: GameDate): {year: number, season: string} => {
     const seasons = ['WINTER', 'SPRING', 'SUMMER', 'AUTUMN'];
+    const season = String(date.season);
     const idx = seasons.indexOf(season);
-    if (idx <= 0) return { year: year - 1, season: 'AUTUMN' };
-    return { year, season: seasons[idx - 1] };
+    if (idx <= 0) return { year: date.year - 1, season: 'AUTUMN' };
+    return { year: date.year, season: seasons[idx - 1] };
   };
   
-  const treasuryDate = typeof treasury.lastUpdated === 'string'
-    ? JSON.parse(treasury.lastUpdated) as GameDate
-    : treasury.lastUpdated;
-  
-  const prevPeriod = getSeasonAndYear(
-    treasuryDate.year, 
-    typeof treasuryDate.season === 'string' ? treasuryDate.season : 'SPRING'
-  );
+  const treasuryDate = parseGameDate(treasury.lastUpdated);
+  const prevPeriod = getSeasonAndYear(treasuryDate);
   
   const previousIncome = economieRecords
     .filter(record => {
-      const recordDate = typeof record.date === 'string'
-        ? JSON.parse(record.date) as GameDate
-        : record.date;
+      const recordDate = parseGameDate(record.date);
       
       return record.type === 'income' && 
         recordDate.year === prevPeriod.year && 
-        recordDate.season === prevPeriod.season;
+        String(recordDate.season) === prevPeriod.season;
     })
     .reduce((sum, record) => sum + record.amount, 0);
     
   const previousExpenses = economieRecords
     .filter(record => {
-      const recordDate = typeof record.date === 'string'
-        ? JSON.parse(record.date) as GameDate
-        : record.date;
+      const recordDate = parseGameDate(record.date);
       
       return record.type === 'expense' && 
         recordDate.year === prevPeriod.year && 
-        recordDate.season === prevPeriod.season;
+        String(recordDate.season) === prevPeriod.season;
     })
     .reduce((sum, record) => sum + record.amount, 0);
   
@@ -100,10 +96,7 @@ export const EconomieStats: React.FC = () => {
   const balanceTrend = calculateTrend(treasury.balance, treasury.balance - (currentIncome - currentExpenses));
   
   const formatTreasuryDate = () => {
-    const date = typeof treasury.lastUpdated === 'string'
-      ? JSON.parse(treasury.lastUpdated) as GameDate
-      : treasury.lastUpdated;
-    
+    const date = parseGameDate(treasury.lastUpdated);
     return `${date.season} ${date.year}`;
   };
   

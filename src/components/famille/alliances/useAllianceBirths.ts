@@ -15,7 +15,8 @@ export const useAllianceBirths = (
   
   // Get current time from the store
   const timeStore = useTimeStore();
-  const { year, season } = timeStore;
+  const { season } = timeStore;
+  const year = timeStore.getYear();
   
   // Filter alliances to only show active ones
   const activeAlliances = familyAlliances.filter(alliance => alliance.status === 'actif');

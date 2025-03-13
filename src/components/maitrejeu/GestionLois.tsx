@@ -67,7 +67,7 @@ export const GestionLois: React.FC = () => {
 
   // Function to format the season in French
   const formatSeason = (season: Season | PlayerSeason | string): string => {
-    return formatSeasonDisplay(season);
+    return formatSeasonDisplay(season as Season | PlayerSeason);
   };
 
   return (

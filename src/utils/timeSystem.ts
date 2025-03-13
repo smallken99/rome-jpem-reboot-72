@@ -6,18 +6,13 @@ export const useTimeStore = () => {
   // Simulation of a store - in a real implementation, use zustand or another state manager
   const year = 721; // AUC
   const season: Season = 'Ver';
-  const dayInSeason = 1; // Day in the season (1-90)
   
   return {
     year,
     season,
-    dayInSeason,
     advanceTime: () => {/* Logic for advancing time */},
-    advanceDay: () => {/* Advance by one day */},
-    advanceSeason: () => {/* Advance by one season */},
     getSeason: () => season,
     getYear: () => year,
-    formatDate: () => `${formatSeasonDisplay(season)} ${year} AUC, Jour ${dayInSeason}`
   };
 };
 

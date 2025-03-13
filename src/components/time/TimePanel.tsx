@@ -1,36 +1,38 @@
+
 import React, { useState } from 'react';
 import { Calendar, Hourglass, SunDim } from 'lucide-react';
-import { useTimeStore, formatRomanSeason } from '@/utils/timeSystem';
-import { Season } from '@/components/maitrejeu/types/common';
+import { useTimeStore } from '@/utils/timeSystem';
+import { formatSeasonDisplay } from '@/components/maitrejeu/types/common';
 
 interface TimePanelProps {
   minimal?: boolean;
 }
 
 export const TimePanel: React.FC<TimePanelProps> = ({ minimal = false }) => {
-  const { year, season, dayInSeason, formatDate, advanceDay, advanceSeason } = useTimeStore();
+  const { year, season, advanceTime, getSeason, getYear } = useTimeStore();
   const [timeMessage, setTimeMessage] = useState<string | null>(null);
   
   // Function to advance time
   const handleAdvanceTime = () => {
     // Save current state for comparison
-    const currentSeason = season;
-    const currentYear = year;
+    const currentSeason = getSeason();
+    const currentYear = getYear();
     
-    // Advance by one day
-    advanceDay();
+    // Advance time
+    advanceTime();
     
-    // If we reach the end of the season
-    if (dayInSeason >= 90) {
-      // Advance season
-      advanceSeason();
-      
+    // Get the new season after advancing
+    const newSeason = getSeason();
+    const newYear = getYear();
+    
+    // If season changed
+    if (currentSeason !== newSeason) {
       // Display a new season message
-      setTimeMessage(`Nouvelle saison: ${formatRomanSeason(season)}`);
+      setTimeMessage(`Nouvelle saison: ${formatSeasonDisplay(newSeason)}`);
       
       // If we've completed a full year
-      if (currentSeason === 'Hiems' && season === 'Ver') {
-        setTimeMessage(`Nouvelle année: ${year + 1} AUC`);
+      if (newYear > currentYear) {
+        setTimeMessage(`Nouvelle année: ${newYear} AUC`);
       }
       
       // Clear the message after 3 seconds
@@ -40,7 +42,9 @@ export const TimePanel: React.FC<TimePanelProps> = ({ minimal = false }) => {
   
   // Get the icon and color for the season
   const getSeasonInfo = () => {
-    switch (season) {
+    const currentSeason = getSeason();
+    
+    switch (currentSeason) {
       case 'Ver':
         return { icon: <SunDim className={`${minimal ? 'h-4 w-4' : 'h-5 w-5'} text-green-500`} />, color: 'bg-green-100 text-green-800' };
       case 'Aestas':
@@ -61,9 +65,9 @@ export const TimePanel: React.FC<TimePanelProps> = ({ minimal = false }) => {
       <div className="flex items-center space-x-2 text-sm">
         <div className={`px-1.5 py-0.5 rounded-md flex items-center gap-1 ${color}`}>
           {icon}
-          <span className="text-xs font-medium">{formatRomanSeason(season)}</span>
+          <span className="text-xs font-medium">{formatSeasonDisplay(getSeason())}</span>
         </div>
-        <span className="text-xs text-muted-foreground">{year} AUC</span>
+        <span className="text-xs text-muted-foreground">{getYear()} AUC</span>
       </div>
     );
   }
@@ -73,7 +77,7 @@ export const TimePanel: React.FC<TimePanelProps> = ({ minimal = false }) => {
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
           <Calendar className="h-5 w-5 text-muted-foreground" />
-          <span className="text-sm font-medium">{formatDate()}</span>
+          <span className="text-sm font-medium">{formatSeasonDisplay(getSeason())} {getYear()} AUC</span>
         </div>
         
         <button
@@ -88,7 +92,7 @@ export const TimePanel: React.FC<TimePanelProps> = ({ minimal = false }) => {
       <div className="flex items-center gap-4 mt-2">
         <div className={`px-2 py-1 rounded-md flex items-center gap-1 ${color}`}>
           {icon}
-          <span className="text-xs font-medium">{formatRomanSeason(season)}</span>
+          <span className="text-xs font-medium">{formatSeasonDisplay(getSeason())}</span>
         </div>
       </div>
       

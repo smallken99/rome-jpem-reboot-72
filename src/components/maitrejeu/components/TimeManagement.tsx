@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Calendar, Clock } from 'lucide-react';
 import { useMaitreJeu } from '../context';
-import { GamePhase, Season, PlayerSeason, formatSeasonDisplay } from '../types/common';
+import { GamePhase, Season, PlayerSeason, formatSeasonDisplay, convertSeason } from '../types/common';
 
 export const TimeManagement = () => {
   const { 

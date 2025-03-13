@@ -9,6 +9,7 @@ import {
   TreasuryStatus
 } from '@/components/maitrejeu/types/economie';
 import { toast } from 'sonner';
+import { GameDate } from '@/components/maitrejeu/types/common';
 
 const DEFAULT_FILTER: EconomieFilter = {
   search: '',
@@ -20,6 +21,19 @@ const DEFAULT_FILTER: EconomieFilter = {
 const DEFAULT_SORT: EconomieSort = {
   field: 'date',
   direction: 'desc'
+};
+
+// Helper function to safely parse GameDate
+const parseGameDate = (date: GameDate | string): GameDate => {
+  if (typeof date === 'string') {
+    try {
+      return JSON.parse(date) as GameDate;
+    } catch (e) {
+      // Default fallback if parsing fails
+      return { year: 700, season: "SPRING" };
+    }
+  }
+  return date;
 };
 
 export const useEconomieManagement = () => {
@@ -87,8 +101,9 @@ export const useEconomieManagement = () => {
         const startYear = filter.dateRange.start.year;
         const startSeason = filter.dateRange.start.season;
         
-        const recordYear = record.date.year;
-        const recordSeason = record.date.season;
+        const recordDate = parseGameDate(record.date);
+        const recordYear = recordDate.year;
+        const recordSeason = recordDate.season;
         
         if (recordYear < startYear || (recordYear === startYear && recordSeason < startSeason)) {
           return false;
@@ -99,8 +114,9 @@ export const useEconomieManagement = () => {
         const endYear = filter.dateRange.end.year;
         const endSeason = filter.dateRange.end.season;
         
-        const recordYear = record.date.year;
-        const recordSeason = record.date.season;
+        const recordDate = parseGameDate(record.date);
+        const recordYear = recordDate.year;
+        const recordSeason = recordDate.season;
         
         if (recordYear > endYear || (recordYear === endYear && recordSeason > endSeason)) {
           return false;
@@ -118,18 +134,25 @@ export const useEconomieManagement = () => {
       
       // Tri spécial pour les dates du jeu
       if (field === 'date') {
-        const yearA = a.date.year;
-        const yearB = b.date.year;
+        const dateA = parseGameDate(a.date);
+        const dateB = parseGameDate(b.date);
+        
+        const yearA = dateA.year;
+        const yearB = dateB.year;
         
         const seasonOrder: Record<string, number> = {
           'SPRING': 0,
           'SUMMER': 1,
           'AUTUMN': 2,
-          'WINTER': 3
+          'WINTER': 3,
+          'Ver': 0,
+          'Aestas': 1,
+          'Autumnus': 2,
+          'Hiems': 3
         };
         
-        const seasonA = seasonOrder[a.date.season];
-        const seasonB = seasonOrder[b.date.season];
+        const seasonA = seasonOrder[String(dateA.season)];
+        const seasonB = seasonOrder[String(dateB.season)];
         
         if (yearA !== yearB) {
           return sort.direction === 'asc' ? yearA - yearB : yearB - yearA;
