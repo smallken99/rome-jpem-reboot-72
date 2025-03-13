@@ -43,7 +43,7 @@ export interface Alliance {
   traitésAssociés?: string[];
   commandement?: string;
   forces: {
-    légions?: number;
+    legions?: number;
     auxiliaires?: number;
   };
   statut: "Actif" | "Inactif" | "Dissous";

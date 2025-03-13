@@ -188,7 +188,7 @@ export const alliancesMock: Alliance[] = [
     dateFormation: "496 AUC",
     commandement: "Rome",
     forces: {
-      légions: 8,
+      legions: 8,
       auxiliaires: 12000
     },
     statut: "Actif"
@@ -201,7 +201,7 @@ export const alliancesMock: Alliance[] = [
     dateFormation: "550 AUC",
     commandement: "Rome",
     forces: {
-      légions: 12,
+      legions: 12,
       auxiliaires: 20000
     },
     statut: "Actif"
@@ -214,7 +214,7 @@ export const alliancesMock: Alliance[] = [
     dateFormation: "563 AUC",
     commandement: "Commandement partagé",
     forces: {
-      légions: 6,
+      legions: 6,
       auxiliaires: 15000
     },
     statut: "Actif"
@@ -227,7 +227,7 @@ export const alliancesMock: Alliance[] = [
     dateFormation: "537 AUC",
     commandement: "Rome",
     forces: {
-      légions: 2,
+      legions: 2,
       auxiliaires: 5000
     },
     statut: "Inactif"
@@ -240,7 +240,7 @@ export const alliancesMock: Alliance[] = [
     dateFormation: "525 AUC",
     commandement: "Conseil commun",
     forces: {
-      légions: 3,
+      legions: 3,
       auxiliaires: 8000
     },
     statut: "Actif"
