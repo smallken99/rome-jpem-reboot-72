@@ -2,24 +2,28 @@
 import React from 'react';
 import { ArrowUpRight, ArrowDownRight, Coins, TrendingUp, ShieldCheck, Scale } from 'lucide-react';
 import { useEconomy } from '@/hooks/useEconomy';
+import { useMaitreJeu } from '@/components/maitrejeu/context';
+import { formatMoney } from '@/utils/formatUtils';
 
 export const TresorStats: React.FC = () => {
-  // Pour l'instant, nous utilisons des données fictives
-  // Dans une implémentation réelle, ces données viendraient d'une API ou d'un hook
-  const totalTreasury = 15785000;
-  const annualRevenue = 3250000;
-  const annualExpenses = 2780000;
-  const monthlyBalance = 39000;
-  const reserves = 4500000;
-  const taxCollection = 87;
-
+  const { treasury, economicFactors } = useMaitreJeu();
   const economy = useEconomy();
+  
+  // Utilisez les données du MJ si disponibles, sinon fallback sur les valeurs par défaut
+  const totalTreasury = treasury?.balance || 15785000;
+  const annualRevenue = economicFactors?.taxCollection + economicFactors?.provinceRevenue + 
+                        economicFactors?.tradeRevenue + economicFactors?.warSpoilsRevenue || 3250000;
+  const annualExpenses = economicFactors?.militaryExpense + economicFactors?.publicWorksExpense + 
+                        economicFactors?.religiousCeremonyExpense + economicFactors?.adminExpense || 2780000;
+  const monthlyBalance = Math.round((annualRevenue - annualExpenses) / 12);
+  const reserves = treasury?.balance * 0.2 || 4500000;
+  const taxCollection = (economicFactors?.taxCollection / (annualRevenue - economicFactors?.taxCollection)) * 100 || 87;
   
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
       <StatCard 
         title="Trésor Total" 
-        value={`${(totalTreasury / 1000000).toFixed(2)}M As`}
+        value={formatMoney(totalTreasury)}
         icon={<Coins className="h-5 w-5 text-rome-gold" />}
         description="Fonds disponibles dans le Trésor"
         color="bg-rome-gold/10"
@@ -27,7 +31,7 @@ export const TresorStats: React.FC = () => {
       
       <StatCard 
         title="Revenus Annuels" 
-        value={`${(annualRevenue / 1000000).toFixed(2)}M As`}
+        value={formatMoney(annualRevenue)}
         change={+9.4}
         icon={<ArrowUpRight className="h-5 w-5 text-green-600" />}
         description="Croissance par rapport à l'année précédente"
@@ -36,7 +40,7 @@ export const TresorStats: React.FC = () => {
       
       <StatCard 
         title="Dépenses Annuelles" 
-        value={`${(annualExpenses / 1000000).toFixed(2)}M As`}
+        value={formatMoney(annualExpenses)}
         change={+5.2}
         icon={<ArrowDownRight className="h-5 w-5 text-amber-600" />}
         description="Augmentation par rapport à l'année précédente"
@@ -45,7 +49,7 @@ export const TresorStats: React.FC = () => {
       
       <StatCard 
         title="Balance Mensuelle" 
-        value={`+${monthlyBalance.toLocaleString()} As`}
+        value={`+${formatMoney(monthlyBalance)}`}
         icon={<TrendingUp className="h-5 w-5 text-green-600" />}
         description="Excédent moyen mensuel"
         color="bg-green-50"
@@ -53,7 +57,7 @@ export const TresorStats: React.FC = () => {
       
       <StatCard 
         title="Réserves Stratégiques" 
-        value={`${(reserves / 1000000).toFixed(2)}M As`}
+        value={formatMoney(reserves)}
         icon={<ShieldCheck className="h-5 w-5 text-rome-navy" />}
         description="Fonds réservés aux urgences"
         color="bg-rome-navy/10"
@@ -61,7 +65,7 @@ export const TresorStats: React.FC = () => {
       
       <StatCard 
         title="Efficacité de Collecte" 
-        value={`${taxCollection}%`}
+        value={`${taxCollection.toFixed(0)}%`}
         icon={<Scale className="h-5 w-5 text-rome-terracotta" />}
         description="Taux de recouvrement des impôts"
         color="bg-rome-terracotta/10"
