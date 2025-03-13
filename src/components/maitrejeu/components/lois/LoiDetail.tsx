@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Edit, CalendarDays, Users, Check, X, AlertCircle } from 'lucide-react';
-import { Loi } from '../../types';
+import { Loi } from '../../types/lois';
 import { formatGameDate } from '@/utils/timeSystem';
 
 export interface LoiDetailProps {

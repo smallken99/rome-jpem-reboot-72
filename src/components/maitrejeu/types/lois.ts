@@ -1,37 +1,54 @@
 
-import { Season } from './common';
+// Types pour les lois
 
-export type LoiState = 'En délibération' | 'Promulguée' | 'Rejetée' | 'proposée' | 'adoptée';
-export type LoiType = 'civile' | 'militaire' | 'religieuse' | 'économique' | 'politique';
+export type LoiType = 'politique' | 'économique' | 'sociale' | 'judiciaire' | 'militaire' | 'religieuse';
+export type LoiStatut = 'proposée' | 'adoptée' | 'rejetée' | 'Promulguée' | 'En délibération';
 
-export interface Impact {
-  description: string;
-  valeur: number;
-  cible: string;
+// Clause d'une loi
+export interface Clause {
+  id: string;
+  texte: string;
+  explication?: string;
 }
 
+// Impact d'une loi sur différents domaines
+export interface Impact {
+  domaine: string;
+  valeur: number;
+  explication?: string;
+}
+
+// Interface principale pour une loi
 export interface Loi {
   id: string;
   titre: string;
-  nom: string;
   description: string;
   type: LoiType;
+  catégorie?: string;
   proposeur: string;
   dateProposition: {
     year: number;
-    season: Season;
+    season: string;
   };
-  date?: {
+  date: {
     year: number;
-    season: Season;
+    season: string;
   };
-  catégorie?: string;
-  état: LoiState;
-  importance?: 'majeure' | 'normale' | 'mineure';
-  votesPositifs?: number;
-  votesNégatifs?: number;
-  votesAbstention?: number;
-  clauses: string[];
-  impacts: Impact[];
-  effets?: Record<string, number>;
+  état: LoiStatut;
+  votesPositifs: number;
+  votesNégatifs: number;
+  votesAbstention: number;
+  votes: {
+    pour: number;
+    contre: number;
+    abstention: number;
+  };
+  clauses?: Clause[];
+  impacts?: Impact[];
+  effets: string[];
+  dateVote?: {
+    year: number;
+    season: string;
+  };
+  commentaires?: string;
 }

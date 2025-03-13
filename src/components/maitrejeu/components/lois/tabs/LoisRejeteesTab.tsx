@@ -1,45 +1,33 @@
 
 import React from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Loi } from '../../../types/lois';
 import { LoisList } from '../LoisList';
-import { Season } from '../../../types/common';
+import { useMaitreJeu } from '../../../context';
+import { Loi } from '../../../types/lois';
 
 interface LoisRejeteesTabProps {
-  lois: Loi[];
   onViewLoi: (loi: Loi) => void;
-  onEditLoi: (loi: Loi) => void;
-  formatSeason: (season: Season) => string;
 }
 
-export const LoisRejeteesTab: React.FC<LoisRejeteesTabProps> = ({ 
-  lois, 
-  onViewLoi, 
-  onEditLoi,
-  formatSeason 
-}) => {
+export const LoisRejeteesTab: React.FC<LoisRejeteesTabProps> = ({ onViewLoi }) => {
+  const { lois } = useMaitreJeu();
+  
+  // Filtrer les lois rejetées
+  const loisRejetees = lois.filter(
+    (loi) => loi.état === 'rejetée'
+  );
+  
+  // Handler adapté pour passer l'ID mais récupérer la loi complète
+  const handleViewLoi = (id: string) => {
+    const loi = lois.find(l => l.id === id);
+    if (loi) {
+      onViewLoi(loi);
+    }
+  };
+  
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>Lois rejetées</CardTitle>
-        <CardDescription>
-          Projets de loi qui n'ont pas été adoptés
-        </CardDescription>
-      </CardHeader>
-      <CardContent>
-        {lois.length === 0 ? (
-          <p className="text-center text-muted-foreground py-8">
-            Aucune loi rejetée trouvée
-          </p>
-        ) : (
-          <LoisList 
-            lois={lois} 
-            onViewLoi={onViewLoi}
-            onEditLoi={onEditLoi}
-            formatSeason={formatSeason}
-          />
-        )}
-      </CardContent>
-    </Card>
+    <div>
+      <h2 className="text-2xl font-bold mb-4">Lois rejetées</h2>
+      <LoisList lois={loisRejetees} onViewLoi={handleViewLoi} />
+    </div>
   );
 };

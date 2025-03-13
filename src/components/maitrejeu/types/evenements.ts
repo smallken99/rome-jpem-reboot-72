@@ -1,46 +1,36 @@
 
-import { GameDate, ImportanceType } from './common';
+// Types pour les événements
 
-export type EvenementType = 'POLITIQUE' | 'ECONOMIQUE' | 'GUERRE' | 'RELIGION' | 'DIPLOMATIQUE' | 'SOCIAL' | 'CRISE';
+export type EvenementType = 'POLITIQUE' | 'MILITAIRE' | 'DIPLOMATIQUE' | 'ECONOMIQUE' | 'SOCIAL' | 'RELIGIEUX' | 'CATASTROPHE';
+export type ImportanceType = 'mineure' | 'normale' | 'majeure' | 'critique';
 
+// Interface pour une option de résolution d'un événement
 export interface EvenementAction {
   id: string;
   texte: string;
-  effets: Record<string, number>;
-  // Propriétés de compatibilité avec l'ancien système
-  label?: string;
-  consequence?: string;
+  effets: Record<string, number>;  // Effets sur différentes statistiques
+  label: string;
+  consequence: string;
 }
 
+// Interface principale pour un événement
 export interface Evenement {
   id: string;
   titre: string;
   description: string;
   type: EvenementType;
-  date: GameDate;
+  date: {
+    year: number;
+    season: string;
+  };
   importance: ImportanceType;
   options: EvenementAction[];
   resolved: boolean;
   selectedOption?: string;
 }
 
+// Interface pour les props du formulaire d'événements
 export interface EvenementFormProps {
   isOpen: boolean;
   onClose: () => void;
-}
-
-export interface PoliticalEvent {
-  id: string;
-  date: GameDate;
-  title: string;
-  description: string;
-  type: EvenementType;
-  importance: ImportanceType;
-  resolved?: boolean;
-  impact?: {
-    politique?: number;
-    sociale?: number;
-    economique?: number;
-    militaire?: number;
-  };
 }

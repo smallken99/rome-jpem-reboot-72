@@ -6,8 +6,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Label } from '@/components/ui/label';
 import { useMaitreJeu } from '../../context';
-import { Loi } from '../../types';
-import { v4 as uuidv4 } from 'uuid';
+import { Loi, LoiType } from '../../types/lois';
 
 export interface LoiFormProps {
   initialData?: Loi;
@@ -18,16 +17,20 @@ export const LoiForm: React.FC<LoiFormProps> = ({
   initialData,
   onSubmit
 }) => {
-  const { senateurs, currentDate } = useMaitreJeu();
+  const { senateurs, currentYear, currentSeason } = useMaitreJeu();
   
   const [loiData, setLoiData] = useState<Omit<Loi, "id">>({
     titre: initialData?.titre || '',
     description: initialData?.description || '',
     proposeur: initialData?.proposeur || '',
-    dateProposition: initialData?.dateProposition || currentDate,
+    dateProposition: initialData?.dateProposition || { year: currentYear, season: currentSeason },
+    date: initialData?.date || { year: currentYear, season: currentSeason },
     type: initialData?.type || 'politique',
     état: initialData?.état || 'proposée',
     effets: initialData?.effets || [],
+    votesPositifs: initialData?.votesPositifs || 0,
+    votesNégatifs: initialData?.votesNégatifs || 0,
+    votesAbstention: initialData?.votesAbstention || 0,
     votes: initialData?.votes || { pour: 0, contre: 0, abstention: 0 },
     commentaires: initialData?.commentaires || ''
   });
@@ -45,7 +48,7 @@ export const LoiForm: React.FC<LoiFormProps> = ({
     if (newEffet.trim()) {
       setLoiData(prev => ({
         ...prev,
-        effets: [...(prev.effets || []), newEffet]
+        effets: [...prev.effets, newEffet]
       }));
       setNewEffet('');
     }
@@ -54,7 +57,7 @@ export const LoiForm: React.FC<LoiFormProps> = ({
   const handleRemoveEffet = (index: number) => {
     setLoiData(prev => ({
       ...prev,
-      effets: prev.effets?.filter((_, i) => i !== index) || []
+      effets: prev.effets.filter((_, i) => i !== index)
     }));
   };
   
@@ -112,7 +115,7 @@ export const LoiForm: React.FC<LoiFormProps> = ({
           <Label htmlFor="type">Type de loi</Label>
           <Select
             value={loiData.type}
-            onValueChange={(value) => handleChange('type', value)}
+            onValueChange={(value) => handleChange('type', value as LoiType)}
           >
             <SelectTrigger>
               <SelectValue placeholder="Sélectionner un type" />
@@ -166,7 +169,7 @@ export const LoiForm: React.FC<LoiFormProps> = ({
         <Label htmlFor="commentaires">Commentaires additionnels</Label>
         <Textarea
           id="commentaires"
-          value={loiData.commentaires}
+          value={loiData.commentaires || ''}
           onChange={(e) => handleChange('commentaires', e.target.value)}
           placeholder="Commentaires ou notes supplémentaires..."
           rows={3}

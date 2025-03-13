@@ -4,7 +4,6 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { EvenementType, ImportanceType } from '../../types/evenements';
 
 interface EvenementBasicInfoProps {
@@ -30,69 +29,65 @@ export const EvenementBasicInfo: React.FC<EvenementBasicInfoProps> = ({
 }) => {
   return (
     <div className="space-y-4">
-      <div className="space-y-2">
-        <Label htmlFor="title">Titre</Label>
+      <div>
+        <Label htmlFor="titre">Titre de l'événement</Label>
         <Input 
-          id="title" 
+          id="titre" 
           value={titre}
           onChange={(e) => onTitreChange(e.target.value)}
-          placeholder="Titre de l'événement"
+          placeholder="Ex: Invasion des barbares"
         />
       </div>
       
-      <div className="space-y-2">
+      <div>
         <Label htmlFor="description">Description</Label>
         <Textarea 
           id="description" 
           value={description}
           onChange={(e) => onDescriptionChange(e.target.value)}
-          placeholder="Description détaillée de l'événement"
-          rows={3}
+          placeholder="Décrivez l'événement en détail..."
+          rows={4}
         />
       </div>
       
       <div className="grid grid-cols-2 gap-4">
-        <div className="space-y-2">
-          <Label htmlFor="type">Type</Label>
-          <Select 
+        <div>
+          <Label htmlFor="type">Type d'événement</Label>
+          <Select
             value={type}
             onValueChange={(value) => onTypeChange(value as EvenementType)}
           >
-            <SelectTrigger>
-              <SelectValue placeholder="Type d'événement" />
+            <SelectTrigger id="type">
+              <SelectValue placeholder="Sélectionner un type" />
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="POLITIQUE">Politique</SelectItem>
-              <SelectItem value="GUERRE">Guerre</SelectItem>
-              <SelectItem value="ECONOMIQUE">Économique</SelectItem>
-              <SelectItem value="RELIGION">Religion</SelectItem>
+              <SelectItem value="MILITAIRE">Militaire</SelectItem>
               <SelectItem value="DIPLOMATIQUE">Diplomatique</SelectItem>
+              <SelectItem value="ECONOMIQUE">Économique</SelectItem>
               <SelectItem value="SOCIAL">Social</SelectItem>
-              <SelectItem value="CRISE">Crise</SelectItem>
+              <SelectItem value="RELIGIEUX">Religieux</SelectItem>
+              <SelectItem value="CATASTROPHE">Catastrophe</SelectItem>
             </SelectContent>
           </Select>
         </div>
         
-        <div className="space-y-2">
-          <Label>Importance</Label>
-          <RadioGroup 
-            value={importance} 
+        <div>
+          <Label htmlFor="importance">Importance</Label>
+          <Select
+            value={importance}
             onValueChange={(value) => onImportanceChange(value as ImportanceType)}
-            className="flex space-x-2"
           >
-            <div className="flex items-center space-x-1">
-              <RadioGroupItem value="mineure" id="mineure" />
-              <Label htmlFor="mineure">Mineure</Label>
-            </div>
-            <div className="flex items-center space-x-1">
-              <RadioGroupItem value="normale" id="normale" />
-              <Label htmlFor="normale">Normale</Label>
-            </div>
-            <div className="flex items-center space-x-1">
-              <RadioGroupItem value="majeure" id="majeure" />
-              <Label htmlFor="majeure">Majeure</Label>
-            </div>
-          </RadioGroup>
+            <SelectTrigger id="importance">
+              <SelectValue placeholder="Sélectionner l'importance" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="mineure">Mineure</SelectItem>
+              <SelectItem value="normale">Normale</SelectItem>
+              <SelectItem value="majeure">Majeure</SelectItem>
+              <SelectItem value="critique">Critique</SelectItem>
+            </SelectContent>
+          </Select>
         </div>
       </div>
     </div>
