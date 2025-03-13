@@ -27,11 +27,10 @@ export const generatePreceptors = (): Record<string, Preceptor[]> => {
       preceptorsByType[type].push({
         id: `${type}-${i}`,
         name: `${availableNames[nameIndex]} ${i === 0 ? 'le Sage' : i === 1 ? 'l\'Érudit' : ''}`,
-        speciality: educationSpecialties[type][specialtyIndex],
-        reputation,
-        quality,
-        cost,
-        available: true,
+        specialty: educationSpecialties[type][specialtyIndex],
+        skill: i === 0 ? 85 : i === 1 ? 70 : 55,
+        price: cost,
+        status: 'available',
         background: `Un éducateur expérimenté, spécialisé en ${educationSpecialties[type][specialtyIndex]}.`,
         childId: null
       });

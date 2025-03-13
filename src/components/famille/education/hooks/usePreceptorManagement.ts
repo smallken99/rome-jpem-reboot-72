@@ -1,7 +1,8 @@
 
 import { useState } from 'react';
 import { toast } from 'sonner';
-import { Preceptor, PreceptorsByType } from '../types/educationTypes';
+import { Preceptor } from '../types/educationTypes';
+import { PreceptorsByType } from '../context/types';
 
 export const usePreceptorManagement = () => {
   const [hiredPreceptors, setHiredPreceptors] = useState<Preceptor[]>([]);
@@ -60,9 +61,9 @@ export const usePreceptorManagement = () => {
     const result: PreceptorsByType = {};
     
     preceptors.forEach(preceptor => {
-      if (!preceptor.speciality) return;
+      if (!preceptor.specialty) return;
       
-      const type = determineEducationType(preceptor.speciality);
+      const type = determineEducationType(preceptor.specialty);
       if (!result[type]) {
         result[type] = [];
       }

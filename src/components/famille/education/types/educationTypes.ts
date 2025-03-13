@@ -1,4 +1,6 @@
 
+import { LucideIcon } from "lucide-react";
+
 export interface Child {
   id: string;
   name: string;
@@ -13,6 +15,7 @@ export interface Child {
     yearsCompleted?: number;
     totalYears?: number;
     statBonus?: number;
+    speciality?: string;
   };
 }
 
@@ -25,6 +28,13 @@ export interface Preceptor {
   status: 'available' | 'hired' | 'assigned';
   portrait?: string;
   background?: string;
+  childId?: string | null;
+  // For backward compatibility with existing code
+  quality?: number;
+  reputation?: string;
+  cost?: number;
+  available?: boolean;
+  speciality?: string;
 }
 
 export interface EducationPath {
@@ -33,15 +43,21 @@ export interface EducationPath {
   description: string;
   benefits: string[];
   duration: number;
-  requirements?: {
+  icon?: LucideIcon;
+  requirements: {
     age?: number;
-    gender?: string[];
+    gender?: string;
     skills?: Record<string, number>;
+    cost?: number;
+    duration?: string;
   };
   outcomes: {
     skills: string[];
     bonuses: Record<string, number>;
-  };
+  } | string[];
+  specialties?: string[];
+  relatedStat?: string;
+  type?: string;
 }
 
 export interface ChildHeaderProps {

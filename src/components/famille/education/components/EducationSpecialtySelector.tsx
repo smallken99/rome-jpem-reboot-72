@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { EducationSpecialtySelectorProps } from '../types/educationTypes';
+import { EducationSpecialtySelectorProps } from '../context/types';
 import { educationPaths } from '../data';
 import { Check, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -15,6 +15,9 @@ export const EducationSpecialtySelector: React.FC<EducationSpecialtySelectorProp
   const educationPath = educationPaths.find(path => path.id === educationType);
   
   if (!educationPath) return null;
+  
+  // Obtenir les spécialités disponibles pour ce type d'éducation
+  const availableSpecialties = educationPath.specialties || [];
   
   // Gérer la sélection d'une spécialité
   const handleSpecialtyToggle = (specialty: string) => {
@@ -31,6 +34,19 @@ export const EducationSpecialtySelector: React.FC<EducationSpecialtySelectorProp
   // Vérifier si une spécialité est sélectionnée
   const isSelected = (specialty: string) => selectedSpecialties.includes(specialty);
   
+  if (availableSpecialties.length === 0) {
+    return (
+      <div className="space-y-4">
+        <div>
+          <h3 className="text-lg font-medium">Spécialités</h3>
+          <p className="text-sm text-muted-foreground">
+            Aucune spécialité disponible pour ce type d'éducation.
+          </p>
+        </div>
+      </div>
+    );
+  }
+  
   return (
     <div className="space-y-4">
       <div>
@@ -41,7 +57,7 @@ export const EducationSpecialtySelector: React.FC<EducationSpecialtySelectorProp
       </div>
       
       <div className="flex flex-wrap gap-2">
-        {educationPath.specialties && typeof educationPath.specialties.map === 'function' && educationPath.specialties.map(specialty => (
+        {availableSpecialties.map(specialty => (
           <Button
             key={specialty}
             variant={isSelected(specialty) ? "default" : "outline"}

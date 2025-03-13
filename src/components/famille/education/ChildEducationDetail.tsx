@@ -33,13 +33,13 @@ const ChildEducationDetail: React.FC = () => {
   
   // Charger les données existantes de l'enfant
   useEffect(() => {
-    if (child) {
+    if (child && child.currentEducation) {
       setSelectedType(child.currentEducation.type || 'none');
       setSelectedSpecialties(child.currentEducation.skills || []);
       
       // Si l'enfant a un mentor, trouve son ID dans la liste des précepteurs engagés
       if (child.currentEducation.mentor) {
-        const preceptor = hiredPreceptors.find(p => p.name === child.currentEducation.mentor);
+        const preceptor = hiredPreceptors.find(p => p.name === child.currentEducation?.mentor);
         if (preceptor) {
           setSelectedMentor(preceptor.id);
         }
@@ -56,8 +56,7 @@ const ChildEducationDetail: React.FC = () => {
   const availableMentors = hiredPreceptors.filter(p => {
     // Un précepteur est disponible s'il n'est pas assigné à un enfant 
     // ou s'il est déjà assigné à cet enfant
-    const isAvailable = !p.childId || p.childId === childId;
-    return isAvailable;
+    return !p.childId || p.childId === childId;
   });
   
   // Gérer la soumission du formulaire
@@ -70,32 +69,18 @@ const ChildEducationDetail: React.FC = () => {
     setIsSubmitting(true);
     
     // Utiliser le contexte pour démarrer l'éducation
-    const success = startChildEducation(
-      childId,
-      selectedType,
-      selectedMentor,
-      selectedSpecialties
-    );
+    startChildEducation(childId, selectedType, selectedMentor);
     
     setIsSubmitting(false);
-    
-    if (success) {
-      toast.success(`Éducation configurée pour ${child.name}`);
-      navigate('/famille/education');
-    } else {
-      toast.error("Une erreur est survenue lors de la configuration de l'éducation");
-    }
+    toast.success(`Éducation configurée pour ${child.name}`);
+    navigate('/famille/education');
   };
   
   return (
     <div className="space-y-6">
       {/* En-tête avec les informations de l'enfant */}
       <ChildHeader 
-        child={{
-          name: child.name,
-          age: child.age,
-          gender: child.gender
-        }}
+        child={child}
       />
       
       {/* Avertissement si l'enfant est déjà en éducation */}
@@ -136,7 +121,7 @@ const ChildEducationDetail: React.FC = () => {
             <option value="">Aucun précepteur (autodidacte)</option>
             {availableMentors.map(mentor => (
               <option key={mentor.id} value={mentor.id}>
-                {mentor.name} - {mentor.speciality}
+                {mentor.name} - {mentor.specialty}
               </option>
             ))}
           </select>

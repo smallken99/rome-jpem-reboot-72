@@ -1,8 +1,7 @@
 
 import { useState } from 'react';
 import { toast } from 'sonner';
-import { Child, EducationHistory, ChildEducation } from '../types/educationTypes';
-import { getRelatedStatName } from '../utils/educationUtils';
+import { Child, EducationHistory } from '../context/types';
 import { Character } from '@/types/character';
 
 export const useEducationProgress = () => {
@@ -30,16 +29,12 @@ export const useEducationProgress = () => {
     const baseProgress = 50 + Math.floor(Math.random() * 20);
     
     // Bonus for mentor quality
-    const mentorQualityBonus = child.currentEducation.mentor 
+    const mentorQualityBonus = child.currentEducation?.mentor 
       ? 10 
       : 0;
     
-    // Bonus for previous education in same field
-    const previousEducationBonus = child.currentEducation.educationHistory?.some(
-      history => history.type === educationType
-    ) ? 15 : 0;
-    
-    return baseProgress + mentorQualityBonus + previousEducationBonus;
+    // Base progress
+    return baseProgress + mentorQualityBonus;
   };
   
   // Advance education by a year
@@ -47,6 +42,10 @@ export const useEducationProgress = () => {
     child: Child, 
     onComplete?: (childId: string, education: EducationHistory) => void
   ): {progress: number, isComplete: boolean} => {
+    if (!child.currentEducation) {
+      return { progress: 0, isComplete: false };
+    }
+    
     const { currentEducation } = child;
     const yearlyProgress = calculateYearlyProgress(child, currentEducation.type);
     const newProgress = Math.min(currentEducation.progress + yearlyProgress, 100);
@@ -80,10 +79,10 @@ export const useEducationProgress = () => {
     
     if (statName && updatedCharacter.stats[statName as keyof typeof updatedCharacter.stats]) {
       const stat = updatedCharacter.stats[statName as keyof typeof updatedCharacter.stats];
-      if ('value' in stat) {
+      if (typeof stat === 'object' && 'value' in stat) {
         // Don't exceed max value (usually 80 from education alone)
-        const newValue = Math.min(stat.value + educationHistory.statBonus, 80);
-        stat.value = newValue;
+        const newValue = Math.min((stat.value as number) + educationHistory.statBonus, 80);
+        (stat as any).value = newValue;
       }
     }
     
@@ -96,6 +95,7 @@ export const useEducationProgress = () => {
       case 'military':
         return 'martialEducation';
       case 'political':
+      case 'rhetoric':
         return 'oratory';
       case 'religious':
         return 'piety';

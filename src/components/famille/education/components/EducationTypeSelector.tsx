@@ -1,8 +1,9 @@
 
 import React from 'react';
 import { educationPaths } from '../data';
-import { EducationTypeSelectorProps } from '../types/educationTypes';
+import { EducationTypeSelectorProps } from '../context/types';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
+import { BookOpen, Sword, Cross } from 'lucide-react';
 
 export const EducationTypeSelector: React.FC<EducationTypeSelectorProps> = ({
   value,
@@ -11,9 +12,18 @@ export const EducationTypeSelector: React.FC<EducationTypeSelectorProps> = ({
 }) => {
   // Filtrer les chemins d'éducation par genre
   const filteredPaths = educationPaths.filter(path => {
-    if (path.requirements.gender === 'both') return true;
-    return path.requirements.gender === childGender;
+    if (path.requirements?.gender === 'both') return true;
+    return path.requirements?.gender === childGender;
   });
+
+  // Helper function to get icon for education type
+  const getIcon = (pathId: string) => {
+    switch(pathId) {
+      case 'military': return <Sword className="h-5 w-5" />;
+      case 'religious': return <Cross className="h-5 w-5" />;
+      default: return <BookOpen className="h-5 w-5" />;
+    }
+  };
 
   return (
     <div className="space-y-4">
@@ -32,7 +42,7 @@ export const EducationTypeSelector: React.FC<EducationTypeSelectorProps> = ({
             <TabsTrigger 
               key={path.id} 
               value={path.id}
-              disabled={path.requirements.age > 15} // Exemple: désactivé si trop avancé
+              disabled={path.requirements?.age && path.requirements.age > 15} // Exemple: désactivé si trop avancé
             >
               {path.name.split(' ')[1]}
             </TabsTrigger>
@@ -42,7 +52,7 @@ export const EducationTypeSelector: React.FC<EducationTypeSelectorProps> = ({
         {filteredPaths.map(path => (
           <TabsContent key={path.id} value={path.id} className="mt-4 space-y-4">
             <div className="flex items-center gap-2">
-              <path.icon className="h-5 w-5" />
+              {getIcon(path.id)}
               <h3 className="text-xl font-semibold">{path.name}</h3>
             </div>
             
@@ -61,14 +71,14 @@ export const EducationTypeSelector: React.FC<EducationTypeSelectorProps> = ({
               <div>
                 <h4 className="font-medium mb-2">Prérequis</h4>
                 <ul className="list-disc list-inside space-y-1 text-sm">
-                  <li>Âge minimum: {path.requirements.age} ans</li>
+                  <li>Âge minimum: {path.requirements?.age || 'N/A'} ans</li>
                   <li>Genre: {
-                    path.requirements.gender === 'male' ? 'Garçon uniquement' : 
-                    path.requirements.gender === 'female' ? 'Fille uniquement' : 
+                    path.requirements?.gender === 'male' ? 'Garçon uniquement' : 
+                    path.requirements?.gender === 'female' ? 'Fille uniquement' : 
                     'Tous'
                   }</li>
-                  <li>Coût: {path.requirements.cost} As</li>
-                  <li>Durée typique: {path.requirements.duration}</li>
+                  <li>Coût: {path.requirements?.cost || 'N/A'} As</li>
+                  <li>Durée typique: {path.requirements?.duration || path.duration + ' ans'}</li>
                 </ul>
               </div>
             </div>

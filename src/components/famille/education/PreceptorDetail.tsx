@@ -45,7 +45,7 @@ export const PreceptorDetail: React.FC = () => {
         } else {
           // Sinon charger tous les précepteurs du type spécifié
           if (loadPreceptorsByType) {
-            const preceptors = await loadPreceptorsByType(speciality);
+            const preceptors = loadPreceptorsByType(speciality);
             const foundPreceptor = preceptors.find(p => p.id === preceptorId);
             
             if (!foundPreceptor) {
@@ -69,25 +69,11 @@ export const PreceptorDetail: React.FC = () => {
   }, [preceptorId, speciality, loadPreceptorsByType, hiredPreceptors]);
   
   // Gérer l'embauche du précepteur
-  const handleHire = async () => {
+  const handleHire = () => {
     if (!preceptor) return;
     
-    try {
-      const success = await hirePreceptor(preceptor);
-      
-      if (success) {
-        toast.success(`${preceptor.name} a été embauché avec succès!`);
-        navigate('/famille/education/preceptors');
-      } else {
-        toast.error("Une erreur est survenue lors de l'embauche du précepteur");
-      }
-    } catch (error) {
-      console.error('Erreur lors de l\'embauche:', error);
-      toast.error("Une erreur est survenue lors de l'embauche du précepteur");
-    }
-  };
-  
-  const handleCancel = () => {
+    hirePreceptor(preceptor.id);
+    toast.success(`${preceptor.name} a été embauché avec succès!`);
     navigate('/famille/education/preceptors');
   };
   
@@ -104,13 +90,20 @@ export const PreceptorDetail: React.FC = () => {
   // Détermine si le précepteur est déjà engagé
   const isAlreadyHired = hiredPreceptors.some(p => p.id === preceptor.id);
   
+  // Pour assurer la compatibilité
+  const reputation = preceptor.reputation || (preceptor.skill >= 80 ? "Excellent" : preceptor.skill >= 60 ? "Bon" : "Moyen");
+  const quality = preceptor.quality || Math.ceil(preceptor.skill / 20);
+  const cost = preceptor.cost || preceptor.price;
+  const specialty = preceptor.specialty || preceptor.speciality || "";
+  const available = preceptor.available !== undefined ? preceptor.available : preceptor.status === 'available';
+  
   return (
     <div className="space-y-6">
       {/* En-tête avec les informations du précepteur */}
       <PreceptorHeader 
         preceptor={{
           name: preceptor.name,
-          reputation: preceptor.reputation
+          reputation: reputation as "Excellent" | "Bon" | "Moyen"
         }}
       />
       
@@ -119,15 +112,15 @@ export const PreceptorDetail: React.FC = () => {
           {/* Qualité du précepteur */}
           <div>
             <h3 className="text-lg font-semibold mb-2">Qualité</h3>
-            <PreceptorQualityStars quality={preceptor.quality} />
+            <PreceptorQualityStars quality={quality} />
           </div>
           
           {/* Spécialité */}
           <div>
             <h3 className="text-lg font-semibold mb-2">Spécialité</h3>
             <PreceptorSpeciality 
-              type={preceptor.speciality.split(' ')[0]} 
-              specialty={preceptor.speciality} 
+              type={specialty.split(' ')[0]} 
+              specialty={specialty} 
             />
           </div>
           
@@ -136,7 +129,7 @@ export const PreceptorDetail: React.FC = () => {
           {/* Biographie */}
           <div>
             <h3 className="text-lg font-semibold mb-2">Biographie</h3>
-            <PreceptorBiography bio={preceptor.background} />
+            <PreceptorBiography bio={preceptor.background || "Un précepteur expérimenté"} />
           </div>
         </div>
         
@@ -147,13 +140,13 @@ export const PreceptorDetail: React.FC = () => {
             
             {isAlreadyHired ? (
               <PreceptorCostInfo 
-                cost={preceptor.cost} 
+                cost={cost} 
                 available={false} 
               />
             ) : (
               <PreceptorCostInfo 
-                cost={preceptor.cost} 
-                available={preceptor.available} 
+                cost={cost} 
+                available={available} 
               />
             )}
             
@@ -161,7 +154,7 @@ export const PreceptorDetail: React.FC = () => {
             <div className="mt-6">
               <PreceptorActions 
                 onHire={handleHire}
-                isAvailable={!isAlreadyHired && preceptor.available}
+                isAvailable={!isAlreadyHired && available}
                 isLoading={isHiringPreceptor}
               />
             </div>

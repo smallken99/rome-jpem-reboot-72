@@ -1,15 +1,16 @@
 
 import React from 'react';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 import { AlertTriangle } from 'lucide-react';
-import { EducationWarningProps } from '../types/educationTypes';
+import { EducationWarningProps } from '../context/types';
 
-export const EducationWarning: React.FC<EducationWarningProps> = ({ icon, text }) => {
+export const EducationWarning: React.FC<EducationWarningProps> = ({ text }) => {
   return (
-    <div className="bg-amber-50 border border-amber-200 rounded-md p-4 flex items-start gap-3">
-      {icon || <AlertTriangle className="h-5 w-5 text-amber-500 mt-0.5 flex-shrink-0" />}
-      <div>
-        <p className="text-amber-800">{text}</p>
-      </div>
-    </div>
+    <Alert variant="destructive" className="bg-red-50 border-red-200 text-red-800">
+      <AlertTriangle className="h-4 w-4" />
+      <AlertDescription>
+        {text}
+      </AlertDescription>
+    </Alert>
   );
 };

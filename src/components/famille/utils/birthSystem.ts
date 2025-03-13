@@ -1,6 +1,5 @@
-
 import { Character } from '@/types/character';
-import { romanNamePrefixes, romanNameSuffixes } from '@/components/famille/education/data';
+import { romanNames } from '@/components/famille/education/data/romanNames';
 import { Season } from '@/utils/timeSystem';
 
 // Constants for birth system
@@ -20,6 +19,9 @@ const SEASONAL_BIRTH_MODIFIERS: Record<Season, number> = {
   'Autumnus': -0.02, // Autumn: -2% birth chance
   'Hiems': -0.05    // Winter: -5% birth chance (harsh conditions)
 };
+
+const romanNamePrefixes = romanNames.map(name => name.split(' ')[0]);
+const romanNameSuffixes = romanNames.map(name => name.split(' ')[1]);
 
 /**
  * Determines if a birth occurs for a married couple
