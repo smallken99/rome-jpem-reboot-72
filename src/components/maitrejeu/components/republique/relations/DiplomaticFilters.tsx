@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { Filter, X } from 'lucide-react';
+import { Filter, X, Search } from 'lucide-react';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { 
@@ -22,6 +22,7 @@ interface FilterOptions {
   region: string;
   dateFrom: string;
   dateTo: string;
+  searchTerm: string;
 }
 
 interface DiplomaticFiltersProps {
@@ -39,7 +40,8 @@ export const DiplomaticFilters: React.FC<DiplomaticFiltersProps> = ({
     status: '',
     region: '',
     dateFrom: '',
-    dateTo: ''
+    dateTo: '',
+    searchTerm: ''
   });
   
   const [isOpen, setIsOpen] = React.useState(false);
@@ -47,6 +49,12 @@ export const DiplomaticFilters: React.FC<DiplomaticFiltersProps> = ({
   const handleFilterChange = (key: keyof FilterOptions, value: string) => {
     const newFilters = { ...filters, [key]: value };
     setFilters(newFilters);
+  };
+  
+  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const searchTerm = e.target.value;
+    setFilters(prev => ({ ...prev, searchTerm }));
+    onFilterChange({ ...filters, searchTerm });
   };
   
   const applyFilters = () => {
@@ -59,7 +67,8 @@ export const DiplomaticFilters: React.FC<DiplomaticFiltersProps> = ({
       status: '',
       region: '',
       dateFrom: '',
-      dateTo: ''
+      dateTo: '',
+      searchTerm: ''
     });
     onReset();
     setIsOpen(false);
@@ -103,94 +112,107 @@ export const DiplomaticFilters: React.FC<DiplomaticFiltersProps> = ({
   ];
   
   return (
-    <Popover open={isOpen} onOpenChange={setIsOpen}>
-      <PopoverTrigger asChild>
-        <Button 
-          variant="outline" 
-          className="flex items-center gap-2"
-          aria-label="Filtres avancés"
-        >
-          <Filter size={16} />
-          <span>Filtres avancés</span>
-        </Button>
-      </PopoverTrigger>
-      <PopoverContent className="w-80 p-4" align="end">
-        <div className="space-y-4">
-          <div className="flex items-center justify-between">
-            <h3 className="font-medium">Filtres</h3>
-            <Button variant="ghost" size="icon" onClick={resetFilters}>
-              <X size={16} />
-            </Button>
-          </div>
-          
-          <div className="space-y-2">
-            <Label htmlFor="status">Statut</Label>
-            <Select 
-              value={filters.status} 
-              onValueChange={(value) => handleFilterChange('status', value)}
-            >
-              <SelectTrigger id="status">
-                <SelectValue placeholder="Tous les statuts" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="">Tous les statuts</SelectItem>
-                {getStatusOptions().map(option => (
-                  <SelectItem key={option.value} value={option.value}>
-                    {option.label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-          
-          <div className="space-y-2">
-            <Label htmlFor="region">Région</Label>
-            <Select 
-              value={filters.region} 
-              onValueChange={(value) => handleFilterChange('region', value)}
-            >
-              <SelectTrigger id="region">
-                <SelectValue placeholder="Toutes les régions" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="">Toutes les régions</SelectItem>
-                {regions.map(region => (
-                  <SelectItem key={region.value} value={region.value}>
-                    {region.label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-          
-          <div className="grid grid-cols-2 gap-2">
-            <div className="space-y-2">
-              <Label htmlFor="dateFrom">Date (de)</Label>
-              <Input
-                id="dateFrom"
-                type="text"
-                placeholder="Ex: 200 av. J.-C."
-                value={filters.dateFrom}
-                onChange={(e) => handleFilterChange('dateFrom', e.target.value)}
-              />
+    <div className="flex items-center space-x-2">
+      <div className="relative w-full max-w-sm">
+        <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+        <Input
+          type="search"
+          placeholder="Rechercher..."
+          className="w-full pl-8"
+          value={filters.searchTerm}
+          onChange={handleSearchChange}
+        />
+      </div>
+      
+      <Popover open={isOpen} onOpenChange={setIsOpen}>
+        <PopoverTrigger asChild>
+          <Button 
+            variant="outline" 
+            className="flex items-center gap-2"
+            aria-label="Filtres avancés"
+          >
+            <Filter size={16} />
+            <span>Filtres avancés</span>
+          </Button>
+        </PopoverTrigger>
+        <PopoverContent className="w-80 p-4" align="end">
+          <div className="space-y-4">
+            <div className="flex items-center justify-between">
+              <h3 className="font-medium">Filtres</h3>
+              <Button variant="ghost" size="icon" onClick={resetFilters}>
+                <X size={16} />
+              </Button>
             </div>
+            
             <div className="space-y-2">
-              <Label htmlFor="dateTo">Date (à)</Label>
-              <Input
-                id="dateTo"
-                type="text"
-                placeholder="Ex: 100 av. J.-C."
-                value={filters.dateTo}
-                onChange={(e) => handleFilterChange('dateTo', e.target.value)}
-              />
+              <Label htmlFor="status">Statut</Label>
+              <Select 
+                value={filters.status} 
+                onValueChange={(value) => handleFilterChange('status', value)}
+              >
+                <SelectTrigger id="status">
+                  <SelectValue placeholder="Tous les statuts" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="">Tous les statuts</SelectItem>
+                  {getStatusOptions().map(option => (
+                    <SelectItem key={option.value} value={option.value}>
+                      {option.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            
+            <div className="space-y-2">
+              <Label htmlFor="region">Région</Label>
+              <Select 
+                value={filters.region} 
+                onValueChange={(value) => handleFilterChange('region', value)}
+              >
+                <SelectTrigger id="region">
+                  <SelectValue placeholder="Toutes les régions" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="">Toutes les régions</SelectItem>
+                  {regions.map(region => (
+                    <SelectItem key={region.value} value={region.value}>
+                      {region.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            
+            <div className="grid grid-cols-2 gap-2">
+              <div className="space-y-2">
+                <Label htmlFor="dateFrom">Date (de)</Label>
+                <Input
+                  id="dateFrom"
+                  type="text"
+                  placeholder="Ex: 200 av. J.-C."
+                  value={filters.dateFrom}
+                  onChange={(e) => handleFilterChange('dateFrom', e.target.value)}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="dateTo">Date (à)</Label>
+                <Input
+                  id="dateTo"
+                  type="text"
+                  placeholder="Ex: 100 av. J.-C."
+                  value={filters.dateTo}
+                  onChange={(e) => handleFilterChange('dateTo', e.target.value)}
+                />
+              </div>
+            </div>
+            
+            <div className="flex justify-end">
+              <Button onClick={applyFilters}>Appliquer</Button>
             </div>
           </div>
-          
-          <div className="flex justify-end">
-            <Button onClick={applyFilters}>Appliquer</Button>
-          </div>
-        </div>
-      </PopoverContent>
-    </Popover>
+        </PopoverContent>
+      </Popover>
+    </div>
   );
 };
