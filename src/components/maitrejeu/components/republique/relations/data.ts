@@ -1,10 +1,7 @@
 
-import { Nation, Alliance, Traite } from './types';
+import { Nation, Traite, Alliance } from './types';
 
-// Export all the types that are used in other components
-export type { Nation, Alliance, Traite };
-
-// Mock data for nations
+// Nations mock data
 export const nationsMock: Nation[] = [
   {
     id: "1",
@@ -12,166 +9,210 @@ export const nationsMock: Nation[] = [
     région: "Afrique du Nord",
     statut: "Ennemi",
     puissanceMilitaire: 85,
-    richesse: 90,
-    relationAvecRome: 15,
-    dateDernierTraité: "218 av. J.-C.",
+    richesse: 80,
+    relationAvecRome: 10,
+    dateDernierTraité: "AUC 608",
     capitale: "Carthage",
-    gouvernement: "République oligarchique",
-    notes: "Principal rival de Rome en Méditerranée occidentale"
+    gouvernement: "République marchande",
+    notes: "Rival historique de Rome, puissante flotte marchande et militaire"
   },
   {
     id: "2",
-    nom: "Macédoine",
-    région: "Grèce",
+    nom: "Grèce",
+    région: "Méditerranée orientale",
     statut: "Neutre",
-    puissanceMilitaire: 70,
+    puissanceMilitaire: 60,
     richesse: 75,
     relationAvecRome: 45,
-    dateDernierTraité: "220 av. J.-C.",
-    capitale: "Pella",
-    gouvernement: "Monarchie",
-    notes: "Royaume hellénistique puissant"
+    dateDernierTraité: "AUC 587",
+    capitale: "Athènes",
+    gouvernement: "Diverses cités-États",
+    notes: "Centre culturel important, alliances fluctuantes"
   },
   {
     id: "3",
-    nom: "Numidie",
-    région: "Afrique du Nord",
+    nom: "Égypte Ptolémaïque",
+    région: "Afrique du Nord-Est",
     statut: "Allié",
-    puissanceMilitaire: 60,
-    richesse: 50,
-    relationAvecRome: 75,
-    dateDernierTraité: "212 av. J.-C.",
-    capitale: "Cirta",
+    puissanceMilitaire: 65,
+    richesse: 90,
+    relationAvecRome: 70,
+    dateDernierTraité: "AUC 623",
+    capitale: "Alexandrie",
     gouvernement: "Monarchie",
-    notes: "Allié important contre Carthage"
+    notes: "Fournisseur de grain vital pour Rome"
   },
   {
     id: "4",
-    nom: "Gaule Cisalpine",
-    région: "Europe",
+    nom: "Numidie",
+    région: "Afrique du Nord",
     statut: "Soumis",
     puissanceMilitaire: 45,
     richesse: 40,
-    relationAvecRome: 30,
-    dateDernierTraité: "222 av. J.-C.",
-    capitale: "Mediolanum",
-    gouvernement: "Tribus confédérées",
-    notes: "Région stratégique pour l'expansion romaine vers le nord"
+    relationAvecRome: 60,
+    dateDernierTraité: "AUC 605",
+    capitale: "Cirta",
+    gouvernement: "Royaume tribal",
+    notes: "Cavalerie légendaire, allié contre Carthage"
   },
   {
     id: "5",
-    nom: "Royaume de Syracuse",
-    région: "Sicile",
+    nom: "Parthie",
+    région: "Asie",
     statut: "Allié",
-    puissanceMilitaire: 30,
-    richesse: 65,
-    relationAvecRome: 80,
-    dateDernierTraité: "215 av. J.-C.",
-    capitale: "Syracuse",
-    gouvernement: "Tyrannie",
-    notes: "Centre culturel et commercial important en Méditerranée"
+    puissanceMilitaire: 75,
+    richesse: 70,
+    relationAvecRome: 50,
+    dateDernierTraité: "AUC 615",
+    capitale: "Ctésiphon",
+    gouvernement: "Empire dynastique",
+    notes: "Cavalerie d'élite, contrôle les routes commerciales orientales"
   }
 ];
 
-// Mock data for treaties
+// Traités mock data
 export const traitesMock: Traite[] = [
   {
     id: "1",
-    titre: "Traité de Paix avec Carthage",
-    parties: ["Rome", "Carthage"],
+    titre: "Traité de paix romain-carthaginois",
     type: "Paix",
-    dateSignature: "241 av. J.-C.",
-    duree: "20 ans",
-    clauses: [
-      "Carthage doit évacuer la Sicile",
-      "Indemnité de guerre de 3 200 talents à payer sur 10 ans",
-      "Libération des prisonniers romains sans rançon"
+    parties: ["Rome", "Carthage"],
+    dateSignature: "AUC 608",
+    duree: "25 ans",
+    statut: "Actif",
+    termes: [
+      "Carthage doit payer un tribut annuel de 10,000 talents",
+      "Carthage doit diminuer sa flotte à 10 navires de guerre",
+      "Carthage ne peut pas déclarer la guerre sans l'approbation de Rome"
     ],
-    statut: "Rompu"
+    bénéfices: {
+      économiques: 8,
+      militaires: 6,
+      politiques: 9
+    }
   },
   {
     id: "2",
-    titre: "Alliance défensive avec Syracuse",
-    parties: ["Rome", "Syracuse"],
-    type: "Alliance",
-    dateSignature: "215 av. J.-C.",
-    duree: "25 ans",
-    clauses: [
-      "Assistance militaire mutuelle en cas d'agression",
-      "Droits de commerce préférentiels",
-      "Fourniture annuelle de blé à Rome"
+    titre: "Alliance commerciale avec l'Égypte",
+    type: "Commercial",
+    parties: ["Rome", "Égypte Ptolémaïque"],
+    dateSignature: "AUC 623",
+    duree: "10 ans",
+    statut: "Actif",
+    termes: [
+      "Tarifs préférentiels pour l'importation de grain égyptien",
+      "Protection des marchands romains en Égypte",
+      "Accès aux ports égyptiens pour les navires romains"
     ],
-    statut: "Actif"
+    bénéfices: {
+      économiques: 9,
+      politiques: 7,
+      militaires: 3
+    }
   },
   {
     id: "3",
-    titre: "Traité commercial avec la Macédoine",
-    parties: ["Rome", "Macédoine"],
-    type: "Commerce",
-    dateSignature: "220 av. J.-C.",
-    duree: "15 ans",
-    clauses: [
-      "Réduction des droits de douane pour les marchands romains",
-      "Accès aux ports macédoniens",
-      "Protection des navires marchands"
+    titre: "Traité d'amitié avec la Grèce",
+    type: "Diplomatique",
+    parties: ["Rome", "Athènes", "Sparte", "Corinthe"],
+    dateSignature: "AUC 587",
+    duree: "Indéterminée",
+    statut: "Actif",
+    termes: [
+      "Non-agression mutuelle",
+      "Échanges culturels et éducatifs",
+      "Résolution pacifique des conflits"
     ],
-    statut: "Actif"
+    bénéfices: {
+      politiques: 8,
+      économiques: 5,
+      militaires: 2
+    }
+  },
+  {
+    id: "4",
+    titre: "Traité de vassalité numide",
+    type: "Vassalité",
+    parties: ["Rome", "Numidie"],
+    dateSignature: "AUC 605",
+    statut: "Actif",
+    termes: [
+      "La Numidie fournit des troupes auxiliaires à Rome",
+      "La Numidie paie un tribut annuel",
+      "Rome garantit la protection de la Numidie"
+    ],
+    bénéfices: {
+      militaires: 7,
+      politiques: 6,
+      économiques: 4
+    }
+  },
+  {
+    id: "5",
+    titre: "Traité commercial avec la Parthie",
+    type: "Commercial",
+    parties: ["Rome", "Empire Parthe"],
+    dateSignature: "AUC 615",
+    duree: "15 ans",
+    statut: "En négociation",
+    termes: [
+      "Sécurisation des routes commerciales",
+      "Tarifs réduits sur les produits de luxe",
+      "Échange d'ambassadeurs permanents"
+    ]
   }
 ];
 
-// Mock data for military alliances
+// Alliances mock data
 export const alliancesMock: Alliance[] = [
   {
     id: "1",
-    nom: "Ligue Latine",
-    membres: ["Rome", "Tibur", "Préneste", "Tusculum"],
+    nom: "Ligue latine",
     type: "Défensive",
-    dateFormation: "493 av. J.-C.",
-    objectif: "Défense contre les Volsques et les Èques",
-    puissanceCombiné: 85,
+    membres: ["Rome", "Villes latines", "Colonies romaines"],
+    dateFormation: "AUC 493",
+    dateCreation: "AUC 493",
+    objectif: "Défense commune contre les Èques et les Volsques",
+    puissanceCombiné: 75,
     traitésAssociés: ["Foedus Cassianum"],
-    dateCreation: "493 av. J.-C.",
     commandement: "Rome",
     forces: {
-      legions: 4,
-      auxiliaires: 8000,
-      navires: 0
+      légions: 4,
+      auxiliaires: 10000
     },
     statut: "Actif"
   },
   {
     id: "2",
-    nom: "Alliance Italiote",
-    membres: ["Rome", "Capoue", "Cumes", "Naples"],
-    type: "Militaire",
-    dateFormation: "338 av. J.-C.",
-    objectif: "Organisation militaire de l'Italie centrale",
-    puissanceCombiné: 75,
-    traitésAssociés: ["Traité de Capoue"],
-    dateCreation: "338 av. J.-C.",
-    commandement: "Rome",
+    nom: "Alliance hellénique",
+    type: "Culturelle et militaire",
+    membres: ["Rome", "Athènes", "Sparte", "Rhodes"],
+    dateFormation: "AUC 587",
+    dateCreation: "AUC 587",
+    objectif: "Protection des intérêts grecs et romains en Méditerranée orientale",
+    puissanceCombiné: 65,
+    traitésAssociés: ["Traité d'amitié avec la Grèce"],
+    commandement: "Conseil mixte",
     forces: {
-      legions: 3,
-      auxiliaires: 6000,
-      navires: 12
+      légions: 2,
+      auxiliaires: 5000
     },
     statut: "Actif"
   },
   {
     id: "3",
-    nom: "Coalition Anti-Carthaginoise",
-    membres: ["Rome", "Syracuse", "Massilia", "Numidie"],
-    type: "Offensive",
-    dateFormation: "218 av. J.-C.",
+    nom: "Coalition anti-carthaginoise",
+    type: "Militaire",
+    membres: ["Rome", "Numidie", "Cités grecques de Sicile"],
+    dateFormation: "AUC 605",
+    dateCreation: "AUC 605",
     objectif: "Opposition à l'expansion carthaginoise",
     puissanceCombiné: 90,
-    traitésAssociés: ["Alliance défensive avec Syracuse", "Pacte de Massilia"],
-    dateCreation: "218 av. J.-C.",
+    traitésAssociés: ["Traité de paix romain-carthaginois", "Traité de vassalité numide"],
     commandement: "Rome",
     forces: {
-      legions: 8,
-      auxiliaires: 15000,
-      navires: 120
+      légions: 6,
+      auxiliaires: 15000
     },
     statut: "Actif"
   }
