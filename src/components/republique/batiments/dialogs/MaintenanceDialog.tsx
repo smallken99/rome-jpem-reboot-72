@@ -1,10 +1,11 @@
 
 import React, { useState } from 'react';
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Label } from '@/components/ui/label';
-import { formatMoney } from '@/utils/formatUtils';
 import { PublicBuilding } from '../hooks/useBatimentsPublics';
+import { Tool, Coins } from 'lucide-react';
 
 interface MaintenanceDialogProps {
   open: boolean;
@@ -17,95 +18,109 @@ export const MaintenanceDialog: React.FC<MaintenanceDialogProps> = ({
   open,
   onOpenChange,
   selectedItem,
-  onMaintain,
+  onMaintain
 }) => {
-  const [maintenanceLevel, setMaintenanceLevel] = useState<'minimal' | 'standard' | 'excellent'>('standard');
-
+  const [selectedLevel, setSelectedLevel] = useState<'minimal' | 'standard' | 'excellent'>('standard');
+  
   if (!selectedItem) return null;
+  
+  const getMaintenanceCost = (level: 'minimal' | 'standard' | 'excellent') => {
+    switch (level) {
+      case 'minimal': return Math.round(selectedItem.maintenanceCost * 0.7);
+      case 'standard': return selectedItem.maintenanceCost;
+      case 'excellent': return Math.round(selectedItem.maintenanceCost * 1.5);
+    }
+  };
+  
+  const getImprovement = (level: 'minimal' | 'standard' | 'excellent') => {
+    switch (level) {
+      case 'minimal': return '5%';
+      case 'standard': return '15%';
+      case 'excellent': return '30%';
+    }
+  };
 
+  const handleSubmit = () => {
+    onMaintain(selectedLevel);
+    onOpenChange(false);
+  };
+  
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[425px]">
+      <DialogContent>
         <DialogHeader>
-          <DialogTitle>Maintenance du bâtiment</DialogTitle>
-          <DialogDescription>
-            Choisissez le niveau de maintenance à effectuer pour {selectedItem?.name}.
-          </DialogDescription>
+          <DialogTitle className="font-cinzel">Maintenance de {selectedItem.name}</DialogTitle>
         </DialogHeader>
-        <div className="grid gap-4 py-4">
-          <div className="space-y-2">
-            <Label htmlFor="maintenance-minimal">
-              <div className="flex items-center space-x-2">
-                <input
-                  type="radio"
-                  id="maintenance-minimal"
-                  name="maintenance"
-                  checked={maintenanceLevel === 'minimal'}
-                  onChange={() => setMaintenanceLevel('minimal')}
-                  className="h-4 w-4"
-                />
-                <span>Minimal (70% du coût)</span>
-              </div>
-              <p className="text-sm text-muted-foreground ml-6">
-                Réparations essentielles uniquement. Améliore l'état de 5%.
-              </p>
-            </Label>
-          </div>
-          
-          <div className="space-y-2">
-            <Label htmlFor="maintenance-standard">
-              <div className="flex items-center space-x-2">
-                <input
-                  type="radio"
-                  id="maintenance-standard"
-                  name="maintenance"
-                  checked={maintenanceLevel === 'standard'}
-                  onChange={() => setMaintenanceLevel('standard')}
-                  className="h-4 w-4"
-                />
-                <span>Standard (100% du coût)</span>
-              </div>
-              <p className="text-sm text-muted-foreground ml-6">
-                Maintenance complète. Améliore l'état de 15%.
-              </p>
-            </Label>
-          </div>
-          
-          <div className="space-y-2">
-            <Label htmlFor="maintenance-excellent">
-              <div className="flex items-center space-x-2">
-                <input
-                  type="radio"
-                  id="maintenance-excellent"
-                  name="maintenance"
-                  checked={maintenanceLevel === 'excellent'}
-                  onChange={() => setMaintenanceLevel('excellent')}
-                  className="h-4 w-4"
-                />
-                <span>Excellent (150% du coût)</span>
-              </div>
-              <p className="text-sm text-muted-foreground ml-6">
-                Maintenance de luxe avec améliorations. Améliore l'état de 30%.
-              </p>
-            </Label>
-          </div>
-          
-          {selectedItem && (
-            <div className="mt-2 p-3 bg-muted rounded-md">
-              <p className="text-sm">
-                Coût estimé: {formatMoney(selectedItem.maintenanceCost * (
-                  maintenanceLevel === 'minimal' ? 0.7 : 
-                  maintenanceLevel === 'standard' ? 1 : 1.5
-                ))}
-              </p>
+        
+        <div className="space-y-6">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <Tool className="h-4 w-4 text-muted-foreground" />
+              <span>État actuel:</span>
             </div>
-          )}
+            <span className={`font-medium ${
+              selectedItem.condition < 30 ? "text-red-500" : 
+              selectedItem.condition < 70 ? "text-yellow-500" : 
+              "text-green-500"
+            }`}>
+              {selectedItem.condition}%
+            </span>
+          </div>
+          
+          <div className="space-y-2">
+            <Label>Niveau de maintenance</Label>
+            <RadioGroup value={selectedLevel} onValueChange={(value) => setSelectedLevel(value as any)}>
+              <div className="flex items-center space-x-2 border p-3 rounded-md hover:bg-muted">
+                <RadioGroupItem value="minimal" id="minimal" />
+                <Label htmlFor="minimal" className="flex-1 cursor-pointer">
+                  <div className="font-medium">Minimal</div>
+                  <div className="text-sm text-muted-foreground">Réparations essentielles seulement</div>
+                </Label>
+                <div className="flex flex-col items-end">
+                  <span className="text-sm font-medium">{getMaintenanceCost('minimal').toLocaleString()} As</span>
+                  <span className="text-xs text-green-600">+{getImprovement('minimal')}</span>
+                </div>
+              </div>
+              
+              <div className="flex items-center space-x-2 border p-3 rounded-md hover:bg-muted">
+                <RadioGroupItem value="standard" id="standard" />
+                <Label htmlFor="standard" className="flex-1 cursor-pointer">
+                  <div className="font-medium">Standard</div>
+                  <div className="text-sm text-muted-foreground">Maintenance complète</div>
+                </Label>
+                <div className="flex flex-col items-end">
+                  <span className="text-sm font-medium">{getMaintenanceCost('standard').toLocaleString()} As</span>
+                  <span className="text-xs text-green-600">+{getImprovement('standard')}</span>
+                </div>
+              </div>
+              
+              <div className="flex items-center space-x-2 border p-3 rounded-md hover:bg-muted">
+                <RadioGroupItem value="excellent" id="excellent" />
+                <Label htmlFor="excellent" className="flex-1 cursor-pointer">
+                  <div className="font-medium">Excellent</div>
+                  <div className="text-sm text-muted-foreground">Rénovation complète</div>
+                </Label>
+                <div className="flex flex-col items-end">
+                  <span className="text-sm font-medium">{getMaintenanceCost('excellent').toLocaleString()} As</span>
+                  <span className="text-xs text-green-600">+{getImprovement('excellent')}</span>
+                </div>
+              </div>
+            </RadioGroup>
+          </div>
+          
+          <div className="bg-muted/30 p-3 rounded-md">
+            <div className="flex items-center gap-2 text-sm">
+              <Coins className="h-4 w-4 text-muted-foreground" />
+              <span>Trésor public disponible:</span>
+              <span className="font-medium">10,000,000 As</span>
+            </div>
+          </div>
         </div>
+        
         <DialogFooter>
-          <Button variant="outline" onClick={() => onOpenChange(false)}>
-            Annuler
-          </Button>
-          <Button onClick={() => onMaintain(maintenanceLevel)}>
+          <Button variant="outline" onClick={() => onOpenChange(false)}>Annuler</Button>
+          <Button onClick={handleSubmit}>
+            <Tool className="h-4 w-4 mr-2" />
             Effectuer la maintenance
           </Button>
         </DialogFooter>

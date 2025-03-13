@@ -3,6 +3,7 @@ import React from 'react';
 import { MagistratureBureau } from '../MagistratureBureau';
 import { magistracies } from '@/data/magistracies';
 import { QuesteurFunctions } from '@/components/republique/functions/QuesteurFunctions';
+import { BureauxNavigator } from '@/components/republique/BureauxNavigator';
 
 export const QuesteurBureau: React.FC = () => {
   const questeur = magistracies.find(m => m.id === 'questeur');
@@ -12,8 +13,11 @@ export const QuesteurBureau: React.FC = () => {
   }
   
   return (
-    <MagistratureBureau magistrate={questeur}>
-      <QuesteurFunctions />
-    </MagistratureBureau>
+    <div className="space-y-6">
+      <BureauxNavigator currentBureau="questeur" />
+      <MagistratureBureau magistrate={questeur}>
+        <QuesteurFunctions />
+      </MagistratureBureau>
+    </div>
   );
 };

@@ -1,146 +1,211 @@
 
 import React, { useState } from 'react';
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Slider } from '@/components/ui/slider';
 import { toast } from 'sonner';
 
 interface NewProjectDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  onCreateProject: (project: any) => void;
+  onCreateProject: (projectData: any) => void;
 }
 
 export const NewProjectDialog: React.FC<NewProjectDialogProps> = ({
   open,
   onOpenChange,
-  onCreateProject,
+  onCreateProject
 }) => {
-  const [newProject, setNewProject] = useState({
+  const [formData, setFormData] = useState({
     name: '',
     location: '',
-    estimatedCost: 200000,
+    buildingTypeId: '',
+    estimatedCost: 100000,
     duration: 2,
-    buildingTypeId: 'forum',
-    benefits: []
+    benefits: [''],
+    sponsors: []
   });
-
-  const handleCreateProject = () => {
-    if (!newProject.name || !newProject.location) {
-      toast.error("Veuillez remplir tous les champs obligatoires");
+  
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({ ...prev, [name]: value }));
+  };
+  
+  const handleSelectChange = (name: string, value: string) => {
+    setFormData(prev => ({ ...prev, [name]: value }));
+  };
+  
+  const handleSliderChange = (name: string, value: number[]) => {
+    setFormData(prev => ({ ...prev, [name]: value[0] }));
+  };
+  
+  const handleBenefitChange = (index: number, value: string) => {
+    const updatedBenefits = [...formData.benefits];
+    updatedBenefits[index] = value;
+    setFormData(prev => ({ ...prev, benefits: updatedBenefits }));
+  };
+  
+  const addBenefit = () => {
+    setFormData(prev => ({ ...prev, benefits: [...prev.benefits, ''] }));
+  };
+  
+  const removeBenefit = (index: number) => {
+    const updatedBenefits = formData.benefits.filter((_, i) => i !== index);
+    setFormData(prev => ({ ...prev, benefits: updatedBenefits }));
+  };
+  
+  const handleSubmit = () => {
+    // Validation
+    if (!formData.name || !formData.location || !formData.buildingTypeId) {
+      toast.error("Tous les champs obligatoires doivent être remplis");
       return;
     }
     
-    const project = {
-      ...newProject,
-      benefits: ['Améliore le prestige de Rome', 'Offre des services aux citoyens'],
-      sponsors: ['Sénat romain']
+    // Filter out empty benefits
+    const filteredBenefits = formData.benefits.filter(benefit => benefit.trim() !== '');
+    
+    if (filteredBenefits.length === 0) {
+      toast.error("Vous devez spécifier au moins un bénéfice");
+      return;
+    }
+    
+    const projectData = {
+      ...formData,
+      benefits: filteredBenefits
     };
     
-    onCreateProject(project);
+    onCreateProject(projectData);
     onOpenChange(false);
     
     // Reset form
-    setNewProject({
+    setFormData({
       name: '',
       location: '',
-      estimatedCost: 200000,
+      buildingTypeId: '',
+      estimatedCost: 100000,
       duration: 2,
-      buildingTypeId: 'forum',
-      benefits: []
+      benefits: [''],
+      sponsors: []
     });
   };
-
+  
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[500px]">
+      <DialogContent className="max-w-2xl">
         <DialogHeader>
-          <DialogTitle>Nouveau projet de construction</DialogTitle>
-          <DialogDescription>
-            Proposez un nouveau projet de construction publique pour la République.
-          </DialogDescription>
+          <DialogTitle className="font-cinzel">Nouveau projet de construction</DialogTitle>
         </DialogHeader>
-        <div className="grid gap-4 py-4">
-          <div className="grid grid-cols-4 items-center gap-4">
-            <Label htmlFor="project-name" className="text-right">
-              Nom
-            </Label>
-            <Input
-              id="project-name"
-              value={newProject.name}
-              onChange={(e) => setNewProject({...newProject, name: e.target.value})}
-              className="col-span-3"
-              placeholder="Ex: Temple de Mars"
-            />
+        
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="name">Nom du bâtiment</Label>
+              <Input 
+                id="name" 
+                name="name" 
+                value={formData.name} 
+                onChange={handleInputChange} 
+                placeholder="ex: Temple de Minerve"
+              />
+            </div>
+            
+            <div className="space-y-2">
+              <Label htmlFor="location">Localisation</Label>
+              <Input 
+                id="location" 
+                name="location" 
+                value={formData.location} 
+                onChange={handleInputChange} 
+                placeholder="ex: Forum Romain"
+              />
+            </div>
+            
+            <div className="space-y-2">
+              <Label htmlFor="buildingType">Type de bâtiment</Label>
+              <Select 
+                value={formData.buildingTypeId} 
+                onValueChange={(value) => handleSelectChange('buildingTypeId', value)}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Sélectionner un type" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="temple">Temple</SelectItem>
+                  <SelectItem value="basilica">Basilique</SelectItem>
+                  <SelectItem value="forum">Forum</SelectItem>
+                  <SelectItem value="thermae">Thermes</SelectItem>
+                  <SelectItem value="amphitheatre">Amphithéâtre</SelectItem>
+                  <SelectItem value="aqueduct">Aqueduc</SelectItem>
+                  <SelectItem value="theater">Théâtre</SelectItem>
+                  <SelectItem value="warehouse">Entrepôt</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
           </div>
-          <div className="grid grid-cols-4 items-center gap-4">
-            <Label htmlFor="project-location" className="text-right">
-              Emplacement
-            </Label>
-            <Input
-              id="project-location"
-              value={newProject.location}
-              onChange={(e) => setNewProject({...newProject, location: e.target.value})}
-              className="col-span-3"
-              placeholder="Ex: Forum Romanum"
-            />
-          </div>
-          <div className="grid grid-cols-4 items-center gap-4">
-            <Label htmlFor="project-cost" className="text-right">
-              Coût estimé
-            </Label>
-            <Input
-              id="project-cost"
-              type="number"
-              value={newProject.estimatedCost}
-              onChange={(e) => setNewProject({...newProject, estimatedCost: parseInt(e.target.value)})}
-              className="col-span-3"
-              min={50000}
-              step={10000}
-            />
-          </div>
-          <div className="grid grid-cols-4 items-center gap-4">
-            <Label htmlFor="project-duration" className="text-right">
-              Durée (années)
-            </Label>
-            <Input
-              id="project-duration"
-              type="number"
-              value={newProject.duration}
-              onChange={(e) => setNewProject({...newProject, duration: parseInt(e.target.value)})}
-              className="col-span-3"
-              min={1}
-              max={10}
-            />
-          </div>
-          <div className="grid grid-cols-4 items-center gap-4">
-            <Label htmlFor="project-type" className="text-right">
-              Type
-            </Label>
-            <select
-              id="project-type"
-              value={newProject.buildingTypeId}
-              onChange={(e) => setNewProject({...newProject, buildingTypeId: e.target.value})}
-              className="col-span-3 border rounded-md p-2"
-            >
-              <option value="forum">Forum</option>
-              <option value="temple">Temple</option>
-              <option value="basilica">Basilique</option>
-              <option value="aqueduct">Aqueduc</option>
-              <option value="theatre">Théâtre</option>
-              <option value="circus">Cirque</option>
-              <option value="baths">Thermes</option>
-            </select>
+          
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <Label>Coût estimé: {formData.estimatedCost.toLocaleString()} As</Label>
+              <Slider 
+                value={[formData.estimatedCost]} 
+                min={50000} 
+                max={1000000} 
+                step={10000} 
+                onValueChange={(value) => handleSliderChange('estimatedCost', value)} 
+              />
+            </div>
+            
+            <div className="space-y-2">
+              <Label>Durée de construction: {formData.duration} {formData.duration > 1 ? 'années' : 'année'}</Label>
+              <Slider 
+                value={[formData.duration]} 
+                min={1} 
+                max={10} 
+                step={1} 
+                onValueChange={(value) => handleSliderChange('duration', value)} 
+              />
+            </div>
+            
+            <div className="space-y-2">
+              <Label>Bénéfices</Label>
+              {formData.benefits.map((benefit, index) => (
+                <div key={index} className="flex items-center gap-2">
+                  <Input 
+                    value={benefit} 
+                    onChange={(e) => handleBenefitChange(index, e.target.value)} 
+                    placeholder="ex: Améliore le prestige de Rome"
+                  />
+                  {formData.benefits.length > 1 && (
+                    <Button 
+                      type="button" 
+                      variant="ghost" 
+                      size="sm" 
+                      onClick={() => removeBenefit(index)}
+                    >
+                      -
+                    </Button>
+                  )}
+                </div>
+              ))}
+              <Button 
+                type="button" 
+                variant="outline" 
+                size="sm" 
+                onClick={addBenefit}
+              >
+                Ajouter un bénéfice
+              </Button>
+            </div>
           </div>
         </div>
+        
         <DialogFooter>
-          <Button variant="outline" onClick={() => onOpenChange(false)}>
-            Annuler
-          </Button>
-          <Button onClick={handleCreateProject}>
-            Proposer le projet
-          </Button>
+          <Button variant="outline" onClick={() => onOpenChange(false)}>Annuler</Button>
+          <Button onClick={handleSubmit}>Créer le projet</Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>
