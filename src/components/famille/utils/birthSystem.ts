@@ -1,5 +1,5 @@
 
-import { Character } from '@/types/character';
+import { Character, CharacterStat } from '@/types/character';
 import { romanNames } from '@/components/famille/education/data/romanNames';
 import { Season } from '@/utils/timeSystem';
 import { getStatValue } from '@/utils/characterUtils';
