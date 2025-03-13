@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Label } from '@/components/ui/label';
 import { PublicBuilding } from '../hooks/useBatimentsPublics';
-import { Tool, Coins } from 'lucide-react';
+import { Wrench, Coins } from 'lucide-react';
 
 interface MaintenanceDialogProps {
   open: boolean;
@@ -55,7 +55,7 @@ export const MaintenanceDialog: React.FC<MaintenanceDialogProps> = ({
         <div className="space-y-6">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <Tool className="h-4 w-4 text-muted-foreground" />
+              <Wrench className="h-4 w-4 text-muted-foreground" />
               <span>État actuel:</span>
             </div>
             <span className={`font-medium ${
@@ -120,7 +120,7 @@ export const MaintenanceDialog: React.FC<MaintenanceDialogProps> = ({
         <DialogFooter>
           <Button variant="outline" onClick={() => onOpenChange(false)}>Annuler</Button>
           <Button onClick={handleSubmit}>
-            <Tool className="h-4 w-4 mr-2" />
+            <Wrench className="h-4 w-4 mr-2" />
             Effectuer la maintenance
           </Button>
         </DialogFooter>

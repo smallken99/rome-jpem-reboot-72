@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { PublicBuilding } from '../hooks/useBatimentsPublics';
-import { Eye, Tool, AlertTriangle, CheckCircle } from 'lucide-react';
+import { Eye, Wrench, AlertTriangle, CheckCircle } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
@@ -74,7 +74,7 @@ export const BuildingsTabContent: React.FC<BuildingsTabContentProps> = ({
                     {building.condition < 30 ? (
                       <AlertTriangle className="h-4 w-4 text-red-500 mr-1" />
                     ) : building.condition < 70 ? (
-                      <Tool className="h-4 w-4 text-yellow-500 mr-1" />
+                      <Wrench className="h-4 w-4 text-yellow-500 mr-1" />
                     ) : (
                       <CheckCircle className="h-4 w-4 text-green-500 mr-1" />
                     )}
@@ -121,7 +121,7 @@ export const BuildingsTabContent: React.FC<BuildingsTabContentProps> = ({
                   className="flex-1 gap-1"
                   onClick={() => onMaintain(building.id)}
                 >
-                  <Tool className="h-4 w-4" />
+                  <Wrench className="h-4 w-4" />
                   <span>Maintenance</span>
                 </Button>
               </div>

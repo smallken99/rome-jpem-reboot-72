@@ -3,7 +3,7 @@ import React from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { PublicBuilding, ConstructionProject } from '../hooks/useBatimentsPublics';
-import { Tool, MapPin, Building, Coins, Users } from 'lucide-react';
+import { Wrench, MapPin, Building, Coins, Users } from 'lucide-react';
 import { Separator } from '@/components/ui/separator';
 
 interface DetailsDialogProps {
@@ -45,7 +45,7 @@ export const DetailsDialog: React.FC<DetailsDialogProps> = ({
                 </div>
                 
                 <div className="flex items-center gap-2">
-                  <Tool className="h-4 w-4 text-muted-foreground" />
+                  <Wrench className="h-4 w-4 text-muted-foreground" />
                   <span className="text-sm">État: <span className="font-medium">{selectedItem.condition}%</span></span>
                 </div>
                 
@@ -75,7 +75,7 @@ export const DetailsDialog: React.FC<DetailsDialogProps> = ({
                 
                 {selectedItem.expectedCompletionYear && (
                   <div className="flex items-center gap-2">
-                    <Tool className="h-4 w-4 text-muted-foreground" />
+                    <Wrench className="h-4 w-4 text-muted-foreground" />
                     <span className="text-sm">Achèvement prévu: <span className="font-medium">{selectedItem.expectedCompletionYear} AUC</span></span>
                   </div>
                 )}
@@ -144,7 +144,7 @@ export const DetailsDialog: React.FC<DetailsDialogProps> = ({
               onClick={() => onMaintain(selectedItem.id)}
               className="mr-auto"
             >
-              <Tool className="h-4 w-4 mr-2" />
+              <Wrench className="h-4 w-4 mr-2" />
               Maintenance
             </Button>
           )}
