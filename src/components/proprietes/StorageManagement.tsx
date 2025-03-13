@@ -1,42 +1,83 @@
 
-import React from 'react';
+import React, { useState } from 'react';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { RomanCard } from '@/components/ui-custom/RomanCard';
-import { ResourcesTable } from '@/components/economie/ResourcesTable';
-import { StatBox } from '@/components/ui-custom/StatBox';
-import { Wheat, Coins, Warehouse, Package } from 'lucide-react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
+import { ResourceTable } from './storage/ResourceTable';
+import { StorageLocations } from './storage/StorageLocations';
+import { ResourceTransactions } from './storage/ResourceTransactions';
+import { Package, Search, Building, History } from 'lucide-react';
 
 export const StorageManagement: React.FC = () => {
+  const [activeTab, setActiveTab] = useState('resources');
+  const [searchTerm, setSearchTerm] = useState('');
+  
   return (
-    <RomanCard className="mb-6">
-      <RomanCard.Header>
-        <h3 className="font-cinzel text-lg text-rome-navy">Greniers et Stockage</h3>
-      </RomanCard.Header>
-      <RomanCard.Content>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-          <StatBox 
-            title="Capacité de stockage"
-            value="2,500 modii"
-            description="Capacité totale des greniers"
-            icon={<Warehouse className="h-5 w-5" />}
-          />
-          <StatBox 
-            title="Stockage utilisé"
-            value="1,830 modii"
-            description="73% de la capacité utilisée"
-            icon={<Package className="h-5 w-5" />}
-          />
-          <StatBox 
-            title="Valeur des stocks"
-            value="146,400 As"
-            description="Valeur marchande estimée"
-            icon={<Coins className="h-5 w-5" />}
-            trend="up"
-            trendValue="+5%"
+    <div className="space-y-6">
+      <div className="flex flex-col sm:flex-row justify-between gap-4">
+        <div className="relative flex-1">
+          <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
+          <Input
+            placeholder="Rechercher des ressources ou entrepôts..."
+            className="pl-8"
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
           />
         </div>
-        
-        <ResourcesTable />
-      </RomanCard.Content>
-    </RomanCard>
+        <div className="flex gap-2">
+          <Button className="roman-btn">
+            <Package className="mr-2 h-4 w-4" />
+            <span>Ajouter une ressource</span>
+          </Button>
+        </div>
+      </div>
+      
+      <div className="flex flex-wrap gap-3 mb-6">
+        <Button 
+          variant={activeTab === 'resources' ? 'default' : 'outline'} 
+          className="gap-2"
+          onClick={() => setActiveTab('resources')}
+        >
+          <Package className="h-4 w-4" />
+          <span>Ressources</span>
+        </Button>
+        <Button 
+          variant={activeTab === 'locations' ? 'default' : 'outline'} 
+          className="gap-2"
+          onClick={() => setActiveTab('locations')}
+        >
+          <Building className="h-4 w-4" />
+          <span>Entrepôts</span>
+        </Button>
+        <Button 
+          variant={activeTab === 'transactions' ? 'default' : 'outline'} 
+          className="gap-2"
+          onClick={() => setActiveTab('transactions')}
+        >
+          <History className="h-4 w-4" />
+          <span>Transactions</span>
+        </Button>
+      </div>
+      
+      <RomanCard>
+        <RomanCard.Content className="p-0">
+          <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+            <TabsContent value="resources" className="p-6 m-0">
+              <ResourceTable searchTerm={searchTerm} />
+            </TabsContent>
+            
+            <TabsContent value="locations" className="p-6 m-0">
+              <StorageLocations searchTerm={searchTerm} />
+            </TabsContent>
+            
+            <TabsContent value="transactions" className="p-6 m-0">
+              <ResourceTransactions searchTerm={searchTerm} />
+            </TabsContent>
+          </Tabs>
+        </RomanCard.Content>
+      </RomanCard>
+    </div>
   );
 };
