@@ -1,4 +1,3 @@
-
 import { RegistrationData } from '@/types/registration';
 import { getStatValue } from '@/utils/characterUtils';
 
@@ -12,10 +11,19 @@ export const calculateBonusMalus = (registrationData: RegistrationData): Registr
   // Reset stats to base values
   if (familyHead.stats) {
     if (typeof familyHead.stats.popularity === 'object') {
-      familyHead.stats.popularity.value = 20;
-      familyHead.stats.oratory.value = 20;
-      familyHead.stats.piety.value = 20;
-      familyHead.stats.martialEducation.value = 20;
+      // Use type guard to ensure TypeScript knows we're dealing with objects with a value property
+      if ('value' in familyHead.stats.popularity) {
+        familyHead.stats.popularity.value = 20;
+      }
+      if ('value' in familyHead.stats.oratory) {
+        familyHead.stats.oratory.value = 20;
+      }
+      if ('value' in familyHead.stats.piety) {
+        familyHead.stats.piety.value = 20;
+      }
+      if ('value' in familyHead.stats.martialEducation) {
+        familyHead.stats.martialEducation.value = 20;
+      }
     }
   }
   
@@ -26,20 +34,20 @@ export const calculateBonusMalus = (registrationData: RegistrationData): Registr
   if (gens.origin === 'aristocrate') {
     gens.wealth += 75000;
     if (familyHead.stats) {
-      if (typeof familyHead.stats.popularity === 'object') {
+      if (typeof familyHead.stats.popularity === 'object' && 'value' in familyHead.stats.popularity) {
         familyHead.stats.popularity.value -= 5;
       }
     }
   } else if (gens.origin === 'agricole') {
     // Assume different property quality will be handled elsewhere
     if (familyHead.stats) {
-      if (typeof familyHead.stats.piety === 'object') {
+      if (typeof familyHead.stats.piety === 'object' && 'value' in familyHead.stats.piety) {
         familyHead.stats.piety.value -= 5;
       }
     }
   } else if (gens.origin === 'populaire') {
     if (familyHead.stats) {
-      if (typeof familyHead.stats.popularity === 'object') {
+      if (typeof familyHead.stats.popularity === 'object' && 'value' in familyHead.stats.popularity) {
         familyHead.stats.popularity.value += 10;
       }
     }
@@ -49,26 +57,26 @@ export const calculateBonusMalus = (registrationData: RegistrationData): Registr
   // Apply education bonuses/maluses
   if (headEducation === 'rome') {
     if (familyHead.stats) {
-      if (typeof familyHead.stats.oratory === 'object') {
+      if (typeof familyHead.stats.oratory === 'object' && 'value' in familyHead.stats.oratory) {
         familyHead.stats.oratory.value += 10;
       }
     }
     gens.wealth -= 20000;
   } else if (headEducation === 'armee') {
     if (familyHead.stats) {
-      if (typeof familyHead.stats.martialEducation === 'object') {
+      if (typeof familyHead.stats.martialEducation === 'object' && 'value' in familyHead.stats.martialEducation) {
         familyHead.stats.martialEducation.value += 10;
       }
-      if (typeof familyHead.stats.oratory === 'object') {
+      if (typeof familyHead.stats.oratory === 'object' && 'value' in familyHead.stats.oratory) {
         familyHead.stats.oratory.value -= 5;
       }
     }
   } else if (headEducation === 'religieux') {
     if (familyHead.stats) {
-      if (typeof familyHead.stats.piety === 'object') {
+      if (typeof familyHead.stats.piety === 'object' && 'value' in familyHead.stats.piety) {
         familyHead.stats.piety.value += 10;
       }
-      if (typeof familyHead.stats.popularity === 'object') {
+      if (typeof familyHead.stats.popularity === 'object' && 'value' in familyHead.stats.popularity) {
         familyHead.stats.popularity.value -= 5;
       }
     }
@@ -78,22 +86,22 @@ export const calculateBonusMalus = (registrationData: RegistrationData): Registr
   if (gens.philosophy === 'traditionaliste') {
     gens.reputation += 10;
     if (familyHead.stats) {
-      if (typeof familyHead.stats.oratory === 'object') {
+      if (typeof familyHead.stats.oratory === 'object' && 'value' in familyHead.stats.oratory) {
         familyHead.stats.oratory.value -= 5;
       }
     }
   } else if (gens.philosophy === 'pragmatique') {
     if (familyHead.stats) {
-      if (typeof familyHead.stats.oratory === 'object') {
+      if (typeof familyHead.stats.oratory === 'object' && 'value' in familyHead.stats.oratory) {
         familyHead.stats.oratory.value += 10;
       }
-      if (typeof familyHead.stats.martialEducation === 'object') {
+      if (typeof familyHead.stats.martialEducation === 'object' && 'value' in familyHead.stats.martialEducation) {
         familyHead.stats.martialEducation.value -= 5;
       }
     }
   } else if (gens.philosophy === 'opportuniste') {
     if (familyHead.stats) {
-      if (typeof familyHead.stats.popularity === 'object') {
+      if (typeof familyHead.stats.popularity === 'object' && 'value' in familyHead.stats.popularity) {
         familyHead.stats.popularity.value += 10;
       }
     }
