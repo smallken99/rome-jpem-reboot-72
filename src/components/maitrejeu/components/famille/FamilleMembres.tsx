@@ -12,11 +12,15 @@ import { MembreFamilleModal } from './MembreFamilleModal';
 interface FamilleMembresProps {
   membres: MembreFamille[];
   familleId: string;
+  onEditMembre: (membre: MembreFamille) => void;  // Ajout de cette propriété
+  onDeleteMembre: (membreId: string) => void;  // Ajout de cette propriété
 }
 
 export const FamilleMembres: React.FC<FamilleMembresProps> = ({
   membres,
-  familleId
+  familleId,
+  onEditMembre,  // Ajout du nouveau prop
+  onDeleteMembre  // Ajout du nouveau prop
 }) => {
   const { deleteMembreFamille, getFamille, updateMembreFamille, familles } = useMaitreJeu();
   const [membreToDelete, setMembreToDelete] = useState<string | null>(null);

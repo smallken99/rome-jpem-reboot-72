@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
@@ -13,20 +12,21 @@ export interface MembreFamilleModalProps {
   isOpen: boolean;
   onClose: () => void;
   familleId: string | null;
-  editMembre?: MembreFamille;
+  membre?: MembreFamille;
   familles: FamilleInfo[];
+  onSave?: (data: any) => void;
 }
 
 export const MembreFamilleModal: React.FC<MembreFamilleModalProps> = ({
   isOpen,
   onClose,
   familleId,
-  editMembre,
-  familles
+  membre,
+  familles,
+  onSave
 }) => {
   const { addMembreFamille, updateMembreFamille, getMembresByFamille } = useMaitreJeu();
   
-  // Initialisation du formulaire avec des valeurs par défaut ou les valeurs du membre à éditer
   const [formData, setFormData] = useState<{
     nom: string;
     prenom: string;
@@ -54,31 +54,28 @@ export const MembreFamilleModal: React.FC<MembreFamilleModalProps> = ({
     description: '',
   });
   
-  // Mise à jour du formulaire si on édite un membre existant
   useEffect(() => {
-    if (editMembre) {
-      // Correction: S'assurer que toutes les propriétés requises sont définies
+    if (membre) {
       setFormData({
-        nom: editMembre.nom,
-        prenom: editMembre.prenom,
-        age: editMembre.age,
-        genre: editMembre.genre,
-        statut: editMembre.statut,
-        statutMatrimonial: editMembre.statutMatrimonial,
-        role: editMembre.role || '',  // Valeur par défaut si undefined
-        description: editMembre.description || '',  // Valeur par défaut si undefined
-        pere: editMembre.pere,
-        mere: editMembre.mere,
-        education: editMembre.education,
-        popularite: editMembre.popularite,
-        piete: editMembre.piete, 
-        joueur: editMembre.joueur,
-        senateurId: editMembre.senateurId
+        nom: membre.nom,
+        prenom: membre.prenom,
+        age: membre.age,
+        genre: membre.genre,
+        statut: membre.statut,
+        statutMatrimonial: membre.statutMatrimonial,
+        role: membre.role || '',
+        description: membre.description || '',
+        pere: membre.pere,
+        mere: membre.mere,
+        education: membre.education,
+        popularite: membre.popularite,
+        piete: membre.piete,
+        joueur: membre.joueur,
+        senateurId: membre.senateurId
       });
     }
-  }, [editMembre]);
+  }, [membre]);
   
-  // Les membres de famille disponibles pour les relations parentales
   const membresFamille = familleId ? getMembresByFamille(familleId) : [];
   
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
@@ -91,11 +88,16 @@ export const MembreFamilleModal: React.FC<MembreFamilleModalProps> = ({
   };
   
   const handleSubmit = () => {
-    if (editMembre) {
-      // Mise à jour d'un membre existant
-      updateMembreFamille(editMembre.id, formData);
+    if (membre && onSave) {
+      onSave(formData);
+    } else if (membre) {
+      updateMembreFamille(membre.id, formData);
+    } else if (familleId && onSave) {
+      onSave({
+        ...formData,
+        familleId
+      });
     } else if (familleId) {
-      // Création d'un nouveau membre
       addMembreFamille({
         ...formData,
         familleId
@@ -108,7 +110,7 @@ export const MembreFamilleModal: React.FC<MembreFamilleModalProps> = ({
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="sm:max-w-[525px]">
         <DialogHeader>
-          <DialogTitle>{editMembre ? 'Modifier un membre' : 'Ajouter un membre'}</DialogTitle>
+          <DialogTitle>{membre ? 'Modifier un membre' : 'Ajouter un membre'}</DialogTitle>
         </DialogHeader>
         
         <div className="grid gap-4 py-4">
@@ -184,7 +186,7 @@ export const MembreFamilleModal: React.FC<MembreFamilleModalProps> = ({
             Annuler
           </Button>
           <Button type="submit" onClick={handleSubmit}>
-            {editMembre ? 'Modifier' : 'Ajouter'}
+            {membre ? 'Modifier' : 'Ajouter'}
           </Button>
         </DialogFooter>
       </DialogContent>

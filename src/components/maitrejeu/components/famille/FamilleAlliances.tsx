@@ -13,13 +13,17 @@ interface FamilleAlliancesProps {
   familleId: string;
   familles: FamilleInfo[];
   membres: MembreFamille[];
+  onEditAlliance: (alliance: FamilleAlliance) => void;  // Ajout de cette propriété
+  onDeleteAlliance: (id: string) => void;  // Ajout de cette propriété
 }
 
 export const FamilleAlliances: React.FC<FamilleAlliancesProps> = ({ 
   alliances, 
   familleId,
   familles,
-  membres 
+  membres,
+  onEditAlliance,  // Ajout du nouveau prop
+  onDeleteAlliance  // Ajout du nouveau prop
 }) => {
   const [activeTab, setActiveTab] = useState<'actives' | 'inactives' | 'negociations' | 'rompues'>('actives');
   const { updateAlliance } = useMaitreJeu();

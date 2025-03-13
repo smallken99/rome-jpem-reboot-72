@@ -9,7 +9,7 @@ import { FamilleModal } from './components/famille/FamilleModal';
 import { FamillesList } from './components/famille/FamillesList';
 import { FamilleMembres } from './components/famille/FamilleMembres';
 import { FamilleAlliances } from './components/famille/FamilleAlliances';
-import { PlusCircle, Users, Handshake, UserPlus, Eye } from 'lucide-react';
+import { PlusCircle, Users, Handshake, UserPlus, Eye, Pencil } from 'lucide-react'; // Ajout de l'import Pencil
 import { FamilleInfo, FamilleCreationData, FamilleFilter, MembreFamille, FamilleAlliance } from './types';
 import { MembreFamilleModal } from './components/famille/MembreFamilleModal';
 import { AllianceModal } from './components/famille/AllianceModal';

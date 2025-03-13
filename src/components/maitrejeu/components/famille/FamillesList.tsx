@@ -13,6 +13,10 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 interface FamillesListProps {
   familles: FamilleInfo[];
   onSelectFamille: (id: string) => void;
+  onEditFamille: (famille: FamilleInfo) => void;  // Ajout de cette propriété
+  onDeleteFamille: (id: string) => void;  // Ajout de cette propriété
+  onAddMembre: (familleId: string) => void;  // Ajout de cette propriété
+  onAddAlliance: (familleId: string) => void;  // Ajout de cette propriété
   filter: FamilleFilter;
   onFilterChange: (filter: FamilleFilter) => void;
 }
@@ -20,6 +24,10 @@ interface FamillesListProps {
 export const FamillesList: React.FC<FamillesListProps> = ({
   familles,
   onSelectFamille,
+  onEditFamille,  // Ajout du nouveau prop
+  onDeleteFamille,  // Ajout du nouveau prop
+  onAddMembre,  // Ajout du nouveau prop
+  onAddAlliance,  // Ajout du nouveau prop
   filter,
   onFilterChange
 }) => {
