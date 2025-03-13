@@ -1,10 +1,11 @@
-import { GameDate } from '@/components/maitrejeu/types/common';
+
+import { GameDate, GamePhase } from '@/components/maitrejeu/types/common';
 import { useMaitreJeu } from '@/components/maitrejeu/context';
 
 export type Season = 'Ver' | 'Aestas' | 'Autumnus' | 'Hiems';
 export type PlayerSeason = 'SPRING' | 'SUMMER' | 'AUTUMN' | 'WINTER';
 
-// Ajout du hook useTimeStore qui manque
+// Hook pour accéder aux informations de temps du jeu
 export const useTimeStore = () => {
   // Utiliser le contexte du Maître de Jeu pour obtenir les informations de temps
   const { currentDate, currentPhase, advanceTime, changePhase } = useMaitreJeu();
@@ -14,6 +15,12 @@ export const useTimeStore = () => {
     currentPhase,
     advanceTime,
     changePhase,
+    
+    // Ajout de propriétés dérivées
+    year: currentDate.year,
+    season: currentDate.season,
+    
+    // Méthodes utilitaires
     formatSeason: (season: Season) => formatSeason(season),
     formatRomanSeason: (season: Season) => {
       const seasons: Record<Season, string> = {
@@ -23,7 +30,10 @@ export const useTimeStore = () => {
         'Hiems': 'Hiver'
       };
       return seasons[season] || season;
-    }
+    },
+    
+    // Helper pour obtenir l'année
+    getYear: () => currentDate.year
   };
 };
 
