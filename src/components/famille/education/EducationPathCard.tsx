@@ -23,6 +23,13 @@ export const EducationPathCard: React.FC<EducationPathCardProps> = ({ path }) =>
   
   const { name, color } = formatEducationType(path.id);
   
+  // Get skills based on outcomes type
+  const getSkills = () => {
+    if (!path.outcomes) return [];
+    if (Array.isArray(path.outcomes)) return path.outcomes;
+    return path.outcomes.skills || [];
+  };
+  
   return (
     <Card className="h-full">
       <CardHeader className="pb-2">
@@ -50,9 +57,9 @@ export const EducationPathCard: React.FC<EducationPathCardProps> = ({ path }) =>
               )}
               {path.requirements.gender && (
                 <li className="flex items-center gap-1">
-                  <span>• Genre: {path.requirements.gender.includes('male') && path.requirements.gender.includes('female') 
+                  <span>• Genre: {path.requirements.gender === 'both' 
                     ? 'Tous' 
-                    : path.requirements.gender.includes('male') 
+                    : path.requirements.gender === 'male' 
                       ? 'Garçons uniquement' 
                       : 'Filles uniquement'}</span>
                 </li>
@@ -76,7 +83,7 @@ export const EducationPathCard: React.FC<EducationPathCardProps> = ({ path }) =>
         <div className="text-sm pt-2 border-t">
           <p className="font-medium mb-1">Compétences acquises:</p>
           <div className="flex flex-wrap gap-1 mt-1">
-            {path.outcomes.skills.map((skill, idx) => (
+            {getSkills().map((skill, idx) => (
               <Badge key={idx} variant="outline" className="capitalize">
                 {skill}
               </Badge>

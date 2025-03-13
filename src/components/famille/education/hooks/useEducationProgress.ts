@@ -1,7 +1,7 @@
 
 import { useState } from 'react';
 import { toast } from 'sonner';
-import { Child, EducationHistory } from '../context/types';
+import { Child, EducationHistory, ChildEducation } from '../types/educationTypes';
 import { Character } from '@/types/character';
 
 export const useEducationProgress = () => {
@@ -60,8 +60,8 @@ export const useEducationProgress = () => {
         completedAt: child.age,
         statBonus: currentEducation.statBonus || 20,
         skills: currentEducation.skills || [],
-        startYear: 0, // Ajouté pour satisfaire le type
-        completed: true // Ajouté pour satisfaire le type
+        startYear: 0, // Added for type compatibility
+        completed: true // Added for type compatibility
       };
       
       onComplete(child.id, completedEducation);

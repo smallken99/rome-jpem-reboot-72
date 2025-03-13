@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { educationPaths } from '../data';
-import { EducationTypeSelectorProps } from '../context/types';
+import { EducationTypeSelectorProps } from '../types/educationTypes';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { BookOpen, Sword, Cross } from 'lucide-react';
 
@@ -77,8 +77,10 @@ export const EducationTypeSelector: React.FC<EducationTypeSelectorProps> = ({
                     path.requirements?.gender === 'female' ? 'Fille uniquement' : 
                     'Tous'
                   }</li>
-                  <li>Coût: {path.requirements?.cost || 'N/A'} As</li>
-                  <li>Durée typique: {path.requirements?.duration || path.duration + ' ans'}</li>
+                  {path.requirements?.cost && (
+                    <li>Coût: {path.requirements.cost} As</li>
+                  )}
+                  <li>Durée typique: {path.requirements?.duration || `${path.duration} ans`}</li>
                 </ul>
               </div>
             </div>

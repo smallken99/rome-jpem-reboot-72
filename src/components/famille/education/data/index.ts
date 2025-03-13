@@ -14,7 +14,7 @@ export const educationPaths: EducationPath[] = [
     duration: 2,
     requirements: {
       age: 12,
-      gender: ['male', 'female']
+      gender: 'both' // Changed from string[] to string
     },
     outcomes: {
       skills: ['éloquence', 'persuasion', 'débat'],
@@ -36,7 +36,7 @@ export const educationPaths: EducationPath[] = [
     duration: 3,
     requirements: {
       age: 14,
-      gender: ['male', 'female']
+      gender: 'both' // Changed from string[] to string
     },
     outcomes: {
       skills: ['diplomatie', 'administration', 'droit'],
@@ -58,7 +58,7 @@ export const educationPaths: EducationPath[] = [
     duration: 2,
     requirements: {
       age: 13,
-      gender: ['male'] // Restricted to males in Roman society
+      gender: 'male' // Changed from string[] to string
     },
     outcomes: {
       skills: ['stratégie', 'combat', 'leadership'],
@@ -80,7 +80,7 @@ export const educationPaths: EducationPath[] = [
     duration: 2,
     requirements: {
       age: 10,
-      gender: ['male', 'female']
+      gender: 'both' // Changed from string[] to string
     },
     outcomes: {
       skills: ['rituel', 'théologie', 'divination'],

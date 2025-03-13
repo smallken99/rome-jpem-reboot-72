@@ -25,18 +25,23 @@ export const useEducationSystem = () => {
     const preceptors: Preceptor[] = [];
     for (let i = 0; i < 10; i++) {
       const reputation = generateReputation();
-      const educationType = educationPaths[Math.floor(Math.random() * educationPaths.length)].type || '';
+      const educationType = educationPaths[Math.floor(Math.random() * educationPaths.length)].id || '';
       
       preceptors.push({
         id: `preceptor-${i}`,
         name: generateRomanName(),
-        speciality: generateSpeciality(),
-        reputation: reputation,
+        specialty: generateSpeciality(),
+        skill: reputation === "Excellent" ? 5 : reputation === "Bon" ? 4 : 3,
+        price: generateFee(),
+        status: 'available',
+        background: `Un éducateur expérimenté, spécialisé en ${generateSpeciality()}.`,
+        childId: null,
+        // For backward compatibility
+        reputation,
         quality: reputation === "Excellent" ? 5 : reputation === "Bon" ? 4 : 3,
         cost: generateFee(),
         available: true,
-        background: `Un éducateur expérimenté, spécialisé en ${generateSpeciality()}.`,
-        childId: null
+        speciality: generateSpeciality()
       });
     }
     
@@ -47,10 +52,10 @@ export const useEducationSystem = () => {
   // Function to filter education paths based on child's age and gender
   const getPathsForChild = (child: Child): EducationPath[] => {
     return availablePaths.filter(path => {
-      const meetsAgeRequirement = child.age >= (path.minAge || 0);
+      const meetsAgeRequirement = child.age >= (path.requirements?.age || 0);
       const meetsGenderRequirement = 
-        path.suitableFor === 'both' || 
-        path.suitableFor === child.gender;
+        path.requirements?.gender === 'both' || 
+        path.requirements?.gender === child.gender;
       
       return meetsAgeRequirement && meetsGenderRequirement;
     });
@@ -62,13 +67,18 @@ export const useEducationSystem = () => {
     return {
       id: `preceptor-${Date.now()}`,
       name: generateRomanName(),
-      speciality: generateSpeciality(),
-      reputation: reputation,
+      specialty: generateSpeciality(),
+      skill: reputation === "Excellent" ? 5 : reputation === "Bon" ? 4 : 3,
+      price: generateFee(),
+      status: 'available',
+      background: `Un éducateur expérimenté, spécialisé en ${generateSpeciality()}.`,
+      childId: null,
+      // For backward compatibility
+      reputation,
       quality: reputation === "Excellent" ? 5 : reputation === "Bon" ? 4 : 3,
       cost: generateFee(),
       available: true,
-      background: `Un éducateur expérimenté, spécialisé en ${generateSpeciality()}.`,
-      childId: null
+      speciality: generateSpeciality()
     };
   };
   
