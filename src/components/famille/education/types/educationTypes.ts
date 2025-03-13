@@ -6,17 +6,7 @@ export interface Child {
   name: string;
   age: number;
   gender: string;
-  currentEducation?: {
-    type: string;
-    mentor: string | null;
-    mentorId?: string | null;
-    progress: number;
-    skills: string[];
-    yearsCompleted?: number;
-    totalYears?: number;
-    statBonus?: number;
-    speciality?: string;
-  };
+  currentEducation?: ChildEducation;
 }
 
 export interface Preceptor {
@@ -137,6 +127,7 @@ export interface EducationHistory {
   completed: boolean;
 }
 
+// Add missing PreceptorsByType interface
 export interface PreceptorsByType {
   [type: string]: Preceptor[];
 }

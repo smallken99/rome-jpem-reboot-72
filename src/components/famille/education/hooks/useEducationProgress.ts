@@ -2,7 +2,7 @@
 import { useState } from 'react';
 import { toast } from 'sonner';
 import { Child, EducationHistory, ChildEducation } from '../types/educationTypes';
-import { Character } from '@/types/character';
+import { Character, CharacterStat } from '@/types/character';
 
 export const useEducationProgress = () => {
   const [educatingChildren, setEducatingChildren] = useState<Record<string, boolean>>({});
@@ -78,11 +78,18 @@ export const useEducationProgress = () => {
     const statName = getRelatedStatToUpdate(educationHistory.type);
     
     if (statName && updatedCharacter.stats[statName as keyof typeof updatedCharacter.stats]) {
-      const stat = updatedCharacter.stats[statName as keyof typeof updatedCharacter.stats];
-      if (typeof stat === 'object' && 'value' in stat) {
+      const statValue = updatedCharacter.stats[statName as keyof typeof updatedCharacter.stats];
+      
+      // Handle both number and CharacterStat types
+      if (typeof statValue === 'number') {
+        // For number type stats
+        (updatedCharacter.stats[statName as keyof typeof updatedCharacter.stats] as number) = 
+          Math.min((statValue as number) + educationHistory.statBonus, 80);
+      } else if (statValue && typeof statValue === 'object' && 'value' in statValue) {
+        // For CharacterStat type
+        const statObj = statValue as CharacterStat;
         // Don't exceed max value (usually 80 from education alone)
-        const newValue = Math.min((stat.value as number) + educationHistory.statBonus, 80);
-        (stat as any).value = newValue;
+        statObj.value = Math.min(statObj.value + educationHistory.statBonus, 80);
       }
     }
     

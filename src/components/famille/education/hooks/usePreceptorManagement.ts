@@ -1,8 +1,7 @@
 
 import { useState } from 'react';
 import { toast } from 'sonner';
-import { Preceptor } from '../types/educationTypes';
-import { PreceptorsByType } from '../context/types';
+import { Preceptor, PreceptorsByType } from '../types/educationTypes';
 
 export const usePreceptorManagement = () => {
   const [hiredPreceptors, setHiredPreceptors] = useState<Preceptor[]>([]);

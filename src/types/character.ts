@@ -9,18 +9,12 @@ export interface Character {
   title?: string;
   role?: string;
   stats: {
-    popularity: number;
-    oratory: number;
-    piety: number;
-    martialEducation: number;
+    popularity: number | CharacterStat;
+    oratory: number | CharacterStat;
+    piety: number | CharacterStat;
+    martialEducation: number | CharacterStat;
   };
-  education?: {
-    type: string;
-    specialties: string[];
-    mentor: string | null;
-    completed?: boolean;
-    completedAt?: string;
-  };
+  education?: EducationInfo;
   currentEducation?: {
     type: string;
     mentor: string | null;
@@ -41,4 +35,13 @@ export interface CharacterStat {
   icon: string;
   description: string;
   color: string;
+}
+
+// Type pour l'éducation d'un personnage
+export interface EducationInfo {
+  type: string;
+  specialties: string[];
+  mentor: string | null;
+  completed?: boolean;
+  completedAt?: string;
 }

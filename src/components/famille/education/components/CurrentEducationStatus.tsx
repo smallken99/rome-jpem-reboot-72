@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { ChildEducation } from '../context/types';
+import { ChildEducation } from '../types/educationTypes';
 import { AnnualProgress } from './AnnualProgress';
 import { MentorInfo } from './MentorInfo';
 import { PietyBonus } from './PietyBonus';

@@ -1,6 +1,6 @@
 
 import React, { useState } from 'react';
-import { Character } from '@/types/character';
+import { Character, CharacterStat } from '@/types/character';
 import { CharacterStats } from './CharacterStats';
 import { RomanCard } from '@/components/ui-custom/RomanCard';
 import { Badge } from '@/components/ui/badge';
@@ -47,9 +47,9 @@ export const CharacterSheet: React.FC<CharacterSheetProps> = ({
   
   // Convert statistics to array for the CharacterStats component
   const statsArray = [
-    character.stats.popularity,
-    character.stats.oratory,
-    character.stats.piety,
+    character.stats.popularity, 
+    character.stats.oratory, 
+    character.stats.piety, 
     character.stats.martialEducation
   ];
 

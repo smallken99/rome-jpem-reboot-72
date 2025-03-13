@@ -1,11 +1,11 @@
 
 import React from 'react';
-import { CharacterStat as CharacterStatType } from '@/types/character';
+import { CharacterStat } from '@/types/character';
 import { cn } from '@/lib/utils';
 import StatBar from './StatBar';
 
 interface CharacterStatsProps {
-  stats: CharacterStatType[];
+  stats: (CharacterStat | number)[];
   className?: string;
   isFemale?: boolean;
 }
@@ -47,14 +47,26 @@ export const CharacterStats: React.FC<CharacterStatsProps> = ({ stats, className
     }
   };
 
-  // Filtrer pour n'afficher que les stats principales
-  const mainStats = stats.filter(stat => 
-    ['popularity', 'oratory', 'piety', 'martialEducation'].includes(stat.icon)
-  );
+  // Ensure all stats are in CharacterStat format for the StatBar component
+  const formattedStats: CharacterStat[] = stats.map(stat => {
+    if (typeof stat === 'number') {
+      // If stat is a number, create a default CharacterStat
+      return {
+        name: 'Stat',
+        value: stat,
+        maxValue: 100,
+        icon: 'default',
+        description: 'Statistique du personnage',
+        color: 'blue'
+      };
+    }
+    // If it's already a CharacterStat, return it directly
+    return stat;
+  });
 
   return (
     <div className={cn("space-y-3", className)}>
-      {mainStats.map((stat, index) => {
+      {formattedStats.map((stat, index) => {
         // Pour les femmes: désactiver l'éducation martiale et ajouter un bonus de piété
         // Pour les hommes: aucun changement
         const isDisabledStat = isFemale && stat.icon === 'martialEducation';
