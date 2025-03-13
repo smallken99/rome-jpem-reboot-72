@@ -10,7 +10,13 @@ interface TimePanelProps {
 }
 
 export const TimePanel: React.FC<TimePanelProps> = ({ minimal = false }) => {
-  const { year, season, day, phase } = useTimeStore();
+  const timeStore = useTimeStore();
+  // Extraire les propriétés de manière sécurisée
+  const year = timeStore.year || timeStore.currentDate?.year;
+  const season = timeStore.season || timeStore.currentDate?.season;
+  // Ces propriétés peuvent ne pas exister dans toutes les implémentations
+  const day = timeStore.day || timeStore.currentDate?.day || 1;
+  const phase = timeStore.phase || timeStore.currentPhase || "SENAT";
   
   if (minimal) {
     return (

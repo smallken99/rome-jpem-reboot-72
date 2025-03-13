@@ -2,7 +2,10 @@
 // Types pour les lois
 
 export type LoiType = 'politique' | 'économique' | 'sociale' | 'judiciaire' | 'militaire' | 'religieuse' | 'civile';
-export type LoiStatut = 'proposée' | 'adoptée' | 'rejetée' | 'Promulguée' | 'En délibération' | 'Rejetée';
+export type LoiStatut = 'proposée' | 'adoptée' | 'rejetée' | 'Promulguée' | 'En délibération' | 'Rejetée' | 'Public' | 'Privé' | 'votée' | 'en_débat';
+
+// Alias pour rétrocompatibilité
+export type LoiState = LoiStatut;
 
 // Clause d'une loi
 export interface Clause {
@@ -54,6 +57,3 @@ export interface Loi {
   commentaires?: string;
   nom?: string;
 }
-
-// Alias pour la rétrocompatibilité
-export type LoiState = LoiStatut;

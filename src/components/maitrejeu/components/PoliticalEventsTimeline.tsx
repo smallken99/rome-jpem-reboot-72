@@ -1,66 +1,95 @@
 
 import React from 'react';
-import { Timeline } from '@/components/ui/timeline-custom';
+import { Badge } from "@/components/ui/badge";
+import { Card, CardContent } from "@/components/ui/card";
 import { PoliticalEvent } from '../types/equilibre';
+import { formatSeasonDisplay } from '../types/common';
 
-export interface PoliticalEventsTimelineProps {
-  politicalEvents: PoliticalEvent[];
+interface PoliticalEventsTimelineProps {
+  events: PoliticalEvent[];
 }
 
-export const PoliticalEventsTimeline: React.FC<PoliticalEventsTimelineProps> = ({
-  politicalEvents
-}) => {
-  // Sort events by date (newest first)
-  const sortedEvents = [...politicalEvents].sort((a, b) => {
-    if (a.date.year !== b.date.year) {
-      return b.date.year - a.date.year;
+export const PoliticalEventsTimeline: React.FC<PoliticalEventsTimelineProps> = ({ events }) => {
+  const sortedEvents = [...events].sort((a, b) => {
+    // Si date est un objet Date
+    if (a.date instanceof Date && b.date instanceof Date) {
+      return a.date.getTime() - b.date.getTime();
     }
-    // Map seasons to numerical values for comparison
-    const seasonOrder = { 'SPRING': 0, 'SUMMER': 1, 'AUTUMN': 2, 'WINTER': 3 };
-    return seasonOrder[b.date.season] - seasonOrder[a.date.season];
+    
+    // Si year et season sont fournis directement
+    if (a.year !== undefined && b.year !== undefined) {
+      if (a.year !== b.year) {
+        return a.year - b.year;
+      }
+      
+      // Ordre des saisons
+      const seasons = ['Ver', 'Aestas', 'Autumnus', 'Hiems', 'SPRING', 'SUMMER', 'AUTUMN', 'WINTER'];
+      const aSeasonIndex = seasons.indexOf(a.season || '');
+      const bSeasonIndex = seasons.indexOf(b.season || '');
+      
+      return aSeasonIndex - bSeasonIndex;
+    }
+    
+    // Si ce sont des chaînes de caractères
+    return String(a.date).localeCompare(String(b.date));
   });
 
+  const getEventBadgeColor = (event: PoliticalEvent) => {
+    const importanceValue = event.importance || "normale";
+    switch (importanceValue) {
+      case "majeure": return "destructive";
+      case "normale": return "secondary";
+      case "mineure": return "outline";
+      default: return "secondary";
+    }
+  };
+
+  // Formater la date d'un événement pour l'affichage
+  const formatEventDate = (event: PoliticalEvent) => {
+    if (event.year && event.season) {
+      return `An ${event.year} - ${formatSeasonDisplay(event.season as any)}`;
+    }
+    
+    if (event.date instanceof Date) {
+      return event.date.toLocaleDateString();
+    }
+    
+    return String(event.date);
+  };
+
   return (
-    <Timeline className="mt-4">
-      {sortedEvents.map((event) => (
-        <Timeline.Item key={event.id} className="pb-8">
-          <Timeline.Header>
-            <Timeline.Title className={event.importance === 'majeure' ? 'text-xl font-bold text-red-600' : ''}>
-              {event.title}
-            </Timeline.Title>
-            <Timeline.Badge className={`
-              ${event.importance === 'majeure' ? 'bg-red-100 text-red-800' : ''}
-              ${event.importance === 'mineure' ? 'bg-blue-100 text-blue-800' : ''}
-              ${event.importance === 'normale' ? 'bg-gray-100 text-gray-800' : ''}
-            `}>
-              {event.date.year} - {event.date.season}
-            </Timeline.Badge>
-          </Timeline.Header>
-          <Timeline.Content>
-            <p className="mb-2">{event.description}</p>
-            
-            {/* Show impact values if they exist */}
-            {event.impact && (
-              <div className="mt-2 grid grid-cols-2 gap-2 text-xs">
-                {Object.entries(event.impact).map(([key, value]) => (
-                  <div key={key} className="flex items-center justify-between">
-                    <span className="capitalize">{key}:</span>
-                    <span className={typeof value === 'number' && value > 0 ? 'text-green-600' : 'text-red-600'}>
-                      {typeof value === 'number' && value > 0 ? `+${value}` : value}
+    <div className="space-y-4">
+      <h3 className="text-lg font-semibold">Chronologie des événements politiques</h3>
+      
+      {sortedEvents.length === 0 ? (
+        <Card>
+          <CardContent className="p-4 text-center text-muted-foreground">
+            Aucun événement politique enregistré
+          </CardContent>
+        </Card>
+      ) : (
+        <div className="space-y-3">
+          {sortedEvents.map(event => (
+            <Card key={event.id} className="relative overflow-hidden">
+              <div className={`absolute left-0 top-0 bottom-0 w-1 bg-${event.faction === 'Populares' ? 'red' : event.faction === 'Optimates' ? 'blue' : 'gray'}-500`} />
+              <CardContent className="p-4 pl-6">
+                <div className="flex justify-between items-start">
+                  <div>
+                    <h4 className="font-medium">{event.title}</h4>
+                    <p className="text-sm text-muted-foreground mt-1">{event.description}</p>
+                  </div>
+                  <div className="flex flex-col items-end">
+                    <Badge variant={getEventBadgeColor(event) as any}>{event.type}</Badge>
+                    <span className="text-xs text-muted-foreground mt-1">
+                      {formatEventDate(event)}
                     </span>
                   </div>
-                ))}
-              </div>
-            )}
-          </Timeline.Content>
-        </Timeline.Item>
-      ))}
-
-      {politicalEvents.length === 0 && (
-        <Timeline.Content className="text-center py-4">
-          Aucun événement politique enregistré.
-        </Timeline.Content>
+                </div>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
       )}
-    </Timeline>
+    </div>
   );
 };

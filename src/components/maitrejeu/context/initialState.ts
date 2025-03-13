@@ -463,18 +463,17 @@ export const initialEquilibre: Equilibre | null = {
   optimates: 40,
   moderates: 25,
   
-  // Propriétés additionnelles pour rétrocompatibilité
-  population: 0,
-  armée: 0,
-  économie: 0,
-  morale: 0,
-  loyauté: 0,
-  patriciens: 0,
-  plébéiens: 0,
+  // Propriétés additionnelles pour la compatibilité
+  population: 100,
+  armée: 80,
+  économie: 70,
+  morale: 65,
+  loyauté: 75,
+  patriciens: 40,
+  plébéiens: 60,
   populaires: 35,
-  neutrales: 0,
+  neutrales: 25,
   historique: []
 };
 export const initialDate: GameDate = { year: 632, season: "SPRING" };
 export const initialPhase: GamePhase = "SENATE";
-

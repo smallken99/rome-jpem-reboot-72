@@ -15,6 +15,7 @@ export const createEquilibreOperations = (
       return {
         ...prev,
         populaires,
+        populares: populaires, // Mettre à jour les deux pour la compatibilité
         optimates,
         moderates
       };
