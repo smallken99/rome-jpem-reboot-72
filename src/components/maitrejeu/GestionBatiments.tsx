@@ -5,292 +5,265 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
 import { 
   Building, 
-  Home, 
-  Landmark, 
-  Castle, 
-  Map, 
   Plus, 
+  Hammer, 
+  AlertTriangle, 
   Search,
-  Filter
+  Filter,
+  SortAsc,
+  Map 
 } from 'lucide-react';
 import { Input } from '@/components/ui/input';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Badge } from '@/components/ui/badge';
 
 export const GestionBatiments: React.FC = () => {
   const [activeTab, setActiveTab] = useState('publics');
   const [searchTerm, setSearchTerm] = useState('');
-  const [filter, setFilter] = useState('tous');
   
-  // Données fictives pour les bâtiments
-  const buildingsData = {
-    publics: [
-      { id: 'b1', nom: 'Forum Romanum', type: 'Forum', statut: 'Construit', année: 753, construction: 100 },
-      { id: 'b2', nom: 'Temple de Jupiter', type: 'Temple', statut: 'Construit', année: 509, construction: 100 },
-      { id: 'b3', nom: 'Basilique Aemilia', type: 'Basilique', statut: 'Construit', année: 179, construction: 100 },
-      { id: 'b4', nom: 'Théâtre de Pompée', type: 'Théâtre', statut: 'En projet', année: 61, construction: 0 }
-    ],
-    privés: [
-      { id: 'p1', nom: 'Domus Augusti', type: 'Domus', propriétaire: 'Auguste', valeur: 5000000 },
-      { id: 'p2', nom: 'Villa des Papyrus', type: 'Villa', propriétaire: 'Lucius Calpurnius Piso Caesoninus', valeur: 3000000 },
-      { id: 'p3', nom: 'Domus Aurea', type: 'Domus', propriétaire: 'Néron', valeur: 10000000 }
-    ],
-    religieux: [
-      { id: 'r1', nom: 'Temple de Vesta', type: 'Temple', divinité: 'Vesta', prêtre: 'Vestales' },
-      { id: 'r2', nom: 'Temple de Mars', type: 'Temple', divinité: 'Mars', prêtre: 'Flamine de Mars' },
-      { id: 'r3', nom: 'Temple de Saturne', type: 'Temple', divinité: 'Saturne', prêtre: 'Flamine de Saturne' }
-    ],
-    militaires: [
-      { id: 'm1', nom: 'Camp Prétorien', type: 'Camp', garnison: 'Garde Prétorienne', capacité: 5000 },
-      { id: 'm2', nom: 'Castra Albana', type: 'Fort', garnison: 'Legio II Parthica', capacité: 2000 },
-      { id: 'm3', nom: 'Mur Servien', type: 'Fortification', garnison: 'Milice urbaine', capacité: 500 }
-    ]
+  // Données fictives pour la démonstration
+  const batimentsPublics = [
+    { id: '1', nom: 'Temple de Jupiter', type: 'Religieux', état: 'Bon', maintenance: 'Basse', coût: 2000 },
+    { id: '2', nom: 'Théâtre de Pompée', type: 'Divertissement', état: 'Excellent', maintenance: 'Moyenne', coût: 5000 },
+    { id: '3', nom: 'Forum Romain', type: 'Civil', état: 'Vétuste', maintenance: 'Haute', coût: 8000 },
+    { id: '4', nom: 'Aqueduc Claudien', type: 'Infrastructure', état: 'Moyen', maintenance: 'Moyenne', coût: 12000 },
+  ];
+  
+  const projetsConstruction = [
+    { id: '1', nom: 'Nouveau Temple de Mars', type: 'Religieux', progression: 45, budget: 15000, responsable: 'Gaius Aurelius' },
+    { id: '2', nom: 'Extension du Forum', type: 'Civil', progression: 20, budget: 30000, responsable: 'Marcus Tullius' },
+    { id: '3', nom: 'Rénovation des Thermes', type: 'Bains', progression: 80, budget: 8000, responsable: 'Lucius Calpurnius' },
+  ];
+  
+  // Obtenir la couleur pour le badge d'état
+  const getStateColor = (état: string) => {
+    switch (état.toLowerCase()) {
+      case 'excellent':
+        return 'bg-green-100 text-green-800 border-green-300';
+      case 'bon':
+        return 'bg-blue-100 text-blue-800 border-blue-300';
+      case 'moyen':
+        return 'bg-yellow-100 text-yellow-800 border-yellow-300';
+      case 'vétuste':
+        return 'bg-red-100 text-red-800 border-red-300';
+      default:
+        return 'bg-gray-100 text-gray-800 border-gray-300';
+    }
   };
   
-  // Filtrer les bâtiments par terme de recherche et filtre
-  const filterBuildings = (buildings: any[]) => {
-    return buildings.filter(building => {
-      if (searchTerm && !building.nom.toLowerCase().includes(searchTerm.toLowerCase())) {
-        return false;
-      }
-      
-      if (filter !== 'tous' && building.type !== filter) {
-        return false;
-      }
-      
-      return true;
-    });
-  };
-  
-  // Obtenir les filtres disponibles pour l'onglet actif
-  const getFiltersForActiveTab = () => {
-    const allBuildingsInTab = buildingsData[activeTab as keyof typeof buildingsData];
-    const types = [...new Set(allBuildingsInTab.map(b => b.type))];
-    
-    return types;
+  // Obtenir la couleur pour le badge de maintenance
+  const getMaintenanceColor = (niveau: string) => {
+    switch (niveau.toLowerCase()) {
+      case 'basse':
+        return 'bg-green-100 text-green-800 border-green-300';
+      case 'moyenne':
+        return 'bg-yellow-100 text-yellow-800 border-yellow-300';
+      case 'haute':
+        return 'bg-red-100 text-red-800 border-red-300';
+      default:
+        return 'bg-gray-100 text-gray-800 border-gray-300';
+    }
   };
   
   return (
     <div className="p-6 space-y-6">
-      <h1 className="text-3xl font-bold mb-6">Gestion des Bâtiments</h1>
-      
-      <div className="flex flex-col md:flex-row justify-between gap-4 mb-6">
-        <div className="flex items-center gap-2 flex-1">
-          <div className="relative flex-1">
-            <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-            <Input
-              type="search"
-              placeholder="Rechercher un bâtiment..."
-              className="pl-8"
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-            />
-          </div>
-          
-          <Select value={filter} onValueChange={setFilter}>
-            <SelectTrigger className="w-[180px]">
-              <SelectValue placeholder="Type" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="tous">Tous les types</SelectItem>
-              {getFiltersForActiveTab().map(type => (
-                <SelectItem key={type} value={type}>{type}</SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
+      <div className="flex justify-between items-center">
+        <h1 className="text-3xl font-bold">Gestion des Bâtiments Publics</h1>
         
-        <Button className="flex items-center gap-2">
+        <Button 
+          onClick={() => console.log('Nouveau bâtiment/projet')}
+          className="flex items-center gap-1"
+        >
           <Plus className="h-4 w-4" />
-          Nouveau Bâtiment
+          Nouveau Projet
+        </Button>
+      </div>
+      
+      <div className="flex flex-col sm:flex-row gap-4 items-center">
+        <div className="relative flex-1">
+          <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-gray-500" />
+          <Input
+            placeholder="Rechercher un bâtiment..."
+            className="pl-8"
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+          />
+        </div>
+        <Button variant="outline" size="icon" className="h-10 w-10">
+          <Filter className="h-4 w-4" />
+        </Button>
+        <Button variant="outline" size="icon" className="h-10 w-10">
+          <SortAsc className="h-4 w-4" />
+        </Button>
+        <Button variant="outline" size="icon" className="h-10 w-10">
+          <Map className="h-4 w-4" />
         </Button>
       </div>
       
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-        <TabsList className="grid grid-cols-2 md:grid-cols-5 mb-6">
-          <TabsTrigger value="publics" className="flex items-center gap-2">
-            <Landmark className="h-4 w-4" />
-            <span className="hidden md:inline">Publics</span>
-          </TabsTrigger>
-          <TabsTrigger value="privés" className="flex items-center gap-2">
-            <Home className="h-4 w-4" />
-            <span className="hidden md:inline">Privés</span>
-          </TabsTrigger>
-          <TabsTrigger value="religieux" className="flex items-center gap-2">
-            <Building className="h-4 w-4" />
-            <span className="hidden md:inline">Religieux</span>
-          </TabsTrigger>
-          <TabsTrigger value="militaires" className="flex items-center gap-2">
-            <Castle className="h-4 w-4" />
-            <span className="hidden md:inline">Militaires</span>
-          </TabsTrigger>
-          <TabsTrigger value="carte" className="flex items-center gap-2">
-            <Map className="h-4 w-4" />
-            <span className="hidden md:inline">Carte</span>
-          </TabsTrigger>
+        <TabsList className="grid grid-cols-3 mb-4">
+          <TabsTrigger value="publics">Bâtiments Publics</TabsTrigger>
+          <TabsTrigger value="projets">Projets de Construction</TabsTrigger>
+          <TabsTrigger value="maintenance">Maintenance & Réparations</TabsTrigger>
         </TabsList>
         
         <TabsContent value="publics">
           <Card>
             <CardHeader>
-              <CardTitle>Bâtiments Publics</CardTitle>
+              <CardTitle>Bâtiments Publics de Rome</CardTitle>
               <CardDescription>
-                Édifices appartenant à la République Romaine, financés par le trésor public.
+                Gérez les bâtiments publics, temples, aqueducs et autres infrastructures
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <table className="w-full">
-                <thead>
-                  <tr className="border-b">
-                    <th className="text-left py-2 px-4 font-medium">Nom</th>
-                    <th className="text-left py-2 px-4 font-medium">Type</th>
-                    <th className="text-left py-2 px-4 font-medium">Statut</th>
-                    <th className="text-left py-2 px-4 font-medium">Année</th>
-                    <th className="text-left py-2 px-4 font-medium">Construction</th>
-                    <th className="text-left py-2 px-4 font-medium">Actions</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {filterBuildings(buildingsData.publics).map(building => (
-                    <tr key={building.id} className="border-b">
-                      <td className="py-2 px-4">{building.nom}</td>
-                      <td className="py-2 px-4">{building.type}</td>
-                      <td className="py-2 px-4">{building.statut}</td>
-                      <td className="py-2 px-4">{building.année} av. J.-C.</td>
-                      <td className="py-2 px-4">{building.construction}%</td>
-                      <td className="py-2 px-4">
-                        <Button variant="outline" size="sm">Détails</Button>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {batimentsPublics.map(batiment => (
+                  <Card key={batiment.id} className="overflow-hidden">
+                    <CardHeader className="p-4 pb-2 bg-muted/40">
+                      <CardTitle className="text-base flex items-center gap-2">
+                        <Building className="h-4 w-4" />
+                        {batiment.nom}
+                      </CardTitle>
+                      <CardDescription>{batiment.type}</CardDescription>
+                    </CardHeader>
+                    <CardContent className="p-4 pt-2">
+                      <div className="mt-2 space-y-2">
+                        <div className="flex justify-between items-center">
+                          <span className="text-sm text-muted-foreground">État:</span>
+                          <Badge variant="outline" className={getStateColor(batiment.état)}>
+                            {batiment.état}
+                          </Badge>
+                        </div>
+                        <div className="flex justify-between items-center">
+                          <span className="text-sm text-muted-foreground">Maintenance:</span>
+                          <Badge variant="outline" className={getMaintenanceColor(batiment.maintenance)}>
+                            {batiment.maintenance}
+                          </Badge>
+                        </div>
+                        <div className="flex justify-between items-center">
+                          <span className="text-sm text-muted-foreground">Coût annuel:</span>
+                          <span className="font-medium">{batiment.coût} denarii</span>
+                        </div>
+                      </div>
+                      <div className="mt-4 flex justify-end gap-2">
+                        <Button 
+                          variant="outline" 
+                          size="sm"
+                          onClick={() => console.log('Voir détails', batiment.id)}
+                        >
+                          Détails
+                        </Button>
+                        <Button 
+                          variant="outline" 
+                          size="sm"
+                          onClick={() => console.log('Maintenance', batiment.id)}
+                        >
+                          <Hammer className="h-4 w-4 mr-1" />
+                          Maintenance
+                        </Button>
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
             </CardContent>
           </Card>
         </TabsContent>
         
-        <TabsContent value="privés">
+        <TabsContent value="projets">
           <Card>
             <CardHeader>
-              <CardTitle>Bâtiments Privés</CardTitle>
+              <CardTitle>Projets de Construction</CardTitle>
               <CardDescription>
-                Propriétés des citoyens romains, résidences et villas.
+                Suivez l'avancement des projets de construction dans la République
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <table className="w-full">
-                <thead>
-                  <tr className="border-b">
-                    <th className="text-left py-2 px-4 font-medium">Nom</th>
-                    <th className="text-left py-2 px-4 font-medium">Type</th>
-                    <th className="text-left py-2 px-4 font-medium">Propriétaire</th>
-                    <th className="text-left py-2 px-4 font-medium">Valeur</th>
-                    <th className="text-left py-2 px-4 font-medium">Actions</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {filterBuildings(buildingsData.privés).map(building => (
-                    <tr key={building.id} className="border-b">
-                      <td className="py-2 px-4">{building.nom}</td>
-                      <td className="py-2 px-4">{building.type}</td>
-                      <td className="py-2 px-4">{building.propriétaire}</td>
-                      <td className="py-2 px-4">{building.valeur.toLocaleString()} sesterces</td>
-                      <td className="py-2 px-4">
-                        <Button variant="outline" size="sm">Détails</Button>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+              <div className="space-y-4">
+                {projetsConstruction.map(projet => (
+                  <Card key={projet.id} className="overflow-hidden">
+                    <CardHeader className="p-4 pb-2">
+                      <div className="flex justify-between items-start">
+                        <div>
+                          <CardTitle className="text-base">{projet.nom}</CardTitle>
+                          <CardDescription>{projet.type}</CardDescription>
+                        </div>
+                        <Badge>{projet.progression}%</Badge>
+                      </div>
+                    </CardHeader>
+                    <CardContent className="p-4 pt-0">
+                      <div className="w-full bg-gray-200 rounded-full h-2.5 mt-2 mb-4">
+                        <div 
+                          className="bg-blue-600 h-2.5 rounded-full" 
+                          style={{ width: `${projet.progression}%` }}
+                        ></div>
+                      </div>
+                      
+                      <div className="grid grid-cols-2 gap-4">
+                        <div>
+                          <p className="text-sm text-muted-foreground">Budget:</p>
+                          <p className="font-medium">{projet.budget} denarii</p>
+                        </div>
+                        <div>
+                          <p className="text-sm text-muted-foreground">Responsable:</p>
+                          <p className="font-medium">{projet.responsable}</p>
+                        </div>
+                      </div>
+                      
+                      <div className="mt-4 flex justify-end gap-2">
+                        <Button 
+                          variant="outline" 
+                          size="sm"
+                          onClick={() => console.log('Voir détails projet', projet.id)}
+                        >
+                          Détails
+                        </Button>
+                        <Button 
+                          size="sm"
+                          onClick={() => console.log('Modififier projet', projet.id)}
+                        >
+                          Modifier
+                        </Button>
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
             </CardContent>
           </Card>
         </TabsContent>
         
-        <TabsContent value="religieux">
+        <TabsContent value="maintenance">
           <Card>
             <CardHeader>
-              <CardTitle>Bâtiments Religieux</CardTitle>
+              <CardTitle>Maintenance & Réparations</CardTitle>
               <CardDescription>
-                Temples et lieux sacrés dédiés aux divinités romaines.
+                Gérez les travaux de maintenance et les réparations d'urgence
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <table className="w-full">
-                <thead>
-                  <tr className="border-b">
-                    <th className="text-left py-2 px-4 font-medium">Nom</th>
-                    <th className="text-left py-2 px-4 font-medium">Type</th>
-                    <th className="text-left py-2 px-4 font-medium">Divinité</th>
-                    <th className="text-left py-2 px-4 font-medium">Prêtre</th>
-                    <th className="text-left py-2 px-4 font-medium">Actions</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {filterBuildings(buildingsData.religieux).map(building => (
-                    <tr key={building.id} className="border-b">
-                      <td className="py-2 px-4">{building.nom}</td>
-                      <td className="py-2 px-4">{building.type}</td>
-                      <td className="py-2 px-4">{building.divinité}</td>
-                      <td className="py-2 px-4">{building.prêtre}</td>
-                      <td className="py-2 px-4">
-                        <Button variant="outline" size="sm">Détails</Button>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </CardContent>
-          </Card>
-        </TabsContent>
-        
-        <TabsContent value="militaires">
-          <Card>
-            <CardHeader>
-              <CardTitle>Bâtiments Militaires</CardTitle>
-              <CardDescription>
-                Forts, camps et autres installations militaires de la République.
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <table className="w-full">
-                <thead>
-                  <tr className="border-b">
-                    <th className="text-left py-2 px-4 font-medium">Nom</th>
-                    <th className="text-left py-2 px-4 font-medium">Type</th>
-                    <th className="text-left py-2 px-4 font-medium">Garnison</th>
-                    <th className="text-left py-2 px-4 font-medium">Capacité</th>
-                    <th className="text-left py-2 px-4 font-medium">Actions</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {filterBuildings(buildingsData.militaires).map(building => (
-                    <tr key={building.id} className="border-b">
-                      <td className="py-2 px-4">{building.nom}</td>
-                      <td className="py-2 px-4">{building.type}</td>
-                      <td className="py-2 px-4">{building.garnison}</td>
-                      <td className="py-2 px-4">{building.capacité} soldats</td>
-                      <td className="py-2 px-4">
-                        <Button variant="outline" size="sm">Détails</Button>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </CardContent>
-          </Card>
-        </TabsContent>
-        
-        <TabsContent value="carte">
-          <Card>
-            <CardHeader>
-              <CardTitle>Carte des Bâtiments</CardTitle>
-              <CardDescription>
-                Visualisation géographique des bâtiments de Rome et de l'Empire.
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="h-[500px] flex items-center justify-center bg-muted">
-              <div className="text-center">
-                <Map className="h-16 w-16 mx-auto text-muted-foreground" />
-                <p className="mt-2 text-muted-foreground">La carte interactive sera disponible prochainement</p>
+              <div className="bg-amber-50 border border-amber-200 rounded-lg p-4 mb-6 flex items-start gap-3">
+                <AlertTriangle className="h-5 w-5 text-amber-600 mt-0.5 flex-shrink-0" />
+                <div>
+                  <h3 className="font-medium text-amber-800">Alertes de maintenance</h3>
+                  <p className="text-amber-700 text-sm mt-1">
+                    3 bâtiments nécessitent une maintenance urgente. Planifiez des travaux de réparation pour éviter une détérioration supplémentaire.
+                  </p>
+                </div>
+              </div>
+              
+              <div className="space-y-4 mt-6">
+                <h3 className="font-medium">Travaux en cours</h3>
+                <p className="text-muted-foreground">Aucun travail de maintenance actuellement en cours.</p>
+              </div>
+              
+              <div className="flex justify-end mt-4">
+                <Button 
+                  onClick={() => console.log('Planifier maintenance')}
+                  className="flex items-center gap-1"
+                >
+                  <Hammer className="h-4 w-4" />
+                  Planifier des travaux
+                </Button>
               </div>
             </CardContent>
           </Card>
@@ -299,5 +272,3 @@ export const GestionBatiments: React.FC = () => {
     </div>
   );
 };
-
-export default GestionBatiments;

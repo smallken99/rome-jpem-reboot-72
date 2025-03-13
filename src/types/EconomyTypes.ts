@@ -10,6 +10,7 @@ export interface Transaction {
   date: Date | string;
   source?: string;
   recurring?: boolean;
+  recipient?: string;
 }
 
 export interface TransactionCreationParams {
@@ -19,6 +20,7 @@ export interface TransactionCreationParams {
   category: string;
   source?: string;
   recurring?: boolean;
+  recipient?: string;
 }
 
 export interface EconomyStats {

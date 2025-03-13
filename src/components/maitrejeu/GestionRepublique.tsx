@@ -25,7 +25,7 @@ export const GestionRepublique: React.FC = () => {
         </TabsList>
         
         <TabsContent value="senat" className="space-y-6">
-          <SenatComposition />
+          <SenatComposition role="mj" />
         </TabsContent>
         
         <TabsContent value="lois" className="space-y-6">

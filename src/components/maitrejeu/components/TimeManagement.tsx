@@ -5,20 +5,16 @@ import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Calendar, Clock } from 'lucide-react';
 import { useMaitreJeu } from '../context';
+import { GamePhase } from '../types/common';
 import { 
-  GamePhase, 
-  Season, 
   PlayerSeason, 
-  formatSeasonDisplay,
-  convertSeason 
-} from '../types/common';
-import { convertSeasonBetweenSystems, areSeasonsEqual } from '@/utils/timeSystem';
+  formatGameDate,
+  convertSeasonBetweenSystems
+} from '@/utils/timeSystem';
 
 export const TimeManagement = () => {
   const { 
     currentDate, 
-    currentSeason, 
-    currentYear, 
     currentPhase, 
     advanceTime, 
     changePhase 
@@ -29,7 +25,7 @@ export const TimeManagement = () => {
   
   const handleAdvanceTime = () => {
     // Conversion de PlayerSeason vers Season pour l'appel à advanceTime
-    const mjSeason = convertSeasonBetweenSystems(selectedSeason, 'mj') as Season;
+    const mjSeason = convertSeasonBetweenSystems(selectedSeason, 'mj');
     advanceTime(mjSeason);
   };
   
@@ -58,11 +54,8 @@ export const TimeManagement = () => {
     "ADMINISTRATION"
   ];
   
-  // Obtenir l'affichage formaté pour la saison actuelle
-  const getFormattedCurrentSeason = () => {
-    const season = typeof currentSeason === 'string' ? currentSeason : 'Ver';
-    return formatSeasonDisplay(season);
-  };
+  // Formatage de la date actuelle
+  const formattedDate = formatGameDate(currentDate);
   
   return (
     <Card className="mb-4">
@@ -78,7 +71,7 @@ export const TimeManagement = () => {
             <div className="flex items-center space-x-2 mb-4">
               <Calendar className="h-5 w-5 text-muted-foreground" />
               <span className="font-medium">
-                An {currentYear} - {getFormattedCurrentSeason()}
+                {formattedDate}
               </span>
             </div>
             

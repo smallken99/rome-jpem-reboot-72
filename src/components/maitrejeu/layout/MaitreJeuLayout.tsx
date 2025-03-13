@@ -27,7 +27,7 @@ export const MaitreJeuLayout: React.FC<MaitreJeuLayoutProps> = ({
         <div className="flex flex-col md:flex-row gap-6">
           <MaitreJeuSidebar activeTab={activeTab} setActiveTab={setActiveTab} />
           
-          <div className="flex-1 bg-white rounded-lg shadow-md">
+          <div className="flex-1 bg-white rounded-lg shadow-md overflow-hidden">
             <MaitreJeuContent activeTab={activeTab} />
           </div>
         </div>
