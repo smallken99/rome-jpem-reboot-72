@@ -2,7 +2,10 @@
 import React from 'react';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { AlertTriangle } from 'lucide-react';
-import { EducationWarningProps } from '../context/types';
+
+interface EducationWarningProps {
+  text: string;
+}
 
 export const EducationWarning: React.FC<EducationWarningProps> = ({ text }) => {
   return (

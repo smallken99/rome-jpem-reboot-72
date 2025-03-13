@@ -7,7 +7,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { ArrowLeft, Scroll, Coins, Award } from 'lucide-react';
+import { ArrowLeft, Scroll, Crown, Award } from 'lucide-react';
 import { toast } from 'sonner';
 import { characters } from '@/data/characters';
 import { Character } from '@/types/character';
@@ -17,8 +17,8 @@ export const InheritanceDetails: React.FC = () => {
   const navigate = useNavigate();
   
   const [heir, setHeir] = useState<Character | null>(null);
-  const [inheritanceAmount, setInheritanceAmount] = useState<number>(50000);
   const [inheritanceNotes, setInheritanceNotes] = useState<string>('');
+  const [futureTitle, setFutureTitle] = useState<string>('');
   
   useEffect(() => {
     if (heirId) {
@@ -34,7 +34,7 @@ export const InheritanceDetails: React.FC = () => {
   
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    toast.success(`Testament mis à jour pour ${heir?.name}`);
+    toast.success(`${heir?.name} a été confirmé comme héritier principal`);
     navigate('/famille/heritage');
   };
   
@@ -49,9 +49,9 @@ export const InheritanceDetails: React.FC = () => {
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
-        <h2 className="text-2xl font-cinzel font-medium">Testament pour {heir.name}</h2>
+        <h2 className="text-2xl font-cinzel font-medium">Succession de {heir.name}</h2>
         <ActionButton 
-          label="Retour à l'héritage" 
+          label="Retour" 
           to="/famille/heritage"
           variant="outline"
           icon={<ArrowLeft className="h-4 w-4" />}
@@ -61,15 +61,15 @@ export const InheritanceDetails: React.FC = () => {
       <RomanCard>
         <RomanCard.Header>
           <div className="flex items-center gap-2">
-            <Scroll className="h-5 w-5 text-rome-navy" />
-            <h3 className="font-cinzel">Détails du Testament</h3>
+            <Crown className="h-5 w-5 text-rome-navy" />
+            <h3 className="font-cinzel">Détails de l'Héritier</h3>
           </div>
         </RomanCard.Header>
         
         <RomanCard.Content>
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="heirName">Héritier</Label>
+              <Label htmlFor="heirName">Héritier désigné</Label>
               <Input 
                 id="heirName" 
                 value={heir.name} 
@@ -79,31 +79,25 @@ export const InheritanceDetails: React.FC = () => {
             </div>
             
             <div className="space-y-2">
-              <Label htmlFor="inheritanceAmount">
-                <div className="flex items-center gap-2">
-                  <Coins className="h-4 w-4 text-rome-gold" />
-                  <span>Montant de l'héritage (en As)</span>
-                </div>
-              </Label>
+              <Label htmlFor="futureTitle">Titre futur</Label>
               <Input 
-                id="inheritanceAmount" 
-                type="number" 
-                value={inheritanceAmount}
-                onChange={(e) => setInheritanceAmount(parseInt(e.target.value) || 0)}
-                min={0}
+                id="futureTitle" 
+                value={futureTitle}
+                onChange={(e) => setFutureTitle(e.target.value)}
+                placeholder="Ex: Pater Familias de la Gens Julia"
               />
               <p className="text-xs text-muted-foreground">
-                La valeur totale du patrimoine familial disponible pour l'héritage.
+                Le titre qui sera accordé à l'héritier lorsqu'il prendra la tête de la famille.
               </p>
             </div>
             
             <div className="space-y-2">
-              <Label htmlFor="inheritanceNotes">Conditions et clauses spéciales</Label>
+              <Label htmlFor="inheritanceNotes">Instructions et conditions spéciales</Label>
               <Textarea
                 id="inheritanceNotes"
                 value={inheritanceNotes}
                 onChange={(e) => setInheritanceNotes(e.target.value)}
-                placeholder="Ajoutez des conditions spéciales ou des clauses au testament..."
+                placeholder="Ajoutez des conditions ou instructions particulières pour l'héritier..."
                 className="min-h-[150px]"
               />
             </div>
@@ -111,15 +105,12 @@ export const InheritanceDetails: React.FC = () => {
             <div className="bg-rome-parchment/50 p-3 rounded-md text-sm space-y-2 mt-4">
               <div className="flex items-center gap-2">
                 <Award className="h-4 w-4 text-rome-terracotta" />
-                <h4 className="font-medium">Implications légales</h4>
+                <h4 className="font-medium">Tradition familiale</h4>
               </div>
               <p>
-                Selon la loi romaine, un testament doit nommer un héritier principal (heres) qui
-                recevra la majorité du patrimoine. Des legs spécifiques (legata) peuvent être attribués
-                à d'autres personnes.
-              </p>
-              <p>
-                Le testament doit être signé en présence de sept témoins citoyens pour être valide.
+                Selon la tradition romaine, l'héritier principal (heres) devient le nouveau 
+                Pater Familias et chef de la famille. Il aura la responsabilité de préserver 
+                l'honneur et la position de la famille dans la société romaine.
               </p>
             </div>
             
@@ -131,7 +122,7 @@ export const InheritanceDetails: React.FC = () => {
               />
               <ActionButton 
                 type="submit"
-                label="Enregistrer le testament"
+                label="Confirmer l'héritier"
                 variant="default"
               />
             </div>

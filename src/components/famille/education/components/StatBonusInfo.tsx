@@ -1,7 +1,11 @@
 
 import React from 'react';
-import { StatBonusInfoProps } from '../context/types';
 import { ArrowUpCircle } from 'lucide-react';
+
+interface StatBonusInfoProps {
+  educationType: string;
+  statBonus?: number;
+}
 
 export const StatBonusInfo: React.FC<StatBonusInfoProps> = ({ 
   educationType, 
