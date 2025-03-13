@@ -46,8 +46,7 @@ export function useBuildingSale() {
       const success = economy.receivePayment(
         estimatedValue,
         "Marché immobilier",
-        "Immobilier",
-        `Vente de "${buildingToSell.name}"`
+        "Immobilier"
       );
       
       toast.success(`Vente de "${buildingToSell.name}" réalisée pour ${estimatedValue.toLocaleString()} As`);

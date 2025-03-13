@@ -51,8 +51,7 @@ export function useBuildingPurchase() {
       const success = economy.makePayment(
         building.initialCost,
         "Vendeur de propriété",
-        "Immobilier",
-        `Achat de "${newBuilding.name}" à ${location}`
+        "Immobilier"
       );
       
       if (success) {
@@ -63,7 +62,7 @@ export function useBuildingPurchase() {
       }
       
       setIsLoading(false);
-      return success;
+      return true;
     }, 1000);
     
     return true;

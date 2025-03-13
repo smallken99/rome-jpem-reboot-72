@@ -52,8 +52,7 @@ export function useBuildingMaintenance() {
       const success = economy.makePayment(
         building.maintenanceCost,
         "Service d'entretien",
-        "Maintenance",
-        `Entretien de "${building.name}"`
+        "Maintenance"
       );
       
       toast.success(`Entretien de "${building.name}" effectué avec succès`);

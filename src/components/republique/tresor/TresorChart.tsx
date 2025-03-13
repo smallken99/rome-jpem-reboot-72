@@ -25,9 +25,11 @@ export const TresorChart: React.FC = () => {
       const transactionsByMonth = new Map<number, {incomes: number, expenses: number}>();
       
       economy.transactions.forEach(transaction => {
-        const transactionDate = transaction.date instanceof Date ? 
-          transaction.date : 
-          new Date(transaction.date);
+        const transactionDate = new Date(
+          transaction.date instanceof Date ? 
+            transaction.date : 
+            new Date()
+        );
           
         const month = transactionDate.getMonth();
         const current = transactionsByMonth.get(month) || {incomes: 0, expenses: 0};

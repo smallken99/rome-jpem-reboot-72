@@ -32,13 +32,18 @@ export const LoiForm: React.FC<LoiFormProps> = ({
 }) => {
   const { handleInputChange, handleSelectChange } = onChange;
   
+  const handleFormSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    onSubmit(loi);
+  };
+  
   return (
     <Card className="my-4">
       <CardHeader>
         <CardTitle>Proposer une nouvelle loi</CardTitle>
       </CardHeader>
       <CardContent>
-        <form onSubmit={(e) => { e.preventDefault(); onSubmit(loi); }} className="space-y-4">
+        <form onSubmit={handleFormSubmit} className="space-y-4">
           <div>
             <label htmlFor="titre" className="block text-sm font-medium mb-1">Titre</label>
             <Input

@@ -2,7 +2,7 @@
 import React, { useState } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useMaitreJeu } from './context';
-import { Loi } from './types/lois';
+import { Loi, LoiType } from './types/lois';
 import { LoisList } from './components/lois/LoisList';
 import { LoiForm } from './components/lois/LoiForm';
 import { ElectionPlanner } from './components/elections/ElectionPlanner';
@@ -14,7 +14,7 @@ interface LoiFormData {
   titre: string;
   description: string;
   proposeur: string;
-  type: string;
+  type: LoiType;
   catégorie: string;
   importance: 'majeure' | 'normale' | 'mineure';
 }
@@ -106,11 +106,17 @@ export const GestionPolitique = () => {
           
           {showAddLoi && (
             <LoiForm 
-              loi={newLoi}
+              loi={{
+                titre: newLoi.titre,
+                description: newLoi.description,
+                proposeur: newLoi.proposeur,
+                type: newLoi.type,
+                importance: newLoi.importance
+              }}
               onSubmit={handleAddLoi}
               onChange={{
-                handleInputChange,
-                handleSelectChange
+                handleInputChange: (e, field) => handleInputChange(e, field as keyof LoiFormData),
+                handleSelectChange: (value, field) => handleSelectChange(value, field as keyof LoiFormData)
               }}
               onCancel={() => setShowAddLoi(false)}
             />
