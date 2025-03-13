@@ -49,7 +49,7 @@ export const AlliancesMilitaires: React.FC<AlliancesMilitairesProps> = ({ search
                 <TableCell>{alliance.dateFormation}</TableCell>
                 <TableCell>
                   <div className="flex flex-col">
-                    <span>{alliance.forces?.legions || 0} légions</span>
+                    <span>{alliance.forces?.légions || 0} légions</span>
                     <span className="text-xs text-muted-foreground">{alliance.forces?.auxiliaires || 0} auxiliaires</span>
                   </div>
                 </TableCell>
