@@ -294,3 +294,14 @@ export const educationPaths: EducationPath[] = [
     relatedStat: 'leadership'
   }
 ];
+
+// Fonction utilitaire pour obtenir un chemin d'éducation par ID
+export const getEducationPathById = (id: string) => {
+  return educationPaths.find(path => path.id === id);
+};
+
+// Fonction utilitaire pour obtenir la liste des spécialités d'un chemin d'éducation
+export const getSpecialtiesByPath = (pathId: string): string[] => {
+  const path = getEducationPathById(pathId);
+  return path && path.specialties ? path.specialties : [];
+};

@@ -18,12 +18,8 @@ export const EducationSpecialtySelector: React.FC<EducationSpecialtySelectorProp
       return educationPath.specialties;
     }
     
-    // Fallback to the utility function if available
-    try {
-      return getSpecialtiesByPath(educationType) || [];
-    } catch (e) {
-      return [];
-    }
+    // Use the utility function from educationPaths
+    return getSpecialtiesByPath(educationType);
   };
   
   const specialties = getSpecialties();
