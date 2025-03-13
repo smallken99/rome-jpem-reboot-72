@@ -1,331 +1,265 @@
 
-import React, { useState } from 'react';
+import React from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { BarChart, LineChart, PieChart } from 'lucide-react';
-import { useMaitreJeu } from './context';
+import { 
+  Users, 
+  Building, 
+  GalleryVerticalEnd, 
+  BarChart3,
+  TrendingUp, 
+  Scale, 
+  History
+} from 'lucide-react';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import { formatCurrency } from '@/utils/formatUtils';
 
-export const MaitreJeuStats: React.FC = () => {
-  const { senateurs, provinces, economieRecords, lois, familles } = useMaitreJeu();
-  const [activeTab, setActiveTab] = useState('economie');
+interface MaitreJeuStatsProps {}
+
+interface SenateurJouable {
+  id: string;
+  nom: string;
+  age: number;
+  influence: number;
+  statut: string;
+  famille: string;
+}
+
+// Données mockées pour les statistiques
+const sénateurs: SenateurJouable[] = [
+  { id: '1', nom: 'Marcus Caelius', age: 32, influence: 55, statut: 'actif', famille: 'Caelii' },
+  { id: '2', nom: 'Lucius Cornelius', age: 47, influence: 78, statut: 'actif', famille: 'Cornelii' },
+  { id: '3', nom: 'Gaius Julius', age: 39, influence: 65, statut: 'actif', famille: 'Julii' },
+  { id: '4', nom: 'Quintus Fabius', age: 51, influence: 82, statut: 'actif', famille: 'Fabii' },
+  { id: '5', nom: 'Publius Licinius', age: 43, influence: 61, statut: 'actif', famille: 'Licinii' }
+];
+
+const budgetData = [
+  { name: 'Dépenses Militaires', valeur: 250000 },
+  { name: 'Administration', valeur: 120000 },
+  { name: 'Travaux Publics', valeur: 180000 },
+  { name: 'Jeux et Festivals', valeur: 90000 },
+  { name: 'Approvisionnement', valeur: 110000 }
+];
+
+const influenceData = [
+  { famille: 'Cornelii', influence: 82 },
+  { famille: 'Julii', influence: 75 },
+  { famille: 'Fabii', influence: 68 },
+  { famille: 'Aemilii', influence: 61 },
+  { famille: 'Claudii', influence: 57 }
+];
+
+export const MaitreJeuStats: React.FC<MaitreJeuStatsProps> = () => {
+  const [activeTab, setActiveTab] = useState('budget');
   
-  // Statistiques économiques
-  const revenus = economieRecords.filter(r => r.type === 'income').reduce((acc, r) => acc + r.amount, 0);
-  const depenses = economieRecords.filter(r => r.type === 'expense').reduce((acc, r) => acc + r.amount, 0);
-  const balance = revenus - depenses;
-  
-  // Statistiques politiques
-  const loisAdoptees = lois.filter(l => l.état === 'adoptée' || l.état === 'Promulguée').length;
-  const loisRejetees = lois.filter(l => l.état === 'rejetée').length;
-  const loisEnAttente = lois.filter(l => l.état === 'proposée' || l.état === 'En délibération').length;
-  
-  // Statistiques démographiques
-  const senateursFactions = senateurs.reduce((acc, s) => {
-    const faction = s.faction || 'Autre';
-    acc[faction] = (acc[faction] || 0) + 1;
-    return acc;
-  }, {} as Record<string, number>);
+  const totalSenateurs = sénateurs.length;
+  const senateurActifs = sénateurs.filter(s => s.statut === 'actif').length;
+  const influenceMoyenne = Math.round(sénateurs.reduce((acc, s) => acc + s.influence, 0) / totalSenateurs);
   
   return (
-    <div className="p-6 space-y-6">
-      <h1 className="text-3xl font-bold mb-6">Statistiques Globales</h1>
+    <div className="p-6">
+      <h1 className="text-2xl font-bold mb-6">Statistiques de la République</h1>
       
-      <Tabs value={activeTab} onValueChange={setActiveTab}>
-        <TabsList className="grid w-full grid-cols-3">
-          <TabsTrigger value="economie" className="flex items-center gap-2">
-            <BarChart className="h-4 w-4" />
-            Économie
-          </TabsTrigger>
-          <TabsTrigger value="politique" className="flex items-center gap-2">
-            <LineChart className="h-4 w-4" />
-            Politique
-          </TabsTrigger>
-          <TabsTrigger value="demographie" className="flex items-center gap-2">
-            <PieChart className="h-4 w-4" />
-            Démographie
-          </TabsTrigger>
-        </TabsList>
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm font-medium">Sénateurs</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{totalSenateurs}</div>
+            <p className="text-sm text-muted-foreground">
+              {senateurActifs} actifs ({Math.round((senateurActifs/totalSenateurs)*100)}%)
+            </p>
+          </CardContent>
+        </Card>
         
-        <TabsContent value="economie" className="mt-6">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
-            <Card>
-              <CardHeader className="pb-2">
-                <CardTitle className="text-green-600">Revenus</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">{formatCurrency(revenus)}</div>
-                <p className="text-sm text-muted-foreground">
-                  Taxes, tributs et autres revenus
-                </p>
-              </CardContent>
-            </Card>
-            
-            <Card>
-              <CardHeader className="pb-2">
-                <CardTitle className="text-red-600">Dépenses</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">{formatCurrency(depenses)}</div>
-                <p className="text-sm text-muted-foreground">
-                  Armée, administration et projets
-                </p>
-              </CardContent>
-            </Card>
-            
-            <Card>
-              <CardHeader className="pb-2">
-                <CardTitle className={balance >= 0 ? "text-blue-600" : "text-red-600"}>
-                  Balance
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">{formatCurrency(balance)}</div>
-                <p className="text-sm text-muted-foreground">
-                  {balance >= 0 ? "Excédent budgétaire" : "Déficit à combler"}
-                </p>
-              </CardContent>
-            </Card>
-          </div>
-          
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <Card>
-              <CardHeader>
-                <CardTitle>Sources de revenus</CardTitle>
-                <CardDescription>
-                  Répartition des revenus par source
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="h-80">
-                <div className="flex h-full items-center justify-center">
-                  <p className="text-muted-foreground">Graphique des revenus à implémenter</p>
-                </div>
-              </CardContent>
-            </Card>
-            
-            <Card>
-              <CardHeader>
-                <CardTitle>Ventilation des dépenses</CardTitle>
-                <CardDescription>
-                  Répartition des dépenses par catégorie
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="h-80">
-                <div className="flex h-full items-center justify-center">
-                  <p className="text-muted-foreground">Graphique des dépenses à implémenter</p>
-                </div>
-              </CardContent>
-            </Card>
-            
-            <Card className="md:col-span-2">
-              <CardHeader>
-                <CardTitle>Évolution économique</CardTitle>
-                <CardDescription>
-                  Évolution des finances au fil du temps
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="h-80">
-                <div className="flex h-full items-center justify-center">
-                  <p className="text-muted-foreground">Graphique d'évolution à implémenter</p>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-        </TabsContent>
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm font-medium">Influence Moyenne</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{influenceMoyenne}/100</div>
+            <p className="text-sm text-muted-foreground">
+              Top: {Math.max(...sénateurs.map(s => s.influence))}/100
+            </p>
+          </CardContent>
+        </Card>
         
-        <TabsContent value="politique" className="mt-6">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
-            <Card>
-              <CardHeader className="pb-2">
-                <CardTitle>Lois adoptées</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">{loisAdoptees}</div>
-                <p className="text-sm text-muted-foreground">
-                  Sur un total de {lois.length} lois
-                </p>
-              </CardContent>
-            </Card>
-            
-            <Card>
-              <CardHeader className="pb-2">
-                <CardTitle>Lois rejetées</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">{loisRejetees}</div>
-                <p className="text-sm text-muted-foreground">
-                  Sur un total de {lois.length} lois
-                </p>
-              </CardContent>
-            </Card>
-            
-            <Card>
-              <CardHeader className="pb-2">
-                <CardTitle>Lois en attente</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">{loisEnAttente}</div>
-                <p className="text-sm text-muted-foreground">
-                  En cours de délibération
-                </p>
-              </CardContent>
-            </Card>
-          </div>
-          
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <Card>
-              <CardHeader>
-                <CardTitle>Équilibre du Sénat</CardTitle>
-                <CardDescription>
-                  Répartition des factions au Sénat
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="h-80">
-                <div className="flex h-full items-center justify-center">
-                  <p className="text-muted-foreground">Graphique des factions à implémenter</p>
-                </div>
-              </CardContent>
-            </Card>
-            
-            <Card>
-              <CardHeader>
-                <CardTitle>Activité législative</CardTitle>
-                <CardDescription>
-                  Nombre de lois proposées et adoptées par période
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="h-80">
-                <div className="flex h-full items-center justify-center">
-                  <p className="text-muted-foreground">Graphique d'activité à implémenter</p>
-                </div>
-              </CardContent>
-            </Card>
-            
-            <Card className="md:col-span-2">
-              <CardHeader>
-                <CardTitle>Votes au Sénat</CardTitle>
-                <CardDescription>
-                  Résultats des votes pour les lois et élections importantes
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="flex h-80 items-center justify-center">
-                  <p className="text-muted-foreground">Graphique des votes à implémenter</p>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-        </TabsContent>
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm font-medium">Trésor Public</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{formatCurrency(875000)}</div>
+            <p className="text-sm text-muted-foreground">
+              +{formatCurrency(25000)} ce mois
+            </p>
+          </CardContent>
+        </Card>
         
-        <TabsContent value="demographie" className="mt-6">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
-            <Card>
-              <CardHeader className="pb-2">
-                <CardTitle>Sénateurs</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">{senateurs.length}</div>
-                <p className="text-sm text-muted-foreground">
-                  Membres du Sénat romain
-                </p>
-              </CardContent>
-            </Card>
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm font-medium">Lois Actives</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">37</div>
+            <p className="text-sm text-muted-foreground">
+              5 en débat
+            </p>
+          </CardContent>
+        </Card>
+      </div>
+      
+      <Card className="mb-6">
+        <CardHeader>
+          <CardTitle>Analyse Détaillée</CardTitle>
+          <CardDescription>Statistiques diverses sur l'état de la République</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <Tabs value={activeTab} onValueChange={setActiveTab}>
+            <TabsList className="grid grid-cols-3 mb-6">
+              <TabsTrigger value="budget" className="flex items-center">
+                <BarChart3 className="h-4 w-4 mr-2" />
+                <span>Budget</span>
+              </TabsTrigger>
+              <TabsTrigger value="influence" className="flex items-center">
+                <Scale className="h-4 w-4 mr-2" />
+                <span>Influence</span>
+              </TabsTrigger>
+              <TabsTrigger value="activites" className="flex items-center">
+                <History className="h-4 w-4 mr-2" />
+                <span>Activités</span>
+              </TabsTrigger>
+            </TabsList>
             
-            <Card>
-              <CardHeader className="pb-2">
-                <CardTitle>Familles</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">{familles.length}</div>
-                <p className="text-sm text-muted-foreground">
-                  Familles influentes de Rome
-                </p>
-              </CardContent>
-            </Card>
+            <TabsContent value="budget">
+              <h3 className="text-lg font-medium mb-4">Répartition du Budget</h3>
+              <div className="h-80">
+                <ResponsiveContainer width="100%" height="100%">
+                  <BarChart
+                    data={budgetData}
+                    margin={{ top: 20, right: 30, left: 20, bottom: 5 }}
+                  >
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis dataKey="name" />
+                    <YAxis tickFormatter={(value) => formatCurrency(value).split(' ')[0]} />
+                    <Tooltip formatter={(value) => formatCurrency(value as number)} />
+                    <Legend />
+                    <Bar dataKey="valeur" fill="#8884d8" name="Montant" />
+                  </BarChart>
+                </ResponsiveContainer>
+              </div>
+            </TabsContent>
             
-            <Card>
-              <CardHeader className="pb-2">
-                <CardTitle>Provinces</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">{provinces.length}</div>
-                <p className="text-sm text-muted-foreground">
-                  Territoires sous contrôle romain
-                </p>
-              </CardContent>
-            </Card>
-          </div>
-          
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <Card>
-              <CardHeader>
-                <CardTitle>Répartition des Sénateurs</CardTitle>
-                <CardDescription>
-                  Analyse des factions au sein du Sénat
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="h-80">
-                <div className="flex h-full items-center justify-center">
-                  <div className="w-full max-w-md">
-                    <ul className="space-y-3">
-                      {Object.entries(senateursFactions).map(([faction, count]) => (
-                        <li key={faction} className="flex items-center">
-                          <div className="w-full">
-                            <div className="flex justify-between mb-1">
-                              <span className="text-sm font-medium">{faction}</span>
-                              <span className="text-sm text-muted-foreground">
-                                {count} ({Math.round((count / senateurs.length) * 100)}%)
-                              </span>
-                            </div>
-                            <div className="w-full bg-gray-200 rounded-full h-2.5">
-                              <div 
-                                className={`h-2.5 rounded-full ${
-                                  faction === 'Optimates' ? 'bg-blue-600' :
-                                  faction === 'Populares' ? 'bg-red-600' :
-                                  faction === 'Moderates' ? 'bg-green-600' : 'bg-gray-600'
-                                }`}
-                                style={{ width: `${(count / senateurs.length) * 100}%` }}
-                              />
-                            </div>
-                          </div>
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
+            <TabsContent value="influence">
+              <h3 className="text-lg font-medium mb-4">Influence des Familles</h3>
+              <div className="h-80">
+                <ResponsiveContainer width="100%" height="100%">
+                  <BarChart
+                    data={influenceData}
+                    margin={{ top: 20, right: 30, left: 20, bottom: 5 }}
+                  >
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis dataKey="famille" />
+                    <YAxis domain={[0, 100]} />
+                    <Tooltip />
+                    <Legend />
+                    <Bar dataKey="influence" fill="#82ca9d" name="Influence" />
+                  </BarChart>
+                </ResponsiveContainer>
+              </div>
+            </TabsContent>
+            
+            <TabsContent value="activites">
+              <h3 className="text-lg font-medium mb-4">Activités Récentes</h3>
+              <div className="space-y-4">
+                <div className="p-4 border rounded-md">
+                  <div className="font-medium">Vote d'une nouvelle loi</div>
+                  <div className="text-sm text-muted-foreground">Lex Manlia de vicesima a été promulguée</div>
+                  <div className="text-xs text-muted-foreground mt-1">Il y a 3 jours</div>
                 </div>
-              </CardContent>
-            </Card>
-            
-            <Card>
-              <CardHeader>
-                <CardTitle>Statut des Provinces</CardTitle>
-                <CardDescription>
-                  État actuel des provinces romaines
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="h-80">
-                <div className="flex h-full items-center justify-center">
-                  <p className="text-muted-foreground">Graphique des provinces à implémenter</p>
+                
+                <div className="p-4 border rounded-md">
+                  <div className="font-medium">Élection de magistrats</div>
+                  <div className="text-sm text-muted-foreground">Quintus Fabius a été élu consul</div>
+                  <div className="text-xs text-muted-foreground mt-1">Il y a 7 jours</div>
                 </div>
-              </CardContent>
-            </Card>
-            
-            <Card className="md:col-span-2">
-              <CardHeader>
-                <CardTitle>Alliances et Relations</CardTitle>
-                <CardDescription>
-                  Réseau d'alliances entre familles et factions
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="flex h-80 items-center justify-center">
-                  <p className="text-muted-foreground">Réseau d'alliances à implémenter</p>
+                
+                <div className="p-4 border rounded-md">
+                  <div className="font-medium">Changement de gouverneur</div>
+                  <div className="text-sm text-muted-foreground">Gaius Julius a été nommé gouverneur de Sicile</div>
+                  <div className="text-xs text-muted-foreground mt-1">Il y a 12 jours</div>
                 </div>
-              </CardContent>
-            </Card>
-          </div>
-        </TabsContent>
-      </Tabs>
+              </div>
+            </TabsContent>
+          </Tabs>
+        </CardContent>
+      </Card>
+      
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Users className="h-5 w-5" />
+              <span>Démographie</span>
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div className="p-3 border rounded-md">
+                  <div className="text-sm text-muted-foreground">Population</div>
+                  <div className="text-xl font-semibold">~950,000</div>
+                </div>
+                <div className="p-3 border rounded-md">
+                  <div className="text-sm text-muted-foreground">Citoyens</div>
+                  <div className="text-xl font-semibold">~120,000</div>
+                </div>
+                <div className="p-3 border rounded-md">
+                  <div className="text-sm text-muted-foreground">Patriciens</div>
+                  <div className="text-xl font-semibold">~2,500</div>
+                </div>
+                <div className="p-3 border rounded-md">
+                  <div className="text-sm text-muted-foreground">Esclaves</div>
+                  <div className="text-xl font-semibold">~300,000</div>
+                </div>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+        
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Building className="h-5 w-5" />
+              <span>Provinces</span>
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div className="p-3 border rounded-md">
+                  <div className="text-sm text-muted-foreground">Provinces</div>
+                  <div className="text-xl font-semibold">9</div>
+                </div>
+                <div className="p-3 border rounded-md">
+                  <div className="text-sm text-muted-foreground">Revenus</div>
+                  <div className="text-xl font-semibold">{formatCurrency(450000)}/an</div>
+                </div>
+                <div className="p-3 border rounded-md">
+                  <div className="text-sm text-muted-foreground">Légions</div>
+                  <div className="text-xl font-semibold">14</div>
+                </div>
+                <div className="p-3 border rounded-md">
+                  <div className="text-sm text-muted-foreground">Stabilité</div>
+                  <div className="text-xl font-semibold">72%</div>
+                </div>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
     </div>
   );
 };

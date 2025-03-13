@@ -12,7 +12,10 @@ export const formatCurrency = (amount: number): string => {
   }
 };
 
-// Fonction pour formater une date de jeu
+// Alias pour la compatibilité: formatMoney est utilisé dans plusieurs composants
+export const formatMoney = formatCurrency;
+
+// Fonction pour formatter une date de jeu
 export const formatDate = (date: GameDate): string => {
   return `${date.year} AUC, ${formatSeason(date.season)}`;
 };
@@ -53,4 +56,17 @@ export const formatShortDate = (date: GameDate): string => {
   };
   
   return `${date.year} ${seasonMap[date.season as string] || date.season}`;
+};
+
+// Fonction pour formatter la durée de fonctionnement (uptime)
+export const formatUptime = (uptime: number): string => {
+  const days = Math.floor(uptime / 86400);
+  const hours = Math.floor((uptime % 86400) / 3600);
+  const minutes = Math.floor((uptime % 3600) / 60);
+  
+  if (days > 0) {
+    return `${days}j ${hours}h ${minutes}m`;
+  } else {
+    return `${hours}h ${minutes}m`;
+  }
 };

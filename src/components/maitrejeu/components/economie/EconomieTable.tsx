@@ -3,20 +3,27 @@ import React from 'react';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Pencil, Trash2 } from 'lucide-react';
+import { Pencil, Trash2, ArrowUp, ArrowDown } from 'lucide-react';
 import { EconomieRecord } from '../../types/economie';
-import { formatCurrency } from '@/utils/formatUtils';
+import { formatCurrency, formatDate } from '@/utils/formatUtils';
 
 interface EconomieTableProps {
   records: EconomieRecord[];
   onEdit: (id: string) => void;
   onDelete: (id: string) => void;
+  sort?: {
+    field: keyof EconomieRecord;
+    direction: 'asc' | 'desc';
+  };
+  onSortChange?: (field: keyof EconomieRecord) => void;
 }
 
 export const EconomieTable: React.FC<EconomieTableProps> = ({ 
   records, 
   onEdit, 
-  onDelete 
+  onDelete,
+  sort,
+  onSortChange
 }) => {
   const getStatusBadge = (status: string) => {
     switch(status) {
@@ -48,16 +55,50 @@ export const EconomieTable: React.FC<EconomieTableProps> = ({
     }
   };
   
+  const renderSortIcon = (field: keyof EconomieRecord) => {
+    if (!sort || sort.field !== field) return null;
+    return sort.direction === 'asc' ? <ArrowUp className="h-3 w-3 ml-1" /> : <ArrowDown className="h-3 w-3 ml-1" />;
+  };
+  
+  const handleHeaderClick = (field: keyof EconomieRecord) => {
+    if (onSortChange) {
+      onSortChange(field);
+    }
+  };
+  
+  const renderTableHeader = (label: string, field: keyof EconomieRecord, sortable: boolean = true) => {
+    return (
+      <TableHead 
+        className={sortable && onSortChange ? "cursor-pointer" : ""}
+        onClick={sortable && onSortChange ? () => handleHeaderClick(field) : undefined}
+      >
+        <div className="flex items-center">
+          {label}
+          {sortable && renderSortIcon(field)}
+        </div>
+      </TableHead>
+    );
+  };
+  
+  const formatDateField = (date: string | any) => {
+    if (typeof date === 'string') {
+      return date;
+    } else if (date && typeof date === 'object' && 'year' in date && 'season' in date) {
+      return formatDate(date);
+    }
+    return String(date);
+  };
+  
   return (
     <div className="rounded-md border">
       <Table>
         <TableHeader>
           <TableRow>
-            <TableHead>Description</TableHead>
-            <TableHead>Type</TableHead>
-            <TableHead>Source</TableHead>
-            <TableHead>Montant</TableHead>
-            <TableHead>Date</TableHead>
+            {renderTableHeader("Description", "description")}
+            {renderTableHeader("Type", "type")}
+            {renderTableHeader("Source", "source")}
+            {renderTableHeader("Montant", "amount")}
+            {renderTableHeader("Date", "date")}
             <TableHead className="text-right">Actions</TableHead>
           </TableRow>
         </TableHeader>
@@ -75,7 +116,7 @@ export const EconomieTable: React.FC<EconomieTableProps> = ({
                 <TableCell>{getStatusBadge(record.type)}</TableCell>
                 <TableCell>{getSourceDisplay(record.source)}</TableCell>
                 <TableCell>{formatCurrency(record.amount)}</TableCell>
-                <TableCell>{record.date}</TableCell>
+                <TableCell>{formatDateField(record.date)}</TableCell>
                 <TableCell className="text-right space-x-2">
                   <Button
                     variant="ghost"

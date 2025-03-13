@@ -5,9 +5,9 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Plus, Search } from 'lucide-react';
-import { ResourceTable } from './property-management/inventory/ResourcesList';
+import { ResourcesList } from './property-management/inventory/ResourcesList';
 import { StorageLocations } from './property-management/inventory/StorageLocations';
-import { ResourceTransactions } from './property-management/inventory/TransactionsList';
+import { TransactionsList } from './property-management/inventory/TransactionsList';
 
 export const StorageManagement = () => {
   const [activeTab, setActiveTab] = useState('resources');
@@ -48,7 +48,7 @@ export const StorageManagement = () => {
           </TabsList>
           
           <TabsContent value="resources" className="mt-6">
-            <ResourceTable searchTerm={searchTerm} />
+            <ResourcesList searchTerm={searchTerm} />
           </TabsContent>
           
           <TabsContent value="locations" className="mt-6">
@@ -56,7 +56,7 @@ export const StorageManagement = () => {
           </TabsContent>
           
           <TabsContent value="transactions" className="mt-6">
-            <ResourceTransactions searchTerm={searchTerm} />
+            <TransactionsList searchTerm={searchTerm} />
           </TabsContent>
         </Tabs>
       </CardContent>

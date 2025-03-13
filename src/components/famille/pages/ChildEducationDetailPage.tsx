@@ -2,7 +2,7 @@
 import React from 'react';
 import Layout from '@/components/layout/Layout';
 import { PageHeader } from '@/components/ui-custom/PageHeader';
-import ChildEducationDetail from '@/components/famille/education/ChildEducationDetail';
+import { ChildEducationDetail } from '@/components/famille/education/ChildEducationDetail';
 
 export const ChildEducationDetailPage: React.FC = () => {
   return (
