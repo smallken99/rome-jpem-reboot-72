@@ -14,6 +14,7 @@ import { EconomieRecord, EconomieFilter, EconomieSort } from '@/components/maitr
 import { useMaitreJeu } from '@/components/maitrejeu/context';
 import { ArrowUpDown } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { GameDate } from '@/components/maitrejeu/types/common';
 
 interface EconomieTableProps {
   records: EconomieRecord[];
@@ -49,6 +50,19 @@ export const EconomieTable: React.FC<EconomieTableProps> = ({
     return sort.direction === 'asc' ? 
       <ArrowUpDown className="ml-2 h-4 w-4 text-primary" /> : 
       <ArrowUpDown className="ml-2 h-4 w-4 text-primary rotate-180" />;
+  };
+
+  const formatRecordDate = (recordDate: GameDate | string) => {
+    if (typeof recordDate === 'string') {
+      try {
+        const parsedDate = JSON.parse(recordDate) as GameDate;
+        return formatDate(parsedDate.year, String(parsedDate.season));
+      } catch (e) {
+        return recordDate; // Fallback if can't parse
+      }
+    } else {
+      return formatDate(recordDate.year, String(recordDate.season));
+    }
   };
 
   return (
@@ -108,7 +122,7 @@ export const EconomieTable: React.FC<EconomieTableProps> = ({
             records.map(record => (
               <TableRow key={record.id}>
                 <TableCell className="font-medium">
-                  {formatDate(record.date.year, record.date.season)}
+                  {formatRecordDate(record.date)}
                   {record.isRecurring && (
                     <Badge variant="outline" className="ml-2">Récurrent</Badge>
                   )}

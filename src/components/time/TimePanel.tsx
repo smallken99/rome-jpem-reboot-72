@@ -1,7 +1,7 @@
-
 import React, { useState } from 'react';
 import { Calendar, Hourglass, SunDim } from 'lucide-react';
-import { useTimeStore, Season, formatRomanSeason } from '@/utils/timeSystem';
+import { useTimeStore, formatRomanSeason } from '@/utils/timeSystem';
+import { Season } from '@/components/maitrejeu/types/common';
 
 interface TimePanelProps {
   minimal?: boolean;
@@ -11,34 +11,34 @@ export const TimePanel: React.FC<TimePanelProps> = ({ minimal = false }) => {
   const { year, season, dayInSeason, formatDate, advanceDay, advanceSeason } = useTimeStore();
   const [timeMessage, setTimeMessage] = useState<string | null>(null);
   
-  // Fonction pour avancer le temps
+  // Function to advance time
   const handleAdvanceTime = () => {
-    // Sauvegarder l'état actuel pour comparaison
+    // Save current state for comparison
     const currentSeason = season;
     const currentYear = year;
     
-    // Avancer d'un jour
+    // Advance by one day
     advanceDay();
     
-    // Si nous atteignons la fin de la saison
+    // If we reach the end of the season
     if (dayInSeason >= 90) {
-      // Avancer la saison
+      // Advance season
       advanceSeason();
       
-      // Afficher un message de nouvelle saison
+      // Display a new season message
       setTimeMessage(`Nouvelle saison: ${formatRomanSeason(season)}`);
       
-      // Si nous avons terminé une année complète
+      // If we've completed a full year
       if (currentSeason === 'Hiems' && season === 'Ver') {
         setTimeMessage(`Nouvelle année: ${year + 1} AUC`);
       }
       
-      // Effacer le message après 3 secondes
+      // Clear the message after 3 seconds
       setTimeout(() => setTimeMessage(null), 3000);
     }
   };
   
-  // Obtenir l'icône et la couleur de la saison
+  // Get the icon and color for the season
   const getSeasonInfo = () => {
     switch (season) {
       case 'Ver':

@@ -4,6 +4,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '
 import { Button } from '@/components/ui/button';
 import { Loi } from '../../types/lois';
 import { Badge } from '@/components/ui/badge';
+import { formatSeasonDisplay } from '@/components/maitrejeu/types/common';
 
 interface LoiDetailProps {
   loi: Loi;
@@ -31,6 +32,12 @@ export const LoiDetail: React.FC<LoiDetailProps> = ({ loi, onClose }) => {
     }
   };
 
+  // Format the season for display
+  const getFormattedSeason = () => {
+    if (!loi.date) return '';
+    return formatSeasonDisplay(loi.date.season);
+  };
+
   return (
     <Dialog open={true} onOpenChange={() => onClose()}>
       <DialogContent className="sm:max-w-[500px]">
@@ -55,10 +62,7 @@ export const LoiDetail: React.FC<LoiDetailProps> = ({ loi, onClose }) => {
           <div className="mb-4">
             <h3 className="text-sm font-semibold mb-1">Date</h3>
             <p>
-              {loi.date.season === 'SPRING' && 'Printemps'}
-              {loi.date.season === 'SUMMER' && 'Été'}
-              {loi.date.season === 'AUTUMN' && 'Automne'}
-              {loi.date.season === 'WINTER' && 'Hiver'} {loi.date.year}
+              {getFormattedSeason()} {loi.date?.year}
             </p>
           </div>
           

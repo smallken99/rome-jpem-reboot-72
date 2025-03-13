@@ -1,79 +1,61 @@
 
-// Types pour le système de temps du jeu
-export type Season = 'Ver' | 'Aestas' | 'Autumnus' | 'Hiems';
-export type PlayerSeason = 'SPRING' | 'SUMMER' | 'AUTUMN' | 'WINTER';
+import { Season, PlayerSeason, seasonMapping, reverseSeasonMapping, formatSeasonDisplay, GameDate } from '@/components/maitrejeu/types/common';
 
-// Mapping entre les saisons romaines et les saisons pour les joueurs
-const seasonMapping = {
-  Ver: 'SPRING',
-  Aestas: 'SUMMER',
-  Autumnus: 'AUTUMN',
-  Hiems: 'WINTER'
-} as const;
-
-// Mapping inverse
-const reverseSeasonMapping = {
-  SPRING: 'Ver',
-  SUMMER: 'Aestas',
-  AUTUMN: 'Autumnus',
-  WINTER: 'Hiems'
-} as const;
-
-// Store pour la gestion du temps
+// Store for the management of time
 export const useTimeStore = () => {
-  // Simulation d'un store - dans une vraie implémentation, utiliser zustand ou un autre gestionnaire d'état
+  // Simulation of a store - in a real implementation, use zustand or another state manager
   const year = 721; // AUC
   const season: Season = 'Ver';
-  const dayInSeason = 1; // Jour dans la saison (1-90)
+  const dayInSeason = 1; // Day in the season (1-90)
   
   return {
     year,
     season,
     dayInSeason,
-    advanceTime: () => {/* Logique d'avancement du temps */},
-    advanceDay: () => {/* Avancer d'un jour */},
-    advanceSeason: () => {/* Avancer d'une saison */},
+    advanceTime: () => {/* Logic for advancing time */},
+    advanceDay: () => {/* Advance by one day */},
+    advanceSeason: () => {/* Advance by one season */},
     getSeason: () => season,
     getYear: () => year,
-    formatDate: () => `${formatRomanSeason(season)} ${year} AUC, Jour ${dayInSeason}`
+    formatDate: () => `${formatSeasonDisplay(season)} ${year} AUC, Jour ${dayInSeason}`
   };
 };
 
-// Fonction pour formater les saisons en texte lisible
-export const formatRomanSeason = (season: Season): string => {
-  switch (season) {
-    case 'Ver': return 'Printemps';
-    case 'Aestas': return 'Été';
-    case 'Autumnus': return 'Automne';
-    case 'Hiems': return 'Hiver';
-    default: return 'Printemps';
-  }
+// Function to format Roman seasons as readable text
+export const formatRomanSeason = (season: Season | PlayerSeason): string => {
+  return formatSeasonDisplay(season);
 };
 
-// Convertisseur entre les systèmes de temps
+// Converter between time systems
 export const convertSeasonBetweenSystems = (
   season: Season | PlayerSeason, 
   targetSystem: 'player' | 'mj'
 ): PlayerSeason | Season => {
   if (targetSystem === 'player') {
-    return seasonMapping[season as Season] || 'SPRING';
+    if (season in seasonMapping) {
+      return seasonMapping[season as Season];
+    }
+    return season as PlayerSeason;
   } else {
-    return reverseSeasonMapping[season as PlayerSeason] || 'Ver';
+    if (season in reverseSeasonMapping) {
+      return reverseSeasonMapping[season as PlayerSeason];
+    }
+    return season as Season;
   }
 };
 
-// Hook pour gérer les événements liés au temps
+// Hook to handle time-related events
 export const useTimeEvents = (
   onDayChange?: (day: number) => void,
   onSeasonChange?: (season: Season) => void,
   onYearChange?: (year: number) => void
 ) => {
-  // Ici, vous pourriez utiliser useState, useEffect, etc.
-  // Mais pour simplifier, nous retournons juste une interface factice
+  // Here, you would use useState, useEffect, etc.
+  // But for simplicity, we're just returning a mock interface
   
   return {
     advanceTime: () => {
-      // Logique pour avancer le temps et déclencher les callbacks appropriés
+      // Logic to advance time and trigger appropriate callbacks
       if (onYearChange) onYearChange(722); // Simulation
     }
   };

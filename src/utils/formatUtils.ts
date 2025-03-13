@@ -1,8 +1,7 @@
-
-import { Season, PlayerSeason } from './timeSystem';
+import { Season, PlayerSeason, reverseSeasonMapping } from '@/components/maitrejeu/types/common';
 
 /**
- * Formate un nombre en monnaie romaine (As)
+ * Formats a number as Roman currency (As)
  */
 export const formatMoney = (amount: number): string => {
   if (amount >= 1000000) {
@@ -15,7 +14,7 @@ export const formatMoney = (amount: number): string => {
 };
 
 /**
- * Formate une date de jeu en texte lisible
+ * Formats a game date as readable text
  */
 export const formatDate = (year: number, season: string): string => {
   const seasonNames: Record<string, string> = {
@@ -29,14 +28,14 @@ export const formatDate = (year: number, season: string): string => {
 };
 
 /**
- * Formate un pourcentage
+ * Formats a percentage
  */
 export const formatPercentage = (value: number, decimalPlaces: number = 1): string => {
   return `${value.toFixed(decimalPlaces)}%`;
 };
 
 /**
- * Formate un grand nombre
+ * Formats a large number
  */
 export const formatLargeNumber = (num: number): string => {
   if (num >= 1000000) {
@@ -48,7 +47,7 @@ export const formatLargeNumber = (num: number): string => {
 };
 
 /**
- * Calcule l'évolution en pourcentage entre deux valeurs
+ * Calculates the percentage change between two values
  */
 export const calculatePercentageChange = (current: number, previous: number): number => {
   if (previous === 0) return 0;
@@ -56,7 +55,7 @@ export const calculatePercentageChange = (current: number, previous: number): nu
 };
 
 /**
- * Formate un temps d'activité en format lisible
+ * Formats uptime in a readable format
  */
 export const formatUptime = (uptimeInSeconds: number): string => {
   const days = Math.floor(uptimeInSeconds / 86400);
@@ -73,7 +72,7 @@ export const formatUptime = (uptimeInSeconds: number): string => {
 };
 
 /**
- * Convertit une saison du système de temps en saison pour le MJ
+ * Converts a season from the time system to the Game Master season
  */
 export const convertTimeSeasonToMaitreJeuSeason = (season: string): Season => {
   const seasonMap: Record<string, Season> = {
@@ -91,14 +90,14 @@ export const convertTimeSeasonToMaitreJeuSeason = (season: string): Season => {
 };
 
 /**
- * Formate une date complète pour affichage
+ * Formats a complete date for display
  */
 export const formatFullDate = (date: { year: number, season: string }): string => {
   return `${convertTimeSeasonToMaitreJeuSeason(date.season)} ${date.year} AUC`;
 };
 
 /**
- * Convertit une valeur numérique en notation romaine de qualité/influence
+ * Converts a numeric value to Roman notation of quality/influence
  */
 export const numberToRomanInfluence = (value: number): string => {
   if (value >= 90) return '++++';

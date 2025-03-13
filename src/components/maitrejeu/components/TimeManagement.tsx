@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Calendar, Clock } from 'lucide-react';
 import { useMaitreJeu } from '../context';
-import { GamePhase, Season } from '../types/common';
+import { GamePhase, Season, PlayerSeason, formatSeasonDisplay } from '../types/common';
 
 export const TimeManagement = () => {
   const { 
@@ -17,7 +17,7 @@ export const TimeManagement = () => {
     changePhase 
   } = useMaitreJeu();
   
-  const [selectedSeason, setSelectedSeason] = useState<Season>(currentSeason);
+  const [selectedSeason, setSelectedSeason] = useState<PlayerSeason>('SPRING');
   const [selectedPhase, setSelectedPhase] = useState<GamePhase>(currentPhase);
   
   const handleAdvanceTime = () => {
@@ -28,7 +28,7 @@ export const TimeManagement = () => {
     changePhase(selectedPhase);
   };
   
-  // Extraire les phases de jeu disponibles du type GamePhase
+  // Extract available game phases from the GamePhase type
   const gamePhases: GamePhase[] = [
     "SENATE", 
     "ACTIONS", 
@@ -49,6 +49,12 @@ export const TimeManagement = () => {
     "ADMINISTRATION"
   ];
   
+  // Get the formatted display for the current season
+  const getFormattedCurrentSeason = () => {
+    const season = typeof currentSeason === 'string' ? currentSeason : 'Ver';
+    return formatSeasonDisplay(season);
+  };
+  
   return (
     <Card className="mb-4">
       <CardHeader>
@@ -63,9 +69,7 @@ export const TimeManagement = () => {
             <div className="flex items-center space-x-2 mb-4">
               <Calendar className="h-5 w-5 text-muted-foreground" />
               <span className="font-medium">
-                An {currentYear} - {currentSeason === "SPRING" ? "Printemps" : 
-                                   currentSeason === "SUMMER" ? "Été" : 
-                                   currentSeason === "AUTUMN" ? "Automne" : "Hiver"}
+                An {currentYear} - {getFormattedCurrentSeason()}
               </span>
             </div>
             
@@ -73,7 +77,7 @@ export const TimeManagement = () => {
               <label className="text-sm font-medium">Avancer au...</label>
               <Select
                 value={selectedSeason}
-                onValueChange={(value: Season) => setSelectedSeason(value)}
+                onValueChange={(value: PlayerSeason) => setSelectedSeason(value)}
               >
                 <SelectTrigger>
                   <SelectValue placeholder="Sélectionner une saison" />

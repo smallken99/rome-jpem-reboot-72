@@ -3,7 +3,7 @@ import { GameDate } from './common';
 
 export interface EconomieRecord {
   id: string;
-  date: string;
+  date: GameDate | string;
   source: string;
   category: string;
   amount: number;
@@ -14,8 +14,8 @@ export interface EconomieRecord {
   isRecurring: boolean;
   recurringInterval?: 'seasonal' | 'yearly';
   tags: string[];
-  createdAt: Date;
-  updatedAt: Date;
+  createdAt: Date | string;
+  updatedAt: Date | string;
   approved?: boolean;
   impactFactors?: Record<string, number>;
 }
@@ -23,7 +23,7 @@ export interface EconomieRecord {
 export interface TreasuryStatus {
   id: string;
   balance: number;
-  lastUpdated: GameDate;
+  lastUpdated: GameDate | string;
   inflationRate: number;
   taxRate: number;
   comments: string;
@@ -75,7 +75,7 @@ export interface EconomieCreationData {
   isRecurring: boolean;
   recurringInterval?: 'seasonal' | 'yearly';
   tags: string[];
-  date?: string;
+  date?: GameDate | string;
   approved?: boolean;
   impactFactors?: Record<string, number>;
 }

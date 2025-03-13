@@ -2,7 +2,7 @@
 import { useState, useEffect } from 'react';
 import { useToast } from '@/components/ui/use-toast';
 import { Character } from '@/types/character';
-import { useTimeStore, Season } from '@/utils/timeSystem';
+import { useTimeStore } from '@/utils/timeSystem';
 import { checkAllianceForBirths } from './birthUtils';
 import { familyAlliances } from '@/data/alliances';
 

@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { Loi } from '../../types/lois';
-import { Season } from '../../types/common';
+import { Season, PlayerSeason, formatSeasonDisplay } from '../../types/common';
 
 interface LoiTimelineProps {
   lois: Loi[];
@@ -9,25 +9,32 @@ interface LoiTimelineProps {
 }
 
 export const LoiTimeline: React.FC<LoiTimelineProps> = ({ lois, onSelectLoi }) => {
-  // Trier les lois par date (de la plus récente à la plus ancienne)
+  // Sort laws by date (from most recent to oldest)
   const sortedLois = [...lois].sort((a, b) => {
-    // Comparer d'abord les années
+    // First compare years
     if (a.date.year !== b.date.year) {
       return b.date.year - a.date.year;
     }
     
-    // Si les années sont identiques, comparer les saisons
-    const seasonOrder: Record<Season, number> = {
+    // If years are identical, compare seasons
+    const seasonOrder: Record<string, number> = {
       "WINTER": 0,
       "AUTUMN": 1,
       "SUMMER": 2,
-      "SPRING": 3
+      "SPRING": 3,
+      "Hiems": 0,
+      "Autumnus": 1,
+      "Aestas": 2,
+      "Ver": 3
     };
     
-    return seasonOrder[b.date.season] - seasonOrder[a.date.season];
+    const seasonA = typeof a.date.season === 'string' ? a.date.season : 'SPRING';
+    const seasonB = typeof b.date.season === 'string' ? b.date.season : 'SPRING';
+    
+    return seasonOrder[seasonB] - seasonOrder[seasonA];
   });
   
-  // Regrouper les lois par année pour l'affichage dans la timeline
+  // Group laws by year for display in the timeline
   const loisParAnnee: Record<number, Loi[]> = {};
   sortedLois.forEach(loi => {
     if (!loisParAnnee[loi.date.year]) {
@@ -35,16 +42,6 @@ export const LoiTimeline: React.FC<LoiTimelineProps> = ({ lois, onSelectLoi }) =
     }
     loisParAnnee[loi.date.year].push(loi);
   });
-  
-  // Fonction pour formater la saison en français
-  const formatSeason = (season: Season): string => {
-    switch(season) {
-      case "SPRING": return "Printemps";
-      case "SUMMER": return "Été";
-      case "AUTUMN": return "Automne";
-      case "WINTER": return "Hiver";
-    }
-  };
   
   return (
     <div className="space-y-8">
@@ -73,7 +70,7 @@ export const LoiTimeline: React.FC<LoiTimelineProps> = ({ lois, onSelectLoi }) =
                       {loi.état}
                     </span>
                   </div>
-                  <p className="text-sm text-muted-foreground">{formatSeason(loi.date.season)}</p>
+                  <p className="text-sm text-muted-foreground">{formatSeasonDisplay(loi.date.season)}</p>
                   <p className="text-sm mt-1">{loi.description.substring(0, 100)}...</p>
                   <div className="flex gap-2 mt-2">
                     <span className="text-xs bg-secondary px-2 py-1 rounded-full">

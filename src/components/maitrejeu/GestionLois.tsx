@@ -5,7 +5,7 @@ import { PlusCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Loi } from './types/lois';
 import { useMaitreJeu } from './context';
-import { Season } from './types/common';
+import { Season, PlayerSeason, formatSeasonDisplay } from './types/common';
 import { LoiDetail } from './components/lois/LoiDetail';
 import { LoiModal } from './components/lois/LoiModal';
 import { LoisSearchAndFilters } from './components/lois/LoisSearchAndFilters';
@@ -22,7 +22,7 @@ export const GestionLois: React.FC = () => {
   const [loiToEdit, setLoiToEdit] = useState<Loi | null>(null);
   const [selectedLoi, setSelectedLoi] = useState<Loi | null>(null);
 
-  // Filtrer les lois en fonction du terme de recherche
+  // Filter laws based on search term
   const filteredLois = lois.filter(loi => 
     loi.titre.toLowerCase().includes(searchTerm.toLowerCase()) ||
     loi.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -30,7 +30,7 @@ export const GestionLois: React.FC = () => {
     loi.catégorie.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  // Filtrer les lois en fonction de l'onglet actif
+  // Filter laws based on the active tab
   const getFilteredLoisByTab = () => {
     switch(activeTab) {
       case 'actives':
@@ -40,7 +40,7 @@ export const GestionLois: React.FC = () => {
       case 'rejetees': 
         return filteredLois.filter(loi => loi.état === "Rejetée");
       case 'historique':
-        return filteredLois; // Afficher toutes les lois dans l'onglet historique
+        return filteredLois; // Show all laws in the history tab
       default:
         return filteredLois;
     }
@@ -65,14 +65,9 @@ export const GestionLois: React.FC = () => {
     setSelectedLoi(null);
   };
 
-  // Fonction pour traduire la saison en français
-  const formatSeason = (season: Season): string => {
-    switch(season) {
-      case "SPRING": return "Printemps";
-      case "SUMMER": return "Été";
-      case "AUTUMN": return "Automne";
-      case "WINTER": return "Hiver";
-    }
+  // Function to format the season in French
+  const formatSeason = (season: Season | PlayerSeason | string): string => {
+    return formatSeasonDisplay(season);
   };
 
   return (
