@@ -15,29 +15,26 @@ export const StatBonusInfo: React.FC<StatBonusInfoProps> = ({
   const getRelevantStat = (type: string) => {
     switch (type) {
       case 'military':
-        return 'Éducation Martiale';
-      case 'political':
+        return { name: 'Éducation Martiale', color: 'text-red-600 bg-red-50 border-red-200' };
       case 'rhetoric':
-        return 'Éloquence';
+        return { name: 'Éloquence', color: 'text-blue-600 bg-blue-50 border-blue-200' };
       case 'religious':
-        return 'Piété';
-      case 'philosophical':
-        return 'Intelligence';
+        return { name: 'Piété', color: 'text-amber-600 bg-amber-50 border-amber-200' };
       default:
-        return 'Compétences générales';
+        return { name: 'Compétences générales', color: 'text-gray-600 bg-gray-50 border-gray-200' };
     }
   };
   
-  const statName = getRelevantStat(educationType);
+  const { name, color } = getRelevantStat(educationType);
   
   return (
-    <div className="rounded-lg border p-3 bg-blue-50 border-blue-200 text-blue-800">
+    <div className={`rounded-lg border p-3 ${color}`}>
       <div className="flex items-center gap-2">
-        <ArrowUpCircle className="h-5 w-5 text-blue-600" />
+        <ArrowUpCircle className="h-5 w-5" />
         <div>
           <h4 className="font-medium">Bonus de statistique</h4>
           <p className="text-sm">
-            Améliore <span className="font-medium">{statName}</span> de +{statBonus} points à l'issue de l'éducation
+            Améliore <span className="font-medium">{name}</span> de +{statBonus} points à l'issue de l'éducation
           </p>
         </div>
       </div>

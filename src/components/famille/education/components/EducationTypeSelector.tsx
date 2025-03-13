@@ -1,9 +1,9 @@
 
 import React from 'react';
-import { educationPaths } from '../data';
+import { educationPaths } from '../data/educationPaths';
 import { EducationTypeSelectorProps } from '../types/educationTypes';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
-import { BookOpen, Sword, Cross } from 'lucide-react';
+import { BookOpen, Sword, Heart } from 'lucide-react';
 
 export const EducationTypeSelector: React.FC<EducationTypeSelectorProps> = ({
   value,
@@ -20,8 +20,19 @@ export const EducationTypeSelector: React.FC<EducationTypeSelectorProps> = ({
   const getIcon = (pathId: string) => {
     switch(pathId) {
       case 'military': return <Sword className="h-5 w-5" />;
-      case 'religious': return <Cross className="h-5 w-5" />;
+      case 'religious': return <Heart className="h-5 w-5" />;
+      case 'rhetoric': return <BookOpen className="h-5 w-5" />;
       default: return <BookOpen className="h-5 w-5" />;
+    }
+  };
+
+  // Helper function to get the display name for education type
+  const getDisplayName = (pathId: string) => {
+    switch(pathId) {
+      case 'military': return 'Militaire';
+      case 'religious': return 'Piété';
+      case 'rhetoric': return 'Éloquence';
+      default: return pathId;
     }
   };
 
@@ -30,21 +41,23 @@ export const EducationTypeSelector: React.FC<EducationTypeSelectorProps> = ({
       <div>
         <h3 className="text-lg font-medium">Type d'Éducation</h3>
         <p className="text-sm text-muted-foreground">
-          Choisissez le type d'éducation que vous souhaitez pour votre enfant.
+          Choisissez le type d'éducation qui définira la carrière future de votre enfant.
         </p>
       </div>
 
       <Tabs value={value} onValueChange={onChange} className="w-full">
-        <TabsList className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5">
+        <TabsList className="grid grid-cols-2 md:grid-cols-4">
           <TabsTrigger value="none">Aucune</TabsTrigger>
           
           {filteredPaths.map(path => (
             <TabsTrigger 
               key={path.id} 
               value={path.id}
-              disabled={path.requirements?.age && path.requirements.age > 15} // Exemple: désactivé si trop avancé
+              disabled={path.requirements?.age && path.requirements.age > 15} 
+              className="flex items-center gap-2"
             >
-              {path.name.split(' ')[1]}
+              {getIcon(path.id)}
+              {getDisplayName(path.id)}
             </TabsTrigger>
           ))}
         </TabsList>

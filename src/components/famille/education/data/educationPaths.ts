@@ -1,87 +1,15 @@
+
 import { EducationPath } from '../types/educationTypes';
 import { 
-  BookOpen, 
   Sword, 
-  Landmark, 
-  Scale, 
-  MessageCircle, 
-  HeartHandshake,
-  GraduationCap,
-  Award
+  BookOpen, 
+  Heart,
+  Award,
+  GraduationCap
 } from 'lucide-react';
 
-// Types d'éducation disponibles
+// Types d'éducation disponibles (limités à 3 principaux)
 export const educationPaths: EducationPath[] = [
-  {
-    id: 'political',
-    name: 'Éducation Politique',
-    description: 'Formation à l\'art de la politique romaine',
-    benefits: [
-      'Compréhension des institutions romaines',
-      'Connaissance des procédures législatives',
-      'Développement des relations politiques'
-    ],
-    duration: 2,
-    requirements: {
-      age: 10,
-      gender: 'male',
-      cost: 5000,
-      duration: '2 ans'
-    },
-    outcomes: {
-      skills: [
-        'Capacité à briguer des postes électoraux',
-        'Réseau de contacts politiques',
-        'Amélioration de l\'Éloquence et de la Popularité'
-      ],
-      bonuses: {
-        oratory: 15,
-        popularity: 10
-      }
-    },
-    specialties: [
-      'Procédures sénatoriales',
-      'Droit romain',
-      'Éloquence civique',
-      'Histoire politique'
-    ],
-    relatedStat: 'popularity'
-  },
-  {
-    id: 'rhetoric',
-    name: 'Éducation Rhétorique',
-    description: 'Maîtrise de l\'art oratoire, essentiel pour la vie publique',
-    benefits: [
-      'Éloquence publique',
-      'Capacité de persuasion',
-      'Construction d\'arguments logiques'
-    ],
-    duration: 3,
-    requirements: {
-      age: 8,
-      gender: 'both',
-      cost: 4000,
-      duration: '3 ans'
-    },
-    outcomes: {
-      skills: [
-        'Capacité à prononcer des discours convaincants',
-        'Amélioration significative de l\'Éloquence',
-        'Compétence en négociation'
-      ],
-      bonuses: {
-        oratory: 20,
-        influence: 10
-      }
-    },
-    specialties: [
-      'Rhétorique grecque',
-      'Débat public',
-      'Composition littéraire',
-      'Art de la mémoire'
-    ],
-    relatedStat: 'oratory'
-  },
   {
     id: 'military',
     name: 'Éducation Militaire',
@@ -89,20 +17,20 @@ export const educationPaths: EducationPath[] = [
     benefits: [
       'Compétences tactiques et stratégiques',
       'Discipline physique et mentale',
-      'Connaissance des armes et formations'
+      'Commandement de troupes'
     ],
-    duration: 2,
+    duration: 3,
     requirements: {
       age: 12,
       gender: 'male',
       cost: 3500,
-      duration: '2 ans'
+      duration: '3 ans'
     },
     outcomes: {
       skills: [
-        'Préparation au service militaire',
-        'Capacité à commander des troupes',
-        'Amélioration de l\'Éducation Martiale'
+        'Aptitude au combat',
+        'Stratégie militaire',
+        'Commandement de légion'
       ],
       bonuses: {
         martialEducation: 25,
@@ -110,10 +38,15 @@ export const educationPaths: EducationPath[] = [
       }
     },
     specialties: [
-      'Tactique légionnaire',
-      'Équitation militaire',
-      'Fortifications',
-      'Navigation militaire'
+      'Combat au corps à corps',
+      'Stratégie militaire',
+      'Commandement',
+      'Équitation de guerre',
+      'Tactiques légionnaires',
+      'Siège et fortifications',
+      'Navigation militaire',
+      'Archerie',
+      'Cavalerie'
     ],
     relatedStat: 'martialEducation'
   },
@@ -123,8 +56,8 @@ export const educationPaths: EducationPath[] = [
     description: 'Étude des cultes et rituels romains',
     benefits: [
       'Connaissance des rites et cérémonies',
-      'Compréhension des présages et augures',
-      'Maîtrise du calendrier religieux'
+      'Interprétation des présages',
+      'Influence spirituelle'
     ],
     duration: 3,
     requirements: {
@@ -135,162 +68,67 @@ export const educationPaths: EducationPath[] = [
     },
     outcomes: {
       skills: [
-        'Capacité à interpréter les présages',
-        'Possibilité d\'accéder aux collèges sacerdotaux',
-        'Amélioration de la Piété'
+        'Rituels sacrés',
+        'Divination',
+        'Connaissance théologique'
       ],
       bonuses: {
-        piety: 20,
+        piety: 25,
         influence: 5
       }
     },
     specialties: [
-      'Divination',
-      'Rituels sacrificiels',
-      'Cultes familiaux',
-      'Mystères étrusques'
+      'Rituels sacrés',
+      'Interprétation des présages',
+      'Droit pontifical',
+      'Mythologie',
+      'Tradition ancestrale',
+      'Cérémonies officielles',
+      'Culte de Vesta',
+      'Mystères d\'Eleusis',
+      'Lecture des entrailles'
     ],
     relatedStat: 'piety'
   },
   {
-    id: 'philosophical',
-    name: 'Éducation Philosophique',
-    description: 'Étude des grandes écoles philosophiques grecques et romaines',
+    id: 'rhetoric',
+    name: 'Éducation Rhétorique',
+    description: 'Maîtrise de l\'art oratoire, essentiel pour la vie publique',
     benefits: [
-      'Sagesse et connaissance',
-      'Raisonnement logique',
-      'Compréhension de l\'éthique'
-    ],
-    duration: 4,
-    requirements: {
-      age: 14,
-      gender: 'both',
-      cost: 6000,
-      duration: '4 ans'
-    },
-    outcomes: {
-      skills: [
-        'Capacité d\'analyse et de réflexion',
-        'Amélioration de la Sagesse',
-        'Respect des pairs intellectuels'
-      ],
-      bonuses: {
-        intelligence: 25,
-        oratory: 5
-      }
-    },
-    specialties: [
-      'Stoïcisme',
-      'Épicurisme',
-      'Académie platonicienne',
-      'Scepticisme'
-    ],
-    relatedStat: 'intelligence'
-  },
-  {
-    id: 'diplomatic',
-    name: 'Éducation Diplomatique',
-    description: 'Formation aux relations internationales et à la négociation',
-    benefits: [
-      'Art de la négociation',
-      'Connaissance des cultures étrangères',
-      'Maîtrise des langues'
+      'Éloquence publique',
+      'Capacité de persuasion',
+      'Arguments logiques'
     ],
     duration: 3,
     requirements: {
-      age: 12,
+      age: 10,
       gender: 'both',
-      cost: 5500,
+      cost: 4000,
       duration: '3 ans'
     },
     outcomes: {
       skills: [
-        'Préparation aux missions diplomatiques',
-        'Capacité à négocier des traités',
-        'Amélioration de l\'Influence'
+        'Art du discours',
+        'Débat public',
+        'Négociation politique'
       ],
       bonuses: {
-        influence: 20,
-        oratory: 10
+        oratory: 25,
+        popularity: 10
       }
     },
     specialties: [
-      'Protocole diplomatique',
-      'Langues étrangères',
-      'Géographie politique',
-      'Histoire des relations étrangères'
+      'Rhétorique grecque',
+      'Débat public',
+      'Composition littéraire',
+      'Art de la mémoire',
+      'Droit romain',
+      'Éloquence civique',
+      'Histoire politique',
+      'Diplomatie',
+      'Grec ancien'
     ],
-    relatedStat: 'influence'
-  },
-  {
-    id: 'administrative',
-    name: 'Éducation Administrative',
-    description: 'Formation à la gestion publique et aux finances',
-    benefits: [
-      'Compétences en gestion financière',
-      'Connaissance des procédures administratives',
-      'Maîtrise du droit fiscal'
-    ],
-    duration: 2,
-    requirements: {
-      age: 14,
-      gender: 'male',
-      cost: 4000,
-      duration: '2 ans'
-    },
-    outcomes: {
-      skills: [
-        'Capacité à gérer les finances publiques',
-        'Expertise en taxation et trésorerie',
-        'Amélioration de l\'Intelligence'
-      ],
-      bonuses: {
-        intelligence: 15,
-        popularity: 5
-      }
-    },
-    specialties: [
-      'Comptabilité publique',
-      'Réglementation commerciale',
-      'Administration provinciale',
-      'Gestion des travaux publics'
-    ],
-    relatedStat: 'intelligence'
-  },
-  {
-    id: 'leadership',
-    name: 'Éducation au Leadership',
-    description: 'Formation aux qualités de meneur et de commandement',
-    benefits: [
-      'Art de commander et d\'inspirer',
-      'Gestion des groupes et des conflits',
-      'Prise de décision'
-    ],
-    duration: 2,
-    requirements: {
-      age: 15,
-      gender: 'male',
-      cost: 6000,
-      duration: '2 ans'
-    },
-    outcomes: {
-      skills: [
-        'Capacité à diriger des équipes',
-        'Respect et loyauté des subordonnés',
-        'Amélioration du Leadership'
-      ],
-      bonuses: {
-        leadership: 20,
-        martialEducation: 5
-      }
-    },
-    specialties: [
-      'Commandement civil',
-      'Autorité et charisme',
-      'Résolution de conflits',
-      'Planification stratégique'
-    ],
-    relatedStat: 'leadership'
+    relatedStat: 'oratory'
   }
 ];
 
@@ -306,6 +144,7 @@ export const getSpecialtiesByPath = (educationType: string): string[] => {
     return path.specialties;
   }
 
+  // Fallback vers des spécialités par défaut si le chemin n'est pas trouvé
   switch (educationType) {
     case 'military':
     case 'militaire':
@@ -317,16 +156,6 @@ export const getSpecialtiesByPath = (educationType: string): string[] => {
         'Tactiques légionnaires',
         'Siège et fortifications'
       ];
-    case 'political':
-    case 'politique':
-      return [
-        'Rhétorique',
-        'Droit romain',
-        'Négociation',
-        'Gestion administrative',
-        'Diplomatie',
-        'Histoire politique'
-      ];
     case 'religious':
     case 'religieuse':
       return [
@@ -337,35 +166,15 @@ export const getSpecialtiesByPath = (educationType: string): string[] => {
         'Tradition ancestrale',
         'Cérémonies officielles'
       ];
-    case 'philosophical':
-    case 'philosophique':
+    case 'rhetoric':
+    case 'rhetorique':
       return [
-        'Stoïcisme',
-        'Épicurisme',
-        'Logique',
-        'Éthique',
-        'Métaphysique',
-        'Rhétorique philosophique'
-      ];
-    case 'artistic':
-    case 'artistique':
-      return [
-        'Poésie',
-        'Sculpture',
-        'Musique',
-        'Théâtre',
-        'Littérature',
-        'Calligraphie'
-      ];
-    case 'economic':
-    case 'économique':
-      return [
-        'Gestion agricole',
-        'Commerce maritime',
-        'Négociation commerciale',
-        'Comptabilité',
-        'Exploitation minière',
-        'Investissements immobiliers'
+        'Rhétorique grecque',
+        'Débat public',
+        'Composition littéraire',
+        'Art de la mémoire',
+        'Droit romain',
+        'Éloquence civique'
       ];
     default:
       return [];
