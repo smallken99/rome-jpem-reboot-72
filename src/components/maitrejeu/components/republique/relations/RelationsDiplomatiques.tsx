@@ -3,19 +3,50 @@ import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Search, Plus } from 'lucide-react';
+import { Search, Plus, Globe, FileText, Shield } from 'lucide-react';
 import { TraitesList } from './TraitesList';
 import { NationsList } from './NationsList';
 import { AlliancesMilitaires } from './AlliancesMilitaires';
 import { ActionButton } from '@/components/ui-custom/ActionButton';
 import { ActionsPanel, ActionItem } from '@/components/ui-custom/ActionsPanel';
+import { 
+  Dialog, 
+  DialogContent, 
+  DialogHeader, 
+  DialogTitle, 
+  DialogDescription,
+  DialogFooter
+} from '@/components/ui/dialog';
+import { Button } from '@/components/ui/button';
+import { Nation, Traite, Alliance } from './types';
+import { toast } from 'sonner';
 
 export const RelationsDiplomatiques: React.FC = () => {
   const [activeTab, setActiveTab] = useState('nations');
   const [searchTerm, setSearchTerm] = useState('');
   
+  // États pour les modales d'ajout
+  const [isAddNationOpen, setIsAddNationOpen] = useState(false);
+  const [isAddTraiteOpen, setIsAddTraiteOpen] = useState(false);
+  const [isAddAllianceOpen, setIsAddAllianceOpen] = useState(false);
+  
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchTerm(e.target.value);
+  };
+  
+  // Fonctions pour ouvrir les modales d'ajout
+  const openAddNationModal = () => setIsAddNationOpen(true);
+  const openAddTraiteModal = () => setIsAddTraiteOpen(true);
+  const openAddAllianceModal = () => setIsAddAllianceOpen(true);
+  
+  // Fonction générique pour simuler l'ajout (à connecter à une API réelle plus tard)
+  const handleAdd = (type: 'nation' | 'traite' | 'alliance') => {
+    toast.success(`${type === 'nation' ? 'Nation' : type === 'traite' ? 'Traité' : 'Alliance'} ajouté avec succès`);
+    
+    // Fermeture des modales appropriées
+    if (type === 'nation') setIsAddNationOpen(false);
+    else if (type === 'traite') setIsAddTraiteOpen(false);
+    else setIsAddAllianceOpen(false);
   };
   
   // Actions spécifiques à chaque tab
@@ -26,7 +57,7 @@ export const RelationsDiplomatiques: React.FC = () => {
           { 
             label: "Ajouter une nation", 
             icon: <Plus size={16} />, 
-            onClick: () => console.log("Ajouter nation"), 
+            onClick: openAddNationModal, 
             variant: 'default'
           }
         ];
@@ -35,7 +66,7 @@ export const RelationsDiplomatiques: React.FC = () => {
           { 
             label: "Ajouter un traité", 
             icon: <Plus size={16} />, 
-            onClick: () => console.log("Ajouter traité"), 
+            onClick: openAddTraiteModal, 
             variant: 'default'
           }
         ];
@@ -44,7 +75,7 @@ export const RelationsDiplomatiques: React.FC = () => {
           { 
             label: "Ajouter une alliance", 
             icon: <Plus size={16} />, 
-            onClick: () => console.log("Ajouter alliance"), 
+            onClick: openAddAllianceModal, 
             variant: 'default'
           }
         ];
@@ -64,13 +95,35 @@ export const RelationsDiplomatiques: React.FC = () => {
             </CardDescription>
           </div>
           
-          <ActionButton 
-            icon={<Plus size={16} />}
-            label={`Nouveau ${activeTab === 'nations' ? 'nation' : activeTab === 'traites' ? 'traité' : 'alliance'}`}
-            onClick={() => console.log(`Ajouter ${activeTab}`)}
-            variant="default"
-            title={`Ajouter un nouveau ${activeTab === 'nations' ? 'nation' : activeTab === 'traites' ? 'traité' : 'alliance'}`}
-          />
+          {activeTab === 'nations' && (
+            <ActionButton 
+              icon={<Globe size={16} className="mr-1" />}
+              label="Nouvelle nation"
+              onClick={openAddNationModal}
+              variant="default"
+              title="Ajouter une nouvelle nation"
+            />
+          )}
+          
+          {activeTab === 'traites' && (
+            <ActionButton 
+              icon={<FileText size={16} className="mr-1" />}
+              label="Nouveau traité"
+              onClick={openAddTraiteModal}
+              variant="default"
+              title="Ajouter un nouveau traité"
+            />
+          )}
+          
+          {activeTab === 'alliances' && (
+            <ActionButton 
+              icon={<Shield size={16} className="mr-1" />}
+              label="Nouvelle alliance"
+              onClick={openAddAllianceModal}
+              variant="default"
+              title="Ajouter une nouvelle alliance"
+            />
+          )}
         </div>
         
         <div className="relative mt-4">
@@ -123,6 +176,78 @@ export const RelationsDiplomatiques: React.FC = () => {
           </TabsContent>
         </Tabs>
       </CardContent>
+      
+      {/* Modale pour ajouter une nouvelle nation */}
+      <Dialog open={isAddNationOpen} onOpenChange={setIsAddNationOpen}>
+        <DialogContent className="sm:max-w-[500px]">
+          <DialogHeader>
+            <DialogTitle>Ajouter une nouvelle nation</DialogTitle>
+            <DialogDescription>
+              Ajoutez les détails de la nouvelle nation et définissez ses relations avec Rome.
+            </DialogDescription>
+          </DialogHeader>
+          
+          <div className="grid gap-4 py-4">
+            {/* Formulaire à implémenter */}
+            <p className="text-center text-muted-foreground">
+              Formulaire d'ajout de nation à implémenter
+            </p>
+          </div>
+          
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setIsAddNationOpen(false)}>Annuler</Button>
+            <Button onClick={() => handleAdd('nation')}>Ajouter</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+      
+      {/* Modale pour ajouter un nouveau traité */}
+      <Dialog open={isAddTraiteOpen} onOpenChange={setIsAddTraiteOpen}>
+        <DialogContent className="sm:max-w-[500px]">
+          <DialogHeader>
+            <DialogTitle>Ajouter un nouveau traité</DialogTitle>
+            <DialogDescription>
+              Spécifiez les détails du traité et les nations impliquées.
+            </DialogDescription>
+          </DialogHeader>
+          
+          <div className="grid gap-4 py-4">
+            {/* Formulaire à implémenter */}
+            <p className="text-center text-muted-foreground">
+              Formulaire d'ajout de traité à implémenter
+            </p>
+          </div>
+          
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setIsAddTraiteOpen(false)}>Annuler</Button>
+            <Button onClick={() => handleAdd('traite')}>Ajouter</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+      
+      {/* Modale pour ajouter une nouvelle alliance */}
+      <Dialog open={isAddAllianceOpen} onOpenChange={setIsAddAllianceOpen}>
+        <DialogContent className="sm:max-w-[500px]">
+          <DialogHeader>
+            <DialogTitle>Ajouter une nouvelle alliance</DialogTitle>
+            <DialogDescription>
+              Définissez les membres et les termes de la nouvelle alliance militaire.
+            </DialogDescription>
+          </DialogHeader>
+          
+          <div className="grid gap-4 py-4">
+            {/* Formulaire à implémenter */}
+            <p className="text-center text-muted-foreground">
+              Formulaire d'ajout d'alliance à implémenter
+            </p>
+          </div>
+          
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setIsAddAllianceOpen(false)}>Annuler</Button>
+            <Button onClick={() => handleAdd('alliance')}>Ajouter</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </Card>
   );
 };
