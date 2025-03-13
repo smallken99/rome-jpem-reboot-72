@@ -1,194 +1,123 @@
+import { useState, useEffect, useCallback } from 'react';
+import { v4 as uuidv4 } from 'uuid';
+import { useToast } from '@/components/ui/use-toast';
+import { Transaction } from '@/types/EconomyTypes';
 
-import { useState, useCallback, useEffect } from 'react';
-import { toast } from 'sonner';
-import { useEconomy } from './useEconomy';
+// Hook pour gérer le patrimoine (biens, propriétés, argent)
+export const usePatrimoine = () => {
+  const [patrimoine, setPatrimoine] = useState<any[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string | null>(null);
+  const [balance, setBalance] = useState<number>(0); // Solde initial
+  const [transactions, setTransactions] = useState<Transaction[]>([]); // Liste des transactions
+  const { toast } = useToast();
 
-export type Resource = {
-  id: string;
-  name: string;
-  amount: number;
-  unit: string;
-  value: number; // Valeur par unité en As
-};
-
-export type ResourceTransaction = {
-  id: number;
-  resourceId: string;
-  amount: number;
-  date: Date;
-  type: 'achat' | 'vente' | 'production';
-  price: number; // Prix total de la transaction
-};
-
-export function usePatrimoine() {
-  // Utiliser le système économique centralisé pour la gestion de la trésorerie
-  const economy = useEconomy();
-  
-  // État pour les ressources et les transactions de ressources
-  const [resources, setResources] = useState<Resource[]>([
-    { id: 'vin', name: 'Vin', amount: 200, unit: 'amphores', value: 50 },
-    { id: 'huile_olive', name: "Huile d'olive", amount: 300, unit: 'amphores', value: 40 },
-    { id: 'cereales', name: 'Céréales', amount: 500, unit: 'modii', value: 10 },
-    { id: 'laine', name: 'Laine', amount: 100, unit: 'balles', value: 30 }
-  ]);
-  const [resourceTransactions, setResourceTransactions] = useState<ResourceTransaction[]>([]);
-
-  // Récupérer le solde du système économique centralisé
-  const balance = economy.balance;
-  
-  // Fonction pour modifier le solde, délégué au système économique
-  const updateBalance = useCallback((amount: number) => {
-    if (amount > 0) {
-      economy.receivePayment(amount, "Ajustement", "Patrimoine", "Ajustement du patrimoine");
-    } else if (amount < 0) {
-      economy.makePayment(Math.abs(amount), "Ajustement", "Patrimoine", "Ajustement du patrimoine");
-    }
-    return true;
-  }, [economy]);
-  
-  // Ajouter une ressource (production des domaines ruraux)
-  const addResource = (resourceId: string, amount: number) => {
-    const resourceExists = resources.find(r => r.id === resourceId);
-    
-    if (resourceExists) {
-      // Mettre à jour une ressource existante
-      setResources(prev => 
-        prev.map(resource => 
-          resource.id === resourceId 
-            ? { ...resource, amount: resource.amount + amount }
-            : resource
-        )
-      );
-    } else {
-      // Créer une nouvelle ressource
-      toast.error("Ressource inconnue");
-      return false;
-    }
-    
-    // Ajouter la transaction
-    const resource = resources.find(r => r.id === resourceId);
-    if (resource) {
-      const transaction: ResourceTransaction = {
-        id: Math.floor(Math.random() * 10000),
-        resourceId,
-        amount,
-        date: new Date(),
-        type: 'production',
-        price: amount * resource.value
-      };
-      
-      setResourceTransactions(prev => [...prev, transaction]);
-      toast.success(`Production de ${amount} ${resource.unit} de ${resource.name}`);
-    }
-    
-    return true;
-  };
-  
-  // Vendre une ressource
-  const sellResource = (resourceId: string, amount: number, pricePerUnit: number) => {
-    const resource = resources.find(r => r.id === resourceId);
-    
-    if (!resource) {
-      toast.error("Ressource inconnue");
-      return false;
-    }
-    
-    if (resource.amount < amount) {
-      toast.error(`Stock insuffisant (${resource.amount} ${resource.unit} disponibles)`);
-      return false;
-    }
-    
-    // Mettre à jour le stock
-    setResources(prev => 
-      prev.map(r => 
-        r.id === resourceId 
-          ? { ...r, amount: r.amount - amount }
-          : r
-      )
-    );
-    
-    // Ajouter la transaction
-    const totalPrice = amount * pricePerUnit;
-    const transaction: ResourceTransaction = {
-      id: Math.floor(Math.random() * 10000),
-      resourceId,
-      amount: -amount, // Négatif car c'est une vente
-      date: new Date(),
-      type: 'vente',
-      price: totalPrice
+  // Charger les données du patrimoine
+  useEffect(() => {
+    const loadPatrimoine = async () => {
+      setLoading(true);
+      try {
+        // Simuler un appel API
+        setTimeout(() => {
+          const mockPatrimoine = [
+            { id: 'p1', type: 'villa', name: 'Villa Urbana', value: 50000, location: 'Rome' },
+            { id: 'p2', type: 'domus', name: 'Domus Aurea', value: 30000, location: 'Rome' },
+            { id: 'p3', type: 'fundus', name: 'Fundus Sabinus', value: 20000, location: 'Sabine' }
+          ];
+          setPatrimoine(mockPatrimoine);
+          setLoading(false);
+        }, 500);
+      } catch (err) {
+        setError('Erreur lors du chargement du patrimoine');
+        console.error(err);
+        setLoading(false);
+      }
     };
-    
-    setResourceTransactions(prev => [...prev, transaction]);
-    
-    // Mettre à jour le solde via le système économique
-    economy.receivePayment(
-      totalPrice,
-      "Marché commercial",
-      "Vente de ressources",
-      `Vente de ${amount} ${resource.unit} de ${resource.name}`
-    );
-    
-    toast.success(`Vente de ${amount} ${resource.unit} de ${resource.name} pour ${totalPrice.toLocaleString()} As`);
-    return true;
+
+    loadPatrimoine();
+  }, []);
+
+  // Ajouter un bien au patrimoine
+  const addBien = (bien: any) => {
+    setPatrimoine([...patrimoine, { ...bien, id: uuidv4() }]);
+    toast({
+      title: "Nouveau bien acquis!",
+      description: `Un(e) ${bien.type} a été ajouté(e) au patrimoine.`,
+    });
   };
-  
-  // Acheter une ressource
-  const buyResource = (resourceId: string, amount: number, pricePerUnit: number) => {
-    const totalPrice = amount * pricePerUnit;
-    
-    // Vérifier si le solde est suffisant en utilisant le système économique
-    if (!economy.canAfford(totalPrice)) {
-      toast.error("Fonds insuffisants pour cet achat");
-      return false;
-    }
-    
-    const resource = resources.find(r => r.id === resourceId);
-    
-    if (!resource) {
-      toast.error("Ressource inconnue");
-      return false;
-    }
-    
-    // Mettre à jour le stock
-    setResources(prev => 
-      prev.map(r => 
-        r.id === resourceId 
-          ? { ...r, amount: r.amount + amount }
-          : r
-      )
-    );
-    
-    // Ajouter la transaction
-    const transaction: ResourceTransaction = {
-      id: Math.floor(Math.random() * 10000),
-      resourceId,
-      amount,
-      date: new Date(),
-      type: 'achat',
-      price: -totalPrice // Négatif car c'est une dépense
-    };
-    
-    setResourceTransactions(prev => [...prev, transaction]);
-    
-    // Mettre à jour le solde via le système économique
-    economy.makePayment(
-      totalPrice,
-      "Fournisseur",
-      "Achat de ressources",
-      `Achat de ${amount} ${resource.unit} de ${resource.name}`
-    );
-    
-    toast.success(`Achat de ${amount} ${resource.unit} de ${resource.name} pour ${totalPrice.toLocaleString()} As`);
-    return true;
+
+  // Vendre un bien du patrimoine
+  const vendreBien = (id: string, amount: number) => {
+    setPatrimoine(patrimoine.filter(bien => bien.id !== id));
+    setBalance(prevBalance => prevBalance + amount);
+    toast({
+      title: "Bien vendu!",
+      description: "Un bien a été vendu et le solde a été mis à jour.",
+    });
   };
-  
+
+  // Mettre à jour un bien du patrimoine
+  const updateBien = (id: string, updates: any) => {
+    setPatrimoine(
+      patrimoine.map(bien => (bien.id === id ? { ...bien, ...updates } : bien))
+    );
+    toast({
+      title: "Bien mis à jour!",
+      description: "Les informations du bien ont été mises à jour.",
+    });
+  };
+
+  // Supprimer un bien du patrimoine
+  const supprimerBien = (id: string) => {
+    setPatrimoine(patrimoine.filter(bien => bien.id !== id));
+    toast({
+      title: "Bien supprimé!",
+      description: "Le bien a été supprimé du patrimoine.",
+    });
+  };
+
+  // Ajouter une transaction
+  const addTransaction = useCallback((transaction: any) => {
+    const newTransaction = { ...transaction, id: uuidv4(), date: new Date() };
+    setTransactions(prev => [newTransaction, ...prev]);
+    setBalance(prevBalance => prevBalance + transaction.amount);
+    toast({
+      title: "Nouvelle transaction!",
+      description: "Une nouvelle transaction a été enregistrée.",
+    });
+  }, [setTransactions, setBalance, toast]);
+
+  // Simuler l'achat d'un bâtiment
+  const buildingPurchased = (buildingType: string, cost: number) => {
+    addTransaction({
+      amount: -cost,
+      description: `Achat ${buildingType}`,
+      category: 'Immobilier'
+    });
+  };
+
+  // Simuler la vente d'un bâtiment
+  const buildingSold = (buildingType: string, value: number) => {
+    addTransaction({
+      amount: value,
+      description: `Vente ${buildingType}`,
+      category: 'Immobilier'
+    });
+  };
+
   return {
+    patrimoine,
+    loading,
+    error,
+    addBien,
+    vendreBien,
+    updateBien,
+    supprimerBien,
     balance,
-    updateBalance,
-    resources,
-    resourceTransactions,
-    addResource,
-    sellResource,
-    buyResource
+    setBalance,
+    addTransaction,
+    transactions,
+    buildingPurchased,
+    buildingSold
   };
-}
+};

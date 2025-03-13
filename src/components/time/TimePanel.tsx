@@ -1,7 +1,7 @@
 
 import React, { useState } from 'react';
 import { Calendar, Hourglass, SunDim } from 'lucide-react';
-import { useTimeStore, formatRomanSeason, areSeasonsEqual } from '@/utils/timeSystem';
+import { useTimeStore, formatRomanSeason, areSeasonsEqual, Season } from '@/utils/timeSystem';
 import { formatSeasonDisplay } from '@/components/maitrejeu/types/common';
 
 interface TimePanelProps {
@@ -44,17 +44,16 @@ export const TimePanel: React.FC<TimePanelProps> = ({ minimal = false }) => {
   const getSeasonInfo = () => {
     const currentSeason = getSeason();
     
-    switch (currentSeason) {
-      case 'Ver':
-        return { icon: <SunDim className={`${minimal ? 'h-4 w-4' : 'h-5 w-5'} text-green-500`} />, color: 'bg-green-100 text-green-800' };
-      case 'Aestas':
-        return { icon: <SunDim className={`${minimal ? 'h-4 w-4' : 'h-5 w-5'} text-amber-500`} />, color: 'bg-amber-100 text-amber-800' };
-      case 'Autumnus':
-        return { icon: <SunDim className={`${minimal ? 'h-4 w-4' : 'h-5 w-5'} text-orange-500`} />, color: 'bg-orange-100 text-orange-800' };
-      case 'Hiems':
-        return { icon: <SunDim className={`${minimal ? 'h-4 w-4' : 'h-5 w-5'} text-blue-500`} />, color: 'bg-blue-100 text-blue-800' };
-      default:
-        return { icon: <SunDim className={`${minimal ? 'h-4 w-4' : 'h-5 w-5'}`} />, color: 'bg-gray-100 text-gray-800' };
+    if (currentSeason === 'Ver') {
+      return { icon: <SunDim className={`${minimal ? 'h-4 w-4' : 'h-5 w-5'} text-green-500`} />, color: 'bg-green-100 text-green-800' };
+    } else if (currentSeason === 'Aestas') {
+      return { icon: <SunDim className={`${minimal ? 'h-4 w-4' : 'h-5 w-5'} text-amber-500`} />, color: 'bg-amber-100 text-amber-800' };
+    } else if (currentSeason === 'Autumnus') {
+      return { icon: <SunDim className={`${minimal ? 'h-4 w-4' : 'h-5 w-5'} text-orange-500`} />, color: 'bg-orange-100 text-orange-800' };
+    } else if (currentSeason === 'Hiems') {
+      return { icon: <SunDim className={`${minimal ? 'h-4 w-4' : 'h-5 w-5'} text-blue-500`} />, color: 'bg-blue-100 text-blue-800' };
+    } else {
+      return { icon: <SunDim className={`${minimal ? 'h-4 w-4' : 'h-5 w-5'}`} />, color: 'bg-gray-100 text-gray-800' };
     }
   };
   

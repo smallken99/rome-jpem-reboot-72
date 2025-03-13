@@ -32,6 +32,7 @@ import { createTimeOperations } from './timeOperations';
 import { createClientOperations } from './clientOperations';
 import { createEconomieOperations } from './economieOperations';
 import { createFamilleOperations } from './familleOperations';
+import { Season } from '@/utils/timeSystem';
 
 // Création du contexte avec une valeur par défaut
 const MaitreJeuContext = createContext<MaitreJeuContextType>({} as MaitreJeuContextType);
@@ -62,7 +63,7 @@ export const MaitreJeuProvider: React.FC<{ children: React.ReactNode }> = ({ chi
 
   // Calcul des valeurs dérivées
   const currentYear = currentDate.year;
-  const currentSeason = currentDate.season;
+  const currentSeason = currentDate.season as Season;
 
   // Opérations
   const senateurOps = createSenateurOperations(setSenateurs);

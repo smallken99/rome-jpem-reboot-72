@@ -1,6 +1,6 @@
 
-import { GameDate, Season, GamePhase } from '../types/common';
-import { convertSeasonBetweenSystems } from '@/utils/timeSystem';
+import { GameDate, GamePhase } from '../types/common';
+import { convertSeasonBetweenSystems, Season, PlayerSeason } from '@/utils/timeSystem';
 
 // Crée les opérations de gestion du temps
 export const createTimeOperations = (

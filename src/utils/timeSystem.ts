@@ -1,16 +1,43 @@
 
 import { v4 as uuidv4 } from 'uuid';
-import { 
-  Season, 
-  PlayerSeason, 
-  seasonMapping, 
-  reverseSeasonMapping, 
-  formatSeasonDisplay, 
-  GameDate 
-} from '@/components/maitrejeu/types/common';
+import { GameDate, GamePhase } from '@/components/maitrejeu/types/common';
 
-// Exporter les types nécessaires
-export type { Season, PlayerSeason, GameDate };
+// Définition des saisons romaines
+export type Season = 'Ver' | 'Aestas' | 'Autumnus' | 'Hiems';
+// Définition des saisons pour les joueurs (en français)
+export type PlayerSeason = 'SPRING' | 'SUMMER' | 'AUTUMN' | 'WINTER';
+
+// Mappings entre les saisons romaines (MJ) et les saisons joueur
+export const seasonMapping: Record<Season, PlayerSeason> = {
+  'Ver': 'SPRING',
+  'Aestas': 'SUMMER',
+  'Autumnus': 'AUTUMN',
+  'Hiems': 'WINTER'
+};
+
+// Mapping inverse (joueur vers MJ)
+export const reverseSeasonMapping: Record<PlayerSeason, Season> = {
+  'SPRING': 'Ver',
+  'SUMMER': 'Aestas',
+  'AUTUMN': 'Autumnus',
+  'WINTER': 'Hiems'
+};
+
+// Fonction pour formater les saisons en texte lisible
+export const formatSeasonDisplay = (season: Season | PlayerSeason): string => {
+  const displayNames: Record<Season | PlayerSeason, string> = {
+    'Ver': 'Printemps',
+    'Aestas': 'Été',
+    'Autumnus': 'Automne',
+    'Hiems': 'Hiver',
+    'SPRING': 'Printemps',
+    'SUMMER': 'Été',
+    'AUTUMN': 'Automne',
+    'WINTER': 'Hiver'
+  };
+  
+  return displayNames[season] || String(season);
+};
 
 // Définition du store pour la gestion du temps
 export const useTimeStore = () => {
@@ -56,9 +83,6 @@ export const useTimeEvents = (
   onSeasonChange?: (season: Season) => void,
   onYearChange?: (year: number) => void
 ) => {
-  // Ici, vous utiliseriez useState, useEffect, etc.
-  // Mais pour la simplicité, nous retournons juste une interface simulée
-  
   return {
     advanceTime: () => {
       // Logique pour faire avancer le temps et déclencher les callbacks appropriés
@@ -68,7 +92,11 @@ export const useTimeEvents = (
 };
 
 // Fonction pour convertir entre les formats de saisons
-export const parseGameDate = (dateString: string): GameDate => {
+export const parseGameDate = (dateString: string | null): GameDate => {
+  if (!dateString) {
+    return { year: 721, season: 'Ver' };
+  }
+
   try {
     // Si c'est déjà un objet GameDate
     if (typeof dateString === 'object' && 'year' in dateString && 'season' in dateString) {
@@ -78,9 +106,15 @@ export const parseGameDate = (dateString: string): GameDate => {
     // Tenter de parser un objet JSON
     const parsed = JSON.parse(dateString);
     if (parsed && typeof parsed === 'object' && 'year' in parsed && 'season' in parsed) {
+      // Vérifier que la saison est bien dans le bon format
+      const season = parsed.season as Season | PlayerSeason;
+      const normalizedSeason = season in reverseSeasonMapping 
+        ? reverseSeasonMapping[season as PlayerSeason]
+        : season as Season;
+        
       return {
         year: Number(parsed.year),
-        season: parsed.season as Season
+        season: normalizedSeason
       };
     }
   } catch (e) {
