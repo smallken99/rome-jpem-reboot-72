@@ -1,136 +1,181 @@
+
 import React, { useState } from 'react';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Button } from '@/components/ui/button';
-import { Edit, FileText, MoreHorizontal, Plus, Trash2 } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
+import { Button } from '@/components/ui/button';
+import { Eye, FileText, CheckCircle, XCircle, Clock, Vote } from 'lucide-react';
+import { Input } from '@/components/ui/input';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Loi, useLois } from './hooks/useLois';
 
-// Types pour les lois
-interface Loi {
-  id: string;
-  titre: string;
-  description: string;
-  dateAdoption: string;
-  status: 'active' | 'proposed' | 'rejected' | 'amended';
+interface LoisTableProps {
+  onViewDetails: (loi: Loi) => void;
+  onVote?: (loi: Loi) => void;
+  onPromulguer?: (loi: Loi) => void;
 }
 
-export const LoisTable = () => {
-  const [lois, setLois] = useState<Loi[]>([
-    {
-      id: "1",
-      titre: "Lex Hortensia",
-      description: "Les plébiscites votés par le concile de la plèbe ont force de loi pour tous les citoyens.",
-      dateAdoption: "287 av. J.-C.",
-      status: "active"
-    },
-    {
-      id: "2",
-      titre: "Lex Valeria Horatia",
-      description: "Rétablit le droit d'appel au peuple contre les décisions des magistrats.",
-      dateAdoption: "449 av. J.-C.",
-      status: "active"
-    },
-    {
-      id: "3",
-      titre: "Lex Canuleia",
-      description: "Autorise le mariage entre patriciens et plébéiens.",
-      dateAdoption: "445 av. J.-C.",
-      status: "active"
-    },
-    {
-      id: "4",
-      titre: "Lex Licinia Sextia",
-      description: "Limite la quantité de terres publiques qu'un individu peut posséder.",
-      dateAdoption: "367 av. J.-C.",
-      status: "amended"
-    },
-    {
-      id: "5",
-      titre: "Nouvelle Loi Agraire",
-      description: "Proposition de redistribution des terres publiques aux citoyens nécessiteux.",
-      dateAdoption: "En discussion",
-      status: "proposed"
-    }
-  ]);
+export const LoisTable: React.FC<LoisTableProps> = ({ 
+  onViewDetails, 
+  onVote, 
+  onPromulguer 
+}) => {
+  const { lois, categories, isLoading } = useLois();
+  const [searchTerm, setSearchTerm] = useState('');
+  const [categoryFilter, setCategoryFilter] = useState('all');
+  const [statusFilter, setStatusFilter] = useState('all');
+  
+  if (isLoading) {
+    return (
+      <div className="flex justify-center items-center p-8">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900"></div>
+      </div>
+    );
+  }
+  
+  // Filtrer les lois
+  const filteredLois = lois.filter(loi => {
+    const matchesSearch = loi.titre.toLowerCase().includes(searchTerm.toLowerCase()) || 
+                        loi.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                        loi.auteur.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesCategory = categoryFilter === 'all' || loi.categorieId === categoryFilter;
+    const matchesStatus = statusFilter === 'all' || loi.statut === statusFilter;
+    
+    return matchesSearch && matchesCategory && matchesStatus;
+  });
   
   // Fonction pour obtenir le badge de statut
-  const getStatusBadge = (status: string) => {
-    switch (status) {
-      case 'active':
-        return <Badge className="bg-green-100 text-green-800 border-green-200">Active</Badge>;
-      case 'proposed':
-        return <Badge className="bg-blue-100 text-blue-800 border-blue-200">Proposée</Badge>;
-      case 'rejected':
-        return <Badge className="bg-red-100 text-red-800 border-red-200">Rejetée</Badge>;
-      case 'amended':
-        return <Badge className="bg-amber-100 text-amber-800 border-amber-200">Amendée</Badge>;
+  const getStatusBadge = (statut: Loi['statut']) => {
+    switch(statut) {
+      case 'proposée':
+        return <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200">Proposée</Badge>;
+      case 'en_débat':
+        return <Badge variant="outline" className="bg-amber-50 text-amber-700 border-amber-200">En débat</Badge>;
+      case 'votée':
+        return <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">Votée</Badge>;
+      case 'rejetée':
+        return <Badge variant="outline" className="bg-red-50 text-red-700 border-red-200">Rejetée</Badge>;
+      case 'promulguée':
+        return <Badge variant="outline" className="bg-purple-50 text-purple-700 border-purple-200">Promulguée</Badge>;
       default:
-        return <Badge variant="outline">{status}</Badge>;
+        return null;
     }
   };
-
+  
+  // Trouver le nom de la catégorie à partir de son ID
+  const getCategoryName = (categorieId: string) => {
+    const category = categories.find(cat => cat.id === categorieId);
+    return category ? category.nom : 'Inconnu';
+  };
+  
   return (
-    <div>
-      <div className="flex justify-between items-center mb-4">
-        <div>
-          <h3 className="text-lg font-semibold">Lois de la République</h3>
-          <p className="text-sm text-muted-foreground">Gérez les lois et décrets en vigueur</p>
+    <div className="space-y-4">
+      <div className="flex flex-col md:flex-row gap-4">
+        <div className="w-full md:w-1/3">
+          <Input
+            placeholder="Rechercher une loi..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="w-full"
+          />
         </div>
-        <Button variant="outline" className="roman-btn-outline">
-          <Plus className="h-4 w-4 mr-2" />
-          Nouvelle Loi
-        </Button>
+        
+        <div className="w-full md:w-1/3">
+          <Select value={categoryFilter} onValueChange={setCategoryFilter}>
+            <SelectTrigger>
+              <SelectValue placeholder="Catégorie" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">Toutes les catégories</SelectItem>
+              {categories.map(category => (
+                <SelectItem key={category.id} value={category.id}>{category.nom}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+        
+        <div className="w-full md:w-1/3">
+          <Select value={statusFilter} onValueChange={setStatusFilter}>
+            <SelectTrigger>
+              <SelectValue placeholder="Statut" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">Tous les statuts</SelectItem>
+              <SelectItem value="proposée">Proposée</SelectItem>
+              <SelectItem value="en_débat">En débat</SelectItem>
+              <SelectItem value="votée">Votée</SelectItem>
+              <SelectItem value="rejetée">Rejetée</SelectItem>
+              <SelectItem value="promulguée">Promulguée</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
       </div>
       
-      <div className="rounded-md border">
-        <Table>
-          <TableHeader>
-            <TableRow className="bg-muted/50">
-              <TableHead className="font-cinzel">Titre</TableHead>
-              <TableHead className="font-cinzel">Description</TableHead>
-              <TableHead className="font-cinzel">Date d'Adoption</TableHead>
-              <TableHead className="font-cinzel">Statut</TableHead>
-              <TableHead className="text-right font-cinzel">Actions</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {lois.map((loi) => (
-              <TableRow key={loi.id}>
-                <TableCell className="font-medium">{loi.titre}</TableCell>
-                <TableCell>{loi.description}</TableCell>
-                <TableCell>{loi.dateAdoption}</TableCell>
-                <TableCell>{getStatusBadge(loi.status)}</TableCell>
-                <TableCell className="text-right">
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <Button variant="ghost" className="h-8 w-8 p-0">
-                        <span className="sr-only">Ouvrir le menu</span>
-                        <MoreHorizontal className="h-4 w-4" />
-                      </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end">
-                      <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                      <DropdownMenuItem>
-                        <FileText className="h-4 w-4 mr-2" />
-                        Voir le texte
-                      </DropdownMenuItem>
-                      <DropdownMenuItem>
-                        <Edit className="h-4 w-4 mr-2" />
-                        Modifier
-                      </DropdownMenuItem>
-                      <DropdownMenuSeparator />
-                      <DropdownMenuItem>
-                        <Trash2 className="h-4 w-4 mr-2" />
-                        Supprimer
-                      </DropdownMenuItem>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
-                </TableCell>
+      {filteredLois.length === 0 ? (
+        <div className="text-center p-8 border border-dashed rounded-lg">
+          <FileText className="h-10 w-10 text-muted-foreground mx-auto mb-2" />
+          <p className="text-muted-foreground">Aucune loi ne correspond à ces critères.</p>
+        </div>
+      ) : (
+        <div className="border rounded-md">
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Titre</TableHead>
+                <TableHead>Auteur</TableHead>
+                <TableHead>Catégorie</TableHead>
+                <TableHead>Statut</TableHead>
+                <TableHead>Date</TableHead>
+                <TableHead className="text-right">Actions</TableHead>
               </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      </div>
+            </TableHeader>
+            <TableBody>
+              {filteredLois.map((loi) => (
+                <TableRow key={loi.id}>
+                  <TableCell className="font-medium">{loi.titre}</TableCell>
+                  <TableCell>{loi.auteur}</TableCell>
+                  <TableCell>{getCategoryName(loi.categorieId)}</TableCell>
+                  <TableCell>{getStatusBadge(loi.statut)}</TableCell>
+                  <TableCell>{loi.dateVote || loi.dateProposition}</TableCell>
+                  <TableCell className="text-right">
+                    <div className="flex justify-end gap-2">
+                      <Button 
+                        variant="ghost" 
+                        size="icon"
+                        onClick={() => onViewDetails(loi)}
+                        title="Voir les détails"
+                      >
+                        <Eye className="h-4 w-4" />
+                      </Button>
+                      
+                      {onVote && (loi.statut === 'proposée' || loi.statut === 'en_débat') && (
+                        <Button 
+                          variant="ghost" 
+                          size="icon"
+                          onClick={() => onVote(loi)}
+                          title="Voter"
+                        >
+                          <Vote className="h-4 w-4" />
+                        </Button>
+                      )}
+                      
+                      {onPromulguer && loi.statut === 'votée' && (
+                        <Button 
+                          variant="ghost" 
+                          size="icon"
+                          onClick={() => onPromulguer(loi)}
+                          title="Promulguer"
+                        >
+                          <CheckCircle className="h-4 w-4" />
+                        </Button>
+                      )}
+                    </div>
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </div>
+      )}
     </div>
   );
 };

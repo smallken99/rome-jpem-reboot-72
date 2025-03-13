@@ -1,11 +1,13 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Label } from '@/components/ui/label';
 import { PublicBuilding } from '../hooks/useBatimentsPublics';
 import { Wrench, Coins } from 'lucide-react';
+import { useEconomy } from '@/hooks/useEconomy';
+import { toast } from 'sonner';
 
 interface MaintenanceDialogProps {
   open: boolean;
@@ -21,6 +23,15 @@ export const MaintenanceDialog: React.FC<MaintenanceDialogProps> = ({
   onMaintain
 }) => {
   const [selectedLevel, setSelectedLevel] = useState<'minimal' | 'standard' | 'excellent'>('standard');
+  const economy = useEconomy();
+  const [treasuryFunds, setTreasuryFunds] = useState(10000000);
+  
+  useEffect(() => {
+    // Dans une implémentation réelle, nous récupérerions les fonds du trésor depuis l'API
+    if (economy.treasury) {
+      setTreasuryFunds(economy.treasury.amount);
+    }
+  }, [economy.treasury]);
   
   if (!selectedItem) return null;
   
@@ -41,7 +52,14 @@ export const MaintenanceDialog: React.FC<MaintenanceDialogProps> = ({
   };
 
   const handleSubmit = () => {
+    const cost = getMaintenanceCost(selectedLevel);
+    if (cost > treasuryFunds) {
+      toast.error("Fonds insuffisants dans le trésor public");
+      return;
+    }
+    
     onMaintain(selectedLevel);
+    toast.success(`Maintenance ${selectedLevel} effectuée avec succès`);
     onOpenChange(false);
   };
   
@@ -108,18 +126,25 @@ export const MaintenanceDialog: React.FC<MaintenanceDialogProps> = ({
             </RadioGroup>
           </div>
           
-          <div className="bg-muted/30 p-3 rounded-md">
+          <div className={`p-3 rounded-md ${getMaintenanceCost(selectedLevel) > treasuryFunds ? 'bg-red-50 border-red-200 border' : 'bg-muted/30'}`}>
             <div className="flex items-center gap-2 text-sm">
               <Coins className="h-4 w-4 text-muted-foreground" />
               <span>Trésor public disponible:</span>
-              <span className="font-medium">10,000,000 As</span>
+              <span className="font-medium">{treasuryFunds.toLocaleString()} As</span>
+              
+              {getMaintenanceCost(selectedLevel) > treasuryFunds && (
+                <span className="text-xs text-red-500 ml-auto">Fonds insuffisants</span>
+              )}
             </div>
           </div>
         </div>
         
         <DialogFooter>
           <Button variant="outline" onClick={() => onOpenChange(false)}>Annuler</Button>
-          <Button onClick={handleSubmit}>
+          <Button 
+            onClick={handleSubmit}
+            disabled={getMaintenanceCost(selectedLevel) > treasuryFunds}
+          >
             <Wrench className="h-4 w-4 mr-2" />
             Effectuer la maintenance
           </Button>
