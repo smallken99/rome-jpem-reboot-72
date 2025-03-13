@@ -1,106 +1,94 @@
 
 import React from 'react';
-import { Check, GraduationCap, Ban } from 'lucide-react';
-import { AnnualProgress } from './AnnualProgress';
-import { MentorInfo } from './MentorInfo';
-import { PietyBonus } from './PietyBonus';
-import { StatBonusInfo } from './StatBonusInfo';
-import { Child } from '../types/educationTypes';
-import { CardActions } from './CardActions';
-
-interface EducationStatusProps {
-  child: Child;
-  hasEducation: boolean;
-  hasInvalidEducation: boolean;
-}
+import { Progress } from '@/components/ui/progress';
+import { EducationStatusProps } from '../types/educationTypes';
+import { Scroll, User, AlertTriangle } from 'lucide-react';
+import { getEducationPath } from '../data';
 
 export const EducationStatus: React.FC<EducationStatusProps> = ({ 
-  child, 
-  hasEducation, 
-  hasInvalidEducation 
+  child,
+  hasEducation,
+  hasInvalidEducation
 }) => {
+  // Format the education type for display
+  const getEducationTypeDisplay = (type: string) => {
+    switch (type) {
+      case 'rhetoric': return 'Rhétorique';
+      case 'politics': return 'Politique';
+      case 'military': return 'Militaire';
+      case 'religious': return 'Religieuse';
+      default: return type;
+    }
+  };
+  
+  // Get the education path for more details
+  const educationPath = child.currentEducation?.type ? 
+    getEducationPath(child.currentEducation.type) : undefined;
+  
   if (!hasEducation) {
     return (
-      <div className="flex flex-col items-center justify-center py-6 text-center">
-        <GraduationCap className="h-10 w-10 text-muted-foreground mb-2" />
-        <h3 className="text-lg font-medium mb-1">Aucune éducation en cours</h3>
-        <p className="text-sm text-muted-foreground max-w-md">
-          Cet enfant n'a actuellement aucune éducation. Choisissez un parcours éducatif pour commencer sa formation.
-        </p>
-        
-        {child.age < 8 && (
-          <EducationWarning
-            icon={<Ban className="h-4 w-4" />}
-            text={`${child.name} est trop jeune pour la plupart des éducations. Il/Elle peut uniquement suivre une éducation religieuse pour le moment.`}
-          />
-        )}
-        
-        <CardActions 
-          educationType="none" 
-          childId={child.id} 
-          childGender={child.gender} 
-          childAge={child.age} 
-        />
+      <div className="p-4 bg-muted/30 rounded-md mb-4">
+        <div className="flex items-center gap-2 text-muted-foreground">
+          <Scroll className="h-4 w-4" />
+          <span>Aucune éducation en cours</span>
+        </div>
       </div>
     );
   }
-
-  return (
-    <div className="space-y-4">
-      <div className="flex justify-between items-start">
-        <div>
-          <h3 className="text-lg font-medium flex items-center gap-2">
-            <Check className="h-5 w-5 text-green-500" />
-            Éducation en cours
-          </h3>
-          <p className="text-sm text-muted-foreground">
-            Type: {child.currentEducation.type === 'military' ? 'Militaire' : 
-                  child.currentEducation.type === 'political' ? 'Politique' : 
-                  child.currentEducation.type === 'religious' ? 'Religieuse' :
-                  child.currentEducation.type === 'commercial' ? 'Commerce' : 'Inconnue'}
-          </p>
+  
+  if (hasInvalidEducation) {
+    return (
+      <div className="p-4 bg-red-50 border border-red-200 rounded-md mb-4">
+        <div className="flex items-center gap-2 text-red-700">
+          <AlertTriangle className="h-4 w-4" />
+          <span>Éducation militaire non accessible aux filles romaines</span>
         </div>
-        
-        <CardActions 
-          educationType={child.currentEducation.type} 
-          childId={child.id} 
-          childGender={child.gender} 
-          childAge={child.age} 
-        />
+      </div>
+    );
+  }
+  
+  if (!child.currentEducation) return null;
+  
+  return (
+    <div className="space-y-4 mb-4">
+      <div className="flex items-center justify-between">
+        <h3 className="font-medium">Éducation en cours: <span className="text-primary">{getEducationTypeDisplay(child.currentEducation.type)}</span></h3>
+        <div className="px-2 py-1 bg-blue-100 text-blue-800 rounded text-xs">
+          {child.currentEducation.yearsCompleted} / {child.currentEducation.totalYears} années
+        </div>
       </div>
       
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div>
-          {child.currentEducation.yearsCompleted !== undefined && 
-            child.currentEducation.totalYears !== undefined && (
-            <AnnualProgress 
-              yearsCompleted={child.currentEducation.yearsCompleted} 
-              totalYears={child.currentEducation.totalYears} 
-            />
-          )}
-          
-          <MentorInfo 
-            mentor={child.currentEducation.mentor} 
-            speciality={child.currentEducation.speciality}
-          />
+      {child.currentEducation.mentor && (
+        <div className="flex items-center gap-2 text-sm">
+          <User className="h-4 w-4 text-muted-foreground" />
+          <span>Précepteur: <span className="font-medium">{child.currentEducation.mentor}</span></span>
         </div>
-        
-        <div>
-          {child.currentEducation.pityBonus !== undefined && 
-            child.currentEducation.pityBonus > 0 && 
-            child.gender === 'female' && (
-            <PietyBonus bonus={child.currentEducation.pityBonus} />
-          )}
-          
-          <StatBonusInfo 
-            educationType={child.currentEducation.type}
-            statBonus={child.currentEducation.statBonus}
-          />
+      )}
+      
+      <div className="space-y-1">
+        <div className="flex items-center justify-between text-sm">
+          <span>Progression:</span>
+          <span className="font-medium">{child.currentEducation.progress}%</span>
         </div>
+        <Progress value={child.currentEducation.progress} />
       </div>
+      
+      {educationPath && (
+        <div className="pt-2 border-t text-sm space-y-2">
+          <p className="text-muted-foreground">{educationPath.description}</p>
+          
+          {child.currentEducation.progress >= 100 && (
+            <div className="space-y-1">
+              <p className="font-medium">Compétences acquises:</p>
+              <ul className="list-disc list-inside text-xs space-y-1">
+                {educationPath.outcomes.skills.map((skill, idx) => (
+                  <li key={idx} className="capitalize">{skill}</li>
+                ))}
+              </ul>
+            </div>
+          )}
+        </div>
+      )}
     </div>
   );
 };
-
-// Needed for the component above
-import { EducationWarning } from './EducationWarning';

@@ -1,119 +1,91 @@
 
 import React, { useState } from 'react';
-import { ScrollText, User, Crown } from 'lucide-react';
-import { Separator } from '@/components/ui/separator';
-import { characters } from '@/data/characters';
-import { useToast } from '@/components/ui/use-toast';
-import { HeirCard } from './inheritance/HeirCard';
-import { FemaleCard } from './inheritance/FemaleCard';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Scroll, Users, Coins } from 'lucide-react';
+import { InheritanceChart } from './inheritance/InheritanceChart';
+import { HeirsTable } from './inheritance/HeirsTable';
+import { ActionButton } from '@/components/ui-custom/ActionButton';
+
+// Mock data for inheritance
+const inheritanceData = {
+  totalValue: 250000,
+  distribution: [
+    { name: 'Marcus (fils aîné)', value: 40, amount: 100000 },
+    { name: 'Lucius (fils cadet)', value: 20, amount: 50000 },
+    { name: 'Julia (fille)', value: 15, amount: 37500 },
+    { name: 'Temples', value: 10, amount: 25000 },
+    { name: 'Famille élargie', value: 10, amount: 25000 },
+    { name: 'Affranchis', value: 5, amount: 12500 },
+  ]
+};
 
 export const Inheritance: React.FC = () => {
-  // Filter to only male heirs for inheritance eligibility
-  const eligibleHeirs = characters.filter(char => 
-    char.gender === 'male' && (
-      char.role?.toLowerCase().includes('fils') || 
-      char.role?.toLowerCase().includes('neveu') ||
-      char.role?.toLowerCase().includes('frère')
-    )
-  );
-  
-  const defaultHeir = eligibleHeirs.find(heir => 
-    heir.role?.toLowerCase().includes('fils aîné')
-  ) || eligibleHeirs[0];
-  
-  const [selectedHeirId, setSelectedHeirId] = useState<string>(defaultHeir?.id || '');
-  const { toast } = useToast();
-  
-  const handleHeirSelection = (heirId: string) => {
-    setSelectedHeirId(heirId);
-    
-    toast({
-      title: "Héritier sélectionné",
-      description: "L'héritier principal a été désigné avec succès.",
-      duration: 3000,
-    });
-  };
-  
-  // Find female characters and prepare them with the correct type
-  const femaleCharacters = characters
-    .filter(char => char.gender === 'female' && char.role?.toLowerCase().includes('fille'));
+  const [isEditMode, setIsEditMode] = useState(false);
   
   return (
     <div className="inheritance">
-      <div className="p-4 mb-4 bg-rome-parchment/50 rounded-md">
-        <p className="italic text-muted-foreground">
-          Dans la tradition romaine, la succession se faisait par désignation d'un héritier principal, 
-          généralement le fils aîné. Désignez votre héritier pour assurer la continuité de votre Gens.
-        </p>
-      </div>
-      
-      <div className="testament-section mb-4">
-        <div className="flex items-center gap-2 mb-3">
-          <ScrollText className="h-5 w-5 text-rome-terracotta" />
-          <h3 className="font-cinzel text-lg">Testament Actuel</h3>
+      <div className="flex flex-col md:flex-row items-start md:items-center justify-between mb-6">
+        <div>
+          <h3 className="text-xl font-cinzel mb-1">Testament et Héritage</h3>
+          <p className="text-sm text-muted-foreground">
+            Déterminez comment votre patrimoine sera transmis à vos héritiers
+          </p>
         </div>
         
-        <div className="p-3 border border-rome-gold/30 rounded-md bg-white/70">
-          <p className="text-sm">
-            <span className="font-medium">Status:</span>{' '}
-            <span className="text-green-600">Validé par le Sénat</span>
-          </p>
-          <p className="text-sm mt-1">
-            <span className="font-medium">Dernière modification:</span>{' '}
-            <span>Ides de Mars, 710 AUC</span>
-          </p>
+        <div className="flex flex-wrap gap-3 mt-4 md:mt-0">
+          <div className="flex items-center gap-2 px-3 py-1 bg-amber-50 text-amber-800 rounded">
+            <Coins className="h-4 w-4" />
+            <span className="font-medium">{inheritanceData.totalValue.toLocaleString()} As de patrimoine</span>
+          </div>
           
-          {selectedHeirId && (
-            <div className="mt-3 pt-3 border-t border-dashed border-muted">
-              <p className="text-sm font-medium flex items-center gap-1.5">
-                <Crown className="h-4 w-4 text-rome-gold" />
-                Héritier Principal: 
-                <span className="text-rome-navy">
-                  {characters.find(char => char.id === selectedHeirId)?.name || 'Inconnu'}
-                </span>
-              </p>
-            </div>
-          )}
+          <div className="flex items-center gap-2 px-3 py-1 bg-blue-50 text-blue-800 rounded">
+            <Users className="h-4 w-4" />
+            <span className="font-medium">{inheritanceData.distribution.length} bénéficiaires</span>
+          </div>
+          
+          <Button
+            variant="outline"
+            size="sm"
+            className="flex items-center gap-2 roman-btn-outline"
+            onClick={() => setIsEditMode(!isEditMode)}
+          >
+            <Scroll className="h-4 w-4" />
+            {isEditMode ? 'Annuler les modifications' : 'Modifier le testament'}
+          </Button>
         </div>
       </div>
       
-      <div className="heirs-section space-y-4">
-        <div className="flex items-center gap-2 mb-3">
-          <User className="h-5 w-5 text-rome-terracotta" />
-          <h3 className="font-cinzel text-lg">Héritiers Potentiels</h3>
-        </div>
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <Card className="md:col-span-2">
+          <CardHeader>
+            <CardTitle>Distribution du patrimoine</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <InheritanceChart data={inheritanceData.distribution} />
+            
+            {isEditMode && (
+              <div className="flex justify-end mt-4">
+                <ActionButton
+                  label="Enregistrer les modifications"
+                  onClick={() => setIsEditMode(false)}
+                />
+              </div>
+            )}
+          </CardContent>
+        </Card>
         
-        {eligibleHeirs.length > 0 ? (
-          eligibleHeirs.map(heir => (
-            <HeirCard 
-              key={heir.id} 
-              heir={heir} 
-              isSelected={heir.id === selectedHeirId}
-              onSelect={handleHeirSelection}
+        <Card>
+          <CardHeader>
+            <CardTitle>Liste des héritiers</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <HeirsTable 
+              heirs={inheritanceData.distribution} 
+              editMode={isEditMode} 
             />
-          ))
-        ) : (
-          <div className="text-center p-4 border border-dashed border-muted rounded-md">
-            <p className="text-muted-foreground">Aucun héritier potentiel masculin n'a été trouvé dans votre famille.</p>
-          </div>
-        )}
-        
-        {/* Display female family members separately as non-eligible */}
-        <div className="mt-8">
-          <div className="flex items-center gap-2 mb-3">
-            <User className="h-5 w-5 text-rome-terracotta" />
-            <h3 className="font-cinzel text-lg">Membres Féminins (non éligibles à l'héritage principal)</h3>
-          </div>
-          
-          {femaleCharacters.map((character, index) => (
-            <FemaleCard 
-              key={character.id} 
-              character={character} 
-              dowryAmount={10000 + (index * 5000)} 
-              index={index}
-            />
-          ))}
-        </div>
+          </CardContent>
+        </Card>
       </div>
     </div>
   );

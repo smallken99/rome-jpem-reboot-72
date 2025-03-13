@@ -14,6 +14,11 @@ export interface ProcesData {
   type: string;
   statut: string;
   date: string;
+  description?: string;
+  verdict?: string;
+  magistratResponsable?: string;
+  notes?: string[];
+  preuves?: string[];
 }
 
 export interface ProcesTableProps {
@@ -49,9 +54,9 @@ export const ProcesTable: React.FC<ProcesTableProps> = ({
   };
 
   const handleViewDetails = (procesId: string) => {
-    const proces = proces.find(p => p.id === procesId);
-    if (proces && onViewDetails) {
-      onViewDetails(proces);
+    const procesItem = proces.find(p => p.id === procesId);
+    if (procesItem && onViewDetails) {
+      onViewDetails(procesItem);
     } else {
       setSelectedProces(procesId === selectedProces ? null : procesId);
     }

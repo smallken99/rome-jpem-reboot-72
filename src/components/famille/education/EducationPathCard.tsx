@@ -1,95 +1,89 @@
 
 import React from 'react';
-import { Sword, Building, ScrollText, ShieldQuestion } from 'lucide-react';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Check, Clock, Users } from 'lucide-react';
 import { EducationPath } from './types/educationTypes';
-import { useNavigate } from 'react-router-dom';
 
 interface EducationPathCardProps {
   path: EducationPath;
 }
 
 export const EducationPathCard: React.FC<EducationPathCardProps> = ({ path }) => {
-  const navigate = useNavigate();
-  
-  const getSuitabilityText = (suitableFor: string) => {
-    switch(suitableFor) {
-      case 'both':
-        return 'Tous';
-      case 'male':
-        return 'Garçons uniquement';
-      case 'female':
-        return 'Filles uniquement';
-      default:
-        return 'Tous';
-    }
-  };
-
-  // Render the icon component
-  const IconComponent = path.icon || ShieldQuestion;
-
-  const isMaleOnly = path.requirements.gender === 'male';
-  const isFemaleOnly = path.requirements.gender === 'female';
-
-  // Get stat bonus description based on related stat
-  const getStatBonusDescription = (relatedStat: string) => {
-    switch(relatedStat) {
-      case 'martialEducation':
-        return 'Améliore l\'Éducation Martiale';
-      case 'oratory':
-        return 'Améliore l\'Éloquence';
-      case 'piety':
-        return 'Améliore la Piété';
-      default:
-        return 'Améliore une caractéristique';
+  // Helper to format the education type
+  const formatEducationType = (type: string) => {
+    switch (type) {
+      case 'rhetoric': return { name: 'Rhétorique', color: 'bg-blue-100 text-blue-800 border-blue-200' };
+      case 'politics': return { name: 'Politique', color: 'bg-purple-100 text-purple-800 border-purple-200' };
+      case 'military': return { name: 'Militaire', color: 'bg-red-100 text-red-800 border-red-200' };
+      case 'religious': return { name: 'Religieuse', color: 'bg-amber-100 text-amber-800 border-amber-200' };
+      default: return { name: type, color: 'bg-gray-100 text-gray-800 border-gray-200' };
     }
   };
   
-  const handleViewPreceptorsClick = () => {
-    navigate(`/famille/education/preceptors?type=${path.id}`);
-  };
-
+  const { name, color } = formatEducationType(path.id);
+  
   return (
-    <div className={`roman-card p-4 border-t-4 ${isMaleOnly ? 'border-t-blue-500' : isFemaleOnly ? 'border-t-pink-500' : 'border-t-rome-navy'} hover:shadow-md transition-all duration-300`}>
-      <div className="flex items-center gap-2 mb-2">
-        <div className="text-rome-navy">
-          <IconComponent size={22} />
+    <Card className="h-full">
+      <CardHeader className="pb-2">
+        <div className="flex justify-between items-start">
+          <CardTitle>{path.name}</CardTitle>
+          <Badge className={color}>{name}</Badge>
         </div>
-        <h4 className="font-cinzel">{path.name}</h4>
-      </div>
+        <CardDescription>{path.description}</CardDescription>
+      </CardHeader>
       
-      <p className="text-sm text-muted-foreground mb-3">{path.description}</p>
-      
-      <div className="text-xs grid grid-cols-3 gap-x-3 gap-y-2">
-        <div>
-          <span className="font-medium">Âge minimum:</span> {path.requirements.age} ans
+      <CardContent className="space-y-4">
+        <div className="flex items-center gap-2 text-sm">
+          <Clock className="h-4 w-4 text-muted-foreground" />
+          <span>Durée: {path.duration} {path.duration > 1 ? 'années' : 'année'}</span>
         </div>
-        <div>
-          <span className="font-medium">Convient:</span> <span className={isMaleOnly ? 'text-blue-600 font-semibold' : isFemaleOnly ? 'text-pink-600 font-semibold' : ''}>{getSuitabilityText(path.requirements.gender)}</span>
+        
+        {path.requirements && (
+          <div className="text-sm">
+            <p className="font-medium mb-1">Conditions:</p>
+            <ul className="space-y-1 text-muted-foreground">
+              {path.requirements.age && (
+                <li className="flex items-center gap-1">
+                  <span>• Âge minimum: {path.requirements.age} ans</span>
+                </li>
+              )}
+              {path.requirements.gender && (
+                <li className="flex items-center gap-1">
+                  <span>• Genre: {path.requirements.gender.includes('male') && path.requirements.gender.includes('female') 
+                    ? 'Tous' 
+                    : path.requirements.gender.includes('male') 
+                      ? 'Garçons uniquement' 
+                      : 'Filles uniquement'}</span>
+                </li>
+              )}
+            </ul>
+          </div>
+        )}
+        
+        <div className="text-sm pt-2 border-t">
+          <p className="font-medium mb-1">Bénéfices:</p>
+          <ul className="space-y-1">
+            {path.benefits.map((benefit, idx) => (
+              <li key={idx} className="flex items-center gap-1 text-muted-foreground">
+                <Check className="h-3 w-3 text-green-600 flex-shrink-0" />
+                <span>{benefit}</span>
+              </li>
+            ))}
+          </ul>
         </div>
-        <div>
-          <span className="font-medium">Durée:</span> {path.requirements.duration}
+        
+        <div className="text-sm pt-2 border-t">
+          <p className="font-medium mb-1">Compétences acquises:</p>
+          <div className="flex flex-wrap gap-1 mt-1">
+            {path.outcomes.skills.map((skill, idx) => (
+              <Badge key={idx} variant="outline" className="capitalize">
+                {skill}
+              </Badge>
+            ))}
+          </div>
         </div>
-      </div>
-      
-      {isMaleOnly && (
-        <div className="text-xs text-blue-700 bg-blue-50 p-2 mt-2 rounded">
-          L'éducation militaire n'est accessible qu'aux hommes dans la Rome antique.
-        </div>
-      )}
-
-      {/* Add a section that displays the related stat improvement */}
-      <div className="text-xs bg-green-50 p-2 mt-2 rounded text-green-700">
-        <span className="font-medium">Bonus après validation:</span> {getStatBonusDescription(path.relatedStat)}
-      </div>
-      
-      <div className="mt-4 flex justify-end">
-        <button 
-          className="roman-btn-outline text-xs"
-          onClick={handleViewPreceptorsClick}
-        >
-          Voir les précepteurs disponibles
-        </button>
-      </div>
-    </div>
+      </CardContent>
+    </Card>
   );
 };
