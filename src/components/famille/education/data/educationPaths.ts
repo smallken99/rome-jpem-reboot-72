@@ -299,15 +299,15 @@ export const getEducationPathById = (id: string) => {
   return educationPaths.find(path => path.id === id);
 };
 
-// Fonction utilitaire pour obtenir la liste des spécialités d'un chemin d'éducation
-export const getSpecialtiesByPath = (pathId: string): string[] => {
-  const path = getEducationPathById(pathId);
-  return path && path.specialties ? path.specialties : [];
-};
-
 // Fonction pour obtenir les spécialités en fonction du type d'éducation
 export const getSpecialtiesByPath = (educationType: string): string[] => {
+  const path = educationPaths.find(path => path.id === educationType);
+  if (path && path.specialties && path.specialties.length > 0) {
+    return path.specialties;
+  }
+
   switch (educationType) {
+    case 'military':
     case 'militaire':
       return [
         'Combat au corps à corps',
@@ -317,6 +317,7 @@ export const getSpecialtiesByPath = (educationType: string): string[] => {
         'Tactiques légionnaires',
         'Siège et fortifications'
       ];
+    case 'political':
     case 'politique':
       return [
         'Rhétorique',
@@ -326,6 +327,7 @@ export const getSpecialtiesByPath = (educationType: string): string[] => {
         'Diplomatie',
         'Histoire politique'
       ];
+    case 'religious':
     case 'religieuse':
       return [
         'Rituels sacrés',
@@ -335,6 +337,7 @@ export const getSpecialtiesByPath = (educationType: string): string[] => {
         'Tradition ancestrale',
         'Cérémonies officielles'
       ];
+    case 'philosophical':
     case 'philosophique':
       return [
         'Stoïcisme',
@@ -344,6 +347,7 @@ export const getSpecialtiesByPath = (educationType: string): string[] => {
         'Métaphysique',
         'Rhétorique philosophique'
       ];
+    case 'artistic':
     case 'artistique':
       return [
         'Poésie',
@@ -353,6 +357,7 @@ export const getSpecialtiesByPath = (educationType: string): string[] => {
         'Littérature',
         'Calligraphie'
       ];
+    case 'economic':
     case 'économique':
       return [
         'Gestion agricole',
