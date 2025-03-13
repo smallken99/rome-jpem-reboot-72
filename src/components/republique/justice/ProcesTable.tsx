@@ -20,12 +20,14 @@ export interface ProcesTableProps {
   proces: ProcesData[];
   status: 'en-cours' | 'juge';
   onAssign?: (procesId: string) => void;
+  onViewDetails?: (proces: ProcesData) => void;
 }
 
 export const ProcesTable: React.FC<ProcesTableProps> = ({ 
   proces, 
   status,
-  onAssign 
+  onAssign,
+  onViewDetails
 }) => {
   const [selectedProces, setSelectedProces] = useState<string | null>(null);
 
@@ -47,7 +49,12 @@ export const ProcesTable: React.FC<ProcesTableProps> = ({
   };
 
   const handleViewDetails = (procesId: string) => {
-    setSelectedProces(procesId === selectedProces ? null : procesId);
+    const proces = proces.find(p => p.id === procesId);
+    if (proces && onViewDetails) {
+      onViewDetails(proces);
+    } else {
+      setSelectedProces(procesId === selectedProces ? null : procesId);
+    }
   };
 
   const handleVote = (procesId: string, vote: 'pour' | 'contre') => {
@@ -76,7 +83,7 @@ export const ProcesTable: React.FC<ProcesTableProps> = ({
         {status === 'en-cours' && (
           <Button variant="outline" className="roman-btn-outline">
             <FileText className="h-4 w-4 mr-2" />
-            Nouveau procès
+            <span>Nouveau procès</span>
           </Button>
         )}
       </div>
@@ -139,7 +146,7 @@ export const ProcesTable: React.FC<ProcesTableProps> = ({
                   </TableCell>
                 </TableRow>
                 
-                {selectedProces === proces.id && (
+                {selectedProces === proces.id && !onViewDetails && (
                   <TableRow className="bg-muted/20">
                     <TableCell colSpan={7} className="p-4">
                       <div className="space-y-4">

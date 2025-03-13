@@ -28,10 +28,9 @@ export const MaintenanceDialog: React.FC<MaintenanceDialogProps> = ({
   
   useEffect(() => {
     // Dans une implémentation réelle, nous récupérerions les fonds du trésor depuis l'API
-    if (economy.treasury) {
-      setTreasuryFunds(economy.treasury.amount);
-    }
-  }, [economy.treasury]);
+    // Pour l'instant, nous utilisons directement le solde de l'économie
+    setTreasuryFunds(economy.balance);
+  }, [economy.balance]);
   
   if (!selectedItem) return null;
   

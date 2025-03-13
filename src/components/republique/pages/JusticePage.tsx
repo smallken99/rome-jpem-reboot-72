@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import { PageHeader } from '@/components/ui-custom/PageHeader';
 import { RomanCard } from '@/components/ui-custom/RomanCard';
 import { JudiciaryStats } from '@/components/republique/justice/JudiciaryStats';
-import { ProcesTable } from '@/components/republique/justice/ProcesTable';
+import { ProcesTable, ProcesData } from '@/components/republique/justice/ProcesTable';
 import { ProcesForm } from '@/components/republique/justice/ProcesForm';
 import { ProcesDetailsDialog } from '@/components/republique/justice/ProcesDetailsDialog';
 import { JugementDialog } from '@/components/republique/justice/JugementDialog';
@@ -11,22 +11,6 @@ import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Gavel, Search, FilePlus, Scroll } from 'lucide-react';
 import { toast } from 'sonner';
-
-// Interface pour les données de procès
-interface ProcesData {
-  id: string;
-  titre: string;
-  demandeur: string;
-  accusé: string;
-  type: string;
-  statut: string;
-  date: string;
-  description?: string;
-  verdict?: string;
-  magistratResponsable?: string;
-  notes?: string[];
-  preuves?: string[];
-}
 
 export const JusticePage: React.FC = () => {
   // État pour les procès
@@ -178,7 +162,11 @@ export const JusticePage: React.FC = () => {
               </div>
             </RomanCard.Header>
             <RomanCard.Content>
-              <ProcesTable proces={procesCourants} status="en-cours" onViewDetails={handleViewDetails} />
+              <ProcesTable 
+                proces={procesCourants} 
+                status="en-cours" 
+                onViewDetails={handleViewDetails} 
+              />
             </RomanCard.Content>
           </RomanCard>
         </TabsContent>
@@ -195,7 +183,11 @@ export const JusticePage: React.FC = () => {
               </div>
             </RomanCard.Header>
             <RomanCard.Content>
-              <ProcesTable proces={procesPassés} status="juge" onViewDetails={handleViewDetails} />
+              <ProcesTable 
+                proces={procesPassés} 
+                status="juge" 
+                onViewDetails={handleViewDetails} 
+              />
             </RomanCard.Content>
           </RomanCard>
         </TabsContent>
