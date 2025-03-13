@@ -1,75 +1,55 @@
 
-import { GameDate, GamePhase } from '@/components/maitrejeu/types/common';
-import { useMaitreJeu } from '@/components/maitrejeu/context';
+export type Season = "Ver" | "Aestas" | "Autumnus" | "Hiems";
+export type PlayerSeason = "SPRING" | "SUMMER" | "AUTUMN" | "WINTER";
 
-export type Season = 'Ver' | 'Aestas' | 'Autumnus' | 'Hiems';
-export type PlayerSeason = 'SPRING' | 'SUMMER' | 'AUTUMN' | 'WINTER';
-
-// Hook pour accéder aux informations de temps du jeu
-export const useTimeStore = () => {
-  // Utiliser le contexte du Maître de Jeu pour obtenir les informations de temps
-  const { currentDate, currentPhase, advanceTime, changePhase } = useMaitreJeu();
-  
-  return {
-    currentDate,
-    currentPhase,
-    advanceTime,
-    changePhase,
-    
-    // Ajout de propriétés dérivées
-    year: currentDate.year,
-    season: currentDate.season,
-    
-    // Méthodes utilitaires
-    formatSeason: (season: Season) => formatSeason(season),
-    formatRomanSeason: (season: Season) => {
-      const seasons: Record<Season, string> = {
-        'Ver': 'Printemps',
-        'Aestas': 'Été',
-        'Autumnus': 'Automne',
-        'Hiems': 'Hiver'
-      };
-      return seasons[season] || season;
-    },
-    
-    // Helper pour obtenir l'année
-    getYear: () => currentDate.year
-  };
+// Mapping between Roman seasons and player seasons
+export const seasonMapping: Record<Season, PlayerSeason> = {
+  "Ver": "SPRING",
+  "Aestas": "SUMMER",
+  "Autumnus": "AUTUMN",
+  "Hiems": "WINTER"
 };
 
-// Fonction pour formater la saison en français
-export const formatSeason = (season: Season): string => {
-  const seasons: Record<Season, string> = {
-    'Ver': 'Printemps',
-    'Aestas': 'Été',
-    'Autumnus': 'Automne',
-    'Hiems': 'Hiver'
-  };
-  return seasons[season] || String(season);
+// Reverse mapping
+export const reverseSeasonMapping: Record<PlayerSeason, Season> = {
+  "SPRING": "Ver",
+  "SUMMER": "Aestas",
+  "AUTUMN": "Autumnus",
+  "WINTER": "Hiems"
 };
 
-// Fonction pour formater la date du jeu
-export const formatGameDate = (date: GameDate): string => {
-  return `${formatSeason(date.season as Season)} ${date.year}`;
-};
-
-// Fonction pour convertir les saisons entre les systèmes MJ et Player
-export const convertSeasonBetweenSystems = (season: string, targetSystem: 'mj' | 'player'): Season | PlayerSeason => {
-  if (targetSystem === 'mj') {
-    const seasons: Record<string, Season> = {
-      'SPRING': 'Ver',
-      'SUMMER': 'Aestas',
-      'AUTUMN': 'Autumnus',
-      'WINTER': 'Hiems'
-    };
-    return seasons[season] || 'Ver';
+// Helper function to convert between season types
+export const convertSeasonBetweenSystems = (
+  season: Season | PlayerSeason | string, 
+  targetSystem: 'player' | 'mj'
+): Season | PlayerSeason => {
+  if (targetSystem === 'player') {
+    if (season === "Ver" || season === "Aestas" || season === "Autumnus" || season === "Hiems") {
+      return seasonMapping[season as Season];
+    }
+    // If it's already a player season or an unrecognized value, return as is
+    return season as PlayerSeason;
   } else {
-    const seasons: Record<string, PlayerSeason> = {
-      'Ver': 'SPRING',
-      'Aestas': 'SUMMER',
-      'Autumnus': 'AUTUMN',
-      'Hiems': 'WINTER'
-    };
-    return seasons[season] || 'SPRING';
+    if (season === "SPRING" || season === "SUMMER" || season === "AUTUMN" || season === "WINTER") {
+      return reverseSeasonMapping[season as PlayerSeason];
+    }
+    // If it's already an MJ season or an unrecognized value, return as is
+    return season as Season;
+  }
+};
+
+// Format a season to display name in French
+export const formatSeasonDisplay = (season: Season | PlayerSeason | string): string => {
+  // Convert to Season type first if needed
+  const romanSeason = (season === "SPRING" || season === "SUMMER" || season === "AUTUMN" || season === "WINTER") 
+    ? convertSeasonBetweenSystems(season as PlayerSeason, 'mj') 
+    : season as Season;
+    
+  switch (romanSeason) {
+    case "Ver": return "Printemps";
+    case "Aestas": return "Été";
+    case "Autumnus": return "Automne";
+    case "Hiems": return "Hiver";
+    default: return "Saison inconnue";
   }
 };

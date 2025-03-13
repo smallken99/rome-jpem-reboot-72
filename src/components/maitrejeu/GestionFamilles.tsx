@@ -212,7 +212,7 @@ export const GestionFamilles: React.FC = () => {
         <FamilleModal
           isOpen={true}
           onClose={() => setShowFamilleModal(false)}
-          initialData={selectedFamille || undefined}
+          famille={selectedFamille || undefined}
           onSave={(data) => selectedFamille ? handleUpdateFamille(data) : handleCreateFamille(data)}
         />
       )}
@@ -224,9 +224,9 @@ export const GestionFamilles: React.FC = () => {
             setShowMembreModal(false);
             setSelectedMembre(null);
           }}
-          initialData={selectedMembre || undefined}
+          membre={selectedMembre || undefined}
           familles={familles}
-          selectedFamilleId={selectedFamilleId}
+          selectedFamilleId={selectedFamilleId || ''}
           onSave={(data) => selectedMembre ? handleUpdateMembre(data) : handleCreateMembre(data)}
         />
       )}
@@ -238,9 +238,9 @@ export const GestionFamilles: React.FC = () => {
             setShowAllianceModal(false);
             setSelectedAlliance(null);
           }}
-          initialData={selectedAlliance || undefined}
+          alliance={selectedAlliance || undefined}
           familles={familles}
-          selectedFamilleId={selectedFamilleId}
+          selectedFamilleId={selectedFamilleId || ''}
           onSave={(data) => selectedAlliance ? handleUpdateAlliance(data) : handleCreateAlliance(data)}
         />
       )}

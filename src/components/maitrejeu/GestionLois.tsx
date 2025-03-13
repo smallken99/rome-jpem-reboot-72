@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
@@ -14,6 +13,7 @@ import { LoisRejeteesTab } from './components/lois/tabs/LoisRejeteesTab';
 import { HistoriqueLois } from './components/lois/HistoriqueLois';
 import { Loi, LoiType } from './types/lois';
 import { Season } from './types/common';
+import { v4 as uuidv4 } from 'uuid';
 
 export const GestionLois: React.FC = () => {
   const { lois, addLoi } = useMaitreJeu();
@@ -40,14 +40,12 @@ export const GestionLois: React.FC = () => {
   };
   
   const filteredLois = lois.filter(loi => {
-    // Filtre par terme de recherche
     if (searchTerm && 
         !loi.titre.toLowerCase().includes(searchTerm.toLowerCase()) &&
         !loi.description.toLowerCase().includes(searchTerm.toLowerCase())) {
       return false;
     }
     
-    // Filtre par type
     if (filterType && loi.type !== filterType) {
       return false;
     }
@@ -60,8 +58,12 @@ export const GestionLois: React.FC = () => {
     setActiveTab('detail');
   };
   
-  const handleCreateLoi = (loiData: Omit<Loi, "id">) => {
-    addLoi(loiData);
+  const handleCreateLoi = (loiData: any) => {
+    const loiWithId: Loi = {
+      ...loiData,
+      id: uuidv4()
+    };
+    addLoi(loiWithId);
     setShowLoiModal(false);
   };
   

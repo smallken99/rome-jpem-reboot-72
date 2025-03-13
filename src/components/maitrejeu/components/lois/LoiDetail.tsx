@@ -1,179 +1,206 @@
 
 import React from 'react';
+import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Loi } from '../../types/lois';
-import { Button } from '@/components/ui/button';
-import { Edit } from 'lucide-react';
+import { ArrowLeft, PenSquare, Vote } from 'lucide-react';
+import { LoiTimeline } from './LoiTimeline';
+import { formatSeasonDisplay } from '@/utils/timeSystem';
 
 export interface LoiDetailProps {
   loi: Loi;
-  onEdit: () => void;
+  onClose?: () => void;
+  onEdit?: () => void;
 }
 
-export const LoiDetail: React.FC<LoiDetailProps> = ({ loi, onEdit }) => {
-  // Helper pour afficher le statut avec la bonne couleur
-  const getStatusBadge = (status: string) => {
-    switch (status) {
+export const LoiDetail: React.FC<LoiDetailProps> = ({ 
+  loi,
+  onClose,
+  onEdit
+}) => {
+  // Helper to get the background color for the law status
+  const getStatusColor = (status: string) => {
+    switch (status.toLowerCase()) {
       case 'adoptée':
-      case 'Promulguée':
-      case 'votée':
-        return <Badge className="bg-green-500">Adoptée</Badge>;
+      case 'promulguée':
+        return 'bg-green-100 text-green-800 border-green-300';
       case 'rejetée':
-      case 'Rejetée':
-        return <Badge className="bg-red-500">Rejetée</Badge>;
+        return 'bg-red-100 text-red-800 border-red-300';
+      case 'en délibération':
       case 'proposée':
-        return <Badge variant="outline">Proposée</Badge>;
-      case 'En délibération':
-      case 'en_débat':
-        return <Badge variant="secondary">En délibération</Badge>;
+        return 'bg-blue-100 text-blue-800 border-blue-300';
       default:
-        return <Badge>{status}</Badge>;
+        return 'bg-gray-100 text-gray-800 border-gray-300';
     }
   };
-
-  // Helper pour afficher l'importance
-  const getImportanceBadge = (importance?: string) => {
-    if (!importance) return null;
+  
+  // Helper to format vote counts
+  const formatVotes = () => {
+    const total = loi.votesPositifs + loi.votesNégatifs + loi.votesAbstention;
+    if (total === 0) return 'Aucun vote';
     
-    switch (importance) {
-      case 'majeure':
-        return <Badge variant="destructive">Majeure</Badge>;
-      case 'normale':
-        return <Badge variant="secondary">Normale</Badge>;
-      case 'mineure':
-        return <Badge variant="outline">Mineure</Badge>;
-      default:
-        return null;
-    }
+    const pourcentagePour = Math.round((loi.votesPositifs / total) * 100);
+    const pourcentageContre = Math.round((loi.votesNégatifs / total) * 100);
+    const pourcentageAbstention = Math.round((loi.votesAbstention / total) * 100);
+    
+    return `Pour: ${loi.votesPositifs} (${pourcentagePour}%) | Contre: ${loi.votesNégatifs} (${pourcentageContre}%) | Abstention: ${loi.votesAbstention} (${pourcentageAbstention}%)`;
   };
-
+  
   return (
-    <Card>
-      <CardHeader className="pb-3">
-        <div className="flex justify-between items-start">
-          <div>
-            <CardTitle className="text-xl font-bold">{loi.titre}</CardTitle>
-            {loi.nom && <p className="text-muted-foreground">{loi.nom}</p>}
-          </div>
-          <Button size="sm" variant="outline" onClick={onEdit}>
-            <Edit className="w-4 h-4 mr-2" />
-            Modifier
-          </Button>
-        </div>
-        <div className="flex flex-wrap gap-2 mt-2">
-          {getStatusBadge(loi.état)}
-          <Badge variant="secondary">{loi.type}</Badge>
-          {loi.catégorie && <Badge variant="outline">{loi.catégorie}</Badge>}
-          {getImportanceBadge(loi.importance)}
-        </div>
-      </CardHeader>
-      <CardContent>
-        <div className="space-y-6">
-          <div>
-            <h3 className="text-sm font-medium text-muted-foreground mb-1">Description</h3>
-            <p className="whitespace-pre-line">{loi.description}</p>
-          </div>
-
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <h3 className="text-sm font-medium text-muted-foreground mb-1">Proposeur</h3>
-              <p>{loi.proposeur}</p>
-            </div>
-            <div>
-              <h3 className="text-sm font-medium text-muted-foreground mb-1">Date de proposition</h3>
-              <p>An {loi.dateProposition.year}, {loi.dateProposition.season}</p>
-            </div>
-          </div>
-
-          {loi.dateVote && (
-            <div>
-              <h3 className="text-sm font-medium text-muted-foreground mb-1">Date de vote</h3>
-              <p>An {loi.dateVote.year}, {loi.dateVote.season}</p>
-            </div>
+    <div className="space-y-6">
+      <div className="flex justify-between items-center">
+        <div className="flex items-center space-x-2">
+          {onClose && (
+            <Button 
+              variant="outline" 
+              size="icon"
+              onClick={onClose}
+            >
+              <ArrowLeft className="h-4 w-4" />
+            </Button>
           )}
-
-          <div>
-            <h3 className="text-sm font-medium text-muted-foreground mb-1">Résultat du vote</h3>
-            <div className="grid grid-cols-3 gap-2 mt-2">
-              <div className="bg-green-100 dark:bg-green-900/20 p-3 rounded">
-                <p className="text-sm text-muted-foreground">Pour</p>
-                <p className="text-xl font-bold text-green-600 dark:text-green-400">{loi.votes.pour}</p>
+          <h2 className="text-2xl font-bold">{loi.titre}</h2>
+        </div>
+        
+        <div className="flex space-x-2">
+          <Badge variant="outline" className={getStatusColor(loi.état)}>
+            {loi.état}
+          </Badge>
+          
+          {onEdit && (
+            <Button 
+              variant="outline" 
+              size="sm"
+              onClick={onEdit}
+              className="flex items-center gap-1"
+            >
+              <PenSquare className="h-4 w-4" />
+              Modifier
+            </Button>
+          )}
+        </div>
+      </div>
+      
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div className="lg:col-span-2 space-y-6">
+          <Card>
+            <CardHeader>
+              <CardTitle>Détails de la loi</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div>
+                <h3 className="text-sm font-medium text-muted-foreground">Description</h3>
+                <p className="mt-1">{loi.description}</p>
               </div>
-              <div className="bg-red-100 dark:bg-red-900/20 p-3 rounded">
-                <p className="text-sm text-muted-foreground">Contre</p>
-                <p className="text-xl font-bold text-red-600 dark:text-red-400">{loi.votes.contre}</p>
+              
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <h3 className="text-sm font-medium text-muted-foreground">Proposeur</h3>
+                  <p className="mt-1">{loi.proposeur}</p>
+                </div>
+                <div>
+                  <h3 className="text-sm font-medium text-muted-foreground">Type</h3>
+                  <p className="mt-1">{loi.type}</p>
+                </div>
+                <div>
+                  <h3 className="text-sm font-medium text-muted-foreground">Date de proposition</h3>
+                  <p className="mt-1">An {loi.dateProposition.year}, {formatSeasonDisplay(loi.dateProposition.season)}</p>
+                </div>
+                <div>
+                  <h3 className="text-sm font-medium text-muted-foreground">Importance</h3>
+                  <p className="mt-1">{loi.importance || 'Normale'}</p>
+                </div>
               </div>
-              <div className="bg-gray-100 dark:bg-gray-800 p-3 rounded">
-                <p className="text-sm text-muted-foreground">Abstention</p>
-                <p className="text-xl font-bold">{loi.votes.abstention}</p>
-              </div>
-            </div>
-          </div>
-
+            </CardContent>
+          </Card>
+          
           {loi.clauses && loi.clauses.length > 0 && (
-            <div>
-              <h3 className="text-sm font-medium text-muted-foreground mb-2">Clauses</h3>
-              <ul className="space-y-2">
-                {loi.clauses.map((clause, index) => (
-                  <li key={clause.id} className="bg-muted p-3 rounded">
-                    <p className="font-medium">Clause {index + 1}</p>
-                    <p className="mt-1">{clause.texte}</p>
-                    {clause.explication && (
-                      <p className="mt-1 text-sm text-muted-foreground">{clause.explication}</p>
-                    )}
-                  </li>
-                ))}
-              </ul>
-            </div>
-          )}
-
-          {loi.impacts && loi.impacts.length > 0 && (
-            <div>
-              <h3 className="text-sm font-medium text-muted-foreground mb-2">Impacts</h3>
-              <ul className="space-y-2">
-                {loi.impacts.map((impact, index) => (
-                  <li key={index} className="bg-muted p-3 rounded flex justify-between">
-                    <span>{impact.domaine}</span>
-                    <span className={impact.valeur > 0 ? 'text-green-500' : 'text-red-500'}>
-                      {impact.valeur > 0 ? '+' : ''}{impact.valeur}
-                    </span>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          )}
-
-          {loi.effets && (typeof loi.effets === 'object' || loi.effets.length > 0) && (
-            <div>
-              <h3 className="text-sm font-medium text-muted-foreground mb-2">Effets</h3>
-              {Array.isArray(loi.effets) ? (
-                <ul className="list-disc pl-5 space-y-1">
-                  {loi.effets.map((effet, index) => (
-                    <li key={index}>{effet}</li>
+            <Card>
+              <CardHeader>
+                <CardTitle>Clauses</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <ul className="space-y-3">
+                  {loi.clauses.map((clause, index) => (
+                    <li key={index} className="border-b pb-2 last:border-0">
+                      <div className="font-medium">{clause.texte}</div>
+                      {clause.explication && (
+                        <div className="text-sm text-muted-foreground mt-1">{clause.explication}</div>
+                      )}
+                    </li>
                   ))}
                 </ul>
-              ) : (
-                <div className="space-y-2">
-                  {Object.entries(loi.effets).map(([key, value]) => (
-                    <div key={key} className="bg-muted p-3 rounded flex justify-between">
-                      <span className="capitalize">{key}</span>
-                      <span>{typeof value === 'object' ? JSON.stringify(value) : value}</span>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
+              </CardContent>
+            </Card>
           )}
-
-          {loi.commentaires && (
-            <div>
-              <h3 className="text-sm font-medium text-muted-foreground mb-1">Commentaires</h3>
-              <p className="whitespace-pre-line">{loi.commentaires}</p>
-            </div>
+          
+          {loi.impacts && loi.impacts.length > 0 && (
+            <Card>
+              <CardHeader>
+                <CardTitle>Impacts</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <ul className="space-y-3">
+                  {loi.impacts.map((impact, index) => (
+                    <li key={index} className="flex justify-between items-center border-b pb-2 last:border-0">
+                      <span>{impact.domaine}</span>
+                      <Badge variant={impact.valeur > 0 ? 'success' : 'destructive'}>
+                        {impact.valeur > 0 ? '+' : ''}{impact.valeur}
+                      </Badge>
+                    </li>
+                  ))}
+                </ul>
+              </CardContent>
+            </Card>
           )}
         </div>
-      </CardContent>
-    </Card>
+        
+        <div className="space-y-6">
+          <Card>
+            <CardHeader>
+              <CardTitle>Votes</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-3">
+                <div className="bg-background p-4 rounded-lg border">
+                  <div className="text-sm text-muted-foreground">Résultat</div>
+                  <div className="text-lg font-semibold mt-1">{formatVotes()}</div>
+                </div>
+                
+                <div className="flex flex-col space-y-2">
+                  <div className="w-full bg-gray-200 rounded-full h-2.5">
+                    <div 
+                      className="bg-green-500 h-2.5 rounded-full" 
+                      style={{ width: `${loi.votesPositifs / (loi.votesPositifs + loi.votesNégatifs + loi.votesAbstention) * 100 || 0}%` }}
+                    ></div>
+                  </div>
+                  
+                  <div className="flex justify-between text-xs text-muted-foreground">
+                    <span>Pour</span>
+                    <span>Contre</span>
+                    <span>Abstention</span>
+                  </div>
+                </div>
+                
+                <Button className="w-full gap-2" variant="outline">
+                  <Vote className="h-4 w-4" />
+                  Voter
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+          
+          <Card>
+            <CardHeader>
+              <CardTitle>Chronologie</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <LoiTimeline loi={loi} />
+            </CardContent>
+          </Card>
+        </div>
+      </div>
+    </div>
   );
 };

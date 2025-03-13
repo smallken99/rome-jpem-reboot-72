@@ -2,23 +2,25 @@
 import React, { useState } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useMaitreJeu } from './context';
-import { Loi } from './types';
+import { Loi, LoiType } from './types';
 import { LoisList } from './components/lois/LoisList';
 import { LoiForm } from './components/lois/LoiForm';
 import { ElectionPlanner } from './components/elections/ElectionPlanner';
 import { LoiDetail } from './components/lois/LoiDetail';
+import { v4 as uuidv4 } from 'uuid';
 
-// Type spécifique pour le formulaire de loi qui est un sous-ensemble de Loi
+// Type for the form data
 interface LoiFormData {
   titre: string;
   description: string;
   proposeur: string;
+  type: LoiType;
   catégorie: string;
   importance: 'majeure' | 'normale' | 'mineure';
 }
 
 export const GestionPolitique = () => {
-  const { lois } = useMaitreJeu();
+  const { lois, addLoi, currentYear, currentSeason } = useMaitreJeu();
   const [selectedTab, setSelectedTab] = useState('lois');
   const [showAddLoi, setShowAddLoi] = useState(false);
   const [selectedLoi, setSelectedLoi] = useState<Loi | null>(null);
@@ -27,6 +29,7 @@ export const GestionPolitique = () => {
     description: '',
     proposeur: '',
     catégorie: 'politique',
+    type: 'politique',
     importance: 'normale'
   });
   
@@ -34,20 +37,22 @@ export const GestionPolitique = () => {
   const handleAddLoi = () => {
     if (!newLoi.titre || !newLoi.description) return;
     
-    const { addLoi, currentYear, currentSeason } = useMaitreJeu();
-    
-    // Ajouter ID à la nouvelle loi
+    // Add ID to the new law
     const loiWithId: Loi = {
       ...newLoi,
-      id: crypto.randomUUID(),
-      nom: newLoi.titre, // Utiliser le titre comme nom par défaut
-      type: 'civile', // Valeur par défaut
+      id: uuidv4(),
+      nom: newLoi.titre, // Use title as default name
       date: { year: currentYear, season: currentSeason },
       dateProposition: { year: currentYear, season: currentSeason },
-      état: "En délibération" as const,
+      état: "En délibération",
       votesPositifs: 0,
       votesNégatifs: 0,
       votesAbstention: 0,
+      votes: {
+        pour: 0,
+        contre: 0,
+        abstention: 0
+      },
       clauses: [],
       impacts: [],
       effets: {}
@@ -59,6 +64,7 @@ export const GestionPolitique = () => {
       description: '',
       proposeur: '',
       catégorie: 'politique',
+      type: 'politique',
       importance: 'normale'
     });
     setShowAddLoi(false);
@@ -97,7 +103,7 @@ export const GestionPolitique = () => {
           
           {showAddLoi && (
             <LoiForm 
-              newLoi={newLoi}
+              loi={newLoi}
               handleInputChange={handleInputChange}
               handleSelectChange={handleSelectChange}
               handleAddLoi={handleAddLoi}

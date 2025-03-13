@@ -1,70 +1,92 @@
 
 import React from 'react';
-import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Loi } from '../../../types/lois';
+import { Slider } from '@/components/ui/slider';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 
 interface LoiEffetsSectionProps {
-  formData: Omit<Loi, 'id'>;
-  handleEffetChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  effets: Record<string, any> | string[];
+  updateEffet: (key: string, value: number) => void;
 }
 
-export const LoiEffetsSection: React.FC<LoiEffetsSectionProps> = ({
-  formData,
-  handleEffetChange
-}) => {
+export const LoiEffetsSection: React.FC<LoiEffetsSectionProps> = ({ effets, updateEffet }) => {
+  // Check if effets is an object or array
+  const isObject = !Array.isArray(effets);
+
+  const getEffetValue = (key: string): number => {
+    if (isObject) {
+      return (effets as Record<string, any>)[key] || 0;
+    }
+    return 0;
+  };
+
   return (
-    <div className="space-y-2">
-      <Label>Effets de la loi</Label>
-      <div className="grid grid-cols-2 gap-4">
-        <div className="space-y-2">
-          <Label htmlFor="stabilité">Stabilité</Label>
-          <Input
-            id="stabilité"
-            name="stabilité"
-            type="number"
-            value={formData.effets.stabilité || 0}
-            onChange={handleEffetChange}
-            placeholder="-10 à +10"
-          />
+    <Card>
+      <CardHeader>
+        <CardTitle>Effets de la loi</CardTitle>
+        <CardDescription>Définissez l'impact de la loi sur différents aspects de la République</CardDescription>
+      </CardHeader>
+      <CardContent className="space-y-6">
+        <div className="space-y-3">
+          <Label>Stabilité politique</Label>
+          <div className="flex items-center gap-4">
+            <Slider
+              value={[getEffetValue('stabilité')]}
+              min={-10}
+              max={10}
+              step={1}
+              onValueChange={(value) => updateEffet('stabilité', value[0])}
+              className="flex-1"
+            />
+            <span className="w-10 text-center font-semibold">{getEffetValue('stabilité')}</span>
+          </div>
         </div>
         
-        <div className="space-y-2">
-          <Label htmlFor="popularité">Popularité</Label>
-          <Input
-            id="popularité"
-            name="popularité"
-            type="number"
-            value={formData.effets.popularité || 0}
-            onChange={handleEffetChange}
-            placeholder="-10 à +10"
-          />
+        <div className="space-y-3">
+          <Label>Popularité auprès du peuple</Label>
+          <div className="flex items-center gap-4">
+            <Slider
+              value={[getEffetValue('popularité')]}
+              min={-10}
+              max={10}
+              step={1}
+              onValueChange={(value) => updateEffet('popularité', value[0])}
+              className="flex-1"
+            />
+            <span className="w-10 text-center font-semibold">{getEffetValue('popularité')}</span>
+          </div>
         </div>
         
-        <div className="space-y-2">
-          <Label htmlFor="corruption">Corruption</Label>
-          <Input
-            id="corruption"
-            name="corruption"
-            type="number"
-            value={formData.effets.corruption || 0}
-            onChange={handleEffetChange}
-            placeholder="-10 à +10"
-          />
+        <div className="space-y-3">
+          <Label>Corruption</Label>
+          <div className="flex items-center gap-4">
+            <Slider
+              value={[getEffetValue('corruption')]}
+              min={-10}
+              max={10}
+              step={1}
+              onValueChange={(value) => updateEffet('corruption', value[0])}
+              className="flex-1"
+            />
+            <span className="w-10 text-center font-semibold">{getEffetValue('corruption')}</span>
+          </div>
         </div>
         
-        <div className="space-y-2">
-          <Label htmlFor="efficacité">Efficacité</Label>
-          <Input
-            id="efficacité"
-            name="efficacité"
-            type="number"
-            value={formData.effets.efficacité || 0}
-            onChange={handleEffetChange}
-            placeholder="-10 à +10"
-          />
+        <div className="space-y-3">
+          <Label>Efficacité administrative</Label>
+          <div className="flex items-center gap-4">
+            <Slider
+              value={[getEffetValue('efficacité')]}
+              min={-10}
+              max={10}
+              step={1}
+              onValueChange={(value) => updateEffet('efficacité', value[0])}
+              className="flex-1"
+            />
+            <span className="w-10 text-center font-semibold">{getEffetValue('efficacité')}</span>
+          </div>
         </div>
-      </div>
-    </div>
+      </CardContent>
+    </Card>
   );
 };

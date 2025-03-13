@@ -12,8 +12,8 @@ interface TimePanelProps {
 
 export const TimePanel: React.FC<TimePanelProps> = ({ minimal = false }) => {
   const { 
-    currentYear, 
-    currentSeason,
+    year,
+    season,
     currentPhase,
     advanceTime
   } = useGameTime();
@@ -27,7 +27,7 @@ export const TimePanel: React.FC<TimePanelProps> = ({ minimal = false }) => {
     return (
       <div className="flex items-center space-x-2 text-sm">
         <CalendarIcon className="h-4 w-4" />
-        <span className="font-medium">An {currentYear} - {formatSeasonDisplay(currentSeason)}</span>
+        <span className="font-medium">An {year} - {formatSeasonDisplay(season)}</span>
       </div>
     );
   }
@@ -42,10 +42,10 @@ export const TimePanel: React.FC<TimePanelProps> = ({ minimal = false }) => {
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-2">
               <CalendarIcon className="h-5 w-5 text-muted-foreground" />
-              <span className="font-medium">An {currentYear}</span>
+              <span className="font-medium">An {year}</span>
             </div>
             <div className="bg-primary/10 px-2 py-1 rounded text-primary font-medium">
-              {formatSeasonDisplay(currentSeason)}
+              {formatSeasonDisplay(season)}
             </div>
           </div>
           

@@ -75,4 +75,17 @@ export interface LoiFormData {
   votesNégatifs: number;
   votesAbstention: number;
   commentaires?: string;
+  votes?: {
+    pour: number;
+    contre: number;
+    abstention: number;
+  };
+  date?: {
+    year: number;
+    season: string;
+  };
+  dateProposition?: {
+    year: number;
+    season: string;
+  };
 }

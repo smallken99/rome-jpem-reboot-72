@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { useMaitreJeu } from '../../context';
 import { MembreCard } from './MembreCard';
@@ -160,9 +161,10 @@ export const FamilleMembres: React.FC<FamilleMembresProps> = ({
         <MembreFamilleModal
           isOpen={!!membreToEdit}
           onClose={() => setMembreToEdit(null)}
-          familleId={familleId}
+          selectedFamilleId={familleId}
           membre={membreToEdit}
           familles={familles}
+          onSave={() => {}}
         />
       )}
     </div>
