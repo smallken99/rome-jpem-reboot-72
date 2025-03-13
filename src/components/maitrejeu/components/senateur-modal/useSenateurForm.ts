@@ -13,6 +13,10 @@ const defaultSenateur: SenateurJouable = {
   roles: [],
   richesse: 1000,
   influence: 10,
+  popularite: 0,
+  militaire: 0,
+  piete: 0,
+  eloquence: 0,
   competences: {
     diplomatie: 1,
     guerre: 1,
@@ -21,7 +25,6 @@ const defaultSenateur: SenateurJouable = {
   },
   famille: '',
   fonction: '',
-  popularite: 0,
   appartenance: 'Neutral'
 };
 
@@ -34,7 +37,9 @@ export const useSenateurForm = (senateur: SenateurJouable | null) => {
     const { name, value } = e.target;
     setFormData(prev => ({
       ...prev,
-      [name]: name === 'age' || name === 'popularite' || name === 'influence' || name === 'richesse' 
+      [name]: name === 'age' || name === 'popularite' || name === 'influence' || 
+              name === 'richesse' || name === 'militaire' || name === 'piete' || 
+              name === 'eloquence'
         ? Number(value) 
         : value
     }));

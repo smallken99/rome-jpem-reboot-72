@@ -93,6 +93,7 @@ export const SenateurModal: React.FC<SenateurModalProps> = ({
             onChange={handleChange}
           />
           
+          {/* Les 4 statistiques principales */}
           <FormField 
             label="Popularité"
             id="popularite"
@@ -101,6 +102,39 @@ export const SenateurModal: React.FC<SenateurModalProps> = ({
             min="0"
             max="100"
             value={formData.popularite || 0}
+            onChange={handleChange}
+          />
+          
+          <FormField 
+            label="Militaire"
+            id="militaire"
+            name="militaire"
+            type="number"
+            min="0"
+            max="100"
+            value={formData.militaire || 0}
+            onChange={handleChange}
+          />
+          
+          <FormField 
+            label="Piété"
+            id="piete"
+            name="piete"
+            type="number"
+            min="0"
+            max="100"
+            value={formData.piete || 0}
+            onChange={handleChange}
+          />
+          
+          <FormField 
+            label="Éloquence"
+            id="eloquence"
+            name="eloquence"
+            type="number"
+            min="0"
+            max="100"
+            value={formData.eloquence || 0}
             onChange={handleChange}
           />
           

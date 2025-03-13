@@ -8,3 +8,11 @@ export * from './paths/rhetoricPath';
 export const getEducationPath = (type: string) => {
   return educationPaths.find(path => path.id === type);
 };
+
+// Export educationPaths from the educationPaths file
+export { educationPaths } from './educationPaths';
+
+// Function to get education types for backwards compatibility
+export const getEducationTypes = () => {
+  return ['military', 'religious', 'rhetoric'];
+};

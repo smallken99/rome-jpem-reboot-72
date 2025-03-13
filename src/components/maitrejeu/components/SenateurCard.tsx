@@ -3,89 +3,81 @@ import React from 'react';
 import { Card, CardContent, CardFooter, CardHeader } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { SenateurJouable } from '../types/senateurs';
-import { Edit, User, UserCheck, Trash } from 'lucide-react';
+import { Edit, Trash2, UserCheck } from 'lucide-react';
+import { SenateurInfluenceBar } from './republique/SenateurInfluenceBar';
 
-export interface SenateurCardProps {
+interface SenateurCardProps {
   senateur: SenateurJouable;
-  onEdit?: () => void; 
-  onDelete?: () => void; // Ajout de la propriété onDelete
+  onEdit?: () => void;
+  onDelete?: () => void;
+  onAssign?: () => void;
+  showAssignButton?: boolean;
 }
 
-export const SenateurCard: React.FC<SenateurCardProps> = ({ senateur, onEdit, onDelete }) => {
-  const isAssigned = !!senateur.playerId;
-  
+const SenateurCard: React.FC<SenateurCardProps> = ({ 
+  senateur, 
+  onEdit, 
+  onDelete, 
+  onAssign,
+  showAssignButton = false
+}) => {
   return (
-    <Card className={`overflow-hidden ${
-      senateur.appartenance === 'Optimates' ? 'border-blue-200' : 
-      senateur.appartenance === 'Populares' ? 'border-red-200' : 
-      'border-purple-200'
-    }`}>
-      <CardHeader className={`p-4 ${
-        senateur.appartenance === 'Optimates' ? 'bg-blue-50' : 
-        senateur.appartenance === 'Populares' ? 'bg-red-50' : 
-        'bg-purple-50'
-      }`}>
-        <div className="flex justify-between items-center">
-          <h3 className="text-lg font-bold">{senateur.nom}</h3>
-          <span className={`text-sm font-medium px-2 py-1 rounded ${
-            senateur.appartenance === 'Optimates' ? 'bg-blue-100 text-blue-700' : 
-            senateur.appartenance === 'Populares' ? 'bg-red-100 text-red-700' : 
-            'bg-purple-100 text-purple-700'
-          }`}>
-            {senateur.appartenance || 'Neutre'}
-          </span>
+    <Card className="h-full flex flex-col">
+      <CardHeader className="pb-2">
+        <div>
+          <h3 className="text-lg font-bold">{senateur.prenom} {senateur.nom}</h3>
+          <p className="text-sm text-muted-foreground">
+            {senateur.gens} • {senateur.age} ans
+          </p>
         </div>
-        <p className="text-sm text-muted-foreground">Famille {senateur.famille || senateur.gens}</p>
       </CardHeader>
       
-      <CardContent className="p-4">
-        <div className="grid grid-cols-2 gap-2 text-sm">
-          <div className="flex flex-col">
-            <span className="text-muted-foreground">Âge</span>
-            <span>{senateur.age} ans</span>
+      <CardContent className="py-2 flex-grow">
+        <div className="space-y-4">
+          <div className="flex justify-between items-center">
+            <span className="text-sm text-muted-foreground">Faction:</span>
+            <span className="font-medium">{senateur.appartenance || "Neutre"}</span>
           </div>
-          <div className="flex flex-col">
-            <span className="text-muted-foreground">Fonction</span>
-            <span>{senateur.fonction || 'Aucune'}</span>
+          
+          {senateur.fonction && (
+            <div className="flex justify-between items-center">
+              <span className="text-sm text-muted-foreground">Fonction:</span>
+              <span className="font-medium">{senateur.fonction}</span>
+            </div>
+          )}
+          
+          <div className="flex justify-between items-center">
+            <span className="text-sm text-muted-foreground">Richesse:</span>
+            <span className="font-medium">{senateur.richesse.toLocaleString()} as</span>
           </div>
-          <div className="flex flex-col">
-            <span className="text-muted-foreground">Popularité</span>
-            <span>{senateur.popularite || '0'}/100</span>
-          </div>
-          <div className="flex flex-col">
-            <span className="text-muted-foreground">Influence</span>
-            <span>{senateur.influence}/100</span>
+          
+          <div className="space-y-2">
+            <SenateurInfluenceBar value={senateur.influence} label="Influence" />
+            <SenateurInfluenceBar value={senateur.popularite || 0} label="Popularité" />
+            <SenateurInfluenceBar value={senateur.militaire || 0} label="Militaire" />
+            <SenateurInfluenceBar value={senateur.piete || 0} label="Piété" />
+            <SenateurInfluenceBar value={senateur.eloquence || 0} label="Éloquence" />
           </div>
         </div>
       </CardContent>
       
-      <CardFooter className="p-4 bg-gray-50 flex justify-between">
-        <div className="flex items-center">
-          {isAssigned ? (
-            <div className="flex items-center text-green-600">
-              <UserCheck className="h-4 w-4 mr-1" />
-              <span className="text-xs">Assigné</span>
-            </div>
-          ) : (
-            <div className="flex items-center text-gray-400">
-              <User className="h-4 w-4 mr-1" />
-              <span className="text-xs">Non assigné</span>
-            </div>
-          )}
-        </div>
-        
-        <div className="flex space-x-2">
+      <CardFooter className="pt-2">
+        <div className="flex gap-2 w-full">
           {onEdit && (
-            <Button variant="ghost" size="sm" onClick={onEdit}>
-              <Edit className="h-4 w-4 mr-1" />
-              Modifier
+            <Button variant="outline" size="sm" onClick={onEdit} className="flex-1">
+              <Edit className="h-4 w-4 mr-1" /> Modifier
             </Button>
           )}
           
           {onDelete && (
-            <Button variant="ghost" size="sm" onClick={onDelete} className="text-red-500 hover:text-red-700">
-              <Trash className="h-4 w-4 mr-1" />
-              Supprimer
+            <Button variant="outline" size="sm" onClick={onDelete} className="flex-1 text-destructive hover:text-destructive">
+              <Trash2 className="h-4 w-4 mr-1" /> Supprimer
+            </Button>
+          )}
+          
+          {showAssignButton && onAssign && (
+            <Button variant="default" size="sm" onClick={onAssign} className="flex-1">
+              <UserCheck className="h-4 w-4 mr-1" /> Assigner
             </Button>
           )}
         </div>
@@ -93,3 +85,5 @@ export const SenateurCard: React.FC<SenateurCardProps> = ({ senateur, onEdit, on
     </Card>
   );
 };
+
+export { SenateurCard };

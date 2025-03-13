@@ -2,11 +2,12 @@
 import React from 'react';
 import { cn } from '@/lib/utils';
 
-interface SenateurInfluenceBarProps {
-  influence: number;
+interface SenateurStatBarProps {
+  value: number;
+  label?: string;
 }
 
-export const SenateurInfluenceBar: React.FC<SenateurInfluenceBarProps> = ({ influence }) => {
+export const SenateurInfluenceBar: React.FC<SenateurStatBarProps> = ({ value, label = "Influence" }) => {
   // Déterminer la couleur en fonction du niveau d'influence
   const getColorClass = (value: number) => {
     if (value >= 80) return "bg-red-500";
@@ -17,7 +18,7 @@ export const SenateurInfluenceBar: React.FC<SenateurInfluenceBarProps> = ({ infl
   };
 
   // Limiter la valeur entre 0 et 100
-  const normalizedValue = Math.max(0, Math.min(100, influence));
+  const normalizedValue = Math.max(0, Math.min(100, value));
   
   return (
     <div className="space-y-1 w-full">
@@ -28,7 +29,7 @@ export const SenateurInfluenceBar: React.FC<SenateurInfluenceBarProps> = ({ infl
         />
       </div>
       <div className="text-xs text-center text-muted-foreground">
-        {normalizedValue}/100
+        {label}: {normalizedValue}/100
       </div>
     </div>
   );
