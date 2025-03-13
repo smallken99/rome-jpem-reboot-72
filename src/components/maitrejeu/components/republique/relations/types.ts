@@ -37,11 +37,11 @@ export interface Alliance {
   type: string;
   membres: string[];
   dateFormation: string;
-  dateCreation: string;
+  dateCreation?: string;
   objectif?: string;
   puissanceCombiné?: number;
   traitésAssociés?: string[];
-  commandement: string;
+  commandement?: string;
   forces: {
     légions?: number;
     auxiliaires?: number;

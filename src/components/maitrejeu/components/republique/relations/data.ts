@@ -1,218 +1,247 @@
 
-import { Nation, Traite, Alliance } from './types';
+import { Traite, Nation, Alliance } from './types';
+import { generateId } from '@/components/maitrejeu/types/common';
 
-// Nations mock data
-export const nationsMock: Nation[] = [
-  {
-    id: "1",
-    nom: "Carthage",
-    région: "Afrique du Nord",
-    statut: "Ennemi",
-    puissanceMilitaire: 85,
-    richesse: 80,
-    relationAvecRome: 10,
-    dateDernierTraité: "AUC 608",
-    capitale: "Carthage",
-    gouvernement: "République marchande",
-    notes: "Rival historique de Rome, puissante flotte marchande et militaire"
-  },
-  {
-    id: "2",
-    nom: "Grèce",
-    région: "Méditerranée orientale",
-    statut: "Neutre",
-    puissanceMilitaire: 60,
-    richesse: 75,
-    relationAvecRome: 45,
-    dateDernierTraité: "AUC 587",
-    capitale: "Athènes",
-    gouvernement: "Diverses cités-États",
-    notes: "Centre culturel important, alliances fluctuantes"
-  },
-  {
-    id: "3",
-    nom: "Égypte Ptolémaïque",
-    région: "Afrique du Nord-Est",
-    statut: "Allié",
-    puissanceMilitaire: 65,
-    richesse: 90,
-    relationAvecRome: 70,
-    dateDernierTraité: "AUC 623",
-    capitale: "Alexandrie",
-    gouvernement: "Monarchie",
-    notes: "Fournisseur de grain vital pour Rome"
-  },
-  {
-    id: "4",
-    nom: "Numidie",
-    région: "Afrique du Nord",
-    statut: "Soumis",
-    puissanceMilitaire: 45,
-    richesse: 40,
-    relationAvecRome: 60,
-    dateDernierTraité: "AUC 605",
-    capitale: "Cirta",
-    gouvernement: "Royaume tribal",
-    notes: "Cavalerie légendaire, allié contre Carthage"
-  },
-  {
-    id: "5",
-    nom: "Parthie",
-    région: "Asie",
-    statut: "Allié",
-    puissanceMilitaire: 75,
-    richesse: 70,
-    relationAvecRome: 50,
-    dateDernierTraité: "AUC 615",
-    capitale: "Ctésiphon",
-    gouvernement: "Empire dynastique",
-    notes: "Cavalerie d'élite, contrôle les routes commerciales orientales"
-  }
-];
-
-// Traités mock data
+// Données fictives pour les traités
 export const traitesMock: Traite[] = [
   {
-    id: "1",
-    titre: "Traité de paix romain-carthaginois",
+    id: generateId(),
+    titre: "Traité de Paix avec Carthage",
     type: "Paix",
     parties: ["Rome", "Carthage"],
-    dateSignature: "AUC 608",
+    dateSignature: "548 AUC",
     duree: "25 ans",
-    statut: "Actif",
+    statut: "Expiré",
     termes: [
-      "Carthage doit payer un tribut annuel de 10,000 talents",
-      "Carthage doit diminuer sa flotte à 10 navires de guerre",
-      "Carthage ne peut pas déclarer la guerre sans l'approbation de Rome"
+      "Carthage paiera 10,000 talents d'argent sur 50 ans",
+      "Carthage cède toutes ses possessions en Sicile",
+      "Les prisonniers romains seront rendus sans rançon"
     ],
     bénéfices: {
       économiques: 8,
-      militaires: 6,
+      militaires: 5,
       politiques: 9
     }
   },
   {
-    id: "2",
-    titre: "Alliance commerciale avec l'Égypte",
-    type: "Commercial",
-    parties: ["Rome", "Égypte Ptolémaïque"],
-    dateSignature: "AUC 623",
+    id: generateId(),
+    titre: "Alliance défensive avec Athènes",
+    type: "Défense",
+    parties: ["Rome", "Athènes"],
+    dateSignature: "623 AUC",
     duree: "10 ans",
     statut: "Actif",
     termes: [
-      "Tarifs préférentiels pour l'importation de grain égyptien",
+      "Assistance militaire mutuelle en cas d'attaque",
+      "Partage des informations diplomatiques",
+      "Accès préférentiel aux ports"
+    ]
+  },
+  {
+    id: generateId(),
+    titre: "Traité commercial avec l'Égypte",
+    type: "Commerce",
+    parties: ["Rome", "Égypte ptolémaïque"],
+    dateSignature: "605 AUC",
+    statut: "Actif",
+    termes: [
+      "Réduction des taxes sur le blé égyptien",
       "Protection des marchands romains en Égypte",
-      "Accès aux ports égyptiens pour les navires romains"
+      "Accès aux ports égyptiens pour la flotte romaine"
     ],
     bénéfices: {
-      économiques: 9,
-      politiques: 7,
-      militaires: 3
+      économiques: 10,
+      politiques: 7
     }
   },
   {
-    id: "3",
-    titre: "Traité d'amitié avec la Grèce",
-    type: "Diplomatique",
-    parties: ["Rome", "Athènes", "Sparte", "Corinthe"],
-    dateSignature: "AUC 587",
-    duree: "Indéterminée",
+    id: generateId(),
+    titre: "Accord de protection avec Massilia",
+    type: "Protection",
+    parties: ["Rome", "Massilia"],
+    dateSignature: "542 AUC",
     statut: "Actif",
     termes: [
-      "Non-agression mutuelle",
-      "Échanges culturels et éducatifs",
-      "Résolution pacifique des conflits"
-    ],
-    bénéfices: {
-      politiques: 8,
-      économiques: 5,
-      militaires: 2
-    }
+      "Rome garantit la sécurité de Massilia",
+      "Massilia fournit des navires et des informations",
+      "Massilia reste neutre dans les conflits romains"
+    ]
   },
   {
-    id: "4",
-    titre: "Traité de vassalité numide",
-    type: "Vassalité",
-    parties: ["Rome", "Numidie"],
-    dateSignature: "AUC 605",
-    statut: "Actif",
-    termes: [
-      "La Numidie fournit des troupes auxiliaires à Rome",
-      "La Numidie paie un tribut annuel",
-      "Rome garantit la protection de la Numidie"
-    ],
-    bénéfices: {
-      militaires: 7,
-      politiques: 6,
-      économiques: 4
-    }
-  },
-  {
-    id: "5",
-    titre: "Traité commercial avec la Parthie",
-    type: "Commercial",
-    parties: ["Rome", "Empire Parthe"],
-    dateSignature: "AUC 615",
+    id: generateId(),
+    titre: "Traité d'alliance avec la Ligue étolienne",
+    type: "Alliance",
+    parties: ["Rome", "Ligue étolienne"],
+    dateSignature: "563 AUC",
     duree: "15 ans",
     statut: "En négociation",
     termes: [
-      "Sécurisation des routes commerciales",
-      "Tarifs réduits sur les produits de luxe",
-      "Échange d'ambassadeurs permanents"
+      "Action militaire conjointe contre Philippe V de Macédoine",
+      "Partage des territoires conquis",
+      "Rome conserve le butin, la Ligue les terres"
     ]
   }
 ];
 
-// Alliances mock data
+// Données fictives pour les nations
+export const nationsMock: Nation[] = [
+  {
+    id: generateId(),
+    nom: "Carthage",
+    région: "Afrique du Nord",
+    statut: "Ennemi",
+    puissanceMilitaire: 8,
+    richesse: 9,
+    relationAvecRome: 2,
+    dateDernierTraité: "548 AUC",
+    capitale: "Carthage",
+    gouvernement: "République oligarchique",
+    notes: "Principale rivale de Rome en Méditerranée occidentale. Grande puissance maritime et commerciale."
+  },
+  {
+    id: generateId(),
+    nom: "Royaume de Macédoine",
+    région: "Grèce",
+    statut: "Ennemi",
+    puissanceMilitaire: 7,
+    richesse: 6,
+    relationAvecRome: 3,
+    dateDernierTraité: "557 AUC",
+    capitale: "Pella",
+    gouvernement: "Monarchie",
+    notes: "Sous le règne de Philippe V. Cherche à étendre son influence en Grèce et dans l'Égée."
+  },
+  {
+    id: generateId(),
+    nom: "Égypte ptolémaïque",
+    région: "Afrique / Asie",
+    statut: "Allié",
+    puissanceMilitaire: 6,
+    richesse: 10,
+    relationAvecRome: 8,
+    dateDernierTraité: "605 AUC",
+    capitale: "Alexandrie",
+    gouvernement: "Monarchie hellénistique",
+    notes: "Riche royaume dirigé par la dynastie ptolémaïque. Principal fournisseur de grain."
+  },
+  {
+    id: generateId(),
+    nom: "Royaume séleucide",
+    région: "Asie",
+    statut: "Neutre",
+    puissanceMilitaire: 9,
+    richesse: 8,
+    relationAvecRome: 5,
+    dateDernierTraité: "565 AUC",
+    capitale: "Antioche",
+    gouvernement: "Monarchie hellénistique",
+    notes: "Vaste empire s'étendant de l'Anatolie à l'Inde. En conflit avec l'Égypte ptolémaïque."
+  },
+  {
+    id: generateId(),
+    nom: "Numides",
+    région: "Afrique du Nord",
+    statut: "Allié",
+    puissanceMilitaire: 5,
+    richesse: 4,
+    relationAvecRome: 7,
+    dateDernierTraité: "550 AUC",
+    capitale: "Cirta",
+    gouvernement: "Royaume tribal",
+    notes: "Alliés importants contre Carthage. Excellente cavalerie légère."
+  },
+  {
+    id: generateId(),
+    nom: "Massilia",
+    région: "Gaule",
+    statut: "Allié",
+    puissanceMilitaire: 3,
+    richesse: 7,
+    relationAvecRome: 9,
+    dateDernierTraité: "542 AUC",
+    capitale: "Massilia",
+    gouvernement: "République",
+    notes: "Colonie grecque et allié fidèle de Rome. Important centre commercial."
+  },
+  {
+    id: generateId(),
+    nom: "Ligue achéenne",
+    région: "Grèce",
+    statut: "Allié",
+    puissanceMilitaire: 4,
+    richesse: 5,
+    relationAvecRome: 6,
+    dateDernierTraité: "570 AUC",
+    capitale: "Aegium",
+    gouvernement: "Confédération",
+    notes: "Alliance de cités-États grecques opposées à l'influence macédonienne."
+  }
+];
+
+// Données fictives pour les alliances militaires
 export const alliancesMock: Alliance[] = [
   {
-    id: "1",
+    id: generateId(),
     nom: "Ligue latine",
     type: "Défensive",
-    membres: ["Rome", "Villes latines", "Colonies romaines"],
-    dateFormation: "AUC 493",
-    dateCreation: "AUC 493",
-    objectif: "Défense commune contre les Èques et les Volsques",
-    puissanceCombiné: 75,
-    traitésAssociés: ["Foedus Cassianum"],
+    membres: ["Rome", "Tibur", "Praeneste", "Tusculum", "Lanuvium"],
+    dateFormation: "496 AUC",
     commandement: "Rome",
     forces: {
-      légions: 4,
-      auxiliaires: 10000
+      légions: 8,
+      auxiliaires: 12000
     },
     statut: "Actif"
   },
   {
-    id: "2",
-    nom: "Alliance hellénique",
-    type: "Culturelle et militaire",
-    membres: ["Rome", "Athènes", "Sparte", "Rhodes"],
-    dateFormation: "AUC 587",
-    dateCreation: "AUC 587",
-    objectif: "Protection des intérêts grecs et romains en Méditerranée orientale",
-    puissanceCombiné: 65,
-    traitésAssociés: ["Traité d'amitié avec la Grèce"],
-    commandement: "Conseil mixte",
+    id: generateId(),
+    nom: "Alliance italique",
+    type: "Offensive",
+    membres: ["Rome", "Samnites", "Étrusques", "Ombriens"],
+    dateFormation: "550 AUC",
+    commandement: "Rome",
+    forces: {
+      légions: 12,
+      auxiliaires: 20000
+    },
+    statut: "Actif"
+  },
+  {
+    id: generateId(),
+    nom: "Coalition anti-macédonienne",
+    type: "Offensive",
+    membres: ["Rome", "Ligue étolienne", "Pergame", "Rhodes"],
+    dateFormation: "563 AUC",
+    commandement: "Commandement partagé",
+    forces: {
+      légions: 6,
+      auxiliaires: 15000
+    },
+    statut: "Actif"
+  },
+  {
+    id: generateId(),
+    nom: "Alliance maritime méditerranéenne",
+    type: "Défensive",
+    membres: ["Rome", "Massilia", "Syracuse", "Rhodes"],
+    dateFormation: "537 AUC",
+    commandement: "Rome",
     forces: {
       légions: 2,
       auxiliaires: 5000
     },
-    statut: "Actif"
+    statut: "Inactif"
   },
   {
-    id: "3",
-    nom: "Coalition anti-carthaginoise",
-    type: "Militaire",
-    membres: ["Rome", "Numidie", "Cités grecques de Sicile"],
-    dateFormation: "AUC 605",
-    dateCreation: "AUC 605",
-    objectif: "Opposition à l'expansion carthaginoise",
-    puissanceCombiné: 90,
-    traitésAssociés: ["Traité de paix romain-carthaginois", "Traité de vassalité numide"],
-    commandement: "Rome",
+    id: generateId(),
+    nom: "Pacte de la Mer Adriatique",
+    type: "Commercial/Défensif",
+    membres: ["Rome", "Épire", "Corcyre", "Apollonie"],
+    dateFormation: "525 AUC",
+    commandement: "Conseil commun",
     forces: {
-      légions: 6,
-      auxiliaires: 15000
+      légions: 3,
+      auxiliaires: 8000
     },
     statut: "Actif"
   }
