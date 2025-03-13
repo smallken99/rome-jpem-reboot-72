@@ -1,4 +1,6 @@
 
+import { Season, PlayerSeason } from './timeSystem';
+
 /**
  * Formate un nombre en monnaie romaine (As)
  */
@@ -73,8 +75,8 @@ export const formatUptime = (uptimeInSeconds: number): string => {
 /**
  * Convertit une saison du système de temps en saison pour le MJ
  */
-export const convertTimeSeasonToMaitreJeuSeason = (season: string): import('@/components/maitrejeu/types/common').Season => {
-  const seasonMap: Record<string, import('@/components/maitrejeu/types/common').Season> = {
+export const convertTimeSeasonToMaitreJeuSeason = (season: string): Season => {
+  const seasonMap: Record<string, Season> = {
     'SPRING': 'Ver',
     'SUMMER': 'Aestas',
     'AUTUMN': 'Autumnus',

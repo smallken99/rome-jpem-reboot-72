@@ -15,11 +15,16 @@ export const createEconomieOperations = (
       amount: data.amount,
       category: data.category,
       description: data.description,
-      date: data.date,
+      date: data.date || new Date().toISOString(),
       source: data.source || 'manual_entry',
       approved: data.approved !== undefined ? data.approved : true,
       tags: data.tags || [],
-      impactFactors: data.impactFactors || {}
+      impactFactors: data.impactFactors || {},
+      type: data.type,
+      isRecurring: data.isRecurring,
+      recurringInterval: data.recurringInterval,
+      createdAt: new Date(),
+      updatedAt: new Date()
     };
     
     setEconomieRecords(prev => [newRecord, ...prev]);
@@ -31,7 +36,7 @@ export const createEconomieOperations = (
     setEconomieRecords(prev => 
       prev.map(record => 
         record.id === id 
-          ? { ...record, ...updates } 
+          ? { ...record, ...updates, updatedAt: new Date() } 
           : record
       )
     );
@@ -51,11 +56,11 @@ export const createEconomieOperations = (
     let filteredRecords = [...records];
     
     if (startDate) {
-      filteredRecords = filteredRecords.filter(r => new Date(r.date) >= new Date(startDate));
+      filteredRecords = filteredRecords.filter(r => r.date >= startDate);
     }
     
     if (endDate) {
-      filteredRecords = filteredRecords.filter(r => new Date(r.date) <= new Date(endDate));
+      filteredRecords = filteredRecords.filter(r => r.date <= endDate);
     }
     
     const totalIncome = filteredRecords
@@ -185,9 +190,10 @@ export const createEconomieOperations = (
       
       // Créer un objet date pour cette projection
       // Correction du typage ici:
+      const year = currentFactors.currentYear || 721;
       const dateInfo: GameDate = {
-        year: Math.floor(currentFactors.currentYear + index / 4),
-        season: getSeason(index % 4) as Season,
+        year: Math.floor(year + index / 4),
+        season: getSeason(index % 4),
         phase: "ECONOMY",
         day: 1
       };

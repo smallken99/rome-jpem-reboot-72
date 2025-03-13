@@ -2,7 +2,7 @@
 import { useState, useEffect } from 'react';
 import { useToast } from '@/components/ui/use-toast';
 import { Character } from '@/types/character';
-import { useTimeStore, useTimeEvents, Season } from '@/utils/timeSystem';
+import { useTimeStore, Season } from '@/utils/timeSystem';
 import { checkAllianceForBirths } from './birthUtils';
 import { familyAlliances } from '@/data/alliances';
 
@@ -14,7 +14,8 @@ export const useAllianceBirths = (
   const { toast } = useToast();
   
   // Get current time from the store
-  const { year, season } = useTimeStore();
+  const timeStore = useTimeStore();
+  const { year, season } = timeStore;
   
   // Filter alliances to only show active ones
   const activeAlliances = familyAlliances.filter(alliance => alliance.status === 'actif');
@@ -49,26 +50,18 @@ export const useAllianceBirths = (
     });
   };
 
-  // Set up time event listeners
-  const { advanceTime } = useTimeEvents(
-    undefined, // No special day event
-    undefined, // No special season event
-    () => {
-      // Year change event - check for births
-      checkForBirths();
-    }
-  );
-
-  // Set up automatic time advancement (for demonstration)
+  // Set up time advancement (for demonstration)
   useEffect(() => {
     // For demo purposes, we're advancing time every 15 seconds
     // In a real game, this might be tied to game actions or a play/pause system
     const timeAdvanceInterval = setInterval(() => {
-      advanceTime();
+      timeStore.advanceTime();
+      // Check for births when a year changes
+      checkForBirths();
     }, 15000); // Advance time every 15 seconds
     
     return () => clearInterval(timeAdvanceInterval);
-  }, [advanceTime]);
+  }, [timeStore]);
 
   return {
     alliances: familyAlliances,

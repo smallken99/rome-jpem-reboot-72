@@ -18,7 +18,7 @@ export interface Transaction {
   amount: number;
   category: string;
   description: string;
-  date: string;
+  date: Date;
   source?: string;
 }
 
@@ -61,15 +61,17 @@ export const useEconomy = () => {
       
       // Si le MJ a des enregistrements d'économie, les utiliser comme transactions
       if (mjContext.economieRecords && mjContext.economieRecords.length > 0) {
-        setTransactions(mjContext.economieRecords.map(record => ({
+        const mappedTransactions = mjContext.economieRecords.map(record => ({
           id: record.id,
           type: record.amount > 0 ? 'income' : 'expense',
           amount: Math.abs(record.amount),
           category: record.category,
           description: record.description,
-          date: record.date,
+          date: new Date(),
           source: record.source
-        })));
+        }));
+        
+        setTransactions(mappedTransactions);
       }
     }
   }, [mjContext?.treasury, mjContext?.economicFactors, mjContext?.economieRecords]);
@@ -78,7 +80,7 @@ export const useEconomy = () => {
   const addTransaction = (transaction: Omit<Transaction, 'id' | 'date'>) => {
     const newTransaction: Transaction = {
       id: `trans_${Date.now()}`,
-      date: new Date().toISOString(),
+      date: new Date(),
       ...transaction
     };
     
@@ -95,11 +97,46 @@ export const useEconomy = () => {
         category: transaction.category,
         description: transaction.description,
         source: transaction.source || 'player_action',
-        date: new Date().toISOString()
+        isRecurring: false,
+        tags: [],
+        type: transaction.type
       });
     }
     
     return newTransaction;
+  };
+
+  // Vérifier si le solde permet une dépense
+  const canAfford = (amount: number): boolean => {
+    return balance >= amount;
+  };
+
+  // Effectuer un paiement (dépense)
+  const makePayment = (amount: number, recipient: string, category: string, description: string): boolean => {
+    if (!canAfford(amount)) return false;
+    
+    addTransaction({
+      type: 'expense',
+      amount,
+      category,
+      description: `${recipient}: ${description}`,
+      source: recipient
+    });
+    
+    return true;
+  };
+
+  // Recevoir un paiement (revenu)
+  const receivePayment = (amount: number, source: string, category: string, description: string): boolean => {
+    addTransaction({
+      type: 'income',
+      amount,
+      category,
+      description: `${source}: ${description}`,
+      source
+    });
+    
+    return true;
   };
 
   const getRecentTransactions = (count: number = 10) => {
@@ -154,6 +191,9 @@ export const useEconomy = () => {
     transactions,
     loading,
     addTransaction,
+    canAfford,
+    makePayment,
+    receivePayment,
     getRecentTransactions,
     getTransactionsByCategory,
     calculateFinancialReport,

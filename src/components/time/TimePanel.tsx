@@ -1,7 +1,7 @@
 
 import React, { useState } from 'react';
 import { Calendar, Hourglass, SunDim } from 'lucide-react';
-import { useTimeStore, formatRomanSeason } from '@/utils/timeSystem';
+import { useTimeStore, Season, formatRomanSeason } from '@/utils/timeSystem';
 
 interface TimePanelProps {
   minimal?: boolean;

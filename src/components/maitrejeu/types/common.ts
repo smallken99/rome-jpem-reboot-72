@@ -1,10 +1,12 @@
 
-export type Season = "SPRING" | "SUMMER" | "AUTUMN" | "WINTER";
+export type Season = "Ver" | "Aestas" | "Autumnus" | "Hiems";
 export type ImportanceType = "mineure" | "normale" | "majeure";
 
 export interface GameDate {
   year: number;
   season: Season;
+  phase?: GamePhase;
+  day?: number;
 }
 
 export type GamePhase = 
