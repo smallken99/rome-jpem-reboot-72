@@ -1,141 +1,144 @@
 
-import { useState } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { Preceptor } from '../types/educationTypes';
-import { toast } from 'sonner';
-
-// Mock data for preceptors
-const mockPreceptors: Preceptor[] = [
-  {
-    id: 'p1',
-    name: 'Marcus Tullius',
-    specialty: 'rhetoric',
-    skill: 75,
-    price: 2000,
-    status: 'available'
-  },
-  {
-    id: 'p2',
-    name: 'Quintus Valerius',
-    specialty: 'politics',
-    skill: 80,
-    price: 3000,
-    status: 'available'
-  },
-  {
-    id: 'p3',
-    name: 'Gaius Flavius',
-    specialty: 'military',
-    skill: 85,
-    price: 4000,
-    status: 'available'
-  },
-  {
-    id: 'p4',
-    name: 'Lucius Aemilius',
-    specialty: 'philosophy',
-    skill: 90,
-    price: 5000,
-    status: 'available'
-  },
-  {
-    id: 'p5',
-    name: 'Titus Claudius',
-    specialty: 'rhetoric',
-    skill: 65,
-    price: 1500,
-    status: 'available'
-  },
-  {
-    id: 'p6',
-    name: 'Publius Cornelius',
-    specialty: 'military',
-    skill: 70,
-    price: 2500,
-    status: 'available'
-  },
-];
+import { preceptorDatabase } from '../data/preceptorDatabase';
 
 export const usePreceptorsManagement = () => {
-  const [preceptors, setPreceptors] = useState<Preceptor[]>(mockPreceptors);
+  const [preceptors, setPreceptors] = useState<Preceptor[]>([]);
   const [hiredPreceptors, setHiredPreceptors] = useState<Preceptor[]>([]);
   const [isHiringPreceptor, setIsHiringPreceptor] = useState(false);
 
-  const refreshPreceptors = () => {
-    // In a real app, this would call an API
-    // For now, we'll just reset to our mock data
-    setPreceptors(mockPreceptors.filter(p => 
-      !hiredPreceptors.some(hp => hp.id === p.id)
-    ));
-  };
+  // Initialize preceptors
+  useEffect(() => {
+    refreshPreceptors();
+  }, []);
 
-  const loadPreceptorsByType = (type: string): Preceptor[] => {
-    if (!type || type === 'all') {
+  // Refresh preceptors list
+  const refreshPreceptors = useCallback(() => {
+    const freshPreceptors = preceptorDatabase.getPreceptors();
+    
+    // Exclude already hired preceptors
+    const availablePreceptors = freshPreceptors.filter(p => 
+      !hiredPreceptors.some(hired => hired.id === p.id)
+    );
+    
+    setPreceptors(availablePreceptors);
+  }, [hiredPreceptors]);
+
+  // Load preceptors by type
+  const loadPreceptorsByType = useCallback((type: string) => {
+    if (type === 'all') {
       return preceptors;
     }
     return preceptors.filter(p => p.specialty === type);
-  };
+  }, [preceptors]);
 
-  const hirePreceptor = (preceptorId: string) => {
+  // Hire preceptor
+  const hirePreceptor = useCallback((preceptorId: string) => {
+    setIsHiringPreceptor(true);
+    
+    // Find preceptor in available list
     const preceptor = preceptors.find(p => p.id === preceptorId);
     
-    if (!preceptor) {
-      toast.error("Précepteur non trouvé.");
-      return;
+    if (preceptor) {
+      // Add to hired list with updated status
+      setHiredPreceptors(prev => [
+        ...prev, 
+        { ...preceptor, status: 'hired', available: false }
+      ]);
+      
+      // Remove from available list
+      setPreceptors(prev => prev.filter(p => p.id !== preceptorId));
     }
     
-    // Update preceptor status
-    const updatedPreceptor = { ...preceptor, status: 'hired' as const };
-    
-    // Remove from available preceptors
-    setPreceptors(prev => prev.filter(p => p.id !== preceptorId));
-    
-    // Add to hired preceptors
-    setHiredPreceptors(prev => [...prev, updatedPreceptor]);
-    
-    toast.success(`${preceptor.name} a été embauché comme précepteur.`);
-  };
+    setIsHiringPreceptor(false);
+  }, [preceptors]);
 
-  const firePreceptor = (preceptorId: string) => {
+  // Fire preceptor
+  const firePreceptor = useCallback((preceptorId: string) => {
+    // Find preceptor in hired list
     const preceptor = hiredPreceptors.find(p => p.id === preceptorId);
     
-    if (!preceptor) {
-      toast.error("Précepteur non trouvé parmi ceux embauchés.");
-      return;
+    if (preceptor) {
+      // Remove from hired list
+      setHiredPreceptors(prev => prev.filter(p => p.id !== preceptorId));
+      
+      // Add back to available list with updated status
+      if (preceptor.status !== 'assigned') {
+        setPreceptors(prev => [
+          ...prev, 
+          { ...preceptor, status: 'available', available: true, childId: null }
+        ]);
+      }
     }
-    
-    // Update preceptor status
-    const updatedPreceptor = { ...preceptor, status: 'available' as const };
-    
-    // Remove from hired preceptors
-    setHiredPreceptors(prev => prev.filter(p => p.id !== preceptorId));
-    
-    // Add back to available preceptors
-    setPreceptors(prev => [...prev, updatedPreceptor]);
-    
-    toast.success(`${preceptor.name} a été libéré de ses fonctions.`);
-  };
+  }, [hiredPreceptors]);
 
-  const assignPreceptorToChild = (childId: string, preceptorId: string) => {
-    const preceptor = hiredPreceptors.find(p => p.id === preceptorId);
-    
-    if (!preceptor) {
-      toast.error("Précepteur non trouvé.");
-      return;
-    }
-    
-    // In a real app, we would update the assignment in the database
-    toast.success(`${preceptor.name} a été assigné à l'éducation de l'enfant.`);
-  };
+  // Assign preceptor to child
+  const assignPreceptorToChild = useCallback((preceptorId: string, childId: string) => {
+    setHiredPreceptors(prev => prev.map(p => 
+      p.id === preceptorId ? { ...p, status: 'assigned', childId } : p
+    ));
+  }, []);
 
   return {
     preceptors,
     hiredPreceptors,
     isHiringPreceptor,
-    setIsHiringPreceptor,
     refreshPreceptors,
     loadPreceptorsByType,
     hirePreceptor,
     firePreceptor,
     assignPreceptorToChild
   };
+};
+
+// Ajouter cette ligne si le fichier preceptorDatabase.ts n'existe pas
+export const preceptorDatabase = {
+  getPreceptors: () => {
+    // Mockup data
+    return [
+      {
+        id: '1',
+        name: 'Marcus Tullius',
+        specialty: 'rhetoric',
+        skill: 85,
+        price: 5000,
+        status: 'available',
+        background: 'Ancien orateur au Sénat',
+        quality: 85,
+        reputation: 'excellent',
+        cost: 5000,
+        available: true,
+        speciality: 'rhetoric'
+      },
+      {
+        id: '2',
+        name: 'Quintus Fabius',
+        specialty: 'military',
+        skill: 80,
+        price: 4500,
+        status: 'available',
+        background: 'Vétéran des guerres puniques',
+        quality: 80,
+        reputation: 'excellent',
+        cost: 4500,
+        available: true,
+        speciality: 'military'
+      },
+      {
+        id: '3',
+        name: 'Publius Cornelius',
+        specialty: 'religious',
+        skill: 75,
+        price: 4000,
+        status: 'available',
+        background: 'Ancien augure',
+        quality: 75,
+        reputation: 'bon',
+        cost: 4000,
+        available: true,
+        speciality: 'religious'
+      }
+    ] as Preceptor[];
+  }
 };
