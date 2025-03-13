@@ -143,7 +143,7 @@ export const SenatComposition: React.FC<{ role: 'mj' | 'player' }> = ({ role }) 
                       <span className="text-sm text-muted-foreground">Influence:</span>
                       <span className="font-medium">{senateur.influence}/100</span>
                     </div>
-                    <SenateurInfluenceBar influence={senateur.influence} />
+                    <SenateurInfluenceBar value={senateur.influence} />
                   </div>
                 </div>
               </RomanCard.Content>

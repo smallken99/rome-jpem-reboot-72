@@ -26,6 +26,9 @@ export interface SenateurJouable {
   famille?: string;
   fonction?: string;
   popularite?: number;
+  militaire?: number;
+  piete?: number;
+  eloquence?: number;
   appartenance?: "Optimates" | "Populares" | "Neutral";
   playerId?: string;
 }

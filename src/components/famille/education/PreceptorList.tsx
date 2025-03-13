@@ -7,6 +7,11 @@ import { UserPlus, Users, Search } from 'lucide-react';
 import { useEducation } from './context/EducationContext';
 import { getEducationTypes } from './data';
 
+interface EducationType {
+  value: string;
+  label: string;
+}
+
 export const PreceptorList: React.FC = () => {
   const { 
     preceptors, 
@@ -19,7 +24,11 @@ export const PreceptorList: React.FC = () => {
   const [selectedType, setSelectedType] = useState<string>('all');
   const [showAvailable, setShowAvailable] = useState(true);
   
-  const educationTypes = getEducationTypes();
+  const educationTypes: EducationType[] = [
+    { value: 'military', label: 'Militaire' },
+    { value: 'religious', label: 'Piété' },
+    { value: 'rhetoric', label: 'Éloquence' }
+  ];
   
   // Filter preceptors based on selected type
   const filteredPreceptors = showAvailable 

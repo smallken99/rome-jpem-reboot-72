@@ -6,6 +6,7 @@ export * from './paths/rhetoricPath';
 
 // Function to get an education path by type for backwards compatibility
 export const getEducationPath = (type: string) => {
+  const { educationPaths } = require('./educationPaths');
   return educationPaths.find(path => path.id === type);
 };
 
