@@ -10,7 +10,7 @@ export const EducationPage: React.FC = () => {
     <Layout>
       <PageHeader 
         title="Éducation des Enfants"
-        subtitle="Dirigez l'éducation de la prochaine génération"
+        subtitle="Formez la prochaine génération pour perpétuer l'héritage familial"
       />
       <div className="roman-card">
         <Education characters={characters} />

@@ -8,8 +8,8 @@ export const Heritage: React.FC = () => {
   return (
     <Layout>
       <PageHeader 
-        title="Héritage et Testaments"
-        subtitle="Gérez la succession et la transmission du patrimoine"
+        title="Héritage Familial"
+        subtitle="Gérez votre succession et assurez la continuité de votre lignée"
       />
       <div className="roman-card">
         <Inheritance />

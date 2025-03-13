@@ -1,40 +1,69 @@
 
 import React, { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
-import { RomanCard } from '@/components/ui-custom/RomanCard';
-import { ActionButton } from '@/components/ui-custom/ActionButton';
-import { Card, CardContent } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
-import { ArrowLeft, Scroll, Crown, Award } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { formatMoney } from '@/utils/formatUtils';
 import { toast } from 'sonner';
-import { characters } from '@/data/characters';
-import { Character } from '@/types/character';
+import { ArrowLeft, Building, Coins, Scroll, User } from 'lucide-react';
 
-export const InheritanceDetails: React.FC = () => {
-  const { heirId } = useParams<{ heirId: string }>();
+// Sample data for an heir
+const heirData = {
+  "heir1": { id: "heir1", name: "Marcus Tullius", role: "Fils aîné", gender: "male", age: 18 },
+  "heir2": { id: "heir2", name: "Lucius Tullius", role: "Fils cadet", gender: "male", age: 16 },
+  "heir3": { id: "heir3", name: "Gnaeus Tullius", role: "Neveu", gender: "male", age: 22 },
+};
+
+// Sample data for estate distribution
+const estateItems = [
+  { id: '1', name: 'Villa Tusculana', type: 'propriété', value: 120000, assigned: false },
+  { id: '2', name: 'Terres agricoles en Campanie', type: 'propriété', value: 85000, assigned: false },
+  { id: '3', name: 'Domus sur le Palatin', type: 'propriété', value: 200000, assigned: false },
+  { id: '4', name: 'Revenus commerciaux', type: 'actif', value: 30000, assigned: false },
+  { id: '5', name: 'Esclaves domestiques', type: 'autre', value: 45000, assigned: false },
+];
+
+interface InheritanceDetailsProps {
+  heirId: string;
+}
+
+export const InheritanceDetails: React.FC<InheritanceDetailsProps> = ({ heirId }) => {
   const navigate = useNavigate();
+  const [heir, setHeir] = useState<any>(null);
+  const [activeTab, setActiveTab] = useState('properties');
+  const [assignedItems, setAssignedItems] = useState<string[]>([]);
   
-  const [heir, setHeir] = useState<Character | null>(null);
-  const [inheritanceNotes, setInheritanceNotes] = useState<string>('');
-  const [futureTitle, setFutureTitle] = useState<string>('');
-  
+  // Load heir data
   useEffect(() => {
-    if (heirId) {
-      const foundHeir = characters.find(char => char.id === heirId);
-      if (foundHeir) {
-        setHeir(foundHeir);
-      } else {
-        toast.error("Héritier non trouvé");
-        navigate('/famille/heritage');
-      }
+    const foundHeir = heirData[heirId as keyof typeof heirData];
+    if (foundHeir) {
+      setHeir(foundHeir);
+    } else {
+      toast.error("Héritier non trouvé");
+      navigate('/famille/heritage');
     }
   }, [heirId, navigate]);
   
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    toast.success(`${heir?.name} a été confirmé comme héritier principal`);
+  const toggleAssignment = (itemId: string) => {
+    setAssignedItems(prev => 
+      prev.includes(itemId) 
+        ? prev.filter(id => id !== itemId) 
+        : [...prev, itemId]
+    );
+  };
+  
+  const handleSaveInheritance = () => {
+    if (assignedItems.length === 0) {
+      toast.error("Vous devez assigner au moins un élément à l'héritier");
+      return;
+    }
+    
+    const totalValue = estateItems
+      .filter(item => assignedItems.includes(item.id))
+      .reduce((sum, item) => sum + item.value, 0);
+    
+    toast.success(`Succession configurée pour ${heir?.name} avec des biens d'une valeur de ${formatMoney(totalValue)}`);
     navigate('/famille/heritage');
   };
   
@@ -48,89 +77,112 @@ export const InheritanceDetails: React.FC = () => {
   
   return (
     <div className="space-y-6">
-      <div className="flex justify-between items-center">
-        <h2 className="text-2xl font-cinzel font-medium">Succession de {heir.name}</h2>
-        <ActionButton 
-          label="Retour" 
-          to="/famille/heritage"
-          variant="outline"
-          icon={<ArrowLeft className="h-4 w-4" />}
-        />
-      </div>
+      <Button 
+        variant="outline" 
+        className="flex items-center gap-2" 
+        onClick={() => navigate('/famille/heritage')}
+      >
+        <ArrowLeft className="h-4 w-4" />
+        Retour à la liste des héritiers
+      </Button>
       
-      <RomanCard>
-        <RomanCard.Header>
-          <div className="flex items-center gap-2">
-            <Crown className="h-5 w-5 text-rome-navy" />
-            <h3 className="font-cinzel">Détails de l'Héritier</h3>
+      <Card>
+        <CardHeader>
+          <div className="flex items-start justify-between">
+            <div>
+              <CardTitle className="flex items-center gap-2">
+                <User className="h-5 w-5 text-blue-500" />
+                Détails de l'Héritier - {heir.name}
+              </CardTitle>
+              <p className="text-sm text-muted-foreground mt-1">
+                {heir.role}, {heir.age} ans
+              </p>
+            </div>
+            <Button onClick={handleSaveInheritance}>Confirmer la Succession</Button>
           </div>
-        </RomanCard.Header>
-        
-        <RomanCard.Content>
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="heirName">Héritier désigné</Label>
-              <Input 
-                id="heirName" 
-                value={heir.name} 
-                disabled
-                className="bg-gray-50"
-              />
-            </div>
+        </CardHeader>
+        <CardContent>
+          <Tabs value={activeTab} onValueChange={setActiveTab}>
+            <TabsList className="w-full mb-4">
+              <TabsTrigger value="properties" className="flex-1">
+                <Building className="h-4 w-4 mr-2" />
+                Propriétés
+              </TabsTrigger>
+              <TabsTrigger value="money" className="flex-1">
+                <Coins className="h-4 w-4 mr-2" />
+                Finances
+              </TabsTrigger>
+              <TabsTrigger value="titles" className="flex-1">
+                <Scroll className="h-4 w-4 mr-2" />
+                Titres et Positions
+              </TabsTrigger>
+            </TabsList>
             
-            <div className="space-y-2">
-              <Label htmlFor="futureTitle">Titre futur</Label>
-              <Input 
-                id="futureTitle" 
-                value={futureTitle}
-                onChange={(e) => setFutureTitle(e.target.value)}
-                placeholder="Ex: Pater Familias de la Gens Julia"
-              />
-              <p className="text-xs text-muted-foreground">
-                Le titre qui sera accordé à l'héritier lorsqu'il prendra la tête de la famille.
-              </p>
-            </div>
-            
-            <div className="space-y-2">
-              <Label htmlFor="inheritanceNotes">Instructions et conditions spéciales</Label>
-              <Textarea
-                id="inheritanceNotes"
-                value={inheritanceNotes}
-                onChange={(e) => setInheritanceNotes(e.target.value)}
-                placeholder="Ajoutez des conditions ou instructions particulières pour l'héritier..."
-                className="min-h-[150px]"
-              />
-            </div>
-            
-            <div className="bg-rome-parchment/50 p-3 rounded-md text-sm space-y-2 mt-4">
-              <div className="flex items-center gap-2">
-                <Award className="h-4 w-4 text-rome-terracotta" />
-                <h4 className="font-medium">Tradition familiale</h4>
+            <TabsContent value="properties">
+              <div className="space-y-4">
+                <p className="text-sm">
+                  Sélectionnez les propriétés et biens qui seront transmis à {heir.name} lors de votre succession.
+                </p>
+                
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                  {estateItems.map(item => (
+                    <div 
+                      key={item.id}
+                      className={`p-3 border rounded-md cursor-pointer transition-all ${
+                        assignedItems.includes(item.id) 
+                          ? 'border-green-500 bg-green-50' 
+                          : 'border-gray-200 hover:border-gray-300'
+                      }`}
+                      onClick={() => toggleAssignment(item.id)}
+                    >
+                      <div className="flex justify-between">
+                        <div className="font-medium">{item.name}</div>
+                        <div>{formatMoney(item.value)}</div>
+                      </div>
+                      <div className="text-sm text-muted-foreground capitalize">{item.type}</div>
+                    </div>
+                  ))}
+                </div>
+                
+                <div className="p-3 bg-blue-50 text-blue-800 rounded-md mt-4">
+                  <div className="font-medium">Valeur totale des biens assignés:</div>
+                  <div className="text-xl">
+                    {formatMoney(
+                      estateItems
+                        .filter(item => assignedItems.includes(item.id))
+                        .reduce((sum, item) => sum + item.value, 0)
+                    )}
+                  </div>
+                </div>
               </div>
-              <p>
-                Selon la tradition romaine, l'héritier principal (heres) devient le nouveau 
-                Pater Familias et chef de la famille. Il aura la responsabilité de préserver 
-                l'honneur et la position de la famille dans la société romaine.
-              </p>
-            </div>
+            </TabsContent>
             
-            <div className="flex justify-end gap-2 pt-4">
-              <ActionButton 
-                variant="outline"
-                label="Annuler"
-                to="/famille/heritage"
-              />
-              <ActionButton 
-                type="submit"
-                label="Confirmer l'héritier"
-                variant="default"
-              />
-            </div>
-          </form>
-        </RomanCard.Content>
-      </RomanCard>
+            <TabsContent value="money">
+              <div className="space-y-4">
+                <p className="text-sm">
+                  Configurez les aspects financiers de la succession, comme les rentes et les dotations.
+                </p>
+                
+                <div className="bg-muted p-4 text-center rounded-md">
+                  Fonctionnalité à venir dans une prochaine mise à jour.
+                </div>
+              </div>
+            </TabsContent>
+            
+            <TabsContent value="titles">
+              <div className="space-y-4">
+                <p className="text-sm">
+                  Définissez quels titres, positions et responsabilités seront transmis à votre héritier.
+                </p>
+                
+                <div className="bg-muted p-4 text-center rounded-md">
+                  Fonctionnalité à venir dans une prochaine mise à jour.
+                </div>
+              </div>
+            </TabsContent>
+          </Tabs>
+        </CardContent>
+      </Card>
     </div>
   );
 };
-
-export default InheritanceDetails;
