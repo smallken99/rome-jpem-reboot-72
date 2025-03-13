@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { 
   Dialog, 
@@ -25,6 +24,8 @@ interface AllianceModalProps {
   familles: FamilleInfo[];
   membres: MembreFamille[];
   initialFamilleId: string | null;
+  alliance?: FamilleAlliance;
+  onSave?: (data: any) => void;
 }
 
 export const AllianceModal: React.FC<AllianceModalProps> = ({
@@ -32,9 +33,11 @@ export const AllianceModal: React.FC<AllianceModalProps> = ({
   onClose,
   familles,
   membres,
-  initialFamilleId
+  initialFamilleId,
+  alliance,
+  onSave
 }) => {
-  const { createAlliance } = useMaitreJeu();
+  const { createAlliance, updateAlliance } = useMaitreJeu();
 
   const [formData, setFormData] = useState<{
     famille1Id: string;
@@ -55,16 +58,29 @@ export const AllianceModal: React.FC<AllianceModalProps> = ({
   // Reset form when modal opens
   useEffect(() => {
     if (isOpen) {
-      setFormData({
-        famille1Id: initialFamilleId || '',
-        famille2Id: '',
-        type: 'politique',
-        termes: '',
-        membresIds: [],
-        benefices: []
-      });
+      if (alliance) {
+        // Initialize with existing alliance data if editing
+        setFormData({
+          famille1Id: alliance.famille1Id,
+          famille2Id: alliance.famille2Id,
+          type: alliance.type,
+          termes: alliance.termes,
+          membresIds: alliance.membres || [],
+          benefices: alliance.benefices || [],
+        });
+      } else {
+        // Initialize with default values for new alliance
+        setFormData({
+          famille1Id: initialFamilleId || '',
+          famille2Id: '',
+          type: 'politique',
+          termes: '',
+          membresIds: [],
+          benefices: []
+        });
+      }
     }
-  }, [isOpen, initialFamilleId]);
+  }, [isOpen, initialFamilleId, alliance]);
 
   const handleSelectChange = (name: string, value: string) => {
     setFormData({
@@ -107,13 +123,21 @@ export const AllianceModal: React.FC<AllianceModalProps> = ({
   };
 
   const handleSubmit = () => {
-    createAlliance(
-      formData.famille1Id,
-      formData.famille2Id,
-      formData.type,
-      formData.termes,
-      formData.benefices
-    );
+    if (alliance && onSave) {
+      onSave(formData);
+    } else if (alliance) {
+      updateAlliance(alliance.id, formData);
+    } else if (onSave) {
+      onSave(formData);
+    } else {
+      createAlliance(
+        formData.famille1Id,
+        formData.famille2Id,
+        formData.type,
+        formData.termes,
+        formData.benefices
+      );
+    }
     onClose();
   };
 
