@@ -145,7 +145,7 @@ export const LoiDetail: React.FC<LoiDetailProps> = ({
                   {loi.impacts.map((impact, index) => (
                     <li key={index} className="flex justify-between items-center border-b pb-2 last:border-0">
                       <span>{impact.domaine}</span>
-                      <Badge variant={impact.valeur > 0 ? 'success' : 'destructive'}>
+                      <Badge variant={impact.valeur > 0 ? 'outline' : 'destructive'}>
                         {impact.valeur > 0 ? '+' : ''}{impact.valeur}
                       </Badge>
                     </li>
@@ -196,7 +196,7 @@ export const LoiDetail: React.FC<LoiDetailProps> = ({
               <CardTitle>Chronologie</CardTitle>
             </CardHeader>
             <CardContent>
-              <LoiTimeline loi={loi} />
+              <LoiTimeline lois={[loi]} />
             </CardContent>
           </Card>
         </div>

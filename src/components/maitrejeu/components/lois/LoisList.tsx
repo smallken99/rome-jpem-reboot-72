@@ -5,7 +5,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { User, CalendarDays, ArrowRight } from 'lucide-react';
 import { Loi } from '../../types/lois';
-import { formatGameDate } from '@/utils/timeSystem';
+import { formatSeasonDisplay } from '@/utils/timeSystem';
 
 export interface LoisListProps {
   lois: Loi[];
@@ -21,6 +21,10 @@ export const LoisList: React.FC<LoisListProps> = ({ lois, onViewLoi }) => {
       case 'Promulguée': return 'bg-purple-100 text-purple-800';
       default: return 'bg-gray-100 text-gray-800';
     }
+  };
+  
+  const formatGameDate = (date: { year: number; season: string }) => {
+    return `An ${date.year}, ${formatSeasonDisplay(date.season)}`;
   };
   
   if (lois.length === 0) {

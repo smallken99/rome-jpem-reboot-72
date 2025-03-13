@@ -1,3 +1,4 @@
+import { create } from 'zustand';
 
 export type Season = "Ver" | "Aestas" | "Autumnus" | "Hiems";
 export type PlayerSeason = "SPRING" | "SUMMER" | "AUTUMN" | "WINTER";
@@ -53,3 +54,38 @@ export const formatSeasonDisplay = (season: Season | PlayerSeason | string): str
     default: return "Saison inconnue";
   }
 };
+
+// Format a game date (year + season)
+export const formatGameDate = (date: { year: number; season: Season | PlayerSeason | string }): string => {
+  const formattedSeason = formatSeasonDisplay(date.season);
+  return `An ${date.year}, ${formattedSeason}`;
+};
+
+// Time store for state management
+interface TimeState {
+  year: number;
+  season: PlayerSeason;
+  advanceTime: () => void;
+  getYear: () => number;
+}
+
+export const useTimeStore = create<TimeState>((set, get) => ({
+  year: 573, // Starting year (AUC - Ab Urbe Condita)
+  season: "SPRING",
+  
+  advanceTime: () => set(state => {
+    const seasons: PlayerSeason[] = ["SPRING", "SUMMER", "AUTUMN", "WINTER"];
+    const currentSeasonIndex = seasons.indexOf(state.season);
+    const nextSeasonIndex = (currentSeasonIndex + 1) % seasons.length;
+    
+    // If we're moving from winter to spring, advance the year
+    if (nextSeasonIndex === 0) {
+      return { year: state.year + 1, season: seasons[nextSeasonIndex] };
+    }
+    
+    // Otherwise just advance the season
+    return { season: seasons[nextSeasonIndex] };
+  }),
+  
+  getYear: () => get().year,
+}));

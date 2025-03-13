@@ -4,13 +4,13 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Calendar, Clock, ArrowRight } from 'lucide-react';
 import { useMaitreJeu } from '../context';
-import { formatGameDate } from '@/utils/timeSystem';
+import { formatSeasonDisplay } from '@/utils/timeSystem';
 
 export const TimePanel: React.FC = () => {
   const { currentDate, currentPhase, advanceTime } = useMaitreJeu();
   
   // Formatage de la date actuelle
-  const formattedDate = formatGameDate(currentDate);
+  const formattedDate = `An ${currentDate.year}, ${formatSeasonDisplay(currentDate.season)}`;
   
   return (
     <Card className="mb-6">

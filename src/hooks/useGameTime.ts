@@ -15,7 +15,7 @@ export const useGameTime = () => {
   } = useMaitreJeu();
 
   // Format a season for display
-  const formatSeason = (season: Season) => {
+  const formatSeason = (season: Season | string) => {
     return formatSeasonDisplay(season);
   };
 

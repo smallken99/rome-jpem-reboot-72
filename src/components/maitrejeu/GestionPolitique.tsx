@@ -2,7 +2,8 @@
 import React, { useState } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useMaitreJeu } from './context';
-import { Loi, LoiType } from './types';
+import { Loi } from './types/lois';
+import { LoiType } from './types/lois';
 import { LoisList } from './components/lois/LoisList';
 import { LoiForm } from './components/lois/LoiForm';
 import { ElectionPlanner } from './components/elections/ElectionPlanner';
@@ -78,8 +79,11 @@ export const GestionPolitique = () => {
     setNewLoi({ ...newLoi, [field]: value });
   };
   
-  const handleViewLoi = (loi: Loi) => {
-    setSelectedLoi(loi);
+  const handleViewLoi = (id: string) => {
+    const loi = lois.find(l => l.id === id);
+    if (loi) {
+      setSelectedLoi(loi);
+    }
   };
   
   const handleCloseLoi = () => {
@@ -104,9 +108,11 @@ export const GestionPolitique = () => {
           {showAddLoi && (
             <LoiForm 
               loi={newLoi}
-              handleInputChange={handleInputChange}
-              handleSelectChange={handleSelectChange}
-              handleAddLoi={handleAddLoi}
+              onSubmit={handleAddLoi}
+              onChange={{
+                handleInputChange,
+                handleSelectChange
+              }}
               onCancel={() => setShowAddLoi(false)}
             />
           )}
@@ -114,6 +120,7 @@ export const GestionPolitique = () => {
           {selectedLoi && (
             <LoiDetail 
               loi={selectedLoi}
+              onEdit={() => console.log('Edit loi:', selectedLoi.id)}
               onClose={handleCloseLoi}
             />
           )}

@@ -1,6 +1,14 @@
 
-export { GestionEquilibre } from './GestionEquilibre';
-export { GestionLois } from './GestionLois';
-export { GestionFamilles } from './GestionFamilles';
-export { MaitreJeuLayout } from './layout/MaitreJeuLayout';
-export { default as MaitreJeu } from '../pages/MaitreJeu';
+import React from 'react';
+import { Routes, Route } from 'react-router-dom';
+import MaitreJeu from '@/pages/MaitreJeu';
+
+const MaitreJeuRoutes = () => {
+  return (
+    <Routes>
+      <Route path="/*" element={<MaitreJeu />} />
+    </Routes>
+  );
+};
+
+export default MaitreJeuRoutes;

@@ -3,12 +3,12 @@ import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { LoiForm } from './LoiForm';
-import { Loi } from '../../types';
+import { Loi } from '../../types/lois';
 
 export interface LoiModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onSave: (loiData: Omit<Loi, "id">) => void;
+  onSave: (loiData: any) => void;
   initialData?: Loi;
 }
 
@@ -18,7 +18,7 @@ export const LoiModal: React.FC<LoiModalProps> = ({
   onSave,
   initialData
 }) => {
-  const handleSave = (data: Omit<Loi, "id">) => {
+  const handleSave = (data: any) => {
     onSave(data);
     onClose();
   };
@@ -33,8 +33,18 @@ export const LoiModal: React.FC<LoiModalProps> = ({
         </DialogHeader>
         
         <LoiForm 
-          initialData={initialData}
+          loi={initialData || {
+            titre: '',
+            description: '',
+            proposeur: '',
+            type: 'politique',
+            importance: 'normale'
+          }}
           onSubmit={handleSave}
+          onChange={{
+            handleInputChange: (e, field) => {},
+            handleSelectChange: (value, field) => {}
+          }}
         />
         
         <DialogFooter>

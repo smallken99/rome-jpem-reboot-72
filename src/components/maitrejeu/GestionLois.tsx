@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
@@ -72,6 +73,11 @@ export const GestionLois: React.FC = () => {
     setActiveTab('actives');
   };
   
+  // Type-safe filter change handler
+  const handleFilterTypeChange = (value: string) => {
+    setFilterType(value as LoiType | '');
+  };
+  
   return (
     <div className="p-6">
       <div className="flex justify-between items-center mb-6">
@@ -106,7 +112,7 @@ export const GestionLois: React.FC = () => {
           <div className="w-64">
             <Select 
               value={filterType} 
-              onValueChange={setFilterType}
+              onValueChange={handleFilterTypeChange}
             >
               <SelectTrigger>
                 <SelectValue placeholder="Tous les types" />
@@ -161,6 +167,7 @@ export const GestionLois: React.FC = () => {
             <LoiDetail 
               loi={selectedLoi} 
               onEdit={() => console.log('Edit loi:', selectedLoi.id)} 
+              onClose={handleClose}
             />
           </TabsContent>
         )}

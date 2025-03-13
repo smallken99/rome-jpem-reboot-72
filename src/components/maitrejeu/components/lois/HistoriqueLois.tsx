@@ -3,13 +3,13 @@ import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Loi } from '../../types/lois';
-import { Season } from '../../types/common';
+import { Season } from '@/utils/timeSystem';
 import { CheckCircle, XCircle, AlertCircle, ScrollText } from 'lucide-react';
 
 interface HistoireLoiProps {
   lois: Loi[];
   onViewLoi: (loi: Loi) => void;
-  formatSeason: (season: Season) => string;
+  formatSeason: (season: string) => string;
 }
 
 export const HistoriqueLois: React.FC<HistoireLoiProps> = ({ lois, onViewLoi, formatSeason }) => {
@@ -54,7 +54,7 @@ export const HistoriqueLois: React.FC<HistoireLoiProps> = ({ lois, onViewLoi, fo
             <div>
               <h3 className="font-medium text-lg">{loi.titre}</h3>
               <p className="text-sm text-muted-foreground">
-                {formatSeason(loi.date.season)} {Math.abs(loi.date.year)} {loi.date.year < 0 ? 'av. J.-C.' : 'ap. J.-C.'}
+                {formatSeason(loi.date.season.toString())} {Math.abs(loi.date.year)} {loi.date.year < 0 ? 'av. J.-C.' : 'ap. J.-C.'}
               </p>
             </div>
             <div className="self-start">

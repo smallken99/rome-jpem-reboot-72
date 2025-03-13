@@ -2,8 +2,8 @@
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Loi } from '../../types';
-import { formatGameDate } from '@/utils/timeSystem';
+import { Loi } from '../../types/lois';
+import { formatSeasonDisplay } from '@/utils/timeSystem';
 
 export interface LoiTimelineProps {
   lois: Loi[];
@@ -20,8 +20,8 @@ export const LoiTimeline: React.FC<LoiTimelineProps> = ({ lois, onSelectLoi }) =
     
     // Si les années sont identiques, comparer les saisons
     const seasonOrder: Record<string, number> = { 'Ver': 0, 'Aestas': 1, 'Autumnus': 2, 'Hiems': 3 };
-    const seasonA = a.dateProposition?.season ? seasonOrder[a.dateProposition.season] : 0;
-    const seasonB = b.dateProposition?.season ? seasonOrder[b.dateProposition.season] : 0;
+    const seasonA = a.dateProposition?.season ? seasonOrder[a.dateProposition.season.toString()] || 0 : 0;
+    const seasonB = b.dateProposition?.season ? seasonOrder[b.dateProposition.season.toString()] || 0 : 0;
     
     return seasonB - seasonA;
   });
@@ -45,6 +45,10 @@ export const LoiTimeline: React.FC<LoiTimelineProps> = ({ lois, onSelectLoi }) =
       case 'Promulguée': return 'bg-purple-100 text-purple-800';
       default: return 'bg-gray-100 text-gray-800';
     }
+  };
+  
+  const formatGameDate = (date: { year: number; season: string }) => {
+    return `An ${date.year}, ${formatSeasonDisplay(date.season)}`;
   };
   
   if (Object.keys(loisParAnnee).length === 0) {

@@ -5,7 +5,7 @@ import { Character } from '@/types/character';
 import { useTimeStore } from '@/utils/timeSystem';
 import { checkAllianceForBirths } from './birthUtils';
 import { familyAlliances } from '@/data/alliances';
-import { Season, reverseSeasonMapping } from '@/components/maitrejeu/types/common';
+import { Season, reverseSeasonMapping } from '@/utils/timeSystem';
 
 export const useAllianceBirths = (
   characters: Character[],

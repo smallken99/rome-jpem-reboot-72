@@ -6,7 +6,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Calendar, Clock } from 'lucide-react';
 import { useMaitreJeu } from '../context';
 import { GamePhase } from '../types/common';
-import { Season, formatGameDate, convertSeasonBetweenSystems } from '@/utils/timeSystem';
+import { Season, formatSeasonDisplay } from '@/utils/timeSystem';
 
 export const TimeManagement = () => {
   const { 
@@ -49,6 +49,10 @@ export const TimeManagement = () => {
   ];
   
   // Formatage de la date actuelle
+  const formatGameDate = (date: { year: number; season: string | Season }) => {
+    return `An ${date.year}, ${formatSeasonDisplay(date.season)}`;
+  };
+  
   const formattedDate = formatGameDate(currentDate);
   
   return (
