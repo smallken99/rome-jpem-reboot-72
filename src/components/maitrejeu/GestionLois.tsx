@@ -1,217 +1,218 @@
 
-import React, { useState } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import React, { useState, useEffect } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
-import { Plus } from 'lucide-react';
+import { Plus, Filter, X } from 'lucide-react';
 import { useMaitreJeu } from './context';
-import { Loi, LoiState } from './types/lois';
+import { Loi } from './types';
+import { GameDate } from './types/common';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Input } from '@/components/ui/input';
 import { LoisList } from './components/lois/LoisList';
 import { LoiDetail } from './components/lois/LoiDetail';
+import { LoiForm } from './components/lois/LoiForm';
 import { LoiModal } from './components/lois/LoiModal';
-import { v4 as uuidv4 } from 'uuid';
-import { LoiTimeline } from './components/lois/LoiTimeline';
 import { LoisSearchAndFilters } from './components/lois/LoisSearchAndFilters';
+import { LoiTimeline } from './components/lois/LoiTimeline';
 
 export const GestionLois: React.FC = () => {
   const { lois, addLoi, currentDate } = useMaitreJeu();
+  const [activeTab, setActiveTab] = useState('toutes');
+  const [selectedLoiId, setSelectedLoiId] = useState<string | null>(null);
+  const [showLoiModal, setShowLoiModal] = useState(false);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [filters, setFilters] = useState<Record<string, any>>({});
   
-  const [activeTab, setActiveTab] = useState<string>('proposées');
-  const [selectedLoiId, setSelectedLoiId] = useState<string>('');
-  const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
-  const [searchTerm, setSearchTerm] = useState<string>('');
-  const [filters, setFilters] = useState({
-    type: '',
-    importance: '',
-    année: '',
-    état: ''
-  });
-  
-  const handleAddLoi = (loiData: Omit<Loi, "id">) => {
-    // Créer une nouvelle loi avec un ID unique
-    const newLoi: Loi = {
-      id: uuidv4(),
-      ...loiData
-    };
-    
-    // Ajouter la loi
-    addLoi(newLoi);
-    setIsModalOpen(false);
+  const handleFilterChange = (key: string, value: any) => {
+    setFilters(prev => ({
+      ...prev,
+      [key]: value
+    }));
   };
   
-  const handleEditLoi = (id: string) => {
-    setSelectedLoiId(id);
+  const handleResetFilters = () => {
+    setFilters({});
+    setSearchTerm('');
   };
   
-  const voteLoi = (id: string, vote: 'pour' | 'contre' | 'abstention', count: number = 1) => {
-    // Cette fonction sera implémentée dans le contexte
-    console.log(`Vote ${vote} pour la loi ${id} avec ${count} voix`);
-    
-    // Mise à jour temporaire pour l'UI
-    const updatedLois = lois.map(loi => {
-      if (loi.id === id) {
-        if (vote === 'pour') {
-          return { ...loi, votesPositifs: loi.votesPositifs + count };
-        } else if (vote === 'contre') {
-          return { ...loi, votesNégatifs: loi.votesNégatifs + count };
-        } else {
-          return { ...loi, votesAbstention: loi.votesAbstention + count };
-        }
-      }
-      return loi;
-    });
-    
-    // Mettre à jour l'état local puisque le contexte n'a pas la fonction voteLoi
-    // Dans une implémentation complète, cela serait géré par le contexte
-  };
-  
-  // Filtrer et trier les lois en fonction de l'onglet actif
   const filteredLois = lois.filter(loi => {
-    // Appliquer le filtre de recherche
-    if (searchTerm && !loi.titre.toLowerCase().includes(searchTerm.toLowerCase()) && 
-        !loi.description.toLowerCase().includes(searchTerm.toLowerCase())) {
+    // Appliquer la recherche textuelle
+    if (searchTerm && !loi.titre.toLowerCase().includes(searchTerm.toLowerCase())) {
       return false;
     }
     
-    // Appliquer les autres filtres
-    if (filters.type && loi.type !== filters.type) {
-      return false;
-    }
-    if (filters.importance && loi.importance !== filters.importance) {
-      return false;
-    }
-    if (filters.année && loi.date.year.toString() !== filters.année) {
-      return false;
-    }
-    if (filters.état && loi.état !== filters.état) {
-      return false;
+    // Appliquer les filtres
+    for (const key in filters) {
+      if (filters[key] && loi[key as keyof Loi] !== filters[key]) {
+        return false;
+      }
     }
     
     // Filtrer selon l'onglet actif
-    if (activeTab === 'proposées') {
-      return loi.état === 'En délibération' || loi.état === 'proposée';
-    } else if (activeTab === 'actives') {
-      return loi.état === 'adoptée' || loi.état === 'Promulguée';
-    } else if (activeTab === 'rejetées') {
-      return loi.état === 'Rejetée' || loi.état === 'En délibération';
-    } else if (activeTab === 'historique') {
-      return true; // Afficher toutes les lois dans l'historique
+    if (activeTab === 'proposées' && loi.état !== 'proposée') {
+      return false;
+    }
+    if (activeTab === 'votées' && loi.état !== 'adoptée' && loi.état !== 'rejetée') {
+      return false;
+    }
+    if (activeTab === 'promulguées' && loi.état !== 'Promulguée') {
+      return false;
     }
     
     return true;
   });
   
-  // Récupérer la loi sélectionnée
-  const selectedLoi = lois.find(loi => loi.id === selectedLoiId);
+  const selectedLoi = selectedLoiId ? lois.find(l => l.id === selectedLoiId) : null;
+  
+  const handleViewLoi = (id: string) => {
+    setSelectedLoiId(id);
+  };
+  
+  const handleEditLoi = () => {
+    // Ouvrir le modal d'édition
+    setShowLoiModal(true);
+  };
+  
+  const handleCreateLoi = (loiData: Omit<Loi, "id">) => {
+    addLoi(loiData as Loi);
+    setShowLoiModal(false);
+  };
+  
+  const handleBackToList = () => {
+    setSelectedLoiId(null);
+  };
   
   return (
     <div className="p-6 space-y-6">
-      <div className="flex justify-between items-center">
-        <h1 className="text-3xl font-bold">Gestion des Lois</h1>
-        
-        <Button 
-          onClick={() => setIsModalOpen(true)}
-          className="flex items-center gap-1"
-        >
-          <Plus className="h-4 w-4" />
-          Nouvelle Loi
-        </Button>
-      </div>
+      <h1 className="text-3xl font-bold mb-6">Gestion des Lois</h1>
       
-      {selectedLoiId && selectedLoi ? (
+      {selectedLoi ? (
+        <div className="mb-4">
+          <Button variant="outline" onClick={handleBackToList}>
+            Retour à la liste
+          </Button>
+        </div>
+      ) : (
+        <div className="flex justify-between mb-4">
+          <Button onClick={() => setShowLoiModal(true)} className="flex items-center gap-2">
+            <Plus className="h-4 w-4" />
+            Proposer une nouvelle loi
+          </Button>
+        </div>
+      )}
+      
+      {!selectedLoi ? (
+        <>
+          <Card className="mb-6">
+            <CardHeader className="pb-3">
+              <CardTitle className="text-lg font-semibold">Recherche et filtres</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="flex flex-col md:flex-row gap-4 mb-4">
+                <div className="flex-1">
+                  <Input
+                    placeholder="Rechercher une loi..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    className="mb-2"
+                  />
+                </div>
+                
+                <div className="flex gap-2">
+                  <Button 
+                    variant="outline" 
+                    className="flex items-center gap-2"
+                    onClick={handleResetFilters}
+                  >
+                    <X className="h-4 w-4" />
+                    Réinitialiser
+                  </Button>
+                </div>
+              </div>
+              
+              <div className="flex flex-wrap gap-2">
+                {Object.entries(filters).map(([key, value]) => (
+                  value && (
+                    <Badge 
+                      key={key} 
+                      variant="outline"
+                      className="flex items-center gap-1"
+                    >
+                      {key}: {value}
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-4 w-4 p-0"
+                        onClick={() => handleFilterChange(key, null)}
+                      >
+                        <X className="h-3 w-3" />
+                      </Button>
+                    </Badge>
+                  )
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+          
+          <Tabs value={activeTab} onValueChange={setActiveTab}>
+            <TabsList className="grid grid-cols-4 mb-6 w-full md:w-auto">
+              <TabsTrigger value="toutes">Toutes</TabsTrigger>
+              <TabsTrigger value="proposées">Proposées</TabsTrigger>
+              <TabsTrigger value="votées">Votées</TabsTrigger>
+              <TabsTrigger value="promulguées">Promulguées</TabsTrigger>
+            </TabsList>
+            
+            <TabsContent value="toutes">
+              <LoisList 
+                lois={filteredLois} 
+                onViewLoi={handleViewLoi}
+              />
+            </TabsContent>
+            
+            <TabsContent value="proposées">
+              <LoisList 
+                lois={filteredLois.filter(l => l.état === 'proposée')} 
+                onViewLoi={handleViewLoi}
+              />
+            </TabsContent>
+            
+            <TabsContent value="votées">
+              <LoisList 
+                lois={filteredLois.filter(l => l.état === 'adoptée' || l.état === 'rejetée')} 
+                onViewLoi={handleViewLoi}
+              />
+            </TabsContent>
+            
+            <TabsContent value="promulguées">
+              <LoisList 
+                lois={filteredLois.filter(l => l.état === 'Promulguée')} 
+                onViewLoi={handleViewLoi}
+              />
+            </TabsContent>
+          </Tabs>
+          
+          <LoiTimeline 
+            lois={lois}
+            onSelectLoi={handleViewLoi}
+          />
+        </>
+      ) : (
         <Card>
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-xl">Détails de la Loi</CardTitle>
-            <Button 
-              variant="ghost" 
-              onClick={() => setSelectedLoiId('')}
-              className="h-8 px-2"
-            >
-              Retour à la liste
-            </Button>
-          </CardHeader>
-          <CardContent>
+          <CardContent className="p-6">
             <LoiDetail 
-              loi={selectedLoi}
-              onEdit={() => handleEditLoi(selectedLoi.id)}
+              loi={selectedLoi} 
+              onEdit={handleEditLoi}
             />
           </CardContent>
         </Card>
-      ) : (
-        <>
-          <Card className="p-4">
-            <LoisSearchAndFilters 
-              searchTerm={searchTerm}
-              setSearchTerm={setSearchTerm}
-              onFilterChange={(key, value) => setFilters({...filters, [key]: value})}
-              onResetFilters={() => setFilters({type: '', importance: '', année: '', état: ''})}
-            />
-          </Card>
-          
-          <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-            <TabsList className="grid grid-cols-4 mb-4">
-              <TabsTrigger value="proposées">Lois Proposées</TabsTrigger>
-              <TabsTrigger value="actives">Lois Actives</TabsTrigger>
-              <TabsTrigger value="rejetées">Lois Rejetées</TabsTrigger>
-              <TabsTrigger value="historique">Historique</TabsTrigger>
-            </TabsList>
-            
-            <TabsContent value="proposées">
-              <Card>
-                <CardContent className="p-6">
-                  <LoisList 
-                    lois={filteredLois} 
-                    onCreateLoi={() => setIsModalOpen(true)}
-                    onViewLoi={handleEditLoi}
-                  />
-                </CardContent>
-              </Card>
-            </TabsContent>
-            
-            <TabsContent value="actives">
-              <Card>
-                <CardContent className="p-6">
-                  <LoisList 
-                    lois={filteredLois} 
-                    onCreateLoi={() => setIsModalOpen(true)} 
-                    onViewLoi={handleEditLoi}
-                  />
-                </CardContent>
-              </Card>
-            </TabsContent>
-            
-            <TabsContent value="rejetées">
-              <Card>
-                <CardContent className="p-6">
-                  <LoisList 
-                    lois={filteredLois} 
-                    onCreateLoi={() => setIsModalOpen(true)} 
-                    onViewLoi={handleEditLoi}
-                  />
-                </CardContent>
-              </Card>
-            </TabsContent>
-            
-            <TabsContent value="historique">
-              <Card>
-                <CardContent className="p-6">
-                  <LoiTimeline 
-                    lois={filteredLois} 
-                    onViewLoi={handleEditLoi}
-                  />
-                </CardContent>
-              </Card>
-            </TabsContent>
-          </Tabs>
-        </>
       )}
       
-      {isModalOpen && (
-        <LoiModal 
-          isOpen={isModalOpen} 
-          onClose={() => setIsModalOpen(false)} 
-          onSave={handleAddLoi}
-          initialDate={currentDate}
+      {showLoiModal && (
+        <LoiModal
+          isOpen={true}
+          onClose={() => setShowLoiModal(false)}
+          onSave={handleCreateLoi}
         />
       )}
     </div>

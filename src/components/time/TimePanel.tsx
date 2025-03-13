@@ -1,105 +1,67 @@
 
-import React, { useState } from 'react';
-import { Calendar, Hourglass, SunDim } from 'lucide-react';
-import { useTimeStore, formatRomanSeason, areSeasonsEqual, Season } from '@/utils/timeSystem';
-import { formatSeasonDisplay } from '@/components/maitrejeu/types/common';
+import React from 'react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Calendar, Clock, ArrowRight } from 'lucide-react';
+import { useMaitreJeu } from '@/components/maitrejeu/context';
+import { formatGameDate, Season } from '@/utils/timeSystem';
 
-interface TimePanelProps {
-  minimal?: boolean;
-}
-
-export const TimePanel: React.FC<TimePanelProps> = ({ minimal = false }) => {
-  const { year, season, advanceTime, getSeason, getYear } = useTimeStore();
-  const [timeMessage, setTimeMessage] = useState<string | null>(null);
+export const TimePanel: React.FC = () => {
+  const { currentDate, currentPhase, advanceTime } = useMaitreJeu();
   
-  // Fonction pour faire avancer le temps
-  const handleAdvanceTime = () => {
-    // Sauvegarder l'état actuel pour comparaison
-    const currentSeason = getSeason();
-    const currentYear = getYear();
-    
-    // Faire avancer le temps
-    advanceTime();
-    
-    // Obtenir la nouvelle saison après avancement
-    const newSeason = getSeason();
-    const newYear = getYear();
-    
-    // Si la saison a changé
-    if (currentSeason !== newSeason) {
-      // Afficher un message de nouvelle saison
-      setTimeMessage(`Nouvelle saison: ${formatSeasonDisplay(newSeason)}`);
-      
-      // Si nous avons complété une année complète
-      if (newYear > currentYear) {
-        setTimeMessage(`Nouvelle année: ${newYear} AUC`);
-      }
-      
-      // Effacer le message après 3 secondes
-      setTimeout(() => setTimeMessage(null), 3000);
-    }
+  // Fonction pour formater la saison en français
+  const formatRomanSeason = (season: Season): string => {
+    const seasons: Record<Season, string> = {
+      'Ver': 'Printemps',
+      'Aestas': 'Été',
+      'Autumnus': 'Automne',
+      'Hiems': 'Hiver'
+    };
+    return seasons[season] || String(season);
   };
   
-  // Obtenir l'icône et la couleur pour la saison
-  const getSeasonInfo = () => {
-    const currentSeason = getSeason();
-    
-    if (currentSeason === 'Ver') {
-      return { icon: <SunDim className={`${minimal ? 'h-4 w-4' : 'h-5 w-5'} text-green-500`} />, color: 'bg-green-100 text-green-800' };
-    } else if (currentSeason === 'Aestas') {
-      return { icon: <SunDim className={`${minimal ? 'h-4 w-4' : 'h-5 w-5'} text-amber-500`} />, color: 'bg-amber-100 text-amber-800' };
-    } else if (currentSeason === 'Autumnus') {
-      return { icon: <SunDim className={`${minimal ? 'h-4 w-4' : 'h-5 w-5'} text-orange-500`} />, color: 'bg-orange-100 text-orange-800' };
-    } else if (currentSeason === 'Hiems') {
-      return { icon: <SunDim className={`${minimal ? 'h-4 w-4' : 'h-5 w-5'} text-blue-500`} />, color: 'bg-blue-100 text-blue-800' };
-    } else {
-      return { icon: <SunDim className={`${minimal ? 'h-4 w-4' : 'h-5 w-5'}`} />, color: 'bg-gray-100 text-gray-800' };
-    }
-  };
-  
-  const { icon, color } = getSeasonInfo();
-  
-  if (minimal) {
-    return (
-      <div className="flex items-center space-x-2 text-sm">
-        <div className={`px-1.5 py-0.5 rounded-md flex items-center gap-1 ${color}`}>
-          {icon}
-          <span className="text-xs font-medium">{formatSeasonDisplay(getSeason())}</span>
-        </div>
-        <span className="text-xs text-muted-foreground">{getYear()} AUC</span>
-      </div>
-    );
-  }
+  // Formatage de la date actuelle
+  const formattedDate = formatGameDate(currentDate);
   
   return (
-    <div className="rounded-md border p-3 bg-white shadow-sm">
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <Calendar className="h-5 w-5 text-muted-foreground" />
-          <span className="text-sm font-medium">{formatSeasonDisplay(getSeason())} {getYear()} AUC</span>
+    <Card className="mb-6">
+      <CardHeader className="pb-3">
+        <CardTitle className="text-lg font-semibold flex items-center">
+          <Clock className="mr-2 h-5 w-5" />
+          Avancement du Temps
+        </CardTitle>
+      </CardHeader>
+      <CardContent>
+        <div className="flex flex-col md:flex-row justify-between items-center">
+          <div className="flex items-center space-x-3 mb-4 md:mb-0">
+            <div className="flex flex-col">
+              <span className="text-sm text-muted-foreground">Date actuelle</span>
+              <span className="font-medium flex items-center mt-1">
+                <Calendar className="mr-2 h-4 w-4 text-muted-foreground" />
+                {formattedDate}
+              </span>
+            </div>
+            
+            <div className="h-10 w-px bg-gray-200 mx-2 hidden md:block" />
+            
+            <div className="flex flex-col">
+              <span className="text-sm text-muted-foreground">Phase</span>
+              <span className="font-medium flex items-center mt-1">
+                <Clock className="mr-2 h-4 w-4 text-muted-foreground" />
+                {currentPhase}
+              </span>
+            </div>
+          </div>
+          
+          <Button 
+            onClick={() => advanceTime()}
+            className="flex items-center gap-1"
+          >
+            Avancer au tour suivant
+            <ArrowRight className="ml-1 h-4 w-4" />
+          </Button>
         </div>
-        
-        <button
-          onClick={handleAdvanceTime}
-          className="p-1.5 rounded-full bg-muted/50 hover:bg-muted transition-colors"
-          title="Avancer le temps"
-        >
-          <Hourglass className="h-4 w-4 text-muted-foreground" />
-        </button>
-      </div>
-      
-      <div className="flex items-center gap-4 mt-2">
-        <div className={`px-2 py-1 rounded-md flex items-center gap-1 ${color}`}>
-          {icon}
-          <span className="text-xs font-medium">{formatSeasonDisplay(getSeason())}</span>
-        </div>
-      </div>
-      
-      {timeMessage && (
-        <div className="mt-2 text-sm bg-blue-50 text-blue-700 px-2 py-1 rounded animate-fade-in">
-          {timeMessage}
-        </div>
-      )}
-    </div>
+      </CardContent>
+    </Card>
   );
 };

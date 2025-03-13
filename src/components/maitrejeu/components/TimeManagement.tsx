@@ -6,11 +6,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Calendar, Clock } from 'lucide-react';
 import { useMaitreJeu } from '../context';
 import { GamePhase } from '../types/common';
-import { 
-  PlayerSeason, 
-  formatGameDate,
-  convertSeasonBetweenSystems
-} from '@/utils/timeSystem';
+import { Season, formatGameDate, convertSeasonBetweenSystems } from '@/utils/timeSystem';
 
 export const TimeManagement = () => {
   const { 
@@ -20,13 +16,11 @@ export const TimeManagement = () => {
     changePhase 
   } = useMaitreJeu();
   
-  const [selectedSeason, setSelectedSeason] = useState<PlayerSeason>('SPRING');
+  const [selectedSeason, setSelectedSeason] = useState<Season>('Ver');
   const [selectedPhase, setSelectedPhase] = useState<GamePhase>(currentPhase);
   
   const handleAdvanceTime = () => {
-    // Conversion de PlayerSeason vers Season pour l'appel à advanceTime
-    const mjSeason = convertSeasonBetweenSystems(selectedSeason, 'mj');
-    advanceTime(mjSeason);
+    advanceTime(selectedSeason);
   };
   
   const handleChangePhase = () => {
@@ -79,16 +73,16 @@ export const TimeManagement = () => {
               <label className="text-sm font-medium">Avancer au...</label>
               <Select
                 value={selectedSeason}
-                onValueChange={(value: PlayerSeason) => setSelectedSeason(value)}
+                onValueChange={(value: Season) => setSelectedSeason(value)}
               >
                 <SelectTrigger>
                   <SelectValue placeholder="Sélectionner une saison" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="SPRING">Printemps</SelectItem>
-                  <SelectItem value="SUMMER">Été</SelectItem>
-                  <SelectItem value="AUTUMN">Automne</SelectItem>
-                  <SelectItem value="WINTER">Hiver</SelectItem>
+                  <SelectItem value="Ver">Printemps</SelectItem>
+                  <SelectItem value="Aestas">Été</SelectItem>
+                  <SelectItem value="Autumnus">Automne</SelectItem>
+                  <SelectItem value="Hiems">Hiver</SelectItem>
                 </SelectContent>
               </Select>
             </div>

@@ -1,96 +1,181 @@
 
-import React from 'react';
-import { Input } from '@/components/ui/input';
+import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { ImportanceType } from '../../types/common';
+import { Label } from '@/components/ui/label';
+import { useMaitreJeu } from '../../context';
+import { Loi } from '../../types';
+import { v4 as uuidv4 } from 'uuid';
 
-// Type spécifique pour le formulaire de loi qui est un sous-ensemble de Loi
-interface LoiFormData {
-  titre: string;
-  proposeur: string;
-  catégorie: string;
-  importance: ImportanceType;
-  description: string;
-}
-
-interface LoiFormProps {
-  newLoi: LoiFormData;
-  handleInputChange: (e: React.ChangeEvent<HTMLInputElement>, field: keyof LoiFormData) => void;
-  handleSelectChange: (value: string, field: keyof LoiFormData) => void;
-  handleAddLoi: () => void;
-  onCancel: () => void;
+export interface LoiFormProps {
+  initialData?: Loi;
+  onSubmit: (data: Omit<Loi, "id">) => void;
 }
 
 export const LoiForm: React.FC<LoiFormProps> = ({
-  newLoi,
-  handleInputChange,
-  handleSelectChange,
-  handleAddLoi,
-  onCancel
+  initialData,
+  onSubmit
 }) => {
+  const { senateurs, currentDate } = useMaitreJeu();
+  
+  const [loiData, setLoiData] = useState<Omit<Loi, "id">>({
+    titre: initialData?.titre || '',
+    description: initialData?.description || '',
+    proposeur: initialData?.proposeur || '',
+    dateProposition: initialData?.dateProposition || currentDate,
+    type: initialData?.type || 'politique',
+    état: initialData?.état || 'proposée',
+    effets: initialData?.effets || [],
+    votes: initialData?.votes || { pour: 0, contre: 0, abstention: 0 },
+    commentaires: initialData?.commentaires || ''
+  });
+  
+  const [newEffet, setNewEffet] = useState('');
+  
+  const handleChange = (field: keyof Omit<Loi, "id">, value: any) => {
+    setLoiData(prev => ({
+      ...prev,
+      [field]: value
+    }));
+  };
+  
+  const handleAddEffet = () => {
+    if (newEffet.trim()) {
+      setLoiData(prev => ({
+        ...prev,
+        effets: [...(prev.effets || []), newEffet]
+      }));
+      setNewEffet('');
+    }
+  };
+  
+  const handleRemoveEffet = (index: number) => {
+    setLoiData(prev => ({
+      ...prev,
+      effets: prev.effets?.filter((_, i) => i !== index) || []
+    }));
+  };
+  
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    onSubmit(loiData);
+  };
+  
   return (
-    <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full">
-      <div className="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
-        <div className="mt-3 text-center">
-          <h3 className="text-lg leading-6 font-medium text-gray-900">Proposer une nouvelle loi</h3>
-          <div className="mt-2">
+    <form onSubmit={handleSubmit} className="space-y-4">
+      <div className="space-y-2">
+        <Label htmlFor="titre">Titre de la loi</Label>
+        <Input
+          id="titre"
+          value={loiData.titre}
+          onChange={(e) => handleChange('titre', e.target.value)}
+          placeholder="Ex: Lex Agraria"
+          required
+        />
+      </div>
+      
+      <div className="space-y-2">
+        <Label htmlFor="description">Description</Label>
+        <Textarea
+          id="description"
+          value={loiData.description}
+          onChange={(e) => handleChange('description', e.target.value)}
+          placeholder="Décrivez le contenu et l'objectif de cette loi..."
+          rows={4}
+          required
+        />
+      </div>
+      
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="space-y-2">
+          <Label htmlFor="proposeur">Proposeur</Label>
+          <Select
+            value={loiData.proposeur}
+            onValueChange={(value) => handleChange('proposeur', value)}
+          >
+            <SelectTrigger>
+              <SelectValue placeholder="Sélectionner un sénateur" />
+            </SelectTrigger>
+            <SelectContent>
+              {senateurs.map((senateur) => (
+                <SelectItem key={senateur.id} value={senateur.nom}>
+                  {senateur.prenom} {senateur.nom}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+        
+        <div className="space-y-2">
+          <Label htmlFor="type">Type de loi</Label>
+          <Select
+            value={loiData.type}
+            onValueChange={(value) => handleChange('type', value)}
+          >
+            <SelectTrigger>
+              <SelectValue placeholder="Sélectionner un type" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="politique">Politique</SelectItem>
+              <SelectItem value="sociale">Sociale</SelectItem>
+              <SelectItem value="économique">Économique</SelectItem>
+              <SelectItem value="judiciaire">Judiciaire</SelectItem>
+              <SelectItem value="militaire">Militaire</SelectItem>
+              <SelectItem value="religieuse">Religieuse</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+      </div>
+      
+      <div className="space-y-2">
+        <Label>Effets de la loi</Label>
+        <div className="space-y-2">
+          {loiData.effets && loiData.effets.map((effet, index) => (
+            <div key={index} className="flex items-center gap-2">
+              <Input value={effet} readOnly />
+              <Button 
+                type="button" 
+                variant="ghost" 
+                onClick={() => handleRemoveEffet(index)}
+              >
+                Supprimer
+              </Button>
+            </div>
+          ))}
+          
+          <div className="flex items-center gap-2">
             <Input
-              placeholder="Titre de la loi"
-              value={newLoi.titre}
-              onChange={(e) => handleInputChange(e, 'titre')}
-              className="mb-2"
+              value={newEffet}
+              onChange={(e) => setNewEffet(e.target.value)}
+              placeholder="Ajouter un effet de la loi..."
             />
-            <Input
-              placeholder="Proposeur"
-              value={newLoi.proposeur}
-              onChange={(e) => handleInputChange(e, 'proposeur')}
-              className="mb-2"
-            />
-            <Select value={newLoi.catégorie} onValueChange={(value) => handleSelectChange(value, 'catégorie')}>
-              <SelectTrigger className="w-full mb-2">
-                <SelectValue placeholder="Catégorie" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="politique">Politique</SelectItem>
-                <SelectItem value="social">Social</SelectItem>
-                <SelectItem value="économique">Économique</SelectItem>
-                <SelectItem value="Agraire">Agraire</SelectItem>
-                <SelectItem value="Électorale">Électorale</SelectItem>
-                <SelectItem value="Administrative">Administrative</SelectItem>
-                <SelectItem value="Judiciaire">Judiciaire</SelectItem>
-                <SelectItem value="Militaire">Militaire</SelectItem>
-                <SelectItem value="Fiscale">Fiscale</SelectItem>
-                <SelectItem value="Religieuse">Religieuse</SelectItem>
-              </SelectContent>
-            </Select>
-            <Select value={newLoi.importance} onValueChange={(value) => handleSelectChange(value as ImportanceType, 'importance')}>
-              <SelectTrigger className="w-full mb-2">
-                <SelectValue placeholder="Importance" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="majeure">Majeure</SelectItem>
-                <SelectItem value="mineure">Mineure</SelectItem>
-                <SelectItem value="normale">Normale</SelectItem>
-              </SelectContent>
-            </Select>
-            <Input
-              placeholder="Description"
-              value={newLoi.description}
-              onChange={(e) => handleInputChange(e, 'description')}
-              className="mb-2"
-            />
-          </div>
-          <div className="items-center px-4 py-3">
-            <Button variant="secondary" onClick={handleAddLoi} className="mr-2">
-              Proposer
-            </Button>
-            <Button variant="ghost" onClick={onCancel}>
-              Annuler
+            <Button 
+              type="button" 
+              variant="outline" 
+              onClick={handleAddEffet}
+            >
+              Ajouter
             </Button>
           </div>
         </div>
       </div>
-    </div>
+      
+      <div className="space-y-2">
+        <Label htmlFor="commentaires">Commentaires additionnels</Label>
+        <Textarea
+          id="commentaires"
+          value={loiData.commentaires}
+          onChange={(e) => handleChange('commentaires', e.target.value)}
+          placeholder="Commentaires ou notes supplémentaires..."
+          rows={3}
+        />
+      </div>
+      
+      <Button type="submit" className="w-full">
+        {initialData ? 'Mettre à jour' : 'Créer la loi'}
+      </Button>
+    </form>
   );
 };

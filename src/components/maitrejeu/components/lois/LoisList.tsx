@@ -1,87 +1,82 @@
 
 import React from 'react';
-import { Card } from '@/components/ui/card';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Book } from 'lucide-react';
-import { Loi } from '../../types/lois';
-import { Season } from '../../types/common';
+import { User, CalendarDays, ArrowRight } from 'lucide-react';
+import { Loi } from '../../types';
+import { formatGameDate } from '@/utils/timeSystem';
 
-interface LoisListProps {
+export interface LoisListProps {
   lois: Loi[];
-  onCreateLoi?: () => void;
-  onViewLoi: (loi: Loi) => void;
-  onEditLoi?: (loi: Loi) => void;
-  showAdditionalActions?: boolean;
-  actionLabel?: string;
-  primaryAction?: boolean;
-  formatSeason?: (season: Season) => string;
+  onViewLoi: (id: string) => void;
 }
 
-export const LoisList: React.FC<LoisListProps> = ({ 
-  lois, 
-  onCreateLoi, 
-  onViewLoi,
-  onEditLoi,
-  showAdditionalActions = false,
-  actionLabel = "Modifier",
-  primaryAction = false,
-  formatSeason
-}) => {
+export const LoisList: React.FC<LoisListProps> = ({ lois, onViewLoi }) => {
+  const getStatutColor = (statut: string) => {
+    switch (statut) {
+      case 'proposée': return 'bg-blue-100 text-blue-800';
+      case 'adoptée': return 'bg-green-100 text-green-800';
+      case 'rejetée': return 'bg-red-100 text-red-800';
+      case 'Promulguée': return 'bg-purple-100 text-purple-800';
+      default: return 'bg-gray-100 text-gray-800';
+    }
+  };
+  
+  if (lois.length === 0) {
+    return (
+      <Card>
+        <CardContent className="p-6 text-center text-muted-foreground">
+          Aucune loi ne correspond à vos critères de recherche.
+        </CardContent>
+      </Card>
+    );
+  }
+  
   return (
     <div className="space-y-4">
-      {lois.map(loi => (
-        <Card key={loi.id} className="p-4">
-          <div className="flex justify-between items-start">
-            <div>
-              <h3 className="font-medium text-lg">{loi.titre}</h3>
-              <p className="text-sm text-muted-foreground">{loi.description}</p>
-              {formatSeason && (
-                <div className="flex gap-2 mt-2">
-                  <span className="text-xs bg-secondary px-2 py-1 rounded-full">
-                    {loi.catégorie}
+      {lois.map((loi) => (
+        <Card key={loi.id} className="overflow-hidden">
+          <CardHeader className="pb-2">
+            <div className="flex justify-between items-start">
+              <div>
+                <CardTitle className="text-lg">{loi.titre}</CardTitle>
+                <CardDescription className="flex items-center gap-2">
+                  <span className="flex items-center">
+                    <User className="h-3 w-3 mr-1" />
+                    {loi.proposeur}
                   </span>
-                  <span className="text-xs bg-secondary px-2 py-1 rounded-full">
-                    {`${formatSeason(loi.date.season)} ${Math.abs(loi.date.year)} ${loi.date.year < 0 ? 'av. J.-C.' : 'ap. J.-C.'}`}
+                  <span className="flex items-center">
+                    <CalendarDays className="h-3 w-3 mr-1" />
+                    {formatGameDate(loi.dateProposition)}
                   </span>
-                </div>
-              )}
-              {!formatSeason && loi.proposeur && (
-                <p className="text-sm mt-1">Proposeur: <span className="font-medium">{loi.proposeur}</span></p>
-              )}
+                </CardDescription>
+              </div>
+              
+              <Badge variant="outline" className={getStatutColor(loi.état)}>
+                {loi.état}
+              </Badge>
             </div>
-            <div className="flex items-center gap-2">
-              {showAdditionalActions && (
-                <Button 
-                  variant={primaryAction ? "default" : "destructive"} 
-                  size="sm"
-                >
-                  {actionLabel}
-                </Button>
-              )}
-              {onEditLoi && (
-                <Button 
-                  variant="outline" 
-                  size="sm" 
-                  onClick={() => onEditLoi(loi)}
-                >
-                  {showAdditionalActions ? "Détails" : "Modifier"}
-                </Button>
-              )}
-              <Button variant="outline" size="sm" onClick={() => onViewLoi(loi)}>
-                <Book className="h-4 w-4 mr-2" />
+          </CardHeader>
+          <CardContent>
+            <p className="text-sm text-muted-foreground line-clamp-2 mb-3">
+              {loi.description}
+            </p>
+            
+            <div className="flex justify-end">
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                className="flex items-center"
+                onClick={() => onViewLoi(loi.id)}
+              >
                 Voir détails
+                <ArrowRight className="ml-1 h-4 w-4" />
               </Button>
             </div>
-          </div>
+          </CardContent>
         </Card>
       ))}
-      
-      {onCreateLoi && (
-        <Button variant="secondary" className="mt-4" onClick={onCreateLoi}>
-          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-4 w-4 mr-2"><circle cx="12" cy="12" r="10"></circle><path d="M12 8v8"></path><path d="M8 12h8"></path></svg>
-          Proposer une nouvelle loi
-        </Button>
-      )}
     </div>
   );
 };

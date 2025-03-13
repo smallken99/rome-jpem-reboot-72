@@ -1,90 +1,110 @@
 
 import React from 'react';
-import { Loi } from '../../types/lois';
-import { Season, PlayerSeason, formatSeasonDisplay } from '../../types/common';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Loi } from '../../types';
+import { formatGameDate } from '@/utils/timeSystem';
 
-interface LoiTimelineProps {
+export interface LoiTimelineProps {
   lois: Loi[];
-  onSelectLoi: (loi: Loi) => void;
+  onSelectLoi?: (id: string) => void;
 }
 
 export const LoiTimeline: React.FC<LoiTimelineProps> = ({ lois, onSelectLoi }) => {
-  // Sort laws by date (from most recent to oldest)
+  // On trie les lois par date de proposition (des plus récentes aux plus anciennes)
   const sortedLois = [...lois].sort((a, b) => {
-    // First compare years
-    if (a.date.year !== b.date.year) {
-      return b.date.year - a.date.year;
-    }
+    const dateA = a.dateProposition?.year || 0;
+    const dateB = b.dateProposition?.year || 0;
     
-    // If years are identical, compare seasons
-    const seasonOrder: Record<string, number> = {
-      "WINTER": 0,
-      "AUTUMN": 1,
-      "SUMMER": 2,
-      "SPRING": 3,
-      "Hiems": 0,
-      "Autumnus": 1,
-      "Aestas": 2,
-      "Ver": 3
-    };
+    if (dateA !== dateB) return dateB - dateA;
     
-    const seasonA = typeof a.date.season === 'string' ? a.date.season : 'SPRING';
-    const seasonB = typeof b.date.season === 'string' ? b.date.season : 'SPRING';
+    // Si les années sont identiques, comparer les saisons
+    const seasonOrder: Record<string, number> = { 'Ver': 0, 'Aestas': 1, 'Autumnus': 2, 'Hiems': 3 };
+    const seasonA = a.dateProposition?.season ? seasonOrder[a.dateProposition.season] : 0;
+    const seasonB = b.dateProposition?.season ? seasonOrder[b.dateProposition.season] : 0;
     
-    return seasonOrder[seasonB] - seasonOrder[seasonA];
+    return seasonB - seasonA;
   });
   
-  // Group laws by year for display in the timeline
+  // Regrouper les lois par année
   const loisParAnnee: Record<number, Loi[]> = {};
   sortedLois.forEach(loi => {
-    if (!loisParAnnee[loi.date.year]) {
-      loisParAnnee[loi.date.year] = [];
+    if (loi.dateProposition?.year) {
+      if (!loisParAnnee[loi.dateProposition.year]) {
+        loisParAnnee[loi.dateProposition.year] = [];
+      }
+      loisParAnnee[loi.dateProposition.year].push(loi);
     }
-    loisParAnnee[loi.date.year].push(loi);
   });
   
+  const getStatutColor = (statut: string) => {
+    switch (statut) {
+      case 'proposée': return 'bg-blue-100 text-blue-800';
+      case 'adoptée': return 'bg-green-100 text-green-800';
+      case 'rejetée': return 'bg-red-100 text-red-800';
+      case 'Promulguée': return 'bg-purple-100 text-purple-800';
+      default: return 'bg-gray-100 text-gray-800';
+    }
+  };
+  
+  if (Object.keys(loisParAnnee).length === 0) {
+    return (
+      <Card>
+        <CardContent className="p-6 text-center text-muted-foreground">
+          Aucune loi n'a encore été proposée.
+        </CardContent>
+      </Card>
+    );
+  }
+  
   return (
-    <div className="space-y-8">
-      {Object.entries(loisParAnnee)
-        .sort(([yearA], [yearB]) => parseInt(yearB) - parseInt(yearA))
-        .map(([year, loisAnnee]) => (
-          <div key={year} className="space-y-4">
-            <h3 className="font-bold text-lg border-b pb-2">
-              Année {Math.abs(parseInt(year))} {parseInt(year) < 0 ? 'av. J.-C.' : 'ap. J.-C.'}
-            </h3>
-            <div className="space-y-4 pl-4 border-l-2 border-gray-200">
-              {loisAnnee.map(loi => (
-                <div 
-                  key={loi.id} 
-                  className="relative pl-6 cursor-pointer hover:bg-gray-50 p-2 rounded-lg transition-colors"
-                  onClick={() => onSelectLoi(loi)}
-                >
-                  <div className="absolute w-3 h-3 rounded-full -left-[7px] top-3 border-2 border-white bg-primary"></div>
-                  <div className="flex justify-between">
-                    <h4 className="font-medium">{loi.titre}</h4>
-                    <span className={`text-xs px-2 py-1 rounded-full ${
-                      loi.état === "Promulguée" ? "bg-green-100 text-green-800" : 
-                      loi.état === "Rejetée" ? "bg-red-100 text-red-800" : 
-                      "bg-yellow-100 text-yellow-800"
-                    }`}>
-                      {loi.état}
-                    </span>
+    <Card>
+      <CardHeader>
+        <CardTitle>Chronologie des Lois</CardTitle>
+      </CardHeader>
+      <CardContent>
+        <div className="space-y-8">
+          {Object.entries(loisParAnnee).map(([annee, loisAnnee]) => (
+            <div key={annee} className="space-y-4">
+              <h3 className="text-lg font-semibold sticky top-0 bg-white py-2">
+                Année {annee}
+              </h3>
+              
+              <div className="border-l-2 border-muted space-y-4 pl-4 ml-2">
+                {loisAnnee.map(loi => (
+                  <div 
+                    key={loi.id} 
+                    className="relative pb-1 cursor-pointer hover:bg-muted/30 p-2 rounded-md -ml-2 transition-colors"
+                    onClick={() => onSelectLoi && onSelectLoi(loi.id)}
+                  >
+                    <div className="absolute -left-6 top-3 w-4 h-4 rounded-full bg-primary border-4 border-white dark:border-gray-800" />
+                    
+                    <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-2">
+                      <div className="space-y-1">
+                        <div className="text-sm text-muted-foreground">
+                          {formatGameDate(loi.dateProposition)}
+                        </div>
+                        <h4 className="text-base font-medium">{loi.titre}</h4>
+                      </div>
+                      
+                      <Badge 
+                        variant="outline" 
+                        className={`${getStatutColor(loi.état)} whitespace-nowrap`}
+                      >
+                        {loi.état}
+                      </Badge>
+                    </div>
+                    
+                    <p className="text-sm text-muted-foreground mt-1 line-clamp-2">
+                      {loi.description}
+                    </p>
                   </div>
-                  <p className="text-sm text-muted-foreground">{formatSeasonDisplay(loi.date.season)}</p>
-                  <p className="text-sm mt-1">{loi.description.substring(0, 100)}...</p>
-                  <div className="flex gap-2 mt-2">
-                    <span className="text-xs bg-secondary px-2 py-1 rounded-full">
-                      {loi.catégorie}
-                    </span>
-                    <span className="text-xs bg-secondary px-2 py-1 rounded-full">
-                      Proposeur: {loi.proposeur.split(' ')[0]}
-                    </span>
-                  </div>
-                </div>
-              ))}
+                ))}
+              </div>
             </div>
-          </div>
-        ))}
-    </div>
+          ))}
+        </div>
+      </CardContent>
+    </Card>
   );
 };

@@ -1,71 +1,45 @@
 
 import React from 'react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
-import { useMaitreJeu } from '../../context';
-import { Loi } from '../../types/lois';
-import { useLoiForm } from './hooks/useLoiForm';
-import { LoiBasicInfoSection } from './form-sections/LoiBasicInfoSection';
-import { LoiStatusSection } from './form-sections/LoiStatusSection';
-import { LoiVotesSection } from './form-sections/LoiVotesSection';
-import { LoiEffetsSection } from './form-sections/LoiEffetsSection';
+import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { LoiForm } from './LoiForm';
+import { Loi } from '../../types';
 
-interface LoiModalProps {
+export interface LoiModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onSave: (loi: Loi) => void;
-  editLoi?: Loi | null;
+  onSave: (loiData: Omit<Loi, "id">) => void;
+  initialData?: Loi;
 }
 
 export const LoiModal: React.FC<LoiModalProps> = ({
   isOpen,
   onClose,
   onSave,
-  editLoi
+  initialData
 }) => {
-  const { formData, handleInputChange, handleSelectChange, handleEffetChange, resetForm, handleSubmit } = 
-    useLoiForm(editLoi, onSave);
+  const handleSave = (data: Omit<Loi, "id">) => {
+    onSave(data);
+    onClose();
+  };
   
   return (
-    <Dialog open={isOpen} onOpenChange={(open) => {
-      if (!open) {
-        resetForm();
-        onClose();
-      }
-    }}>
-      <DialogContent className="sm:max-w-[650px] max-h-[90vh] overflow-y-auto">
+    <Dialog open={isOpen} onOpenChange={onClose}>
+      <DialogContent className="max-w-lg">
         <DialogHeader>
-          <DialogTitle>{editLoi ? 'Modifier une loi' : 'Créer une nouvelle loi'}</DialogTitle>
+          <DialogTitle>
+            {initialData ? 'Modifier la loi' : 'Proposer une nouvelle loi'}
+          </DialogTitle>
         </DialogHeader>
         
-        <div className="grid gap-4 py-4">
-          <LoiBasicInfoSection 
-            formData={formData} 
-            handleInputChange={handleInputChange} 
-          />
-          
-          <LoiStatusSection 
-            formData={formData}
-            handleSelectChange={handleSelectChange}
-          />
-          
-          <LoiVotesSection 
-            formData={formData}
-            handleInputChange={handleInputChange}
-          />
-          
-          <LoiEffetsSection 
-            formData={formData}
-            handleEffetChange={handleEffetChange}
-          />
-        </div>
+        <LoiForm 
+          initialData={initialData}
+          onSubmit={handleSave}
+        />
         
         <DialogFooter>
-          <Button type="button" variant="outline" onClick={onClose}>
+          <Button variant="outline" onClick={onClose}>
             Annuler
-          </Button>
-          <Button type="button" onClick={() => handleSubmit()}>
-            {editLoi ? 'Mettre à jour' : 'Créer'}
           </Button>
         </DialogFooter>
       </DialogContent>
