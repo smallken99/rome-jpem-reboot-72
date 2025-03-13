@@ -15,10 +15,11 @@ export interface MembreFamille {
   genre: GenreFamille;
   statut: StatutFamilial;
   statutMatrimonial: StatutMatrimonial;
+  familleId?: string;     // ID de la famille à laquelle appartient le membre
   role?: string;
-  pere?: string; // ID du père
-  mere?: string; // ID de la mère
-  senateurId?: string; // Référence à un sénateur si applicable
+  pere?: string;          // ID du père
+  mere?: string;          // ID de la mère
+  senateurId?: string;    // Référence à un sénateur si applicable
   education?: string;
   popularite?: number;
   piete?: number;

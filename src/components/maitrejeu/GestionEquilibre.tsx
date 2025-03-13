@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -22,19 +21,16 @@ export const GestionEquilibre: React.FC = () => {
   const [showEventForm, setShowEventForm] = useState(false);
   const [activeTab, setActiveTab] = useState('general');
   
-  // États pour les facteurs d'équilibre
   const [facteurSenat, setFacteurSenat] = useState(equilibre?.facteurSenat || 50);
   const [facteurPlebs, setFacteurPlebs] = useState(equilibre?.facteurPlebs || 50);
   const [facteurPatriciens, setFacteurPatriciens] = useState(equilibre?.facteurPatriciens || 50);
   const [facteurMilitaire, setFacteurMilitaire] = useState(equilibre?.facteurMilitaire || 50);
   const [facteurReligieux, setFacteurReligieux] = useState(equilibre?.facteurReligieux || 50);
   
-  // États pour les factions
   const [populaires, setPopulaires] = useState(equilibre?.populaires || 33);
   const [optimates, setOptimates] = useState(equilibre?.optimates || 33);
   const [moderates, setModerates] = useState(equilibre?.moderates || 34);
   
-  // État pour les notes
   const [notes, setNotes] = useState(equilibre?.notes || '');
   
   const recentEvenements = evenements
@@ -46,7 +42,6 @@ export const GestionEquilibre: React.FC = () => {
     .sort((a, b) => (b.date.year - a.date.year) || (b.date.season.localeCompare(a.date.season)));
   
   const appliquerChangements = () => {
-    // Mettre à jour l'équilibre général
     updateEquilibre({
       facteurSenat,
       facteurPlebs,
@@ -56,10 +51,7 @@ export const GestionEquilibre: React.FC = () => {
       notes
     });
     
-    // Mettre à jour l'équilibre des factions
     updateFactionBalance(populaires, optimates, moderates);
-    
-    // Afficher un message de succès...
   };
   
   const getStatusColor = (value: number) => {
@@ -436,7 +428,7 @@ export const GestionEquilibre: React.FC = () => {
                           <Badge variant="outline" className="bg-secondary/20">
                             {evt.importance}
                           </Badge>
-                          <Badge variant={evt.resolved ? "success" : "secondary"}>
+                          <Badge variant={evt.resolved ? "outline" : "secondary"}>
                             {evt.resolved ? "Résolu" : "En cours"}
                           </Badge>
                         </div>
@@ -505,9 +497,9 @@ export const GestionEquilibre: React.FC = () => {
         <TabsContent value="lois" className="space-y-6 mt-6">
           <Card>
             <CardHeader>
-              <CardTitle>Lois Récentes</CardTitle>
+              <CardTitle>Lois récentes</CardTitle>
               <CardDescription>
-                Législation récente qui a influencé l'équilibre politique
+                Récentes réformes législatives et leur impact
               </CardDescription>
             </CardHeader>
             <CardContent className="max-h-96 overflow-y-auto">
@@ -521,13 +513,9 @@ export const GestionEquilibre: React.FC = () => {
                         <Badge variant="outline" className="bg-secondary/20">
                           {loi.type}
                         </Badge>
-                        <Badge variant={
-                          loi.état === 'Promulguée' || loi.état === 'adoptée' 
-                            ? "success" 
-                            : loi.état === 'rejetée' 
-                              ? "destructive" 
-                              : "secondary"
-                        }>
+                        <Badge variant={loi.état === "adoptée" ? "outline" : 
+                                        loi.état === "rejetée" ? "destructive" : 
+                                        "secondary"}>
                           {loi.état}
                         </Badge>
                       </div>

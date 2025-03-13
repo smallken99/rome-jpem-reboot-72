@@ -1,8 +1,8 @@
 
 // Types pour les lois
 
-export type LoiType = 'politique' | 'économique' | 'sociale' | 'judiciaire' | 'militaire' | 'religieuse';
-export type LoiStatut = 'proposée' | 'adoptée' | 'rejetée' | 'Promulguée' | 'En délibération';
+export type LoiType = 'politique' | 'économique' | 'sociale' | 'judiciaire' | 'militaire' | 'religieuse' | 'civile';
+export type LoiStatut = 'proposée' | 'adoptée' | 'rejetée' | 'Promulguée' | 'En délibération' | 'Rejetée';
 
 // Clause d'une loi
 export interface Clause {
@@ -35,6 +35,7 @@ export interface Loi {
     season: string;
   };
   état: LoiStatut;
+  importance?: 'mineure' | 'normale' | 'majeure';
   votesPositifs: number;
   votesNégatifs: number;
   votesAbstention: number;
@@ -45,10 +46,14 @@ export interface Loi {
   };
   clauses?: Clause[];
   impacts?: Impact[];
-  effets: string[];
+  effets: string[] | Record<string, any>;
   dateVote?: {
     year: number;
     season: string;
   };
   commentaires?: string;
+  nom?: string;
 }
+
+// Alias pour la rétrocompatibilité
+export type LoiState = LoiStatut;

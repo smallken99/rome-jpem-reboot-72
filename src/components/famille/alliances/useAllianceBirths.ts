@@ -2,9 +2,10 @@
 import { useState, useEffect } from 'react';
 import { useToast } from '@/components/ui/use-toast';
 import { Character } from '@/types/character';
-import { useTimeStore, Season } from '@/utils/timeSystem';
+import { useTimeStore } from '@/utils/timeSystem';
 import { checkAllianceForBirths } from './birthUtils';
 import { familyAlliances } from '@/data/alliances';
+import { Season, reverseSeasonMapping } from '@/components/maitrejeu/types/common';
 
 export const useAllianceBirths = (
   characters: Character[],
@@ -15,7 +16,9 @@ export const useAllianceBirths = (
   
   // Obtenir l'heure actuelle depuis le store
   const timeStore = useTimeStore();
-  const { season } = timeStore;
+  const playerSeason = timeStore.season;
+  // Convertir la saison au format attendu
+  const season: Season = reverseSeasonMapping[playerSeason] || "Ver";
   const year = timeStore.getYear();
   
   // Filtrer les alliances pour n'afficher que les actives

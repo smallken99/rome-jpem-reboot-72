@@ -454,6 +454,16 @@ export const initialElections: Election[] = [];
 export const initialHistoireEntries: HistoireEntry[] = [];
 export const initialLois: Loi[] = [];
 export const initialEquilibre: Equilibre | null = {
+  facteurSenat: 50,
+  facteurPlebs: 50,
+  facteurPatriciens: 50,
+  facteurMilitaire: 50,
+  facteurReligieux: 50,
+  populaires: 35,
+  optimates: 40,
+  moderates: 25,
+  
+  // Propriétés additionnelles pour rétrocompatibilité
   population: 0,
   armée: 0,
   économie: 0,
@@ -461,11 +471,10 @@ export const initialEquilibre: Equilibre | null = {
   loyauté: 0,
   patriciens: 0,
   plébéiens: 0,
-  populares: 35,
-  optimates: 40,
+  populaires: 35,
   neutrales: 0,
-  moderates: 25,
   historique: []
 };
 export const initialDate: GameDate = { year: 632, season: "SPRING" };
 export const initialPhase: GamePhase = "SENATE";
+

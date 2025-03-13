@@ -10,5 +10,29 @@ export interface Equilibre {
   populaires: number;            // Pourcentage (0-100)
   optimates: number;             // Pourcentage (0-100)
   moderates: number;             // Pourcentage (0-100)
+  
+  // Propriétés additionnelles pour la compatibilité
+  population?: number;
+  armée?: number;
+  économie?: number;
+  morale?: number;
+  loyauté?: number;
+  patriciens?: number;
+  plébéiens?: number;
+  populares?: number;
+  neutrales?: number;
+  historique?: any[];
+  
   notes?: string;                // Notes sur l'état actuel
+}
+
+// Type pour les événements politiques dans la timeline
+export interface PoliticalEvent {
+  id: string;
+  title: string;
+  description: string;
+  date: Date | string;
+  type: string;
+  impact: number;
+  faction?: string;
 }

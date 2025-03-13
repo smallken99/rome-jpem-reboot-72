@@ -1,29 +1,38 @@
 
-import React, { useEffect, useState } from 'react';
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import React, { useState, useEffect } from 'react';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { FamilleInfo, StatutFamilial, FamilleCreationData } from '../../types';
-import { useMaitreJeu } from '../../context';
+import { 
+  Select, 
+  SelectContent, 
+  SelectItem, 
+  SelectTrigger, 
+  SelectValue 
+} from '@/components/ui/select';
+import { FamilleInfo, FamilleCreationData, StatutFamilial } from '../../types';
 
-interface FamilleModalProps {
+export interface FamilleModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onSave: (famille: FamilleCreationData) => void;
-  editFamille?: FamilleInfo;
+  initialData?: FamilleInfo;
+  onSave: (data: FamilleCreationData) => void;
 }
 
 export const FamilleModal: React.FC<FamilleModalProps> = ({
   isOpen,
   onClose,
-  onSave,
-  editFamille
+  initialData,
+  onSave
 }) => {
-  const { updateFamille } = useMaitreJeu();
-  
   const [formData, setFormData] = useState<FamilleCreationData>({
     nom: '',
     gens: '',
@@ -33,106 +42,71 @@ export const FamilleModal: React.FC<FamilleModalProps> = ({
     richesse: 10000,
     description: '',
     devise: '',
-    couleurPrimaire: '#3b82f6',
-    couleurSecondaire: '#d1d5db'
+    couleurPrimaire: '#3B82F6',
+    couleurSecondaire: '#64748B'
   });
-  
-  // Initialiser le formulaire avec les données de la famille à éditer
+
   useEffect(() => {
-    if (editFamille) {
+    if (initialData) {
       setFormData({
-        nom: editFamille.nom,
-        gens: editFamille.gens,
-        statut: editFamille.statut,
-        prestige: editFamille.prestige,
-        influence: editFamille.influence,
-        richesse: editFamille.richesse,
-        description: editFamille.description || '',
-        devise: editFamille.devise || '',
-        couleurPrimaire: editFamille.couleurPrimaire || '#3b82f6',
-        couleurSecondaire: editFamille.couleurSecondaire || '#d1d5db'
-      });
-    } else {
-      // Réinitialiser le formulaire
-      setFormData({
-        nom: '',
-        gens: '',
-        statut: 'Patricien',
-        prestige: 50,
-        influence: 50,
-        richesse: 10000,
-        description: '',
-        devise: '',
-        couleurPrimaire: '#3b82f6',
-        couleurSecondaire: '#d1d5db'
+        nom: initialData.nom || '',
+        gens: initialData.gens || '',
+        statut: initialData.statut || 'Patricien',
+        prestige: initialData.prestige || 50,
+        influence: initialData.influence || 50,
+        richesse: initialData.richesse || 10000,
+        description: initialData.description || '',
+        devise: initialData.devise || '',
+        couleurPrimaire: initialData.couleurPrimaire || '#3B82F6',
+        couleurSecondaire: initialData.couleurSecondaire || '#64748B'
       });
     }
-  }, [editFamille, isOpen]);
-  
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    const { name, value } = e.target;
-    setFormData(prev => ({
-      ...prev,
-      [name]: name === 'prestige' || name === 'influence' || name === 'richesse' 
-        ? parseInt(value, 10) 
-        : value
-    }));
+  }, [initialData]);
+
+  const handleChange = (field: keyof FamilleCreationData, value: any) => {
+    setFormData(prev => ({ ...prev, [field]: value }));
   };
-  
+
   const handleSubmit = () => {
-    if (editFamille) {
-      updateFamille(editFamille.id, formData);
-      onClose();
-    } else {
-      onSave(formData);
-    }
+    onSave(formData);
   };
-  
-  const isFormValid = () => {
-    return formData.nom && formData.gens;
-  };
-  
+
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-[500px]">
+      <DialogContent className="sm:max-w-[600px]">
         <DialogHeader>
-          <DialogTitle>{editFamille ? 'Modifier une famille' : 'Créer une nouvelle famille'}</DialogTitle>
-          <DialogDescription>
-            {editFamille 
-              ? 'Modifier les informations de la famille'
-              : 'Remplissez les informations pour créer une nouvelle famille'}
-          </DialogDescription>
+          <DialogTitle>
+            {initialData ? 'Modifier une famille' : 'Créer une nouvelle famille'}
+          </DialogTitle>
         </DialogHeader>
-        
+
         <div className="grid gap-4 py-4">
-          <div className="grid grid-cols-2 gap-3">
-            <div>
-              <Label htmlFor="nom">Nom de famille</Label>
+          <div className="grid grid-cols-2 gap-4">
+            <div className="flex flex-col gap-2">
+              <Label htmlFor="nom">Nom de la famille</Label>
               <Input
                 id="nom"
-                name="nom"
                 value={formData.nom}
-                onChange={handleChange}
+                onChange={(e) => handleChange('nom', e.target.value)}
                 placeholder="Ex: Julii"
               />
             </div>
-            <div>
+            <div className="flex flex-col gap-2">
               <Label htmlFor="gens">Gens</Label>
               <Input
                 id="gens"
-                name="gens"
                 value={formData.gens}
-                onChange={handleChange}
+                onChange={(e) => handleChange('gens', e.target.value)}
                 placeholder="Ex: Julia"
               />
             </div>
           </div>
-          
-          <div>
+
+          <div className="flex flex-col gap-2">
             <Label htmlFor="statut">Statut</Label>
             <Select
               value={formData.statut}
-              onValueChange={(value) => setFormData(prev => ({ ...prev, statut: value as StatutFamilial }))}
+              onValueChange={(value) => handleChange('statut', value as StatutFamilial)}
             >
               <SelectTrigger id="statut">
                 <SelectValue placeholder="Sélectionner un statut" />
@@ -143,114 +117,108 @@ export const FamilleModal: React.FC<FamilleModalProps> = ({
               </SelectContent>
             </Select>
           </div>
-          
-          <div>
-            <Label htmlFor="prestige">Prestige ({formData.prestige}/100)</Label>
-            <Input
-              id="prestige"
-              name="prestige"
-              type="range"
-              min="0"
-              max="100"
-              value={formData.prestige}
-              onChange={handleChange}
-            />
+
+          <div className="grid grid-cols-2 gap-4">
+            <div className="flex flex-col gap-2">
+              <Label htmlFor="prestige">Prestige ({formData.prestige})</Label>
+              <Input
+                id="prestige"
+                type="range"
+                min="0"
+                max="100"
+                value={formData.prestige}
+                onChange={(e) => handleChange('prestige', parseInt(e.target.value))}
+              />
+            </div>
+            <div className="flex flex-col gap-2">
+              <Label htmlFor="influence">Influence ({formData.influence})</Label>
+              <Input
+                id="influence"
+                type="range"
+                min="0"
+                max="100"
+                value={formData.influence}
+                onChange={(e) => handleChange('influence', parseInt(e.target.value))}
+              />
+            </div>
           </div>
-          
-          <div>
-            <Label htmlFor="influence">Influence ({formData.influence}/100)</Label>
-            <Input
-              id="influence"
-              name="influence"
-              type="range"
-              min="0"
-              max="100"
-              value={formData.influence}
-              onChange={handleChange}
-            />
-          </div>
-          
-          <div>
-            <Label htmlFor="richesse">Richesse ({formData.richesse} as)</Label>
+
+          <div className="flex flex-col gap-2">
+            <Label htmlFor="richesse">Richesse (As)</Label>
             <Input
               id="richesse"
-              name="richesse"
               type="number"
-              min="0"
               value={formData.richesse}
-              onChange={handleChange}
+              onChange={(e) => handleChange('richesse', parseInt(e.target.value))}
+              min="0"
             />
           </div>
-          
-          <div>
+
+          <div className="flex flex-col gap-2">
             <Label htmlFor="devise">Devise</Label>
             <Input
               id="devise"
-              name="devise"
               value={formData.devise}
-              onChange={handleChange}
-              placeholder="Ex: Through history, glory"
+              onChange={(e) => handleChange('devise', e.target.value)}
+              placeholder="Ex: Fortune favors the bold"
             />
           </div>
-          
-          <div className="grid grid-cols-2 gap-3">
-            <div>
+
+          <div className="grid grid-cols-2 gap-4">
+            <div className="flex flex-col gap-2">
               <Label htmlFor="couleurPrimaire">Couleur primaire</Label>
-              <div className="flex items-center gap-2">
+              <div className="flex gap-2">
                 <Input
                   id="couleurPrimaire"
-                  name="couleurPrimaire"
                   type="color"
                   value={formData.couleurPrimaire}
-                  onChange={handleChange}
-                  className="w-12 h-8 p-0"
+                  onChange={(e) => handleChange('couleurPrimaire', e.target.value)}
+                  className="w-12 h-10 p-1"
                 />
-                <Input 
+                <Input
                   value={formData.couleurPrimaire}
-                  onChange={handleChange}
-                  name="couleurPrimaire"
+                  onChange={(e) => handleChange('couleurPrimaire', e.target.value)}
                   className="flex-1"
                 />
               </div>
             </div>
-            <div>
+            <div className="flex flex-col gap-2">
               <Label htmlFor="couleurSecondaire">Couleur secondaire</Label>
-              <div className="flex items-center gap-2">
+              <div className="flex gap-2">
                 <Input
                   id="couleurSecondaire"
-                  name="couleurSecondaire"
                   type="color"
                   value={formData.couleurSecondaire}
-                  onChange={handleChange}
-                  className="w-12 h-8 p-0"
+                  onChange={(e) => handleChange('couleurSecondaire', e.target.value)}
+                  className="w-12 h-10 p-1"
                 />
-                <Input 
+                <Input
                   value={formData.couleurSecondaire}
-                  onChange={handleChange}
-                  name="couleurSecondaire"
+                  onChange={(e) => handleChange('couleurSecondaire', e.target.value)}
                   className="flex-1"
                 />
               </div>
             </div>
           </div>
-          
-          <div>
+
+          <div className="flex flex-col gap-2">
             <Label htmlFor="description">Description</Label>
             <Textarea
               id="description"
-              name="description"
               value={formData.description}
-              onChange={handleChange}
+              onChange={(e) => handleChange('description', e.target.value)}
               placeholder="Description de la famille..."
-              rows={3}
+              rows={4}
             />
           </div>
         </div>
-        
+
         <DialogFooter>
-          <Button variant="outline" onClick={onClose}>Annuler</Button>
-          <Button onClick={handleSubmit} disabled={!isFormValid()}>
-            {editFamille ? 'Sauvegarder' : 'Créer la famille'}
+          <Button variant="outline" onClick={onClose}>
+            Annuler
+          </Button>
+          <Button onClick={handleSubmit}>
+            {initialData ? 'Mettre à jour' : 'Créer'}
           </Button>
         </DialogFooter>
       </DialogContent>
