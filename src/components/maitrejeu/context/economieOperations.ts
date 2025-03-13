@@ -1,206 +1,228 @@
 
-import { generateId } from '../types/common';
-import { EconomieRecord, EconomieCreationData } from '../types/economie';
+import { v4 as uuidv4 } from 'uuid';
+import { EconomieRecord, EconomieCreationData, TreasuryStatus, EconomicFactors } from '../types/economie';
+import { Season } from '@/utils/timeSystem';
+import { GameDate } from '../types/common';
 
+// Crée les opérations pour la gestion de l'économie par le MJ
 export const createEconomieOperations = (
   setEconomieRecords: React.Dispatch<React.SetStateAction<EconomieRecord[]>>
 ) => {
   // Ajouter un nouvel enregistrement économique
   const addEconomieRecord = (data: EconomieCreationData): string => {
-    const id = generateId();
-    const now = new Date();
-    
     const newRecord: EconomieRecord = {
-      id,
-      date: {
-        year: new Date().getFullYear() - 753, // AUC (Ab Urbe Condita) - année de fondation de Rome
-        season: getCurrentSeason(),
-      },
-      ...data,
-      createdAt: now,
-      updatedAt: now
+      id: uuidv4(),
+      amount: data.amount,
+      category: data.category,
+      description: data.description,
+      date: data.date,
+      source: data.source || 'manual_entry',
+      approved: data.approved !== undefined ? data.approved : true,
+      tags: data.tags || [],
+      impactFactors: data.impactFactors || {}
     };
     
     setEconomieRecords(prev => [newRecord, ...prev]);
-    return id;
+    return newRecord.id;
   };
   
-  // Mettre à jour un enregistrement économique existant
+  // Mettre à jour un enregistrement existant
   const updateEconomieRecord = (id: string, updates: Partial<EconomieCreationData>) => {
     setEconomieRecords(prev => 
       prev.map(record => 
         record.id === id 
-          ? { 
-              ...record, 
-              ...updates, 
-              updatedAt: new Date() 
-            } 
+          ? { ...record, ...updates } 
           : record
       )
     );
   };
   
-  // Supprimer un enregistrement économique
+  // Supprimer un enregistrement
   const deleteEconomieRecord = (id: string) => {
     setEconomieRecords(prev => prev.filter(record => record.id !== id));
   };
   
-  // Utilitaire pour obtenir la saison actuelle
-  const getCurrentSeason = (): 'SPRING' | 'SUMMER' | 'AUTUMN' | 'WINTER' => {
-    const month = new Date().getMonth();
-    if (month >= 2 && month <= 4) return 'SPRING';
-    if (month >= 5 && month <= 7) return 'SUMMER';
-    if (month >= 8 && month <= 10) return 'AUTUMN';
-    return 'WINTER';
-  };
-
-  // Générer des rapports économiques
-  const generateEconomicReport = (
-    startYear: number,
-    startSeason: string,
-    endYear: number,
-    endSeason: string,
-    records: EconomieRecord[]
+  // Calculer le bilan économique
+  const calculateEconomicBalance = (
+    records: EconomieRecord[], 
+    startDate?: string, 
+    endDate?: string
   ) => {
-    // Filtrer les enregistrements dans la période
-    const filteredRecords = records.filter(record => {
-      if (record.date.year < startYear) return false;
-      if (record.date.year > endYear) return false;
-      
-      // Même année que le début, vérifier la saison
-      if (record.date.year === startYear && record.date.season < startSeason) return false;
-      
-      // Même année que la fin, vérifier la saison
-      if (record.date.year === endYear && record.date.season > endSeason) return false;
-      
-      return true;
-    });
+    let filteredRecords = [...records];
     
-    // Calculer les totaux
+    if (startDate) {
+      filteredRecords = filteredRecords.filter(r => new Date(r.date) >= new Date(startDate));
+    }
+    
+    if (endDate) {
+      filteredRecords = filteredRecords.filter(r => new Date(r.date) <= new Date(endDate));
+    }
+    
     const totalIncome = filteredRecords
-      .filter(r => r.type === 'income')
+      .filter(r => r.amount > 0)
       .reduce((sum, r) => sum + r.amount, 0);
       
     const totalExpenses = filteredRecords
-      .filter(r => r.type === 'expense')
-      .reduce((sum, r) => sum + r.amount, 0);
+      .filter(r => r.amount < 0)
+      .reduce((sum, r) => sum + Math.abs(r.amount), 0);
       
-    // Calculer par catégorie
-    const categories: Record<string, { income: number, expense: number }> = {};
-    
-    filteredRecords.forEach(record => {
-      if (!categories[record.category]) {
-        categories[record.category] = { income: 0, expense: 0 };
-      }
-      
-      if (record.type === 'income') {
-        categories[record.category].income += record.amount;
-      } else {
-        categories[record.category].expense += record.amount;
-      }
-    });
-    
     return {
-      period: {
-        start: { year: startYear, season: startSeason },
-        end: { year: endYear, season: endSeason }
-      },
       totalIncome,
       totalExpenses,
       balance: totalIncome - totalExpenses,
-      categories
+      recordCount: filteredRecords.length,
+      categories: getCategorySummary(filteredRecords)
     };
+  };
+  
+  // Obtenir un résumé par catégorie
+  const getCategorySummary = (records: EconomieRecord[]) => {
+    const categories: Record<string, { income: number; expenses: number }> = {};
+    
+    records.forEach(record => {
+      if (!categories[record.category]) {
+        categories[record.category] = { income: 0, expenses: 0 };
+      }
+      
+      if (record.amount > 0) {
+        categories[record.category].income += record.amount;
+      } else {
+        categories[record.category].expenses += Math.abs(record.amount);
+      }
+    });
+    
+    return categories;
   };
   
   // Calculer l'impact économique d'un événement
   const calculateEventEconomicImpact = (
-    eventType: string,
-    baseAmount: number,
-    treasuryBalance: number,
-    inflationRate: number
-  ): { income: number, expense: number, netImpact: number } => {
-    let income = 0;
-    let expense = 0;
+    event: { 
+      type: string; 
+      severity: number; 
+      duration: number;
+      impactAreas: string[];
+    },
+    currentFactors: EconomicFactors
+  ): Partial<EconomicFactors> => {
+    // Créer une copie des facteurs actuels
+    const updatedFactors: Partial<EconomicFactors> = {};
+    const impactMultiplier = event.severity / 10; // 0.1 à 1.0
     
-    // Ajuster en fonction de l'inflation
-    const inflationFactor = 1 + (inflationRate / 100);
-    
-    switch (eventType) {
-      case 'guerre':
-        expense = baseAmount * 1.5 * inflationFactor;
-        break;
-      case 'famine':
-        expense = baseAmount * inflationFactor;
-        // Le coût augmente si le trésor est bas
-        if (treasuryBalance < baseAmount * 10) {
-          expense *= 1.25;
-        }
-        break;
-      case 'commerce':
-        income = baseAmount * inflationFactor;
-        // Les profits augmentent si le trésor est élevé (meilleure infrastructure)
-        if (treasuryBalance > baseAmount * 20) {
-          income *= 1.2;
-        }
-        break;
-      case 'tribut':
-        income = baseAmount * inflationFactor;
-        break;
-      default:
-        // Événement générique
-        const random = Math.random();
-        if (random < 0.6) {
-          expense = baseAmount * inflationFactor * (0.5 + random);
-        } else {
-          income = baseAmount * inflationFactor * random;
-        }
-    }
-    
-    return {
-      income,
-      expense,
-      netImpact: income - expense
-    };
-  };
-  
-  // Gérer les impôts et revenus récurrents
-  const processRecurringTransactions = (date: { year: number, season: string }, records: EconomieRecord[]) => {
-    const recurringRecords = records.filter(r => r.isRecurring);
-    const newTransactions: EconomieRecord[] = [];
-    
-    recurringRecords.forEach(record => {
-      if (
-        (record.recurringInterval === 'seasonal') ||
-        (record.recurringInterval === 'yearly' && date.season === 'SPRING')
-      ) {
-        // Créer un nouvel enregistrement basé sur la transaction récurrente
-        const now = new Date();
-        const newRecord: EconomieRecord = {
-          ...record,
-          id: generateId(),
-          date: { ...date },
-          createdAt: now,
-          updatedAt: now
-        };
-        
-        newTransactions.push(newRecord);
+    // Appliquer les impacts selon les domaines affectés
+    event.impactAreas.forEach(area => {
+      switch (area) {
+        case 'tax':
+          updatedFactors.taxCollection = currentFactors.taxCollection * (1 - impactMultiplier * 0.2);
+          break;
+        case 'trade':
+          updatedFactors.tradeRevenue = currentFactors.tradeRevenue * (1 - impactMultiplier * 0.3);
+          break;
+        case 'military':
+          updatedFactors.militaryExpense = currentFactors.militaryExpense * (1 + impactMultiplier * 0.5);
+          break;
+        case 'province':
+          updatedFactors.provinceRevenue = currentFactors.provinceRevenue * (1 - impactMultiplier * 0.25);
+          break;
+        case 'religion':
+          updatedFactors.religiousCeremonyExpense = currentFactors.religiousCeremonyExpense * (1 + impactMultiplier * 0.2);
+          break;
+        case 'public':
+          updatedFactors.publicWorksExpense = currentFactors.publicWorksExpense * (1 + impactMultiplier * 0.4);
+          break;
+        case 'war':
+          updatedFactors.warSpoilsRevenue = currentFactors.warSpoilsRevenue * (1 + impactMultiplier);
+          updatedFactors.militaryExpense = currentFactors.militaryExpense * (1 + impactMultiplier * 0.8);
+          break;
+        case 'admin':
+          updatedFactors.adminExpense = currentFactors.adminExpense * (1 + impactMultiplier * 0.15);
+          break;
       }
     });
     
-    // Ajouter les nouvelles transactions
-    if (newTransactions.length > 0) {
-      setEconomieRecords(prev => [...newTransactions, ...prev]);
+    return updatedFactors;
+  };
+  
+  // Simuler des projections économiques
+  const simulateEconomicProjection = (
+    currentFactors: EconomicFactors,
+    seasons: number,
+    events: Array<{ impact: Partial<EconomicFactors>; startSeason: number; duration: number }>
+  ) => {
+    // Copie profonde des facteurs pour éviter la mutation
+    const projectedFactors: EconomicFactors[] = Array(seasons).fill(0).map(() => ({ ...currentFactors }));
+    
+    // Appliquer une tendance naturelle (croissance économique, inflation)
+    for (let i = 0; i < seasons; i++) {
+      projectedFactors[i].taxCollection *= (1 + 0.01); // +1% par saison
+      projectedFactors[i].tradeRevenue *= (1 + 0.015); // +1.5% par saison
+      projectedFactors[i].militaryExpense *= (1 + 0.02); // +2% par saison
+      projectedFactors[i].adminExpense *= (1 + 0.01); // +1% par saison
     }
     
-    return newTransactions;
+    // Appliquer les événements
+    events.forEach(event => {
+      const startIndex = Math.max(0, event.startSeason);
+      const endIndex = Math.min(seasons - 1, startIndex + event.duration - 1);
+      
+      for (let i = startIndex; i <= endIndex; i++) {
+        // Appliquer chaque impact à la projection de cette saison
+        Object.entries(event.impact).forEach(([key, value]) => {
+          // Type assertion nécessaire ici
+          const economicKey = key as keyof EconomicFactors;
+          if (typeof value === 'number') {
+            (projectedFactors[i][economicKey] as number) = value;
+          }
+        });
+      }
+    });
+    
+    // Calculer les totaux et les soldes pour chaque saison
+    const projections = projectedFactors.map((factors, index) => {
+      const totalRevenue = factors.taxCollection + factors.provinceRevenue + 
+                          factors.tradeRevenue + factors.warSpoilsRevenue;
+      const totalExpenses = factors.militaryExpense + factors.publicWorksExpense + 
+                            factors.religiousCeremonyExpense + factors.adminExpense;
+      
+      // Créer un objet date pour cette projection
+      // Correction du typage ici:
+      const dateInfo: GameDate = {
+        year: Math.floor(currentFactors.currentYear + index / 4),
+        season: getSeason(index % 4) as Season,
+        phase: "ECONOMY",
+        day: 1
+      };
+      
+      return {
+        seasonIndex: index,
+        date: dateInfo,
+        factors: { ...factors },
+        totalRevenue,
+        totalExpenses,
+        balance: totalRevenue - totalExpenses
+      };
+    });
+    
+    return projections;
+  };
+  
+  // Fonction utilitaire pour obtenir la saison selon l'index
+  const getSeason = (index: number): Season => {
+    switch (index) {
+      case 0: return 'Ver';
+      case 1: return 'Aestas';
+      case 2: return 'Autumnus';
+      case 3: return 'Hiems';
+      default: return 'Ver';
+    }
   };
   
   return {
     addEconomieRecord,
     updateEconomieRecord,
     deleteEconomieRecord,
-    generateEconomicReport,
+    calculateEconomicBalance,
+    getCategorySummary,
     calculateEventEconomicImpact,
-    processRecurringTransactions
+    simulateEconomicProjection
   };
 };

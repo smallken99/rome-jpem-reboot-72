@@ -52,3 +52,56 @@ export const calculatePercentageChange = (current: number, previous: number): nu
   if (previous === 0) return 0;
   return ((current - previous) / previous) * 100;
 };
+
+/**
+ * Formate un temps d'activité en format lisible
+ */
+export const formatUptime = (uptimeInSeconds: number): string => {
+  const days = Math.floor(uptimeInSeconds / 86400);
+  const hours = Math.floor((uptimeInSeconds % 86400) / 3600);
+  const minutes = Math.floor((uptimeInSeconds % 3600) / 60);
+  
+  if (days > 0) {
+    return `${days}j ${hours}h ${minutes}m`;
+  } else if (hours > 0) {
+    return `${hours}h ${minutes}m`;
+  } else {
+    return `${minutes}m`;
+  }
+};
+
+/**
+ * Convertit une saison du système de temps en saison pour le MJ
+ */
+export const convertTimeSeasonToMaitreJeuSeason = (season: string): import('@/components/maitrejeu/types/common').Season => {
+  const seasonMap: Record<string, import('@/components/maitrejeu/types/common').Season> = {
+    'SPRING': 'Ver',
+    'SUMMER': 'Aestas',
+    'AUTUMN': 'Autumnus',
+    'WINTER': 'Hiems',
+    'Ver': 'Ver',
+    'Aestas': 'Aestas',
+    'Autumnus': 'Autumnus',
+    'Hiems': 'Hiems'
+  };
+  
+  return seasonMap[season] || 'Ver';
+};
+
+/**
+ * Formate une date complète pour affichage
+ */
+export const formatFullDate = (date: { year: number, season: string }): string => {
+  return `${convertTimeSeasonToMaitreJeuSeason(date.season)} ${date.year} AUC`;
+};
+
+/**
+ * Convertit une valeur numérique en notation romaine de qualité/influence
+ */
+export const numberToRomanInfluence = (value: number): string => {
+  if (value >= 90) return '++++';
+  if (value >= 70) return '+++';
+  if (value >= 50) return '++';
+  if (value >= 30) return '+';
+  return '-';
+};
