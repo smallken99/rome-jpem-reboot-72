@@ -20,7 +20,7 @@ export const createTimeOperations = (
       
       // Sinon, avancer à la saison suivante selon un ordre prédéfini
       const seasons: Season[] = ['Ver', 'Aestas', 'Autumnus', 'Hiems'];
-      const currentIndex = seasons.indexOf(prevDate.season);
+      const currentIndex = seasons.indexOf(prevDate.season as Season);
       const nextIndex = (currentIndex + 1) % seasons.length;
       
       // Si nous revenons à la première saison, incrémenter l'année

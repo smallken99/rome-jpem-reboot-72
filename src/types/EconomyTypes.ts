@@ -12,6 +12,15 @@ export interface Transaction {
   recurring?: boolean;
 }
 
+export interface TransactionCreationParams {
+  amount: number;
+  type: 'income' | 'expense';
+  description: string;
+  category: string;
+  source?: string;
+  recurring?: boolean;
+}
+
 export interface EconomyStats {
   totalIncome: number;
   totalExpenses: number;
