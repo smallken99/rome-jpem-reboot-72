@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { ResourceTransaction } from '../types';
 import { formatDate } from '@/utils/formatUtils';
@@ -7,7 +8,7 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { Separator } from '@/components/ui/separator';
 import { ArrowDownIcon, ArrowUpIcon, ArrowRightIcon } from 'lucide-react';
 import { GameDate } from '@/components/maitrejeu/types/common';
-import { convertDateToGameDate } from '@/utils/dateConverters';
+import { convertDateToGameDate, parseGameDate } from '@/utils/dateConverters';
 
 interface ResourceTransactionsProps {
   transactions: ResourceTransaction[];

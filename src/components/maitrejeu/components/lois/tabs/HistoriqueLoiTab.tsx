@@ -5,7 +5,7 @@ import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { Button } from '@/components/ui/button';
 import { HistoriqueLoiTabProps } from '../types';
-import { formatDate, parseGameDate } from '@/utils/timeSystem';
+import { formatDate, parseGameDate } from '@/utils/dateConverters';
 import { Loi } from '@/components/maitrejeu/types/lois';
 
 export const HistoriqueLoiTab: React.FC<HistoriqueLoiTabProps> = ({ 
@@ -62,6 +62,20 @@ export const HistoriqueLoiTab: React.FC<HistoriqueLoiTabProps> = ({
     return loi.statut || loi.status || loi.état || '';
   };
 
+  // Helper function to get the votes
+  const getVotesFor = (loi: Loi): number => {
+    return loi.votes?.pour || loi.votesPositifs || loi.votesFor || 0;
+  };
+
+  const getVotesAgainst = (loi: Loi): number => {
+    return loi.votes?.contre || loi.votesNégatifs || loi.votesAgainst || 0;
+  };
+
+  // Helper function to get the type
+  const getLoiType = (loi: Loi): string => {
+    return loi.type ? String(loi.type) : "Politique";
+  };
+
   return (
     <div className="space-y-4">
       {sortedLois.length === 0 ? (
@@ -107,8 +121,8 @@ export const HistoriqueLoiTab: React.FC<HistoriqueLoiTabProps> = ({
               </div>
               <Separator className="my-3" />
               <div className="flex justify-between text-xs">
-                <span>Votes: <span className="text-green-600 font-medium">{loi.votes?.pour || loi.votesPositifs || loi.votesFor || 0}</span> / <span className="text-red-600 font-medium">{loi.votes?.contre || loi.votesNégatifs || loi.votesAgainst || 0}</span></span>
-                <span>Type: {loi.type || "Politique"}</span>
+                <span>Votes: <span className="text-green-600 font-medium">{getVotesFor(loi)}</span> / <span className="text-red-600 font-medium">{getVotesAgainst(loi)}</span></span>
+                <span>Type: {getLoiType(loi)}</span>
               </div>
             </CardContent>
           </Card>

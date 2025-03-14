@@ -1,7 +1,7 @@
 
 import { Loi as LoiMaitreJeu } from './lois';
 import { Loi as LoiRepublique } from '@/components/republique/lois/hooks/useLois';
-import { parseGameDate } from '@/utils/timeSystem';
+import { parseGameDate, formatGameDate } from '@/utils/dateConverters';
 
 // Helper function to convert a date to string format
 const formatLoiDate = (date: any): string => {
@@ -68,17 +68,15 @@ export const convertMJToRepubliqueLoi = (loi: LoiMaitreJeu): LoiRepublique => {
 
 // Function to convert a law from the Republic format to the Game Master format
 export const convertRepubliqueToMJLoi = (loi: LoiRepublique): LoiMaitreJeu => {
-  let year = 0;
-  let season = "SPRING";
+  let gameDate;
   
   try {
     if (typeof loi.dateProposition === 'string') {
-      const dateParts = loi.dateProposition.split(' ');
-      year = parseInt(dateParts[0]) || new Date().getFullYear();
-      season = dateParts[1] || 'SPRING';
+      gameDate = parseGameDate(loi.dateProposition);
     }
   } catch (error) {
     console.error("Error parsing date", error);
+    gameDate = { year: new Date().getFullYear(), season: "SPRING" };
   }
   
   return {
@@ -86,7 +84,7 @@ export const convertRepubliqueToMJLoi = (loi: LoiRepublique): LoiMaitreJeu => {
     title: loi.titre,
     description: loi.description,
     proposedBy: loi.auteur,
-    date: { year, season },
+    date: gameDate,
     status: mapRepubliqueStatusToMJ(loi.statut),
     category: loi.categorieId,
     votesFor: loi.votes?.pour || 0,

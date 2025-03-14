@@ -4,6 +4,7 @@ import { Badge } from '@/components/ui/badge';
 import { CheckCircle, XCircle, ScrollText, Calendar } from 'lucide-react';
 import { Loi } from '../../types/lois';
 import { formatSeasonDisplay } from '@/utils/timeSystem';
+import { parseGameDate } from '@/utils/dateConverters';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
 
@@ -16,37 +17,39 @@ export const LoiTimeline: React.FC<LoiTimelineProps> = ({ lois }) => {
   const generateTimelineEvents = (loi: Loi) => {
     const events = [
       {
-        date: loi.dateProposition,
+        date: loi.dateProposition || loi.date,
         title: 'Proposition',
-        description: `Loi proposée par ${loi.proposeur}`,
+        description: `Loi proposée par ${loi.proposeur || loi.proposedBy || loi.auteur || 'un sénateur'}`,
         icon: <ScrollText className="h-4 w-4" />,
         status: 'proposée'
       }
     ];
     
     // Si la loi a été votée, ajouter l'événement
-    if (loi.état === 'adoptée' || loi.état === 'Promulguée') {
+    if (loi.état === 'adoptée' || loi.état === 'Promulguée' || 
+        loi.status === 'active' || loi.statut === 'promulguée') {
       events.push({
         date: loi.date, // Date de vote
         title: 'Adoption',
-        description: `La loi a été adoptée par le Sénat (${loi.votesPositifs} pour, ${loi.votesNégatifs} contre)`,
+        description: `La loi a été adoptée par le Sénat (${loi.votesPositifs || loi.votesFor || loi.votes?.pour || 0} pour, ${loi.votesNégatifs || loi.votesAgainst || loi.votes?.contre || 0} contre)`,
         icon: <CheckCircle className="h-4 w-4" />,
         status: 'adoptée'
       });
-    } else if (loi.état === 'rejetée' || loi.état === 'Rejetée') {
+    } else if (loi.état === 'rejetée' || loi.état === 'Rejetée' || 
+              loi.status === 'rejected' || loi.statut === 'rejetée') {
       events.push({
         date: loi.date, // Date de vote
         title: 'Rejet',
-        description: `La loi a été rejetée par le Sénat (${loi.votesPositifs} pour, ${loi.votesNégatifs} contre)`,
+        description: `La loi a été rejetée par le Sénat (${loi.votesPositifs || loi.votesFor || loi.votes?.pour || 0} pour, ${loi.votesNégatifs || loi.votesAgainst || loi.votes?.contre || 0} contre)`,
         icon: <XCircle className="h-4 w-4" />,
         status: 'rejetée'
       });
     }
     
     // Si la loi a été promulguée, ajouter l'événement
-    if (loi.état === 'Promulguée') {
+    if (loi.état === 'Promulguée' || loi.status === 'active' || loi.statut === 'promulguée') {
       events.push({
-        date: { ...loi.date, season: loi.date.season }, // Date de promulgation
+        date: loi.implementationDate || loi.date, // Date de promulgation
         title: 'Promulgation',
         description: 'La loi a été promulguée et est entrée en vigueur',
         icon: <Calendar className="h-4 w-4" />,
@@ -67,8 +70,13 @@ export const LoiTimeline: React.FC<LoiTimelineProps> = ({ lois }) => {
     }
   };
   
-  const formatDate = (date: { year: number; season: string }) => {
-    return `An ${date.year}, ${formatSeasonDisplay(date.season)}`;
+  const formatDate = (date: string | GameDate | undefined) => {
+    if (!date) return 'Date inconnue';
+    
+    // Convert to GameDate if it's a string
+    const gameDate = typeof date === 'string' ? parseGameDate(date) : date;
+    
+    return `An ${gameDate.year}, ${formatSeasonDisplay(gameDate.season)}`;
   };
   
   // Fusionner les événements de toutes les lois

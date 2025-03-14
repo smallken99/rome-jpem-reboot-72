@@ -40,24 +40,24 @@ export interface Loi {
   implementationDate?: GameDate;
   expirationDate?: GameDate;
   
-  // Additional properties
-  notes?: string;
-  effets?: string[] | Record<string, any>;
-  conditions?: string[];
-  penalites?: string[];
-  
-  // Republique format properties
+  // République format properties
+  type?: string | LoiType;
+  importance?: string;
   clauses?: any[];
   commentaires?: string[];
-  importance?: string;
+  tags?: string[];
   votes?: {
     pour: number;
     contre: number;
     abstention: number;
   };
-  type?: string | LoiType;
+  
+  // Additional properties
+  notes?: string;
+  effets?: string[] | Record<string, any>;
+  conditions?: string[];
+  penalites?: string[];
   nom?: string;
-  tags?: string[];
 }
 
 export type LoiType = 
