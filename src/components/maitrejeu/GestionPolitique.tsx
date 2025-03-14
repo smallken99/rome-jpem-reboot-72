@@ -63,7 +63,9 @@ export const GestionPolitique = () => {
       catégorie: newLoi.catégorie,
       importance: newLoi.importance,
       clauses: [],
-      effets: [],
+      commentaires: [],
+      tags: [],
+      effets: {},
       conditions: [],
       penalites: []
     };

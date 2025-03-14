@@ -1,23 +1,23 @@
 
-import { Loi, CategorieLoi } from '@/components/republique/lois/hooks/useLois';
+import { Loi } from '@/components/maitrejeu/types/lois';
 
 export interface LoisActivesTabProps {
-  lois: Loi[];
+  lois: any[]; // Accepte n'importe quel tableau qui sera adapté à l'intérieur du composant
   onViewLoi: (loi?: Loi) => void;
 }
 
 export interface LoisProposeesTabProps {
-  lois: Loi[];
+  lois: any[]; // Accepte n'importe quel tableau qui sera adapté à l'intérieur du composant
   onViewLoi: (loi?: Loi) => void;
 }
 
 export interface LoisRejeteesTabProps {
-  lois: Loi[];
+  lois: any[]; // Accepte n'importe quel tableau qui sera adapté à l'intérieur du composant
   onViewLoi: (loi?: Loi) => void;
 }
 
 export interface HistoriqueLoiTabProps {
-  lois: Loi[];
+  lois: any[]; // Accepte n'importe quel tableau qui sera adapté à l'intérieur du composant
   onViewLoi: (loi?: Loi) => void;
   formatSeason: (season: string) => string;
 }
@@ -25,7 +25,7 @@ export interface HistoriqueLoiTabProps {
 export interface LoiModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onSave: (loiData: Loi) => void;
-  loi?: Loi;
-  categories?: CategorieLoi[];
+  onSave: (loiData: any) => void;
+  loi?: any;
+  categories?: Array<{id: string, name: string, description: string}>;
 }

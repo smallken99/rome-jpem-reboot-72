@@ -41,12 +41,14 @@ export interface Loi {
   implementationDate?: GameDate;
   expirationDate?: GameDate;
   
-  // Propriétés supplémentaires pour LoiModal et loisAdapter
+  // Propriétés OBLIGATOIRES manquantes qui causent des erreurs
   type: string | LoiType;
   importance: string;
   clauses: any[];
   commentaires: string[];
   tags: string[];
+  
+  // Propriétés facultatives
   votes?: {
     pour: number;
     contre: number;

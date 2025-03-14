@@ -9,17 +9,20 @@ export interface Loi {
     year: number;
     season: string;
   };
-  état: 'Public' | 'Privé' | 'En délibération';
+  état: 'Public' | 'Privé' | 'En délibération' | 'proposée' | 'en_débat' | 'votée' | 'rejetée' | 'promulguée' | 'adoptée';
   importance: string;
   votesPositifs: number;
   votesNégatifs: number;
   votesAbstention: number;
   effets: Record<string, any>;
+  
   // Propriétés requises par LoiModal et loisAdapter
   type: string;
   clauses: any[];
   commentaires: string[];
   tags: string[];
+  
+  // Propriétés alternatives pour compatibilité
   statut?: string;
   votes?: {
     pour: number;
@@ -36,4 +39,6 @@ export interface Loi {
   expirationDate?: { year: number; season: string };
   votesFor?: number;
   votesAgainst?: number;
+  status?: string;
+  nom?: string;
 }

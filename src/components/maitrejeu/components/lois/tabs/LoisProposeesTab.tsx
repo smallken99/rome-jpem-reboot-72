@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
@@ -7,6 +6,7 @@ import { Eye, ThumbsUp, ThumbsDown } from 'lucide-react';
 import { formatDate } from '@/utils/formatUtils';
 import { LoisProposeesTabProps } from '../types';
 import { Loi } from '@/components/maitrejeu/types/lois';
+import { ensureLoiCompliance } from '../utils/loiAdapter';
 
 export const LoisProposeesTab: React.FC<LoisProposeesTabProps> = ({ lois, onViewLoi }) => {
   // Helper functions to handle different Loi formats
@@ -44,6 +44,9 @@ export const LoisProposeesTab: React.FC<LoisProposeesTabProps> = ({ lois, onView
     return loi.votesAgainst || loi.votesNégatifs || (loi.votes?.contre || 0);
   };
   
+  // Assurer la compatibilité des lois
+  const compliantLois = lois.map(loi => ensureLoiCompliance(loi));
+  
   return (
     <div className="space-y-4">
       <Table>
@@ -58,8 +61,8 @@ export const LoisProposeesTab: React.FC<LoisProposeesTabProps> = ({ lois, onView
           </TableRow>
         </TableHeader>
         <TableBody>
-          {lois.length > 0 ? (
-            lois.map((loi) => (
+          {compliantLois.length > 0 ? (
+            compliantLois.map((loi) => (
               <TableRow key={loi.id}>
                 <TableCell className="font-medium">{getLoiTitle(loi)}</TableCell>
                 <TableCell>{getLoiDate(loi)}</TableCell>

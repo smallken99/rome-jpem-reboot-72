@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import { HistoriqueLoiTabProps } from '../types';
 import { formatGameDate } from '@/utils/dateConverters';
 import { Loi } from '@/components/maitrejeu/types/lois';
+import { ensureLoiCompliance } from '../utils/loiAdapter';
 
 export const HistoriqueLoiTab: React.FC<HistoriqueLoiTabProps> = ({ 
   lois, 
@@ -81,7 +82,10 @@ export const HistoriqueLoiTab: React.FC<HistoriqueLoiTabProps> = ({
     return getVoteCount(loi, 'contre');
   };
 
-  const sortedLois = [...lois].sort((a, b) => {
+  // Assurer la compatibilité des lois
+  const compliantLois = lois.map(loi => ensureLoiCompliance(loi));
+  
+  const sortedLois = [...compliantLois].sort((a, b) => {
     const dateA = getLoiDate(a);
     const dateB = getLoiDate(b);
     return dateB.localeCompare(dateA);
