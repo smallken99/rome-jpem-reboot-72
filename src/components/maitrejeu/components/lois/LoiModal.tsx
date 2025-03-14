@@ -33,7 +33,7 @@ export const LoiModal: React.FC<LoiModalProps> = ({
   const { toast } = useToast();
   const [activeTab, setActiveTab] = useState('info');
   
-  const initialState: LoiRepublique = loi || {
+  const initialState: LoiRepublique = {
     id: '',
     titre: '',
     description: '',
@@ -61,7 +61,38 @@ export const LoiModal: React.FC<LoiModalProps> = ({
   useEffect(() => {
     if (loi) {
       // Ensure we have all required properties when editing an existing loi
-      setFormData(ensureLoiCompliance(loi));
+      const compliantLoi = ensureLoiCompliance(loi);
+      
+      // Convert to LoiRepublique format
+      const republiqueLoi: LoiRepublique = {
+        id: compliantLoi.id,
+        titre: compliantLoi.title || compliantLoi.titre || '',
+        description: compliantLoi.description || '',
+        auteur: compliantLoi.proposedBy || compliantLoi.proposeur || compliantLoi.auteur || '',
+        dateProposition: typeof compliantLoi.dateProposition === 'string' 
+          ? compliantLoi.dateProposition 
+          : typeof compliantLoi.date === 'string'
+            ? compliantLoi.date
+            : '',
+        statut: compliantLoi.status === 'active' || compliantLoi.statut === 'promulguée' 
+          ? 'promulguée' 
+          : compliantLoi.status === 'rejected' || compliantLoi.statut === 'rejetée'
+            ? 'rejetée'
+            : 'proposée',
+        categorieId: compliantLoi.category || compliantLoi.categorieId || compliantLoi.catégorie || '',
+        type: compliantLoi.type,
+        clauses: compliantLoi.clauses,
+        commentaires: compliantLoi.commentaires,
+        importance: compliantLoi.importance,
+        votes: {
+          pour: compliantLoi.votesFor || compliantLoi.votesPositifs || (compliantLoi.votes?.pour || 0),
+          contre: compliantLoi.votesAgainst || compliantLoi.votesNégatifs || (compliantLoi.votes?.contre || 0),
+          abstention: compliantLoi.votesAbstention || (compliantLoi.votes?.abstention || 0)
+        },
+        tags: compliantLoi.tags || []
+      };
+      
+      setFormData(republiqueLoi);
     } else {
       setFormData(initialState);
     }

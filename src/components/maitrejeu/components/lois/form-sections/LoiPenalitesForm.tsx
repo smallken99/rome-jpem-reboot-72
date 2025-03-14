@@ -3,7 +3,7 @@ import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Loi } from '@/components/maitrejeu/types/lois';
+import { Loi } from '@/components/republique/lois/hooks/useLois';
 
 interface LoiPenalitesFormProps {
   formData: Loi;

@@ -6,7 +6,7 @@ import { LoiEffetsForm } from './LoiEffetsForm';
 import { LoiConditionsForm } from './LoiConditionsForm';
 import { LoiPenalitesForm } from './LoiPenalitesForm';
 import { Loi } from '@/components/republique/lois/hooks/useLois';
-import { ensureLoiCompliance } from '../../utils/loiAdapter';
+import { ensureLoiCompliance } from '../utils/loiAdapter';
 
 interface LoiFormTabsProps {
   activeTab: string;
@@ -50,7 +50,7 @@ export const LoiFormTabs: React.FC<LoiFormTabsProps> = ({
   categories
 }) => {
   // Ensure we're working with a compliant Loi object
-  const compliantLoi = ensureLoiCompliance(formData);
+  const compliantLoi = formData;
   
   return (
     <Tabs value={activeTab} onValueChange={setActiveTab} className="mt-4">
