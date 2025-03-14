@@ -1,10 +1,12 @@
+
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { StatBox } from '@/components/ui-custom/StatBox';
 import { Coins, TrendingUp, TrendingDown, Scale } from 'lucide-react';
 import { useMaitreJeu } from '@/components/maitrejeu/context';
 import { formatMoney } from '@/utils/formatUtils';
-import { GameDate, parseStringToGameDate } from '@/components/maitrejeu/types/common';
+import { GameDate } from '@/components/maitrejeu/types/common';
+import { parseGameDate } from '@/utils/dateConverters';
 
 export const EconomieStats: React.FC = () => {
   const { economieRecords, treasury } = useMaitreJeu();
@@ -22,16 +24,27 @@ export const EconomieStats: React.FC = () => {
     };
   };
   
-  // Function to safely parse GameDate from string or use directly
-  const parseGameDate = (date: string | GameDate): GameDate => {
-    return parseStringToGameDate(date);
+  // Convert any date type to GameDate
+  const safeParseGameDate = (date: any): GameDate => {
+    try {
+      if (date instanceof Date) {
+        return {
+          year: date.getFullYear(),
+          season: 'SPRING' // Default season
+        };
+      }
+      return parseGameDate(date);
+    } catch (e) {
+      console.error("Error parsing date:", e);
+      return { year: new Date().getFullYear(), season: 'SPRING' };
+    }
   };
   
   // Calculate income and expenses for the last 2 seasons for trends
   const currentIncome = economieRecords
     .filter(record => {
-      const recordDate = parseGameDate(record.date);
-      const treasuryDate = parseGameDate(treasury.lastUpdated);
+      const recordDate = safeParseGameDate(record.date);
+      const treasuryDate = safeParseGameDate(treasury.lastUpdated);
       
       return record.type === 'income' && 
         recordDate.year === treasuryDate.year && 
@@ -41,8 +54,8 @@ export const EconomieStats: React.FC = () => {
     
   const currentExpenses = economieRecords
     .filter(record => {
-      const recordDate = parseGameDate(record.date);
-      const treasuryDate = parseGameDate(treasury.lastUpdated);
+      const recordDate = safeParseGameDate(record.date);
+      const treasuryDate = safeParseGameDate(treasury.lastUpdated);
       
       return record.type === 'expense' && 
         recordDate.year === treasuryDate.year && 
@@ -59,12 +72,12 @@ export const EconomieStats: React.FC = () => {
     return { year: date.year, season: seasons[idx - 1] };
   };
   
-  const treasuryDate = parseGameDate(treasury.lastUpdated);
+  const treasuryDate = safeParseGameDate(treasury.lastUpdated);
   const prevPeriod = getSeasonAndYear(treasuryDate);
   
   const previousIncome = economieRecords
     .filter(record => {
-      const recordDate = parseGameDate(record.date);
+      const recordDate = safeParseGameDate(record.date);
       
       return record.type === 'income' && 
         recordDate.year === prevPeriod.year && 
@@ -74,7 +87,7 @@ export const EconomieStats: React.FC = () => {
     
   const previousExpenses = economieRecords
     .filter(record => {
-      const recordDate = parseGameDate(record.date);
+      const recordDate = safeParseGameDate(record.date);
       
       return record.type === 'expense' && 
         recordDate.year === prevPeriod.year && 
@@ -87,7 +100,7 @@ export const EconomieStats: React.FC = () => {
   const balanceTrend = calculateTrend(treasury.balance, treasury.balance - (currentIncome - currentExpenses));
   
   const formatTreasuryDate = () => {
-    const date = parseGameDate(treasury.lastUpdated);
+    const date = safeParseGameDate(treasury.lastUpdated);
     return `${date.season} ${date.year}`;
   };
   
@@ -122,7 +135,7 @@ export const EconomieStats: React.FC = () => {
       
       <StatBox
         title="Taux d'inflation"
-        value={`${treasury.inflationRate.toFixed(1)}%`}
+        value={`${treasury.inflationRate?.toFixed(1) || '0.0'}%`}
         description="Impact sur les prix et l'économie"
         icon={<Scale className="h-5 w-5" />}
       />

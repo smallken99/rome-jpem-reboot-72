@@ -3,44 +3,68 @@ import { GameDate } from './common';
 
 export interface Loi {
   id: string;
-  title: string;
+  title?: string;
+  titre?: string;
   description: string;
-  proposedBy: string;
-  date: GameDate;
-  status: 'proposed' | 'active' | 'rejected' | 'expired';
-  category: string;
+  proposedBy?: string;
+  proposeur?: string;
+  auteur?: string;
+  date?: GameDate;
+  dateProposition?: string | GameDate;
+  status?: LoiState;
+  statut?: string;
+  état?: string;
+  category?: string;
+  categorieId?: string;
+  catégorie?: string;
   votesFor?: number;
   votesAgainst?: number;
-  implementationDate?: GameDate;
-  expirationDate?: GameDate;
-  notes?: string;
-  effets?: string[];
-  conditions?: string[];
-  penalites?: string[];
-  
-  // Legacy properties
-  titre?: string;
-  proposeur?: string;
-  catégorie?: string;
-  état?: string;
-  importance?: string;
   votesPositifs?: number;
   votesNégatifs?: number;
   votesAbstention?: number;
-  dateProposition?: string | GameDate;
-  type?: string | LoiType;
+  implementationDate?: GameDate;
+  expirationDate?: GameDate;
+  notes?: string;
+  effets?: string[] | Record<string, any>;
+  conditions?: string[];
+  penalites?: string[];
+  
+  // Republique format properties
   clauses?: any[];
   commentaires?: string[];
+  importance?: string;
   votes?: {
     pour: number;
     contre: number;
     abstention: number;
   };
+  type?: string | LoiType;
   nom?: string;
+  tags?: string[];
 }
 
-export type LoiType = 'Agraire' | 'Politique' | 'Militaire' | 'Economique' | 'Sociale' | 'Religieuse' | 'Civile';
-export type LoiState = 'proposed' | 'active' | 'rejected' | 'expired' | 'Promulguée' | 'En délibération' | 'rejetée' | 'adoptée' | 'proposée';
+export type LoiType = 
+  | 'Agraire' 
+  | 'Politique' 
+  | 'Militaire' 
+  | 'Economique' 
+  | 'Sociale' 
+  | 'Religieuse' 
+  | 'Civile';
+
+export type LoiState = 
+  | 'proposed' 
+  | 'active' 
+  | 'rejected' 
+  | 'expired' 
+  | 'Promulguée' 
+  | 'En délibération' 
+  | 'rejetée' 
+  | 'adoptée' 
+  | 'proposée' 
+  | 'en_débat' 
+  | 'votée' 
+  | 'promulguée';
 
 export interface CategorieLoi {
   id: string;
@@ -58,7 +82,7 @@ export interface LoiVote {
 }
 
 export interface LoiFilters {
-  status?: 'proposed' | 'active' | 'rejected' | 'expired';
+  status?: LoiState;
   category?: string;
   proposedBy?: string;
   dateRange?: [Date, Date] | null;
@@ -71,19 +95,23 @@ export interface LoiSorting {
 }
 
 export interface LoiCreate {
-  title: string;
+  title?: string;
+  titre?: string;
   description: string;
-  proposedBy: string;
-  category: string;
+  proposedBy?: string;
+  auteur?: string;
+  category?: string;
+  categorieId?: string;
   effets?: string[];
   conditions?: string[];
   penalites?: string[];
   notes?: string;
+  type?: string | LoiType;
 }
 
 export interface LoiUpdate extends Partial<LoiCreate> {
   id: string;
-  status?: 'proposed' | 'active' | 'rejected' | 'expired';
+  status?: LoiState;
   votesFor?: number;
   votesAgainst?: number;
   implementationDate?: GameDate;

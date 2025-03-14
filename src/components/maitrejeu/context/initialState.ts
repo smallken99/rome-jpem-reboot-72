@@ -1,9 +1,5 @@
 import { SenateurJouable, Province, Evenement, Election, HistoireEntry, Loi, Equilibre } from '../types';
-import { 
-  EconomieRecord, 
-  TreasuryStatus, 
-  EconomicFactors 
-} from '../types/economie';
+import { EconomieRecord, TreasuryStatus, EconomicFactors } from '../types/economie';
 import { GameDate, Season, GamePhase } from '../types/common';
 import { Client } from '../types/clients';
 import { v4 as uuidv4 } from 'uuid';
@@ -457,27 +453,30 @@ export const initialEvenements: Evenement[] = [];
 export const initialElections: Election[] = [];
 export const initialHistoireEntries: HistoireEntry[] = [];
 export const initialLois: Loi[] = [];
-export const initialEquilibre: Equilibre | null = {
-  facteurSenat: 50,
-  facteurPlebs: 50,
-  facteurPatriciens: 50,
-  facteurMilitaire: 50,
-  facteurReligieux: 50,
+export const initialEquilibre: Equilibre = {
+  facteurSenat: 72,
+  facteurPlebs: 65,
+  facteurPatriciens: 80,
+  facteurMilitaire: 68,
+  facteurReligieux: 75,
   populaires: 35,
-  optimates: 40,
-  moderates: 25,
-  
-  // Propriétés additionnelles pour la compatibilité
-  population: 100,
-  armée: 80,
-  économie: 70,
-  morale: 65,
-  loyauté: 75,
-  patriciens: 40,
-  plébéiens: 60,
-  populaires: 35, // Même valeur que populaires
-  neutrales: 25,
+  populaires: 35,
+  optimates: 45,
+  moderates: 20,
+  population: 1000000,
+  indiceCrime: 12,
+  indiceCorruption: 18,
+  indiceMecontentement: 25,
+  stressPolitique: 30,
+  stabiliteGlobale: 68,
+  anneeEnCours: 752,
+  commentaires: "La République est stable, mais des tensions apparaissent.",
   historique: []
 };
-export const initialDate: GameDate = { year: 632, season: "SPRING" };
+
+export const initialDate = {
+  year: 752,
+  season: 'Ver'
+};
+
 export const initialPhase: GamePhase = "SENATE";

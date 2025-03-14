@@ -1,6 +1,6 @@
 
 import { GameDate, GamePhase } from '../types/common';
-import { convertSeasonBetweenSystems, Season, PlayerSeason } from '@/utils/timeSystem';
+import { Season, convertSeasonBetweenSystems, PlayerSeason } from '@/utils/timeSystem';
 
 // Crée les opérations de gestion du temps
 export const createTimeOperations = (
@@ -21,7 +21,7 @@ export const createTimeOperations = (
       // Sinon, avancer à la saison suivante selon un ordre prédéfini
       const seasons: Season[] = ['Ver', 'Aestas', 'Autumnus', 'Hiems'];
       const currentSeason = typeof prevDate.season === 'string'
-        ? convertSeasonBetweenSystems(prevDate.season, 'mj') as Season
+        ? prevDate.season as Season
         : prevDate.season;
       
       const currentIndex = seasons.indexOf(currentSeason);

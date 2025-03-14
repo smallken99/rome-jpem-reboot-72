@@ -6,6 +6,7 @@ import { Separator } from '@/components/ui/separator';
 import { Button } from '@/components/ui/button';
 import { HistoriqueLoiTabProps } from '../types';
 import { formatDate, parseGameDate } from '@/utils/timeSystem';
+import { Loi } from '@/components/maitrejeu/types/lois';
 
 export const HistoriqueLoiTab: React.FC<HistoriqueLoiTabProps> = ({ 
   lois, 
@@ -21,10 +22,45 @@ export const HistoriqueLoiTab: React.FC<HistoriqueLoiTabProps> = ({
 
   // Sort lois by date (most recent first)
   const sortedLois = [...lois].sort((a, b) => {
-    const dateA = a.dateProposition || (a.date ? formatDate(a.date) : '');
-    const dateB = b.dateProposition || (b.date ? formatDate(b.date) : '');
+    const dateA = getLoiDate(a);
+    const dateB = getLoiDate(b);
     return dateB.localeCompare(dateA);
   });
+
+  // Helper function to get the date from different loi formats
+  const getLoiDate = (loi: Loi): string => {
+    if (loi.dateProposition) {
+      return typeof loi.dateProposition === 'string' 
+        ? loi.dateProposition 
+        : `${loi.dateProposition.year} ${loi.dateProposition.season}`;
+    }
+    if (loi.date) {
+      return typeof loi.date === 'string'
+        ? loi.date
+        : `${loi.date.year} ${loi.date.season}`;
+    }
+    return '';
+  };
+
+  // Helper function to get the title
+  const getLoiTitle = (loi: Loi): string => {
+    return loi.titre || loi.title || '';
+  };
+
+  // Helper function to get the author
+  const getLoiAuthor = (loi: Loi): string => {
+    return loi.auteur || loi.proposeur || loi.proposedBy || '';
+  };
+
+  // Helper function to get the category
+  const getLoiCategory = (loi: Loi): string => {
+    return loi.categorieId || loi.catégorie || loi.category || '';
+  };
+
+  // Helper function to get the status
+  const getLoiStatus = (loi: Loi): string => {
+    return loi.statut || loi.status || loi.état || '';
+  };
 
   return (
     <div className="space-y-4">
@@ -40,16 +76,16 @@ export const HistoriqueLoiTab: React.FC<HistoriqueLoiTabProps> = ({
             <CardContent className="p-4">
               <div className="flex flex-col md:flex-row md:items-start gap-4">
                 <div className="flex-1">
-                  <h3 className="text-lg font-medium">{loi.titre || loi.title}</h3>
+                  <h3 className="text-lg font-medium">{getLoiTitle(loi)}</h3>
                   <div className="flex flex-wrap gap-2 mt-2">
                     <span className="text-sm text-muted-foreground">
-                      {formatDate(parseGameDate(loi.dateProposition || loi.date))}
+                      {getLoiDate(loi)}
                     </span>
                     <span className="text-sm text-muted-foreground">
-                      Proposée par {loi.auteur || loi.proposeur || loi.proposedBy}
+                      Proposée par {getLoiAuthor(loi)}
                     </span>
                     <span className="text-sm text-muted-foreground">
-                      {loi.categorieId || loi.catégorie || loi.category}
+                      {getLoiCategory(loi)}
                     </span>
                   </div>
                   <p className="text-sm mt-2 line-clamp-2">
@@ -57,8 +93,8 @@ export const HistoriqueLoiTab: React.FC<HistoriqueLoiTabProps> = ({
                   </p>
                 </div>
                 <div className="flex flex-col items-end gap-2">
-                  <Badge className={`${getStatusColor(loi.statut || loi.status || loi.état || '')}`}>
-                    {loi.statut || mapStatus(loi.status || loi.état || '')}
+                  <Badge className={`${getStatusColor(getLoiStatus(loi))}`}>
+                    {getLoiStatus(loi)}
                   </Badge>
                   <Button 
                     variant="ghost" 
@@ -71,8 +107,8 @@ export const HistoriqueLoiTab: React.FC<HistoriqueLoiTabProps> = ({
               </div>
               <Separator className="my-3" />
               <div className="flex justify-between text-xs">
-                <span>Votes: <span className="text-green-600 font-medium">{loi.votes?.pour || 0}</span> / <span className="text-red-600 font-medium">{loi.votes?.contre || 0}</span></span>
-                <span>Type: {loi.type}</span>
+                <span>Votes: <span className="text-green-600 font-medium">{loi.votes?.pour || loi.votesPositifs || loi.votesFor || 0}</span> / <span className="text-red-600 font-medium">{loi.votes?.contre || loi.votesNégatifs || loi.votesAgainst || 0}</span></span>
+                <span>Type: {loi.type || "Politique"}</span>
               </div>
             </CardContent>
           </Card>
@@ -81,14 +117,3 @@ export const HistoriqueLoiTab: React.FC<HistoriqueLoiTabProps> = ({
     </div>
   );
 };
-
-// Map status to display string
-function mapStatus(status: string): string {
-  switch (status) {
-    case 'proposed': return 'proposée';
-    case 'active': return 'promulguée';
-    case 'rejected': return 'rejetée';
-    case 'expired': return 'expirée';
-    default: return status;
-  }
-}

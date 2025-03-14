@@ -113,3 +113,7 @@ export const ResourceTransactions: React.FC = () => {
     </Card>
   );
 };
+
+const handleDateToGameDate = (date: Date) => {
+  return convertDateToGameDate(date);
+};

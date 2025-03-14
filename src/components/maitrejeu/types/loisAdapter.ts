@@ -1,7 +1,7 @@
 
 import { Loi as LoiMaitreJeu } from './lois';
 import { Loi as LoiRepublique } from '@/components/republique/lois/hooks/useLois';
-import { parseStringToGameDate } from './common';
+import { parseGameDate } from '@/utils/timeSystem';
 
 // Function to convert a law from the Game Master format to the Republic format
 export const convertMJToRepubliqueLoi = (loi: LoiMaitreJeu): LoiRepublique => {
@@ -9,22 +9,22 @@ export const convertMJToRepubliqueLoi = (loi: LoiMaitreJeu): LoiRepublique => {
     id: loi.id,
     titre: loi.title || loi.titre || '',
     description: loi.description || '',
-    auteur: loi.proposedBy || loi.proposeur || '',
+    auteur: loi.proposedBy || loi.proposeur || loi.auteur || '',
     dateProposition: typeof loi.date === 'string' 
       ? loi.date 
-      : `${loi.date.year} ${loi.date.season}`,
-    statut: mapMJStatusToRepublique(loi.status || loi.état || 'proposée'),
-    categorieId: loi.category || loi.catégorie || '',
+      : loi.dateProposition || (loi.date ? `${loi.date.year} ${loi.date.season}` : ''),
+    statut: mapMJStatusToRepublique(loi.status || loi.état || loi.statut || 'proposée'),
+    categorieId: loi.category || loi.catégorie || loi.categorieId || '',
     type: typeof loi.type === 'string' ? loi.type : 'Politique',
     clauses: loi.clauses || [],
-    commentaires: loi.notes ? [loi.notes] : [],
+    commentaires: loi.notes ? [loi.notes] : (loi.commentaires || []),
     importance: loi.importance || 'normale',
     votes: {
-      pour: loi.votesFor || loi.votesPositifs || 0,
-      contre: loi.votesAgainst || loi.votesNégatifs || 0,
-      abstention: loi.votesAbstention || 0
+      pour: loi.votesFor || loi.votesPositifs || (loi.votes?.pour || 0),
+      contre: loi.votesAgainst || loi.votesNégatifs || (loi.votes?.contre || 0),
+      abstention: loi.votesAbstention || (loi.votes?.abstention || 0)
     },
-    tags: []
+    tags: loi.tags || []
   };
 };
 
@@ -34,9 +34,11 @@ export const convertRepubliqueToMJLoi = (loi: LoiRepublique): LoiMaitreJeu => {
   let season = "SPRING";
   
   try {
-    const dateParts = loi.dateProposition.split(' ');
-    year = parseInt(dateParts[0]) || new Date().getFullYear();
-    season = dateParts[1] || 'SPRING';
+    if (typeof loi.dateProposition === 'string') {
+      const dateParts = loi.dateProposition.split(' ');
+      year = parseInt(dateParts[0]) || new Date().getFullYear();
+      season = dateParts[1] || 'SPRING';
+    }
   } catch (error) {
     console.error("Error parsing date", error);
   }
@@ -51,14 +53,15 @@ export const convertRepubliqueToMJLoi = (loi: LoiRepublique): LoiMaitreJeu => {
     category: loi.categorieId,
     votesFor: loi.votes?.pour || 0,
     votesAgainst: loi.votes?.contre || 0,
-    titre: loi.titre,
-    proposeur: loi.auteur,
-    catégorie: loi.categorieId,
-    état: loi.statut,
     votesPositifs: loi.votes?.pour || 0,
     votesNégatifs: loi.votes?.contre || 0,
     votesAbstention: loi.votes?.abstention || 0,
     notes: loi.commentaires && loi.commentaires.length > 0 ? loi.commentaires[0] : '',
+    clauses: loi.clauses || [],
+    commentaires: loi.commentaires || [],
+    type: loi.type || 'Politique',
+    importance: loi.importance || 'normale',
+    tags: loi.tags || [],
     effets: [],
     conditions: [],
     penalites: []

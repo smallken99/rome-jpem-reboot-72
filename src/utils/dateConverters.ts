@@ -1,12 +1,12 @@
 
-import { GameDate } from '@/components/maitrejeu/types/common';
+import { GameDate, Season } from '@/components/maitrejeu/types/common';
 
 // Convert a JS Date to GameDate
 export const convertDateToGameDate = (date: Date): GameDate => {
   const year = date.getFullYear();
   
   // Determine season based on month
-  let season: string;
+  let season: Season;
   const month = date.getMonth();
   
   if (month >= 2 && month <= 4) {
@@ -22,11 +22,11 @@ export const convertDateToGameDate = (date: Date): GameDate => {
   return { year, season };
 };
 
-// Fixed version of the function to parse strings/dates to GameDate
+// Enhanced parsing function to handle all date formats
 export const parseGameDate = (dateVal: string | Date | GameDate): GameDate => {
   // If it's already a GameDate
   if (typeof dateVal === 'object' && 'year' in dateVal && 'season' in dateVal) {
-    return dateVal;
+    return dateVal as GameDate;
   }
   
   // If it's a Date object
@@ -45,7 +45,7 @@ export const parseGameDate = (dateVal: string | Date | GameDate): GameDate => {
         const parts = dateVal.split(' ');
         return {
           year: parseInt(parts[0], 10),
-          season: parts[1]
+          season: parts[1] as Season
         };
       }
     } catch (error) {
@@ -55,4 +55,24 @@ export const parseGameDate = (dateVal: string | Date | GameDate): GameDate => {
   
   // Default fallback
   return { year: new Date().getFullYear(), season: 'SPRING' };
+};
+
+// Convert any date format to string representation
+export const formatGameDate = (date: GameDate | string | Date): string => {
+  const gameDate = parseGameDate(date);
+  return `${gameDate.year} ${gameDate.season}`;
+};
+
+// Function to convert Date objects to GameDate and vice versa
+export const dateToGameDate = (date: Date): GameDate => {
+  return convertDateToGameDate(date);
+};
+
+export const gameDateToDate = (gameDate: GameDate): Date => {
+  // Approximate conversion - this is simplified, in a real app you'd want more precision
+  const month = gameDate.season === 'SPRING' ? 3 : 
+               gameDate.season === 'SUMMER' ? 6 : 
+               gameDate.season === 'AUTUMN' ? 9 : 0;
+  
+  return new Date(gameDate.year, month, 15);
 };

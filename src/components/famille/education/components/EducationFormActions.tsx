@@ -6,6 +6,7 @@ import { SaveIcon, Loader2 } from 'lucide-react';
 interface EducationFormActionsProps {
   onSubmit?: () => void;
   onCancel?: () => void;
+  onSave?: () => void;
   isLoading?: boolean;
   childId?: string;
   disabled?: boolean;
@@ -14,6 +15,7 @@ interface EducationFormActionsProps {
 export const EducationFormActions: React.FC<EducationFormActionsProps> = ({ 
   onSubmit,
   onCancel,
+  onSave,
   isLoading = false,
   childId,
   disabled = false
@@ -26,6 +28,8 @@ export const EducationFormActions: React.FC<EducationFormActionsProps> = ({
   const handleSubmit = (e: React.MouseEvent) => {
     if (onSubmit) {
       onSubmit();
+    } else if (onSave) {
+      onSave();
     }
   };
 

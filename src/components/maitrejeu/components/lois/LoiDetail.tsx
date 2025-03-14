@@ -7,7 +7,7 @@ import { ScrollText, Calendar, GavelIcon, CheckCircle, XCircle } from 'lucide-re
 import { Loi } from '../../types/lois';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { LoiTimeline } from './LoiTimeline';
-import { formatSeasonDisplay } from '@/utils/timeSystem';
+import { formatDate, parseGameDate } from '@/utils/timeSystem';
 
 export interface LoiDetailProps {
   loi: Loi;
@@ -17,42 +17,76 @@ export interface LoiDetailProps {
 
 export const LoiDetail: React.FC<LoiDetailProps> = ({ loi, onEdit, onClose }) => {
   const formatVoteResults = () => {
-    const total = loi.votesPositifs + loi.votesNégatifs + loi.votesAbstention;
+    const votesFor = loi.votesPositifs || loi.votesFor || loi.votes?.pour || 0;
+    const votesAgainst = loi.votesNégatifs || loi.votesAgainst || loi.votes?.contre || 0;
+    const votesAbstain = loi.votesAbstention || loi.votes?.abstention || 0;
+    
+    const total = votesFor + votesAgainst + votesAbstain;
     
     if (total === 0) return "Aucun vote n'a été enregistré";
     
-    const pourcentagePour = Math.round((loi.votesPositifs / total) * 100);
-    const pourcentageContre = Math.round((loi.votesNégatifs / total) * 100);
+    const pourcentagePour = Math.round((votesFor / total) * 100);
+    const pourcentageContre = Math.round((votesAgainst / total) * 100);
     
     return `${pourcentagePour}% pour, ${pourcentageContre}% contre`;
   };
   
   const getStatusIcon = () => {
-    switch (loi.état) {
-      case 'Promulguée':
-      case 'adoptée':
-        return <CheckCircle className="h-4 w-4 mr-1" />;
-      case 'Rejetée':
-        return <XCircle className="h-4 w-4 mr-1" />;
-      default:
-        return <ScrollText className="h-4 w-4 mr-1" />;
+    const status = loi.état || loi.status || loi.statut || '';
+    
+    if (status === 'Promulguée' || status === 'active' || status === 'adoptée' || status === 'promulguée') {
+      return <CheckCircle className="h-4 w-4 mr-1" />;
+    } else if (status === 'Rejetée' || status === 'rejected' || status === 'rejetée') {
+      return <XCircle className="h-4 w-4 mr-1" />;
+    } else {
+      return <ScrollText className="h-4 w-4 mr-1" />;
     }
   };
   
   const getStatusVariant = () => {
-    switch (loi.état) {
-      case 'Promulguée':
-      case 'adoptée':
-        return "outline";
-      case 'Rejetée':
-        return "destructive";
-      default:
-        return "secondary";
+    const status = loi.état || loi.status || loi.statut || '';
+    
+    if (status === 'Promulguée' || status === 'active' || status === 'adoptée' || status === 'promulguée') {
+      return "outline";
+    } else if (status === 'Rejetée' || status === 'rejected' || status === 'rejetée') {
+      return "destructive";
+    } else {
+      return "secondary";
     }
   };
   
-  const formatDate = (date: { year: number; season: string }) => {
-    return `An ${date.year}, ${formatSeasonDisplay(date.season)}`;
+  const getLoiDate = (): string => {
+    if (loi.dateProposition) {
+      return typeof loi.dateProposition === 'string' 
+        ? loi.dateProposition 
+        : formatDate(loi.dateProposition);
+    }
+    if (loi.date) {
+      return typeof loi.date === 'string'
+        ? loi.date
+        : formatDate(loi.date);
+    }
+    return '';
+  };
+  
+  const getLoiTitle = (): string => {
+    return loi.titre || loi.title || '';
+  };
+  
+  const getLoiProposer = (): string => {
+    return loi.proposeur || loi.proposedBy || loi.auteur || '';
+  };
+  
+  const getLoiStatus = (): string => {
+    return loi.état || loi.status || loi.statut || '';
+  };
+  
+  const getLoiType = (): string => {
+    return loi.type?.toString() || 'Politique';
+  };
+  
+  const getLoiCategory = (): string => {
+    return loi.catégorie || loi.category || loi.categorieId || '';
   };
   
   return (
@@ -60,27 +94,27 @@ export const LoiDetail: React.FC<LoiDetailProps> = ({ loi, onEdit, onClose }) =>
       <CardHeader>
         <div className="flex justify-between items-start mb-2">
           <div>
-            <CardTitle className="text-xl font-bold">{loi.titre}</CardTitle>
+            <CardTitle className="text-xl font-bold">{getLoiTitle()}</CardTitle>
             <CardDescription className="flex items-center gap-3 mt-1">
               <span className="flex items-center">
                 <Calendar className="h-4 w-4 mr-1" />
-                {formatDate(loi.dateProposition)}
+                {getLoiDate()}
               </span>
               <span className="flex items-center">
                 <GavelIcon className="h-4 w-4 mr-1" />
-                {loi.proposeur}
+                {getLoiProposer()}
               </span>
             </CardDescription>
           </div>
           <Badge variant={getStatusVariant() as any} className="flex items-center">
             {getStatusIcon()}
-            {loi.état}
+            {getLoiStatus()}
           </Badge>
         </div>
         <div className="flex flex-wrap gap-2 mt-1">
-          <Badge variant="outline">{loi.type}</Badge>
-          <Badge variant="outline">{loi.catégorie}</Badge>
-          <Badge variant="outline">Importance: {loi.importance}</Badge>
+          <Badge variant="outline">{getLoiType()}</Badge>
+          <Badge variant="outline">{getLoiCategory()}</Badge>
+          <Badge variant="outline">Importance: {loi.importance || 'normale'}</Badge>
         </div>
       </CardHeader>
       
@@ -100,7 +134,7 @@ export const LoiDetail: React.FC<LoiDetailProps> = ({ loi, onEdit, onClose }) =>
                 <p className="text-sm text-muted-foreground">{loi.description}</p>
               </div>
               
-              {Array.isArray(loi.clauses) && loi.clauses.length > 0 && (
+              {loi.clauses && loi.clauses.length > 0 && (
                 <div>
                   <h3 className="text-md font-medium mb-2">Clauses principales</h3>
                   <ul className="list-disc pl-5 space-y-2">
@@ -120,15 +154,21 @@ export const LoiDetail: React.FC<LoiDetailProps> = ({ loi, onEdit, onClose }) =>
               <div className="grid grid-cols-3 gap-4">
                 <div className="bg-green-50 p-4 rounded-lg text-center">
                   <p className="text-sm text-muted-foreground">Pour</p>
-                  <p className="text-2xl font-bold text-green-600">{loi.votesPositifs}</p>
+                  <p className="text-2xl font-bold text-green-600">
+                    {loi.votesPositifs || loi.votesFor || loi.votes?.pour || 0}
+                  </p>
                 </div>
                 <div className="bg-red-50 p-4 rounded-lg text-center">
                   <p className="text-sm text-muted-foreground">Contre</p>
-                  <p className="text-2xl font-bold text-red-600">{loi.votesNégatifs}</p>
+                  <p className="text-2xl font-bold text-red-600">
+                    {loi.votesNégatifs || loi.votesAgainst || loi.votes?.contre || 0}
+                  </p>
                 </div>
                 <div className="bg-gray-50 p-4 rounded-lg text-center">
                   <p className="text-sm text-muted-foreground">Abstention</p>
-                  <p className="text-2xl font-bold text-gray-500">{loi.votesAbstention}</p>
+                  <p className="text-2xl font-bold text-gray-500">
+                    {loi.votesAbstention || loi.votes?.abstention || 0}
+                  </p>
                 </div>
               </div>
               
@@ -146,14 +186,22 @@ export const LoiDetail: React.FC<LoiDetailProps> = ({ loi, onEdit, onClose }) =>
           <TabsContent value="effets">
             <div>
               <h3 className="text-md font-medium mb-2">Effets et impacts</h3>
-              {Object.keys(loi.effets).length > 0 ? (
+              {loi.effets && Object.keys(loi.effets).length > 0 ? (
                 <div className="space-y-3">
-                  {Object.entries(loi.effets).map(([key, value]) => (
-                    <div key={key} className="flex justify-between items-center bg-muted p-3 rounded-lg">
-                      <span className="text-sm capitalize">{key}</span>
-                      <Badge variant="outline">{value}</Badge>
-                    </div>
-                  ))}
+                  {Array.isArray(loi.effets) ? (
+                    loi.effets.map((effet, index) => (
+                      <div key={index} className="bg-muted p-3 rounded-lg">
+                        <span className="text-sm">{effet}</span>
+                      </div>
+                    ))
+                  ) : (
+                    Object.entries(loi.effets).map(([key, value]) => (
+                      <div key={key} className="flex justify-between items-center bg-muted p-3 rounded-lg">
+                        <span className="text-sm capitalize">{key}</span>
+                        <Badge variant="outline">{String(value)}</Badge>
+                      </div>
+                    ))
+                  )}
                 </div>
               ) : (
                 <p className="text-sm text-muted-foreground">Aucun effet spécifique n'a été défini pour cette loi.</p>
