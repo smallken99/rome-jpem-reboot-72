@@ -1,10 +1,10 @@
-
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import { ArrowDownIcon, ArrowUpIcon, Package, RefreshCw } from 'lucide-react';
 import { formatDate } from '@/utils/formatUtils';
+import { convertDateToGameDate } from '@/utils/dateConverters';
 
 interface ResourceTransaction {
   id: string;

@@ -1,3 +1,4 @@
+
 import { GameDate } from './common';
 
 export interface EconomieRecord {
@@ -63,16 +64,19 @@ export interface EconomieSort {
 }
 
 export interface TreasuryStatus {
+  id?: string;
   balance: number;
   totalIncome: number;
   totalExpenses: number;
   surplus: number;
   projectedBalance: number;
-  lastUpdated: string | Date;
+  lastUpdated: string | Date | GameDate;
   inflationRate?: number;
+  taxRate?: number;
   taxCollectionRate?: number;
   reserves?: number;
   debt?: number;
+  comments?: string;
 }
 
 export interface EconomicFactors {

@@ -5,14 +5,18 @@ import { SaveIcon, Loader2 } from 'lucide-react';
 
 interface EducationFormActionsProps {
   onSubmit?: () => void;
+  onCancel?: () => void;
   isLoading?: boolean;
   childId?: string;
+  disabled?: boolean;
 }
 
 export const EducationFormActions: React.FC<EducationFormActionsProps> = ({ 
   onSubmit,
+  onCancel,
   isLoading = false,
-  childId
+  childId,
+  disabled = false
 }) => {
   // Si nous avons un ID d'enfant, utilisons-le pour le retour
   const backUrl = childId 
@@ -30,15 +34,16 @@ export const EducationFormActions: React.FC<EducationFormActionsProps> = ({
       <ActionButton 
         variant="outline"
         label="Annuler"
-        to="/famille/education"
-        disabled={isLoading}
+        to={backUrl}
+        disabled={isLoading || disabled}
+        onClick={onCancel}
       />
       <ActionButton 
         type="submit"
         label={isLoading ? "Enregistrement..." : "Enregistrer les modifications"}
         variant="default"
         icon={isLoading ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <SaveIcon className="h-4 w-4" />}
-        disabled={isLoading}
+        disabled={isLoading || disabled}
         onClick={handleSubmit}
       />
     </div>

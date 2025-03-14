@@ -1,150 +1,202 @@
 
-import { useState } from 'react';
-import { v4 as uuidv4 } from 'uuid';
-import { Loi, LoiType, LoiStatut } from '../../../types/lois';
+import { useState, useEffect } from 'react';
+import { useToast } from '@/hooks/use-toast';
+import { useMaitreJeu } from '@/components/maitrejeu/context';
+import { Loi, LoiType, LoiState } from '../../../types/lois';
 import { Clause } from '../../../types/lois';
+import { parseGameDate } from '@/utils/dateConverters';
 
-export interface LoiFormData {
-  titre: string;
-  nom: string;
-  description: string;
-  proposeur: string;
-  type: LoiType;
-  catégorie: string;
-  date: {
-    year: number;
-    season: string;
-  };
-  dateProposition: {
-    year: number;
-    season: string;
-  };
-  état: LoiStatut;
-  importance: 'mineure' | 'normale' | 'majeure';
-  votesPositifs: number;
-  votesNégatifs: number;
-  votesAbstention: number;
-  votes: {
-    pour: number;
-    contre: number;
-    abstention: number;
-  };
-  effets: Record<string, any> | string[];
-  clauses: Clause[] | string[];
-  commentaires?: string;
-}
-
-export const useLoiForm = (currentYear: number, currentSeason: string) => {
-  const defaultLoi: LoiFormData = {
-    titre: '',
-    nom: '',
+export const useLoiForm = (initialLoi?: Loi) => {
+  const { toast } = useToast();
+  const { addLoi } = useMaitreJeu();
+  
+  const defaultLoi: Loi = {
+    id: '',
+    title: '',
     description: '',
-    proposeur: '',
-    type: 'civile',
-    catégorie: '',
-    date: {
-      year: currentYear,
-      season: currentSeason
-    },
-    dateProposition: {
-      year: currentYear,
-      season: currentSeason
-    },
-    état: 'proposée',
-    importance: 'normale',
-    votesPositifs: 0,
-    votesNégatifs: 0,
-    votesAbstention: 0,
-    votes: {
-      pour: 0,
-      contre: 0,
-      abstention: 0
-    },
-    effets: {},
-    clauses: []
+    proposedBy: '',
+    date: { year: new Date().getFullYear(), season: 'SPRING' },
+    status: 'proposed',
+    category: '',
+    votesFor: 0,
+    votesAgainst: 0,
+    effets: [],
+    conditions: [],
+    penalites: []
   };
-
-  const [formData, setFormData] = useState<LoiFormData>(defaultLoi);
-
-  const resetForm = () => {
-    setFormData(defaultLoi);
+  
+  const [formData, setFormData] = useState<Loi>(initialLoi || defaultLoi);
+  const [selectedType, setSelectedType] = useState<LoiType>('Politique');
+  const [clauseInput, setClauseInput] = useState<string>('');
+  const [clauseType, setClauseType] = useState<'effet' | 'condition' | 'penalite'>('effet');
+  const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
+  
+  useEffect(() => {
+    if (initialLoi) {
+      setFormData(initialLoi);
+      
+      if (initialLoi.type && typeof initialLoi.type === 'string') {
+        setSelectedType(initialLoi.type as LoiType);
+      }
+    }
+  }, [initialLoi]);
+  
+  const handleTypeChange = (type: string) => {
+    setSelectedType(type as LoiType);
+    setFormData(prev => ({ ...prev, type: type as LoiType }));
   };
-
-  const loadLoi = (loi: Loi) => {
-    // Adaptation du type Loi vers LoiFormData
-    const loiFormData: LoiFormData = {
-      titre: loi.titre,
-      nom: loi.nom || '',
+  
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>, field: string) => {
+    setFormData(prev => ({ ...prev, [field]: e.target.value }));
+  };
+  
+  const handleSelectChange = (value: string, field: string) => {
+    setFormData(prev => ({ ...prev, [field]: value }));
+  };
+  
+  // Map between different naming conventions
+  const mapToInternalModel = (loi: Loi): Loi => {
+    return {
+      id: loi.id,
+      title: loi.title || loi.titre || '',
       description: loi.description,
-      type: loi.type,
-      catégorie: loi.catégorie || '',
-      proposeur: loi.proposeur,
-      dateProposition: loi.dateProposition,
-      date: loi.date,
-      état: loi.état,
-      importance: loi.importance || 'normale',
-      votesPositifs: loi.votesPositifs,
-      votesNégatifs: loi.votesNégatifs,
-      votesAbstention: loi.votesAbstention,
-      votes: loi.votes,
-      effets: loi.effets,
+      proposedBy: loi.proposedBy || loi.proposeur || '',
+      date: parseGameDate(loi.date),
+      status: (loi.status || mapStatusToInternal(loi.état)) as LoiState,
+      category: loi.category || loi.catégorie || '',
+      votesFor: loi.votesFor || loi.votesPositifs || 0,
+      votesAgainst: loi.votesAgainst || loi.votesNégatifs || 0,
+      votesAbstention: loi.votesAbstention || 0,
+      notes: loi.notes || '',
+      type: (loi.type as LoiType) || 'Politique',
       clauses: loi.clauses || [],
-      commentaires: loi.commentaires
+      effets: loi.effets || [],
+      conditions: loi.conditions || [],
+      penalites: loi.penalites || [],
+      titre: loi.title || loi.titre || '',
+      proposeur: loi.proposedBy || loi.proposeur || '',
+      catégorie: loi.category || loi.catégorie || '',
+      état: loi.status || loi.état || 'proposed',
+      importance: loi.importance || 'normale',
+      votesPositifs: loi.votesFor || loi.votesPositifs || 0,
+      votesNégatifs: loi.votesAgainst || loi.votesNégatifs || 0,
+      commentaires: loi.notes ? [loi.notes] : []
+    };
+  };
+  
+  const mapStatusToInternal = (status?: string): 'proposed' | 'active' | 'rejected' | 'expired' => {
+    if (!status) return 'proposed';
+    
+    switch (status) {
+      case 'Promulguée':
+      case 'adoptée':
+        return 'active';
+      case 'rejetée':
+        return 'rejected';
+      case 'proposée':
+      case 'En délibération':
+      default:
+        return 'proposed';
+    }
+  };
+  
+  const handleClauseAdd = () => {
+    if (!clauseInput.trim()) return;
+    
+    const newClause: Clause = {
+      id: `clause-${Date.now()}`,
+      type: clauseType,
+      content: clauseInput.trim()
     };
     
-    setFormData(loiFormData);
+    setFormData(prev => {
+      if (clauseType === 'effet') {
+        return { 
+          ...prev, 
+          effets: [...(prev.effets || []), clauseInput.trim()]
+        };
+      } else if (clauseType === 'condition') {
+        return { 
+          ...prev, 
+          conditions: [...(prev.conditions || []), clauseInput.trim()]
+        };
+      } else {
+        return { 
+          ...prev, 
+          penalites: [...(prev.penalites || []), clauseInput.trim()]
+        };
+      }
+    });
+    
+    setClauseInput('');
   };
-
-  const handleInputChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
-    field: keyof LoiFormData
-  ) => {
-    setFormData(prev => ({
-      ...prev,
-      [field]: e.target.value
-    }));
+  
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsSubmitting(true);
+    
+    try {
+      // Ensure all fields are valid
+      if (!formData.title.trim()) {
+        toast({
+          title: 'Erreur',
+          description: 'Le titre est requis',
+          variant: 'destructive',
+        });
+        return;
+      }
+      
+      if (!formData.category) {
+        toast({
+          title: 'Erreur',
+          description: 'La catégorie est requise',
+          variant: 'destructive',
+        });
+        return;
+      }
+      
+      // Map to internal model
+      const loiToSubmit = mapToInternalModel(formData);
+      
+      // Add an ID if it's a new loi
+      const finalLoi = loiToSubmit.id 
+        ? loiToSubmit 
+        : { ...loiToSubmit, id: `loi-${Date.now()}` };
+      
+      addLoi(finalLoi);
+      
+      toast({
+        title: initialLoi ? 'Loi mise à jour' : 'Loi créée',
+        description: `La loi "${finalLoi.title}" a été ${initialLoi ? 'mise à jour' : 'créée'} avec succès.`,
+      });
+      
+      setFormData(defaultLoi);
+      
+    } catch (error) {
+      console.error("Error submitting loi:", error);
+      toast({
+        title: 'Erreur',
+        description: 'Une erreur est survenue lors de la sauvegarde de la loi',
+        variant: 'destructive',
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
   };
-
-  const handleSelectChange = (
-    value: string,
-    field: keyof LoiFormData
-  ) => {
-    setFormData(prev => ({
-      ...prev,
-      [field]: value
-    }));
-  };
-
-  const createLoi = (): Loi => {
-    return {
-      id: uuidv4(),
-      titre: formData.titre,
-      nom: formData.nom,
-      description: formData.description,
-      proposeur: formData.proposeur,
-      type: formData.type,
-      catégorie: formData.catégorie,
-      date: formData.date,
-      dateProposition: formData.dateProposition,
-      état: formData.état,
-      importance: formData.importance,
-      votesPositifs: formData.votesPositifs,
-      votesNégatifs: formData.votesNégatifs,
-      votesAbstention: formData.votesAbstention,
-      votes: formData.votes,
-      effets: formData.effets,
-      clauses: formData.clauses as Clause[],
-      commentaires: formData.commentaires
-    };
-  };
-
+  
   return {
     formData,
+    selectedType,
+    clauseInput,
+    clauseType,
+    isSubmitting,
     setFormData,
-    resetForm,
-    loadLoi,
+    handleTypeChange,
     handleInputChange,
     handleSelectChange,
-    createLoi
+    setClauseInput,
+    setClauseType,
+    handleClauseAdd,
+    handleSubmit
   };
 };

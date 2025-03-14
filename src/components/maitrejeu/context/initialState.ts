@@ -427,6 +427,10 @@ export const initialEconomieRecords: EconomieRecord[] = [
 export const initialTreasury: TreasuryStatus = {
   id: "treasury-1",
   balance: 2000000,
+  totalIncome: 500000,
+  totalExpenses: 300000,
+  surplus: 200000,
+  projectedBalance: 2500000,
   lastUpdated: { year: 700, season: "SUMMER" },
   inflationRate: 2.5,
   taxRate: 8.0,
@@ -471,7 +475,7 @@ export const initialEquilibre: Equilibre | null = {
   loyauté: 75,
   patriciens: 40,
   plébéiens: 60,
-  populares: 35, // Même valeur que populaires
+  populaires: 35, // Même valeur que populaires
   neutrales: 25,
   historique: []
 };

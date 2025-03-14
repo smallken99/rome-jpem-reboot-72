@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -20,9 +19,9 @@ import {
 } from '@/components/ui/select';
 import { useToast } from '@/hooks/use-toast';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Loi, CategorieLoi } from '../../types/lois';
 import { LoiModalProps } from '../lois/types';
 import { dateToGameDate } from '@/utils/formatUtils';
+import { Loi as LoiRepublique } from '@/components/republique/lois/hooks/useLois';
 
 const LOI_CATEGORIES = [
   { id: 'politique', name: 'Politique', description: 'Lois concernant la structure politique' },
@@ -43,22 +42,27 @@ export const LoiModal: React.FC<LoiModalProps> = ({
   const { toast } = useToast();
   const [activeTab, setActiveTab] = useState('info');
   
-  const initialState: Loi = loi || {
+  const initialState: LoiRepublique = loi || {
     id: '',
-    title: '',
+    titre: '',
     description: '',
-    proposedBy: '',
-    date: dateToGameDate(new Date()),
-    status: 'proposed',
-    category: '',
-    votesFor: 0,
-    votesAgainst: 0,
-    effets: [],
-    conditions: [],
-    penalites: []
+    auteur: '',
+    dateProposition: '',
+    statut: 'proposée',
+    categorieId: '',
+    type: 'Politique',
+    clauses: [],
+    commentaires: [],
+    importance: 'normale',
+    votes: {
+      pour: 0,
+      contre: 0,
+      abstention: 0
+    },
+    tags: []
   };
   
-  const [formData, setFormData] = useState<Loi>(initialState);
+  const [formData, setFormData] = useState<LoiRepublique>(initialState);
   const [effetInput, setEffetInput] = useState('');
   const [conditionInput, setConditionInput] = useState('');
   const [penaliteInput, setPenaliteInput] = useState('');
@@ -81,7 +85,7 @@ export const LoiModal: React.FC<LoiModalProps> = ({
   };
   
   const handleSave = () => {
-    if (!formData.title.trim()) {
+    if (!formData.titre.trim()) {
       toast({
         title: "Erreur",
         description: "Le titre de la loi est requis",
@@ -90,7 +94,7 @@ export const LoiModal: React.FC<LoiModalProps> = ({
       return;
     }
     
-    if (!formData.category) {
+    if (!formData.categorieId) {
       toast({
         title: "Erreur",
         description: "La catégorie de la loi est requise",
@@ -107,7 +111,7 @@ export const LoiModal: React.FC<LoiModalProps> = ({
     
     toast({
       title: loi ? "Loi mise à jour" : "Loi créée",
-      description: `La loi "${formData.title}" a été ${loi ? 'mise à jour' : 'créée'} avec succès.`,
+      description: `La loi "${formData.titre}" a été ${loi ? 'mise à jour' : 'créée'} avec succès.`,
     });
   };
   
@@ -115,7 +119,7 @@ export const LoiModal: React.FC<LoiModalProps> = ({
     if (effetInput.trim()) {
       setFormData(prev => ({
         ...prev,
-        effets: [...(prev.effets || []), effetInput.trim()]
+        commentaires: [...(prev.commentaires || []), effetInput.trim()]
       }));
       setEffetInput('');
     }
@@ -124,7 +128,7 @@ export const LoiModal: React.FC<LoiModalProps> = ({
   const removeEffet = (index: number) => {
     setFormData(prev => ({
       ...prev,
-      effets: (prev.effets || []).filter((_, i) => i !== index)
+      commentaires: (prev.commentaires || []).filter((_, i) => i !== index)
     }));
   };
   
@@ -132,7 +136,7 @@ export const LoiModal: React.FC<LoiModalProps> = ({
     if (conditionInput.trim()) {
       setFormData(prev => ({
         ...prev,
-        conditions: [...(prev.conditions || []), conditionInput.trim()]
+        clauses: [...(prev.clauses || []), conditionInput.trim()]
       }));
       setConditionInput('');
     }
@@ -141,7 +145,7 @@ export const LoiModal: React.FC<LoiModalProps> = ({
   const removeCondition = (index: number) => {
     setFormData(prev => ({
       ...prev,
-      conditions: (prev.conditions || []).filter((_, i) => i !== index)
+      clauses: (prev.clauses || []).filter((_, i) => i !== index)
     }));
   };
   
@@ -149,7 +153,7 @@ export const LoiModal: React.FC<LoiModalProps> = ({
     if (penaliteInput.trim()) {
       setFormData(prev => ({
         ...prev,
-        penalites: [...(prev.penalites || []), penaliteInput.trim()]
+        tags: [...(prev.tags || []), penaliteInput.trim()]
       }));
       setPenaliteInput('');
     }
@@ -158,7 +162,7 @@ export const LoiModal: React.FC<LoiModalProps> = ({
   const removePenalite = (index: number) => {
     setFormData(prev => ({
       ...prev,
-      penalites: (prev.penalites || []).filter((_, i) => i !== index)
+      tags: (prev.tags || []).filter((_, i) => i !== index)
     }));
   };
   
@@ -183,8 +187,8 @@ export const LoiModal: React.FC<LoiModalProps> = ({
                 <Label htmlFor="title">Titre de la loi</Label>
                 <Input
                   id="title"
-                  name="title"
-                  value={formData.title}
+                  name="titre"
+                  value={formData.titre}
                   onChange={handleChange}
                   placeholder="Lex Julia de..."
                 />
@@ -206,8 +210,8 @@ export const LoiModal: React.FC<LoiModalProps> = ({
                 <div className="space-y-2">
                   <Label htmlFor="category">Catégorie</Label>
                   <Select
-                    value={formData.category}
-                    onValueChange={(value) => handleSelectChange('category', value)}
+                    value={formData.categorieId}
+                    onValueChange={(value) => handleSelectChange('categorieId', value)}
                   >
                     <SelectTrigger>
                       <SelectValue placeholder="Sélectionner une catégorie" />
@@ -226,8 +230,8 @@ export const LoiModal: React.FC<LoiModalProps> = ({
                   <Label htmlFor="proposedBy">Proposée par</Label>
                   <Input
                     id="proposedBy"
-                    name="proposedBy"
-                    value={formData.proposedBy}
+                    name="auteur"
+                    value={formData.auteur}
                     onChange={handleChange}
                     placeholder="Nom du sénateur"
                   />
@@ -239,17 +243,16 @@ export const LoiModal: React.FC<LoiModalProps> = ({
                   <div className="space-y-2">
                     <Label htmlFor="status">Statut</Label>
                     <Select
-                      value={formData.status}
-                      onValueChange={(value) => handleSelectChange('status', value as any)}
+                      value={formData.statut}
+                      onValueChange={(value) => handleSelectChange('statut', value as any)}
                     >
                       <SelectTrigger>
                         <SelectValue placeholder="Sélectionner un statut" />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="proposed">Proposée</SelectItem>
-                        <SelectItem value="active">Active</SelectItem>
-                        <SelectItem value="rejected">Rejetée</SelectItem>
-                        <SelectItem value="expired">Expirée</SelectItem>
+                        <SelectItem value="proposée">Proposée</SelectItem>
+                        <SelectItem value="promulguée">Active</SelectItem>
+                        <SelectItem value="rejetée">Rejetée</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
@@ -258,8 +261,8 @@ export const LoiModal: React.FC<LoiModalProps> = ({
                     <Label htmlFor="notes">Notes</Label>
                     <Input
                       id="notes"
-                      name="notes"
-                      value={formData.notes || ''}
+                      name="commentaires"
+                      value={formData.commentaires ? formData.commentaires[0] : ''}
                       onChange={handleChange}
                       placeholder="Notes additionnelles"
                     />
@@ -287,8 +290,8 @@ export const LoiModal: React.FC<LoiModalProps> = ({
               <div className="space-y-2">
                 <Label>Effets de la loi</Label>
                 <div className="border rounded-md p-4 space-y-2">
-                  {formData.effets && formData.effets.length > 0 ? (
-                    formData.effets.map((effet, index) => (
+                  {formData.commentaires && formData.commentaires.length > 0 ? (
+                    formData.commentaires.map((effet, index) => (
                       <div key={index} className="flex items-center justify-between bg-muted/50 p-2 rounded">
                         <span>{effet}</span>
                         <Button
@@ -330,8 +333,8 @@ export const LoiModal: React.FC<LoiModalProps> = ({
               <div className="space-y-2">
                 <Label>Conditions d'application</Label>
                 <div className="border rounded-md p-4 space-y-2">
-                  {formData.conditions && formData.conditions.length > 0 ? (
-                    formData.conditions.map((condition, index) => (
+                  {formData.clauses && formData.clauses.length > 0 ? (
+                    formData.clauses.map((condition, index) => (
                       <div key={index} className="flex items-center justify-between bg-muted/50 p-2 rounded">
                         <span>{condition}</span>
                         <Button
@@ -373,8 +376,8 @@ export const LoiModal: React.FC<LoiModalProps> = ({
               <div className="space-y-2">
                 <Label>Pénalités en cas de non-respect</Label>
                 <div className="border rounded-md p-4 space-y-2">
-                  {formData.penalites && formData.penalites.length > 0 ? (
-                    formData.penalites.map((penalite, index) => (
+                  {formData.tags && formData.tags.length > 0 ? (
+                    formData.tags.map((penalite, index) => (
                       <div key={index} className="flex items-center justify-between bg-muted/50 p-2 rounded">
                         <span>{penalite}</span>
                         <Button

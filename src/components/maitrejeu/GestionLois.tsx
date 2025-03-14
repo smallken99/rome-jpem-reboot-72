@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -14,7 +13,11 @@ import { LoisRejeteesTab } from './components/lois/tabs/LoisRejeteesTab';
 import { HistoriqueLoiTab } from './components/lois/tabs/HistoriqueLoiTab';
 import { useMaitreJeu } from './context';
 import { Loi } from './types/lois';
-import { convertMJArrayToRepublique, convertRepubliqueToMJLoi } from './types/loisAdapter';
+import { 
+  convertMJArrayToRepublique, 
+  convertRepubliqueToMJLoi, 
+  convertMJToRepubliqueLoi 
+} from './types/loisAdapter';
 
 export const GestionLois = () => {
   const { lois, addLoi } = useMaitreJeu();
@@ -191,7 +194,7 @@ export const GestionLois = () => {
         isOpen={isModalOpen} 
         onClose={handleCloseModal} 
         onSave={handleSaveLoi}
-        loi={selectedLoi ? convertMJToRepubliqueLoi(selectedLoi) : null}
+        loi={selectedLoi ? convertMJToRepubliqueLoi(selectedLoi) : undefined}
       />
     </div>
   );

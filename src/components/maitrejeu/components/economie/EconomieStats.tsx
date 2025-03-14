@@ -1,11 +1,10 @@
-
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { StatBox } from '@/components/ui-custom/StatBox';
 import { Coins, TrendingUp, TrendingDown, Scale } from 'lucide-react';
 import { useMaitreJeu } from '@/components/maitrejeu/context';
 import { formatMoney } from '@/utils/formatUtils';
-import { GameDate } from '@/components/maitrejeu/types/common';
+import { GameDate, parseStringToGameDate } from '@/components/maitrejeu/types/common';
 
 export const EconomieStats: React.FC = () => {
   const { economieRecords, treasury } = useMaitreJeu();
@@ -24,16 +23,8 @@ export const EconomieStats: React.FC = () => {
   };
   
   // Function to safely parse GameDate from string or use directly
-  const parseGameDate = (date: GameDate | string): GameDate => {
-    if (typeof date === 'string') {
-      try {
-        return JSON.parse(date) as GameDate;
-      } catch (e) {
-        // Default fallback if parsing fails
-        return { year: 700, season: "SPRING" };
-      }
-    }
-    return date;
+  const parseGameDate = (date: string | GameDate): GameDate => {
+    return parseStringToGameDate(date);
   };
   
   // Calculate income and expenses for the last 2 seasons for trends

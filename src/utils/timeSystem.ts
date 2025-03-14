@@ -1,91 +1,99 @@
-import { create } from 'zustand';
 
-export type Season = "Ver" | "Aestas" | "Autumnus" | "Hiems";
-export type PlayerSeason = "SPRING" | "SUMMER" | "AUTUMN" | "WINTER";
+import { GameDate, Season } from '@/components/maitrejeu/types/common';
 
-// Mapping between Roman seasons and player seasons
-export const seasonMapping: Record<Season, PlayerSeason> = {
-  "Ver": "SPRING",
-  "Aestas": "SUMMER",
-  "Autumnus": "AUTUMN",
-  "Hiems": "WINTER"
-};
-
-// Reverse mapping
-export const reverseSeasonMapping: Record<PlayerSeason, Season> = {
-  "SPRING": "Ver",
-  "SUMMER": "Aestas",
-  "AUTUMN": "Autumnus",
-  "WINTER": "Hiems"
-};
-
-// Helper function to convert between season types
-export const convertSeasonBetweenSystems = (
-  season: Season | PlayerSeason | string, 
-  targetSystem: 'player' | 'mj'
-): Season | PlayerSeason => {
-  if (targetSystem === 'player') {
-    if (season === "Ver" || season === "Aestas" || season === "Autumnus" || season === "Hiems") {
-      return seasonMapping[season as Season];
+// Format a GameDate or convert a string to GameDate and format it
+export const formatDate = (date: GameDate | string): string => {
+  let gameDate: GameDate;
+  
+  if (typeof date === 'string') {
+    // Convert string to GameDate
+    const parts = date.split(' ');
+    if (parts.length >= 2) {
+      gameDate = {
+        year: parseInt(parts[0]),
+        season: parts[1] as Season
+      };
+    } else {
+      // Default if format is not recognized
+      gameDate = { year: new Date().getFullYear(), season: 'SPRING' };
     }
-    // If it's already a player season or an unrecognized value, return as is
-    return season as PlayerSeason;
   } else {
-    if (season === "SPRING" || season === "SUMMER" || season === "AUTUMN" || season === "WINTER") {
-      return reverseSeasonMapping[season as PlayerSeason];
-    }
-    // If it's already an MJ season or an unrecognized value, return as is
-    return season as Season;
+    gameDate = date;
+  }
+  
+  return `An ${gameDate.year}, ${formatSeasonDisplay(gameDate.season)}`;
+};
+
+// Format season for display
+export const formatSeasonDisplay = (season: string): string => {
+  switch (season) {
+    case 'SPRING':
+    case 'Ver':
+      return 'Printemps';
+    case 'SUMMER':
+    case 'Aestas':
+      return 'Été';
+    case 'AUTUMN':
+    case 'Autumnus':
+      return 'Automne';
+    case 'WINTER':
+    case 'Hiems':
+      return 'Hiver';
+    default:
+      return season;
   }
 };
 
-// Format a season to display name in French
-export const formatSeasonDisplay = (season: Season | PlayerSeason | string): string => {
-  // Convert to Season type first if needed
-  const romanSeason = (season === "SPRING" || season === "SUMMER" || season === "AUTUMN" || season === "WINTER") 
-    ? convertSeasonBetweenSystems(season as PlayerSeason, 'mj') 
-    : season as Season;
-    
-  switch (romanSeason) {
-    case "Ver": return "Printemps";
-    case "Aestas": return "Été";
-    case "Autumnus": return "Automne";
-    case "Hiems": return "Hiver";
-    default: return "Saison inconnue";
+// Convert Date to GameDate
+export const dateToGameDate = (date: Date): GameDate => {
+  const year = date.getFullYear();
+  const month = date.getMonth();
+  
+  let season: Season;
+  if (month >= 2 && month <= 4) season = 'SPRING';
+  else if (month >= 5 && month <= 7) season = 'SUMMER';
+  else if (month >= 8 && month <= 10) season = 'AUTUMN';
+  else season = 'WINTER';
+  
+  return { year, season };
+};
+
+// Get the next season
+export const getNextSeason = (season: Season): Season => {
+  switch (season) {
+    case 'SPRING':
+    case 'Ver':
+      return 'SUMMER';
+    case 'SUMMER':
+    case 'Aestas':
+      return 'AUTUMN';
+    case 'AUTUMN':
+    case 'Autumnus':
+      return 'WINTER';
+    case 'WINTER':
+    case 'Hiems':
+      return 'SPRING';
+    default:
+      return 'SPRING';
   }
 };
 
-// Format a game date (year + season)
-export const formatGameDate = (date: { year: number; season: Season | PlayerSeason | string }): string => {
-  const formattedSeason = formatSeasonDisplay(date.season);
-  return `An ${date.year}, ${formattedSeason}`;
-};
-
-// Time store for state management
-interface TimeState {
-  year: number;
-  season: PlayerSeason;
-  advanceTime: () => void;
-  getYear: () => number;
-}
-
-export const useTimeStore = create<TimeState>((set, get) => ({
-  year: 573, // Starting year (AUC - Ab Urbe Condita)
-  season: "SPRING",
+// Convert a string or GameDate to a standardized GameDate object
+export const parseGameDate = (dateInput: string | GameDate): GameDate => {
+  if (typeof dateInput === 'object' && 'year' in dateInput && 'season' in dateInput) {
+    return dateInput;
+  }
   
-  advanceTime: () => set(state => {
-    const seasons: PlayerSeason[] = ["SPRING", "SUMMER", "AUTUMN", "WINTER"];
-    const currentSeasonIndex = seasons.indexOf(state.season);
-    const nextSeasonIndex = (currentSeasonIndex + 1) % seasons.length;
-    
-    // If we're moving from winter to spring, advance the year
-    if (nextSeasonIndex === 0) {
-      return { year: state.year + 1, season: seasons[nextSeasonIndex] };
+  if (typeof dateInput === 'string') {
+    const parts = dateInput.split(' ');
+    if (parts.length >= 2) {
+      return {
+        year: parseInt(parts[0]),
+        season: parts[1] as Season
+      };
     }
-    
-    // Otherwise just advance the season
-    return { season: seasons[nextSeasonIndex] };
-  }),
+  }
   
-  getYear: () => get().year,
-}));
+  // Default value
+  return { year: new Date().getFullYear(), season: 'SPRING' };
+};

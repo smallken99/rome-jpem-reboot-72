@@ -55,33 +55,41 @@ export const dateToGameDate = (date: Date): GameDate => {
   let season: Season;
   const month = date.getMonth();
   
-  if (month >= 2 && month <= 4) {
-    season = 'SPRING';
-  } else if (month >= 5 && month <= 7) {
-    season = 'SUMMER';
-  } else if (month >= 8 && month <= 10) {
-    season = 'AUTUMN';
-  } else {
-    season = 'WINTER';
-  }
+  if (month >= 2 && month <= 4) season = 'SPRING';
+  else if (month >= 5 && month <= 7) season = 'SUMMER';
+  else if (month >= 8 && month <= 10) season = 'AUTUMN';
+  else season = 'WINTER';
   
   return { year, season };
 };
 
 // Utility function to parse string dates to GameDate
-export const parseStringToGameDate = (dateString: string): GameDate => {
+export const parseStringToGameDate = (dateString: string | Date | GameDate): GameDate => {
+  // If it's already a GameDate, return it
+  if (typeof dateString === 'object' && 'year' in dateString && 'season' in dateString) {
+    return dateString as GameDate;
+  }
+  
+  // If it's a Date object
+  if (dateString instanceof Date) {
+    return dateToGameDate(dateString);
+  }
+  
+  // If it's a string
   try {
-    if (dateString.includes('-')) {
-      // Format: YYYY-MM-DD
-      const date = new Date(dateString);
-      return dateToGameDate(date);
-    } else if (dateString.includes(' ')) {
-      // Format: "YEAR SEASON"
-      const parts = dateString.split(' ');
-      return {
-        year: parseInt(parts[0], 10),
-        season: parts[1] as Season
-      };
+    if (typeof dateString === 'string') {
+      if (dateString.includes('-')) {
+        // Format: YYYY-MM-DD
+        const date = new Date(dateString);
+        return dateToGameDate(date);
+      } else if (dateString.includes(' ')) {
+        // Format: "YEAR SEASON"
+        const parts = dateString.split(' ');
+        return {
+          year: parseInt(parts[0], 10),
+          season: parts[1] as Season
+        };
+      }
     }
     // Default
     return { year: new Date().getFullYear(), season: 'SPRING' };
