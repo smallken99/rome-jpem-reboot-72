@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import {
@@ -32,7 +33,7 @@ export const LoiModal: React.FC<LoiModalProps> = ({
   const { toast } = useToast();
   const [activeTab, setActiveTab] = useState('info');
   
-  const initialState: LoiRepublique = {
+  const initialState: any = {
     id: '',
     titre: '',
     description: '',
@@ -45,10 +46,15 @@ export const LoiModal: React.FC<LoiModalProps> = ({
       contre: 0,
       abstention: 0
     },
-    tags: []
-  } as LoiRepublique;
+    tags: [],
+    // Extended properties required by MaitreJeu components
+    type: '',
+    importance: 'normale',
+    clauses: [],
+    commentaires: []
+  };
   
-  const [formData, setFormData] = useState<LoiRepublique>(initialState);
+  const [formData, setFormData] = useState<any>(initialState);
   const [effetInput, setEffetInput] = useState('');
   const [conditionInput, setConditionInput] = useState('');
   const [penaliteInput, setPenaliteInput] = useState('');
@@ -59,7 +65,7 @@ export const LoiModal: React.FC<LoiModalProps> = ({
       const compliantLoi = ensureLoiCompliance(loi);
       
       // Convert to LoiRepublique format
-      const republiqueLoi: LoiRepublique = {
+      const republiqueLoi: any = {
         id: compliantLoi.id,
         titre: compliantLoi.title || compliantLoi.titre || '',
         description: compliantLoi.description || '',
@@ -80,16 +86,13 @@ export const LoiModal: React.FC<LoiModalProps> = ({
           contre: compliantLoi.votesAgainst || compliantLoi.votesNégatifs || (compliantLoi.votes?.contre || 0),
           abstention: compliantLoi.votesAbstention || (compliantLoi.votes?.abstention || 0)
         },
-        tags: compliantLoi.tags || []
-      } as LoiRepublique;
-      
-      // Add extended properties
-      Object.assign(republiqueLoi, {
-        type: compliantLoi.type,
-        clauses: compliantLoi.clauses,
-        commentaires: compliantLoi.commentaires,
-        importance: compliantLoi.importance
-      });
+        tags: compliantLoi.tags || [],
+        // Add extended properties explicitly
+        type: compliantLoi.type || '',
+        clauses: compliantLoi.clauses || [],
+        commentaires: compliantLoi.commentaires || [],
+        importance: compliantLoi.importance || 'normale'
+      };
       
       setFormData(republiqueLoi);
     } else {
@@ -99,11 +102,11 @@ export const LoiModal: React.FC<LoiModalProps> = ({
   
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
+    setFormData((prev: any) => ({ ...prev, [name]: value }));
   };
   
   const handleSelectChange = (name: string, value: string) => {
-    setFormData(prev => ({ ...prev, [name]: value }));
+    setFormData((prev: any) => ({ ...prev, [name]: value }));
   };
   
   const handleSave = () => {
@@ -139,43 +142,43 @@ export const LoiModal: React.FC<LoiModalProps> = ({
   
   const addEffet = () => {
     if (effetInput.trim()) {
-      setFormData(prev => {
-        const updatedCommentaires = [...((prev as any).commentaires || []), effetInput.trim()];
-        return { ...prev, commentaires: updatedCommentaires } as LoiRepublique;
+      setFormData((prev: any) => {
+        const updatedCommentaires = [...(prev.commentaires || []), effetInput.trim()];
+        return { ...prev, commentaires: updatedCommentaires };
       });
       setEffetInput('');
     }
   };
   
   const removeEffet = (index: number) => {
-    setFormData(prev => {
-      const updatedCommentaires = [...((prev as any).commentaires || [])];
+    setFormData((prev: any) => {
+      const updatedCommentaires = [...(prev.commentaires || [])];
       updatedCommentaires.splice(index, 1);
-      return { ...prev, commentaires: updatedCommentaires } as LoiRepublique;
+      return { ...prev, commentaires: updatedCommentaires };
     });
   };
   
   const addCondition = () => {
     if (conditionInput.trim()) {
-      setFormData(prev => {
-        const updatedClauses = [...((prev as any).clauses || []), conditionInput.trim()];
-        return { ...prev, clauses: updatedClauses } as LoiRepublique;
+      setFormData((prev: any) => {
+        const updatedClauses = [...(prev.clauses || []), conditionInput.trim()];
+        return { ...prev, clauses: updatedClauses };
       });
       setConditionInput('');
     }
   };
   
   const removeCondition = (index: number) => {
-    setFormData(prev => {
-      const updatedClauses = [...((prev as any).clauses || [])];
+    setFormData((prev: any) => {
+      const updatedClauses = [...(prev.clauses || [])];
       updatedClauses.splice(index, 1);
-      return { ...prev, clauses: updatedClauses } as LoiRepublique;
+      return { ...prev, clauses: updatedClauses };
     });
   };
   
   const addPenalite = () => {
     if (penaliteInput.trim()) {
-      setFormData(prev => {
+      setFormData((prev: any) => {
         const updatedTags = [...(prev.tags || []), penaliteInput.trim()];
         return { ...prev, tags: updatedTags };
       });
@@ -184,7 +187,7 @@ export const LoiModal: React.FC<LoiModalProps> = ({
   };
   
   const removePenalite = (index: number) => {
-    setFormData(prev => {
+    setFormData((prev: any) => {
       const updatedTags = [...(prev.tags || [])];
       updatedTags.splice(index, 1);
       return { ...prev, tags: updatedTags };
