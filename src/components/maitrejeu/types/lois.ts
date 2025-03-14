@@ -41,7 +41,7 @@ export interface Loi {
   implementationDate?: GameDate;
   expirationDate?: GameDate;
   
-  // République format properties
+  // Additional properties needed for LoiModal and loisAdapter
   type?: string | LoiType;
   importance?: string;
   clauses?: any[];

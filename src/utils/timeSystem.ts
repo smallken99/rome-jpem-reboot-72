@@ -1,3 +1,4 @@
+
 export type Season = 'SPRING' | 'SUMMER' | 'AUTUMN' | 'WINTER' | 'Ver' | 'Aestas' | 'Autumnus' | 'Hiems';
 
 export interface GameDate {

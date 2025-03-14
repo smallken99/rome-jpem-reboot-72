@@ -15,7 +15,7 @@ export interface Loi {
   votesNégatifs: number;
   votesAbstention: number;
   effets: Record<string, any>;
-  // Add missing properties that are used in various components
+  // Add missing properties required by LoiModal and loisAdapter
   type?: string;
   clauses?: any[];
   commentaires?: string[];
