@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -29,12 +30,20 @@ export const GestionLois = () => {
   
   // Helper to normalize loi status
   const normalizeStatus = (loi: Loi): 'active' | 'proposed' | 'rejected' | 'expired' => {
-    if (loi.status) return loi.status;
+    if (loi.status === 'active') return 'active';
+    if (loi.status === 'proposed') return 'proposed';
+    if (loi.status === 'rejected') return 'rejected';
+    if (loi.status === 'expired') return 'expired';
     
     // Handle legacy status field
-    if (loi.état === 'Promulguée' || loi.état === 'adoptée') return 'active';
+    if (loi.état === 'Promulguée' || loi.état === 'adoptée' || loi.état === 'promulguée') return 'active';
     if (loi.état === 'proposée' || loi.état === 'En délibération') return 'proposed';
     if (loi.état === 'rejetée') return 'rejected';
+    
+    // Handle République format
+    if (loi.statut === 'promulguée') return 'active';
+    if (loi.statut === 'proposée' || loi.statut === 'en_débat') return 'proposed';
+    if (loi.statut === 'rejetée') return 'rejected';
     
     return 'proposed'; // Default
   };
@@ -51,6 +60,10 @@ export const GestionLois = () => {
       case 'SUMMER': return 'Été';
       case 'AUTUMN': return 'Automne';
       case 'WINTER': return 'Hiver';
+      case 'Ver': return 'Printemps';
+      case 'Aestas': return 'Été';
+      case 'Autumnus': return 'Automne';
+      case 'Hiems': return 'Hiver';
       default: return season;
     }
   };
@@ -59,7 +72,7 @@ export const GestionLois = () => {
   const filteredLois = lois.filter(loi => 
     (loi.title || loi.titre || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
     loi.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    (loi.proposedBy || loi.proposeur || '').toLowerCase().includes(searchTerm.toLowerCase())
+    (loi.proposedBy || loi.proposeur || loi.auteur || '').toLowerCase().includes(searchTerm.toLowerCase())
   );
   
   const handleOpenModal = (loi: Loi | null = null) => {

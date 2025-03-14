@@ -1,119 +1,100 @@
 import React from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Badge } from '@/components/ui/badge';
-import { ArrowDownIcon, ArrowUpIcon, Package, RefreshCw } from 'lucide-react';
+import { ResourceTransaction } from '../types';
 import { formatDate } from '@/utils/formatUtils';
+import { Badge } from '@/components/ui/badge';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import { Separator } from '@/components/ui/separator';
+import { ArrowDownIcon, ArrowUpIcon, ArrowRightIcon } from 'lucide-react';
+import { GameDate } from '@/components/maitrejeu/types/common';
 import { convertDateToGameDate } from '@/utils/dateConverters';
 
-interface ResourceTransaction {
-  id: string;
-  date: Date;
-  resourceName: string;
-  type: 'entrée' | 'sortie' | 'transfert';
-  quantity: number;
-  fromLocation?: string;
-  toLocation?: string;
-  reason: string;
+interface ResourceTransactionsProps {
+  transactions: ResourceTransaction[];
+  title?: string;
+  maxHeight?: number;
 }
 
-// Sample data
-const resourceTransactions: ResourceTransaction[] = [
-  { 
-    id: '1', 
-    date: new Date(2023, 2, 15), 
-    resourceName: 'Blé', 
-    type: 'entrée', 
-    quantity: 1200, 
-    toLocation: 'Terres Agricoles', 
-    reason: 'Récolte de printemps' 
-  },
-  { 
-    id: '2', 
-    date: new Date(2023, 2, 20), 
-    resourceName: 'Vin', 
-    type: 'sortie', 
-    quantity: 300, 
-    fromLocation: 'Villa Tusculana', 
-    reason: 'Vente au marché' 
-  },
-  { 
-    id: '3', 
-    date: new Date(2023, 3, 5), 
-    resourceName: 'Huile', 
-    type: 'transfert', 
-    quantity: 500, 
-    fromLocation: 'Entrepôt du Port', 
-    toLocation: 'Domus Palatina',
-    reason: 'Réorganisation des stocks' 
-  },
-  { 
-    id: '4', 
-    date: new Date(2023, 3, 12), 
-    resourceName: 'Blé', 
-    type: 'sortie', 
-    quantity: 800, 
-    fromLocation: 'Terres Agricoles', 
-    reason: 'Distribution aux clients' 
-  },
-];
+export const formatTransactionType = (type: 'achat' | 'vente' | 'transfert') => {
+  switch (type) {
+    case 'achat':
+      return { icon: <ArrowDownIcon className="h-4 w-4 text-red-500" />, label: 'Achat', color: 'bg-red-100 text-red-800 border-red-300' };
+    case 'vente':
+      return { icon: <ArrowUpIcon className="h-4 w-4 text-green-500" />, label: 'Vente', color: 'bg-green-100 text-green-800 border-green-300' };
+    case 'transfert':
+      return { icon: <ArrowRightIcon className="h-4 w-4 text-blue-500" />, label: 'Transfert', color: 'bg-blue-100 text-blue-800 border-blue-300' };
+  }
+};
 
-export const ResourceTransactions: React.FC = () => {
+// Date formatting helper that converts Date to GameDate when needed
+const formatTransactionDate = (date: Date | GameDate): string => {
+  // If it's a Date object, convert it to GameDate
+  if (date instanceof Date) {
+    const gameDate = convertDateToGameDate(date);
+    return `An ${gameDate.year}, ${gameDate.season}`;
+  }
+  
+  // If it's already a GameDate
+  if (typeof date === 'object' && 'year' in date && 'season' in date) {
+    return `An ${date.year}, ${date.season}`;
+  }
+  
+  // Fallback
+  return formatDate(date as any);
+};
+
+export const ResourceTransactions: React.FC<ResourceTransactionsProps> = ({ 
+  transactions, 
+  title = "Transactions récentes",
+  maxHeight
+}) => {
   return (
     <Card>
-      <CardHeader className="pb-3">
-        <CardTitle className="flex items-center gap-2">
-          <RefreshCw className="h-5 w-5 text-muted-foreground" />
-          Mouvements de Ressources
-        </CardTitle>
+      <CardHeader className="px-4 pt-4 pb-2">
+        <CardTitle className="text-base">{title}</CardTitle>
       </CardHeader>
-      <CardContent>
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>Date</TableHead>
-              <TableHead>Ressource</TableHead>
-              <TableHead>Type</TableHead>
-              <TableHead>Quantité</TableHead>
-              <TableHead>Origine/Destination</TableHead>
-              <TableHead>Raison</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {resourceTransactions.map((transaction) => (
-              <TableRow key={transaction.id}>
-                <TableCell>{formatDate(transaction.date)}</TableCell>
-                <TableCell className="font-medium">{transaction.resourceName}</TableCell>
-                <TableCell>
-                  <Badge 
-                    variant={
-                      transaction.type === 'entrée' ? 'success' : 
-                      transaction.type === 'sortie' ? 'destructive' : 'default'
-                    }
-                    className="flex items-center gap-1 w-fit"
-                  >
-                    {transaction.type === 'entrée' && <ArrowDownIcon className="h-3 w-3" />}
-                    {transaction.type === 'sortie' && <ArrowUpIcon className="h-3 w-3" />}
-                    {transaction.type === 'transfert' && <RefreshCw className="h-3 w-3" />}
-                    {transaction.type}
-                  </Badge>
-                </TableCell>
-                <TableCell>{transaction.quantity} unités</TableCell>
-                <TableCell>
-                  {transaction.type === 'entrée' && <span>→ {transaction.toLocation}</span>}
-                  {transaction.type === 'sortie' && <span>{transaction.fromLocation} →</span>}
-                  {transaction.type === 'transfert' && <span>{transaction.fromLocation} → {transaction.toLocation}</span>}
-                </TableCell>
-                <TableCell className="text-sm text-muted-foreground">{transaction.reason}</TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
+      <CardContent className="px-4 pt-0 pb-3">
+        <ScrollArea className={maxHeight ? `max-h-[${maxHeight}px]` : "max-h-[300px]"}>
+          <div className="space-y-3">
+            {transactions.length > 0 ? (
+              transactions.map((transaction, index) => {
+                const { icon, label, color } = formatTransactionType(transaction.type);
+                return (
+                  <div key={index}>
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center space-x-2">
+                        {icon}
+                        <div>
+                          <p className="text-sm font-medium">{transaction.resourceName}</p>
+                          <p className="text-xs text-gray-500">
+                            {formatTransactionDate(transaction.date)}
+                          </p>
+                        </div>
+                      </div>
+                      <div className="text-right">
+                        <p className="text-sm font-medium">
+                          {transaction.type === 'achat' ? '-' : '+'}
+                          {transaction.quantity} {transaction.unit}
+                        </p>
+                        <Badge className={`text-xs ${color}`} variant="outline">
+                          {label}
+                        </Badge>
+                      </div>
+                    </div>
+                    {index < transactions.length - 1 && <Separator className="my-2" />}
+                  </div>
+                );
+              })
+            ) : (
+              <p className="text-sm text-center text-gray-500 py-4">
+                Aucune transaction récente
+              </p>
+            )}
+          </div>
+        </ScrollArea>
       </CardContent>
     </Card>
   );
 };
 
-const handleDateToGameDate = (date: Date) => {
-  return convertDateToGameDate(date);
-};
+export default ResourceTransactions;

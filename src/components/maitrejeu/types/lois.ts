@@ -3,27 +3,44 @@ import { GameDate } from './common';
 
 export interface Loi {
   id: string;
+  // Title properties (different naming conventions)
   title?: string;
   titre?: string;
+  
+  // Core properties
   description: string;
+  
+  // Author/proposer properties (different naming conventions)
   proposedBy?: string;
   proposeur?: string;
   auteur?: string;
+  
+  // Date properties
   date?: GameDate;
   dateProposition?: string | GameDate;
+  
+  // Status properties (different naming conventions)
   status?: LoiState;
   statut?: string;
   état?: string;
+  
+  // Category properties (different naming conventions)
   category?: string;
   categorieId?: string;
   catégorie?: string;
+  
+  // Vote properties (different naming conventions)
   votesFor?: number;
   votesAgainst?: number;
   votesPositifs?: number;
   votesNégatifs?: number;
   votesAbstention?: number;
+  
+  // Date range properties
   implementationDate?: GameDate;
   expirationDate?: GameDate;
+  
+  // Additional properties
   notes?: string;
   effets?: string[] | Record<string, any>;
   conditions?: string[];

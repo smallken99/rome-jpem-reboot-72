@@ -375,8 +375,8 @@ export const initialEconomieRecords: EconomieRecord[] = [
     isRecurring: true,
     recurringInterval: "seasonal",
     tags: ["impôts", "revenus réguliers"],
-    createdAt: new Date(),
-    updatedAt: new Date()
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString()
   },
   {
     id: "econ-2",
@@ -388,8 +388,8 @@ export const initialEconomieRecords: EconomieRecord[] = [
     type: "expense",
     isRecurring: false,
     tags: ["militaire", "campagne"],
-    createdAt: new Date(),
-    updatedAt: new Date()
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString()
   },
   {
     id: "econ-3",
@@ -402,8 +402,8 @@ export const initialEconomieRecords: EconomieRecord[] = [
     isRecurring: true,
     recurringInterval: "seasonal",
     tags: ["commerce", "taxes"],
-    createdAt: new Date(),
-    updatedAt: new Date()
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString()
   },
   {
     id: "econ-4",
@@ -415,8 +415,8 @@ export const initialEconomieRecords: EconomieRecord[] = [
     type: "expense",
     isRecurring: false,
     tags: ["religion", "construction"],
-    createdAt: new Date(),
-    updatedAt: new Date()
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString()
   }
 ];
 
@@ -460,11 +460,10 @@ export const initialEquilibre: Equilibre = {
   facteurMilitaire: 68,
   facteurReligieux: 75,
   populaires: 35,
-  populaires: 35,
   optimates: 45,
   moderates: 20,
   population: 1000000,
-  indiceCrime: 12,
+  criminalityIndex: 12,
   indiceCorruption: 18,
   indiceMecontentement: 25,
   stressPolitique: 30,

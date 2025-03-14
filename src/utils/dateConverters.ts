@@ -57,6 +57,36 @@ export const parseGameDate = (dateVal: string | Date | GameDate): GameDate => {
   return { year: new Date().getFullYear(), season: 'SPRING' };
 };
 
+// Enhanced parsing function for strings that should be GameDate
+export const parseStringToGameDate = (dateVal: string | GameDate): GameDate => {
+  // If it's already a GameDate
+  if (typeof dateVal === 'object' && 'year' in dateVal && 'season' in dateVal) {
+    return dateVal as GameDate;
+  }
+  
+  // If it's a string
+  if (typeof dateVal === 'string') {
+    try {
+      if (dateVal.includes('-')) {
+        // Standard date format: YYYY-MM-DD
+        return convertDateToGameDate(new Date(dateVal));
+      } else if (dateVal.includes(' ')) {
+        // Format: "YEAR SEASON"
+        const parts = dateVal.split(' ');
+        return {
+          year: parseInt(parts[0], 10),
+          season: parts[1] as Season
+        };
+      }
+    } catch (error) {
+      console.error("Error parsing date string:", error);
+    }
+  }
+  
+  // Default fallback
+  return { year: new Date().getFullYear(), season: 'SPRING' };
+};
+
 // Convert any date format to string representation
 export const formatGameDate = (date: GameDate | string | Date): string => {
   const gameDate = parseGameDate(date);
