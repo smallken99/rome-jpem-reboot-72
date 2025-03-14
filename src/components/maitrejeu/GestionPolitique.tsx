@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useMaitreJeu } from './context';
@@ -9,7 +8,6 @@ import { ElectionPlanner } from './components/elections/ElectionPlanner';
 import { LoiDetail } from './components/lois/LoiDetail';
 import { v4 as uuidv4 } from 'uuid';
 
-// Type for the form data
 interface LoiFormData {
   titre: string;
   description: string;
@@ -33,11 +31,9 @@ export const GestionPolitique = () => {
     importance: 'normale'
   });
   
-  // Handler functions
   const handleAddLoi = () => {
     if (!newLoi.titre || !newLoi.description) return;
     
-    // Add ID to the new law
     const loiWithId: Loi = {
       id: uuidv4(),
       title: newLoi.titre,
@@ -45,7 +41,7 @@ export const GestionPolitique = () => {
       proposedBy: newLoi.proposeur,
       category: newLoi.catégorie,
       type: newLoi.type,
-      nom: newLoi.titre, // Use title as default name
+      nom: newLoi.titre,
       date: { year: currentYear, season: currentSeason },
       dateProposition: { year: currentYear, season: currentSeason },
       status: "proposed",
@@ -92,9 +88,11 @@ export const GestionPolitique = () => {
   
   const handleViewLoi = (id: string) => {
     const loi = lois.find(l => l.id === id);
-    if (loi) {
-      setSelectedLoi(loi);
-    }
+    setSelectedLoi(loi || null);
+  };
+  
+  const handleCreateLoi = () => {
+    setShowAddLoi(true);
   };
   
   const handleCloseLoi = () => {
@@ -102,51 +100,47 @@ export const GestionPolitique = () => {
   };
   
   return (
-    <div className="p-4">
-      <Tabs value={selectedTab} onValueChange={setSelectedTab} className="mb-6">
-        <TabsList>
-          <TabsTrigger value="lois">Gestion des Lois</TabsTrigger>
-          <TabsTrigger value="élections">Planification des Élections</TabsTrigger>
+    <div className="p-6">
+      <div className="flex justify-between items-center mb-6">
+        <h1 className="text-3xl font-bold">Gestion Politique</h1>
+        <Button onClick={() => setShowAddLoi(true)}>Nouvelle Loi</Button>
+      </div>
+      
+      <Tabs value={selectedTab} onValueChange={setSelectedTab}>
+        <TabsList className="mb-4">
+          <TabsTrigger value="lois">Lois</TabsTrigger>
+          <TabsTrigger value="elections">Élections</TabsTrigger>
         </TabsList>
         
         <TabsContent value="lois">
-          <LoisList 
-            lois={lois} 
-            onCreateLoi={() => setShowAddLoi(true)} 
-            onViewLoi={handleViewLoi} 
-          />
-          
-          {showAddLoi && (
-            <LoiForm 
-              loi={{
-                titre: newLoi.titre,
-                description: newLoi.description,
-                proposeur: newLoi.proposeur,
-                type: newLoi.type,
-                importance: newLoi.importance
-              }}
-              onSubmit={handleAddLoi}
-              onChange={{
-                handleInputChange: (e, field) => handleInputChange(e, field as keyof LoiFormData),
-                handleSelectChange: (value, field) => handleSelectChange(value, field as keyof LoiFormData)
-              }}
-              onCancel={() => setShowAddLoi(false)}
-            />
-          )}
-          
-          {selectedLoi && (
+          {selectedLoi ? (
             <LoiDetail 
-              loi={selectedLoi}
-              onEdit={() => console.log('Edit loi:', selectedLoi.id)}
-              onClose={handleCloseLoi}
+              loi={selectedLoi} 
+              onBack={() => setSelectedLoi(null)} 
+            />
+          ) : (
+            <LoisList 
+              lois={lois} 
+              onViewLoi={handleViewLoi}
+              onCreateLoi={handleCreateLoi}
             />
           )}
         </TabsContent>
         
-        <TabsContent value="élections">
+        <TabsContent value="elections">
           <ElectionPlanner />
         </TabsContent>
       </Tabs>
+      
+      {showAddLoi && (
+        <LoiForm
+          isOpen={showAddLoi}
+          onClose={() => setShowAddLoi(false)}
+          onSubmit={handleAddLoi}
+          formData={newLoi}
+          setFormData={setNewLoi}
+        />
+      )}
     </div>
   );
 };

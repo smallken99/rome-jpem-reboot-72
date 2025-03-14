@@ -14,6 +14,10 @@ export interface PoliticalEvent {
   title: string;
   description: string;
   date: GameDate;
+  year?: number;
+  season?: string;
+  faction?: string;
+  importance?: 'majeure' | 'normale' | 'mineure';
   impact: {
     populares?: number;
     optimates?: number;
@@ -32,6 +36,7 @@ export interface PoliticalEvent {
 }
 
 export interface Equilibre {
+  // Basic factors
   facteurSenat: number;
   facteurPlebs: number;
   facteurPatriciens: number;
@@ -48,9 +53,25 @@ export interface Equilibre {
   population: number;
   criminalityIndex: number; // Main name
   indiceCrime: number; // Alternative name
+  indiceCorruption?: number; // For compatibility
+  indiceMecontentement?: number; // For compatibility
+  stressPolitique?: number; // For compatibility
+  stabiliteGlobale?: number; // For compatibility
+  anneeEnCours?: number; // For compatibility
+  commentaires?: string; // For compatibility
   economicStability: number;
   foodSupply: number;
   publicOrder: number;
+  notes?: string; // Added for GestionEquilibre.tsx
+
+  // EquilibreBarChart properties
+  armée?: number;
+  économie?: number;
+  morale?: number;
+  loyauté?: number;
+  patriciens?: number;
+  plébéiens?: number;
+  neutrales?: number;
   
   // Thresholds for unrest
   unrestThreshold: number;

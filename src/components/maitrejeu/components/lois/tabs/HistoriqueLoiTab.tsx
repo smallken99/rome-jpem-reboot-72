@@ -1,11 +1,10 @@
-
 import React from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { Button } from '@/components/ui/button';
 import { HistoriqueLoiTabProps } from '../types';
-import { formatDate, parseGameDate } from '@/utils/dateConverters';
+import { formatGameDate } from '@/utils/dateConverters';
 import { Loi } from '@/components/maitrejeu/types/lois';
 
 export const HistoriqueLoiTab: React.FC<HistoriqueLoiTabProps> = ({ 
@@ -20,14 +19,30 @@ export const HistoriqueLoiTab: React.FC<HistoriqueLoiTabProps> = ({
     return 'bg-gray-100 text-gray-800';
   };
 
-  // Sort lois by date (most recent first)
-  const sortedLois = [...lois].sort((a, b) => {
-    const dateA = getLoiDate(a);
-    const dateB = getLoiDate(b);
-    return dateB.localeCompare(dateA);
-  });
+  const getVoteCount = (loi: Loi, type: 'pour' | 'contre' | 'abstention'): number => {
+    if (loi.votes && loi.votes[type] !== undefined) {
+      return loi.votes[type];
+    }
+    
+    if (type === 'pour' && (loi.votesPositifs !== undefined || loi.votesFor !== undefined)) {
+      return loi.votesPositifs || loi.votesFor || 0;
+    }
+    
+    if (type === 'contre' && (loi.votesNégatifs !== undefined || loi.votesAgainst !== undefined)) {
+      return loi.votesNégatifs || loi.votesAgainst || 0;
+    }
+    
+    if (type === 'abstention' && loi.votesAbstention !== undefined) {
+      return loi.votesAbstention;
+    }
+    
+    return 0;
+  };
 
-  // Helper function to get the date from different loi formats
+  const getLoiType = (loi: Loi): string => {
+    return loi.type || loi.catégorie || loi.category || 'Politique';
+  };
+
   const getLoiDate = (loi: Loi): string => {
     if (loi.dateProposition) {
       return typeof loi.dateProposition === 'string' 
@@ -42,39 +57,35 @@ export const HistoriqueLoiTab: React.FC<HistoriqueLoiTabProps> = ({
     return '';
   };
 
-  // Helper function to get the title
   const getLoiTitle = (loi: Loi): string => {
     return loi.titre || loi.title || '';
   };
 
-  // Helper function to get the author
   const getLoiAuthor = (loi: Loi): string => {
     return loi.auteur || loi.proposeur || loi.proposedBy || '';
   };
 
-  // Helper function to get the category
   const getLoiCategory = (loi: Loi): string => {
     return loi.categorieId || loi.catégorie || loi.category || '';
   };
 
-  // Helper function to get the status
   const getLoiStatus = (loi: Loi): string => {
     return loi.statut || loi.status || loi.état || '';
   };
 
-  // Helper function to get the votes
   const getVotesFor = (loi: Loi): number => {
-    return loi.votes?.pour || loi.votesPositifs || loi.votesFor || 0;
+    return getVoteCount(loi, 'pour');
   };
 
   const getVotesAgainst = (loi: Loi): number => {
-    return loi.votes?.contre || loi.votesNégatifs || loi.votesAgainst || 0;
+    return getVoteCount(loi, 'contre');
   };
 
-  // Helper function to get the type
-  const getLoiType = (loi: Loi): string => {
-    return loi.type ? String(loi.type) : "Politique";
-  };
+  const sortedLois = [...lois].sort((a, b) => {
+    const dateA = getLoiDate(a);
+    const dateB = getLoiDate(b);
+    return dateB.localeCompare(dateA);
+  });
 
   return (
     <div className="space-y-4">

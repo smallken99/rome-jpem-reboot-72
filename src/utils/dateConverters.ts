@@ -1,4 +1,3 @@
-
 import { GameDate, Season } from '@/components/maitrejeu/types/common';
 
 // Convert a JS Date to GameDate
@@ -87,11 +86,22 @@ export const parseStringToGameDate = (dateVal: string | GameDate): GameDate => {
   return { year: new Date().getFullYear(), season: 'SPRING' };
 };
 
-// Convert any date format to string representation
-export const formatGameDate = (date: GameDate | string | Date): string => {
-  const gameDate = parseGameDate(date);
-  return `${gameDate.year} ${gameDate.season}`;
+// Add the formatDate function
+export const formatDate = (date: any): string => {
+  if (!date) return '';
+  
+  if (typeof date === 'object' && 'year' in date && 'season' in date) {
+    return `An ${date.year}, ${date.season}`;
+  }
+  
+  if (date instanceof Date) {
+    return date.toLocaleDateString();
+  }
+  
+  return String(date);
 };
+
+export const formatGameDate = formatDate; // Alias for backward compatibility
 
 // Function to convert Date objects to GameDate and vice versa
 export const dateToGameDate = (date: Date): GameDate => {

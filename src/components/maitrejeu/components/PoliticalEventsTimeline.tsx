@@ -11,26 +11,22 @@ interface PoliticalEventsTimelineProps {
 
 export const PoliticalEventsTimeline: React.FC<PoliticalEventsTimelineProps> = ({ events }) => {
   const sortedEvents = [...events].sort((a, b) => {
-    // Si date est un objet Date
-    if (a.date instanceof Date && b.date instanceof Date) {
-      return a.date.getTime() - b.date.getTime();
-    }
-    
-    // Si year et season sont fournis directement
-    if (a.year !== undefined && b.year !== undefined) {
-      if (a.year !== b.year) {
-        return a.year - b.year;
+    // If both events have date objects
+    if (a.date && b.date) {
+      // Compare years first
+      if (a.date.year !== b.date.year) {
+        return a.date.year - b.date.year;
       }
       
-      // Ordre des saisons
+      // Then compare seasons
       const seasons = ['Ver', 'Aestas', 'Autumnus', 'Hiems', 'SPRING', 'SUMMER', 'AUTUMN', 'WINTER'];
-      const aSeasonIndex = seasons.indexOf(a.season || '');
-      const bSeasonIndex = seasons.indexOf(b.season || '');
+      const aSeasonIndex = seasons.indexOf(a.date.season);
+      const bSeasonIndex = seasons.indexOf(b.date.season);
       
       return aSeasonIndex - bSeasonIndex;
     }
     
-    // Si ce sont des chaînes de caractères
+    // Fallback to string comparison if date objects aren't available
     return String(a.date).localeCompare(String(b.date));
   });
 
@@ -46,15 +42,15 @@ export const PoliticalEventsTimeline: React.FC<PoliticalEventsTimelineProps> = (
 
   // Formater la date d'un événement pour l'affichage
   const formatEventDate = (event: PoliticalEvent) => {
-    if (event.year && event.season) {
-      return `An ${event.year} - ${formatSeasonDisplay(event.season as any)}`;
-    }
-    
-    if (event.date instanceof Date) {
-      return event.date.toLocaleDateString();
+    if (event.date && event.date.year && event.date.season) {
+      return `An ${event.date.year} - ${formatSeasonDisplay(event.date.season as any)}`;
     }
     
     return String(event.date);
+  };
+
+  const getEventFaction = (event: PoliticalEvent): string => {
+    return event.faction || 'Neutre';
   };
 
   return (
@@ -71,7 +67,7 @@ export const PoliticalEventsTimeline: React.FC<PoliticalEventsTimelineProps> = (
         <div className="space-y-3">
           {sortedEvents.map(event => (
             <Card key={event.id} className="relative overflow-hidden">
-              <div className={`absolute left-0 top-0 bottom-0 w-1 bg-${event.faction === 'Populares' ? 'red' : event.faction === 'Optimates' ? 'blue' : 'gray'}-500`} />
+              <div className={`absolute left-0 top-0 bottom-0 w-1 bg-${getEventFaction(event) === 'Populares' ? 'red' : getEventFaction(event) === 'Optimates' ? 'blue' : 'gray'}-500`} />
               <CardContent className="p-4 pl-6">
                 <div className="flex justify-between items-start">
                   <div>

@@ -2,6 +2,7 @@
 import { Loi as LoiMaitreJeu } from './lois';
 import { Loi as LoiRepublique } from '@/components/republique/lois/hooks/useLois';
 import { parseGameDate, formatGameDate } from '@/utils/dateConverters';
+import { GameDate } from './common';
 
 // Helper function to convert a date to string format
 const formatLoiDate = (date: any): string => {
@@ -16,6 +17,26 @@ const formatLoiDate = (date: any): string => {
   }
   
   return '';
+};
+
+// Safe accessor function for clauses
+const getClauses = (loi: LoiMaitreJeu): any[] => {
+  return loi.clauses || [];
+};
+
+// Safe accessor function for commentaires
+const getCommentaires = (loi: LoiMaitreJeu): string[] => {
+  return loi.commentaires || [];
+};
+
+// Safe accessor function for type
+const getType = (loi: LoiMaitreJeu): string => {
+  return loi.type?.toString() || 'Politique';
+};
+
+// Safe accessor function for importance
+const getImportance = (loi: LoiMaitreJeu): string => {
+  return loi.importance || 'normale';
 };
 
 // Function to convert a law from the Game Master format to the Republic format
@@ -38,19 +59,19 @@ export const convertMJToRepubliqueLoi = (loi: LoiMaitreJeu): LoiRepublique => {
   
   // Only add these properties if they exist
   if (loi.type !== undefined) {
-    result.type = String(loi.type);
+    result.type = getType(loi);
   } else {
     result.type = 'Politique';
   }
   
   if (loi.clauses !== undefined) {
-    result.clauses = loi.clauses;
+    result.clauses = getClauses(loi);
   } else {
     result.clauses = [];
   }
   
   if (loi.commentaires !== undefined) {
-    result.commentaires = loi.commentaires;
+    result.commentaires = getCommentaires(loi);
   } else if (loi.notes) {
     result.commentaires = [loi.notes];
   } else {
@@ -58,7 +79,7 @@ export const convertMJToRepubliqueLoi = (loi: LoiMaitreJeu): LoiRepublique => {
   }
   
   if (loi.importance !== undefined) {
-    result.importance = loi.importance;
+    result.importance = getImportance(loi);
   } else {
     result.importance = 'normale';
   }
@@ -68,7 +89,7 @@ export const convertMJToRepubliqueLoi = (loi: LoiMaitreJeu): LoiRepublique => {
 
 // Function to convert a law from the Republic format to the Game Master format
 export const convertRepubliqueToMJLoi = (loi: LoiRepublique): LoiMaitreJeu => {
-  let gameDate;
+  let gameDate: GameDate | undefined;
   
   try {
     if (typeof loi.dateProposition === 'string') {

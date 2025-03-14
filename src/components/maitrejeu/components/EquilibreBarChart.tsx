@@ -12,21 +12,26 @@ interface EquilibreBarChartProps {
 export const EquilibreBarChart: React.FC<EquilibreBarChartProps> = ({ equilibre }) => {
   const [activeTab, setActiveTab] = useState('global');
   
+  // Helper function to safely get numeric values with defaults
+  const getEquilibreValue = (key: keyof Equilibre, defaultValue: number = 50): number => {
+    return (equilibre[key] as number) || defaultValue;
+  };
+  
   // Prepare data for the chart
   const globalData = [
-    { name: 'Population', value: equilibre.population },
-    { name: 'Armée', value: equilibre.armée },
-    { name: 'Économie', value: equilibre.économie },
-    { name: 'Morale', value: equilibre.morale },
-    { name: 'Loyauté', value: equilibre.loyauté }
+    { name: 'Population', value: getEquilibreValue('population', 1000000) / 20000 }, // Scale down for chart
+    { name: 'Armée', value: getEquilibreValue('armée', 65) },
+    { name: 'Économie', value: getEquilibreValue('économie', 70) },
+    { name: 'Morale', value: getEquilibreValue('morale', 60) },
+    { name: 'Loyauté', value: getEquilibreValue('loyauté', 75) }
   ];
   
   const politicalData = [
-    { name: 'Patriciens', value: equilibre.patriciens },
-    { name: 'Plébéiens', value: equilibre.plébéiens },
-    { name: 'Populares', value: equilibre.populares },
-    { name: 'Optimates', value: equilibre.optimates },
-    { name: 'Neutres', value: equilibre.neutrales }
+    { name: 'Patriciens', value: getEquilibreValue('patriciens', 80) },
+    { name: 'Plébéiens', value: getEquilibreValue('plébéiens', 60) },
+    { name: 'Populares', value: getEquilibreValue('populares', 35) },
+    { name: 'Optimates', value: getEquilibreValue('optimates', 45) },
+    { name: 'Neutres', value: getEquilibreValue('neutrales', 20) }
   ];
   
   const getBarColor = (value: number) => {

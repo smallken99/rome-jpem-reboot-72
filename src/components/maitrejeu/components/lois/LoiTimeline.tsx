@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Badge } from '@/components/ui/badge';
 import { CheckCircle, XCircle, ScrollText, Calendar } from 'lucide-react';
@@ -7,6 +6,7 @@ import { formatSeasonDisplay } from '@/utils/timeSystem';
 import { parseGameDate } from '@/utils/dateConverters';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
+import { GameDate } from '@/components/maitrejeu/types/common';
 
 interface LoiTimelineProps {
   lois: Loi[];
@@ -73,10 +73,27 @@ export const LoiTimeline: React.FC<LoiTimelineProps> = ({ lois }) => {
   const formatDate = (date: string | GameDate | undefined) => {
     if (!date) return 'Date inconnue';
     
-    // Convert to GameDate if it's a string
-    const gameDate = typeof date === 'string' ? parseGameDate(date) : date;
+    // If it's already a GameDate object
+    if (typeof date === 'object' && 'year' in date && 'season' in date) {
+      return `An ${date.year}, ${formatSeasonDisplay(date.season)}`;
+    }
     
-    return `An ${gameDate.year}, ${formatSeasonDisplay(gameDate.season)}`;
+    // If it's a string, try to parse it as a GameDate
+    try {
+      if (typeof date === 'string') {
+        const parts = date.split(' ');
+        if (parts.length >= 2) {
+          const year = parts[0];
+          const season = parts[1];
+          return `An ${year}, ${formatSeasonDisplay(season)}`;
+        }
+      }
+    } catch (error) {
+      console.error("Failed to parse date:", date);
+    }
+    
+    // Fallback
+    return String(date);
   };
   
   // Fusionner les événements de toutes les lois
