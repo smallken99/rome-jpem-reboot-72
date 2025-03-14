@@ -1,60 +1,52 @@
 
-import { Season, formatDate as timeSystemFormatDate, GameDate } from '@/utils/timeSystem';
-import { formatDate as convertersFormatDate } from '@/utils/dateConverters';
+import { GameDate, Season } from '@/components/maitrejeu/types/common';
+import { formatDate, formatSeasonDisplay } from '@/utils/timeSystem';
 
-// This is a unified date helper to handle both types of GameDate objects
-export const formatAnyGameDate = (date: any): string => {
-  if (!date) return '';
-  
-  // Handle string dates
-  if (typeof date === 'string') {
-    return date;
+/**
+ * Ensures a consistent GameDate object regardless of input format
+ */
+export const ensureGameDate = (date: string | GameDate | undefined): GameDate => {
+  if (!date) {
+    return { year: new Date().getFullYear(), season: 'Ver' };
   }
   
-  // Handle GameDate objects
-  if (typeof date === 'object' && 'year' in date && 'season' in date) {
-    try {
-      // Try the timeSystem formatter first
-      return timeSystemFormatDate(date as any);
-    } catch (e) {
-      // Fall back to dateConverters formatter
-      try {
-        return convertersFormatDate(date as any);
-      } catch (e2) {
-        // Ultimate fallback
-        return `${date.year} ${date.season}`;
+  if (typeof date === 'string') {
+    // Try to parse string format like "750 Ver"
+    const parts = date.split(' ');
+    if (parts.length >= 2) {
+      const year = parseInt(parts[0], 10);
+      const season = parts[1];
+      if (!isNaN(year)) {
+        return { year, season };
       }
     }
+    return { year: new Date().getFullYear(), season: 'Ver' };
   }
   
-  // Return the original if we can't format it
-  return String(date);
+  return date;
 };
 
-// Safely cast a string or object to a GameDate
-export const ensureGameDate = (value: any): GameDate => {
-  if (!value) return { year: 0, season: 'Ver' as Season };
+/**
+ * Formats any date format (string or GameDate) to a human-readable string
+ */
+export const formatAnyGameDate = (date: string | GameDate | undefined): string => {
+  if (!date) return '';
   
-  if (typeof value === 'object' && 'year' in value && 'season' in value) {
-    return {
-      year: value.year,
-      season: value.season as Season
-    };
-  }
+  const gameDate = ensureGameDate(date);
   
-  if (typeof value === 'string') {
-    try {
-      const parts = value.split(' ');
-      if (parts.length >= 2) {
-        return {
-          year: parseInt(parts[0], 10) || 0,
-          season: parts[1] as Season
-        };
-      }
-    } catch (e) {
-      console.error('Failed to parse game date:', value);
-    }
-  }
-  
-  return { year: 0, season: 'Ver' as Season };
+  return `${formatSeasonDisplay(gameDate.season)} de l'an ${Math.abs(gameDate.year)} ${gameDate.year < 0 ? 'av. J.-C.' : 'ap. J.-C.'}`;
+};
+
+/**
+ * Safe accessor for getting year from potentially string or GameDate
+ */
+export const getYear = (date: string | GameDate | undefined): number => {
+  return ensureGameDate(date).year;
+};
+
+/**
+ * Safe accessor for getting season from potentially string or GameDate
+ */
+export const getSeason = (date: string | GameDate | undefined): string => {
+  return ensureGameDate(date).season;
 };
