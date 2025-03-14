@@ -1,6 +1,24 @@
 
-import { GameDate, GamePhase } from '../types/common';
-import { Season, convertSeasonBetweenSystems, PlayerSeason } from '@/utils/timeSystem';
+import { GameDate, GamePhase, Season } from '../types/common';
+
+// Create a simple season conversion function (since we don't have access to timeSystem.ts's version)
+const convertSeasonBetweenSystems = (season: string): Season => {
+  const mapping: Record<string, Season> = {
+    'SPRING': 'Ver',
+    'SUMMER': 'Aestas',
+    'AUTUMN': 'Autumnus',
+    'WINTER': 'Hiems',
+    'Printemps': 'Ver',
+    'Été': 'Aestas',
+    'Automne': 'Autumnus',
+    'Hiver': 'Hiems'
+  };
+  
+  return mapping[season] || season as Season;
+};
+
+// Define PlayerSeason type
+type PlayerSeason = Season;
 
 // Crée les opérations de gestion du temps
 export const createTimeOperations = (

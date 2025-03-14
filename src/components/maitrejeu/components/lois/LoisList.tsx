@@ -5,8 +5,9 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { Button } from '@/components/ui/button';
 import { PlusIcon, Eye } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
-import { formatSeasonDisplay, GameDate } from '@/utils/timeSystem';
+import { formatSeasonDisplay } from '@/utils/timeSystem';
 import { Loi } from '../../types/lois';
+import { formatAnyGameDate } from './utils/dateHelpers';
 
 // Add the missing prop to the interface
 export interface LoisListProps {
@@ -16,27 +17,10 @@ export interface LoisListProps {
 }
 
 export const LoisList: React.FC<LoisListProps> = ({ lois, onViewLoi, onCreateLoi }) => {
-  // Modify the formatDate function to handle GameDate or string
-  const formatDate = (date: string | GameDate | undefined): string => {
+  // Use a safer format date function
+  const formatDate = (date: any): string => {
     if (!date) return "-";
-    
-    // If it's already a GameDate object
-    if (typeof date === 'object' && 'year' in date && 'season' in date) {
-      return `${date.year} ${formatSeasonDisplay(date.season)}`;
-    }
-    
-    // If it's a string, try to parse it as a GameDate
-    try {
-      if (typeof date === 'string') {
-        const [year, season] = date.split(' ');
-        return `${year} ${season}`;
-      }
-    } catch (error) {
-      console.error("Failed to parse date:", date);
-    }
-    
-    // Fallback
-    return String(date);
+    return formatAnyGameDate(date);
   };
 
   return (
@@ -58,7 +42,7 @@ export const LoisList: React.FC<LoisListProps> = ({ lois, onViewLoi, onCreateLoi
                 </CardHeader>
                 <CardContent>
                   <p className="text-sm text-muted-foreground">
-                    {loi.description.substring(0, 100)}...
+                    {loi.description?.substring(0, 100)}...
                   </p>
                   <div className="flex items-center justify-between mt-4">
                     <div className="flex gap-2">

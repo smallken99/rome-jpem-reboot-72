@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -14,6 +15,7 @@ import { EvenementBasicInfo } from './components/evenements/EvenementBasicInfo';
 import { EvenementOptions } from './components/evenements/EvenementOptions';
 import { useEvenementForm } from './components/evenements/useEvenementForm';
 import { CreateEvenementForm } from './components/evenements/CreateEvenementForm';
+import { ensureGameDate } from './components/lois/utils/dateHelpers';
 
 export const GestionEquilibre: React.FC = () => {
   const { equilibre, updateEquilibre, updateFactionBalance, evenements, lois, currentYear, currentSeason } = useMaitreJeu();
@@ -33,13 +35,31 @@ export const GestionEquilibre: React.FC = () => {
   
   const [notes, setNotes] = useState(equilibre?.notes || '');
   
+  // Safely parse event dates
   const recentEvenements = evenements
-    .filter(e => e.date.year === currentYear || e.date.year === currentYear - 1)
-    .sort((a, b) => (b.date.year - a.date.year) || (b.date.season.localeCompare(a.date.season)));
+    .filter(e => {
+      const date = ensureGameDate(e.date);
+      return date.year === currentYear || date.year === currentYear - 1;
+    })
+    .sort((a, b) => {
+      const dateA = ensureGameDate(a.date);
+      const dateB = ensureGameDate(b.date);
+      if (dateA.year !== dateB.year) return dateB.year - dateA.year;
+      return String(dateB.season).localeCompare(String(dateA.season));
+    });
   
+  // Safely parse law dates
   const recentLois = lois
-    .filter(l => l.date.year === currentYear || l.date.year === currentYear - 1)
-    .sort((a, b) => (b.date.year - a.date.year) || (b.date.season.localeCompare(a.date.season)));
+    .filter(l => {
+      const date = ensureGameDate(l.date);
+      return date.year === currentYear || date.year === currentYear - 1;
+    })
+    .sort((a, b) => {
+      const dateA = ensureGameDate(a.date);
+      const dateB = ensureGameDate(b.date);
+      if (dateA.year !== dateB.year) return dateB.year - dateA.year;
+      return String(dateB.season).localeCompare(String(dateA.season));
+    });
   
   const appliquerChangements = () => {
     updateEquilibre({

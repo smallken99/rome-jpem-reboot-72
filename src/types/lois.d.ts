@@ -15,4 +15,25 @@ export interface Loi {
   votesNégatifs: number;
   votesAbstention: number;
   effets: Record<string, any>;
+  // Add missing properties that are used in various components
+  type?: string;
+  clauses?: any[];
+  commentaires?: string[];
+  tags?: string[];
+  statut?: string;
+  votes?: {
+    pour: number;
+    contre: number;
+    abstention: number;
+  };
+  title?: string;
+  proposedBy?: string;
+  category?: string;
+  auteur?: string;
+  categorieId?: string;
+  dateProposition?: string | { year: number; season: string };
+  implementationDate?: { year: number; season: string };
+  expirationDate?: { year: number; season: string };
+  votesFor?: number;
+  votesAgainst?: number;
 }

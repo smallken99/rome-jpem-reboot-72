@@ -14,10 +14,10 @@ export interface PoliticalEvent {
   title: string;
   description: string;
   date: GameDate;
-  year?: number;
-  season?: string;
-  faction?: string;
-  importance?: 'majeure' | 'normale' | 'mineure';
+  year?: number; // Added for compatibility
+  season?: string; // Added for compatibility
+  faction?: string; // Added for compatibility
+  importance?: 'majeure' | 'normale' | 'mineure'; // Added for compatibility
   impact: {
     populares?: number;
     optimates?: number;

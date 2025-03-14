@@ -12,11 +12,16 @@ export const MAX_PATERNAL_AGE = 60;
 export const MALE_CHANCE = 0.55;
 
 // Seasonal birth rate modifiers
-export const SEASONAL_BIRTH_MODIFIERS: Record<Season, number> = {
+export const SEASONAL_BIRTH_MODIFIERS: Partial<Record<Season, number>> = {
   'Ver': 0.05,      // Printemps: +5% (saison de fertilité)
   'Aestas': 0.02,   // Été: +2%
   'Autumnus': -0.02, // Automne: -2%
-  'Hiems': -0.05    // Hiver: -5% (conditions difficiles)
+  'Hiems': -0.05,    // Hiver: -5% (conditions difficiles)
+  // Adding the other season formats for completeness
+  'SPRING': 0.05,
+  'SUMMER': 0.02,
+  'AUTUMN': -0.02,
+  'WINTER': -0.05
 };
 
 // Economic factors for fertility

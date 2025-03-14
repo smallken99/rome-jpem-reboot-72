@@ -1,6 +1,58 @@
-import { GameDate, Season } from '@/components/maitrejeu/types/common';
+import { GameDate, Season } from '@/utils/timeSystem';
 
-// Convert a JS Date to GameDate
+// Add missing formatDate export
+export const formatDate = (date: GameDate | string): string => {
+  if (!date) return '';
+  
+  if (typeof date === 'object' && 'year' in date && 'season' in date) {
+    return `${Math.abs(date.year)} ${date.year < 0 ? 'av. J.-C.' : 'ap. J.-C.'} - ${formatSeason(date.season as Season)}`;
+  }
+  
+  return String(date);
+};
+
+// Format season helper
+export const formatSeason = (season: Season | string): string => {
+  const seasonMappings: Record<string, string> = {
+    SPRING: 'Printemps',
+    SUMMER: 'Été',
+    AUTUMN: 'Automne',
+    WINTER: 'Hiver',
+    Ver: 'Printemps',
+    Aestas: 'Été',
+    Autumnus: 'Automne',
+    Hiems: 'Hiver'
+  };
+  
+  return seasonMappings[season] || season;
+};
+
+// Add a safeFormatDate to handle string dates
+export const safeFormatDate = (date: string | GameDate | undefined): string => {
+  if (!date) return '';
+  
+  if (typeof date === 'string') {
+    try {
+      // Try to parse the string as a GameDate
+      const parts = date.split(' ');
+      if (parts.length >= 2) {
+        const year = parseInt(parts[0], 10);
+        const season = parts[1];
+        if (!isNaN(year)) {
+          return formatDate({ year, season: season as Season });
+        }
+      }
+      return date;
+    } catch (e) {
+      console.error('Error parsing date string:', e);
+      return date;
+    }
+  }
+  
+  return formatDate(date);
+};
+
+// Enhanced parsing function to handle all date formats
 export const convertDateToGameDate = (date: Date): GameDate => {
   const year = date.getFullYear();
   
@@ -84,21 +136,6 @@ export const parseStringToGameDate = (dateVal: string | GameDate): GameDate => {
   
   // Default fallback
   return { year: new Date().getFullYear(), season: 'SPRING' };
-};
-
-// Add the formatDate function
-export const formatDate = (date: any): string => {
-  if (!date) return '';
-  
-  if (typeof date === 'object' && 'year' in date && 'season' in date) {
-    return `An ${date.year}, ${date.season}`;
-  }
-  
-  if (date instanceof Date) {
-    return date.toLocaleDateString();
-  }
-  
-  return String(date);
 };
 
 export const formatGameDate = formatDate; // Alias for backward compatibility

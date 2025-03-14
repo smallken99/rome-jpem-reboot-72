@@ -4,29 +4,11 @@ import { Timeline, TimelineItem, TimelineItemProps } from '@/components/ui/timel
 import { Badge } from '@/components/ui/badge';
 import { GavelIcon, FileTextIcon, CheckIcon, XIcon } from 'lucide-react';
 import { Loi } from '../../types/lois';
-import { formatDate, parseGameDate, GameDate } from '@/utils/timeSystem';
+import { formatAnyGameDate, ensureGameDate } from './utils/dateHelpers';
 
 interface LoiTimelineProps {
   lois: Loi[];
 }
-
-// Helper function to ensure we have a GameDate object
-const ensureGameDate = (date: string | GameDate | undefined): GameDate => {
-  if (!date) return { year: 0, season: 'SPRING' };
-  
-  if (typeof date === 'object' && 'year' in date && 'season' in date) {
-    return date;
-  }
-  
-  // Try to parse string date
-  if (typeof date === 'string') {
-    const parsed = parseGameDate(date);
-    if (parsed) return parsed;
-  }
-  
-  // Default fallback
-  return { year: 0, season: 'SPRING' };
-};
 
 export const LoiTimeline: React.FC<LoiTimelineProps> = ({ lois }) => {
   // Sort lois by date
@@ -51,29 +33,29 @@ export const LoiTimeline: React.FC<LoiTimelineProps> = ({ lois }) => {
   sortedLois.forEach(loi => {
     // Add law creation event
     timelineItems.push({
-      title: `Proposition de loi : ${loi.titre || loi.title}`,
-      description: loi.description.substring(0, 100) + (loi.description.length > 100 ? '...' : ''),
-      date: formatDate(ensureGameDate(loi.dateProposition || loi.date)),
+      title: `Proposition de loi : ${loi.titre || loi.title || ''}`,
+      description: loi.description ? (loi.description.substring(0, 100) + (loi.description.length > 100 ? '...' : '')) : '',
+      date: formatAnyGameDate(loi.dateProposition || loi.date),
       icon: <FileTextIcon className="h-4 w-4" />,
-      badge: <Badge variant="outline">{loi.catégorie || loi.category}</Badge>
+      badge: <Badge variant="outline">{loi.catégorie || loi.category || ''}</Badge>
     });
     
     // If the law is active or rejected, add that event
-    const status = loi.status || loi.état || loi.statut;
+    const status = loi.status || loi.état || loi.statut || '';
     
     if (status === 'active' || status === 'Promulguée' || status === 'adoptée' || status === 'promulguée') {
       timelineItems.push({
-        title: `Loi adoptée : ${loi.titre || loi.title}`,
-        description: `Cette loi a été promulguée avec ${loi.votesPositifs || loi.votesFor || loi.votes?.pour || 0} voix pour et ${loi.votesNégatifs || loi.votesAgainst || loi.votes?.contre || 0} voix contre.`,
-        date: formatDate(ensureGameDate(loi.implementationDate || loi.date)),
+        title: `Loi adoptée : ${loi.titre || loi.title || ''}`,
+        description: `Cette loi a été promulguée avec ${loi.votesPositifs || loi.votesFor || (loi.votes?.pour || 0)} voix pour et ${loi.votesNégatifs || loi.votesAgainst || (loi.votes?.contre || 0)} voix contre.`,
+        date: formatAnyGameDate(loi.implementationDate || loi.date),
         icon: <CheckIcon className="h-4 w-4" />,
         badge: <Badge variant="success">Promulguée</Badge>
       });
     } else if (status === 'rejected' || status === 'Rejetée' || status === 'rejetée') {
       timelineItems.push({
-        title: `Loi rejetée : ${loi.titre || loi.title}`,
-        description: `Cette loi a été rejetée avec ${loi.votesNégatifs || loi.votesAgainst || loi.votes?.contre || 0} voix contre et ${loi.votesPositifs || loi.votesFor || loi.votes?.pour || 0} voix pour.`,
-        date: formatDate(ensureGameDate(loi.date)),
+        title: `Loi rejetée : ${loi.titre || loi.title || ''}`,
+        description: `Cette loi a été rejetée avec ${loi.votesNégatifs || loi.votesAgainst || (loi.votes?.contre || 0)} voix contre et ${loi.votesPositifs || loi.votesFor || (loi.votes?.pour || 0)} voix pour.`,
+        date: formatAnyGameDate(loi.date),
         icon: <XIcon className="h-4 w-4" />,
         badge: <Badge variant="destructive">Rejetée</Badge>
       });
@@ -83,7 +65,7 @@ export const LoiTimeline: React.FC<LoiTimelineProps> = ({ lois }) => {
   // Sort all timeline items by date
   timelineItems.sort((a, b) => {
     if (!a.date || !b.date) return 0;
-    return a.date.localeCompare(b.date);
+    return String(a.date).localeCompare(String(b.date));
   });
   
   return (

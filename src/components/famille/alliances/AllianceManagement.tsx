@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { useTimeStore } from '@/utils/timeSystem';
+import { useGameTime } from '@/hooks/useGameTime';
 import { characters } from '@/data/characters';
 import { Character } from '@/types/character';
 import { toast } from 'sonner';
@@ -13,7 +13,7 @@ import { useAllianceCalculations } from './hooks/useAllianceCalculations';
 export const AllianceManagement = () => {
   const { femaleId } = useParams<{ femaleId: string }>();
   const navigate = useNavigate();
-  const { year } = useTimeStore();
+  const { year } = useGameTime();
   
   const [female, setFemale] = useState<Character | null>(null);
   const [dowryAmount, setDowryAmount] = useState<number>(10000);

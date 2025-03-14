@@ -1,96 +1,80 @@
 
+// Create a helper for form handling that can deal with complex GameDate objects
 import { useState } from 'react';
-import { useToast } from '@/components/ui/use-toast';
-import { LoiType, LoiState } from '../../../types/lois';
-import { Loi } from '@/components/maitrejeu/types/lois';
-import { parseGameDate } from '@/utils/timeSystem';
+import { Loi } from '../../../types/lois';
+import { formatAnyGameDate, ensureGameDate } from '../utils/dateHelpers';
 
-export const useLoiForm = (initialLoi?: Loi, onSubmit?: (loi: Loi) => void) => {
-  const { toast } = useToast();
-  
-  const getDefaultLoi = (): Loi => ({
+export const useLoiForm = (initialLoi?: Loi) => {
+  const [formData, setFormData] = useState<Partial<Loi>>(initialLoi || {
     id: '',
-    title: '',
+    titre: '',
     description: '',
-    proposedBy: '',
-    date: { year: new Date().getFullYear(), season: 'SPRING' },
-    status: 'proposed' as LoiState,
-    category: 'Politique',
-    votesFor: 0,
-    votesAgainst: 0,
-    effets: [],
-    conditions: [],
-    penalites: []
+    proposeur: '',
+    catégorie: 'Politique',
+    date: { year: new Date().getFullYear(), season: 'Ver' },
+    état: 'En délibération',
+    importance: 'normale',
+    votesPositifs: 0,
+    votesNégatifs: 0,
+    votesAbstention: 0,
+    effets: {},
+    // Add the other fields that might be used
+    commentaires: [],
+    clauses: [],
+    tags: [],
+    type: 'Politique'
   });
   
-  const [loi, setLoi] = useState<Loi>(initialLoi || getDefaultLoi());
-  
-  const updateField = (field: keyof Loi, value: any) => {
-    setLoi(prev => ({ ...prev, [field]: value }));
+  // Handle standard input changes
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({ ...prev, [name]: value }));
   };
   
-  const updateEffets = (effets: string[]) => {
-    setLoi(prev => ({ ...prev, effets }));
+  // Handle select input changes
+  const handleSelectChange = (name: string, value: string) => {
+    setFormData(prev => ({ ...prev, [name]: value }));
   };
   
-  const updateConditions = (conditions: string[]) => {
-    setLoi(prev => ({ ...prev, conditions }));
-  };
-  
-  const updatePenalites = (penalites: string[]) => {
-    setLoi(prev => ({ ...prev, penalites }));
-  };
-  
-  const handleSubmit = () => {
-    // Basic validation
-    if (!loi.title && !loi.titre) {
-      toast({
-        title: "Erreur",
-        description: "Le titre de la loi est requis",
-        variant: "destructive",
-      });
-      return;
+  // Handle date changes (special case due to GameDate format)
+  const handleDateChange = (date: string) => {
+    try {
+      const gameDate = ensureGameDate(date);
+      setFormData(prev => ({ ...prev, date: gameDate }));
+    } catch (e) {
+      console.error('Error parsing date:', e);
     }
+  };
+  
+  // Format a date for display in the form
+  const formatDateForDisplay = (date: any): string => {
+    if (!date) return '';
+    return formatAnyGameDate(date);
+  };
+  
+  // Add effect to the law
+  const addEffect = (effect: string) => {
+    if (!effect.trim()) return;
     
-    if (!loi.category && !loi.categorieId) {
-      toast({
-        title: "Erreur",
-        description: "La catégorie de la loi est requise",
-        variant: "destructive",
-      });
-      return;
-    }
-    
-    if (onSubmit) {
-      // Map to correct types to ensure compatibility
-      const loiToSubmit: Loi = {
-        ...loi,
-        type: (loi.type || 'Politique') as LoiType,
-        status: (loi.status || 'proposed') as LoiState,
-        date: parseGameDate(loi.date || { year: new Date().getFullYear(), season: 'SPRING' }),
-        importance: (loi.importance || 'normale') as 'mineure' | 'normale' | 'majeure',
-        // Ensure arrays are properly typed
-        effets: Array.isArray(loi.effets) ? loi.effets : [],
-        conditions: Array.isArray(loi.conditions) ? loi.conditions : [],
-        penalites: Array.isArray(loi.penalites) ? loi.penalites : []
+    setFormData(prev => {
+      const updatedEffets = Array.isArray(prev.effets) 
+        ? [...prev.effets, effect] 
+        : { ...(prev.effets || {}), [Date.now()]: effect };
+      
+      return {
+        ...prev,
+        effets: updatedEffets
       };
-      
-      onSubmit(loiToSubmit);
-      
-      toast({
-        title: initialLoi ? "Loi mise à jour" : "Loi créée",
-        description: `La loi "${loi.title || loi.titre}" a été ${initialLoi ? 'mise à jour' : 'créée'} avec succès.`,
-      });
-    }
+    });
   };
   
   return {
-    loi,
-    setLoi,
-    updateField,
-    updateEffets,
-    updateConditions,
-    updatePenalites,
-    handleSubmit
+    formData,
+    setFormData,
+    handleChange,
+    handleSelectChange,
+    handleDateChange,
+    formatDateForDisplay,
+    addEffect
   };
 };

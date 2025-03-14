@@ -3,7 +3,7 @@ import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useGameTime } from '@/hooks/useGameTime';
-import { formatSeasonDisplay } from '@/utils/timeSystem';
+import { formatSeasonDisplay, Season } from '@/utils/timeSystem';
 import { CalendarIcon, ArrowRightIcon, ClockIcon } from 'lucide-react';
 
 interface TimePanelProps {
@@ -22,12 +22,15 @@ export const TimePanel: React.FC<TimePanelProps> = ({ minimal = false }) => {
   const formatPhase = (phase: string) => {
     return phase.charAt(0).toUpperCase() + phase.slice(1).toLowerCase();
   };
+  
+  // Make sure season is properly typed
+  const safeSeason = season as Season;
 
   if (minimal) {
     return (
       <div className="flex items-center space-x-2 text-sm">
         <CalendarIcon className="h-4 w-4" />
-        <span className="font-medium">An {year} - {formatSeasonDisplay(season)}</span>
+        <span className="font-medium">An {year} - {formatSeasonDisplay(safeSeason)}</span>
       </div>
     );
   }
@@ -45,7 +48,7 @@ export const TimePanel: React.FC<TimePanelProps> = ({ minimal = false }) => {
               <span className="font-medium">An {year}</span>
             </div>
             <div className="bg-primary/10 px-2 py-1 rounded text-primary font-medium">
-              {formatSeasonDisplay(season)}
+              {formatSeasonDisplay(safeSeason)}
             </div>
           </div>
           
