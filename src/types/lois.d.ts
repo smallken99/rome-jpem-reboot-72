@@ -15,11 +15,11 @@ export interface Loi {
   votesNégatifs: number;
   votesAbstention: number;
   effets: Record<string, any>;
-  // Add missing properties required by LoiModal and loisAdapter
-  type?: string;
-  clauses?: any[];
-  commentaires?: string[];
-  tags?: string[];
+  // Propriétés requises par LoiModal et loisAdapter
+  type: string;
+  clauses: any[];
+  commentaires: string[];
+  tags: string[];
   statut?: string;
   votes?: {
     pour: number;

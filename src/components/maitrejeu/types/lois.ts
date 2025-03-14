@@ -3,57 +3,57 @@ import { GameDate } from './common';
 
 export interface Loi {
   id: string;
-  // Title properties (different naming conventions)
+  // Propriétés de titre (différentes conventions de nommage)
   title?: string;
   titre?: string;
   nom?: string;
   
-  // Core properties
+  // Propriétés principales
   description: string;
   
-  // Author/proposer properties (different naming conventions)
+  // Propriétés d'auteur/proposeur (différentes conventions de nommage)
   proposedBy?: string;
   proposeur?: string;
   auteur?: string;
   
-  // Date properties
+  // Propriétés de date
   date?: GameDate | string;
   dateProposition?: string | GameDate;
   
-  // Status properties (different naming conventions)
+  // Propriétés de statut (différentes conventions de nommage)
   status?: LoiState;
   statut?: string;
   état?: string;
   
-  // Category properties (different naming conventions)
+  // Propriétés de catégorie (différentes conventions de nommage)
   category?: string;
   categorieId?: string;
   catégorie?: string;
   
-  // Vote properties (different naming conventions)
+  // Propriétés de vote (différentes conventions de nommage)
   votesFor?: number;
   votesAgainst?: number;
   votesPositifs?: number;
   votesNégatifs?: number;
   votesAbstention?: number;
   
-  // Date range properties
+  // Propriétés de période de validité
   implementationDate?: GameDate;
   expirationDate?: GameDate;
   
-  // Additional properties needed for LoiModal and loisAdapter
-  type?: string | LoiType;
-  importance?: string;
-  clauses?: any[];
-  commentaires?: string[];
-  tags?: string[];
+  // Propriétés supplémentaires pour LoiModal et loisAdapter
+  type: string | LoiType;
+  importance: string;
+  clauses: any[];
+  commentaires: string[];
+  tags: string[];
   votes?: {
     pour: number;
     contre: number;
     abstention: number;
   };
   
-  // Additional properties
+  // Propriétés supplémentaires
   notes?: string;
   effets?: string[] | Record<string, any>;
   conditions?: string[];
