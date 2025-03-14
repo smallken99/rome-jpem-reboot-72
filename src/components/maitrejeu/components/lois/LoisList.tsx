@@ -1,10 +1,11 @@
+
 import React from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Button } from '@/components/ui/button';
 import { PlusIcon, Eye } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
-import { GameDate, formatSeasonDisplay } from '@/utils/timeSystem';
+import { formatSeasonDisplay, GameDate } from '@/utils/timeSystem';
 import { Loi } from '../../types/lois';
 
 // Add the missing prop to the interface
@@ -21,7 +22,7 @@ export const LoisList: React.FC<LoisListProps> = ({ lois, onViewLoi, onCreateLoi
     
     // If it's already a GameDate object
     if (typeof date === 'object' && 'year' in date && 'season' in date) {
-      return `${date.year} ${date.season}`;
+      return `${date.year} ${formatSeasonDisplay(date.season)}`;
     }
     
     // If it's a string, try to parse it as a GameDate
@@ -43,7 +44,9 @@ export const LoisList: React.FC<LoisListProps> = ({ lois, onViewLoi, onCreateLoi
       <CardHeader className="flex items-center justify-between">
         <CardTitle>Lois Actives</CardTitle>
         <CardDescription>Liste des lois en vigueur</CardDescription>
-        <Button onClick={onCreateLoi}><PlusIcon className="mr-2 h-4 w-4" /> Ajouter une loi</Button>
+        {onCreateLoi && (
+          <Button onClick={onCreateLoi}><PlusIcon className="mr-2 h-4 w-4" /> Ajouter une loi</Button>
+        )}
       </CardHeader>
       <CardContent className="pl-2 pr-2">
         <ScrollArea className="h-[400px]">
@@ -51,7 +54,7 @@ export const LoisList: React.FC<LoisListProps> = ({ lois, onViewLoi, onCreateLoi
             {lois.map((loi) => (
               <Card key={loi.id}>
                 <CardHeader>
-                  <CardTitle className="text-base">{loi.titre}</CardTitle>
+                  <CardTitle className="text-base">{loi.titre || loi.title}</CardTitle>
                 </CardHeader>
                 <CardContent>
                   <p className="text-sm text-muted-foreground">
@@ -59,7 +62,7 @@ export const LoisList: React.FC<LoisListProps> = ({ lois, onViewLoi, onCreateLoi
                   </p>
                   <div className="flex items-center justify-between mt-4">
                     <div className="flex gap-2">
-                      <Badge variant="secondary">{loi.catégorie}</Badge>
+                      <Badge variant="secondary">{loi.catégorie || loi.category}</Badge>
                       <Badge variant="outline">{formatDate(loi.date)}</Badge>
                     </div>
                     <Button size="sm" onClick={() => onViewLoi(loi)}>

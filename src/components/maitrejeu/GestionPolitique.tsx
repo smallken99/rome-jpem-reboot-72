@@ -1,5 +1,7 @@
+
 import React, { useState } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Button } from '@/components/ui/button';
 import { useMaitreJeu } from './context';
 import { Loi, LoiType } from './types/lois';
 import { LoisList } from './components/lois/LoisList';
@@ -86,17 +88,12 @@ export const GestionPolitique = () => {
     setNewLoi({ ...newLoi, [field]: value });
   };
   
-  const handleViewLoi = (id: string) => {
-    const loi = lois.find(l => l.id === id);
+  const handleViewLoi = (loi?: Loi) => {
     setSelectedLoi(loi || null);
   };
   
   const handleCreateLoi = () => {
     setShowAddLoi(true);
-  };
-  
-  const handleCloseLoi = () => {
-    setSelectedLoi(null);
   };
   
   return (
@@ -116,7 +113,8 @@ export const GestionPolitique = () => {
           {selectedLoi ? (
             <LoiDetail 
               loi={selectedLoi} 
-              onBack={() => setSelectedLoi(null)} 
+              onEdit={() => {/* function to edit loi */}} 
+              onClose={() => setSelectedLoi(null)} 
             />
           ) : (
             <LoisList 
@@ -134,11 +132,20 @@ export const GestionPolitique = () => {
       
       {showAddLoi && (
         <LoiForm
-          isOpen={showAddLoi}
-          onClose={() => setShowAddLoi(false)}
+          loi={{
+            titre: newLoi.titre,
+            description: newLoi.description,
+            proposeur: newLoi.proposeur,
+            type: newLoi.type,
+            catégorie: newLoi.catégorie,
+            importance: newLoi.importance
+          }}
+          onChange={{
+            handleInputChange: handleInputChange,
+            handleSelectChange: handleSelectChange
+          }}
           onSubmit={handleAddLoi}
-          formData={newLoi}
-          setFormData={setNewLoi}
+          onCancel={() => setShowAddLoi(false)}
         />
       )}
     </div>

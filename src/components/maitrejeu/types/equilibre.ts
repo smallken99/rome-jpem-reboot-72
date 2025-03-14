@@ -58,7 +58,6 @@ export interface Equilibre {
   stressPolitique?: number; // For compatibility
   stabiliteGlobale?: number; // For compatibility
   anneeEnCours?: number; // For compatibility
-  commentaires?: string; // For compatibility
   economicStability: number;
   foodSupply: number;
   publicOrder: number;

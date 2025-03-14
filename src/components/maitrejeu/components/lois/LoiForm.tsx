@@ -89,13 +89,13 @@ export const LoiForm: React.FC<LoiFormProps> = ({
                   <SelectValue placeholder="Sélectionner un type" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="politique">Politique</SelectItem>
-                  <SelectItem value="économique">Économique</SelectItem>
-                  <SelectItem value="sociale">Sociale</SelectItem>
-                  <SelectItem value="judiciaire">Judiciaire</SelectItem>
-                  <SelectItem value="militaire">Militaire</SelectItem>
-                  <SelectItem value="religieuse">Religieuse</SelectItem>
-                  <SelectItem value="civile">Civile</SelectItem>
+                  <SelectItem value="Politique">Politique</SelectItem>
+                  <SelectItem value="Economique">Économique</SelectItem>
+                  <SelectItem value="Sociale">Sociale</SelectItem>
+                  <SelectItem value="Judiciaire">Judiciaire</SelectItem>
+                  <SelectItem value="Militaire">Militaire</SelectItem>
+                  <SelectItem value="Religieuse">Religieuse</SelectItem>
+                  <SelectItem value="Civile">Civile</SelectItem>
                 </SelectContent>
               </Select>
             </div>

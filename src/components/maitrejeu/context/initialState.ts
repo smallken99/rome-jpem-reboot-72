@@ -454,39 +454,48 @@ export const initialElections: Election[] = [];
 export const initialHistoireEntries: HistoireEntry[] = [];
 export const initialLois: Loi[] = [];
 export const initialEquilibre: Equilibre = {
-  facteurSenat: 72,
-  facteurPlebs: 65,
-  facteurPatriciens: 80,
-  facteurMilitaire: 68,
-  facteurReligieux: 75,
+  facteurSenat: 60,
+  facteurPlebs: 40,
+  facteurPatriciens: 75,
+  facteurMilitaire: 80,
+  facteurReligieux: 65,
+  
+  // Political alignment
   populaires: 35,
-  populaires: 35,
-  optimates: 45,
-  moderates: 20,
-  population: 1000000,
-  criminalityIndex: 12,
-  indiceCrime: 12,
-  indiceCorruption: 18,
-  indiceMecontentement: 25,
-  stressPolitique: 30,
-  stabiliteGlobale: 68,
-  anneeEnCours: 752,
-  commentaires: "La République est stable, mais des tensions apparaissent.",
-  economicStability: 70,
-  foodSupply: 65,
-  publicOrder: 75,
-  unrestThreshold: 30,
-  rebellionThreshold: 15,
-  notes: "",
-  // For EquilibreBarChart
-  armée: 65,
-  économie: 70,
-  morale: 60,
-  loyauté: 75,
-  patriciens: 80,
-  plébéiens: 60,
+  populares: 35,
+  optimates: 40,
+  moderates: 25,
+  
+  // City indicators
+  population: 200000,
+  criminalityIndex: 15,
+  indiceCrime: 15,
+  indiceCorruption: 20,
+  indiceMecontentement: 30,
+  stressPolitique: 25,
+  stabiliteGlobale: 70,
+  economicStability: 75,
+  foodSupply: 80,
+  publicOrder: 70,
+  
+  // EquilibreBarChart properties
+  armée: 80,
+  économie: 75,
+  morale: 65,
+  loyauté: 70,
+  patriciens: 75,
+  plébéiens: 40,
   neutrales: 50,
-  historique: []
+  
+  // Thresholds
+  unrestThreshold: 60,
+  rebellionThreshold: 80,
+  
+  // History
+  historique: [],
+  
+  // Notes
+  notes: "Équilibre initial de la République"
 };
 
 export const initialDate = {

@@ -3,7 +3,7 @@ import React from 'react';
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { PoliticalEvent } from '../types/equilibre';
-import { formatSeasonDisplay } from '../types/common';
+import { formatSeasonDisplay, GameDate } from '@/utils/timeSystem';
 
 interface PoliticalEventsTimelineProps {
   events: PoliticalEvent[];

@@ -6,6 +6,7 @@ export interface Loi {
   // Title properties (different naming conventions)
   title?: string;
   titre?: string;
+  nom?: string;
   
   // Core properties
   description: string;
@@ -16,7 +17,7 @@ export interface Loi {
   auteur?: string;
   
   // Date properties
-  date?: GameDate;
+  date?: GameDate | string;
   dateProposition?: string | GameDate;
   
   // Status properties (different naming conventions)
@@ -57,7 +58,6 @@ export interface Loi {
   effets?: string[] | Record<string, any>;
   conditions?: string[];
   penalites?: string[];
-  nom?: string;
 }
 
 export type LoiType = 

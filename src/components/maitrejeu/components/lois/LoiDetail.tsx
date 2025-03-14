@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -7,7 +6,7 @@ import { ScrollText, Calendar, GavelIcon, CheckCircle, XCircle } from 'lucide-re
 import { Loi } from '../../types/lois';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { LoiTimeline } from './LoiTimeline';
-import { formatDate, parseGameDate } from '@/utils/timeSystem';
+import { formatDate } from '@/utils/timeSystem';
 
 export interface LoiDetailProps {
   loi: Loi;
@@ -88,7 +87,7 @@ export const LoiDetail: React.FC<LoiDetailProps> = ({ loi, onEdit, onClose }) =>
   const getLoiCategory = (): string => {
     return loi.catégorie || loi.category || loi.categorieId || '';
   };
-  
+
   return (
     <Card className="mt-6">
       <CardHeader>
