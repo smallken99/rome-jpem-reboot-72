@@ -20,6 +20,9 @@ export const LoiEffetsForm: React.FC<LoiEffetsFormProps> = ({
   addEffet,
   removeEffet
 }) => {
+  // Access extended properties safely
+  const commentaires = (formData as any).commentaires || [];
+
   return (
     <div className="space-y-4">
       <div className="flex items-end gap-2">
@@ -38,8 +41,8 @@ export const LoiEffetsForm: React.FC<LoiEffetsFormProps> = ({
       <div className="space-y-2">
         <Label>Effets de la loi</Label>
         <div className="border rounded-md p-4 space-y-2">
-          {formData.commentaires && formData.commentaires.length > 0 ? (
-            formData.commentaires.map((effet, index) => (
+          {commentaires.length > 0 ? (
+            commentaires.map((effet: string, index: number) => (
               <div key={index} className="flex items-center justify-between bg-muted/50 p-2 rounded">
                 <span>{effet}</span>
                 <Button

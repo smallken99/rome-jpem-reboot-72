@@ -6,7 +6,6 @@ import { LoiEffetsForm } from './LoiEffetsForm';
 import { LoiConditionsForm } from './LoiConditionsForm';
 import { LoiPenalitesForm } from './LoiPenalitesForm';
 import { Loi } from '@/components/republique/lois/hooks/useLois';
-import { ensureLoiCompliance } from '../utils/loiAdapter';
 
 interface LoiFormTabsProps {
   activeTab: string;
@@ -49,9 +48,6 @@ export const LoiFormTabs: React.FC<LoiFormTabsProps> = ({
   removePenalite,
   categories
 }) => {
-  // Ensure we're working with a compliant Loi object
-  const compliantLoi = formData;
-  
   return (
     <Tabs value={activeTab} onValueChange={setActiveTab} className="mt-4">
       <TabsList className="grid grid-cols-4">
@@ -63,7 +59,7 @@ export const LoiFormTabs: React.FC<LoiFormTabsProps> = ({
       
       <TabsContent value="info" className="space-y-4 mt-4">
         <LoiBasicInfoForm 
-          formData={compliantLoi} 
+          formData={formData} 
           handleChange={handleChange} 
           handleSelectChange={handleSelectChange} 
           categories={categories}
@@ -72,7 +68,7 @@ export const LoiFormTabs: React.FC<LoiFormTabsProps> = ({
       
       <TabsContent value="effets" className="space-y-4 mt-4">
         <LoiEffetsForm 
-          formData={compliantLoi}
+          formData={formData}
           effetInput={effetInput}
           setEffetInput={setEffetInput}
           addEffet={addEffet}
@@ -82,7 +78,7 @@ export const LoiFormTabs: React.FC<LoiFormTabsProps> = ({
       
       <TabsContent value="conditions" className="space-y-4 mt-4">
         <LoiConditionsForm 
-          formData={compliantLoi}
+          formData={formData}
           conditionInput={conditionInput}
           setConditionInput={setConditionInput}
           addCondition={addCondition}
@@ -92,7 +88,7 @@ export const LoiFormTabs: React.FC<LoiFormTabsProps> = ({
       
       <TabsContent value="penalites" className="space-y-4 mt-4">
         <LoiPenalitesForm 
-          formData={compliantLoi}
+          formData={formData}
           penaliteInput={penaliteInput}
           setPenaliteInput={setPenaliteInput}
           addPenalite={addPenalite}

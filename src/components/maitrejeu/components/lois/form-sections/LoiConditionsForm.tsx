@@ -20,6 +20,9 @@ export const LoiConditionsForm: React.FC<LoiConditionsFormProps> = ({
   addCondition,
   removeCondition
 }) => {
+  // Access extended properties safely
+  const clauses = (formData as any).clauses || [];
+  
   return (
     <div className="space-y-4">
       <div className="flex items-end gap-2">
@@ -38,8 +41,8 @@ export const LoiConditionsForm: React.FC<LoiConditionsFormProps> = ({
       <div className="space-y-2">
         <Label>Conditions d'application</Label>
         <div className="border rounded-md p-4 space-y-2">
-          {formData.clauses && formData.clauses.length > 0 ? (
-            formData.clauses.map((condition, index) => (
+          {clauses.length > 0 ? (
+            clauses.map((condition: string, index: number) => (
               <div key={index} className="flex items-center justify-between bg-muted/50 p-2 rounded">
                 <span>{condition}</span>
                 <Button
