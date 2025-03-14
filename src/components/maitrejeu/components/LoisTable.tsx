@@ -1,9 +1,9 @@
-
 import React from 'react';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Loi } from '../types/lois';
+import { ensureGameDate } from './lois/utils/dateHelpers';
 
 export interface LoisTableProps {
   lois: Loi[];
@@ -69,96 +69,101 @@ export const LoisTable: React.FC<LoisTableProps> = ({
         </TableHeader>
         
         <TableBody>
-          {lois.map((loi) => (
-            <TableRow key={loi.id}>
-              <TableCell className="font-medium">
-                {loi.titre}
-                <div className="text-xs text-gray-500 mt-1">{loi.description.substring(0, 60)}...</div>
-              </TableCell>
-              
-              <TableCell>{loi.proposeur}</TableCell>
-              
-              <TableCell>
-                <Badge className={getCategoryColor(loi.catégorie)}>
-                  {loi.catégorie}
-                </Badge>
-              </TableCell>
-              
-              <TableCell>
-                An {loi.date.year} - {loi.date.season}
-              </TableCell>
-              
-              <TableCell>
-                <Badge className={getStatusColor(loi.état)}>
-                  {loi.état}
-                </Badge>
-              </TableCell>
-              
-              <TableCell>
-                <div className="flex flex-col gap-1 text-xs">
-                  <div className="flex items-center">
-                    <span className="w-8 text-green-600">Pour:</span> 
-                    <span className="font-medium">{loi.votesPositifs}</span>
-                  </div>
-                  <div className="flex items-center">
-                    <span className="w-8 text-red-600">Contre:</span> 
-                    <span className="font-medium">{loi.votesNégatifs}</span>
-                  </div>
-                  <div className="flex items-center">
-                    <span className="w-8 text-gray-600">Abst:</span> 
-                    <span className="font-medium">{loi.votesAbstention}</span>
-                  </div>
-                </div>
-              </TableCell>
-              
-              <TableCell>
-                <div className="flex flex-col gap-2">
-                  {onVote && loi.état === 'proposée' && (
-                    <div className="flex gap-1">
-                      <Button 
-                        size="sm" 
-                        variant="outline" 
-                        className="bg-green-50 hover:bg-green-100 text-green-700 border-green-200 h-7 text-xs px-2"
-                        onClick={() => onVote(loi.id, 'pour')}
-                      >
-                        Pour
-                      </Button>
-                      <Button 
-                        size="sm" 
-                        variant="outline" 
-                        className="bg-red-50 hover:bg-red-100 text-red-700 border-red-200 h-7 text-xs px-2"
-                        onClick={() => onVote(loi.id, 'contre')}
-                      >
-                        Contre
-                      </Button>
+          {lois.map((loi) => {
+            // Safely get date information
+            const gameDate = ensureGameDate(loi.date);
+            
+            return (
+              <TableRow key={loi.id}>
+                <TableCell className="font-medium">
+                  {loi.titre}
+                  <div className="text-xs text-gray-500 mt-1">{loi.description.substring(0, 60)}...</div>
+                </TableCell>
+                
+                <TableCell>{loi.proposeur}</TableCell>
+                
+                <TableCell>
+                  <Badge className={getCategoryColor(loi.catégorie)}>
+                    {loi.catégorie}
+                  </Badge>
+                </TableCell>
+                
+                <TableCell>
+                  An {gameDate.year} - {gameDate.season}
+                </TableCell>
+                
+                <TableCell>
+                  <Badge className={getStatusColor(loi.état)}>
+                    {loi.état}
+                  </Badge>
+                </TableCell>
+                
+                <TableCell>
+                  <div className="flex flex-col gap-1 text-xs">
+                    <div className="flex items-center">
+                      <span className="w-8 text-green-600">Pour:</span> 
+                      <span className="font-medium">{loi.votesPositifs}</span>
                     </div>
-                  )}
-                  
-                  {onEdit && (
-                    <Button 
-                      size="sm" 
-                      variant="outline" 
-                      className="h-7 text-xs px-2"
-                      onClick={() => onEdit(loi.id)}
-                    >
-                      Détails
-                    </Button>
-                  )}
-                  
-                  {onAbroger && loi.état === 'adoptée' && (
-                    <Button 
-                      size="sm" 
-                      variant="destructive" 
-                      className="h-7 text-xs px-2"
-                      onClick={() => onAbroger(loi.id)}
-                    >
-                      Abroger
-                    </Button>
-                  )}
-                </div>
-              </TableCell>
-            </TableRow>
-          ))}
+                    <div className="flex items-center">
+                      <span className="w-8 text-red-600">Contre:</span> 
+                      <span className="font-medium">{loi.votesNégatifs}</span>
+                    </div>
+                    <div className="flex items-center">
+                      <span className="w-8 text-gray-600">Abst:</span> 
+                      <span className="font-medium">{loi.votesAbstention}</span>
+                    </div>
+                  </div>
+                </TableCell>
+                
+                <TableCell>
+                  <div className="flex flex-col gap-2">
+                    {onVote && loi.état === 'proposée' && (
+                      <div className="flex gap-1">
+                        <Button 
+                          size="sm" 
+                          variant="outline" 
+                          className="bg-green-50 hover:bg-green-100 text-green-700 border-green-200 h-7 text-xs px-2"
+                          onClick={() => onVote(loi.id, 'pour')}
+                        >
+                          Pour
+                        </Button>
+                        <Button 
+                          size="sm" 
+                          variant="outline" 
+                          className="bg-red-50 hover:bg-red-100 text-red-700 border-red-200 h-7 text-xs px-2"
+                          onClick={() => onVote(loi.id, 'contre')}
+                        >
+                          Contre
+                        </Button>
+                      </div>
+                    )}
+                    
+                    {onEdit && (
+                      <Button 
+                        size="sm" 
+                        variant="outline" 
+                        className="h-7 text-xs px-2"
+                        onClick={() => onEdit(loi.id)}
+                      >
+                        Détails
+                      </Button>
+                    )}
+                    
+                    {onAbroger && loi.état === 'adoptée' && (
+                      <Button 
+                        size="sm" 
+                        variant="destructive" 
+                        className="h-7 text-xs px-2"
+                        onClick={() => onAbroger(loi.id)}
+                      >
+                        Abroger
+                      </Button>
+                    )}
+                  </div>
+                </TableCell>
+              </TableRow>
+            );
+          })}
         </TableBody>
       </Table>
     </div>

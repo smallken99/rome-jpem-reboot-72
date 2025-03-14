@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { Timeline, TimelineItem, TimelineItemProps } from '@/components/ui/timeline';
+import { Timeline, TimelineItemProps } from '@/components/ui/timeline';
 import { Badge } from '@/components/ui/badge';
 import { GavelIcon, FileTextIcon, CheckIcon, XIcon } from 'lucide-react';
 import { Loi } from '../../types/lois';

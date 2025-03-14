@@ -6,7 +6,7 @@ import { ScrollText, Calendar, GavelIcon, CheckCircle, XCircle } from 'lucide-re
 import { Loi } from '../../types/lois';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { LoiTimeline } from './LoiTimeline';
-import { formatDate } from '@/utils/timeSystem';
+import { formatAnyGameDate } from './utils/dateHelpers';
 
 export interface LoiDetailProps {
   loi: Loi;
@@ -56,14 +56,10 @@ export const LoiDetail: React.FC<LoiDetailProps> = ({ loi, onEdit, onClose }) =>
   
   const getLoiDate = (): string => {
     if (loi.dateProposition) {
-      return typeof loi.dateProposition === 'string' 
-        ? loi.dateProposition 
-        : formatDate(loi.dateProposition);
+      return formatAnyGameDate(loi.dateProposition);
     }
     if (loi.date) {
-      return typeof loi.date === 'string'
-        ? loi.date
-        : formatDate(loi.date);
+      return formatAnyGameDate(loi.date);
     }
     return '';
   };

@@ -1,4 +1,3 @@
-
 export type Season = 'SPRING' | 'SUMMER' | 'AUTUMN' | 'WINTER' | 'Ver' | 'Aestas' | 'Autumnus' | 'Hiems';
 
 export interface GameDate {
@@ -28,7 +27,7 @@ export const formatDate = (date: GameDate | string): string => {
     return `${Math.abs(date.year)} ${date.year < 0 ? 'av. J.-C.' : 'ap. J.-C.'} - ${formatSeasonDisplay(date.season as Season)}`;
   }
   
-  return dateString;
+  return String(date);
 };
 
 export const parseGameDate = (dateString: string): GameDate | null => {
@@ -50,7 +49,6 @@ export const parseGameDate = (dateString: string): GameDate | null => {
   }
 };
 
-// Adding missing exports
 export type PlayerSeason = Season;
 
 export const reverseSeasonMapping: Record<string, Season> = {
@@ -64,7 +62,6 @@ export const reverseSeasonMapping: Record<string, Season> = {
   'Winter': 'Hiems'
 };
 
-// Adding season conversion utility
 export const convertSeasonBetweenSystems = (season: string): Season => {
   const latinSeasons: Record<string, Season> = {
     'SPRING': 'Ver',
@@ -80,7 +77,6 @@ export const convertSeasonBetweenSystems = (season: string): Season => {
   return latinSeasons[season] || season as Season;
 };
 
-// Add a TimeStore implementation
 const createTimeStore = () => {
   let year = 750; // AUC (Ab Urbe Condita) starting year
   let season: Season = 'Ver';
