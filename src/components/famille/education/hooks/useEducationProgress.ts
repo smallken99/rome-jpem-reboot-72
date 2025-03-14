@@ -54,14 +54,15 @@ export const useEducationProgress = () => {
     if (isComplete && onComplete) {
       // Create education history entry
       const completedEducation: EducationHistory = {
-        type: currentEducation.type,
+        type: currentEducation.type as any,
         mentor: currentEducation.mentor || "Autodidacte",
         speciality: currentEducation.speciality,
         completedAt: child.age,
         statBonus: currentEducation.statBonus || 20,
         skills: currentEducation.skills || [],
-        startYear: 0, // Added for type compatibility
-        completed: true // Added for type compatibility
+        startYear: 0,
+        endYear: 0,
+        completed: true
       };
       
       onComplete(child.id, completedEducation);
@@ -84,12 +85,12 @@ export const useEducationProgress = () => {
       if (typeof statValue === 'number') {
         // For number type stats
         (updatedCharacter.stats[statName as keyof typeof updatedCharacter.stats] as number) = 
-          Math.min((statValue as number) + educationHistory.statBonus, 80);
+          Math.min((statValue as number) + (educationHistory.statBonus || 0), 80);
       } else if (statValue && typeof statValue === 'object' && 'value' in statValue) {
         // For CharacterStat type
         const statObj = statValue as CharacterStat;
         // Don't exceed max value (usually 80 from education alone)
-        statObj.value = Math.min(statObj.value + educationHistory.statBonus, 80);
+        statObj.value = Math.min(statObj.value + (educationHistory.statBonus || 0), 80);
       }
     }
     

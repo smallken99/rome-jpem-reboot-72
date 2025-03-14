@@ -38,7 +38,7 @@ export interface Loi {
   };
 }
 
-export type LoiType = 'Agraire' | 'Politique' | 'Militaire' | 'Economique' | 'Sociale' | 'Religieuse';
+export type LoiType = 'Agraire' | 'Politique' | 'Militaire' | 'Economique' | 'Sociale' | 'Religieuse' | 'Civile';
 export type LoiState = 'proposed' | 'active' | 'rejected' | 'expired' | 'Promulguée' | 'En délibération' | 'rejetée' | 'adoptée' | 'proposée';
 
 export interface CategorieLoi {

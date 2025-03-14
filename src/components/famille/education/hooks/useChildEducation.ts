@@ -181,10 +181,12 @@ export const useChildEducation = (childId: string) => {
         }
       }
       
+      const newStatus = isComplete ? "completed" as const : "in_progress" as const;
+      
       const result = {
         ...prev,
         currentYear: newYear,
-        status: isComplete ? "completed" : "in_progress",
+        status: newStatus,
         skills: updatedSkills,
         specialties: updatedSpecialties
       };
@@ -207,7 +209,7 @@ export const useChildEducation = (childId: string) => {
       
       return {
         ...prev,
-        status: "canceled"
+        status: "canceled" as const
       };
     });
   };
@@ -220,7 +222,7 @@ export const useChildEducation = (childId: string) => {
       
       return {
         ...prev,
-        status: "completed"
+        status: "completed" as const
       };
     });
   };

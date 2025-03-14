@@ -10,13 +10,14 @@ export const useChildrenManagement = (characters: Character[] = []) => {
   useEffect(() => {
     if (!characters.length) return;
     
-    const childrenArray = characters
+    const childrenArray: Child[] = characters
       .filter(char => char.age < 18)
       .map(char => ({
         id: char.id,
         name: char.name,
         age: char.age,
         gender: char.gender,
+        status: 'child',
         currentEducation: {
           type: char.education?.type || 'none',
           mentor: char.education?.mentor || null,

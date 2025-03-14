@@ -3,22 +3,52 @@ import { GameDate } from './common';
 
 export interface EconomieRecord {
   id: string;
-  description: string;
+  source: string;
+  category: string;
   amount: number;
-  type: 'income' | 'expense' | 'transfer' | 'tax';
-  source: 'treasury' | 'province' | 'trade' | 'tax' | string;
+  description: string;
   date: string | GameDate;
-  category?: string;
-  responsable?: string;
-  notes?: string;
-  isRecurring?: boolean;
+  type: 'income' | 'expense' | 'transfer' | 'tax';
+  isRecurring: boolean;
   recurringInterval?: string;
-  tags?: string[];
   affectedSenateurId?: string;
   affectedProvinceId?: string;
+  tags?: string[];
+  approvedBy?: string;
+  notes?: string;
+  createdAt?: string | Date;
   approved?: boolean;
-  createdAt?: string;
   impactFactors?: Record<string, number>;
+}
+
+export interface EconomieCreationData {
+  source: string;
+  category: string;
+  amount: number;
+  description: string;
+  date: string | GameDate;
+  type: 'income' | 'expense' | 'transfer' | 'tax';
+  isRecurring: boolean;
+  recurringInterval?: string;
+  affectedSenateurId?: string;
+  affectedProvinceId?: string;
+  tags?: string[];
+  approvedBy?: string;
+  notes?: string;
+  approved?: boolean;
+  impactFactors?: Record<string, number>;
+}
+
+export interface EconomieFilter {
+  type?: 'income' | 'expense' | 'transfer' | 'tax' | string;
+  dateRange?: [Date, Date] | null;
+  category?: string;
+  minAmount?: number;
+  maxAmount?: number;
+  searchTerm?: string;
+  affectedSenateurId?: string;
+  affectedProvinceId?: string;
+  tags?: string[];
 }
 
 export interface EconomieSort {
@@ -26,65 +56,21 @@ export interface EconomieSort {
   direction: 'asc' | 'desc';
 }
 
-export interface EconomieFilter {
-  type?: 'income' | 'expense' | 'transfer' | 'tax' | 'all';
-  source?: string;
-  minAmount?: number;
-  maxAmount?: number;
-  startDate?: string;
-  endDate?: string;
-  search?: string;
-  affectedEntity?: string;
-  categories?: string[];
-  dateRange?: [Date | null, Date | null];
-}
-
-export interface EconomieStats {
-  totalIncome: number;
-  totalExpenses: number;
-  balance: number;
-  byCategory: {
-    [key: string]: number;
-  };
-  byMonth: {
-    month: string;
-    income: number;
-    expenses: number;
-  }[];
-}
-
-export interface EconomieCreationData {
-  description: string;
-  amount: number;
-  type: 'income' | 'expense' | 'transfer' | 'tax';
-  source: string;
-  date: string | GameDate;
-  category?: string;
-  responsable?: string;
-  notes?: string;
-  isRecurring?: boolean;
-  recurringInterval?: string;
-  tags?: string[];
-  affectedSenateurId?: string;
-  affectedProvinceId?: string;
-  approved?: boolean;
-  impactFactors?: Record<string, number>;
-}
-
 export interface TreasuryStatus {
   balance: number;
-  lastUpdated: string;
-  projectedIncome: number;
-  projectedExpenses: number;
-  fiscalYear: string;
+  totalIncome: number;
+  totalExpenses: number;
+  surplus: number;
+  projectedBalance: number;
+  lastUpdated: string | Date;
   inflationRate?: number;
+  taxCollectionRate?: number;
+  reserves?: number;
+  debt?: number;
 }
 
 export interface EconomicFactors {
-  inflation: number;
-  taxRate: number;
-  economicGrowth: number;
-  publicConfidence: number;
+  id?: string;
   taxCollection?: number;
   tradeRevenue?: number;
   militaryExpense?: number;
@@ -94,33 +80,5 @@ export interface EconomicFactors {
   warSpoilsRevenue?: number;
   adminExpense?: number;
   currentYear?: number;
-  id?: string;
+  tradeStability?: number;
 }
-
-export const ECONOMIE_CATEGORIES = [
-  'Administration',
-  'Armée',
-  'Commerce',
-  'Construction',
-  'Divertissement',
-  'Éducation',
-  'Impôts',
-  'Justice',
-  'Religion',
-  'Santé',
-  'Subventions',
-  'Transport',
-  'Divers'
-];
-
-export const SOURCE_TYPES = [
-  'Trésor public',
-  'Province',
-  'Commerce',
-  'Taxes',
-  'Militaire',
-  'Offrandes',
-  'Étranger',
-  'Prêts',
-  'Autre'
-];

@@ -1,77 +1,96 @@
 
 import React from 'react';
+import { Card, CardContent } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Target, Check, ArrowRight } from 'lucide-react';
 import { EducationObjectivesProps } from '../types/educationTypes';
-import { getEducationPath } from '../data';
-import { Award, Book, Target } from 'lucide-react';
+import { militaryPath } from '../data/paths/militaryPath';
+import { rhetoricPath } from '../data/paths/rhetoricPath';
+import { religiousPath } from '../data/paths/religiousPath';
 
 export const EducationObjectives: React.FC<EducationObjectivesProps> = ({ pathType }) => {
-  const educationPath = getEducationPath(pathType);
-  
-  if (!educationPath) {
-    return (
-      <div className="p-4 border rounded-md bg-amber-50 text-amber-800">
-        <p>Type d'éducation non reconnu</p>
-      </div>
-    );
+  // Récupérer les données du chemin d'éducation
+  const getPath = () => {
+    switch (pathType) {
+      case 'military':
+        return militaryPath;
+      case 'rhetoric':
+        return rhetoricPath;
+      case 'religious':
+        return religiousPath;
+      default:
+        return null;
+    }
+  };
+
+  const path = getPath();
+
+  if (!path) {
+    return <div>Type d'éducation non reconnu</div>;
   }
-  
-  // Extract skills from outcomes
-  const skills = typeof educationPath.outcomes === 'object' && 'skills' in educationPath.outcomes
-    ? educationPath.outcomes.skills
-    : [];
-  
-  // Extract bonuses from outcomes if available
-  const bonuses = typeof educationPath.outcomes === 'object' && 'bonuses' in educationPath.outcomes
-    ? educationPath.outcomes.bonuses
-    : {};
-  
+
+  // Traiter les résultats en fonction du type
+  const getSkills = () => {
+    if (!path.outcomes) return [];
+    
+    if (Array.isArray(path.outcomes)) {
+      return path.outcomes;
+    }
+    
+    return path.outcomes.skills || [];
+  };
+
+  const skills = getSkills();
+
   return (
-    <div className="space-y-4">
-      <div>
-        <h4 className="text-md font-medium flex items-center gap-2">
-          <Target className="h-4 w-4" />
-          Objectifs d'apprentissage
+    <Card className="bg-primary/5 border-primary/20">
+      <CardContent className="pt-4 pb-3">
+        <h4 className="font-medium flex items-center gap-2 mb-2">
+          <Target className="h-4 w-4 text-primary" />
+          Objectifs de l'éducation {path.name}
         </h4>
         
-        <div className="mt-2 p-4 border rounded-md">
-          <div className="space-y-4">
-            {skills.length > 0 && (
-              <div>
-                <h5 className="text-sm font-medium flex items-center gap-1">
-                  <Book className="h-3.5 w-3.5" />
-                  Compétences à acquérir:
-                </h5>
-                <ul className="mt-1 pl-5 list-disc text-sm space-y-1">
-                  {skills.map((skill, index) => (
-                    <li key={index}>{skill}</li>
-                  ))}
-                </ul>
-              </div>
-            )}
-            
-            {Object.keys(bonuses).length > 0 && (
-              <div>
-                <h5 className="text-sm font-medium flex items-center gap-1">
-                  <Award className="h-3.5 w-3.5" />
-                  Bonus de caractéristiques:
-                </h5>
-                <ul className="mt-1 pl-5 list-disc text-sm space-y-1">
-                  {Object.entries(bonuses).map(([stat, value], index) => (
-                    <li key={index}>
-                      <span className="capitalize">{stat}</span>: +{value}
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            )}
-            
-            <div className="text-xs text-muted-foreground italic">
-              L'éducation se déroule sur {educationPath.duration} années et 
-              la progression dépend de la qualité du précepteur.
-            </div>
+        <div className="space-y-3 mb-3">
+          <div>
+            <p className="text-sm text-muted-foreground mb-2">
+              {path.description}
+            </p>
+          </div>
+          
+          <div>
+            <p className="text-xs font-medium mb-1">Bénéfices:</p>
+            <ul className="text-xs space-y-1">
+              {path.benefits.map((benefit, index) => (
+                <li key={index} className="flex items-start gap-1">
+                  <Check className="h-3 w-3 text-green-600 mt-0.5" />
+                  <span>{benefit}</span>
+                </li>
+              ))}
+            </ul>
           </div>
         </div>
-      </div>
-    </div>
+        
+        <div className="border-t pt-2">
+          <p className="text-xs font-medium mb-1">Compétences à acquérir:</p>
+          <div className="flex flex-wrap gap-1">
+            {skills.map((skill, index) => (
+              <Badge key={index} variant="outline" className="text-xs">
+                {skill}
+              </Badge>
+            ))}
+          </div>
+        </div>
+        
+        {path.relatedStat && (
+          <div className="mt-2 pt-2 border-t">
+            <p className="text-xs flex items-center gap-1">
+              <ArrowRight className="h-3 w-3 text-primary" />
+              <span>Attribut principal amélioré: </span>
+              <span className="font-medium capitalize">{path.relatedStat}</span>
+            </p>
+          </div>
+        )}
+      </CardContent>
+    </Card>
   );
 };

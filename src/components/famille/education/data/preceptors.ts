@@ -24,16 +24,21 @@ export const generatePreceptors = (): Record<string, Preceptor[]> => {
       const nameIndex = Math.floor(Math.random() * availableNames.length);
       const specialtyIndex = Math.floor(Math.random() * educationSpecialties[type].length);
       
-      preceptorsByType[type].push({
+      const preceptor: Preceptor = {
         id: `${type}-${i}`,
         name: `${availableNames[nameIndex]} ${i === 0 ? 'le Sage' : i === 1 ? 'l\'Érudit' : ''}`,
         specialty: educationSpecialties[type][specialtyIndex],
+        quality,
+        cost,
+        available: true,
         skill: i === 0 ? 85 : i === 1 ? 70 : 55,
         price: cost,
         status: 'available',
         background: `Un éducateur expérimenté, spécialisé en ${educationSpecialties[type][specialtyIndex]}.`,
         childId: null
-      });
+      };
+      
+      preceptorsByType[type].push(preceptor);
       
       // Éviter les doublons de noms
       availableNames.splice(nameIndex, 1);

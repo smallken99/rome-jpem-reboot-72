@@ -44,6 +44,7 @@ export interface ChildEducation {
   statBonus: number;
   speciality?: string;
   pityBonus?: number;
+  mentorId?: string | null;
 }
 
 export interface Child {
@@ -121,19 +122,22 @@ export interface EducationFormData {
 }
 
 export interface EducationHistory {
-  id: string;
+  id?: string;
   type: EducationPathType;
   startYear: number;
   endYear: number;
   completed: boolean;
   mentor: string;
-  results: {
+  results?: {
     skills: {
       [key: string]: number;
     };
     specialties: string[];
   };
+  speciality?: string;
+  completedAt?: number;
   statBonus?: number;
+  skills?: string[];
 }
 
 // Props pour les composants

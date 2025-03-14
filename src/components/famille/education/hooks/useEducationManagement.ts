@@ -32,12 +32,12 @@ export const useEducationManagement = (
         const newEducation: ChildEducation = {
           type: educationType,
           mentor: mentor ? mentor.name : null,
-          mentorId: mentorId,
           progress: 0,
           skills: [],
           yearsCompleted: 0,
           totalYears: educationDuration,
-          statBonus: 0
+          statBonus: 0,
+          mentorId: mentorId
         };
         
         return {
@@ -117,8 +117,7 @@ export const useEducationManagement = (
           if (educationPath) {
             if (typeof educationPath.outcomes === 'object' && educationPath.outcomes.bonuses) {
               // Use mentor quality if available
-              const mentorId = education.mentorId;
-              const mentor = mentorId ? hiredPreceptors.find(p => p.id === mentorId) : null;
+              const mentor = education.mentorId ? hiredPreceptors.find(p => p.id === education.mentorId) : null;
               const mentorBonus = mentor ? Math.floor(mentor.skill / 10) : 0;
               
               // Get base bonus for relevant stat
