@@ -4,6 +4,7 @@ import { BookOpen } from 'lucide-react';
 
 export const rhetoricPath: EducationPath = {
   id: 'rhetoric',
+  type: 'rhetoric',
   name: 'Éducation Rhétorique',
   description: 'Maîtrise de l\'art oratoire, essentiel pour la vie publique',
   benefits: [

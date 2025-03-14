@@ -4,6 +4,7 @@ import { Sword } from 'lucide-react';
 
 export const militaryPath: EducationPath = {
   id: 'military',
+  type: 'military',
   name: 'Éducation Militaire',
   description: 'Formation aux arts de la guerre et au commandement',
   benefits: [

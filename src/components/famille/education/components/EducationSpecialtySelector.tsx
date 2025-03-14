@@ -9,6 +9,7 @@ export const EducationSpecialtySelector: React.FC<EducationSpecialtySelectorProp
   educationType,
   selectedSpecialties,
   onChange,
+  maxSelections = 3
 }) => {
   const educationPath = getEducationPath(educationType);
   
@@ -53,14 +54,14 @@ export const EducationSpecialtySelector: React.FC<EducationSpecialtySelectorProp
       <div>
         <h3 className="text-lg font-medium">Spécialités</h3>
         <p className="text-sm text-muted-foreground">
-          Sélectionnez jusqu'à 3 spécialités que l'enfant apprendra
+          Sélectionnez jusqu'à {maxSelections} spécialités que l'enfant apprendra
         </p>
       </div>
       
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
         {specialties.map((specialty, index) => {
           const isSelected = selectedSpecialties.includes(specialty);
-          const isDisabled = selectedSpecialties.length >= 3 && !isSelected;
+          const isDisabled = selectedSpecialties.length >= maxSelections && !isSelected;
           
           return (
             <div key={index} className="flex items-start space-x-2">
@@ -81,9 +82,9 @@ export const EducationSpecialtySelector: React.FC<EducationSpecialtySelectorProp
         })}
       </div>
       
-      {selectedSpecialties.length >= 3 && (
+      {selectedSpecialties.length >= maxSelections && (
         <p className="text-xs text-amber-600">
-          Maximum de 3 spécialités atteint.
+          Maximum de {maxSelections} spécialités atteint.
         </p>
       )}
     </div>

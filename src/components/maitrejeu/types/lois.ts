@@ -17,7 +17,29 @@ export interface Loi {
   effets?: string[];
   conditions?: string[];
   penalites?: string[];
+  
+  // Legacy properties
+  titre?: string;
+  proposeur?: string;
+  catégorie?: string;
+  état?: string;
+  importance?: string;
+  votesPositifs?: number;
+  votesNégatifs?: number;
+  votesAbstention?: number;
+  dateProposition?: string;
+  type?: string;
+  clauses?: any[];
+  commentaires?: string[];
+  votes?: {
+    pour: number;
+    contre: number;
+    abstention: number;
+  };
 }
+
+export type LoiType = 'Agraire' | 'Politique' | 'Militaire' | 'Economique' | 'Sociale' | 'Religieuse';
+export type LoiState = 'proposed' | 'active' | 'rejected' | 'expired' | 'Promulguée' | 'En délibération' | 'rejetée' | 'adoptée' | 'proposée';
 
 export interface CategorieLoi {
   id: string;
@@ -65,4 +87,10 @@ export interface LoiUpdate extends Partial<LoiCreate> {
   votesAgainst?: number;
   implementationDate?: GameDate;
   expirationDate?: GameDate;
+}
+
+export interface Clause {
+  id: string;
+  type: 'effet' | 'condition' | 'penalite';
+  content: string;
 }

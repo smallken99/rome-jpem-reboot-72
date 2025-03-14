@@ -8,22 +8,30 @@ export interface EducationPath {
   type: EducationPathType;
   name: string;
   description: string;
-  icon: ReactNode;
-  skillFocus: string[];
-  potentialSpecialties: string[];
+  icon?: ReactNode;
+  skillFocus?: string[];
+  potentialSpecialties?: string[];
   requirements?: {
     age?: number;
     minPrestige?: number;
     traits?: string[];
     gender?: 'male' | 'female' | 'both';
+    cost?: number;
+    duration?: string;
   };
-  baseYears: number;
-  baseCost: number;
-  careerOpportunities: string[];
+  baseYears?: number;
+  baseCost?: number;
+  careerOpportunities?: string[];
   benefits: string[];
   duration: number;
-  outcomes?: string[] | { skills: string[] };
+  outcomes?: {
+    skills: string[];
+    bonuses?: {
+      [key: string]: number;
+    };
+  } | string[];
   specialties?: string[];
+  relatedStat?: string;
 }
 
 export interface ChildEducation {
@@ -91,6 +99,7 @@ export interface Preceptor {
   childId?: string | null;
   speciality?: string;
   reputation?: string;
+  portrait?: string;
 }
 
 export interface PreceptorsByType {
@@ -124,6 +133,7 @@ export interface EducationHistory {
     };
     specialties: string[];
   };
+  statBonus?: number;
 }
 
 // Props pour les composants
@@ -135,8 +145,9 @@ export interface ChildHeaderProps {
 }
 
 export interface CurrentEducationStatusProps {
-  currentEducation: ChildEducation;
-  childGender: string;
+  education?: EducationRecord | null;
+  currentEducation?: ChildEducation;
+  childGender?: string;
 }
 
 export interface EducationFormActionsProps {
@@ -150,10 +161,10 @@ export interface EducationObjectivesProps {
 }
 
 export interface EducationProgressButtonsProps {
-  onAdvance: () => void;
-  onCancel: () => void;
-  onComplete: () => void;
-  canComplete: boolean;
+  onAdvance?: () => void;
+  onCancel?: () => void;
+  onComplete?: () => void;
+  canComplete?: boolean;
   isEducating?: boolean;
   hasEducation?: boolean;
   educationProgress?: number;
@@ -162,8 +173,8 @@ export interface EducationProgressButtonsProps {
 }
 
 export interface EducationTypeSelectorProps {
-  selectedType: EducationPathType | null;
-  onSelectType: (type: EducationPathType) => void;
+  selectedType?: EducationPathType | null;
+  onSelectType?: (type: EducationPathType) => void;
   value?: EducationPathType | null;
   onChange?: (type: EducationPathType) => void;
   childGender?: 'male' | 'female';
@@ -193,8 +204,8 @@ export interface EducationStatusProps {
 }
 
 export interface EducationSpecialtySelectorProps {
-  specialties: string[];
-  selected: string[];
+  educationType: string;
+  selectedSpecialties: string[];
   onChange: (specialties: string[]) => void;
   maxSelections?: number;
 }

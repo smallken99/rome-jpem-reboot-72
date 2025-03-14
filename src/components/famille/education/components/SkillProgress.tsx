@@ -1,46 +1,19 @@
 
 import React from 'react';
-import { BookOpen } from 'lucide-react';
+import { Progress } from '@/components/ui/progress';
+import { SkillProgressProps } from '../types/educationTypes';
 
-interface SkillProgressProps {
-  progress: number;
-  pityBonus?: number;
-  hasInvalidEducation?: boolean;
-  gender?: string;
-}
-
-export const SkillProgress: React.FC<SkillProgressProps> = ({ 
-  progress, 
-  pityBonus = 0, 
-  hasInvalidEducation = false,
-  gender = 'male'
-}) => {
-  // Only apply piety bonus if the character is female
-  const shouldApplyPietyBonus = gender === 'female' && pityBonus > 0;
-  const totalProgress = Math.min(progress + (shouldApplyPietyBonus ? pityBonus : 0), 100); // Cap at 100%
+export const SkillProgress: React.FC<SkillProgressProps> = ({ skill, value }) => {
+  // Calculate a percentage for the Progress component
+  const percentage = Math.min(Math.max(value * 10, 0), 100);
   
   return (
-    <div className="mt-3">
-      <p className="text-xs text-muted-foreground flex items-center gap-1">
-        <BookOpen className="h-3 w-3" />
-        Progression des compétences:
-      </p>
-      <div className="mt-1 h-2 bg-muted rounded-full">
-        <div 
-          className={`h-full ${hasInvalidEducation ? 'bg-red-400' : 'bg-rome-terracotta'} rounded-full`}
-          style={{ width: `${totalProgress}%` }}
-        ></div>
+    <div className="space-y-1">
+      <div className="flex justify-between items-center">
+        <span className="text-sm font-medium capitalize">{skill}</span>
+        <span className="text-sm text-muted-foreground">{value}/10</span>
       </div>
-      <div className="flex justify-between text-xs mt-1">
-        <span>Débutant</span>
-        <span>{progress}%{shouldApplyPietyBonus && <span className="text-green-600"> (+{pityBonus}% piété)</span>}</span>
-        <span>Maître</span>
-      </div>
-      {shouldApplyPietyBonus && (
-        <p className="text-xs text-green-600 mt-1">
-          Le bonus de piété accélère l'acquisition des compétences.
-        </p>
-      )}
+      <Progress value={percentage} className="h-2" />
     </div>
   );
 };

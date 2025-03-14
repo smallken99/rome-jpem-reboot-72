@@ -23,16 +23,39 @@ export const GestionLois = () => {
   const [selectedLoi, setSelectedLoi] = useState<Loi | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
   
+  // Helper to normalize loi status
+  const normalizeStatus = (loi: Loi): 'active' | 'proposed' | 'rejected' | 'expired' => {
+    if (loi.status) return loi.status;
+    
+    // Handle legacy status field
+    if (loi.état === 'Promulguée' || loi.état === 'adoptée') return 'active';
+    if (loi.état === 'proposée' || loi.état === 'En délibération') return 'proposed';
+    if (loi.état === 'rejetée') return 'rejected';
+    
+    return 'proposed'; // Default
+  };
+  
   // Filtrer les lois selon leur état
-  const loisActives = lois.filter(loi => loi.état === 'Promulguée' || loi.état === 'adoptée');
-  const loisProposees = lois.filter(loi => loi.état === 'proposée' || loi.état === 'En délibération');
-  const loisRejetees = lois.filter(loi => loi.état === 'rejetée');
+  const loisActives = lois.filter(loi => normalizeStatus(loi) === 'active');
+  const loisProposees = lois.filter(loi => normalizeStatus(loi) === 'proposed');
+  const loisRejetees = lois.filter(loi => normalizeStatus(loi) === 'rejected');
+  
+  // Helper for formatting seasons
+  const formatSeason = (season: string): string => {
+    switch(season) {
+      case 'SPRING': return 'Printemps';
+      case 'SUMMER': return 'Été';
+      case 'AUTUMN': return 'Automne';
+      case 'WINTER': return 'Hiver';
+      default: return season;
+    }
+  };
   
   // Filtrer selon le terme de recherche
   const filteredLois = lois.filter(loi => 
-    loi.titre.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    (loi.title || loi.titre || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
     loi.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    loi.proposeur.toLowerCase().includes(searchTerm.toLowerCase())
+    (loi.proposedBy || loi.proposeur || '').toLowerCase().includes(searchTerm.toLowerCase())
   );
   
   const handleOpenModal = (loi: Loi | null = null) => {
@@ -96,27 +119,31 @@ export const GestionLois = () => {
             
             <TabsContent value="actives" className="mt-6">
               <LoisActivesTab 
-                lois={searchTerm ? filteredLois.filter(l => loisActives.includes(l)) : loisActives} 
+                lois={searchTerm ? filteredLois.filter(l => normalizeStatus(l) === 'active') : loisActives} 
                 onViewLoi={handleOpenModal}
               />
             </TabsContent>
             
             <TabsContent value="proposees" className="mt-6">
               <LoisProposeesTab 
-                lois={searchTerm ? filteredLois.filter(l => loisProposees.includes(l)) : loisProposees} 
+                lois={searchTerm ? filteredLois.filter(l => normalizeStatus(l) === 'proposed') : loisProposees} 
                 onViewLoi={handleOpenModal}
               />
             </TabsContent>
             
             <TabsContent value="rejetees" className="mt-6">
               <LoisRejeteesTab 
-                lois={searchTerm ? filteredLois.filter(l => loisRejetees.includes(l)) : loisRejetees} 
+                lois={searchTerm ? filteredLois.filter(l => normalizeStatus(l) === 'rejected') : loisRejetees} 
                 onViewLoi={handleOpenModal}
               />
             </TabsContent>
             
             <TabsContent value="historique" className="mt-6">
-              <HistoriqueLoiTab />
+              <HistoriqueLoiTab 
+                lois={lois}
+                onViewLoi={handleOpenModal}
+                formatSeason={formatSeason}
+              />
             </TabsContent>
           </Tabs>
         </CardContent>

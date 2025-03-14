@@ -9,17 +9,26 @@ export const EducationProgressButtons: React.FC<EducationProgressButtonsProps> =
   hasEducation,
   educationProgress = 0,
   onAdvanceYear,
-  onCompleteEducation
+  onCompleteEducation,
+  onAdvance,
+  onCancel,
+  onComplete,
+  canComplete = false
 }) => {
   if (!hasEducation) return null;
   
   const isComplete = educationProgress >= 100;
   
+  // Use the new prop names if provided, otherwise fallback to old ones
+  const handleAdvance = onAdvance || onAdvanceYear;
+  const handleCancel = onCancel || onCompleteEducation;
+  const handleComplete = onComplete || onCompleteEducation;
+  
   return (
     <div className="flex justify-end gap-2 mt-4">
-      {isComplete ? (
+      {isComplete || canComplete ? (
         <Button 
-          onClick={onCompleteEducation}
+          onClick={handleComplete}
           className="bg-green-600 hover:bg-green-700"
         >
           Terminer l'éducation
@@ -28,7 +37,7 @@ export const EducationProgressButtons: React.FC<EducationProgressButtonsProps> =
         <>
           <Button 
             variant="outline" 
-            onClick={onCompleteEducation}
+            onClick={handleCancel}
             className="text-red-600 hover:bg-red-50"
           >
             <X className="h-4 w-4 mr-2" />
@@ -36,7 +45,7 @@ export const EducationProgressButtons: React.FC<EducationProgressButtonsProps> =
           </Button>
           
           <Button 
-            onClick={onAdvanceYear}
+            onClick={handleAdvance}
             disabled={isEducating}
           >
             {isEducating ? (

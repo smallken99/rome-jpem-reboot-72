@@ -17,6 +17,8 @@ export interface EconomieRecord {
   affectedSenateurId?: string;
   affectedProvinceId?: string;
   approved?: boolean;
+  createdAt?: string;
+  impactFactors?: Record<string, number>;
 }
 
 export interface EconomieSort {
@@ -65,6 +67,8 @@ export interface EconomieCreationData {
   tags?: string[];
   affectedSenateurId?: string;
   affectedProvinceId?: string;
+  approved?: boolean;
+  impactFactors?: Record<string, number>;
 }
 
 export interface TreasuryStatus {
@@ -73,6 +77,7 @@ export interface TreasuryStatus {
   projectedIncome: number;
   projectedExpenses: number;
   fiscalYear: string;
+  inflationRate?: number;
 }
 
 export interface EconomicFactors {
@@ -80,6 +85,16 @@ export interface EconomicFactors {
   taxRate: number;
   economicGrowth: number;
   publicConfidence: number;
+  taxCollection?: number;
+  tradeRevenue?: number;
+  militaryExpense?: number;
+  provinceRevenue?: number;
+  religiousCeremonyExpense?: number;
+  publicWorksExpense?: number;
+  warSpoilsRevenue?: number;
+  adminExpense?: number;
+  currentYear?: number;
+  id?: string;
 }
 
 export const ECONOMIE_CATEGORIES = [

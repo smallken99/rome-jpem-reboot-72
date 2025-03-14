@@ -8,6 +8,7 @@ export const children: Child[] = [
     name: 'Marcus',
     age: 12,
     gender: 'male',
+    status: 'child',
     currentEducation: {
       type: 'military',
       mentor: 'Gaius Livius le Sage',
@@ -23,6 +24,7 @@ export const children: Child[] = [
     name: 'Julia',
     age: 10,
     gender: 'female',
+    status: 'child',
     currentEducation: {
       type: 'rhetoric',
       mentor: 'Publius Cornelius l\'Érudit',
@@ -38,11 +40,15 @@ export const children: Child[] = [
     name: 'Lucius',
     age: 15,
     gender: 'male',
+    status: 'child',
     currentEducation: {
       type: 'none',
       mentor: null,
       skills: [],
-      progress: 0
+      progress: 0,
+      yearsCompleted: 0,
+      totalYears: 0,
+      statBonus: 0
     }
   }
 ];

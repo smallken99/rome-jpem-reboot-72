@@ -4,6 +4,7 @@ import { Heart } from 'lucide-react';
 
 export const religiousPath: EducationPath = {
   id: 'religious',
+  type: 'religious',
   name: 'Éducation Religieuse',
   description: 'Étude des cultes et rituels romains',
   benefits: [

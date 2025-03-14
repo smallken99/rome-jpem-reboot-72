@@ -1,94 +1,90 @@
 
 import React from 'react';
-import { EducationRecord } from '../types/educationTypes';
-import { Card, CardContent } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import { Badge } from '@/components/ui/badge';
-import { Clock, Award, User } from 'lucide-react';
+import { Clock, BookOpen, Award } from 'lucide-react';
+import { CurrentEducationStatusProps } from '../types/educationTypes';
 
-interface CurrentEducationStatusProps {
-  education: EducationRecord;
-}
-
-export const CurrentEducationStatus: React.FC<CurrentEducationStatusProps> = ({ education }) => {
-  const progress = (education.currentYear / education.totalYears) * 100;
+export const CurrentEducationStatus: React.FC<CurrentEducationStatusProps> = ({ 
+  education,
+  currentEducation
+}) => {
+  // Use either education or currentEducation depending on which is provided
+  const educationType = education?.pathType || currentEducation?.type || 'none';
+  const progress = education?.currentYear 
+    ? (education.currentYear / education.totalYears) * 100
+    : currentEducation?.progress || 0;
+  const years = education?.currentYear || currentEducation?.yearsCompleted || 0;
+  const totalYears = education?.totalYears || currentEducation?.totalYears || 0;
+  const status = education?.status || (currentEducation?.type !== 'none' ? 'in_progress' : 'not_started');
   
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'in_progress': return 'bg-blue-100 text-blue-800 border-blue-200';
-      case 'completed': return 'bg-green-100 text-green-800 border-green-200';
-      case 'canceled': return 'bg-red-100 text-red-800 border-red-200';
-      default: return 'bg-gray-100 text-gray-800 border-gray-200';
+  // Helper to get education type display name
+  const getEducationTypeName = (type: string) => {
+    switch(type) {
+      case 'military': return 'Militaire';
+      case 'religious': return 'Religieuse';
+      case 'rhetoric': return 'Rhétorique';
+      default: return type.charAt(0).toUpperCase() + type.slice(1);
     }
   };
   
-  const getEducationTypeColor = (type: string) => {
-    switch (type) {
-      case 'military': return 'bg-red-100 text-red-800 border-red-200';
-      case 'rhetoric': return 'bg-blue-100 text-blue-800 border-blue-200';
-      case 'religious': return 'bg-amber-100 text-amber-800 border-amber-200';
-      default: return 'bg-gray-100 text-gray-800 border-gray-200';
+  // Helper to get status display style
+  const getStatusStyle = (status: string) => {
+    switch(status) {
+      case 'completed':
+        return { label: 'Complétée', className: 'bg-green-100 text-green-800 border-green-200' };
+      case 'canceled':
+        return { label: 'Abandonnée', className: 'bg-red-100 text-red-800 border-red-200' };
+      case 'in_progress':
+        return { label: 'En cours', className: 'bg-blue-100 text-blue-800 border-blue-200' };
+      default:
+        return { label: 'Non commencée', className: 'bg-gray-100 text-gray-800 border-gray-200' };
     }
   };
+  
+  const statusStyle = getStatusStyle(status);
+  
+  if (educationType === 'none' || (!education && !currentEducation)) {
+    return (
+      <div className="text-center py-6 border rounded-md bg-gray-50">
+        <BookOpen className="h-8 w-8 mx-auto text-gray-400 mb-2" />
+        <p className="text-muted-foreground">Aucune éducation en cours</p>
+      </div>
+    );
+  }
   
   return (
-    <Card className="mb-6">
-      <CardContent className="pt-6">
-        <div className="flex flex-wrap justify-between mb-4">
-          <div className="flex items-center">
-            <Badge className={getEducationTypeColor(education.pathType)}>
-              {education.pathType === 'military' ? 'Militaire' : 
-               education.pathType === 'rhetoric' ? 'Rhétorique' : 
-               education.pathType === 'religious' ? 'Religieuse' : 
-               education.pathType}
-            </Badge>
-          </div>
-          <div className="flex items-center">
-            <Badge className={getStatusColor(education.status)}>
-              {education.status === 'in_progress' ? 'En cours' :
-               education.status === 'completed' ? 'Terminée' :
-               education.status === 'canceled' ? 'Abandonnée' :
-               education.status}
-            </Badge>
-          </div>
+    <div className="space-y-4">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+        <div>
+          <h3 className="text-lg font-medium">
+            Éducation {getEducationTypeName(educationType)}
+          </h3>
+          <p className="text-sm text-muted-foreground flex items-center gap-1">
+            <Clock className="h-3.5 w-3.5" />
+            Année {years} sur {totalYears}
+          </p>
         </div>
         
-        <div className="space-y-4 mb-4">
-          <div className="flex items-center justify-between">
-            <span className="flex items-center text-sm text-muted-foreground">
-              <Clock className="w-4 h-4 mr-2" />
-              Progression globale
-            </span>
-            <span className="text-sm font-medium">
-              Année {education.currentYear} sur {education.totalYears}
-            </span>
-          </div>
-          
-          <Progress value={progress} className="h-2" />
-          
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="flex items-center justify-between">
-              <span className="flex items-center text-sm text-muted-foreground">
-                <Award className="w-4 h-4 mr-2" />
-                Spécialités acquises
-              </span>
-              <span className="text-sm font-medium">
-                {education.specialties.length}
-              </span>
-            </div>
-            
-            <div className="flex items-center justify-between">
-              <span className="flex items-center text-sm text-muted-foreground">
-                <User className="w-4 h-4 mr-2" />
-                Début de l'éducation
-              </span>
-              <span className="text-sm font-medium">
-                Année {education.startYear}
-              </span>
-            </div>
-          </div>
+        <Badge className={statusStyle.className}>
+          {statusStyle.label}
+        </Badge>
+      </div>
+      
+      <div className="space-y-1">
+        <div className="flex justify-between text-sm">
+          <span>Progression</span>
+          <span>{Math.round(progress)}%</span>
         </div>
-      </CardContent>
-    </Card>
+        <Progress value={progress} className="h-2" />
+      </div>
+      
+      {currentEducation?.statBonus && (
+        <div className="flex items-center gap-2 text-sm border-t pt-2 mt-2">
+          <Award className="h-4 w-4 text-amber-500" />
+          <span>Bonus d'attribut: +{currentEducation.statBonus}</span>
+        </div>
+      )}
+    </div>
   );
 };

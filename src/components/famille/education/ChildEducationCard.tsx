@@ -59,6 +59,7 @@ const ChildEducationCard: React.FC<ChildEducationCardProps> = ({ child }) => {
           educationProgress={child.currentEducation?.progress}
           onAdvanceYear={handleAdvanceYear}
           onCompleteEducation={() => completeEducation(child.id)}
+          canComplete={child.currentEducation?.yearsCompleted >= (child.currentEducation?.totalYears || 0) * 0.75}
         />
       </div>
     </div>
