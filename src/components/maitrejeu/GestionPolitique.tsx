@@ -28,8 +28,8 @@ export const GestionPolitique = () => {
     titre: '',
     description: '',
     proposeur: '',
-    catégorie: 'politique',
-    type: 'politique',
+    catégorie: 'Politique',
+    type: 'Politique',
     importance: 'normale'
   });
   
@@ -39,23 +39,35 @@ export const GestionPolitique = () => {
     
     // Add ID to the new law
     const loiWithId: Loi = {
-      ...newLoi,
       id: uuidv4(),
+      title: newLoi.titre,
+      description: newLoi.description,
+      proposedBy: newLoi.proposeur,
+      category: newLoi.catégorie,
+      type: newLoi.type,
       nom: newLoi.titre, // Use title as default name
       date: { year: currentYear, season: currentSeason },
       dateProposition: { year: currentYear, season: currentSeason },
+      status: "proposed",
       état: "En délibération",
       votesPositifs: 0,
       votesNégatifs: 0,
       votesAbstention: 0,
+      votesFor: 0,
+      votesAgainst: 0,
       votes: {
         pour: 0,
         contre: 0,
         abstention: 0
       },
+      titre: newLoi.titre,
+      proposeur: newLoi.proposeur,
+      catégorie: newLoi.catégorie,
+      importance: newLoi.importance,
       clauses: [],
-      impacts: [],
-      effets: {}
+      effets: [],
+      conditions: [],
+      penalites: []
     };
     
     addLoi(loiWithId);
@@ -63,8 +75,8 @@ export const GestionPolitique = () => {
       titre: '',
       description: '',
       proposeur: '',
-      catégorie: 'politique',
-      type: 'politique',
+      catégorie: 'Politique',
+      type: 'Politique',
       importance: 'normale'
     });
     setShowAddLoi(false);

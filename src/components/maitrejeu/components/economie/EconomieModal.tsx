@@ -23,7 +23,8 @@ import { Switch } from '@/components/ui/switch';
 import { Badge } from '@/components/ui/badge';
 import { X } from 'lucide-react';
 import { useMaitreJeu } from '@/components/maitrejeu/context';
-import { EconomieRecord, EconomieCreationData, ECONOMIE_CATEGORIES, SOURCE_TYPES } from '@/components/maitrejeu/types/economie';
+import { EconomieRecord, EconomieCreationData } from '@/components/maitrejeu/types/economie';
+import { ECONOMIE_CATEGORIES, SOURCE_TYPES } from '@/components/maitrejeu/types/economieConstants';
 
 interface EconomieModalProps {
   isOpen: boolean;
@@ -45,6 +46,7 @@ export const EconomieModal: React.FC<EconomieModalProps> = ({
     category: '',
     amount: 0,
     description: '',
+    date: currentDate,
     type: 'income',
     isRecurring: false,
     tags: []
@@ -61,17 +63,18 @@ export const EconomieModal: React.FC<EconomieModalProps> = ({
         category: editRecord.category,
         amount: editRecord.amount,
         description: editRecord.description,
+        date: editRecord.date,
         affectedSenateurId: editRecord.affectedSenateurId,
         affectedProvinceId: editRecord.affectedProvinceId,
         type: editRecord.type,
         isRecurring: editRecord.isRecurring,
         recurringInterval: editRecord.recurringInterval,
-        tags: editRecord.tags
+        tags: editRecord.tags || []
       });
     } else {
       setFormData(defaultFormData);
     }
-  }, [editRecord, isOpen]);
+  }, [editRecord, isOpen, currentDate]);
   
   const handleChange = (field: keyof EconomieCreationData, value: any) => {
     setFormData(prev => ({
@@ -86,10 +89,10 @@ export const EconomieModal: React.FC<EconomieModalProps> = ({
   };
   
   const handleAddTag = () => {
-    if (tagInput.trim() && !formData.tags.includes(tagInput.trim())) {
+    if (tagInput.trim() && !formData.tags?.includes(tagInput.trim())) {
       setFormData(prev => ({
         ...prev,
-        tags: [...prev.tags, tagInput.trim()]
+        tags: [...(prev.tags || []), tagInput.trim()]
       }));
       setTagInput('');
     }
@@ -98,7 +101,7 @@ export const EconomieModal: React.FC<EconomieModalProps> = ({
   const handleRemoveTag = (tag: string) => {
     setFormData(prev => ({
       ...prev,
-      tags: prev.tags.filter(t => t !== tag)
+      tags: prev.tags?.filter(t => t !== tag) || []
     }));
   };
   
@@ -266,62 +269,60 @@ export const EconomieModal: React.FC<EconomieModalProps> = ({
               
               {formData.isRecurring && (
                 <div className="space-y-2">
-                  <Label htmlFor="recurringInterval">Intervalle de récurrence</Label>
+                  <Label htmlFor="interval">Intervalle</Label>
                   <Select
-                    value={formData.recurringInterval || 'seasonal'}
-                    onValueChange={(value: 'seasonal' | 'yearly') => handleChange('recurringInterval', value)}
+                    value={formData.recurringInterval || 'monthly'}
+                    onValueChange={(value) => handleChange('recurringInterval', value)}
                   >
-                    <SelectTrigger id="recurringInterval">
+                    <SelectTrigger id="interval">
                       <SelectValue placeholder="Sélectionner intervalle" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="seasonal">Chaque saison</SelectItem>
-                      <SelectItem value="yearly">Chaque année</SelectItem>
+                      <SelectItem value="daily">Quotidien</SelectItem>
+                      <SelectItem value="weekly">Hebdomadaire</SelectItem>
+                      <SelectItem value="monthly">Mensuel</SelectItem>
+                      <SelectItem value="seasonal">Saisonnier</SelectItem>
+                      <SelectItem value="yearly">Annuel</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
               )}
               
               <div className="space-y-2">
-                <Label htmlFor="tags">Étiquettes</Label>
+                <Label>Tags</Label>
+                <div className="flex flex-wrap gap-2 mb-2">
+                  {formData.tags?.map(tag => (
+                    <Badge key={tag} variant="secondary" className="flex items-center gap-1">
+                      {tag}
+                      <button
+                        type="button"
+                        onClick={() => handleRemoveTag(tag)}
+                        className="ml-1 rounded-full h-4 w-4 inline-flex items-center justify-center hover:bg-muted"
+                      >
+                        <X className="h-3 w-3" />
+                      </button>
+                    </Badge>
+                  ))}
+                </div>
                 <div className="flex gap-2">
                   <Input
-                    id="tags"
                     value={tagInput}
                     onChange={(e) => setTagInput(e.target.value)}
-                    placeholder="Ajouter une étiquette"
+                    placeholder="Ajouter un tag"
+                    onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), handleAddTag())}
                   />
-                  <Button 
-                    type="button" 
-                    onClick={handleAddTag}
-                    variant="secondary"
-                  >
+                  <Button type="button" variant="outline" onClick={handleAddTag}>
                     Ajouter
                   </Button>
                 </div>
-                
-                {formData.tags.length > 0 && (
-                  <div className="flex flex-wrap gap-2 mt-2">
-                    {formData.tags.map(tag => (
-                      <Badge key={tag} variant="secondary">
-                        {tag}
-                        <button
-                          type="button"
-                          onClick={() => handleRemoveTag(tag)}
-                          className="ml-1 text-xs"
-                        >
-                          <X className="h-3 w-3" />
-                        </button>
-                      </Badge>
-                    ))}
-                  </div>
-                )}
               </div>
             </TabsContent>
           </Tabs>
           
           <DialogFooter>
-            <Button type="button" variant="outline" onClick={onClose}>Annuler</Button>
+            <Button type="button" variant="outline" onClick={onClose}>
+              Annuler
+            </Button>
             <Button type="submit">
               {editRecord ? 'Mettre à jour' : 'Ajouter'}
             </Button>

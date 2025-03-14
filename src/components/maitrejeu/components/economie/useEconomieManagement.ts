@@ -9,10 +9,10 @@ import {
   TreasuryStatus
 } from '@/components/maitrejeu/types/economie';
 import { toast } from 'sonner';
-import { GameDate } from '@/components/maitrejeu/types/common';
+import { GameDate, parseStringToGameDate } from '@/components/maitrejeu/types/common';
 
 const DEFAULT_FILTER: EconomieFilter = {
-  search: '',
+  searchTerm: '',
   categories: [],
   type: 'all',
   affectedEntity: 'all'
@@ -26,12 +26,7 @@ const DEFAULT_SORT: EconomieSort = {
 // Helper function to safely parse GameDate
 const parseGameDate = (date: GameDate | string): GameDate => {
   if (typeof date === 'string') {
-    try {
-      return JSON.parse(date) as GameDate;
-    } catch (e) {
-      // Default fallback if parsing fails
-      return { year: 700, season: "SPRING" };
-    }
+    return parseStringToGameDate(date);
   }
   return date;
 };
@@ -46,7 +41,8 @@ export const useEconomieManagement = () => {
     setEconomicFactors,
     addEconomieRecord,
     updateEconomieRecord,
-    deleteEconomieRecord
+    deleteEconomieRecord,
+    currentDate
   } = useMaitreJeu();
   
   const [filter, setFilter] = useState<EconomieFilter>(DEFAULT_FILTER);
@@ -60,14 +56,14 @@ export const useEconomieManagement = () => {
   const filterRecords = (records: EconomieRecord[], filter: EconomieFilter): EconomieRecord[] => {
     return records.filter(record => {
       // Filtre de recherche textuelle
-      if (filter.search && !Object.values(record).some(value => 
-        typeof value === 'string' && value.toLowerCase().includes(filter.search.toLowerCase())
+      if (filter.searchTerm && !Object.values(record).some(value => 
+        typeof value === 'string' && value.toLowerCase().includes(filter.searchTerm.toLowerCase())
       )) {
         return false;
       }
       
       // Filtre par catégorie
-      if (filter.categories.length > 0 && !filter.categories.includes(record.category)) {
+      if (filter.categories && filter.categories.length > 0 && !filter.categories.includes(record.category)) {
         return false;
       }
       
@@ -77,7 +73,7 @@ export const useEconomieManagement = () => {
       }
       
       // Filtre par entité affectée
-      if (filter.affectedEntity !== 'all') {
+      if (filter.affectedEntity && filter.affectedEntity !== 'all') {
         if (filter.affectedEntity === 'senateur' && !record.affectedSenateurId) {
           return false;
         }
@@ -97,29 +93,27 @@ export const useEconomieManagement = () => {
       }
       
       // Filtre par plage de dates
-      if (filter.dateRange?.start) {
-        const startYear = filter.dateRange.start.year;
-        const startSeason = filter.dateRange.start.season;
-        
-        const recordDate = parseGameDate(record.date);
-        const recordYear = recordDate.year;
-        const recordSeason = recordDate.season;
-        
-        if (recordYear < startYear || (recordYear === startYear && recordSeason < startSeason)) {
-          return false;
+      if (filter.dateRange) {
+        if (filter.dateRange.start) {
+          const recordDate = parseGameDate(record.date);
+          const startDate = filter.dateRange.start;
+          
+          if (recordDate.year < startDate.year || 
+             (recordDate.year === startDate.year && 
+              recordDate.season < startDate.season)) {
+            return false;
+          }
         }
-      }
-      
-      if (filter.dateRange?.end) {
-        const endYear = filter.dateRange.end.year;
-        const endSeason = filter.dateRange.end.season;
         
-        const recordDate = parseGameDate(record.date);
-        const recordYear = recordDate.year;
-        const recordSeason = recordDate.season;
-        
-        if (recordYear > endYear || (recordYear === endYear && recordSeason > endSeason)) {
-          return false;
+        if (filter.dateRange.end) {
+          const recordDate = parseGameDate(record.date);
+          const endDate = filter.dateRange.end;
+          
+          if (recordDate.year > endDate.year || 
+             (recordDate.year === endDate.year && 
+              recordDate.season > endDate.season)) {
+            return false;
+          }
         }
       }
       

@@ -1,4 +1,3 @@
-
 import { GameDate } from './common';
 
 export interface EconomieRecord {
@@ -17,6 +16,7 @@ export interface EconomieRecord {
   approvedBy?: string;
   notes?: string;
   createdAt?: string | Date;
+  updatedAt?: string | Date;
   approved?: boolean;
   impactFactors?: Record<string, number>;
 }
@@ -40,8 +40,11 @@ export interface EconomieCreationData {
 }
 
 export interface EconomieFilter {
-  type?: 'income' | 'expense' | 'transfer' | 'tax' | string;
-  dateRange?: [Date, Date] | null;
+  type?: 'income' | 'expense' | 'transfer' | 'tax' | 'all' | string;
+  dateRange?: { 
+    start?: GameDate; 
+    end?: GameDate; 
+  } | null;
   category?: string;
   minAmount?: number;
   maxAmount?: number;
@@ -49,6 +52,9 @@ export interface EconomieFilter {
   affectedSenateurId?: string;
   affectedProvinceId?: string;
   tags?: string[];
+  categories?: string[];
+  search?: string;
+  affectedEntity?: 'senateur' | 'province' | 'all' | string;
 }
 
 export interface EconomieSort {
@@ -81,4 +87,5 @@ export interface EconomicFactors {
   adminExpense?: number;
   currentYear?: number;
   tradeStability?: number;
+  loanInterestRate?: number;
 }

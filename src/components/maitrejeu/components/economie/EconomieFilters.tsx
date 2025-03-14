@@ -18,7 +18,8 @@ import {
 import { Checkbox } from '@/components/ui/checkbox';
 import { Label } from '@/components/ui/label';
 import { Trash2, Filter, Search } from 'lucide-react';
-import { EconomieFilter, ECONOMIE_CATEGORIES } from '@/components/maitrejeu/types/economie';
+import { EconomieFilter } from '@/components/maitrejeu/types/economie';
+import { ECONOMIE_CATEGORIES } from '@/components/maitrejeu/types/economieConstants';
 
 interface EconomieFiltersProps {
   filter: EconomieFilter;
@@ -34,7 +35,7 @@ export const EconomieFilters: React.FC<EconomieFiltersProps> = ({
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     onFilterChange({
       ...filter,
-      search: e.target.value
+      searchTerm: e.target.value
     });
   };
   
@@ -61,9 +62,10 @@ export const EconomieFilters: React.FC<EconomieFiltersProps> = ({
   };
   
   const handleCategoryToggle = (category: string) => {
-    const updatedCategories = filter.categories.includes(category)
-      ? filter.categories.filter(c => c !== category)
-      : [...filter.categories, category];
+    const categoriesList = filter.categories || [];
+    const updatedCategories = categoriesList.includes(category)
+      ? categoriesList.filter(c => c !== category)
+      : [...categoriesList, category];
     
     onFilterChange({
       ...filter,
@@ -81,7 +83,7 @@ export const EconomieFilters: React.FC<EconomieFiltersProps> = ({
             <Input
               id="search"
               placeholder="Rechercher par source, description..."
-              value={filter.search}
+              value={filter.searchTerm}
               onChange={handleSearchChange}
               className="pl-8"
             />
@@ -129,11 +131,11 @@ export const EconomieFilters: React.FC<EconomieFiltersProps> = ({
               Filtres avancés
               {(filter.minAmount !== undefined || 
                 filter.maxAmount !== undefined || 
-                filter.categories.length > 0) && (
+                (filter.categories && filter.categories.length > 0)) && (
                 <Badge variant="secondary" className="ml-1">
                   {(filter.minAmount !== undefined ? 1 : 0) + 
                    (filter.maxAmount !== undefined ? 1 : 0) + 
-                   (filter.categories.length > 0 ? 1 : 0)}
+                   ((filter.categories && filter.categories.length > 0) ? 1 : 0)}
                 </Badge>
               )}
             </Button>
@@ -171,7 +173,7 @@ export const EconomieFilters: React.FC<EconomieFiltersProps> = ({
                     <div key={category} className="flex items-center space-x-2">
                       <Checkbox
                         id={`category-${category}`}
-                        checked={filter.categories.includes(category)}
+                        checked={(filter.categories || []).includes(category)}
                         onCheckedChange={() => handleCategoryToggle(category)}
                       />
                       <Label htmlFor={`category-${category}`} className="text-sm font-normal">
@@ -195,7 +197,7 @@ export const EconomieFilters: React.FC<EconomieFiltersProps> = ({
         </Button>
       </div>
       
-      {filter.categories.length > 0 && (
+      {filter.categories && filter.categories.length > 0 && (
         <div className="flex flex-wrap gap-2">
           {filter.categories.map(category => (
             <Badge 

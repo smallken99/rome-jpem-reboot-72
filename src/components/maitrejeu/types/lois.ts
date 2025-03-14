@@ -27,8 +27,8 @@ export interface Loi {
   votesPositifs?: number;
   votesNégatifs?: number;
   votesAbstention?: number;
-  dateProposition?: string;
-  type?: string;
+  dateProposition?: string | GameDate;
+  type?: string | LoiType;
   clauses?: any[];
   commentaires?: string[];
   votes?: {
@@ -36,6 +36,7 @@ export interface Loi {
     contre: number;
     abstention: number;
   };
+  nom?: string;
 }
 
 export type LoiType = 'Agraire' | 'Politique' | 'Militaire' | 'Economique' | 'Sociale' | 'Religieuse' | 'Civile';

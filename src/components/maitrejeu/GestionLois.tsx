@@ -14,6 +14,7 @@ import { LoisRejeteesTab } from './components/lois/tabs/LoisRejeteesTab';
 import { HistoriqueLoiTab } from './components/lois/tabs/HistoriqueLoiTab';
 import { useMaitreJeu } from './context';
 import { Loi } from './types/lois';
+import { convertMJArrayToRepublique, convertRepubliqueToMJLoi } from './types/loisAdapter';
 
 export const GestionLois = () => {
   const { lois, addLoi } = useMaitreJeu();
@@ -68,9 +69,32 @@ export const GestionLois = () => {
     setSelectedLoi(null);
   };
   
-  const handleSaveLoi = (loiData: Loi) => {
-    addLoi(loiData);
+  const handleSaveLoi = (loiData: any) => {
+    const mjLoi = convertRepubliqueToMJLoi(loiData);
+    addLoi(mjLoi);
     handleCloseModal();
+  };
+  
+  // Convert lois for component usage
+  const convertedLoisActives = convertMJArrayToRepublique(
+    searchTerm ? filteredLois.filter(l => normalizeStatus(l) === 'active') : loisActives
+  );
+  
+  const convertedLoisProposees = convertMJArrayToRepublique(
+    searchTerm ? filteredLois.filter(l => normalizeStatus(l) === 'proposed') : loisProposees
+  );
+  
+  const convertedLoisRejetees = convertMJArrayToRepublique(
+    searchTerm ? filteredLois.filter(l => normalizeStatus(l) === 'rejected') : loisRejetees
+  );
+  
+  const convertedHandleOpenModal = (loi: any) => {
+    if (loi) {
+      const mjLoi = lois.find(l => l.id === loi.id) || null;
+      handleOpenModal(mjLoi);
+    } else {
+      handleOpenModal(null);
+    }
   };
   
   return (
@@ -119,29 +143,29 @@ export const GestionLois = () => {
             
             <TabsContent value="actives" className="mt-6">
               <LoisActivesTab 
-                lois={searchTerm ? filteredLois.filter(l => normalizeStatus(l) === 'active') : loisActives} 
-                onViewLoi={handleOpenModal}
+                lois={convertedLoisActives} 
+                onViewLoi={convertedHandleOpenModal}
               />
             </TabsContent>
             
             <TabsContent value="proposees" className="mt-6">
               <LoisProposeesTab 
-                lois={searchTerm ? filteredLois.filter(l => normalizeStatus(l) === 'proposed') : loisProposees} 
-                onViewLoi={handleOpenModal}
+                lois={convertedLoisProposees} 
+                onViewLoi={convertedHandleOpenModal}
               />
             </TabsContent>
             
             <TabsContent value="rejetees" className="mt-6">
               <LoisRejeteesTab 
-                lois={searchTerm ? filteredLois.filter(l => normalizeStatus(l) === 'rejected') : loisRejetees} 
-                onViewLoi={handleOpenModal}
+                lois={convertedLoisRejetees} 
+                onViewLoi={convertedHandleOpenModal}
               />
             </TabsContent>
             
             <TabsContent value="historique" className="mt-6">
               <HistoriqueLoiTab 
-                lois={lois}
-                onViewLoi={handleOpenModal}
+                lois={convertMJArrayToRepublique(lois)}
+                onViewLoi={convertedHandleOpenModal}
                 formatSeason={formatSeason}
               />
             </TabsContent>
@@ -167,7 +191,7 @@ export const GestionLois = () => {
         isOpen={isModalOpen} 
         onClose={handleCloseModal} 
         onSave={handleSaveLoi}
-        loi={selectedLoi}
+        loi={selectedLoi ? convertMJToRepubliqueLoi(selectedLoi) : null}
       />
     </div>
   );

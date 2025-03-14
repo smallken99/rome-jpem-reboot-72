@@ -1,8 +1,9 @@
 
 import { Loi as LoiMaitreJeu } from './lois';
 import { Loi as LoiRepublique } from '@/components/republique/lois/hooks/useLois';
+import { parseStringToGameDate } from './common';
 
-// Fonction pour convertir une loi du maître de jeu vers le format de la république
+// Function to convert a law from the Game Master format to the Republic format
 export const convertMJToRepubliqueLoi = (loi: LoiMaitreJeu): LoiRepublique => {
   return {
     id: loi.id,
@@ -12,11 +13,11 @@ export const convertMJToRepubliqueLoi = (loi: LoiMaitreJeu): LoiRepublique => {
     dateProposition: typeof loi.date === 'string' 
       ? loi.date 
       : `${loi.date.year} ${loi.date.season}`,
-    statut: loi.status || loi.état || 'En délibération',
+    statut: mapMJStatusToRepublique(loi.status || loi.état || 'proposée'),
     categorieId: loi.category || loi.catégorie || '',
-    type: loi.type || 'Politique',
+    type: (loi.type as string) || 'Politique',
     clauses: loi.clauses || [],
-    commentaires: loi.notes ? [loi.notes] : [],
+    commentaires: loi.notes ? [loi.notes] : loi.commentaires || [],
     importance: loi.importance || 'normale',
     votes: {
       pour: loi.votesFor || loi.votesPositifs || 0,
@@ -27,30 +28,46 @@ export const convertMJToRepubliqueLoi = (loi: LoiMaitreJeu): LoiRepublique => {
   };
 };
 
-// Fonction pour convertir une loi de la république vers le format du maître de jeu
+// Function to convert a law from the Republic format to the Game Master format
 export const convertRepubliqueToMJLoi = (loi: LoiRepublique): LoiMaitreJeu => {
+  let year = 0;
+  let season = "SPRING";
+  
+  try {
+    const dateParts = loi.dateProposition.split(' ');
+    year = parseInt(dateParts[0]) || new Date().getFullYear();
+    season = dateParts[1] || 'SPRING';
+  } catch (error) {
+    console.error("Error parsing date", error);
+  }
+  
   return {
     id: loi.id,
     title: loi.titre,
     description: loi.description,
     proposedBy: loi.auteur,
-    date: { 
-      year: parseInt(loi.dateProposition.split(' ')[0]) || new Date().getFullYear(), 
-      season: loi.dateProposition.split(' ')[1] || 'SPRING' 
-    },
-    status: loi.statut as any,
+    date: { year, season },
+    status: mapRepubliqueStatusToMJ(loi.statut),
     category: loi.categorieId,
     votesFor: loi.votes?.pour || 0,
     votesAgainst: loi.votes?.contre || 0,
     votesAbstention: loi.votes?.abstention || 0,
     notes: loi.commentaires && loi.commentaires.length > 0 ? loi.commentaires[0] : '',
-    effets: loi.clauses ? loi.clauses.filter(c => c.type === 'effet').map(c => c.content) : [],
-    conditions: loi.clauses ? loi.clauses.filter(c => c.type === 'condition').map(c => c.content) : [],
-    penalites: loi.clauses ? loi.clauses.filter(c => c.type === 'penalite').map(c => c.content) : []
+    titre: loi.titre,
+    proposeur: loi.auteur,
+    catégorie: loi.categorieId,
+    état: loi.statut,
+    votesPositifs: loi.votes?.pour || 0,
+    votesNégatifs: loi.votes?.contre || 0,
+    type: loi.type || 'Politique',
+    clauses: [], // Initialize as empty array since we'll build this
+    effets: [],
+    conditions: [],
+    penalites: []
   };
 };
 
-// Fonction pour convertir un tableau de lois
+// Function to convert arrays of laws
 export const convertMJArrayToRepublique = (lois: LoiMaitreJeu[]): LoiRepublique[] => {
   return lois.map(convertMJToRepubliqueLoi);
 };
@@ -58,3 +75,42 @@ export const convertMJArrayToRepublique = (lois: LoiMaitreJeu[]): LoiRepublique[
 export const convertRepubliqueArrayToMJ = (lois: LoiRepublique[]): LoiMaitreJeu[] => {
   return lois.map(convertRepubliqueToMJLoi);
 };
+
+// Helper function to map statuses between formats
+function mapMJStatusToRepublique(status: string): 'proposée' | 'en_débat' | 'votée' | 'rejetée' | 'promulguée' {
+  switch (status) {
+    case 'proposed':
+    case 'proposée': 
+    case 'En délibération':
+      return 'proposée';
+    case 'active':
+    case 'Promulguée':
+    case 'adoptée': 
+    case 'promulguée':
+      return 'promulguée';
+    case 'rejected':
+    case 'rejetée':
+      return 'rejetée';
+    case 'expired':
+      return 'rejetée'; // Closest equivalent
+    case 'votée':
+      return 'votée';
+    default:
+      return 'en_débat';
+  }
+}
+
+function mapRepubliqueStatusToMJ(status: string): 'proposed' | 'active' | 'rejected' | 'expired' {
+  switch (status) {
+    case 'proposée':
+    case 'en_débat':
+      return 'proposed';
+    case 'votée':
+    case 'promulguée':
+      return 'active';
+    case 'rejetée':
+      return 'rejected';
+    default:
+      return 'proposed';
+  }
+}

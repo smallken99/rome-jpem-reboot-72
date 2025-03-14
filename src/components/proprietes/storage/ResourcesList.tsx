@@ -1,189 +1,158 @@
 
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Eye, Edit, Trash2, Plus } from 'lucide-react';
 import { Resource, ResourcesListProps } from './types';
-import { Plus, ArrowUpDown, Filter } from 'lucide-react';
 
-// Données mockées
-const mockResources: Resource[] = [
-  {
-    id: '1',
-    name: 'Blé',
-    quantity: 500,
-    unit: 'modii',
-    category: 'Céréales',
-    location: 'Grenier Principal',
-    lastUpdate: new Date('2023-09-01'),
-    quality: 'Excellente',
-    origin: 'Sicile'
-  },
-  {
-    id: '2',
-    name: 'Vin',
-    quantity: 200,
-    unit: 'amphores',
-    category: 'Boissons',
-    location: 'Cave du Palatin',
-    lastUpdate: new Date('2023-08-15'),
-    quality: 'Supérieure',
-    origin: 'Campanie'
-  },
-  {
-    id: '3',
-    name: 'Huile d\'olive',
-    quantity: 150,
-    unit: 'amphores',
-    category: 'Huiles',
-    location: 'Entrepôt du Port',
-    lastUpdate: new Date('2023-08-30'),
-    quality: 'Bonne',
-    origin: 'Bétique'
-  }
-];
-
-export const ResourcesList: React.FC<ResourcesListProps> = ({
-  searchTerm = '',
-  onResourceSelect,
+const ResourcesList: React.FC<ResourcesListProps> = ({ 
+  searchTerm = '', 
+  onResourceSelect, 
   onAddResource,
-  filters = {}
+  filters 
 }) => {
-  const [resources, setResources] = useState<Resource[]>([]);
-  const [sortField, setSortField] = useState<keyof Resource>('name');
-  const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
-
-  // Effet de filtrage et tri
-  useEffect(() => {
-    let filteredResources = [...mockResources];
-
-    // Filtrage par terme de recherche
-    if (searchTerm) {
-      const term = searchTerm.toLowerCase();
-      filteredResources = filteredResources.filter(resource =>
-        resource.name.toLowerCase().includes(term) ||
-        resource.category.toLowerCase().includes(term) ||
-        resource.location.toLowerCase().includes(term)
-      );
+  // Example resources for demo
+  const [resources, setResources] = React.useState<Resource[]>([
+    {
+      id: '1',
+      name: 'Blé',
+      quantity: 500,
+      unit: 'kg',
+      category: 'Céréales',
+      location: 'Grenier principal',
+      quality: 'Standard',
+      origin: 'Campanie',
+      lastUpdate: new Date(2022, 2, 15)
+    },
+    {
+      id: '2',
+      name: 'Huile d\'olive',
+      quantity: 100,
+      unit: 'litres',
+      category: 'Huiles',
+      location: 'Cellier',
+      quality: 'Supérieure',
+      origin: 'Italie',
+      lastUpdate: new Date(2022, 3, 10)
+    },
+    {
+      id: '3',
+      name: 'Vin',
+      quantity: 50,
+      unit: 'amphores',
+      category: 'Boissons',
+      location: 'Cave',
+      quality: 'Premium',
+      origin: 'Grèce',
+      lastUpdate: new Date(2022, 1, 20)
     }
-
-    // Filtrage par catégorie
-    if (filters.category) {
-      filteredResources = filteredResources.filter(resource =>
-        resource.category === filters.category
-      );
+  ]);
+  
+  // Filter resources based on search term and filters
+  const filteredResources = resources.filter(resource => {
+    // Search term filter
+    if (searchTerm && !resource.name.toLowerCase().includes(searchTerm.toLowerCase())) {
+      return false;
     }
-
-    // Filtrage par lieu
-    if (filters.location) {
-      filteredResources = filteredResources.filter(resource =>
-        resource.location === filters.location
-      );
-    }
-
-    // Filtrage par quantité
-    if (filters.minQuantity !== undefined) {
-      filteredResources = filteredResources.filter(resource =>
-        resource.quantity >= filters.minQuantity!
-      );
-    }
-    if (filters.maxQuantity !== undefined) {
-      filteredResources = filteredResources.filter(resource =>
-        resource.quantity <= filters.maxQuantity!
-      );
-    }
-
-    // Filtrage par qualité
-    if (filters.quality) {
-      filteredResources = filteredResources.filter(resource =>
-        resource.quality === filters.quality
-      );
-    }
-
-    // Tri des ressources
-    filteredResources.sort((a, b) => {
-      if (sortDirection === 'asc') {
-        return a[sortField] > b[sortField] ? 1 : -1;
-      } else {
-        return a[sortField] < b[sortField] ? 1 : -1;
+    
+    // Apply other filters if provided
+    if (filters) {
+      if (filters.category && resource.category !== filters.category) {
+        return false;
       }
-    });
-
-    setResources(filteredResources);
-  }, [searchTerm, filters, sortField, sortDirection]);
-
-  // Gestion du tri
-  const handleSort = (field: keyof Resource) => {
-    if (field === sortField) {
-      setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc');
-    } else {
-      setSortField(field);
-      setSortDirection('asc');
+      if (filters.location && resource.location !== filters.location) {
+        return false;
+      }
+      if (filters.minQuantity !== undefined && resource.quantity < filters.minQuantity) {
+        return false;
+      }
+      if (filters.maxQuantity !== undefined && resource.quantity > filters.maxQuantity) {
+        return false;
+      }
+      if (filters.quality && resource.quality !== filters.quality) {
+        return false;
+      }
     }
+    
+    return true;
+  });
+  
+  const handleDelete = (id: string) => {
+    setResources(resources.filter(resource => resource.id !== id));
   };
-
+  
   return (
     <Card>
-      <CardHeader className="flex flex-row items-center justify-between">
-        <CardTitle>Ressources</CardTitle>
-        <Button onClick={onAddResource} className="gap-1">
-          <Plus className="h-4 w-4" />
-          <span>Ajouter</span>
-        </Button>
+      <CardHeader>
+        <CardTitle className="flex justify-between items-center">
+          <span>Ressources</span>
+          {onAddResource && (
+            <Button onClick={onAddResource} size="sm">
+              <Plus className="h-4 w-4 mr-2" />
+              Ajouter
+            </Button>
+          )}
+        </CardTitle>
       </CardHeader>
       <CardContent>
-        <div className="rounded-md border">
-          <Table>
-            <TableHeader>
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead>Nom</TableHead>
+              <TableHead>Quantité</TableHead>
+              <TableHead>Catégorie</TableHead>
+              <TableHead>Emplacement</TableHead>
+              <TableHead>Qualité</TableHead>
+              <TableHead>Dernière mise à jour</TableHead>
+              <TableHead className="text-right">Actions</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {filteredResources.length === 0 ? (
               <TableRow>
-                <TableHead className="cursor-pointer" onClick={() => handleSort('name')}>
-                  Nom
-                  <ArrowUpDown className="ml-2 h-4 w-4 inline" />
-                </TableHead>
-                <TableHead className="cursor-pointer" onClick={() => handleSort('quantity')}>
-                  Quantité
-                  <ArrowUpDown className="ml-2 h-4 w-4 inline" />
-                </TableHead>
-                <TableHead className="cursor-pointer" onClick={() => handleSort('category')}>
-                  Catégorie
-                  <ArrowUpDown className="ml-2 h-4 w-4 inline" />
-                </TableHead>
-                <TableHead className="cursor-pointer" onClick={() => handleSort('location')}>
-                  Emplacement
-                  <ArrowUpDown className="ml-2 h-4 w-4 inline" />
-                </TableHead>
-                <TableHead className="cursor-pointer" onClick={() => handleSort('lastUpdate')}>
-                  Dernière mise à jour
-                  <ArrowUpDown className="ml-2 h-4 w-4 inline" />
-                </TableHead>
+                <TableCell colSpan={7} className="text-center py-4">
+                  Aucune ressource trouvée
+                </TableCell>
               </TableRow>
-            </TableHeader>
-            <TableBody>
-              {resources.length > 0 ? (
-                resources.map((resource) => (
-                  <TableRow 
-                    key={resource.id} 
-                    className="cursor-pointer hover:bg-primary/5"
-                    onClick={() => onResourceSelect && onResourceSelect(resource)}
-                  >
-                    <TableCell className="font-medium">{resource.name}</TableCell>
-                    <TableCell>{resource.quantity} {resource.unit}</TableCell>
-                    <TableCell>{resource.category}</TableCell>
-                    <TableCell>{resource.location}</TableCell>
-                    <TableCell>{resource.lastUpdate.toLocaleDateString()}</TableCell>
-                  </TableRow>
-                ))
-              ) : (
-                <TableRow>
-                  <TableCell colSpan={5} className="h-24 text-center">
-                    Aucune ressource trouvée.
+            ) : (
+              filteredResources.map(resource => (
+                <TableRow key={resource.id}>
+                  <TableCell>{resource.name}</TableCell>
+                  <TableCell>{resource.quantity} {resource.unit}</TableCell>
+                  <TableCell>
+                    <Badge variant="outline">{resource.category}</Badge>
+                  </TableCell>
+                  <TableCell>{resource.location}</TableCell>
+                  <TableCell>{resource.quality || 'Standard'}</TableCell>
+                  <TableCell>{resource.lastUpdate.toLocaleDateString()}</TableCell>
+                  <TableCell className="text-right">
+                    <div className="flex justify-end gap-2">
+                      {onResourceSelect && (
+                        <Button variant="ghost" size="icon" onClick={() => onResourceSelect(resource)}>
+                          <Eye className="h-4 w-4" />
+                        </Button>
+                      )}
+                      <Button variant="ghost" size="icon">
+                        <Edit className="h-4 w-4" />
+                      </Button>
+                      <Button variant="ghost" size="icon" onClick={() => handleDelete(resource.id)}>
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </div>
                   </TableCell>
                 </TableRow>
-              )}
-            </TableBody>
-          </Table>
-        </div>
+              ))
+            )}
+          </TableBody>
+        </Table>
       </CardContent>
+      <CardFooter className="flex justify-between">
+        <div>Total: {filteredResources.length} ressources</div>
+      </CardFooter>
     </Card>
   );
 };
+
+export default ResourcesList;

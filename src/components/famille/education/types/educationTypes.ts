@@ -1,4 +1,3 @@
-
 import { ReactNode } from 'react';
 
 export type EducationPathType = 'military' | 'rhetoric' | 'religious';
@@ -155,9 +154,12 @@ export interface CurrentEducationStatusProps {
 }
 
 export interface EducationFormActionsProps {
-  onCancel: () => void;
-  onSave: () => void;
-  disabled: boolean;
+  onSubmit?: () => void;
+  onCancel?: () => void;
+  onSave?: () => void;
+  disabled?: boolean;
+  isLoading?: boolean;
+  childId?: string;
 }
 
 export interface EducationObjectivesProps {
