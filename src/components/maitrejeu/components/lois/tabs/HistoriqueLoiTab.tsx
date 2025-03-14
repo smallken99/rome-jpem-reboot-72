@@ -3,81 +3,77 @@ import React from 'react';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Eye, History } from 'lucide-react';
+import { Eye } from 'lucide-react';
+import { formatDate } from '@/utils/formatUtils';
 import { HistoriqueLoiTabProps } from '../types';
 
-export const HistoriqueLoiTab: React.FC<HistoriqueLoiTabProps> = ({ lois, onViewLoi, formatSeason }) => {
-  // Trier les lois par date
-  const sortedLois = [...lois].sort((a, b) => {
-    const yearA = parseInt(a.dateProposition.split(' ')[0]);
-    const yearB = parseInt(b.dateProposition.split(' ')[0]);
-    return yearB - yearA; // Ordre décroissant
-  });
-  
-  const getStatusBadge = (statut: string) => {
-    switch(statut) {
-      case 'proposée':
-        return <Badge className="bg-blue-500">Proposée</Badge>;
-      case 'en_débat':
-        return <Badge className="bg-amber-500">En débat</Badge>;
-      case 'votée':
-        return <Badge className="bg-purple-500">Votée</Badge>;
-      case 'promulguée':
-        return <Badge className="bg-green-500">Promulguée</Badge>;
-      case 'rejetée':
-        return <Badge className="bg-red-500">Rejetée</Badge>;
-      default:
-        return <Badge>Autre</Badge>;
+export const HistoriqueLoiTab: React.FC<HistoriqueLoiTabProps> = ({ 
+  lois, 
+  onViewLoi,
+  formatSeason 
+}) => {
+  const getStatusBadge = (status: string) => {
+    switch (status) {
+      case 'active': return 'bg-green-100 text-green-800 border-green-200';
+      case 'rejected': return 'bg-red-100 text-red-800 border-red-200';
+      case 'proposed': return 'bg-blue-100 text-blue-800 border-blue-200';
+      case 'expired': return 'bg-gray-100 text-gray-800 border-gray-200';
+      default: return 'bg-gray-100 text-gray-800 border-gray-200';
     }
   };
-  
+
+  const getStatusText = (status: string) => {
+    switch (status) {
+      case 'active': return 'Active';
+      case 'rejected': return 'Rejetée';
+      case 'proposed': return 'Proposée';
+      case 'expired': return 'Expirée';
+      default: return status;
+    }
+  };
+
   return (
     <div className="space-y-4">
-      <div className="flex items-center justify-between">
-        <h3 className="text-lg font-medium">Historique des Lois</h3>
-        <Badge variant="outline" className="flex items-center">
-          <History className="h-3 w-3 mr-1" />
-          {lois.length} lois au total
-        </Badge>
-      </div>
-      
-      <div className="rounded-md border">
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>Titre</TableHead>
-              <TableHead>Auteur</TableHead>
-              <TableHead>Statut</TableHead>
-              <TableHead>Date de Proposition</TableHead>
-              <TableHead className="text-right">Actions</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {sortedLois.length === 0 ? (
-              <TableRow>
-                <TableCell colSpan={5} className="text-center h-24 text-muted-foreground">
-                  Aucune loi dans les archives.
+      <Table>
+        <TableHeader>
+          <TableRow>
+            <TableHead>Titre</TableHead>
+            <TableHead>Année</TableHead>
+            <TableHead>Proposée par</TableHead>
+            <TableHead>Catégorie</TableHead>
+            <TableHead>Statut</TableHead>
+            <TableHead className="text-right">Actions</TableHead>
+          </TableRow>
+        </TableHeader>
+        <TableBody>
+          {lois.length > 0 ? (
+            lois.map((loi) => (
+              <TableRow key={loi.id}>
+                <TableCell className="font-medium">{loi.title}</TableCell>
+                <TableCell>{loi.date.year} {formatSeason(loi.date.season)}</TableCell>
+                <TableCell>{loi.proposedBy}</TableCell>
+                <TableCell>{loi.category}</TableCell>
+                <TableCell>
+                  <Badge className={getStatusBadge(loi.status)}>
+                    {getStatusText(loi.status)}
+                  </Badge>
+                </TableCell>
+                <TableCell className="text-right">
+                  <Button variant="ghost" size="sm" onClick={() => onViewLoi(loi)}>
+                    <Eye className="h-4 w-4 mr-2" /> Voir
+                  </Button>
                 </TableCell>
               </TableRow>
-            ) : (
-              sortedLois.map(loi => (
-                <TableRow key={loi.id}>
-                  <TableCell className="font-medium">{loi.titre}</TableCell>
-                  <TableCell>{loi.auteur}</TableCell>
-                  <TableCell>{getStatusBadge(loi.statut)}</TableCell>
-                  <TableCell>{loi.dateProposition}</TableCell>
-                  <TableCell className="text-right">
-                    <Button variant="ghost" size="sm" onClick={() => onViewLoi(loi)}>
-                      <Eye className="h-4 w-4 mr-2" />
-                      Détails
-                    </Button>
-                  </TableCell>
-                </TableRow>
-              ))
-            )}
-          </TableBody>
-        </Table>
-      </div>
+            ))
+          ) : (
+            <TableRow>
+              <TableCell colSpan={6} className="text-center py-6 text-muted-foreground">
+                Aucune loi dans l'historique
+              </TableCell>
+            </TableRow>
+          )}
+        </TableBody>
+      </Table>
     </div>
   );
 };

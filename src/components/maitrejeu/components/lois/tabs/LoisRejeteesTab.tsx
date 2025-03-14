@@ -3,61 +3,60 @@ import React from 'react';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Eye, XCircle } from 'lucide-react';
+import { Eye, ThumbsUp, ThumbsDown } from 'lucide-react';
+import { formatDate } from '@/utils/formatUtils';
 import { LoisRejeteesTabProps } from '../types';
 
 export const LoisRejeteesTab: React.FC<LoisRejeteesTabProps> = ({ lois, onViewLoi }) => {
-  const rejectedLois = lois.filter(loi => loi.statut === 'rejetée');
-  
   return (
     <div className="space-y-4">
-      <div className="flex items-center justify-between">
-        <h3 className="text-lg font-medium">Lois Rejetées</h3>
-        <Badge className="bg-red-500">{rejectedLois.length} lois rejetées</Badge>
-      </div>
-      
-      <div className="rounded-md border">
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>Titre</TableHead>
-              <TableHead>Auteur</TableHead>
-              <TableHead>Date de Rejet</TableHead>
-              <TableHead>Votes Contre</TableHead>
-              <TableHead className="text-right">Actions</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {rejectedLois.length === 0 ? (
-              <TableRow>
-                <TableCell colSpan={5} className="text-center h-24 text-muted-foreground">
-                  Aucune loi rejetée dans les archives.
+      <Table>
+        <TableHeader>
+          <TableRow>
+            <TableHead>Titre</TableHead>
+            <TableHead>Date de décision</TableHead>
+            <TableHead>Proposée par</TableHead>
+            <TableHead>Catégorie</TableHead>
+            <TableHead>Résultat du vote</TableHead>
+            <TableHead className="text-right">Actions</TableHead>
+          </TableRow>
+        </TableHeader>
+        <TableBody>
+          {lois.length > 0 ? (
+            lois.map((loi) => (
+              <TableRow key={loi.id}>
+                <TableCell className="font-medium">{loi.title}</TableCell>
+                <TableCell>{formatDate(loi.date)}</TableCell>
+                <TableCell>{loi.proposedBy}</TableCell>
+                <TableCell>{loi.category}</TableCell>
+                <TableCell>
+                  <div className="flex items-center space-x-2">
+                    <Badge className="bg-green-100 text-green-800 border-green-200 flex items-center">
+                      <ThumbsUp className="h-3 w-3 mr-1" />
+                      {loi.votesFor || 0}
+                    </Badge>
+                    <Badge className="bg-red-100 text-red-800 border-red-200 flex items-center">
+                      <ThumbsDown className="h-3 w-3 mr-1" />
+                      {loi.votesAgainst || 0}
+                    </Badge>
+                  </div>
+                </TableCell>
+                <TableCell className="text-right">
+                  <Button variant="ghost" size="sm" onClick={() => onViewLoi(loi)}>
+                    <Eye className="h-4 w-4 mr-2" /> Voir
+                  </Button>
                 </TableCell>
               </TableRow>
-            ) : (
-              rejectedLois.map(loi => (
-                <TableRow key={loi.id}>
-                  <TableCell className="font-medium">
-                    <div className="flex items-center">
-                      <XCircle className="h-4 w-4 mr-2 text-red-500" />
-                      {loi.titre}
-                    </div>
-                  </TableCell>
-                  <TableCell>{loi.auteur}</TableCell>
-                  <TableCell>{loi.dateVote}</TableCell>
-                  <TableCell>{loi.votes?.contre || 0}</TableCell>
-                  <TableCell className="text-right">
-                    <Button variant="ghost" size="sm" onClick={() => onViewLoi(loi)}>
-                      <Eye className="h-4 w-4 mr-2" />
-                      Détails
-                    </Button>
-                  </TableCell>
-                </TableRow>
-              ))
-            )}
-          </TableBody>
-        </Table>
-      </div>
+            ))
+          ) : (
+            <TableRow>
+              <TableCell colSpan={6} className="text-center py-6 text-muted-foreground">
+                Aucune loi rejetée
+              </TableCell>
+            </TableRow>
+          )}
+        </TableBody>
+      </Table>
     </div>
   );
 };

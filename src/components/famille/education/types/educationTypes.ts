@@ -15,10 +15,27 @@ export interface EducationPath {
     age?: number;
     minPrestige?: number;
     traits?: string[];
+    gender?: 'male' | 'female' | 'both';
   };
   baseYears: number;
   baseCost: number;
   careerOpportunities: string[];
+  benefits: string[];
+  duration: number;
+  outcomes?: string[] | { skills: string[] };
+  specialties?: string[];
+}
+
+export interface ChildEducation {
+  type: string;
+  mentor: string | null;
+  progress: number;
+  skills: string[];
+  yearsCompleted: number;
+  totalYears: number;
+  statBonus: number;
+  speciality?: string;
+  pityBonus?: number;
 }
 
 export interface Child {
@@ -41,6 +58,7 @@ export interface Child {
   };
   traits?: string[];
   education?: EducationRecord;
+  currentEducation?: ChildEducation;
 }
 
 export interface EducationRecord {
@@ -61,12 +79,22 @@ export interface EducationRecord {
 export interface Preceptor {
   id: string;
   name: string;
-  specialty: EducationPathType;
+  specialty: EducationPathType | string;
   quality: number;
   cost: number;
   available: boolean;
   skills?: string[];
   background?: string;
+  skill?: number;
+  price?: number;
+  status?: 'available' | 'hired' | 'assigned';
+  childId?: string | null;
+  speciality?: string;
+  reputation?: string;
+}
+
+export interface PreceptorsByType {
+  [key: string]: Preceptor[];
 }
 
 export interface EducationFormData {
@@ -83,14 +111,32 @@ export interface EducationFormData {
   specialties: string[];
 }
 
+export interface EducationHistory {
+  id: string;
+  type: EducationPathType;
+  startYear: number;
+  endYear: number;
+  completed: boolean;
+  mentor: string;
+  results: {
+    skills: {
+      [key: string]: number;
+    };
+    specialties: string[];
+  };
+}
+
 // Props pour les composants
 
 export interface ChildHeaderProps {
   child: Child;
+  onNameChange?: (id: string, newName: string) => void;
+  hasInvalidEducation?: boolean;
 }
 
 export interface CurrentEducationStatusProps {
-  education: EducationRecord;
+  currentEducation: ChildEducation;
+  childGender: string;
 }
 
 export interface EducationFormActionsProps {
@@ -108,11 +154,19 @@ export interface EducationProgressButtonsProps {
   onCancel: () => void;
   onComplete: () => void;
   canComplete: boolean;
+  isEducating?: boolean;
+  hasEducation?: boolean;
+  educationProgress?: number;
+  onAdvanceYear?: () => void;
+  onCompleteEducation?: () => void;
 }
 
 export interface EducationTypeSelectorProps {
   selectedType: EducationPathType | null;
   onSelectType: (type: EducationPathType) => void;
+  value?: EducationPathType | null;
+  onChange?: (type: EducationPathType) => void;
+  childGender?: 'male' | 'female';
 }
 
 export interface EducationWarningProps {
@@ -130,4 +184,17 @@ export interface MentorInfoProps {
 
 export interface ChildNotFoundProps {
   onBack: () => void;
+}
+
+export interface EducationStatusProps {
+  child: Child;
+  hasEducation?: boolean;
+  hasInvalidEducation?: boolean;
+}
+
+export interface EducationSpecialtySelectorProps {
+  specialties: string[];
+  selected: string[];
+  onChange: (specialties: string[]) => void;
+  maxSelections?: number;
 }

@@ -70,3 +70,40 @@ export const formatUptime = (uptime: number): string => {
     return `${hours}h ${minutes}m`;
   }
 };
+
+// Fonction pour convertir une Date JavaScript en GameDate
+export const dateToGameDate = (date: Date): GameDate => {
+  // Logique simplifiée pour la conversion
+  const month = date.getMonth();
+  let season: string;
+  
+  if (month >= 2 && month <= 4) season = 'Ver';
+  else if (month >= 5 && month <= 7) season = 'Aestas';
+  else if (month >= 8 && month <= 10) season = 'Autumnus';
+  else season = 'Hiems';
+  
+  return {
+    year: 750 + (date.getFullYear() - 2023), // Exemple simple
+    season
+  };
+};
+
+// Fonction pour calculer la différence entre deux dates de jeu
+export const getDateDifference = (date1: GameDate, date2: GameDate): number => {
+  // Calcul simplifié: chaque année = 4 saisons
+  const seasons1 = date1.year * 4 + getSeasonNumber(date1.season);
+  const seasons2 = date2.year * 4 + getSeasonNumber(date2.season);
+  
+  return seasons2 - seasons1;
+};
+
+// Fonction auxiliaire pour obtenir l'index numérique d'une saison
+const getSeasonNumber = (season: string): number => {
+  switch (season) {
+    case 'Ver': return 0;
+    case 'Aestas': return 1;
+    case 'Autumnus': return 2;
+    case 'Hiems': return 3;
+    default: return 0;
+  }
+};

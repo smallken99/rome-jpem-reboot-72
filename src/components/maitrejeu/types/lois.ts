@@ -1,91 +1,68 @@
 
-// Types pour les lois
+import { GameDate } from './common';
 
-export type LoiType = 'politique' | 'économique' | 'sociale' | 'judiciaire' | 'militaire' | 'religieuse' | 'civile';
-export type LoiStatut = 'proposée' | 'adoptée' | 'rejetée' | 'Promulguée' | 'En délibération' | 'Rejetée' | 'Public' | 'Privé' | 'votée' | 'en_débat';
-
-// Alias pour rétrocompatibilité
-export type LoiState = LoiStatut;
-
-// Clause d'une loi
-export interface Clause {
-  id: string;
-  texte: string;
-  explication?: string;
-}
-
-// Impact d'une loi sur différents domaines
-export interface Impact {
-  domaine: string;
-  valeur: number;
-  explication?: string;
-}
-
-// Interface principale pour une loi
 export interface Loi {
   id: string;
-  titre: string;
+  title: string;
   description: string;
-  type: LoiType;
-  catégorie?: string;
-  proposeur: string;
-  dateProposition: {
-    year: number;
-    season: string;
-  };
-  date: {
-    year: number;
-    season: string;
-  };
-  état: LoiStatut;
-  importance?: 'mineure' | 'normale' | 'majeure';
-  votesPositifs: number;
-  votesNégatifs: number;
-  votesAbstention: number;
-  votes: {
-    pour: number;
-    contre: number;
-    abstention: number;
-  };
-  clauses?: Clause[];
-  impacts?: Impact[];
-  effets: string[] | Record<string, any>;
-  dateVote?: {
-    year: number;
-    season: string;
-  };
-  commentaires?: string;
-  nom?: string;
+  proposedBy: string;
+  date: GameDate;
+  status: 'proposed' | 'active' | 'rejected' | 'expired';
+  category: string;
+  votesFor?: number;
+  votesAgainst?: number;
+  implementationDate?: GameDate;
+  expirationDate?: GameDate;
+  notes?: string;
+  effets?: string[];
+  conditions?: string[];
+  penalites?: string[];
 }
 
-// Interface pour le formulaire de création/édition d'une loi
-export interface LoiFormData {
-  titre: string;
-  nom?: string;
+export interface CategorieLoi {
+  id: string;
+  name: string;
   description: string;
-  type: LoiType;
-  catégorie?: string;
-  proposeur: string;
-  état: LoiStatut;
-  importance: 'mineure' | 'normale' | 'majeure';
-  effets: Record<string, any> | string[];
-  clauses?: Clause[];
-  impacts?: Impact[];
-  votesPositifs: number;
-  votesNégatifs: number;
-  votesAbstention: number;
-  commentaires?: string;
-  votes?: {
-    pour: number;
-    contre: number;
-    abstention: number;
-  };
-  date?: {
-    year: number;
-    season: string;
-  };
-  dateProposition?: {
-    year: number;
-    season: string;
-  };
+}
+
+export interface LoiVote {
+  id: string;
+  loiId: string;
+  senateurId: string;
+  vote: 'for' | 'against' | 'abstain';
+  comment?: string;
+  date: GameDate;
+}
+
+export interface LoiFilters {
+  status?: 'proposed' | 'active' | 'rejected' | 'expired';
+  category?: string;
+  proposedBy?: string;
+  dateRange?: [Date, Date] | null;
+  searchTerm?: string;
+}
+
+export interface LoiSorting {
+  field: keyof Loi;
+  direction: 'asc' | 'desc';
+}
+
+export interface LoiCreate {
+  title: string;
+  description: string;
+  proposedBy: string;
+  category: string;
+  effets?: string[];
+  conditions?: string[];
+  penalites?: string[];
+  notes?: string;
+}
+
+export interface LoiUpdate extends Partial<LoiCreate> {
+  id: string;
+  status?: 'proposed' | 'active' | 'rejected' | 'expired';
+  votesFor?: number;
+  votesAgainst?: number;
+  implementationDate?: GameDate;
+  expirationDate?: GameDate;
 }

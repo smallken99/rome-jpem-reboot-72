@@ -1,70 +1,75 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
 import {
   Dialog,
   DialogContent,
+  DialogFooter,
   DialogHeader,
   DialogTitle,
-  DialogFooter
 } from '@/components/ui/dialog';
-import { Button } from '@/components/ui/button';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { 
-  Select, 
-  SelectContent, 
-  SelectItem, 
-  SelectTrigger, 
-  SelectValue 
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
 } from '@/components/ui/select';
-import { Textarea } from '@/components/ui/textarea';
-import { Badge } from '@/components/ui/badge';
-import { LoiModalProps } from './types';
-import { Loi } from '@/components/republique/lois/hooks/useLois';
+import { useToast } from '@/hooks/use-toast';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Loi, CategorieLoi } from '../../types/lois';
+import { LoiModalProps } from '../lois/types';
+import { dateToGameDate } from '@/utils/formatUtils';
 
-export const LoiModal: React.FC<LoiModalProps> = ({ 
-  isOpen, 
-  onClose, 
-  onSave, 
+const LOI_CATEGORIES = [
+  { id: 'politique', name: 'Politique', description: 'Lois concernant la structure politique' },
+  { id: 'judiciaire', name: 'Judiciaire', description: 'Lois concernant le système judiciaire' },
+  { id: 'sociale', name: 'Sociale', description: 'Lois concernant les affaires sociales' },
+  { id: 'militaire', name: 'Militaire', description: 'Lois concernant les affaires militaires' },
+  { id: 'economique', name: 'Économique', description: 'Lois concernant l\'économie' },
+  { id: 'religieuse', name: 'Religieuse', description: 'Lois concernant les affaires religieuses' },
+];
+
+export const LoiModal: React.FC<LoiModalProps> = ({
+  isOpen,
+  onClose,
+  onSave,
   loi,
-  categories = []
+  categories = LOI_CATEGORIES,
 }) => {
-  const [activeTab, setActiveTab] = useState('general');
-  const [formData, setFormData] = useState<Loi>({
-    id: '',
-    titre: '',
-    description: '',
-    auteur: '',
-    dateProposition: '',
-    statut: 'proposée',
-    categorieId: '',
-    tags: []
-  });
+  const { toast } = useToast();
+  const [activeTab, setActiveTab] = useState('info');
   
-  const [newTag, setNewTag] = useState('');
+  const initialState: Loi = loi || {
+    id: '',
+    title: '',
+    description: '',
+    proposedBy: '',
+    date: dateToGameDate(new Date()),
+    status: 'proposed',
+    category: '',
+    votesFor: 0,
+    votesAgainst: 0,
+    effets: [],
+    conditions: [],
+    penalites: []
+  };
+  
+  const [formData, setFormData] = useState<Loi>(initialState);
+  const [effetInput, setEffetInput] = useState('');
+  const [conditionInput, setConditionInput] = useState('');
+  const [penaliteInput, setPenaliteInput] = useState('');
   
   useEffect(() => {
     if (loi) {
       setFormData(loi);
     } else {
-      // Initialiser avec des valeurs par défaut pour une nouvelle loi
-      const date = new Date();
-      const options: Intl.DateTimeFormatOptions = { day: 'numeric', month: 'long', year: 'numeric' };
-      const formattedDate = date.toLocaleDateString('fr-FR', options).replace(/ ([0-9]{4})$/, ' $1 av. J.-C.');
-      
-      setFormData({
-        id: `loi_${Date.now()}`,
-        titre: '',
-        description: '',
-        auteur: '',
-        dateProposition: formattedDate,
-        statut: 'proposée',
-        categorieId: categories.length > 0 ? categories[0].id : '',
-        tags: []
-      });
+      setFormData(initialState);
     }
-  }, [loi, categories]);
+  }, [loi, isOpen]);
   
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
@@ -75,90 +80,114 @@ export const LoiModal: React.FC<LoiModalProps> = ({
     setFormData(prev => ({ ...prev, [name]: value }));
   };
   
-  const handleAddTag = () => {
-    if (newTag.trim() && !formData.tags.includes(newTag.trim())) {
+  const handleSave = () => {
+    if (!formData.title.trim()) {
+      toast({
+        title: "Erreur",
+        description: "Le titre de la loi est requis",
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    if (!formData.category) {
+      toast({
+        title: "Erreur",
+        description: "La catégorie de la loi est requise",
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    // Generate ID if it's a new law
+    const newLoi = formData.id ? formData : { ...formData, id: `loi-${Date.now()}` };
+    
+    onSave(newLoi);
+    onClose();
+    
+    toast({
+      title: loi ? "Loi mise à jour" : "Loi créée",
+      description: `La loi "${formData.title}" a été ${loi ? 'mise à jour' : 'créée'} avec succès.`,
+    });
+  };
+  
+  const addEffet = () => {
+    if (effetInput.trim()) {
       setFormData(prev => ({
         ...prev,
-        tags: [...prev.tags, newTag.trim()]
+        effets: [...(prev.effets || []), effetInput.trim()]
       }));
-      setNewTag('');
+      setEffetInput('');
     }
   };
   
-  const handleRemoveTag = (tag: string) => {
+  const removeEffet = (index: number) => {
     setFormData(prev => ({
       ...prev,
-      tags: prev.tags.filter(t => t !== tag)
+      effets: (prev.effets || []).filter((_, i) => i !== index)
     }));
   };
   
-  const handleSubmit = () => {
-    onSave(formData);
-    onClose();
+  const addCondition = () => {
+    if (conditionInput.trim()) {
+      setFormData(prev => ({
+        ...prev,
+        conditions: [...(prev.conditions || []), conditionInput.trim()]
+      }));
+      setConditionInput('');
+    }
   };
   
-  const getCategorieName = (id: string) => {
-    const category = categories.find(cat => cat.id === id);
-    return category ? category.nom : '';
+  const removeCondition = (index: number) => {
+    setFormData(prev => ({
+      ...prev,
+      conditions: (prev.conditions || []).filter((_, i) => i !== index)
+    }));
+  };
+  
+  const addPenalite = () => {
+    if (penaliteInput.trim()) {
+      setFormData(prev => ({
+        ...prev,
+        penalites: [...(prev.penalites || []), penaliteInput.trim()]
+      }));
+      setPenaliteInput('');
+    }
+  };
+  
+  const removePenalite = (index: number) => {
+    setFormData(prev => ({
+      ...prev,
+      penalites: (prev.penalites || []).filter((_, i) => i !== index)
+    }));
   };
   
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+      <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>
-            {loi ? `Modifier: ${loi.titre}` : 'Proposer une nouvelle loi'}
-          </DialogTitle>
+          <DialogTitle>{loi ? 'Modifier une loi' : 'Créer une nouvelle loi'}</DialogTitle>
         </DialogHeader>
         
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full mt-4">
-          <TabsList className="grid grid-cols-3 mb-4">
-            <TabsTrigger value="general">Informations Générales</TabsTrigger>
-            <TabsTrigger value="details">Détails et Effets</TabsTrigger>
-            <TabsTrigger value="votes">Votes et Statut</TabsTrigger>
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="mt-4">
+          <TabsList className="grid grid-cols-4">
+            <TabsTrigger value="info">Informations</TabsTrigger>
+            <TabsTrigger value="effets">Effets</TabsTrigger>
+            <TabsTrigger value="conditions">Conditions</TabsTrigger>
+            <TabsTrigger value="penalites">Pénalités</TabsTrigger>
           </TabsList>
           
-          <TabsContent value="general" className="space-y-4">
+          <TabsContent value="info" className="space-y-4 mt-4">
             <div className="grid grid-cols-1 gap-4">
               <div className="space-y-2">
-                <Label htmlFor="titre">Titre de la Loi</Label>
+                <Label htmlFor="title">Titre de la loi</Label>
                 <Input
-                  id="titre"
-                  name="titre"
-                  value={formData.titre}
+                  id="title"
+                  name="title"
+                  value={formData.title}
                   onChange={handleChange}
-                  placeholder="Ex: Lex Manlia de vicesima"
+                  placeholder="Lex Julia de..."
                 />
-              </div>
-              
-              <div className="space-y-2">
-                <Label htmlFor="auteur">Auteur</Label>
-                <Input
-                  id="auteur"
-                  name="auteur"
-                  value={formData.auteur}
-                  onChange={handleChange}
-                  placeholder="Ex: Marcus Manlius"
-                />
-              </div>
-              
-              <div className="space-y-2">
-                <Label htmlFor="categorieId">Catégorie</Label>
-                <Select
-                  value={formData.categorieId}
-                  onValueChange={(value) => handleSelectChange('categorieId', value)}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Sélectionner une catégorie" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {categories.map(category => (
-                      <SelectItem key={category.id} value={category.id}>
-                        {category.nom}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
               </div>
               
               <div className="space-y-2">
@@ -168,172 +197,211 @@ export const LoiModal: React.FC<LoiModalProps> = ({
                   name="description"
                   value={formData.description}
                   onChange={handleChange}
-                  placeholder="Décrivez le contenu et l'objectif de la loi"
+                  placeholder="Décrivez le contenu et le but de cette loi..."
                   rows={4}
                 />
               </div>
               
-              <div className="space-y-2">
-                <Label htmlFor="tags">Tags</Label>
-                <div className="flex gap-2">
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="category">Catégorie</Label>
+                  <Select
+                    value={formData.category}
+                    onValueChange={(value) => handleSelectChange('category', value)}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Sélectionner une catégorie" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {categories.map((category) => (
+                        <SelectItem key={category.id} value={category.name}>
+                          {category.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                
+                <div className="space-y-2">
+                  <Label htmlFor="proposedBy">Proposée par</Label>
                   <Input
-                    id="tags"
-                    value={newTag}
-                    onChange={(e) => setNewTag(e.target.value)}
-                    placeholder="Ajouter un tag"
-                    className="flex-1"
+                    id="proposedBy"
+                    name="proposedBy"
+                    value={formData.proposedBy}
+                    onChange={handleChange}
+                    placeholder="Nom du sénateur"
                   />
-                  <Button type="button" onClick={handleAddTag}>Ajouter</Button>
-                </div>
-                <div className="flex flex-wrap gap-2 mt-2">
-                  {formData.tags.map(tag => (
-                    <Badge key={tag} variant="secondary" className="flex items-center gap-1">
-                      {tag}
-                      <button 
-                        type="button" 
-                        onClick={() => handleRemoveTag(tag)}
-                        className="ml-1 h-4 w-4 rounded-full hover:bg-muted flex items-center justify-center"
-                      >
-                        ×
-                      </button>
-                    </Badge>
-                  ))}
                 </div>
               </div>
-            </div>
-          </TabsContent>
-          
-          <TabsContent value="details" className="space-y-4">
-            <div className="grid grid-cols-1 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="effets">Effets de la loi</Label>
-                <Textarea
-                  id="effets"
-                  name="effets"
-                  value={formData.effets || ''}
-                  onChange={handleChange}
-                  placeholder="Décrivez les effets et conséquences de cette loi"
-                  rows={6}
-                />
-              </div>
               
-              <div className="space-y-2">
-                <Label htmlFor="conditions">Conditions d'application</Label>
-                <Textarea
-                  id="conditions"
-                  name="conditions"
-                  value={formData.conditions || ''}
-                  onChange={handleChange}
-                  placeholder="Précisez les conditions d'application de cette loi"
-                  rows={3}
-                />
-              </div>
-              
-              <div className="space-y-2">
-                <Label htmlFor="penalites">Pénalités en cas de non-respect</Label>
-                <Textarea
-                  id="penalites"
-                  name="penalites"
-                  value={formData.penalites || ''}
-                  onChange={handleChange}
-                  placeholder="Définissez les pénalités applicables"
-                  rows={3}
-                />
-              </div>
-            </div>
-          </TabsContent>
-          
-          <TabsContent value="votes" className="space-y-4">
-            <div className="grid grid-cols-1 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="statut">Statut</Label>
-                <Select
-                  value={formData.statut}
-                  onValueChange={(value) => handleSelectChange('statut', value)}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Statut de la loi" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="proposée">Proposée</SelectItem>
-                    <SelectItem value="en_débat">En débat</SelectItem>
-                    <SelectItem value="votée">Votée</SelectItem>
-                    <SelectItem value="promulguée">Promulguée</SelectItem>
-                    <SelectItem value="rejetée">Rejetée</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              
-              {(formData.statut === 'votée' || formData.statut === 'promulguée' || formData.statut === 'rejetée') && (
-                <>
+              {loi && (
+                <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <Label htmlFor="dateVote">Date du Vote</Label>
-                    <Input
-                      id="dateVote"
-                      name="dateVote"
-                      value={formData.dateVote || ''}
-                      onChange={handleChange}
-                      placeholder="Ex: 21 Mai 45 av. J.-C."
-                    />
+                    <Label htmlFor="status">Statut</Label>
+                    <Select
+                      value={formData.status}
+                      onValueChange={(value) => handleSelectChange('status', value as any)}
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Sélectionner un statut" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="proposed">Proposée</SelectItem>
+                        <SelectItem value="active">Active</SelectItem>
+                        <SelectItem value="rejected">Rejetée</SelectItem>
+                        <SelectItem value="expired">Expirée</SelectItem>
+                      </SelectContent>
+                    </Select>
                   </div>
                   
-                  <div className="grid grid-cols-3 gap-4">
-                    <div className="space-y-2">
-                      <Label htmlFor="votesPour">Votes Pour</Label>
-                      <Input
-                        id="votesPour"
-                        name="votesPour"
-                        type="number"
-                        min="0"
-                        value={formData.votes?.pour || 0}
-                        onChange={(e) => setFormData(prev => ({
-                          ...prev,
-                          votes: { ...(prev.votes || { pour: 0, contre: 0, abstention: 0 }), pour: Number(e.target.value) }
-                        }))}
-                      />
-                    </div>
-                    
-                    <div className="space-y-2">
-                      <Label htmlFor="votesContre">Votes Contre</Label>
-                      <Input
-                        id="votesContre"
-                        name="votesContre"
-                        type="number"
-                        min="0"
-                        value={formData.votes?.contre || 0}
-                        onChange={(e) => setFormData(prev => ({
-                          ...prev,
-                          votes: { ...(prev.votes || { pour: 0, contre: 0, abstention: 0 }), contre: Number(e.target.value) }
-                        }))}
-                      />
-                    </div>
-                    
-                    <div className="space-y-2">
-                      <Label htmlFor="votesAbstention">Abstention</Label>
-                      <Input
-                        id="votesAbstention"
-                        name="votesAbstention"
-                        type="number"
-                        min="0"
-                        value={formData.votes?.abstention || 0}
-                        onChange={(e) => setFormData(prev => ({
-                          ...prev,
-                          votes: { ...(prev.votes || { pour: 0, contre: 0, abstention: 0 }), abstention: Number(e.target.value) }
-                        }))}
-                      />
-                    </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="notes">Notes</Label>
+                    <Input
+                      id="notes"
+                      name="notes"
+                      value={formData.notes || ''}
+                      onChange={handleChange}
+                      placeholder="Notes additionnelles"
+                    />
                   </div>
-                </>
+                </div>
               )}
+            </div>
+          </TabsContent>
+          
+          <TabsContent value="effets" className="space-y-4 mt-4">
+            <div className="space-y-4">
+              <div className="flex items-end gap-2">
+                <div className="flex-1 space-y-2">
+                  <Label htmlFor="effet">Ajouter un effet</Label>
+                  <Input
+                    id="effet"
+                    value={effetInput}
+                    onChange={(e) => setEffetInput(e.target.value)}
+                    placeholder="Décrivez un effet de cette loi..."
+                  />
+                </div>
+                <Button type="button" onClick={addEffet}>Ajouter</Button>
+              </div>
+              
+              <div className="space-y-2">
+                <Label>Effets de la loi</Label>
+                <div className="border rounded-md p-4 space-y-2">
+                  {formData.effets && formData.effets.length > 0 ? (
+                    formData.effets.map((effet, index) => (
+                      <div key={index} className="flex items-center justify-between bg-muted/50 p-2 rounded">
+                        <span>{effet}</span>
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => removeEffet(index)}
+                          className="h-7 text-destructive"
+                        >
+                          Supprimer
+                        </Button>
+                      </div>
+                    ))
+                  ) : (
+                    <div className="text-center text-muted-foreground py-4">
+                      Aucun effet défini pour cette loi
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+          </TabsContent>
+          
+          <TabsContent value="conditions" className="space-y-4 mt-4">
+            <div className="space-y-4">
+              <div className="flex items-end gap-2">
+                <div className="flex-1 space-y-2">
+                  <Label htmlFor="condition">Ajouter une condition</Label>
+                  <Input
+                    id="condition"
+                    value={conditionInput}
+                    onChange={(e) => setConditionInput(e.target.value)}
+                    placeholder="Décrivez une condition d'application..."
+                  />
+                </div>
+                <Button type="button" onClick={addCondition}>Ajouter</Button>
+              </div>
+              
+              <div className="space-y-2">
+                <Label>Conditions d'application</Label>
+                <div className="border rounded-md p-4 space-y-2">
+                  {formData.conditions && formData.conditions.length > 0 ? (
+                    formData.conditions.map((condition, index) => (
+                      <div key={index} className="flex items-center justify-between bg-muted/50 p-2 rounded">
+                        <span>{condition}</span>
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => removeCondition(index)}
+                          className="h-7 text-destructive"
+                        >
+                          Supprimer
+                        </Button>
+                      </div>
+                    ))
+                  ) : (
+                    <div className="text-center text-muted-foreground py-4">
+                      Aucune condition définie pour cette loi
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+          </TabsContent>
+          
+          <TabsContent value="penalites" className="space-y-4 mt-4">
+            <div className="space-y-4">
+              <div className="flex items-end gap-2">
+                <div className="flex-1 space-y-2">
+                  <Label htmlFor="penalite">Ajouter une pénalité</Label>
+                  <Input
+                    id="penalite"
+                    value={penaliteInput}
+                    onChange={(e) => setPenaliteInput(e.target.value)}
+                    placeholder="Décrivez une pénalité en cas de non-respect..."
+                  />
+                </div>
+                <Button type="button" onClick={addPenalite}>Ajouter</Button>
+              </div>
+              
+              <div className="space-y-2">
+                <Label>Pénalités en cas de non-respect</Label>
+                <div className="border rounded-md p-4 space-y-2">
+                  {formData.penalites && formData.penalites.length > 0 ? (
+                    formData.penalites.map((penalite, index) => (
+                      <div key={index} className="flex items-center justify-between bg-muted/50 p-2 rounded">
+                        <span>{penalite}</span>
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => removePenalite(index)}
+                          className="h-7 text-destructive"
+                        >
+                          Supprimer
+                        </Button>
+                      </div>
+                    ))
+                  ) : (
+                    <div className="text-center text-muted-foreground py-4">
+                      Aucune pénalité définie pour cette loi
+                    </div>
+                  )}
+                </div>
+              </div>
             </div>
           </TabsContent>
         </Tabs>
         
-        <DialogFooter className="pt-4">
+        <DialogFooter>
           <Button variant="outline" onClick={onClose}>Annuler</Button>
-          <Button onClick={handleSubmit}>
-            {loi ? 'Mettre à jour' : 'Créer la loi'}
-          </Button>
+          <Button onClick={handleSave}>{loi ? 'Mettre à jour' : 'Créer'}</Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>

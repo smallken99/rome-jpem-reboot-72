@@ -1,88 +1,151 @@
 
 import React from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { MapPin, Package } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Progress } from '@/components/ui/progress';
+import { Warehouse, MapPin, Package, ArrowRight, Edit, BarChart } from 'lucide-react';
 
 interface StorageLocation {
   id: string;
   name: string;
-  type: 'villa' | 'domus' | 'entrepôt' | 'terre';
   capacity: number;
   used: number;
-  security: 'faible' | 'normale' | 'élevée';
+  location: string;
+  type: 'entrepôt' | 'magasin' | 'cellier' | 'autre';
+  resourceCount: number;
 }
 
-// Sample data
-const storageLocations: StorageLocation[] = [
-  { id: '1', name: 'Villa Tusculana', type: 'villa', capacity: 5000, used: 3200, security: 'élevée' },
-  { id: '2', name: 'Domus Palatina', type: 'domus', capacity: 1000, used: 850, security: 'normale' },
-  { id: '3', name: 'Entrepôt du Port', type: 'entrepôt', capacity: 8000, used: 6300, security: 'normale' },
-  { id: '4', name: 'Terres Agricoles', type: 'terre', capacity: 15000, used: 9800, security: 'faible' },
-];
-
 export const StorageLocations: React.FC = () => {
+  // Données fictives de lieux de stockage
+  const storageLocations: StorageLocation[] = [
+    {
+      id: '1',
+      name: 'Entrepôt du Tibre',
+      capacity: 50000,
+      used: 32500,
+      location: 'Rome, quartier du port',
+      type: 'entrepôt',
+      resourceCount: 8
+    },
+    {
+      id: '2',
+      name: 'Cellier de la Villa',
+      capacity: 5000,
+      used: 3200,
+      location: 'Villa Campanie',
+      type: 'cellier',
+      resourceCount: 6
+    },
+    {
+      id: '3',
+      name: 'Magasin du Forum',
+      capacity: 8000,
+      used: 2600,
+      location: 'Rome, Forum',
+      type: 'magasin',
+      resourceCount: 4
+    },
+    {
+      id: '4',
+      name: 'Dépôt de matériaux',
+      capacity: 12000,
+      used: 9800,
+      location: 'Rome, Quirinal',
+      type: 'entrepôt',
+      resourceCount: 5
+    }
+  ];
+
+  // Obtenir la couleur pour le type de stockage
+  const getStorageTypeBadge = (type: string) => {
+    switch (type) {
+      case 'entrepôt': return 'bg-blue-100 text-blue-800 border-blue-200';
+      case 'magasin': return 'bg-green-100 text-green-800 border-green-200';
+      case 'cellier': return 'bg-amber-100 text-amber-800 border-amber-200';
+      default: return 'bg-gray-100 text-gray-800 border-gray-200';
+    }
+  };
+
+  // Obtenir la couleur pour l'indicateur de capacité
+  const getCapacityColor = (usedPercent: number) => {
+    if (usedPercent >= 90) return 'bg-red-600';
+    if (usedPercent >= 75) return 'bg-amber-500';
+    if (usedPercent >= 50) return 'bg-blue-500';
+    return 'bg-green-500';
+  };
+
   return (
-    <Card>
-      <CardHeader className="pb-3">
-        <CardTitle className="flex items-center gap-2">
-          <MapPin className="h-5 w-5 text-muted-foreground" />
-          Lieux de Stockage
-        </CardTitle>
-      </CardHeader>
-      <CardContent>
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>Nom</TableHead>
-              <TableHead>Type</TableHead>
-              <TableHead>Capacité</TableHead>
-              <TableHead>Utilisation</TableHead>
-              <TableHead>Sécurité</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {storageLocations.map((location) => (
-              <TableRow key={location.id}>
-                <TableCell className="font-medium">{location.name}</TableCell>
-                <TableCell>
-                  <Badge variant="outline" className="capitalize">
-                    {location.type}
+    <div className="space-y-6">
+      <div className="flex justify-between items-center">
+        <h3 className="text-lg font-medium">Lieux de stockage</h3>
+        <Button size="sm">
+          <Warehouse className="h-4 w-4 mr-2" /> Ajouter un lieu
+        </Button>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        {storageLocations.map((location) => {
+          const usedPercent = (location.used / location.capacity) * 100;
+          return (
+            <Card key={location.id} className="overflow-hidden">
+              <CardHeader className="pb-2">
+                <div className="flex justify-between items-start">
+                  <CardTitle className="text-xl">{location.name}</CardTitle>
+                  <Badge className={getStorageTypeBadge(location.type)}>
+                    {location.type.charAt(0).toUpperCase() + location.type.slice(1)}
                   </Badge>
-                </TableCell>
-                <TableCell>{location.capacity.toLocaleString()} unités</TableCell>
-                <TableCell>
-                  <div className="flex items-center gap-2">
-                    <div className="w-full bg-slate-100 rounded-full h-2.5">
-                      <div 
-                        className={`h-2.5 rounded-full ${
-                          location.used / location.capacity > 0.9 ? 'bg-red-500' :
-                          location.used / location.capacity > 0.7 ? 'bg-amber-500' : 'bg-green-500'
-                        }`} 
-                        style={{ width: `${(location.used / location.capacity) * 100}%` }}
-                      ></div>
+                </div>
+                <CardDescription className="flex items-center text-sm mt-1">
+                  <MapPin className="h-3.5 w-3.5 mr-1 text-muted-foreground" />
+                  {location.location}
+                </CardDescription>
+              </CardHeader>
+              
+              <CardContent className="pb-2">
+                <div className="space-y-4">
+                  <div>
+                    <div className="flex justify-between items-center mb-1">
+                      <span className="text-sm text-muted-foreground">Capacité utilisée</span>
+                      <span className="text-sm font-medium">
+                        {Math.round(usedPercent)}% ({location.used}/{location.capacity})
+                      </span>
                     </div>
-                    <span className="text-xs text-muted-foreground">
-                      {Math.round((location.used / location.capacity) * 100)}%
-                    </span>
+                    <Progress 
+                      value={usedPercent} 
+                      className={`h-2 ${getCapacityColor(usedPercent)}`} 
+                    />
                   </div>
-                </TableCell>
-                <TableCell>
-                  <Badge 
-                    variant={
-                      location.security === 'élevée' ? 'success' : 
-                      location.security === 'normale' ? 'default' : 'outline'
-                    }
-                  >
-                    {location.security}
-                  </Badge>
-                </TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      </CardContent>
-    </Card>
+                  
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center">
+                      <Package className="h-4 w-4 mr-2 text-muted-foreground" />
+                      <span className="text-sm text-muted-foreground">Ressources stockées</span>
+                    </div>
+                    <span className="font-medium">{location.resourceCount}</span>
+                  </div>
+                </div>
+              </CardContent>
+              
+              <CardFooter className="pt-2">
+                <div className="flex justify-between w-full">
+                  <Button variant="outline" size="sm">
+                    <Edit className="h-3.5 w-3.5 mr-1" /> Modifier
+                  </Button>
+                  <div className="flex gap-2">
+                    <Button variant="outline" size="sm">
+                      <BarChart className="h-3.5 w-3.5 mr-1" /> Statistiques
+                    </Button>
+                    <Button size="sm">
+                      <ArrowRight className="h-3.5 w-3.5" />
+                    </Button>
+                  </div>
+                </div>
+              </CardFooter>
+            </Card>
+          );
+        })}
+      </div>
+    </div>
   );
 };
