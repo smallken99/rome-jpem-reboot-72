@@ -13,7 +13,7 @@ export interface Nation {
   flag?: string;
   relation?: string;
   power?: number;
-  // Ajout des propriétés manquantes
+  // Propriétés supplémentaires
   population?: number;
   militaryStrength?: number;
   diplomaticInfluence?: number;
@@ -26,14 +26,14 @@ export interface Traite {
   id: string;
   title: string;
   parties: string[];
-  type: 'commercial' | 'peace' | 'military' | 'tribute';
+  type: 'commercial' | 'peace' | 'military' | 'tribute' | 'trade';
   status: 'active' | 'draft' | 'expired' | 'revoked' | 'violated';
   description: string;
   dateCreated: string;
   dateExpires?: string;
   date?: string;
   terms?: string[];
-  // Ajout des propriétés manquantes
+  // Propriétés supplémentaires
   dateSignature?: string;
   dateExpiration?: string;
   clauses?: string[];
@@ -52,7 +52,7 @@ export interface Alliance {
   dateCreated: string;
   dateExpires?: string;
   terms?: string[];
-  // Ajout des propriétés manquantes
+  // Propriétés supplémentaires
   members?: string[];
   dateCreation?: string;
   duration?: number;

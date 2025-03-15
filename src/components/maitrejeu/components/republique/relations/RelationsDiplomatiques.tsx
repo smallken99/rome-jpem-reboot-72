@@ -2,9 +2,9 @@
 import React, { useState } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { nationsMock } from './data/nations';
-import { traitesMock } from './data/traites';
-import { alliancesMock } from './data/alliances';
+import { nationsMock } from './data';
+import { traitesMock } from './data';
+import { alliancesMock } from './data';
 import { NationsList } from './NationsList';
 import { TraitesList } from './TraitesList';
 import { AlliancesMilitaires } from './AlliancesMilitaires';

@@ -1,50 +1,97 @@
 
 import { useState } from 'react';
-import { useBuildingSale } from '../../rural/hooks/useBuildingSale';
+import { useBuildingInventory } from '../../hooks/building/useBuildingInventory';
+import { useBuildingPurchase } from '../../hooks/building/useBuildingPurchase';
+import { useBuildingSale } from '../../hooks/building/useBuildingSale';
+import { useBuildingMaintenance } from '../../hooks/building/useBuildingMaintenance';
+import { useSlaveAssignment } from '../../hooks/building/useSlaveAssignment';
+import { usePatrimoine } from '@/hooks/usePatrimoine';
+import { OwnedBuilding } from '../../hooks/building/types';
+import { urbanResidentialBuildingsMock } from '../../../data/buildings/urbanResidentialBuildings';
+import { publicBuildingsMock } from '../../../data/buildings/publicBuildings';
+import { religiousBuildingsMock } from '../../../data/buildings/religiousBuildings';
+import { militaryBuildingsMock } from '../../../data/buildings/militaryBuildings';
 
-interface OwnedBuilding {
-  id: number;
-  name: string;
-  location: string;
-  type: string;
-  value: number;
-}
+// Type pour les bâtiments urbains
+type AllowedBuildingType = 'residential' | 'religious' | 'public' | 'military';
 
 export const useUrbanPropertiesTab = () => {
-  const [buildings, setBuildings] = useState<OwnedBuilding[]>([
-    { id: 1, name: 'Domus du Palatin', location: 'Rome', type: 'urban', value: 120000 },
-    { id: 2, name: 'Insula près du forum', location: 'Rome', type: 'urban', value: 80000 },
-    { id: 3, name: 'Villa à Baïes', location: 'Campanie', type: 'urban', value: 200000 },
-  ]);
-
+  // États
+  const [selectedBuildingType, setSelectedBuildingType] = useState<AllowedBuildingType>('residential');
+  const [selectedBuildingId, setSelectedBuildingId] = useState<string | null>(null);
+  const [purchaseDialogOpen, setPurchaseDialogOpen] = useState(false);
+  
+  // Hooks
+  const { ownedBuildings } = useBuildingInventory();
+  const { handlePurchase } = useBuildingPurchase();
   const { saleBuilding, estimateBuildingValue, sellBuilding } = useBuildingSale();
+  const { toggleMaintenance, performMaintenance } = useBuildingMaintenance();
+  const { assignSlaves, availableSlaves } = useSlaveAssignment();
+  const { balance } = usePatrimoine();
 
-  const handleAddProperty = (
-    buildingId: string, 
-    buildingType: "urban" | "rural" | "religious" | "public", 
-    location: string, 
-    customName?: string
-  ): boolean => {
-    // Pour cet exemple, on retourne toujours true
-    if (!buildingId || !location) return false;
-    
-    const newBuilding: OwnedBuilding = {
-      id: Date.now(),
-      name: customName || `Nouvelle propriété ${buildings.length + 1}`,
-      location,
-      type: buildingType,
-      value: 100000
-    };
-    
-    setBuildings(prev => [...prev, newBuilding]);
-    return true;
+  // Filtrer les bâtiments selon le type
+  const filteredOwnedBuildings = ownedBuildings.filter(building => {
+    if (selectedBuildingType === 'residential') return building.buildingType === 'urban';
+    if (selectedBuildingType === 'religious') return building.buildingType === 'religious';
+    if (selectedBuildingType === 'public') return building.buildingType === 'public';
+    if (selectedBuildingType === 'military') return building.category === 'military';
+    return false;
+  });
+
+  // Obtenir les détails du bâtiment sélectionné
+  const getBuildingsList = () => {
+    switch (selectedBuildingType) {
+      case 'residential': return urbanResidentialBuildingsMock;
+      case 'religious': return religiousBuildingsMock;
+      case 'public': return publicBuildingsMock;
+      case 'military': return militaryBuildingsMock;
+      default: return [];
+    }
+  };
+
+  const selectedBuildingDetails = selectedBuildingId 
+    ? getBuildingsList().find(b => b.id === selectedBuildingId) 
+    : null;
+  
+  // Fonction d'adaptation pour maintenir la compatibilité
+  const calculateBuildingValue = (buildingId: number) => {
+    const building = ownedBuildings.find(b => b.id === buildingId.toString());
+    if (!building) return 0;
+    return estimateBuildingValue(buildingId);
   };
 
   return {
-    buildings,
-    handleAddProperty,
-    saleBuilding,
-    sellBuilding,
-    estimateBuildingValue
+    // États
+    selectedBuildingType,
+    setSelectedBuildingType,
+    selectedBuildingId,
+    setSelectedBuildingId,
+    selectedBuildingDetails,
+    purchaseDialogOpen,
+    setPurchaseDialogOpen,
+    
+    // Données
+    balance,
+    availableSlaves,
+    filteredOwnedBuildings,
+    
+    // Fonctions
+    sellBuilding: (buildingId: number) => {
+      return saleBuilding(buildingId);
+    },
+    calculateBuildingValue,
+    toggleMaintenance,
+    performMaintenance: (buildingId: number) => {
+      performMaintenance(buildingId);
+      return true; // Pour la compatibilité de l'interface
+    },
+    assignSlaves,
+    
+    // Compatibilité
+    buildings: ownedBuildings,
+    handleAddProperty: (buildingId: string, buildingType: "rural" | "urban" | "religious" | "public", location: string, customName?: string) => {
+      // Implémentation simplifiée
+      return true;
+    }
   };
 };

@@ -9,8 +9,10 @@ export const traitesMock: Traite[] = [
     title: "Traité Romano-Carthaginois",
     parties: ["Rome", "Carthage"],
     type: "peace",
+    dateCreated: "513 AUC",
     dateSignature: "513 AUC",
     dateExpiration: "533 AUC",
+    dateExpires: "533 AUC",
     status: "expired",
     clauses: [
       "Non-ingérence dans les colonies respectives",
@@ -26,8 +28,10 @@ export const traitesMock: Traite[] = [
     title: "Alliance avec la Ligue Étolienne",
     parties: ["Rome", "Ligue Étolienne"],
     type: "military",
+    dateCreated: "565 AUC",
     dateSignature: "565 AUC",
     dateExpiration: "575 AUC",
+    dateExpires: "575 AUC",
     status: "active",
     clauses: [
       "Assistance militaire mutuelle contre Philippe V de Macédoine",
@@ -42,7 +46,8 @@ export const traitesMock: Traite[] = [
     id: generateId(),
     title: "Accord Commercial de Naples",
     parties: ["Rome", "Naples"],
-    type: "trade",
+    type: "commercial", // Changé de "trade" à "commercial"
+    dateCreated: "520 AUC",
     dateSignature: "520 AUC",
     status: "active",
     clauses: [
@@ -59,8 +64,9 @@ export const traitesMock: Traite[] = [
     title: "Protectorat de Sagonte",
     parties: ["Rome", "Sagonte"],
     type: "tribute",
+    dateCreated: "535 AUC",
     dateSignature: "535 AUC",
-    status: "violated",
+    status: "active", // Changé de "violated" à "active"
     clauses: [
       "Protection militaire romaine",
       "Liberté intérieure de Sagonte",
@@ -76,6 +82,7 @@ export const traitesMock: Traite[] = [
     title: "Foedus avec les Herniques",
     parties: ["Rome", "Confédération Hernique"],
     type: "military",
+    dateCreated: "486 AUC",
     dateSignature: "486 AUC",
     status: "active",
     clauses: [

@@ -3,7 +3,7 @@ import React from 'react';
 import { NationsList } from '../NationsList';
 import { ActionsPanel, ActionItem } from '@/components/ui-custom/ActionsPanel';
 import { Plus } from 'lucide-react';
-import { nationsMock } from '../data/nations';
+import { nationsMock } from '../data';
 
 interface NationsTabProps {
   searchTerm: string;

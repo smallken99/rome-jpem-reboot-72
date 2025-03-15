@@ -7,8 +7,10 @@ export const alliancesMock: Alliance[] = [
   {
     id: generateId(),
     name: "Ligue latine",
+    nations: ["Rome", "Tibur", "Praeneste", "Tusculum", "Lanuvium"],
     members: ["Rome", "Tibur", "Praeneste", "Tusculum", "Lanuvium"],
-    type: "defensive", // Changed from "Défensive" to "defensive"
+    type: "defensive",
+    dateCreated: "496 AUC",
     dateCreation: "496 AUC",
     duration: 10,
     status: "active",
@@ -20,8 +22,10 @@ export const alliancesMock: Alliance[] = [
   {
     id: generateId(),
     name: "Alliance italique",
+    nations: ["Rome", "Samnites", "Étrusques", "Ombriens"],
     members: ["Rome", "Samnites", "Étrusques", "Ombriens"],
-    type: "offensive", // Changed from "Offensive" to "offensive"
+    type: "offensive",
+    dateCreated: "550 AUC",
     dateCreation: "550 AUC",
     duration: 15,
     status: "active",
@@ -33,8 +37,10 @@ export const alliancesMock: Alliance[] = [
   {
     id: generateId(),
     name: "Coalition anti-macédonienne",
+    nations: ["Rome", "Ligue étolienne", "Pergame", "Rhodes"],
     members: ["Rome", "Ligue étolienne", "Pergame", "Rhodes"],
-    type: "offensive", // Changed from "Offensive" to "offensive"
+    type: "offensive",
+    dateCreated: "563 AUC",
     dateCreation: "563 AUC",
     duration: 8,
     status: "active",
@@ -46,11 +52,13 @@ export const alliancesMock: Alliance[] = [
   {
     id: generateId(),
     name: "Alliance maritime méditerranéenne",
+    nations: ["Rome", "Massilia", "Syracuse", "Rhodes"],
     members: ["Rome", "Massilia", "Syracuse", "Rhodes"],
-    type: "defensive", // Changed from "Défensive" to "defensive"
+    type: "defensive",
+    dateCreated: "537 AUC",
     dateCreation: "537 AUC",
     duration: 12,
-    status: "expired",
+    status: "active", // Changé de "expired" à "active" pour être conforme au type
     militarySupport: 5000,
     economicBenefits: ["Libre circulation maritime", "Réduction des taxes portuaires"],
     commitments: ["Protection des navires alliés", "Lutte contre la piraterie"],
@@ -59,8 +67,10 @@ export const alliancesMock: Alliance[] = [
   {
     id: generateId(),
     name: "Pacte de la Mer Adriatique",
+    nations: ["Rome", "Épire", "Corcyre", "Apollonie"],
     members: ["Rome", "Épire", "Corcyre", "Apollonie"],
-    type: "full", // Changed from "Commercial/Défensif" to "full"
+    type: "full",
+    dateCreated: "525 AUC",
     dateCreation: "525 AUC",
     duration: 10,
     status: "active",

@@ -9,13 +9,14 @@ export interface RevenueExpenseChartData {
 }
 
 export interface RevenueSourceData {
-  name: string;
+  id: string;
+  label: string;
   value: number;
   color: string;
 }
 
 export interface PropertyProfitData {
-  id: number;
+  id: string;
   name: string;
   type: string;
   revenue: number;
@@ -24,13 +25,12 @@ export interface PropertyProfitData {
   profitMargin: number;
 }
 
-export interface OptimizationRecommendation {
-  id: number;
+export interface Recommendation {
+  id: string;
   title: string;
   description: string;
-  impact: 'high' | 'medium' | 'low';
-  estimatedRevenue?: number;
-  estimatedSavings?: number;
+  estimatedImpact: string;
+  difficulty: 'easy' | 'medium' | 'hard';
 }
 
 export interface ProfitabilityHeaderProps {
@@ -53,5 +53,11 @@ export interface ProfitablePropertiesTableProps {
 }
 
 export interface OptimizationRecommendationsProps {
-  recommendations: OptimizationRecommendation[];
+  recommendations: Recommendation[];
+}
+
+export interface PropertyDistributionPieProps {
+  urbanProperties: number;
+  ruralProperties: number;
+  otherProperties: number;
 }
