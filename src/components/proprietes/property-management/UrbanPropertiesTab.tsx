@@ -18,8 +18,8 @@ const UrbanPropertiesTab = () => {
     selectedBuildingId,
     setSelectedBuildingId,
     selectedBuildingDetails,
-    isPurchaseDialogOpen: purchaseDialogOpen,
-    setIsPurchaseDialogOpen: setPurchaseDialogOpen,
+    isPurchaseDialogOpen,
+    setIsPurchaseDialogOpen,
     balance,
     availableSlaves,
     filteredOwnedBuildings,
@@ -113,8 +113,8 @@ const UrbanPropertiesTab = () => {
               selectedBuildingId={selectedBuildingId}
               setSelectedBuildingId={handleBuildingSelect}
               selectedBuildingDetails={adaptedSelectedBuildingDetails}
-              purchaseDialogOpen={purchaseDialogOpen}
-              setPurchaseDialogOpen={setPurchaseDialogOpen}
+              purchaseDialogOpen={isPurchaseDialogOpen}
+              setPurchaseDialogOpen={setIsPurchaseDialogOpen}
             />
           ) : (
             <OwnedUrbanPropertiesSection
@@ -122,7 +122,7 @@ const UrbanPropertiesTab = () => {
               filteredOwnedBuildings={filteredOwnedBuildings || []}
               balance={balance}
               availableSlaves={availableSlaves}
-              setPurchaseDialogOpen={setPurchaseDialogOpen}
+              setPurchaseDialogOpen={setIsPurchaseDialogOpen}
               toggleMaintenance={toggleMaintenance}
               performMaintenance={performMaintenance}
               assignSlaves={assignSlaves}

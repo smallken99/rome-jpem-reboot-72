@@ -5,7 +5,7 @@ export interface Nation {
   id: string;
   name: string;
   region: string;
-  status: "ally" | "neutral" | "hostile" | "vassal" | "tributary";
+  status: "ally" | "neutral" | "hostile" | "vassal" | "tributary" | "enemy";
   relationScore: number;
   flag?: string;
   color?: string;
@@ -17,6 +17,11 @@ export interface Nation {
   diplomaticInfluence?: number;
   tradeValue?: number;
   lastContact?: string;
+  power?: number;
+  relation?: number;
+  relationLevel?: number;
+  founded?: string;
+  leaderTitle?: string;
 }
 
 export interface Traite {
@@ -33,20 +38,29 @@ export interface Traite {
   obligations: string | string[];
   dateCreation?: string;
   terms?: string[];
+  title?: string;
 }
 
 export interface Alliance {
   id: string;
   name: string;
-  type: "military" | "economic" | "cultural" | "political";
+  type: "military" | "economic" | "cultural" | "political" | "defensive" | "trade";
   parties: string[];
-  status: "active" | "pending" | "expired" | "broken";
+  status: "active" | "pending" | "expired" | "broken" | "inactive";
   description: string;
   dateCreated: string;
   dateEnds: string;
   terms: string[];
   benefits: string[] | string;
   requirements: string[] | string;
+  date?: string;
+  dateCreation?: string;
+  duration?: number;
+  nations?: string[];
+  members?: string[];
+  militarySupport?: string | number;
+  economicBenefits?: string | string[];
+  commitments?: string | string[];
 }
 
 export interface DiplomaticFiltersProps {
@@ -81,4 +95,26 @@ export interface AddAllianceModalProps {
   onClose: () => void;
   nations: Nation[];
   onSave: (alliance: Alliance) => void;
+}
+
+export interface TraiteModalProps {
+  isOpen: boolean;
+  onOpenChange: (open: boolean) => void;
+  traite: Traite;
+  isEditable: boolean;
+  onSave: (updatedTraite: any) => void;
+}
+
+export interface NationsListProps {
+  nations: Nation[];
+  searchTerm: string;
+  filters: any;
+  isEditable: boolean;
+}
+
+export interface AlliancesMilitairesProps {
+  alliances: Alliance[];
+  searchTerm: string;
+  filters: any;
+  isEditable: boolean;
 }

@@ -1,142 +1,175 @@
 
-import React, { useState } from 'react';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import React from 'react';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
-import { ScrollArea } from '@/components/ui/scroll-area';
-import { Traite } from './types';
+import { Button } from '@/components/ui/button';
+import { Eye, Edit, Trash2 } from 'lucide-react';
+import { Traite, TraiteModalProps } from './types';
 import { TraiteModal } from './modals/TraiteModal';
-import { FileText, Calendar, Users, ExternalLink, MapPin } from 'lucide-react';
+import { useState } from 'react';
 
 interface TraitesListProps {
   traites: Traite[];
   searchTerm: string;
-  filters: {
-    status?: string;
-    dateFrom?: string;
-    dateTo?: string;
-  };
+  filters: any;
   isEditable: boolean;
 }
 
 const TraitesList: React.FC<TraitesListProps> = ({ traites, searchTerm, filters, isEditable }) => {
   const [selectedTraite, setSelectedTraite] = useState<Traite | null>(null);
   const [isTraiteModalOpen, setIsTraiteModalOpen] = useState(false);
-
+  
+  // Filtrage des traités en fonction du terme de recherche et des filtres
   const filteredTraites = traites.filter(traite => {
-    const matchesSearch = searchTerm === '' || 
-      traite.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      traite.description.toLowerCase().includes(searchTerm.toLowerCase());
+    // Filtre de recherche
+    if (
+      searchTerm &&
+      !traite.name.toLowerCase().includes(searchTerm.toLowerCase()) &&
+      !traite.parties.some(party => party.toLowerCase().includes(searchTerm.toLowerCase())) &&
+      !traite.type.toLowerCase().includes(searchTerm.toLowerCase())
+    ) {
+      return false;
+    }
     
-    const matchesStatus = !filters.status || traite.status === filters.status;
+    // Filtre de statut
+    if (filters.status && traite.status !== filters.status) {
+      return false;
+    }
     
-    // If needed, add more filters for date ranges, etc.
+    // Filtre de type
+    if (filters.type && traite.type !== filters.type) {
+      return false;
+    }
     
-    return matchesSearch && matchesStatus;
+    // Filtre de date de signature
+    if (filters.dateFrom && new Date(traite.dateSignature) < new Date(filters.dateFrom)) {
+      return false;
+    }
+    
+    if (filters.dateTo && new Date(traite.dateSignature) > new Date(filters.dateTo)) {
+      return false;
+    }
+    
+    return true;
   });
-
-  const getStatusBadge = (status: string) => {
+  
+  // Couleurs des statuts pour les badges
+  const getStatusColor = (status: string) => {
     switch (status) {
-      case 'active':
-        return <Badge className="bg-green-500">Actif</Badge>;
-      case 'draft':
-        return <Badge variant="outline" className="border-yellow-500 text-yellow-500">Brouillon</Badge>;
-      case 'expired':
-        return <Badge variant="secondary">Expiré</Badge>;
-      case 'revoked':
-        return <Badge variant="destructive">Révoqué</Badge>;
-      default:
-        return <Badge variant="outline">{status}</Badge>;
+      case 'active': return 'bg-green-500';
+      case 'draft': return 'bg-blue-500';
+      case 'expired': return 'bg-amber-500';
+      case 'revoked': return 'bg-red-500';
+      default: return 'bg-gray-500';
     }
   };
-
-  const getTypeBadge = (type: string) => {
+  
+  // Texte des statuts pour l'affichage
+  const getStatusText = (status: string) => {
+    switch (status) {
+      case 'active': return 'Actif';
+      case 'draft': return 'Brouillon';
+      case 'expired': return 'Expiré';
+      case 'revoked': return 'Révoqué';
+      default: return status;
+    }
+  };
+  
+  // Format du type de traité
+  const getTypeText = (type: string) => {
     switch (type) {
-      case 'commercial':
-        return <Badge variant="outline" className="border-blue-500 text-blue-500">Commercial</Badge>;
-      case 'peace':
-        return <Badge variant="outline" className="border-green-500 text-green-500">Paix</Badge>;
-      case 'military':
-        return <Badge variant="outline" className="border-red-500 text-red-500">Militaire</Badge>;
-      case 'tribute':
-        return <Badge variant="outline" className="border-purple-500 text-purple-500">Tribut</Badge>;
-      default:
-        return <Badge variant="outline">{type}</Badge>;
+      case 'commercial': return 'Commercial';
+      case 'peace': return 'Paix';
+      case 'military': return 'Militaire';
+      case 'territorial': return 'Territorial';
+      default: return type;
     }
   };
-
-  const handleTraiteClick = (traite: Traite) => {
+  
+  const handleView = (traite: Traite) => {
     setSelectedTraite(traite);
     setIsTraiteModalOpen(true);
   };
-
-  const handleSaveTraite = (updatedTraite: any) => {
-    console.log('Saving updated traite:', updatedTraite);
-    setIsTraiteModalOpen(false);
+  
+  const handleEdit = (traite: Traite) => {
+    setSelectedTraite(traite);
+    setIsTraiteModalOpen(true);
+  };
+  
+  const handleDelete = (id: string) => {
+    console.log('Deleting treaty:', id);
+    // TODO: implement delete confirmation
   };
 
+  const handleSaveTraite = (updatedTraite: Traite) => {
+    console.log('Saving updated treaty:', updatedTraite);
+    setIsTraiteModalOpen(false);
+    // In a real app, you would update the data here
+  };
+  
   return (
-    <>
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        {filteredTraites.length === 0 ? (
-          <div className="col-span-full text-center p-8 bg-muted/20 rounded-lg">
-            <p className="text-muted-foreground">Aucun traité trouvé.</p>
-          </div>
-        ) : (
-          filteredTraites.map(traite => (
-            <Card 
-              key={traite.id} 
-              className="cursor-pointer hover:border-primary/50 transition-colors"
-              onClick={() => handleTraiteClick(traite)}
-            >
-              <CardHeader className="pb-2">
-                <div className="flex justify-between items-start">
-                  <div>
-                    <CardTitle className="text-lg font-cinzel">{traite.name}</CardTitle>
-                    <CardDescription className="flex items-center mt-1">
-                      <Calendar className="h-3 w-3 mr-1" />
-                      {traite.dateSignature}
-                    </CardDescription>
+    <div>
+      <Table>
+        <TableHeader>
+          <TableRow>
+            <TableHead>Nom</TableHead>
+            <TableHead>Parties</TableHead>
+            <TableHead>Type</TableHead>
+            <TableHead>Date de signature</TableHead>
+            <TableHead>Statut</TableHead>
+            <TableHead>Actions</TableHead>
+          </TableRow>
+        </TableHeader>
+        <TableBody>
+          {filteredTraites.length === 0 ? (
+            <TableRow>
+              <TableCell colSpan={6} className="text-center py-4">
+                Aucun traité correspondant aux critères
+              </TableCell>
+            </TableRow>
+          ) : (
+            filteredTraites.map(traite => (
+              <TableRow key={traite.id}>
+                <TableCell className="font-medium">{traite.name}</TableCell>
+                <TableCell>{traite.parties.join(', ')}</TableCell>
+                <TableCell>{getTypeText(traite.type)}</TableCell>
+                <TableCell>{traite.dateSignature}</TableCell>
+                <TableCell>
+                  <Badge className={getStatusColor(traite.status)}>{getStatusText(traite.status)}</Badge>
+                </TableCell>
+                <TableCell>
+                  <div className="flex gap-2">
+                    <Button variant="ghost" size="icon" onClick={() => handleView(traite)}>
+                      <Eye className="h-4 w-4" />
+                    </Button>
+                    {isEditable && (
+                      <>
+                        <Button variant="ghost" size="icon" onClick={() => handleEdit(traite)}>
+                          <Edit className="h-4 w-4" />
+                        </Button>
+                        <Button variant="ghost" size="icon" onClick={() => handleDelete(traite.id)}>
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </>
+                    )}
                   </div>
-                  <div className="flex flex-col gap-1 items-end">
-                    {getStatusBadge(traite.status)}
-                    {getTypeBadge(traite.type)}
-                  </div>
-                </div>
-              </CardHeader>
-              <CardContent>
-                <ScrollArea className="h-24">
-                  <p className="text-sm text-muted-foreground">{traite.description}</p>
-                </ScrollArea>
-                <div className="mt-3 flex items-center text-xs text-muted-foreground">
-                  <Users className="h-3 w-3 mr-1" />
-                  <span>Parties: {traite.parties.join(', ')}</span>
-                </div>
-              </CardContent>
-              <CardFooter className="flex justify-between pt-2">
-                <div className="text-xs text-muted-foreground flex items-center">
-                  <FileText className="h-3 w-3 mr-1" />
-                  <span>{traite.clauses ? traite.clauses.length : '0'} clauses</span>
-                </div>
-                <Button variant="ghost" size="sm" className="p-0 h-auto">
-                  <ExternalLink className="h-4 w-4" />
-                  <span className="sr-only">Voir les détails</span>
-                </Button>
-              </CardFooter>
-            </Card>
-          ))
-        )}
-      </div>
+                </TableCell>
+              </TableRow>
+            ))
+          )}
+        </TableBody>
+      </Table>
 
       {selectedTraite && (
-        <TraiteModal
+        <TraiteModal 
           isOpen={isTraiteModalOpen} 
-          onClose={() => setIsTraiteModalOpen(false)}
+          onOpenChange={setIsTraiteModalOpen}
           traite={selectedTraite}
+          isEditable={isEditable}
           onSave={handleSaveTraite}
         />
       )}
-    </>
+    </div>
   );
 };
 

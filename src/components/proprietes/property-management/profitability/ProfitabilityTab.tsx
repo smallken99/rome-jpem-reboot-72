@@ -1,96 +1,122 @@
 
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { ProfitablePropertiesTable } from './ProfitablePropertiesTable';
+import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
+import { ProfitabilityHeader } from './ProfitabilityHeader';
 import { RevenueExpenseChart } from './RevenueExpenseChart';
-import { PropertyDistributionPie } from './PropertyDistributionPie';
 import { RevenueSourcesChart } from './RevenueSourcesChart';
+import { PropertyDistributionPie } from './PropertyDistributionPie';
+import { ProfitablePropertiesTable } from './ProfitablePropertiesTable';
 import { OptimizationRecommendations } from './OptimizationRecommendations';
 import { useProfitabilityData } from './useProfitabilityData';
-import { ProfitabilityHeader } from './ProfitabilityHeader';
 
 export const ProfitabilityTab = () => {
   const {
-    profitableProperties,
-    revenueExpenseData,
+    activeView,
+    setActiveView,
     revenueSources,
     propertyTypes,
-    optimizationRecommendations,
-    activeView,
-    setActiveView
+    revenueExpenseData,
+    propertiesData,
+    recommendations,
+    totalRevenue,
+    totalExpenses,
+    totalProfit,
+    profitMargin,
+    roi
   } = useProfitabilityData();
 
   return (
     <div className="space-y-6">
-      <ProfitabilityHeader 
-        activeView={activeView} 
-        setActiveView={setActiveView} 
-      />
+      {/* En-tête avec les sélecteurs de période */}
+      <ProfitabilityHeader activeView={activeView} setActiveView={setActiveView} />
       
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <Card className="col-span-2">
+      {/* Métriques générales */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
+        <Card>
+          <CardHeader className="py-3">
+            <CardTitle className="text-sm font-medium text-muted-foreground">Revenu Total</CardTitle>
+          </CardHeader>
+          <CardContent className="py-1">
+            <div className="text-2xl font-bold">{totalRevenue.toLocaleString()} As</div>
+          </CardContent>
+        </Card>
+        
+        <Card>
+          <CardHeader className="py-3">
+            <CardTitle className="text-sm font-medium text-muted-foreground">Dépenses Totales</CardTitle>
+          </CardHeader>
+          <CardContent className="py-1">
+            <div className="text-2xl font-bold">{totalExpenses.toLocaleString()} As</div>
+          </CardContent>
+        </Card>
+        
+        <Card>
+          <CardHeader className="py-3">
+            <CardTitle className="text-sm font-medium text-muted-foreground">Profit Total</CardTitle>
+          </CardHeader>
+          <CardContent className="py-1">
+            <div className="text-2xl font-bold">{totalProfit.toLocaleString()} As</div>
+          </CardContent>
+        </Card>
+        
+        <Card>
+          <CardHeader className="py-3">
+            <CardTitle className="text-sm font-medium text-muted-foreground">Marge de Profit</CardTitle>
+          </CardHeader>
+          <CardContent className="py-1">
+            <div className="text-2xl font-bold">{profitMargin.toFixed(1)}%</div>
+          </CardContent>
+        </Card>
+        
+        <Card>
+          <CardHeader className="py-3">
+            <CardTitle className="text-sm font-medium text-muted-foreground">ROI Global</CardTitle>
+          </CardHeader>
+          <CardContent className="py-1">
+            <div className="text-2xl font-bold">{roi.toFixed(1)}%</div>
+          </CardContent>
+        </Card>
+      </div>
+      
+      {/* Graphiques et tableaux */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <Card>
           <CardHeader>
             <CardTitle>Revenus et Dépenses</CardTitle>
           </CardHeader>
           <CardContent>
-            <RevenueExpenseChart 
-              data={revenueExpenseData} 
-              activeView={activeView} 
-            />
+            <RevenueExpenseChart data={revenueExpenseData || []} activeView={activeView} />
           </CardContent>
         </Card>
         
         <Card>
           <CardHeader>
-            <CardTitle>Distribution des Propriétés</CardTitle>
+            <CardTitle>Propriétés les plus rentables</CardTitle>
           </CardHeader>
           <CardContent>
-            <PropertyDistributionPie data={propertyTypes} />
+            <ProfitablePropertiesTable properties={propertiesData} activeView={activeView} />
+          </CardContent>
+        </Card>
+        
+        <Card>
+          <CardHeader>
+            <CardTitle>Sources de revenus</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <RevenueSourcesChart data={revenueSources} />
+          </CardContent>
+        </Card>
+        
+        <Card>
+          <CardHeader>
+            <CardTitle>Recommandations d'optimisation</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <OptimizationRecommendations recommendations={recommendations} />
           </CardContent>
         </Card>
       </div>
-      
-      <Tabs defaultValue="properties">
-        <TabsList className="grid w-full grid-cols-3">
-          <TabsTrigger value="properties">Propriétés Rentables</TabsTrigger>
-          <TabsTrigger value="sources">Sources de Revenus</TabsTrigger>
-          <TabsTrigger value="recommendations">Recommandations</TabsTrigger>
-        </TabsList>
-        
-        <TabsContent value="properties">
-          <Card>
-            <CardHeader>
-              <CardTitle>Propriétés les Plus Rentables</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <ProfitablePropertiesTable data={profitableProperties} />
-            </CardContent>
-          </Card>
-        </TabsContent>
-        
-        <TabsContent value="sources">
-          <Card>
-            <CardHeader>
-              <CardTitle>Sources de Revenus</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <RevenueSourcesChart data={revenueSources} />
-            </CardContent>
-          </Card>
-        </TabsContent>
-        
-        <TabsContent value="recommendations">
-          <Card>
-            <CardHeader>
-              <CardTitle>Recommandations d'Optimisation</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <OptimizationRecommendations recommendations={optimizationRecommendations} />
-            </CardContent>
-          </Card>
-        </TabsContent>
-      </Tabs>
     </div>
   );
 };

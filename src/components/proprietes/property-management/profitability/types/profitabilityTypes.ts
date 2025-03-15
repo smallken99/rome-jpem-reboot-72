@@ -1,7 +1,5 @@
 
-import { OwnedBuilding } from '@/components/proprietes/hooks/building/types';
-
-export type ChartViewType = 'monthly' | 'quarterly' | 'yearly' | 'annual';
+export type ChartViewType = 'yearly' | 'monthly' | 'quarterly' | 'annual';
 
 export interface ProfitabilityHeaderProps {
   activeView: ChartViewType;
@@ -30,17 +28,15 @@ export interface RevenueExpenseChartData extends RevenueExpenseData {
   month?: string;
 }
 
-export interface RevenueExpenseChartProps {
-  data: RevenueExpenseChartData[];
-  activeView: ChartViewType;
-}
-
 export interface RevenueSourceData {
+  id?: string;
   name: string;
   value: number;
   percent: number;
   source?: string;
   percentage?: number;
+  color?: string;
+  label?: string;
 }
 
 export interface PropertyTypeData {
@@ -76,6 +72,7 @@ export interface RevenueSourcesChartProps {
 
 export interface ProfitablePropertiesTableProps {
   properties: PropertyProfitData[];
+  activeView?: ChartViewType;
   sortBy?: string;
   onSortChange?: (sortBy: string) => void;
 }
@@ -83,6 +80,11 @@ export interface ProfitablePropertiesTableProps {
 export interface OptimizationRecommendationsProps {
   recommendations: Recommendation[];
   onSelectProperty?: (propertyId: string | number) => void;
+}
+
+export interface RevenueExpenseChartProps {
+  data: RevenueExpenseChartData[];
+  activeView: ChartViewType;
 }
 
 export interface ProfitabilityData {

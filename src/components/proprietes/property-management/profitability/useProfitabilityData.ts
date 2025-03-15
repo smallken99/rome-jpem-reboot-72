@@ -13,7 +13,7 @@ import {
 // Données fictives pour le développement
 const generateMockData = (): Omit<ProfitabilityData, 'activeView' | 'setActiveView'> => {
   // Propriétés rentables
-  const profitableProperties: PropertyProfitData[] = [
+  const propertiesData: PropertyProfitData[] = [
     { id: 1, name: 'Villa Pompei', type: 'Résidence de luxe', revenue: 12000, expenses: 4500, profit: 7500, profitMargin: 62.5, roi: 12.5 },
     { id: 2, name: 'Ferme de Tusculum', type: 'Domaine agricole', revenue: 8500, expenses: 3200, profit: 5300, profitMargin: 62.4, roi: 10.6 },
     { id: 3, name: 'Oliveraie de Campanie', type: 'Plantation', revenue: 6700, expenses: 2800, profit: 3900, profitMargin: 58.2, roi: 9.8 },
@@ -23,43 +23,44 @@ const generateMockData = (): Omit<ProfitabilityData, 'activeView' | 'setActiveVi
   
   // Données de revenus et dépenses
   const revenueExpenseData: RevenueExpenseChartData[] = [
-    { month: 'Jan', revenue: 18500, expenses: 8200, profit: 10300 },
-    { month: 'Fév', revenue: 17800, expenses: 8000, profit: 9800 },
-    { month: 'Mar', revenue: 19200, expenses: 8300, profit: 10900 },
-    { month: 'Avr', revenue: 20100, expenses: 8500, profit: 11600 },
-    { month: 'Mai', revenue: 21000, expenses: 8800, profit: 12200 },
-    { month: 'Juin', revenue: 22300, expenses: 9100, profit: 13200 },
-    { month: 'Juil', revenue: 24500, expenses: 9300, profit: 15200 },
-    { month: 'Aoû', revenue: 26000, expenses: 9500, profit: 16500 },
-    { month: 'Sep', revenue: 24800, expenses: 9200, profit: 15600 },
-    { month: 'Oct', revenue: 23500, expenses: 9000, profit: 14500 },
-    { month: 'Nov', revenue: 21800, expenses: 8700, profit: 13100 },
-    { month: 'Déc', revenue: 20500, expenses: 8500, profit: 12000 }
+    { name: 'Jan', revenue: 18500, expenses: 8200, profit: 10300, month: 'Jan' },
+    { name: 'Fév', revenue: 17800, expenses: 8000, profit: 9800, month: 'Fév' },
+    { name: 'Mar', revenue: 19200, expenses: 8300, profit: 10900, month: 'Mar' },
+    { name: 'Avr', revenue: 20100, expenses: 8500, profit: 11600, month: 'Avr' },
+    { name: 'Mai', revenue: 21000, expenses: 8800, profit: 12200, month: 'Mai' },
+    { name: 'Juin', revenue: 22300, expenses: 9100, profit: 13200, month: 'Juin' },
+    { name: 'Juil', revenue: 24500, expenses: 9300, profit: 15200, month: 'Juil' },
+    { name: 'Aoû', revenue: 26000, expenses: 9500, profit: 16500, month: 'Aoû' },
+    { name: 'Sep', revenue: 24800, expenses: 9200, profit: 15600, month: 'Sep' },
+    { name: 'Oct', revenue: 23500, expenses: 9000, profit: 14500, month: 'Oct' },
+    { name: 'Nov', revenue: 21800, expenses: 8700, profit: 13100, month: 'Nov' },
+    { name: 'Déc', revenue: 20500, expenses: 8500, profit: 12000, month: 'Déc' }
   ];
   
   // Sources de revenus
   const revenueSources: RevenueSourceData[] = [
-    { source: 'Agriculture', value: 45000, percentage: 35 },
-    { source: 'Viticulture', value: 30000, percentage: 23 },
-    { source: 'Résidences', value: 25000, percentage: 19 },
-    { source: 'Commerce', value: 15000, percentage: 12 },
-    { source: 'Élevage', value: 10000, percentage: 8 },
-    { source: 'Autres', value: 5000, percentage: 3 }
+    { name: 'Agriculture', value: 45000, percent: 35, source: 'Agriculture', percentage: 35 },
+    { name: 'Viticulture', value: 30000, percent: 23, source: 'Viticulture', percentage: 23 },
+    { name: 'Résidences', value: 25000, percent: 19, source: 'Résidences', percentage: 19 },
+    { name: 'Commerce', value: 15000, percent: 12, source: 'Commerce', percentage: 12 },
+    { name: 'Élevage', value: 10000, percent: 8, source: 'Élevage', percentage: 8 },
+    { name: 'Autres', value: 5000, percent: 3, source: 'Autres', percentage: 3 }
   ];
   
   // Types de propriétés
   const propertyTypes: PropertyTypeData[] = [
-    { type: 'Domaines agricoles', count: 3, value: 120000, percentage: 40 },
-    { type: 'Résidences urbaines', count: 2, value: 90000, percentage: 30 },
-    { type: 'Vignobles', count: 1, value: 45000, percentage: 15 },
-    { type: 'Commerces', count: 2, value: 30000, percentage: 10 },
-    { type: 'Entrepôts', count: 1, value: 15000, percentage: 5 }
+    { name: 'Domaines agricoles', count: 3, revenue: 120000, percent: 40, type: 'Domaines agricoles', value: 120000, percentage: 40 },
+    { name: 'Résidences urbaines', count: 2, revenue: 90000, percent: 30, type: 'Résidences urbaines', value: 90000, percentage: 30 },
+    { name: 'Vignobles', count: 1, revenue: 45000, percent: 15, type: 'Vignobles', value: 45000, percentage: 15 },
+    { name: 'Commerces', count: 2, revenue: 30000, percent: 10, type: 'Commerces', value: 30000, percentage: 10 },
+    { name: 'Entrepôts', count: 1, revenue: 15000, percent: 5, type: 'Entrepôts', value: 15000, percentage: 5 }
   ];
   
   // Recommandations d'optimisation
-  const optimizationRecommendations: Recommendation[] = [
+  const recommendations: Recommendation[] = [
     { 
-      id: 1, 
+      id: "1", 
+      title: "Augmenter la production d'oliveraie",
       property: 'Oliveraie de Campanie', 
       action: 'Augmenter la production', 
       impact: 'high', 
@@ -67,7 +68,8 @@ const generateMockData = (): Omit<ProfitabilityData, 'activeView' | 'setActiveVi
       estimatedBenefit: 2000 
     },
     { 
-      id: 2, 
+      id: "2", 
+      title: "Élargir la gamme de produits",
       property: 'Boutique du Forum', 
       action: 'Élargir la gamme de produits', 
       impact: 'medium', 
@@ -75,7 +77,8 @@ const generateMockData = (): Omit<ProfitabilityData, 'activeView' | 'setActiveVi
       estimatedBenefit: 1200 
     },
     { 
-      id: 3, 
+      id: "3", 
+      title: "Réduire les coûts de main-d'œuvre",
       property: 'Ferme de Tusculum', 
       action: 'Réduire les coûts de main-d\'œuvre', 
       impact: 'low', 
@@ -83,13 +86,35 @@ const generateMockData = (): Omit<ProfitabilityData, 'activeView' | 'setActiveVi
       estimatedBenefit: 800 
     }
   ];
+
+  // Calculate totals
+  const totalRevenue = propertiesData.reduce((sum, prop) => sum + prop.revenue, 0);
+  const totalExpenses = propertiesData.reduce((sum, prop) => sum + prop.expenses, 0);
+  const totalProfit = totalRevenue - totalExpenses;
+  const profitMargin = (totalProfit / totalRevenue) * 100;
+  const roi = (totalProfit / totalExpenses) * 100;
+  
+  // Find most and least profitable properties
+  const mostProfitable = [...propertiesData].sort((a, b) => b.profit - a.profit)[0] || null;
+  const leastProfitable = [...propertiesData].sort((a, b) => a.profit - b.profit)[0] || null;
   
   return {
-    profitableProperties,
-    revenueExpenseData,
+    totalRevenue,
+    totalExpenses,
+    totalProfit,
+    profitMargin,
+    roi,
+    mostProfitable,
+    leastProfitable,
+    timeSeriesData: revenueExpenseData,
+    propertiesData,
     revenueSources,
     propertyTypes,
-    optimizationRecommendations
+    recommendations,
+    // Aliases for compatibility
+    profitableProperties: propertiesData,
+    revenueExpenseData,
+    optimizationRecommendations: recommendations
   };
 };
 
