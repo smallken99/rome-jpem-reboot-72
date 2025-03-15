@@ -115,18 +115,21 @@ function mapMJStatusToRepublique(status: string): 'proposée' | 'en_débat' | 'v
  * Map Republique status to MJ status
  */
 function mapRepubliqueStatusToMJ(status: string): LoiState {
-  switch (status.toLowerCase()) {
-    case 'proposée':
-    case 'en_débat':
-      return 'proposed' as LoiState;
-    case 'votée':
-    case 'promulguée':
-      return 'active' as LoiState;
-    case 'rejetée':
-      return 'rejected' as LoiState;
-    default:
-      return 'proposed' as LoiState;
+  const statusLower = status.toLowerCase();
+  
+  if (['proposée', 'en_débat'].includes(statusLower)) {
+    return 'proposed' as LoiState;
   }
+  
+  if (['votée', 'promulguée'].includes(statusLower)) {
+    return 'active' as LoiState;
+  }
+  
+  if (statusLower === 'rejetée') {
+    return 'rejected' as LoiState;
+  }
+  
+  return 'proposed' as LoiState; // Default
 }
 
 /**
@@ -167,6 +170,17 @@ export function convertRepubliqueToMJLoi(loi: LoiRepublique): LoiMaitreJeu {
     gameDate = { year: new Date().getFullYear(), season: "SPRING" };
   }
   
+  // Ensure valid type and importance
+  const ensureValidType = (type: string | undefined): LoiType => {
+    if (!type) return 'Politique' as LoiType;
+    return type as LoiType;
+  };
+
+  const ensureValidImportance = (importance: string | undefined): ImportanceType => {
+    if (!importance) return 'normale' as ImportanceType;
+    return importance as ImportanceType;
+  };
+  
   return {
     id: loi.id,
     title: loi.titre,
@@ -178,8 +192,8 @@ export function convertRepubliqueToMJLoi(loi: LoiRepublique): LoiMaitreJeu {
     votesPositifs: loi.votes?.pour || 0,
     votesNégatifs: loi.votes?.contre || 0,
     votesAbstention: loi.votes?.abstention || 0,
-    type: (loi.type || 'Politique') as LoiType,
-    importance: (loi.importance || 'normale') as ImportanceType,
+    type: ensureValidType(loi.type),
+    importance: ensureValidImportance(loi.importance),
     clauses: loi.clauses || [],
     commentaires: loi.commentaires || [],
     tags: loi.tags || [],

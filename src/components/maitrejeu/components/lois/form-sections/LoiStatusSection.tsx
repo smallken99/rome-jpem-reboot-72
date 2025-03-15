@@ -14,12 +14,18 @@ export const LoiStatusSection: React.FC<LoiStatusSectionProps> = ({
   formData,
   handleSelectChange
 }) => {
+  // Assurer que l'état est l'une des valeurs valides pour l'UI
+  const ensureValidState = (state: string | undefined): string => {
+    if (!state) return 'proposed';
+    return state;
+  };
+
   return (
     <div className="grid grid-cols-2 gap-4">
       <div className="space-y-2">
         <Label htmlFor="catégorie">Catégorie</Label>
         <Select
-          value={formData.catégorie}
+          value={formData.catégorie || ''}
           onValueChange={(value) => handleSelectChange('catégorie', value)}
         >
           <SelectTrigger id="catégorie">
@@ -44,7 +50,7 @@ export const LoiStatusSection: React.FC<LoiStatusSectionProps> = ({
       <div className="space-y-2">
         <Label htmlFor="état">État</Label>
         <Select
-          value={formData.état as string}
+          value={ensureValidState(formData.état as string)}
           onValueChange={(value) => handleSelectChange('état', value)}
         >
           <SelectTrigger id="état">
@@ -67,7 +73,7 @@ export const LoiStatusSection: React.FC<LoiStatusSectionProps> = ({
       <div className="space-y-2 col-span-2">
         <Label>Importance</Label>
         <RadioGroup
-          value={formData.importance as string}
+          value={formData.importance as string || 'normale'}
           onValueChange={(value) => handleSelectChange('importance', value)}
           className="flex space-x-4"
         >

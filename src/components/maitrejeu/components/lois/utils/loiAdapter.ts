@@ -18,6 +18,24 @@ export const ensureLoiCompliance = (loi: any): LoiMJ => {
     return loi as LoiMJ;
   }
   
+  // Fonction pour s'assurer que le type est valide
+  const ensureValidType = (type: string | undefined): LoiType => {
+    if (!type) return 'Politique' as LoiType;
+    return type as LoiType;
+  };
+
+  // Fonction pour s'assurer que l'importance est valide
+  const ensureValidImportance = (importance: string | undefined): ImportanceType => {
+    if (!importance) return 'normale' as ImportanceType;
+    return importance as ImportanceType;
+  };
+
+  // Fonction pour s'assurer que l'état est valide
+  const ensureValidState = (state: string | undefined): LoiState => {
+    if (!state) return 'proposed' as LoiState;
+    return state as LoiState;
+  };
+  
   // Sinon, adapter les propriétés pour assurer la conformité
   return {
     ...loi,
@@ -25,11 +43,11 @@ export const ensureLoiCompliance = (loi: any): LoiMJ => {
     id: loi.id || `loi-${Date.now()}`,
     titre: loi.titre || loi.title || '',
     description: loi.description || '',
-    type: (loi.type as LoiType) || 'Politique',
-    importance: (loi.importance as ImportanceType) || 'normale',
+    type: ensureValidType(loi.type),
+    importance: ensureValidImportance(loi.importance),
     proposeur: loi.proposeur || loi.auteur || loi.proposedBy || '',
     catégorie: loi.catégorie || loi.categorieId || loi.category || '',
-    état: (loi.état || loi.statut || loi.status || 'proposée') as LoiState,
+    état: ensureValidState(loi.état || loi.statut || loi.status || 'proposée'),
     date: loi.date || loi.dateProposition || { year: new Date().getFullYear(), season: 'SPRING' },
     votesPositifs: loi.votesPositifs || (loi.votes?.pour || 0),
     votesNégatifs: loi.votesNégatifs || (loi.votes?.contre || 0),
@@ -85,8 +103,8 @@ export const convertMJToRepublique = (loi: LoiMJ): ExtendedLoi => {
     tags: loi.tags || [],
     clauses: loi.clauses || [],
     commentaires: loi.commentaires || [],
-    type: (loi.type || 'Politique') as LoiType,
-    importance: (loi.importance || 'normale') as ImportanceType
+    type: loi.type as LoiType,
+    importance: loi.importance as ImportanceType
   };
 };
 
@@ -94,6 +112,22 @@ export const convertMJToRepublique = (loi: LoiMJ): ExtendedLoi => {
  * Convertit une loi du format République vers le format MJ
  */
 export const convertRepubliqueToMJ = (loi: ExtendedLoi): LoiMJ => {
+  // Fonctions pour s'assurer que les types sont valides
+  const ensureValidType = (type: string | undefined): LoiType => {
+    if (!type) return 'Politique' as LoiType;
+    return type as LoiType;
+  };
+
+  const ensureValidImportance = (importance: string | undefined): ImportanceType => {
+    if (!importance) return 'normale' as ImportanceType;
+    return importance as ImportanceType;
+  };
+
+  const ensureValidState = (state: string | undefined): LoiState => {
+    if (!state) return 'proposed' as LoiState;
+    return state as LoiState;
+  };
+
   return {
     id: loi.id,
     titre: loi.titre || '',
@@ -103,15 +137,15 @@ export const convertRepubliqueToMJ = (loi: ExtendedLoi): LoiMJ => {
     date: typeof loi.dateProposition === 'string' 
       ? { year: parseInt(loi.dateProposition.split(' ')[0]), season: loi.dateProposition.split(' ')[1] } 
       : loi.dateProposition,
-    état: (loi.statut || 'proposée') as LoiState,
+    état: ensureValidState(loi.statut || 'proposée'),
     votesPositifs: loi.votes?.pour || 0,
     votesNégatifs: loi.votes?.contre || 0,
     votesAbstention: loi.votes?.abstention || 0,
     tags: loi.tags || [],
     clauses: loi.clauses || [],
     commentaires: loi.commentaires || [],
-    type: loi.type as LoiType,
-    importance: loi.importance as ImportanceType,
+    type: ensureValidType(loi.type),
+    importance: ensureValidImportance(loi.importance),
     effets: {},
   };
 };

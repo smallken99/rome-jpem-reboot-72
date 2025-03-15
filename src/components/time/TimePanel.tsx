@@ -1,70 +1,105 @@
 
 import React from 'react';
-import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { useGameTime } from '@/hooks/useGameTime';
-import { formatSeasonDisplay, Season } from '@/utils/timeSystem';
-import { CalendarIcon, ArrowRightIcon, ClockIcon } from 'lucide-react';
+import { Badge } from '@/components/ui/badge';
+import { CalendarDays, Clock } from 'lucide-react';
 
 interface TimePanelProps {
-  minimal?: boolean;
+  year?: number;
+  season?: 'SPRING' | 'SUMMER' | 'AUTUMN' | 'WINTER' | string;
+  phase?: string;
+  showTitle?: boolean;
 }
 
-export const TimePanel: React.FC<TimePanelProps> = ({ minimal = false }) => {
-  const { 
-    year,
-    season,
-    currentPhase,
-    advanceTime
-  } = useGameTime();
-
-  // Format phase display
-  const formatPhase = (phase: string) => {
-    return phase.charAt(0).toUpperCase() + phase.slice(1).toLowerCase();
-  };
+// Fonction pour formater la saison en français
+const formatSeason = (season?: string): string => {
+  if (!season) return 'Printemps';
   
-  // Make sure season is properly typed
-  const safeSeason = season as Season;
-
-  if (minimal) {
-    return (
-      <div className="flex items-center space-x-2 text-sm">
-        <CalendarIcon className="h-4 w-4" />
-        <span className="font-medium">An {year} - {formatSeasonDisplay(safeSeason)}</span>
-      </div>
-    );
+  switch (season.toUpperCase()) {
+    case 'SPRING':
+      return 'Printemps';
+    case 'SUMMER':
+      return 'Été';
+    case 'AUTUMN':
+      return 'Automne';
+    case 'WINTER':
+      return 'Hiver';
+    default:
+      return season;
   }
+};
 
+// Fonction pour formater la phase (avec vérification de nullité)
+const formatPhase = (phase?: string): string => {
+  if (!phase) return 'Politique';
+  
+  switch (phase.toLowerCase()) {
+    case 'political':
+      return 'Politique';
+    case 'economy':
+      return 'Économie';
+    case 'military':
+      return 'Militaire';
+    case 'religious':
+      return 'Religieux';
+    default:
+      return phase;
+  }
+};
+
+// Obtenez l'année et la saison actuelles (ou par défaut si non fournies)
+const getCurrentTimeData = () => {
+  return {
+    year: new Date().getFullYear() - 1800, // Simulation d'une année romaine
+    season: ['SPRING', 'SUMMER', 'AUTUMN', 'WINTER'][Math.floor(new Date().getMonth() / 3)],
+    phase: 'political'
+  };
+};
+
+export const TimePanel: React.FC<TimePanelProps> = ({
+  year,
+  season,
+  phase,
+  showTitle = true
+}) => {
+  // Utiliser les données par défaut si aucune n'est fournie
+  const timeData = getCurrentTimeData();
+  const displayYear = year || timeData.year;
+  const displaySeason = season || timeData.season;
+  const displayPhase = phase || timeData.phase;
+  
   return (
-    <Card>
-      <CardHeader className="pb-2">
-        <CardTitle className="text-lg">Calendrier Romain</CardTitle>
-      </CardHeader>
-      <CardContent>
-        <div className="space-y-3">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-2">
-              <CalendarIcon className="h-5 w-5 text-muted-foreground" />
-              <span className="font-medium">An {year}</span>
-            </div>
-            <div className="bg-primary/10 px-2 py-1 rounded text-primary font-medium">
-              {formatSeasonDisplay(safeSeason)}
-            </div>
-          </div>
-          
+    <Card className="timeline-card">
+      {showTitle && (
+        <CardHeader className="pb-2">
+          <CardTitle className="text-sm font-medium">Calendrier Républicain</CardTitle>
+        </CardHeader>
+      )}
+      
+      <CardContent className="pt-0">
+        <div className="flex items-center justify-between">
           <div className="flex items-center space-x-2">
-            <ClockIcon className="h-5 w-5 text-muted-foreground" />
-            <span className="font-medium">Phase: {formatPhase(currentPhase)}</span>
+            <CalendarDays className="h-4 w-4 text-muted-foreground" />
+            <span>An {displayYear} AUC</span>
           </div>
           
-          <Button 
-            onClick={() => advanceTime()} 
-            className="w-full flex items-center justify-center gap-1"
-          >
-            Avancer <ArrowRightIcon className="h-4 w-4" />
-          </Button>
+          <Badge variant="outline" className="flex items-center">
+            <Clock className="h-3 w-3 mr-1" />
+            {formatSeason(displaySeason)}
+          </Badge>
+        </div>
+        
+        <div className="mt-2 text-xs text-muted-foreground">
+          <div className="flex justify-between items-center">
+            <span>Phase actuelle:</span>
+            <Badge variant="secondary" className="text-xs">
+              {formatPhase(displayPhase)}
+            </Badge>
+          </div>
         </div>
       </CardContent>
     </Card>
   );
 };
+
+export default TimePanel;
