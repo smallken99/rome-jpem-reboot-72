@@ -4,6 +4,7 @@ import { BuildingDescription } from '../types/buildingTypes';
 // Habitations
 export const urbanResidentialBuildings: Record<string, BuildingDescription> = {
   insula: {
+    id: "insula",
     name: "Insula",
     description: "Immeuble d'habitation locative à plusieurs étages, avec commerces au rez-de-chaussée. Logement populaire pour la plèbe urbaine.",
     advantages: [
@@ -22,6 +23,7 @@ export const urbanResidentialBuildings: Record<string, BuildingDescription> = {
     }
   },
   domus: {
+    id: "domus",
     name: "Domus",
     description: "Maison urbaine patricienne avec atrium central, idéale pour recevoir clients et alliés politiques.",
     advantages: [
@@ -40,6 +42,7 @@ export const urbanResidentialBuildings: Record<string, BuildingDescription> = {
     }
   },
   villa_urbana: {
+    id: "villa_urbana",
     name: "Villa Urbana",
     description: "Résidence luxueuse inspirée des villas hellénistiques, avec jardins, fontaines et salles de réception.",
     advantages: [

@@ -14,7 +14,7 @@ export const useRuralPropertyCalculator = (buildingId?: string) => {
   // Get building details based on ID
   const getBuildingDetails = (id?: string): BuildingDescription | null => {
     if (!id) return null;
-    return ruralProperties.find(prop => prop.id === id) || null;
+    return ruralProperties[id] || null;
   };
 
   const handleAddProperty = (

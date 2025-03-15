@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { PlusCircle } from 'lucide-react';
@@ -32,6 +31,11 @@ export const OwnedUrbanPropertiesSection: React.FC<OwnedUrbanPropertiesSectionPr
   sellBuilding,
   calculateBuildingValue
 }) => {
+  // Fonction auxiliaire pour adapter l'ID de type string en numérique
+  const adaptId = (id: string | number): number => {
+    return typeof id === 'string' ? parseInt(id, 10) : id;
+  };
+
   // Titre de la section en fonction du type de bâtiment
   const getBuildingSectionTitle = () => {
     switch (selectedBuildingType) {
@@ -41,11 +45,6 @@ export const OwnedUrbanPropertiesSection: React.FC<OwnedUrbanPropertiesSectionPr
       case 'military': return 'Militaires';
       default: return '';
     }
-  };
-
-  // Fonction auxiliaire pour adapter l'ID de type string en numérique
-  const adaptId = (id: string | number): number => {
-    return typeof id === 'string' ? parseInt(id, 10) : id;
   };
 
   return (

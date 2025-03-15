@@ -4,6 +4,7 @@ import { BuildingDescription } from '../types/buildingTypes';
 // Bâtiments militaires
 export const militaryBuildings: Record<string, BuildingDescription> = {
   castra: {
+    id: "castra",
     name: "Castra",
     description: "Camp militaire servant de base aux légionnaires stationnés à proximité de la ville. C'est un centre de formation et de commandement.",
     advantages: [
@@ -22,6 +23,7 @@ export const militaryBuildings: Record<string, BuildingDescription> = {
     }
   },
   arsenal: {
+    id: "arsenal",
     name: "Arsenal Républicain",
     description: "Lieu où sont fabriquées et stockées les armes et armures destinées aux troupes de la République.",
     advantages: [
@@ -45,6 +47,7 @@ export const militaryBuildings: Record<string, BuildingDescription> = {
     }
   },
   champ_mars: {
+    id: "champ_mars",
     name: "Champs de Mars",
     description: "Grand terrain d'entraînement militaire où les recrues s'exercent aux tactiques de combat et aux manœuvres.",
     advantages: [
@@ -63,6 +66,7 @@ export const militaryBuildings: Record<string, BuildingDescription> = {
     }
   },
   portus_militum: {
+    id: "portus_militum",
     name: "Portus Militum",
     description: "Infrastructure portuaire militaire servant à l'entretien et à l'organisation de la flotte navale républicaine.",
     advantages: [
@@ -81,6 +85,7 @@ export const militaryBuildings: Record<string, BuildingDescription> = {
     }
   },
   muraille: {
+    id: "muraille",
     name: "Muraille et Fortifications",
     description: "Défenses construites pour protéger la ville contre les invasions et maintenir la sécurité aux frontières.",
     advantages: [

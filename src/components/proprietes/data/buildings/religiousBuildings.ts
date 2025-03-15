@@ -4,6 +4,7 @@ import { BuildingDescription } from '../types/buildingTypes';
 // Bâtiments religieux
 export const religiousBuildings: Record<string, BuildingDescription> = {
   autel: {
+    id: "autel",
     name: "Autel",
     description: "Structure sacrée dédiée aux dieux domestiques, manifestant votre piété envers les divinités romaines.",
     advantages: [
@@ -22,6 +23,7 @@ export const religiousBuildings: Record<string, BuildingDescription> = {
     }
   },
   statuaire: {
+    id: "statuaire",
     name: "Statuaire",
     description: "Ensemble de statues dédiées aux divinités, installées dans un espace public, affirmant votre dévotion religieuse.",
     advantages: [
@@ -40,6 +42,7 @@ export const religiousBuildings: Record<string, BuildingDescription> = {
     }
   },
   temple: {
+    id: "temple",
     name: "Temple",
     description: "Édifice religieux consacré à une divinité majeure, contribution significative à la vie religieuse de Rome.",
     advantages: [

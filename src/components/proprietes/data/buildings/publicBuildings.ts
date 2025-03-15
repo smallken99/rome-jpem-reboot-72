@@ -5,6 +5,7 @@ import { BuildingDescription } from '../types/buildingTypes';
 export const publicBuildings: Record<string, BuildingDescription> = {
   // Bâtiments Administratifs et Politiques
   curie: {
+    id: "curie",
     name: "Curie",
     description: "Lieu où se réunit le Sénat pour débattre et prendre des décisions politiques majeures. C'est le cœur du pouvoir républicain.",
     advantages: [
@@ -24,6 +25,7 @@ export const publicBuildings: Record<string, BuildingDescription> = {
     }
   },
   archives_etat: {
+    id: "archives_etat",
     name: "Archives d'État",
     description: "Permet de conserver les lois, les traités, les recensements et autres documents officiels servant à l'administration de la République.",
     advantages: [
@@ -42,6 +44,7 @@ export const publicBuildings: Record<string, BuildingDescription> = {
     }
   },
   forum_republicain: {
+    id: "forum_republicain",
     name: "Forum Républicain",
     description: "Grande place publique servant de centre économique, politique et social, où les citoyens se rassemblent pour échanger, commercer et assister aux annonces officielles.",
     advantages: [
@@ -63,6 +66,7 @@ export const publicBuildings: Record<string, BuildingDescription> = {
   
   // Bâtiments de Sécurité et d'Ordre Public
   praesidium: {
+    id: "praesidium",
     name: "Præsidium",
     description: "Poste central des vigiles chargé de la sécurité urbaine, de la lutte contre les incendies et du maintien de l'ordre public.",
     advantages: [
@@ -82,6 +86,7 @@ export const publicBuildings: Record<string, BuildingDescription> = {
     }
   },
   caserne_garde: {
+    id: "caserne_garde",
     name: "Caserne de la Garde Urbaine",
     description: "Siège des troupes affectées à la surveillance de la ville et à l'application des lois républicaines.",
     advantages: [
@@ -100,6 +105,7 @@ export const publicBuildings: Record<string, BuildingDescription> = {
     }
   },
   prison: {
+    id: "prison",
     name: "Prison Républicaine",
     description: "Lieu de détention réservé aux criminels d'État et aux personnes en attente de jugement.",
     advantages: [
@@ -120,6 +126,7 @@ export const publicBuildings: Record<string, BuildingDescription> = {
   
   // Bâtiments de Divertissement et de Culture
   amphitheatre: {
+    id: "amphitheatre",
     name: "Amphithéâtre",
     description: "Édifice destiné aux combats de gladiateurs, aux spectacles de chasse et aux exécutions publiques, garantissant le divertissement du peuple.",
     advantages: [
@@ -139,6 +146,7 @@ export const publicBuildings: Record<string, BuildingDescription> = {
     }
   },
   cirque: {
+    id: "cirque",
     name: "Cirque",
     description: "Immense structure permettant d'accueillir des courses de chars et des festivités grandioses.",
     advantages: [
@@ -158,6 +166,7 @@ export const publicBuildings: Record<string, BuildingDescription> = {
     }
   },
   odeon: {
+    id: "odeon",
     name: "Odeon",
     description: "Salle dédiée aux représentations musicales, poétiques et théâtrales, favorisant la culture et l'éducation publique.",
     advantages: [
@@ -179,6 +188,7 @@ export const publicBuildings: Record<string, BuildingDescription> = {
   
   // Bâtiments d'Utilité Publique
   aqueduc: {
+    id: "aqueduc",
     name: "Aqueduc",
     description: "Permet l'acheminement de l'eau potable vers la ville, assurant un accès constant aux ressources hydriques pour les habitants.",
     advantages: [
@@ -198,6 +208,7 @@ export const publicBuildings: Record<string, BuildingDescription> = {
     }
   },
   thermes: {
+    id: "thermes",
     name: "Thermes Publics",
     description: "Espaces de bain accessibles à la population, offrant un lieu de détente et d'hygiène pour toutes les classes sociales.",
     advantages: [
@@ -217,6 +228,7 @@ export const publicBuildings: Record<string, BuildingDescription> = {
     }
   },
   granarium: {
+    id: "granarium",
     name: "Granarium Public",
     description: "Grand entrepôt servant à stocker les céréales et autres denrées alimentaires, permettant de réguler les prix et d'éviter les famines.",
     advantages: [
@@ -238,6 +250,7 @@ export const publicBuildings: Record<string, BuildingDescription> = {
   
   // Autres bâtiments publics existants
   statue: {
+    id: "statue",
     name: "Statue",
     description: "Monument public représentant un membre de votre famille ou un ancêtre illustre, érigé sur le forum.",
     advantages: [
@@ -256,6 +269,7 @@ export const publicBuildings: Record<string, BuildingDescription> = {
     }
   },
   maison_indigents: {
+    id: "maison_indigents",
     name: "Maison des Indigents",
     description: "Établissement caritatif offrant abri et nourriture aux citoyens démunis, démontrant votre générosité publique.",
     advantages: [
