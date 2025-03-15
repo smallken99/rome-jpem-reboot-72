@@ -2,8 +2,9 @@
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { PlusCircle } from 'lucide-react';
-import { PropertyCard } from '@/components/proprietes/PropertyCard';
+import { PropertyCard } from '@/components/proprietes/property-management/PropertyCard';
 import { OwnedBuilding, BuildingDescription } from '../../../hooks/building/types';
+import { PropertyCondition } from '../../card/PropertyCondition';
 
 interface OwnedUrbanPropertiesSectionProps {
   buildings: OwnedBuilding[];
@@ -47,14 +48,15 @@ export const OwnedUrbanPropertiesSection: React.FC<OwnedUrbanPropertiesSectionPr
             return (
               <PropertyCard
                 key={building.id}
-                name={building.name}
-                location={building.location}
-                value={`${value.toLocaleString()} As`}
-                type={"villa"}
-                status={building.condition > 90 ? "Excellent" : building.condition > 70 ? "Bon" : building.condition > 50 ? "Moyen" : "Mauvais"}
-                revenue={`${(value * 0.05).toLocaleString()} As/an`}
-                maintenance={`${building.maintenanceCost.toLocaleString()} As/an`}
-                benefits={[]}
+                building={building}
+                buildingDetails={null}
+                onToggleMaintenance={() => {}}
+                onPerformMaintenance={() => false}
+                onAssignSlaves={() => {}}
+                onSell={(id, value) => handleSell(id)}
+                balance={0}
+                totalAvailableSlaves={0}
+                buildingValue={value}
               />
             );
           })}

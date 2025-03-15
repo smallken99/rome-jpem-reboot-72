@@ -3,7 +3,7 @@ import React from 'react';
 import Layout from '@/components/layout/Layout';
 import { PageHeader } from '@/components/ui-custom/PageHeader';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { PropertyCard } from '@/components/proprietes/PropertyCard';
+import { PropertyCard as ListPropertyCard } from '@/components/proprietes/PropertyCard';
 import { PropertyMap } from '@/components/proprietes/PropertyMap';
 import { ResourceCard } from '@/components/proprietes/ResourceCard';
 import { StatBox } from '@/components/ui-custom/StatBox';
@@ -62,7 +62,7 @@ const Proprietes = () => {
             </RomanCard.Header>
             <RomanCard.Content>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                <PropertyCard
+                <ListPropertyCard
                   name="Domus du Palatin"
                   type="Résidence principale"
                   location="Rome, Colline du Palatin"
@@ -70,7 +70,7 @@ const Proprietes = () => {
                   status="Excellent"
                   imageUrl="/placeholder.svg"
                 />
-                <PropertyCard
+                <ListPropertyCard
                   name="Insula de Subure"
                   type="Immeuble de rapport"
                   location="Rome, Quartier de Subure"
@@ -78,7 +78,7 @@ const Proprietes = () => {
                   status="Bon"
                   imageUrl="/placeholder.svg"
                 />
-                <PropertyCard
+                <ListPropertyCard
                   name="Villa d'Ostie"
                   type="Résidence secondaire"
                   location="Ostie"
@@ -86,7 +86,7 @@ const Proprietes = () => {
                   status="Très bon"
                   imageUrl="/placeholder.svg"
                 />
-                <PropertyCard
+                <ListPropertyCard
                   name="Boutiques du Forum"
                   type="Commerces"
                   location="Rome, Forum Romain"
@@ -94,7 +94,7 @@ const Proprietes = () => {
                   status="Bon"
                   imageUrl="/placeholder.svg"
                 />
-                <PropertyCard
+                <ListPropertyCard
                   name="Insula du Champ de Mars"
                   type="Immeuble de rapport"
                   location="Rome, Champ de Mars"
@@ -112,7 +112,7 @@ const Proprietes = () => {
             </RomanCard.Header>
             <RomanCard.Content>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                <PropertyCard
+                <ListPropertyCard
                   name="Domaine de Campanie"
                   type="Villa agricole"
                   location="Campanie"
@@ -120,7 +120,7 @@ const Proprietes = () => {
                   status="Excellent"
                   imageUrl="/placeholder.svg"
                 />
-                <PropertyCard
+                <ListPropertyCard
                   name="Vignobles du Latium"
                   type="Exploitation viticole"
                   location="Latium"
@@ -128,7 +128,7 @@ const Proprietes = () => {
                   status="Très bon"
                   imageUrl="/placeholder.svg"
                 />
-                <PropertyCard
+                <ListPropertyCard
                   name="Oliveraies d'Étrurie"
                   type="Exploitation oléicole"
                   location="Étrurie"

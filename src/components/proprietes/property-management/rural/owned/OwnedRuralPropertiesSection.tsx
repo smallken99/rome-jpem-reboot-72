@@ -2,7 +2,7 @@
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { PlusCircle } from 'lucide-react';
-import { PropertyCard } from '../../PropertyCard';
+import { PropertyCard } from '@/components/proprietes/property-management/PropertyCard';
 import { OwnedBuilding, BuildingDescription } from '../../../hooks/building/types';
 
 interface OwnedRuralPropertiesSectionProps {
@@ -63,6 +63,7 @@ export const OwnedRuralPropertiesSection: React.FC<OwnedRuralPropertiesSectionPr
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {ownedRuralProperties.map((building) => {
             const buildingDetails = ruralProperties[building.buildingId] || null;
+            const buildingValue = calculateBuildingValue(building.id);
             
             return (
               <PropertyCard
@@ -75,7 +76,7 @@ export const OwnedRuralPropertiesSection: React.FC<OwnedRuralPropertiesSectionPr
                 onSell={sellBuilding}
                 balance={balance}
                 totalAvailableSlaves={availableSlaves + building.slaves}
-                buildingValue={calculateBuildingValue(building.id)}
+                buildingValue={buildingValue}
               />
             );
           })}
