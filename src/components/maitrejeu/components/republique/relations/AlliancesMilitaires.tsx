@@ -1,145 +1,141 @@
 
-import React from 'react';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Alliance } from './types';
-import { Card } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
+import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { Eye, Edit, Shield } from 'lucide-react';
-
-// Mock data for the Alliances
-const mockAlliances: Alliance[] = [
-  {
-    id: '1',
-    name: 'Ligue Latine',
-    members: ['Rome', 'Latium', 'Campanie'],
-    type: 'full',
-    dateCreation: '12 Avril 700 AUC',
-    duration: 25,
-    status: 'active',
-    militarySupport: 5000,
-    economicBenefits: ['Accès aux marchés', 'Tarifs douaniers préférentiels'],
-    commitments: ['Assistance militaire mutuelle', 'Partage du butin de guerre'],
-    description: 'Alliance historique entre Rome et les peuples latins'
-  },
-  {
-    id: '2',
-    name: 'Pacte Hellénique',
-    members: ['Rome', 'Athènes', 'Sparte', 'Corinthe'],
-    type: 'defensive',
-    dateCreation: '3 Mai 702 AUC',
-    duration: 10,
-    status: 'active',
-    militarySupport: 3000,
-    economicBenefits: ['Libre-échange des biens culturels', 'Protection des philosophes'],
-    commitments: ['Défense contre les invasions macédoniennes', 'Maintien de la paix en mer Égée'],
-    description: 'Alliance défensive avec les cités-États grecques'
-  },
-  {
-    id: '3',
-    name: 'Coalition Anti-Parthe',
-    members: ['Rome', 'Armenia', 'Pontus', 'Cappadocia'],
-    type: 'offensive',
-    dateCreation: '28 Juin 703 AUC',
-    duration: 5,
-    status: 'expired',
-    militarySupport: 8000,
-    economicBenefits: ['Partage des ressources des territoires conquis', 'Ouverture des routes commerciales'],
-    commitments: ['Campagnes militaires coordonnées', 'Partage des frais de guerre'],
-    description: 'Alliance offensive contre l\'Empire parthe'
-  }
-];
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Plus, Edit, Trash2, Users, CalendarDays, Shield } from 'lucide-react';
+import { Alliance } from './types';
+import { AllianceModal } from './modals/AllianceModal';
 
 interface AlliancesMilitairesProps {
-  searchTerm: string;
-  filters: any;
+  alliances: Alliance[];
+  isEditable: boolean;
 }
 
 export const AlliancesMilitaires: React.FC<AlliancesMilitairesProps> = ({ 
-  searchTerm, 
-  filters
+  alliances, 
+  isEditable 
 }) => {
-  // Simple filtering logic
-  const filteredAlliances = mockAlliances.filter(alliance => {
-    const matchesSearch = alliance.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
-                         alliance.members.some(m => m.toLowerCase().includes(searchTerm.toLowerCase()));
-    
-    const matchesType = !filters.status || alliance.type === filters.status;
-    const matchesStatus = !filters.region || alliance.status === filters.region;
-    
-    return matchesSearch && matchesType && matchesStatus;
-  });
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [selectedAlliance, setSelectedAlliance] = useState<Alliance | null>(null);
   
-  // Status badge style helper
-  const getStatusBadge = (status: Alliance['status']) => {
-    switch(status) {
+  const handleAddAlliance = () => {
+    setSelectedAlliance(null);
+    setIsModalOpen(true);
+  };
+  
+  const handleEditAlliance = (alliance: Alliance) => {
+    setSelectedAlliance(alliance);
+    setIsModalOpen(true);
+  };
+  
+  const handleDeleteAlliance = (allianceId: string) => {
+    console.log('Deleting alliance:', allianceId);
+    // Implement deletion logic
+  };
+  
+  const getStatusBadge = (status: string) => {
+    switch (status) {
       case 'active':
-        return <Badge className="bg-green-100 text-green-800 hover:bg-green-200">Active</Badge>;
+        return <Badge className="bg-green-100 text-green-800">Active</Badge>;
       case 'expired':
-        return <Badge className="bg-gray-100 text-gray-800 hover:bg-gray-200">Expirée</Badge>;
+        return <Badge className="bg-gray-100 text-gray-800">Expirée</Badge>;
       case 'dissolved':
-        return <Badge className="bg-red-100 text-red-800 hover:bg-red-200">Dissoute</Badge>;
+        return <Badge className="bg-red-100 text-red-800">Dissoute</Badge>;
+      default:
+        return <Badge>{status}</Badge>;
     }
   };
   
-  // Type badge style helper
-  const getTypeBadge = (type: Alliance['type']) => {
-    switch(type) {
+  const getTypeBadge = (type: string) => {
+    switch (type) {
       case 'defensive':
-        return <Badge className="bg-blue-100 text-blue-800 hover:bg-blue-200">Défensive</Badge>;
+        return <Badge variant="outline" className="bg-blue-50 text-blue-700">Défensive</Badge>;
       case 'offensive':
-        return <Badge className="bg-red-100 text-red-800 hover:bg-red-200">Offensive</Badge>;
+        return <Badge variant="outline" className="bg-red-50 text-red-700">Offensive</Badge>;
       case 'full':
-        return <Badge className="bg-purple-100 text-purple-800 hover:bg-purple-200">Complète</Badge>;
+        return <Badge variant="outline" className="bg-purple-50 text-purple-700">Complète</Badge>;
+      default:
+        return <Badge variant="outline">{type}</Badge>;
     }
   };
-
+  
   return (
-    <Card>
-      {filteredAlliances.length === 0 ? (
-        <div className="p-8 text-center text-muted-foreground">
-          Aucune alliance ne correspond à vos critères de recherche
+    <div className="space-y-4">
+      {isEditable && (
+        <div className="flex justify-end mb-4">
+          <Button onClick={handleAddAlliance} className="flex items-center gap-2">
+            <Plus className="h-4 w-4" /> Ajouter une alliance
+          </Button>
         </div>
-      ) : (
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>Nom</TableHead>
-              <TableHead>Membres</TableHead>
-              <TableHead>Type</TableHead>
-              <TableHead>Statut</TableHead>
-              <TableHead>Force Militaire</TableHead>
-              <TableHead className="text-right">Actions</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {filteredAlliances.map(alliance => (
-              <TableRow key={alliance.id} className="hover:bg-muted/50">
-                <TableCell className="font-medium">{alliance.name}</TableCell>
-                <TableCell>{alliance.members.join(', ')}</TableCell>
-                <TableCell>{getTypeBadge(alliance.type)}</TableCell>
-                <TableCell>{getStatusBadge(alliance.status)}</TableCell>
-                <TableCell>
-                  <div className="flex items-center">
-                    <Shield className="h-4 w-4 mr-2 text-rome-navy" />
-                    <span>{alliance.militarySupport} hommes</span>
-                  </div>
-                </TableCell>
-                <TableCell className="text-right">
-                  <div className="flex justify-end gap-2">
-                    <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
-                      <Eye className="h-4 w-4" />
-                    </Button>
-                    <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
-                      <Edit className="h-4 w-4" />
-                    </Button>
-                  </div>
-                </TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
       )}
-    </Card>
+      
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        {alliances.map((alliance) => (
+          <Card key={alliance.id} className="overflow-hidden">
+            <CardHeader className="pb-2">
+              <div className="flex justify-between items-start">
+                <CardTitle className="text-lg">{alliance.name}</CardTitle>
+                {getStatusBadge(alliance.status)}
+              </div>
+              <CardDescription className="flex flex-wrap gap-2 items-center mt-1">
+                <div className="flex items-center gap-1">
+                  <CalendarDays className="h-3 w-3" /> {alliance.dateCreation}
+                </div>
+                {getTypeBadge(alliance.type)}
+              </CardDescription>
+            </CardHeader>
+            
+            <CardContent className="pb-4">
+              <div className="space-y-3">
+                <div className="text-sm">{alliance.description}</div>
+                
+                <div>
+                  <div className="text-xs text-muted-foreground mb-1 flex items-center gap-1">
+                    <Users className="h-3 w-3" /> Membres:
+                  </div>
+                  <div className="flex flex-wrap gap-1">
+                    {alliance.members.map((member, index) => (
+                      <Badge key={index} variant="outline" className="bg-gray-50">
+                        {member}
+                      </Badge>
+                    ))}
+                  </div>
+                </div>
+                
+                <div className="flex items-center gap-1 text-xs">
+                  <Shield className="h-3 w-3 text-muted-foreground" />
+                  <span className="text-muted-foreground">Force militaire:</span>
+                  <span className="font-medium">{alliance.militarySupport.toLocaleString()} combattants</span>
+                </div>
+                
+                {isEditable && (
+                  <div className="flex justify-end gap-2 mt-2">
+                    <Button variant="outline" size="sm" onClick={() => handleEditAlliance(alliance)}>
+                      <Edit className="h-3 w-3 mr-1" /> Éditer
+                    </Button>
+                    <Button variant="outline" size="sm" className="text-red-600" onClick={() => handleDeleteAlliance(alliance.id)}>
+                      <Trash2 className="h-3 w-3 mr-1" /> Supprimer
+                    </Button>
+                  </div>
+                )}
+              </div>
+            </CardContent>
+          </Card>
+        ))}
+      </div>
+      
+      {alliances.length === 0 && (
+        <div className="text-center py-8 text-muted-foreground">
+          <p>Aucune alliance trouvée</p>
+        </div>
+      )}
+      
+      <AllianceModal 
+        isOpen={isModalOpen} 
+        onClose={() => setIsModalOpen(false)} 
+        alliance={selectedAlliance} 
+      />
+    </div>
   );
 };

@@ -1,201 +1,161 @@
 
-import React, { useState } from 'react';
-import { Button } from '@/components/ui/button';
-import { Filter, X } from 'lucide-react';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
+import React from 'react';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Search, Filter } from 'lucide-react';
 
 interface DiplomaticFiltersProps {
+  onSearch: (term: string) => void;
+  onFilter: (filters: any) => void;
   activeTab: string;
-  onFilterChange: (filters: any) => void;
-  onReset: () => void;
 }
 
 export const DiplomaticFilters: React.FC<DiplomaticFiltersProps> = ({
-  activeTab,
-  onFilterChange,
-  onReset
+  onSearch,
+  onFilter,
+  activeTab
 }) => {
-  const [isOpen, setIsOpen] = useState(false);
-  const [localFilters, setLocalFilters] = useState({
-    status: '',
-    region: '',
-    dateFrom: '',
-    dateTo: ''
-  });
-  
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
-    setLocalFilters(prev => ({ ...prev, [name]: value }));
+  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    onSearch(e.target.value);
   };
   
-  const handleSelectChange = (name: string, value: string) => {
-    setLocalFilters(prev => ({ ...prev, [name]: value }));
+  const handleFilterChange = (value: string, type: string) => {
+    onFilter({ [type]: value || null });
   };
   
-  const handleApplyFilters = () => {
-    onFilterChange(localFilters);
-    setIsOpen(false);
-  };
-  
-  const handleReset = () => {
-    setLocalFilters({
-      status: '',
-      region: '',
-      dateFrom: '',
-      dateTo: ''
-    });
-    onReset();
-    setIsOpen(false);
-  };
-  
-  // Dynamic options based on active tab
-  const getStatusOptions = () => {
-    switch (activeTab) {
-      case 'nations':
-        return [
-          { value: 'ally', label: 'Allié' },
-          { value: 'enemy', label: 'Ennemi' },
-          { value: 'neutral', label: 'Neutre' },
-          { value: 'tributary', label: 'Tributaire' }
-        ];
-      case 'traites':
-        return [
-          { value: 'peace', label: 'Paix' },
-          { value: 'trade', label: 'Commerce' },
-          { value: 'military', label: 'Militaire' },
-          { value: 'tribute', label: 'Tribut' }
-        ];
-      case 'alliances':
-        return [
-          { value: 'defensive', label: 'Défensive' },
-          { value: 'offensive', label: 'Offensive' },
-          { value: 'full', label: 'Complète' }
-        ];
-      default:
-        return [];
-    }
-  };
-  
-  const getRegionOptions = () => {
-    switch (activeTab) {
-      case 'nations':
-        return [
-          { value: 'North Africa', label: 'Afrique du Nord' },
-          { value: 'Asia', label: 'Asie' },
-          { value: 'Europe', label: 'Europe' },
-          { value: 'Middle East', label: 'Moyen-Orient' }
-        ];
-      case 'traites':
-      case 'alliances':
-        return [
-          { value: 'active', label: 'Actif' },
-          { value: 'expired', label: 'Expiré' },
-          { value: 'violated', label: 'Violé' },
-          { value: 'dissolved', label: 'Dissout' }
-        ];
-      default:
-        return [];
-    }
-  };
-  
-  const statusLabel = activeTab === 'nations' ? 'Statut' : 
-                     activeTab === 'traites' ? 'Type' : 'Type';
-  
-  const regionLabel = activeTab === 'nations' ? 'Région' : 'Statut';
-
   return (
-    <DropdownMenu open={isOpen} onOpenChange={setIsOpen}>
-      <DropdownMenuTrigger asChild>
-        <Button variant="outline" size="sm">
-          <Filter className="h-4 w-4 mr-2" />
-          Filtres
-        </Button>
-      </DropdownMenuTrigger>
-      <DropdownMenuContent className="w-56">
-        <DropdownMenuLabel>Filtres diplomatiques</DropdownMenuLabel>
-        <DropdownMenuSeparator />
+    <div className="space-y-4">
+      <div className="flex items-center border rounded-md px-3 py-2">
+        <Search className="h-4 w-4 text-muted-foreground mr-2" />
+        <Input
+          placeholder="Rechercher..."
+          onChange={handleSearchChange}
+          className="border-0 p-0 focus-visible:ring-0 h-8"
+        />
+      </div>
+      
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        {activeTab === 'nations' && (
+          <>
+            <div className="space-y-2">
+              <Label htmlFor="status-filter" className="text-xs flex items-center gap-1">
+                <Filter className="h-3 w-3" /> Statut
+              </Label>
+              <Select onValueChange={(value) => handleFilterChange(value, 'status')}>
+                <SelectTrigger id="status-filter">
+                  <SelectValue placeholder="Tous les statuts" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="">Tous les statuts</SelectItem>
+                  <SelectItem value="ally">Allié</SelectItem>
+                  <SelectItem value="enemy">Ennemi</SelectItem>
+                  <SelectItem value="neutral">Neutre</SelectItem>
+                  <SelectItem value="tributary">Tributaire</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            
+            <div className="space-y-2">
+              <Label htmlFor="region-filter" className="text-xs flex items-center gap-1">
+                <Filter className="h-3 w-3" /> Région
+              </Label>
+              <Select onValueChange={(value) => handleFilterChange(value, 'region')}>
+                <SelectTrigger id="region-filter">
+                  <SelectValue placeholder="Toutes les régions" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="">Toutes les régions</SelectItem>
+                  <SelectItem value="Afrique du Nord">Afrique du Nord</SelectItem>
+                  <SelectItem value="Grèce">Grèce</SelectItem>
+                  <SelectItem value="Asie">Asie</SelectItem>
+                  <SelectItem value="Gaule">Gaule</SelectItem>
+                  <SelectItem value="Afrique / Asie">Afrique / Asie</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </>
+        )}
         
-        <div className="px-2 py-2">
-          <Label htmlFor="status" className="text-xs">{statusLabel}</Label>
-          <div className="grid grid-cols-2 gap-1 mt-1">
-            {getStatusOptions().map(option => (
-              <Button 
-                key={option.value}
-                variant={localFilters.status === option.value ? "default" : "outline"}
-                size="sm"
-                className="h-7 text-xs"
-                onClick={() => handleSelectChange('status', option.value)}
-              >
-                {option.label}
-              </Button>
-            ))}
-          </div>
-        </div>
+        {activeTab === 'traites' && (
+          <>
+            <div className="space-y-2">
+              <Label htmlFor="type-filter" className="text-xs flex items-center gap-1">
+                <Filter className="h-3 w-3" /> Type
+              </Label>
+              <Select onValueChange={(value) => handleFilterChange(value, 'type')}>
+                <SelectTrigger id="type-filter">
+                  <SelectValue placeholder="Tous les types" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="">Tous les types</SelectItem>
+                  <SelectItem value="peace">Paix</SelectItem>
+                  <SelectItem value="trade">Commerce</SelectItem>
+                  <SelectItem value="military">Militaire</SelectItem>
+                  <SelectItem value="tribute">Tribut</SelectItem>
+                  <SelectItem value="other">Autre</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            
+            <div className="space-y-2">
+              <Label htmlFor="treaty-status-filter" className="text-xs flex items-center gap-1">
+                <Filter className="h-3 w-3" /> Statut
+              </Label>
+              <Select onValueChange={(value) => handleFilterChange(value, 'status')}>
+                <SelectTrigger id="treaty-status-filter">
+                  <SelectValue placeholder="Tous les statuts" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="">Tous les statuts</SelectItem>
+                  <SelectItem value="active">Actif</SelectItem>
+                  <SelectItem value="expired">Expiré</SelectItem>
+                  <SelectItem value="violated">Violé</SelectItem>
+                  <SelectItem value="canceled">Annulé</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </>
+        )}
         
-        <DropdownMenuSeparator />
-        
-        <div className="px-2 py-2">
-          <Label htmlFor="region" className="text-xs">{regionLabel}</Label>
-          <div className="grid grid-cols-2 gap-1 mt-1">
-            {getRegionOptions().map(option => (
-              <Button 
-                key={option.value}
-                variant={localFilters.region === option.value ? "default" : "outline"}
-                size="sm"
-                className="h-7 text-xs"
-                onClick={() => handleSelectChange('region', option.value)}
-              >
-                {option.label}
-              </Button>
-            ))}
-          </div>
-        </div>
-        
-        <DropdownMenuSeparator />
-        
-        <div className="px-2 py-2">
-          <Label htmlFor="dateFrom" className="text-xs">Date (de)</Label>
-          <Input
-            id="dateFrom"
-            name="dateFrom"
-            type="date"
-            value={localFilters.dateFrom}
-            onChange={handleInputChange}
-            className="h-7 mt-1"
-          />
-        </div>
-        
-        <div className="px-2 py-2">
-          <Label htmlFor="dateTo" className="text-xs">Date (à)</Label>
-          <Input
-            id="dateTo"
-            name="dateTo"
-            type="date"
-            value={localFilters.dateTo}
-            onChange={handleInputChange}
-            className="h-7 mt-1"
-          />
-        </div>
-        
-        <DropdownMenuSeparator />
-        
-        <div className="px-2 py-2 flex justify-between">
-          <Button variant="ghost" size="sm" onClick={handleReset}>
-            <X className="h-4 w-4 mr-1" />
-            Réinitialiser
-          </Button>
-          <Button size="sm" onClick={handleApplyFilters}>Appliquer</Button>
-        </div>
-      </DropdownMenuContent>
-    </DropdownMenu>
+        {activeTab === 'alliances' && (
+          <>
+            <div className="space-y-2">
+              <Label htmlFor="alliance-type-filter" className="text-xs flex items-center gap-1">
+                <Filter className="h-3 w-3" /> Type
+              </Label>
+              <Select onValueChange={(value) => handleFilterChange(value, 'type')}>
+                <SelectTrigger id="alliance-type-filter">
+                  <SelectValue placeholder="Tous les types" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="">Tous les types</SelectItem>
+                  <SelectItem value="defensive">Défensive</SelectItem>
+                  <SelectItem value="offensive">Offensive</SelectItem>
+                  <SelectItem value="full">Complète</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            
+            <div className="space-y-2">
+              <Label htmlFor="alliance-status-filter" className="text-xs flex items-center gap-1">
+                <Filter className="h-3 w-3" /> Statut
+              </Label>
+              <Select onValueChange={(value) => handleFilterChange(value, 'status')}>
+                <SelectTrigger id="alliance-status-filter">
+                  <SelectValue placeholder="Tous les statuts" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="">Tous les statuts</SelectItem>
+                  <SelectItem value="active">Actif</SelectItem>
+                  <SelectItem value="expired">Expiré</SelectItem>
+                  <SelectItem value="dissolved">Dissout</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </>
+        )}
+      </div>
+    </div>
   );
 };

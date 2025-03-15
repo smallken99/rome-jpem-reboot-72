@@ -1,105 +1,57 @@
 
+import { Season } from './timeSystem';
+
 /**
- * Formate un montant en As (la monnaie romaine)
- * @param amount - Montant à formater
- * @returns Montant formaté avec séparateurs de milliers et unité "As"
+ * Format a currency value in Roman as
  */
-export const formatMoney = (amount: number): string => {
-  return `${amount.toLocaleString()} As`;
+export const formatCurrency = (value: number): string => {
+  return `${value.toLocaleString()} as`;
 };
 
 /**
- * Formate un pourcentage
- * @param value - Valeur à formater en pourcentage
- * @param decimals - Nombre de décimales (défaut: 1)
- * @returns Valeur formatée en pourcentage
- */
-export const formatPercentage = (value: number, decimals: number = 1): string => {
-  return `${value.toFixed(decimals)}%`;
-};
-
-/**
- * Formate une date au format romain
- * @param date - Date à formater
- * @returns Date au format romain (ex: "XV Kalends Martius, 709 AUC")
- */
-export const formatRomanDate = (date: Date): string => {
-  // Implémentation simplifiée pour l'instant
-  const months = ["Januarius", "Februarius", "Martius", "Aprilis", "Maius", "Junius", 
-                 "Julius", "Augustus", "September", "October", "November", "December"];
-  
-  const month = months[date.getMonth()];
-  const day = date.getDate();
-  
-  // Calcul approximatif de l'année AUC (Ab Urbe Condita - depuis la fondation de Rome)
-  const yearAUC = date.getFullYear() + 753;
-  
-  return `${day} ${month}, ${yearAUC} AUC`;
-};
-
-/**
- * Formate un montant en devise (As)
- * @param amount - Montant à formater
- * @returns Montant formaté avec séparateurs de milliers et unité "As"
- */
-export const formatCurrency = (amount: number): string => {
-  return `${amount.toLocaleString()} As`;
-};
-
-/**
- * Formate un nombre avec séparateurs de milliers
- * @param value - Valeur à formater
- * @returns Nombre formaté avec séparateurs de milliers
- */
-export const formatNumber = (value: number): string => {
-  return value.toLocaleString();
-};
-
-/**
- * Formate une GameDate pour l'affichage
- * @param date - GameDate à formater ou Date standard
- * @returns Date formatée pour l'affichage
+ * Format a date in Roman style
  */
 export const formatDate = (date: any): string => {
-  if (date instanceof Date) {
-    return formatRomanDate(date);
+  if (typeof date === 'string') return date;
+  
+  if (date?.year && date?.season) {
+    return `${formatSeason(date.season)} ${date.year} AUC`;
   }
   
-  if (typeof date === 'object' && date !== null && 'year' in date && 'season' in date) {
-    return `An ${date.year}, ${formatSeason(date.season)}`;
-  }
-  
-  return String(date);
+  return "Date inconnue";
 };
 
 /**
- * Formate une saison pour l'affichage
- * @param season - Saison à formater
- * @returns Saison formatée en français
+ * Format a season in Latin
  */
-export const formatSeason = (season: string): string => {
-  const seasonMap: Record<string, string> = {
-    'Ver': 'Printemps',
-    'Aestas': 'Été',
-    'Autumnus': 'Automne',
-    'Hiems': 'Hiver',
-    'SPRING': 'Printemps',
-    'SUMMER': 'Été',
-    'AUTUMN': 'Automne',
-    'WINTER': 'Hiver'
+export const formatSeason = (season: Season | string): string => {
+  if (typeof season !== 'string') {
+    season = String(season);
+  }
+  
+  const seasons: Record<string, string> = {
+    'VER': 'Ver',
+    'AES': 'Aestas',
+    'AUT': 'Autumnus',
+    'HIE': 'Hiems'
   };
   
-  return seasonMap[season] || season;
+  return seasons[season.toUpperCase()] || season;
 };
 
 /**
- * Formate la durée de fonctionnement
- * @param seconds - Durée en secondes
- * @returns Durée formatée (jours, heures, minutes)
+ * Format a number with thousand separators
+ */
+export const formatNumber = (num: number): string => {
+  return num.toLocaleString();
+};
+
+/**
+ * Format uptime in human-readable format
  */
 export const formatUptime = (seconds: number): string => {
-  const days = Math.floor(seconds / 86400);
-  const hours = Math.floor((seconds % 86400) / 3600);
+  const days = Math.floor(seconds / (3600 * 24));
+  const hours = Math.floor((seconds % (3600 * 24)) / 3600);
   const minutes = Math.floor((seconds % 3600) / 60);
   
   if (days > 0) {
@@ -114,17 +66,8 @@ export const formatUptime = (seconds: number): string => {
 };
 
 /**
- * Formate une date en format court
- * @param date - Date à formater
- * @returns Date au format court (ex: "15 Avr. 709")
+ * Format a percentage with 1 decimal point
  */
-export const formatShortDate = (date: Date): string => {
-  const months = ["Jan", "Fév", "Mar", "Avr", "Mai", "Jun", 
-                 "Jul", "Aoû", "Sep", "Oct", "Nov", "Déc"];
-  
-  const month = months[date.getMonth()];
-  const day = date.getDate();
-  const yearAUC = date.getFullYear() + 753;
-  
-  return `${day} ${month}. ${yearAUC}`;
+export const formatPercentage = (value: number): string => {
+  return `${value.toFixed(1)}%`;
 };
