@@ -1,57 +1,55 @@
 
 import React from 'react';
-import { Card, CardContent } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Eye, Edit, Trash } from 'lucide-react';
-import { traitesMock } from './data';
+import { Eye, Edit, Trash2 } from 'lucide-react';
+import { Traite, TraitesListProps } from './types';
 
-export interface TraitesListProps {
-  isEditable?: boolean;
-  searchTerm?: string;
-  filters?: any;
-}
-
-export const TraitesList: React.FC<TraitesListProps> = ({ 
-  isEditable = true,
-  searchTerm = '',
-  filters = {}
-}) => {
-  const traites = traitesMock;
-  
+export const TraitesList: React.FC<TraitesListProps> = ({ traites, searchTerm, filters, isEditable }) => {
+  // Filtrage des traités en fonction du terme de recherche et des filtres
   const filteredTraites = traites.filter(traite => {
-    // Appliquer la recherche par texte
-    if (searchTerm && !traite.title.toLowerCase().includes(searchTerm.toLowerCase())) {
+    // Filtre de recherche
+    if (
+      searchTerm &&
+      !traite.title.toLowerCase().includes(searchTerm.toLowerCase()) &&
+      !traite.parties.some(party => party.toLowerCase().includes(searchTerm.toLowerCase())) &&
+      !traite.type.toLowerCase().includes(searchTerm.toLowerCase())
+    ) {
       return false;
     }
     
-    // Appliquer les filtres
+    // Filtre de statut
     if (filters.status && traite.status !== filters.status) {
       return false;
     }
     
-    if (filters.type && traite.type !== filters.type) {
+    // Filtre de date de création
+    if (filters.dateFrom && new Date(traite.dateCreated) < new Date(filters.dateFrom)) {
+      return false;
+    }
+    
+    if (filters.dateTo && new Date(traite.dateCreated) > new Date(filters.dateTo)) {
       return false;
     }
     
     return true;
   });
   
-  // Fonction pour obtenir la couleur du badge de statut
-  const getStatusBadgeVariant = (status: string) => {
-    switch(status) {
-      case 'active': return 'default';
-      case 'draft': return 'secondary';
-      case 'expired': return 'outline';
-      case 'revoked': return 'destructive';
-      default: return 'secondary';
+  // Couleurs des statuts pour les badges
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case 'active': return 'bg-green-500';
+      case 'draft': return 'bg-blue-500';
+      case 'expired': return 'bg-yellow-500';
+      case 'revoked': return 'bg-red-500';
+      default: return 'bg-gray-500';
     }
   };
   
-  // Fonction pour obtenir le libellé du statut
-  const getStatusLabel = (status: string) => {
-    switch(status) {
+  // Texte des statuts pour l'affichage
+  const getStatusText = (status: string) => {
+    switch (status) {
       case 'active': return 'En vigueur';
       case 'draft': return 'Brouillon';
       case 'expired': return 'Expiré';
@@ -60,71 +58,84 @@ export const TraitesList: React.FC<TraitesListProps> = ({
     }
   };
   
-  // Fonction pour obtenir le libellé du type
-  const getTypeLabel = (type: string) => {
-    switch(type) {
+  // Format du type de traité
+  const getTypeText = (type: string) => {
+    switch (type) {
+      case 'commercial': return 'Commercial';
       case 'peace': return 'Paix';
-      case 'trade': return 'Commerce';
       case 'military': return 'Militaire';
       case 'tribute': return 'Tribut';
       default: return type;
     }
   };
   
+  const handleView = (id: string) => {
+    console.log('Viewing traite:', id);
+    // TODO: implement view modal
+  };
+  
+  const handleEdit = (id: string) => {
+    console.log('Editing traite:', id);
+    // TODO: implement edit modal
+  };
+  
+  const handleDelete = (id: string) => {
+    console.log('Deleting traite:', id);
+    // TODO: implement delete confirmation
+  };
+  
   return (
-    <Card>
-      <CardContent className="p-0">
-        <Table>
-          <TableHeader>
+    <div>
+      <Table>
+        <TableHeader>
+          <TableRow>
+            <TableHead>Titre</TableHead>
+            <TableHead>Parties</TableHead>
+            <TableHead>Type</TableHead>
+            <TableHead>Date</TableHead>
+            <TableHead>Statut</TableHead>
+            <TableHead>Actions</TableHead>
+          </TableRow>
+        </TableHeader>
+        <TableBody>
+          {filteredTraites.length === 0 ? (
             <TableRow>
-              <TableHead>Traité</TableHead>
-              <TableHead>Avec</TableHead>
-              <TableHead>Type</TableHead>
-              <TableHead>Date</TableHead>
-              <TableHead>Statut</TableHead>
-              {isEditable && <TableHead className="text-right">Actions</TableHead>}
+              <TableCell colSpan={6} className="text-center py-4">
+                Aucun traité correspondant aux critères
+              </TableCell>
             </TableRow>
-          </TableHeader>
-          <TableBody>
-            {filteredTraites.length === 0 ? (
-              <TableRow>
-                <TableCell colSpan={isEditable ? 6 : 5} className="text-center h-24">
-                  Aucun traité trouvé
+          ) : (
+            filteredTraites.map(traite => (
+              <TableRow key={traite.id}>
+                <TableCell className="font-medium">{traite.title}</TableCell>
+                <TableCell>{traite.parties.join(', ')}</TableCell>
+                <TableCell>{getTypeText(traite.type)}</TableCell>
+                <TableCell>{traite.date || traite.dateCreated}</TableCell>
+                <TableCell>
+                  <Badge className={getStatusColor(traite.status)}>{getStatusText(traite.status)}</Badge>
                 </TableCell>
-              </TableRow>
-            ) : (
-              filteredTraites.map((traite) => (
-                <TableRow key={traite.id}>
-                  <TableCell className="font-medium">{traite.title}</TableCell>
-                  <TableCell>{traite.parties.join(', ')}</TableCell>
-                  <TableCell>{getTypeLabel(traite.type)}</TableCell>
-                  <TableCell>{traite.date}</TableCell>
-                  <TableCell>
-                    <Badge variant={getStatusBadgeVariant(traite.status)}>
-                      {getStatusLabel(traite.status)}
-                    </Badge>
-                  </TableCell>
-                  {isEditable && (
-                    <TableCell className="text-right">
-                      <div className="flex justify-end gap-2">
-                        <Button variant="ghost" size="icon">
-                          <Eye className="h-4 w-4" />
-                        </Button>
-                        <Button variant="ghost" size="icon">
+                <TableCell>
+                  <div className="flex gap-2">
+                    <Button variant="ghost" size="icon" onClick={() => handleView(traite.id)}>
+                      <Eye className="h-4 w-4" />
+                    </Button>
+                    {isEditable && (
+                      <>
+                        <Button variant="ghost" size="icon" onClick={() => handleEdit(traite.id)}>
                           <Edit className="h-4 w-4" />
                         </Button>
-                        <Button variant="ghost" size="icon">
-                          <Trash className="h-4 w-4" />
+                        <Button variant="ghost" size="icon" onClick={() => handleDelete(traite.id)}>
+                          <Trash2 className="h-4 w-4" />
                         </Button>
-                      </div>
-                    </TableCell>
-                  )}
-                </TableRow>
-              ))
-            )}
-          </TableBody>
-        </Table>
-      </CardContent>
-    </Card>
+                      </>
+                    )}
+                  </div>
+                </TableCell>
+              </TableRow>
+            ))
+          )}
+        </TableBody>
+      </Table>
+    </div>
   );
 };

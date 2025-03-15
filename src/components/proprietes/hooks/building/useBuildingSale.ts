@@ -28,6 +28,13 @@ export function useBuildingSale() {
     return value;
   };
   
+  // Calculate building value by ID
+  const calculateBuildingValueById = (buildingId: number): number => {
+    const building = useBuildingInventory().ownedBuildings.find(b => b.id === buildingId);
+    if (!building) return 0;
+    return calculateBuildingValue(building);
+  };
+  
   // Vendre un bâtiment (version synchrone pour la compatibilité)
   const sellBuilding = (buildingId: number): boolean => {
     setIsLoading(true);
@@ -61,9 +68,41 @@ export function useBuildingSale() {
     }
   };
   
+  // Vendre un bâtiment avec une valeur estimée
+  const sellBuildingWithValue = (buildingId: number, value: number): boolean => {
+    setIsLoading(true);
+    
+    try {
+      // Trouver le bâtiment dans l'inventaire
+      const building = useBuildingInventory().ownedBuildings.find(b => b.id === buildingId);
+      
+      if (!building) {
+        toast.error("Bâtiment introuvable");
+        return false;
+      }
+      
+      // Supprimer le bâtiment de l'inventaire
+      removeBuilding(buildingId);
+      
+      // Enregistrer la transaction financière
+      buildingSold(building.name, value);
+      
+      toast.success(`${building.name} vendu pour ${value.toLocaleString()} As`);
+      return true;
+    } catch (error) {
+      console.error("Erreur lors de la vente du bâtiment:", error);
+      toast.error("Une erreur est survenue lors de la vente");
+      return false;
+    } finally {
+      setIsLoading(false);
+    }
+  };
+  
   return {
     isLoading,
     calculateBuildingValue,
-    sellBuilding
+    calculateBuildingValueById,
+    sellBuilding,
+    sellBuildingWithValue
   };
 }
