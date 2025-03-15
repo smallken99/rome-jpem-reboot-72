@@ -50,7 +50,6 @@ export const GestionHistoire: React.FC = () => {
       
       // Pour la compatibilité avec le code existant
       description: contenu,
-      year: currentDate.year,
       season: currentDate.season,
       type: categorie
     };

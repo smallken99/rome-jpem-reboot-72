@@ -18,7 +18,7 @@ export const ProvincesMap: React.FC<ProvincesMapProps> = ({
 
   const renderProvinceMarker = (province: Province, index: number) => {
     const getStatusColor = (): "default" | "destructive" | "outline" | "secondary" | "success" => {
-      switch (province.statut) {
+      switch (province.status) {
         case 'Pacifiée':
           return 'success';
         case 'Instable':

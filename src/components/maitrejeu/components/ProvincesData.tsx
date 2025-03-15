@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Input } from '@/components/ui/input';
@@ -42,7 +43,10 @@ export const ProvincesData: React.FC<ProvincesDataProps> = ({ provinces, onViewP
     
     // Apply status filter
     if (statusFilter !== 'all') {
-      filteredProvinces = filteredProvinces.filter(province => province.status === statusFilter);
+      filteredProvinces = filteredProvinces.filter(province => {
+        const lowerStatus = province.status.toLowerCase();
+        return lowerStatus === statusFilter.toLowerCase();
+      });
     }
     
     // Apply sorting
@@ -128,11 +132,10 @@ export const ProvincesData: React.FC<ProvincesDataProps> = ({ provinces, onViewP
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="all">Tous les statuts</SelectItem>
-              <SelectItem value="pacifiée">Pacifiée</SelectItem>
-              <SelectItem value="instable">Instable</SelectItem>
-              <SelectItem value="rebelle">Rebelle</SelectItem>
-              <SelectItem value="conquise">Conquise</SelectItem>
-              <SelectItem value="en révolte">En Révolte</SelectItem>
+              <SelectItem value="Pacifiée">Pacifiée</SelectItem>
+              <SelectItem value="Instable">Instable</SelectItem>
+              <SelectItem value="En guerre">En guerre</SelectItem>
+              <SelectItem value="Rebelle">Rebelle</SelectItem>
             </SelectContent>
           </Select>
         </div>
@@ -191,11 +194,10 @@ export const ProvincesData: React.FC<ProvincesDataProps> = ({ provinces, onViewP
                 <TableCell className="text-right">{province.richesse !== undefined ? `${province.richesse.toLocaleString()} as` : '-'}</TableCell>
                 <TableCell>
                   <span className={`px-2 py-1 rounded-full text-xs font-medium
-                    ${province.status === 'pacifiée' ? 'bg-green-100 text-green-800' : ''}
-                    ${province.status === 'instable' ? 'bg-yellow-100 text-yellow-800' : ''}
-                    ${province.status === 'rebelle' ? 'bg-red-100 text-red-800' : ''}
-                    ${province.status === 'conquise' ? 'bg-blue-100 text-blue-800' : ''}
-                    ${province.status === 'en révolte' ? 'bg-red-100 text-red-800' : ''}
+                    ${province.status === 'Pacifiée' ? 'bg-green-100 text-green-800' : ''}
+                    ${province.status === 'Instable' ? 'bg-yellow-100 text-yellow-800' : ''}
+                    ${province.status === 'Rebelle' ? 'bg-red-100 text-red-800' : ''}
+                    ${province.status === 'En guerre' ? 'bg-red-100 text-red-800' : ''}
                   `}>
                     {province.status}
                   </span>

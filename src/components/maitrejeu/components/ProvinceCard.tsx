@@ -3,7 +3,7 @@ import React from 'react';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { ArrowUpIcon, ArrowDownIcon, ShieldIcon, CoinIcon } from 'lucide-react';
+import { ArrowUpIcon, ArrowDownIcon, ShieldIcon, CoinsIcon } from 'lucide-react';
 import { Province, ProvinceCardProps } from '../types/provinces';
 
 export const ProvinceCard: React.FC<ProvinceCardProps> = ({
@@ -68,7 +68,7 @@ export const ProvinceCard: React.FC<ProvinceCardProps> = ({
           <div className="bg-muted/50 p-2 rounded">
             <div className="text-xs text-muted-foreground">Richesse</div>
             <div className="font-semibold flex items-center">
-              <CoinIcon className="w-3 h-3 mr-1" />
+              <CoinsIcon className="w-3 h-3 mr-1" />
               {province.richesse}
             </div>
           </div>

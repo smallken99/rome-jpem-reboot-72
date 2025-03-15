@@ -141,7 +141,7 @@ export interface PublicBuildingData {
   name: string;
   type: BuildingType;
   location: string;
-  status: 'good' | 'poor' | 'average';
+  status: BuildingStatus;
   constructionYear: number;
   description: string;
   cost: number;

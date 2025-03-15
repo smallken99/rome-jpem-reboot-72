@@ -36,6 +36,6 @@ export interface ProvinceModalProps {
 
 export interface ProvincesMapProps {
   provinces: Province[];
-  onProvinceSelect?: (provinceId: string) => void;
+  onProvinceSelect: (provinceId: string) => void;
   selectedProvinceId?: string;
 }

@@ -111,13 +111,13 @@ export const ProvinceModal: React.FC<ProvinceModalProps> = ({
             </div>
 
             <div className="space-y-2">
-              <label htmlFor="statut" className="text-sm font-medium">
+              <label htmlFor="status" className="text-sm font-medium">
                 Statut
               </label>
               <select
-                id="statut"
-                name="statut"
-                value={formData.statut || ''}
+                id="status"
+                name="status"
+                value={formData.status || ''}
                 onChange={handleChange}
                 className="w-full p-2 border rounded-md"
               >
@@ -131,13 +131,13 @@ export const ProvinceModal: React.FC<ProvinceModalProps> = ({
 
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
-              <label htmlFor="ressourcePrincipale" className="text-sm font-medium">
+              <label htmlFor="ressource" className="text-sm font-medium">
                 Ressource Principale
               </label>
               <Input
-                id="ressourcePrincipale"
-                name="ressourcePrincipale"
-                value={formData.ressourcePrincipale || ''}
+                id="ressource"
+                name="ressource"
+                value={formData.ressource || ''}
                 onChange={handleChange}
               />
             </div>

@@ -1,5 +1,6 @@
+
 import { SenateurJouable, Province, Evenement, Election, HistoireEntry, Loi, Equilibre } from '../types';
-import { EconomieRecord, TreasuryStatus, EconomicFactors } from '../types/economie';
+import { EconomieRecord, TreasuryStatus, EconomicFactors, EconomieCategory } from '../types/economie';
 import { GameDate, Season, GamePhase } from '../types/common';
 import { Client } from '../types/clients';
 import { v4 as uuidv4 } from 'uuid';
@@ -368,7 +369,7 @@ export const initialEconomieRecords: EconomieRecord[] = [
     id: "econ-1",
     date: { year: 700, season: "SPRING" },
     source: "Impôts",
-    category: "Impôts",
+    category: "Impôts" as EconomieCategory,
     amount: 500000,
     description: "Collecte d'impôts trimestrielle",
     type: "income",
@@ -383,7 +384,7 @@ export const initialEconomieRecords: EconomieRecord[] = [
     id: "econ-2",
     date: { year: 700, season: "SPRING" },
     source: "Armée",
-    category: "Armée",
+    category: "Armée" as EconomieCategory,
     amount: 300000,
     description: "Financement de la campagne militaire en Hispanie",
     type: "expense",
@@ -397,7 +398,7 @@ export const initialEconomieRecords: EconomieRecord[] = [
     id: "econ-3",
     date: { year: 700, season: "SUMMER" },
     source: "Commerce extérieur",
-    category: "Commerce",
+    category: "Commerce" as EconomieCategory,
     amount: 150000,
     description: "Revenus des taxes douanières",
     type: "income",
@@ -412,7 +413,7 @@ export const initialEconomieRecords: EconomieRecord[] = [
     id: "econ-4",
     date: { year: 700, season: "SUMMER" },
     source: "Construction",
-    category: "Construction",
+    category: "Construction" as EconomieCategory,
     amount: 200000,
     description: "Construction d'un nouveau temple de Jupiter",
     type: "expense",
@@ -464,8 +465,7 @@ export const initialEquilibre: Equilibre = {
   facteurReligieux: 65,
   
   // Political alignment
-  populaires: 35,
-  populaires: 35,
+  populares: 35,
   optimates: 40,
   moderates: 25,
   
