@@ -1,72 +1,74 @@
 
 import { useState } from 'react';
-import { toast } from 'sonner';
 import { usePatrimoine } from '@/hooks/usePatrimoine';
 import { useBuildingInventory } from './useBuildingInventory';
-import { useEconomy } from '@/hooks/useEconomy';
+import { toast } from 'sonner';
 
 export function useBuildingMaintenance() {
   const [isLoading, setIsLoading] = useState(false);
-  const { balance } = usePatrimoine();
-  const { ownedBuildings, updateBuildingProperty } = useBuildingInventory();
-  const economy = useEconomy();
+  const { makePayment } = usePatrimoine();
+  const { updateBuildingProperty } = useBuildingInventory();
   
-  // Toggle maintenance of a building
-  const toggleMaintenance = (buildingId: number, enabled: boolean) => {
+  // Activer ou désactiver l'entretien automatique
+  const toggleMaintenance = (buildingId: number, enabled: boolean): void => {
     updateBuildingProperty(buildingId, 'maintenanceEnabled', enabled);
     
-    const building = ownedBuildings.find(b => b.id === buildingId);
-    if (building) {
-      toast.success(`Entretien ${enabled ? 'activé' : 'désactivé'} pour ${building.name}`);
-      
-      if (enabled) {
-        updateBuildingProperty(buildingId, 'lastMaintenance', new Date());
-      }
-    }
+    toast.success(
+      enabled 
+        ? "Entretien automatique activé" 
+        : "Entretien automatique désactivé"
+    );
   };
   
-  // Perform maintenance on a building
-  const performMaintenance = (buildingId: number) => {
+  // Effectuer l'entretien d'un bâtiment
+  const performMaintenance = async (buildingId: number): Promise<boolean> => {
     setIsLoading(true);
     
-    const building = ownedBuildings.find(b => b.id === buildingId);
-    
-    if (!building) {
-      toast.error("Bâtiment introuvable");
-      setIsLoading(false);
-      return false;
-    }
-    
-    if (!economy.canAfford(building.maintenanceCost)) {
-      toast.error("Fonds insuffisants pour effectuer l'entretien");
-      setIsLoading(false);
-      return false;
-    }
-    
-    setTimeout(() => {
-      // Update condition and maintenance date
-      updateBuildingProperty(buildingId, 'condition', 100);
-      updateBuildingProperty(buildingId, 'lastMaintenance', new Date());
+    try {
+      // Trouver le bâtiment dans l'inventaire
+      const building = useBuildingInventory().ownedBuildings.find(b => b.id === buildingId);
       
-      // Deduct maintenance cost using economy system
-      const success = economy.makePayment(
-        building.maintenanceCost,
-        "Service d'entretien",
-        "Maintenance"
+      if (!building) {
+        toast.error("Bâtiment introuvable");
+        return false;
+      }
+      
+      // Calculer le coût de l'entretien
+      // Plus le bâtiment est en mauvais état, plus cher sera l'entretien
+      const maintenanceFactor = Math.max(1, (100 - building.condition) / 20);
+      const maintenanceCost = Math.round(building.maintenanceCost * maintenanceFactor);
+      
+      // Effectuer le paiement
+      const success = makePayment(
+        maintenanceCost,
+        `Entretien: ${building.name}`,
+        'Entretien'
       );
       
-      toast.success(`Entretien de "${building.name}" effectué avec succès`);
-      setIsLoading(false);
+      if (!success) {
+        toast.error("Fonds insuffisants pour l'entretien");
+        return false;
+      }
+      
+      // Améliorer l'état du bâtiment
+      const newCondition = Math.min(100, building.condition + 20);
+      updateBuildingProperty(buildingId, 'condition', newCondition);
+      updateBuildingProperty(buildingId, 'lastMaintenance', new Date());
+      
+      toast.success(`Entretien effectué avec succès pour ${building.name}`);
       return true;
-    }, 1000);
-    
-    return true;
+    } catch (error) {
+      console.error("Erreur lors de l'entretien du bâtiment:", error);
+      toast.error("Une erreur est survenue lors de l'entretien");
+      return false;
+    } finally {
+      setIsLoading(false);
+    }
   };
   
   return {
     isLoading,
     toggleMaintenance,
-    performMaintenance,
-    balance // Still provide the balance for UI
+    performMaintenance
   };
 }

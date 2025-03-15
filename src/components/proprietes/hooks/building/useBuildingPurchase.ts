@@ -1,76 +1,58 @@
 
 import { useState } from 'react';
-import { toast } from 'sonner';
-import { BuildingDescription } from '../../data/types/buildingTypes';
 import { usePatrimoine } from '@/hooks/usePatrimoine';
 import { useBuildingInventory } from './useBuildingInventory';
-import { OwnedBuilding } from './types';
-import { useEconomy } from '@/hooks/useEconomy';
+import { BuildingPurchaseOptions, OwnedBuilding } from './types';
+import { toast } from 'sonner';
 
 export function useBuildingPurchase() {
   const [isLoading, setIsLoading] = useState(false);
+  const { balance, buildingPurchased } = usePatrimoine();
   const { addBuilding } = useBuildingInventory();
-  const economy = useEconomy();
   
-  // Purchase a new building
-  const purchaseBuilding = (
-    building: BuildingDescription, 
-    buildingId: string,
-    buildingType: 'urban' | 'rural' | 'religious' | 'public' | 'military',
-    location: string,
-    customName?: string
-  ) => {
+  const purchaseBuilding = async (options: BuildingPurchaseOptions): Promise<boolean> => {
     setIsLoading(true);
     
-    // Check if balance is sufficient using the economy system
-    if (!economy.canAfford(building.initialCost)) {
-      toast.error("Fonds insuffisants pour cette acquisition");
-      setIsLoading(false);
-      return false;
-    }
-    
-    setTimeout(() => {
-      // Create new building
+    try {
+      // Vérifier si les fonds sont suffisants
+      if (options.initialCost > balance) {
+        toast.error("Fonds insuffisants pour acheter cette propriété");
+        return false;
+      }
+      
+      // Crée un nouveau bâtiment
       const newBuilding: OwnedBuilding = {
-        id: Date.now(), // Using timestamp as simple unique ID
-        buildingId,
-        buildingType,
-        name: customName || building.name,
-        location,
+        id: Date.now(),
+        buildingId: options.buildingId,
+        buildingType: options.type,
+        name: options.name,
+        location: options.location,
         maintenanceEnabled: true,
-        maintenanceCost: building.maintenanceCost,
-        slaves: building.slaves ? building.slaves.required : 0,
-        condition: 100, // New building in perfect condition
+        maintenanceCost: options.maintenanceCost,
+        slaves: options.slaves || 0,
+        condition: 100, // Nouveau bâtiment en parfait état
         purchaseDate: new Date()
       };
       
-      // Add to owned buildings
+      // Ajouter le bâtiment à l'inventaire
       addBuilding(newBuilding);
       
-      // Make the transaction using the economy system
-      const success = economy.makePayment(
-        building.initialCost,
-        "Vendeur de propriété",
-        "Immobilier"
-      );
+      // Enregistrer la transaction financière
+      buildingPurchased(options.name, options.initialCost);
       
-      if (success) {
-        toast.success(`Acquisition de "${newBuilding.name}" réalisée avec succès`);
-      } else {
-        // This should not happen since we checked canAfford before, but just in case
-        toast.error("La transaction a échoué");
-      }
-      
-      setIsLoading(false);
+      toast.success(`${options.name} acquis avec succès!`);
       return true;
-    }, 1000);
-    
-    return true;
+    } catch (error) {
+      console.error("Erreur lors de l'achat du bâtiment:", error);
+      toast.error("Une erreur est survenue lors de l'achat");
+      return false;
+    } finally {
+      setIsLoading(false);
+    }
   };
   
   return {
     isLoading,
-    purchaseBuilding,
-    balance: economy.balance, // Provide balance from economy system
+    purchaseBuilding
   };
 }

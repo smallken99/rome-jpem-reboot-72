@@ -1,8 +1,8 @@
 
 import React from 'react';
 import { Button } from '@/components/ui/button';
-import { ArrowLeft } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
+import { ArrowLeft, Download, Warehouse } from 'lucide-react';
+import { Link } from 'react-router-dom';
 
 interface PropertyHeaderProps {
   propertyName: string;
@@ -10,17 +10,33 @@ interface PropertyHeaderProps {
 }
 
 export const PropertyHeader: React.FC<PropertyHeaderProps> = ({ propertyName, propertyId }) => {
-  const navigate = useNavigate();
-  
   return (
-    <div className="flex items-center justify-between mb-6">
-      <div>
-        <h1 className="text-2xl font-bold tracking-tight">Inventaire: {propertyName}</h1>
-        <p className="text-muted-foreground">Gestion des ressources et stocks de votre propriété</p>
+    <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+      <div className="flex items-center gap-3">
+        <Button
+          variant="outline"
+          size="icon"
+          asChild
+          className="h-8 w-8"
+        >
+          <Link to={`/patrimoine/proprietes/${propertyId}`}>
+            <ArrowLeft className="h-4 w-4" />
+          </Link>
+        </Button>
+        <div>
+          <h1 className="text-xl font-cinzel font-bold flex items-center gap-2">
+            <Warehouse className="h-5 w-5 text-rome-terracotta" />
+            Inventaire
+          </h1>
+          <p className="text-muted-foreground text-sm">
+            {propertyName}
+          </p>
+        </div>
       </div>
-      <Button variant="outline" onClick={() => navigate(`/patrimoine/proprietes/${propertyId}`)}>
-        <ArrowLeft className="h-4 w-4 mr-2" />
-        Retour aux détails
+      
+      <Button variant="outline" size="sm" className="gap-1">
+        <Download className="h-4 w-4" />
+        <span>Exporter l'inventaire</span>
       </Button>
     </div>
   );

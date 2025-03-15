@@ -1,53 +1,41 @@
 
-// Types partagés pour l'économie
-
 export interface Transaction {
   id: string;
-  type: 'income' | 'expense';
-  amount: number;
-  category: string;
-  description: string;
   date: Date | string;
-  source?: string;
-  recurring?: boolean;
-  recipient?: string;
-}
-
-export interface TransactionCreationParams {
   amount: number;
-  type: 'income' | 'expense';
   description: string;
   category: string;
-  source?: string;
-  recurring?: boolean;
-  recipient?: string;
+  type: 'income' | 'expense';
 }
 
 export interface EconomyStats {
-  totalIncome: number;
-  totalExpenses: number;
   balance: number;
-  transactionCount: number;
-  categoryBreakdown: Record<string, number>;
-  // Statistiques supplémentaires
-  annualIncome: number;
-  annualExpenses: number;
   monthlyIncome: number;
   monthlyExpenses: number;
   annualTaxes: number;
-  annualTithes: number;
   inflation: number;
 }
 
-export type TransactionType = 'income' | 'expense';
-export type TransactionCategory = 'Agriculture' | 'Commerce' | 'Impôts' | 'Militaire' | 'Religion' | 'Administration' | 'Divers';
+export interface PaymentRecipient {
+  id: string;
+  name: string;
+  type: 'individual' | 'business' | 'government' | 'other';
+}
 
-export interface TransactionFilter {
-  type?: TransactionType;
-  category?: string;
-  minAmount?: number;
-  maxAmount?: number;
-  startDate?: Date;
-  endDate?: Date;
-  search?: string;
+export interface ResourceItem {
+  id: string;
+  name: string;
+  quantity: number;
+  value: number;
+  location: string;
+  trend: 'up' | 'down' | 'neutral';
+}
+
+export interface PropertyFinance {
+  id: string;
+  propertyId: string;
+  revenue: number;
+  expenses: number;
+  profitability: number;
+  lastUpdated: Date | string;
 }

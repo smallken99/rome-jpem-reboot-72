@@ -1,28 +1,37 @@
 
-import { ResourceItemProps } from '../ResourceItem';
-
-export interface PropertyResource extends ResourceItemProps {
-  id: number;
-  propertyId: number;
-}
-
-export interface MarketPrice {
-  resourceName: string;
-  buyPrice: number;
-  sellPrice: number;
-  trend: 'up' | 'down' | 'stable';
-  trendPercentage: number;
-}
-
 export interface Transaction {
-  id: number;
-  propertyId: number;
+  id: string;
+  date: string;
+  type: 'buy' | 'sell' | 'transfer';
   resourceName: string;
   quantity: number;
   unitPrice: number;
   total: number;
-  type: 'buy' | 'sell' | 'transfer';
-  date: string;
-  to?: string;
-  from?: string;
+}
+
+export interface Resource {
+  id: string;
+  name: string;
+  quantity: number;
+  unit: string;
+  value: number;
+  category: string;
+  location: string;
+  lastUpdated: string;
+}
+
+export interface ResourceType {
+  id: string;
+  name: string;
+  unit: string;
+  categories: string[];
+}
+
+export interface MarketPrice {
+  resourceId: string;
+  resourceName: string;
+  basePrice: number;
+  currentPrice: number;
+  trend: 'up' | 'down' | 'stable';
+  volatility: number;
 }

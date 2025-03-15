@@ -1,117 +1,159 @@
 
-import { useState, useCallback } from 'react';
-import { Transaction, TransactionCreationParams, EconomyStats } from '@/types/EconomyTypes';
+import { useState, useEffect, useCallback } from 'react';
 import { v4 as uuidv4 } from 'uuid';
+import { Transaction, EconomyStats } from '@/types/EconomyTypes';
+import { useToast } from '@/components/ui/use-toast';
+
+interface EconomyState {
+  balance: number;
+  transactions: Transaction[];
+  stats: EconomyStats;
+}
 
 export const useEconomy = () => {
-  const [transactions, setTransactions] = useState<Transaction[]>([]);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  
-  // Statistiques par défaut
-  const [economyStats, setEconomyStats] = useState<EconomyStats>({
-    totalIncome: 0,
-    totalExpenses: 0,
-    balance: 0,
-    transactionCount: 0,
-    categoryBreakdown: {},
-    annualIncome: 0,
-    annualExpenses: 0,
-    monthlyIncome: 0,
-    monthlyExpenses: 0,
-    annualTaxes: 0,
-    annualTithes: 0,
-    inflation: 0
+  const [state, setState] = useState<EconomyState>({
+    balance: 150000,
+    transactions: [],
+    stats: {
+      balance: 150000,
+      monthlyIncome: 42000,
+      monthlyExpenses: 30000,
+      annualTaxes: 25000,
+      inflation: 2.5
+    }
   });
   
-  // Fonction pour obtenir le solde actuel
-  const getBalance = useCallback(() => {
-    return transactions.reduce((acc, transaction) => {
-      if (transaction.type === 'income') {
-        return acc + transaction.amount;
-      } else {
-        return acc - transaction.amount;
+  const { toast } = useToast();
+  
+  useEffect(() => {
+    // Charger les transactions simulées
+    const mockTransactions: Transaction[] = [
+      {
+        id: uuidv4(),
+        date: new Date(2023, 6, 15),
+        amount: 25000,
+        description: "Fermage: Domaine viticole",
+        category: "Revenus agricoles",
+        type: "income"
+      },
+      {
+        id: uuidv4(),
+        date: new Date(2023, 6, 12),
+        amount: 15000,
+        description: "Loyers: Insula Via Sacra",
+        category: "Loyers urbains",
+        type: "income"
+      },
+      {
+        id: uuidv4(),
+        date: new Date(2023, 6, 10),
+        amount: 8000,
+        description: "Entretien: Villa Urbana",
+        category: "Entretien",
+        type: "expense"
+      },
+      {
+        id: uuidv4(),
+        date: new Date(2023, 6, 5),
+        amount: 12000,
+        description: "Salaires: Personnel domestique",
+        category: "Personnel",
+        type: "expense"
+      },
+      {
+        id: uuidv4(),
+        date: new Date(2023, 6, 1),
+        amount: 5000,
+        description: "Tribut: Quaestor Urbanus",
+        category: "Impôts",
+        type: "expense"
       }
-    }, 0);
-  }, [transactions]);
-
-  // Fonction pour vérifier si on peut se permettre une dépense
-  const canAfford = useCallback((amount: number) => {
-    return getBalance() >= amount;
-  }, [getBalance]);
-
-  // Fonction pour ajouter une transaction
-  const addTransaction = useCallback((transactionParams: TransactionCreationParams): Transaction => {
-    const newTransaction: Transaction = {
+    ];
+    
+    setState(prev => ({
+      ...prev,
+      transactions: mockTransactions,
+    }));
+  }, []);
+  
+  // Vérifier si les fonds sont suffisants
+  const canAfford = useCallback((amount: number): boolean => {
+    return state.balance >= amount;
+  }, [state.balance]);
+  
+  // Effectuer un paiement
+  const makePayment = useCallback((amount: number, recipient: string, category: string): boolean => {
+    if (!canAfford(amount)) {
+      toast({
+        title: "Fonds insuffisants",
+        description: "Vous ne disposez pas des fonds nécessaires pour cette transaction.",
+        variant: "destructive"
+      });
+      return false;
+    }
+    
+    const transaction: Transaction = {
       id: uuidv4(),
       date: new Date(),
-      ...transactionParams
+      amount,
+      description: `Paiement à: ${recipient}`,
+      category,
+      type: "expense"
     };
     
-    setTransactions(prev => [newTransaction, ...prev]);
-    
-    // Mettre à jour les statistiques
-    setEconomyStats(prev => ({
+    setState(prev => ({
       ...prev,
-      balance: getBalance() + (transactionParams.type === 'income' ? transactionParams.amount : -transactionParams.amount),
-      transactionCount: prev.transactionCount + 1,
-      totalIncome: transactionParams.type === 'income' ? prev.totalIncome + transactionParams.amount : prev.totalIncome,
-      totalExpenses: transactionParams.type === 'expense' ? prev.totalExpenses + transactionParams.amount : prev.totalExpenses
+      balance: prev.balance - amount,
+      transactions: [transaction, ...prev.transactions],
+      stats: {
+        ...prev.stats,
+        balance: prev.stats.balance - amount
+      }
     }));
     
-    return newTransaction;
-  }, [getBalance]);
-
-  // Fonction pour recevoir un paiement
-  const receivePayment = useCallback((amount: number, description: string, category: string = 'Divers'): boolean => {
-    try {
-      addTransaction({
-        type: 'income',
-        amount,
-        description,
-        category
-      });
-      return true;
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Erreur lors de la réception du paiement');
-      return false;
-    }
-  }, [addTransaction]);
-
-  // Fonction pour effectuer un paiement
-  const makePayment = useCallback((
-    amount: number, 
-    description: string, 
-    category: string = 'Divers',
-    requireFunds: boolean = true
-  ): boolean => {
-    try {
-      if (requireFunds && !canAfford(amount)) {
-        throw new Error('Fonds insuffisants pour effectuer ce paiement');
+    toast({
+      title: "Paiement effectué",
+      description: `${amount.toLocaleString()} As ont été versés à ${recipient}.`
+    });
+    
+    return true;
+  }, [canAfford, toast]);
+  
+  // Recevoir un paiement
+  const receivePayment = useCallback((amount: number, source: string, category: string): boolean => {
+    const transaction: Transaction = {
+      id: uuidv4(),
+      date: new Date(),
+      amount,
+      description: `Reçu de: ${source}`,
+      category,
+      type: "income"
+    };
+    
+    setState(prev => ({
+      ...prev,
+      balance: prev.balance + amount,
+      transactions: [transaction, ...prev.transactions],
+      stats: {
+        ...prev.stats,
+        balance: prev.stats.balance + amount
       }
-      
-      addTransaction({
-        type: 'expense',
-        amount,
-        description,
-        category
-      });
-      return true;
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Erreur lors du paiement');
-      return false;
-    }
-  }, [addTransaction, canAfford]);
-
+    }));
+    
+    toast({
+      title: "Paiement reçu",
+      description: `${amount.toLocaleString()} As ont été reçus de ${source}.`
+    });
+    
+    return true;
+  }, [toast]);
+  
   return {
-    balance: getBalance(),
-    economyStats,
-    transactions,
-    loading,
-    error,
-    addTransaction,
-    receivePayment,
+    balance: state.balance,
+    transactions: state.transactions,
+    economyStats: state.stats,
+    canAfford,
     makePayment,
-    canAfford
+    receivePayment
   };
 };

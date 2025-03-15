@@ -37,18 +37,7 @@ export const PatrimoineOverview: React.FC = () => {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{formatMoney(netWorth)}</div>
-            <p className="text-xs text-muted-foreground">Patrimoine total estimé</p>
-          </CardContent>
-        </Card>
-        
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium">Liquidités</CardTitle>
-            <Coins className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{formatMoney(balance)}</div>
-            <p className="text-xs text-muted-foreground">Argent disponible</p>
+            <p className="text-xs text-muted-foreground">Total des avoirs</p>
           </CardContent>
         </Card>
         
@@ -59,92 +48,84 @@ export const PatrimoineOverview: React.FC = () => {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{ownedBuildings.length}</div>
-            <p className="text-xs text-muted-foreground">{urbanProperties} urbaines, {ruralProperties} rurales</p>
+            <p className="text-xs text-muted-foreground">Biens immobiliers</p>
           </CardContent>
         </Card>
         
         <Card>
           <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium">Esclaves</CardTitle>
-            <Users className="h-4 w-4 text-muted-foreground" />
+            <CardTitle className="text-sm font-medium">Liquidités</CardTitle>
+            <Coins className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">
-              {ownedBuildings.reduce((sum, b) => sum + b.slaves, 0)}
-            </div>
-            <p className="text-xs text-muted-foreground">Répartis sur vos propriétés</p>
+            <div className="text-2xl font-bold">{formatMoney(balance)}</div>
+            <p className="text-xs text-muted-foreground">Disponible immédiatement</p>
+          </CardContent>
+        </Card>
+        
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between pb-2">
+            <CardTitle className="text-sm font-medium">Transactions</CardTitle>
+            <FileBarChart className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{transactions.length}</div>
+            <p className="text-xs text-muted-foreground">Enregistrées</p>
           </CardContent>
         </Card>
       </div>
       
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <Card>
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <Card className="md:col-span-2">
           <CardHeader>
-            <CardTitle>Distribution du patrimoine</CardTitle>
+            <CardTitle>Évolution du patrimoine</CardTitle>
           </CardHeader>
-          <CardContent className="pt-2">
-            <div className="h-80">
-              <PatrimoineValueChart 
-                propertyValue={totalPropertyValue} 
-                liquidValue={balance} 
-              />
-            </div>
+          <CardContent>
+            <PatrimoineValueChart />
           </CardContent>
         </Card>
         
         <Card>
           <CardHeader>
-            <CardTitle>Types de propriétés</CardTitle>
+            <CardTitle>Distribution des propriétés</CardTitle>
           </CardHeader>
-          <CardContent className="pt-2">
-            <div className="h-80">
-              <PropertyDistributionPie 
-                urbanCount={urbanProperties}
-                ruralCount={ruralProperties}
-                otherCount={otherProperties}
-              />
-            </div>
+          <CardContent>
+            <PropertyDistributionPie 
+              urbanProperties={urbanProperties} 
+              ruralProperties={ruralProperties} 
+              otherProperties={otherProperties} 
+            />
           </CardContent>
         </Card>
       </div>
       
       <Card>
-        <CardHeader>
+        <CardHeader className="flex justify-between items-center">
           <CardTitle>Transactions récentes</CardTitle>
+          <Button asChild variant="outline" size="sm" className="gap-1">
+            <Link to="/patrimoine/economie">
+              <FileBarChart className="h-4 w-4" />
+              <span>Toutes les transactions</span>
+            </Link>
+          </Button>
         </CardHeader>
         <CardContent>
           <RecentTransactions transactions={transactions.slice(0, 5)} />
         </CardContent>
       </Card>
       
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <Button asChild className="roman-btn flex gap-2 h-auto py-3 px-4">
+      <div className="flex flex-col md:flex-row gap-4">
+        <Button asChild className="flex-1 gap-2">
           <Link to="/patrimoine/proprietes">
-            <Building className="h-5 w-5" />
-            <div className="flex flex-col items-start">
-              <span>Gérer les propriétés</span>
-              <span className="text-xs opacity-80">Acheter, vendre, construire</span>
-            </div>
+            <Building className="h-4 w-4" />
+            <span>Gérer mes propriétés</span>
           </Link>
         </Button>
         
-        <Button asChild variant="outline" className="roman-btn-outline flex gap-2 h-auto py-3 px-4">
-          <Link to="/patrimoine/economie">
-            <FileBarChart className="h-5 w-5" />
-            <div className="flex flex-col items-start">
-              <span>Finances</span>
-              <span className="text-xs opacity-80">Revenus et dépenses</span>
-            </div>
-          </Link>
-        </Button>
-        
-        <Button asChild variant="outline" className="roman-btn-outline flex gap-2 h-auto py-3 px-4">
+        <Button asChild variant="outline" className="flex-1 gap-2">
           <Link to="/patrimoine/carte">
-            <Map className="h-5 w-5" />
-            <div className="flex flex-col items-start">
-              <span>Voir la carte</span>
-              <span className="text-xs opacity-80">Localisation des propriétés</span>
-            </div>
+            <Map className="h-4 w-4" />
+            <span>Voir la carte</span>
           </Link>
         </Button>
       </div>

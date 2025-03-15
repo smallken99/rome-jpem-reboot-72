@@ -1,15 +1,14 @@
 
-import React from 'react';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Warehouse, ShoppingCart, ClipboardList } from 'lucide-react';
-import { ResourcesList } from '../ResourcesList';
-import { MarketPrices } from '../MarketPrices';
-import { TransactionsList } from '../TransactionsList';
-import { PropertyResource, MarketPrice, Transaction } from '../data/types';
+import React, { useState } from 'react';
+import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
+import { Resource, ResourceType, Transaction, MarketPrice } from '../data/types';
+import { ResourcesList } from './ResourcesList';
+import { TransactionsList } from '../../inventory/TransactionsList';
+import { MarketPricesTable } from './MarketPricesTable';
 
 interface InventoryTabsProps {
-  resources: PropertyResource[];
-  resourceTypes: string[];
+  resources: Resource[];
+  resourceTypes: ResourceType[];
   transactions: Transaction[];
   marketPrices: MarketPrice[];
 }
@@ -20,41 +19,30 @@ export const InventoryTabs: React.FC<InventoryTabsProps> = ({
   transactions,
   marketPrices
 }) => {
-  const [activeTab, setActiveTab] = React.useState<string>('resources');
-  const [resourceTypeFilter, setResourceTypeFilter] = React.useState<string>('all');
-
+  const [activeTab, setActiveTab] = useState('resources');
+  
   return (
-    <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-      <TabsList className="grid w-full grid-cols-3">
-        <TabsTrigger value="resources">
-          <Warehouse className="h-4 w-4 mr-2" />
-          Ressources
-        </TabsTrigger>
-        <TabsTrigger value="market">
-          <ShoppingCart className="h-4 w-4 mr-2" />
-          Marché
-        </TabsTrigger>
-        <TabsTrigger value="transactions">
-          <ClipboardList className="h-4 w-4 mr-2" />
-          Transactions
-        </TabsTrigger>
+    <Tabs 
+      value={activeTab} 
+      onValueChange={setActiveTab}
+      className="w-full"
+    >
+      <TabsList className="grid grid-cols-3 mb-6">
+        <TabsTrigger value="resources">Ressources</TabsTrigger>
+        <TabsTrigger value="transactions">Transactions</TabsTrigger>
+        <TabsTrigger value="market">Prix du marché</TabsTrigger>
       </TabsList>
       
-      <TabsContent value="resources" className="mt-6">
-        <ResourcesList 
-          resources={resources}
-          resourceTypes={resourceTypes}
-          resourceTypeFilter={resourceTypeFilter}
-          setResourceTypeFilter={setResourceTypeFilter}
-        />
+      <TabsContent value="resources">
+        <ResourcesList resources={resources} resourceTypes={resourceTypes} />
       </TabsContent>
       
-      <TabsContent value="market" className="mt-6">
-        <MarketPrices prices={marketPrices} />
-      </TabsContent>
-      
-      <TabsContent value="transactions" className="mt-6">
+      <TabsContent value="transactions">
         <TransactionsList transactions={transactions} />
+      </TabsContent>
+      
+      <TabsContent value="market">
+        <MarketPricesTable marketPrices={marketPrices} />
       </TabsContent>
     </Tabs>
   );

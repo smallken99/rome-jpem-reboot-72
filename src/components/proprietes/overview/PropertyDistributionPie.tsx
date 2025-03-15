@@ -1,71 +1,55 @@
 
-import React, { useMemo } from 'react';
-import { PieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip } from 'recharts';
+import React from 'react';
+import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend } from 'recharts';
 
 interface PropertyDistributionPieProps {
-  urbanCount: number;
-  ruralCount: number;
-  otherCount: number;
+  urbanProperties: number;
+  ruralProperties: number;
+  otherProperties: number;
 }
 
-export const PropertyDistributionPie: React.FC<PropertyDistributionPieProps> = ({
-  urbanCount,
-  ruralCount,
-  otherCount
+export const PropertyDistributionPie: React.FC<PropertyDistributionPieProps> = ({ 
+  urbanProperties,
+  ruralProperties,
+  otherProperties
 }) => {
-  const data = useMemo(() => {
-    const result = [];
-    
-    if (urbanCount > 0) {
-      result.push({ name: 'Urbaines', value: urbanCount });
-    }
-    
-    if (ruralCount > 0) {
-      result.push({ name: 'Rurales', value: ruralCount });
-    }
-    
-    if (otherCount > 0) {
-      result.push({ name: 'Autres', value: otherCount });
-    }
-    
-    return result;
-  }, [urbanCount, ruralCount, otherCount]);
-  
-  const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042'];
-  
-  const CustomTooltip = ({ active, payload }: any) => {
-    if (active && payload && payload.length) {
-      return (
-        <div className="bg-white p-2 border border-gray-200 shadow-sm rounded-md">
-          <p className="font-medium">{`${payload[0].name}`}</p>
-          <p className="text-sm text-rome-navy">{`Quantité: ${payload[0].value}`}</p>
-        </div>
-      );
-    }
-  
-    return null;
-  };
-  
+  const data = [
+    { name: 'Urbaines', value: urbanProperties, color: '#3182CE' },
+    { name: 'Rurales', value: ruralProperties, color: '#68D391' },
+    { name: 'Autres', value: otherProperties, color: '#F6AD55' },
+  ].filter(item => item.value > 0);
+
+  // Si aucune propriété, afficher un message
+  if (data.length === 0 || (urbanProperties + ruralProperties + otherProperties) === 0) {
+    return (
+      <div className="h-[250px] flex items-center justify-center">
+        <p className="text-muted-foreground text-sm">Aucune propriété disponible</p>
+      </div>
+    );
+  }
+
   return (
-    <ResponsiveContainer width="100%" height="100%">
-      <PieChart>
-        <Pie
-          data={data}
-          cx="50%"
-          cy="50%"
-          labelLine={false}
-          outerRadius={80}
-          fill="#8884d8"
-          dataKey="value"
-          label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
-        >
-          {data.map((entry, index) => (
-            <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-          ))}
-        </Pie>
-        <Tooltip content={<CustomTooltip />} />
-        <Legend />
-      </PieChart>
-    </ResponsiveContainer>
+    <div className="h-[250px]">
+      <ResponsiveContainer width="100%" height="100%">
+        <PieChart>
+          <Pie
+            data={data}
+            cx="50%"
+            cy="50%"
+            labelLine={false}
+            outerRadius={80}
+            fill="#8884d8"
+            dataKey="value"
+            label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}
+          >
+            {data.map((entry, index) => (
+              <Cell key={`cell-${index}`} fill={entry.color} />
+            ))}
+          </Pie>
+          <Tooltip formatter={(value) => [`${value} propriété${value > 1 ? 's' : ''}`]} />
+          <Legend />
+        </PieChart>
+      </ResponsiveContainer>
+    </div>
   );
 };

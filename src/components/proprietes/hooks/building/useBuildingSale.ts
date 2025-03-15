@@ -1,60 +1,64 @@
 
 import { useState } from 'react';
-import { toast } from 'sonner';
 import { usePatrimoine } from '@/hooks/usePatrimoine';
 import { useBuildingInventory } from './useBuildingInventory';
 import { OwnedBuilding } from './types';
-import { useEconomy } from '@/hooks/useEconomy';
+import { toast } from 'sonner';
 
 export function useBuildingSale() {
   const [isLoading, setIsLoading] = useState(false);
-  const { ownedBuildings, removeBuilding } = useBuildingInventory();
-  const economy = useEconomy();
+  const { buildingSold } = usePatrimoine();
+  const { removeBuilding } = useBuildingInventory();
   
-  // Calculate market value of a building
-  const calculateBuildingValue = (buildingId: number): number => {
-    const building = ownedBuildings.find(b => b.id === buildingId);
+  // Calculer la valeur d'un bâtiment en fonction de son état
+  const calculateBuildingValue = (building: OwnedBuilding): number => {
+    // Base value based on maintenance cost
+    const baseValue = building.maintenanceCost * 10;
     
-    if (!building) return 0;
+    // Apply condition modifier
+    const conditionFactor = building.condition / 100;
     
-    // Value depends on building condition and location
-    // Using a simplified formula
-    const baseValue = building.maintenanceCost * 25; // Approximation of base value
-    const conditionMultiplier = building.condition / 100;
+    // Apply age depreciation
+    const ageInDays = (new Date().getTime() - building.purchaseDate.getTime()) / (1000 * 60 * 60 * 24);
+    const ageFactor = Math.max(0.6, 1 - (ageInDays / 365) * 0.05); // 5% depreciation per year, minimum 60% of base value
     
-    return Math.round(baseValue * conditionMultiplier);
+    // Calculate final value
+    const value = Math.round(baseValue * conditionFactor * ageFactor);
+    
+    return value;
   };
   
-  // Sell an existing building
-  const sellBuilding = (buildingId: number, estimatedValue: number) => {
+  // Vendre un bâtiment
+  const sellBuilding = async (buildingId: number): Promise<boolean> => {
     setIsLoading(true);
     
-    setTimeout(() => {
-      // Find building
-      const buildingToSell = ownedBuildings.find(b => b.id === buildingId);
+    try {
+      // Trouver le bâtiment dans l'inventaire
+      const building = useBuildingInventory().ownedBuildings.find(b => b.id === buildingId);
       
-      if (!buildingToSell) {
+      if (!building) {
         toast.error("Bâtiment introuvable");
-        setIsLoading(false);
         return false;
       }
       
-      // Remove building from list
+      // Calculer la valeur du bâtiment
+      const value = calculateBuildingValue(building);
+      
+      // Supprimer le bâtiment de l'inventaire
       removeBuilding(buildingId);
       
-      // Add sale amount via economy system
-      const success = economy.receivePayment(
-        estimatedValue,
-        "Marché immobilier",
-        "Immobilier"
-      );
+      // Enregistrer la transaction financière
+      buildingSold(building.name, value);
       
-      toast.success(`Vente de "${buildingToSell.name}" réalisée pour ${estimatedValue.toLocaleString()} As`);
-      setIsLoading(false);
+      toast.success(`${building.name} vendu pour ${value.toLocaleString()} As`);
       return true;
-    }, 1000);
-    
-    return true;
+    } catch (error) {
+      console.error("Erreur lors de la vente du bâtiment:", error);
+      toast.error("Une erreur est survenue lors de la vente");
+      return false;
+    } finally {
+      setIsLoading(false);
+    }
   };
   
   return {
