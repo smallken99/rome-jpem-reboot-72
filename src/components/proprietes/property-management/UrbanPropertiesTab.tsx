@@ -76,13 +76,13 @@ export const UrbanPropertiesTab: React.FC = () => {
 
       {/* Section for available properties to purchase */}
       <UrbanCatalogueSection 
-        selectedPropertyId={null}
-        setSelectedPropertyId={() => {}}
-        propertyDetails={null}
+        selectedBuildingType="residential"
+        setSelectedBuildingType={() => {}}
+        selectedBuildingId={null}
+        setSelectedBuildingId={() => {}}
+        selectedBuildingDetails={null}
         purchaseDialogOpen={false}
         setPurchaseDialogOpen={() => {}}
-        propertyLocation="latium"
-        setPropertyLocation={() => {}}
       />
 
       {/* Purchase dialog */}

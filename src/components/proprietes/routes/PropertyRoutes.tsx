@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
-import PropertyManagement from '@/components/proprietes/PropertyManagement';
+import { PropertyManagement } from '@/components/proprietes/PropertyManagement';
 import { PropertyMap } from '@/components/proprietes/PropertyMap';
 import { PropertyDetail } from '@/components/proprietes/property-management/PropertyDetail';
 import { ProfitabilityTab } from '@/components/proprietes/property-management/profitability/ProfitabilityTab';

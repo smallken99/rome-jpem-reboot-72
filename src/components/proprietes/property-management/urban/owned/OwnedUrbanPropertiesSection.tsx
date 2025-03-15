@@ -47,9 +47,14 @@ export const OwnedUrbanPropertiesSection: React.FC<OwnedUrbanPropertiesSectionPr
             return (
               <PropertyCard
                 key={building.id}
-                building={building}
-                onSell={() => handleSell(building.id)}
-                estimatedValue={value}
+                name={building.name}
+                location={building.location}
+                value={`${value.toLocaleString()} As`}
+                type={"Résidence principale" as any}
+                status={building.condition > 90 ? "Excellent" : building.condition > 70 ? "Bon" : building.condition > 50 ? "Moyen" : "Mauvais"}
+                revenue={`${(value * 0.05).toLocaleString()} As/an`}
+                maintenance={`${building.maintenanceCost.toLocaleString()} As/an`}
+                benefits={[]}
               />
             );
           })}

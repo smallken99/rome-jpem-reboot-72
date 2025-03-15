@@ -63,16 +63,26 @@ export const RuralPropertiesTab: React.FC = () => {
 
       {/* Section for owned properties */}
       <OwnedRuralPropertiesSection 
-        buildings={ownedRuralBuildings}
-        onSell={handleSellProperty}
-        estimatedValue={getEstimatedValue}
+        ownedRuralProperties={ownedRuralBuildings}
+        ruralProperties={{}}
+        toggleMaintenance={(id, enabled) => true}
+        performMaintenance={(id) => true}
+        assignSlaves={(id, count) => {}}
+        sellBuilding={handleSellProperty}
+        calculateBuildingValue={(id) => {
+          const building = buildings.find(b => b.id === id);
+          return building ? calculateBuildingValue(building) : 0;
+        }}
+        availableSlaves={10}
+        balance={balance}
+        setPurchaseDialogOpen={setPurchaseDialogOpen}
       />
 
       {/* Section for available properties to purchase */}
       <RuralCatalogueSection 
-        selectedPropertyId={null}
-        setSelectedPropertyId={() => {}}
-        propertyDetails={null}
+        selectedBuildingId={null}
+        setSelectedBuildingId={() => {}}
+        selectedBuildingDetails={null}
         purchaseDialogOpen={false}
         setPurchaseDialogOpen={() => {}}
         propertySize="moyen"
