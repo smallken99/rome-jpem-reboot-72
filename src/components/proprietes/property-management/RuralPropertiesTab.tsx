@@ -1,117 +1,100 @@
 
-import React from 'react';
+import React, { useState } from 'react';
+import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { PropertyPurchaseDialog } from './dialogs/PropertyPurchaseDialog';
-import { RuralCatalogueSection } from './rural/catalogue/RuralCatalogueSection';
+import { RuralPropertySelector } from './rural/RuralPropertySelector';
+import { RuralPropertyDetails } from './rural/RuralPropertyDetails';
+import { useRuralPropertyCalculator } from './rural/hooks/useRuralPropertyCalculator';
 import { OwnedRuralPropertiesSection } from './rural/owned/OwnedRuralPropertiesSection';
-import { useRuralPropertiesTab } from './rural/hooks/useRuralPropertiesTab';
-import { OwnedBuilding, BuildingPurchaseOptions } from '../hooks/building/types';
-import { ruralProperties } from '../data/buildings/ruralProperties';
+import { PropertyPurchaseDialog } from './dialogs/PropertyPurchaseDialog';
+import { usePatrimoine } from '@/hooks/usePatrimoine';
+import { Separator } from '@/components/ui/separator';
+import { BuildingDescription } from '../data/types/buildingTypes';
 
-export const RuralPropertiesTab: React.FC = () => {
-  const {
-    selectedPropertyId,
-    setSelectedPropertyId,
-    purchaseDialogOpen,
-    setPurchaseDialogOpen,
-    propertySize,
-    setPropertySize,
-    propertyLocation,
-    setPropertyLocation,
-    ownedRuralProperties,
-    balance,
-    toggleMaintenance,
-    performMaintenance,
+export const RuralPropertiesTab = () => {
+  const [selectedPropertyId, setSelectedPropertyId] = useState<string>('');
+  const [selectedProperty, setSelectedProperty] = useState<BuildingDescription | null>(null);
+  const [propertySize, setPropertySize] = useState<string>('moyen');
+  const [propertyLocation, setPropertyLocation] = useState<string>('campagne_latium');
+  const [purchaseDialogOpen, setPurchaseDialogOpen] = useState(false);
+
+  const { 
+    buildings, 
+    getBuildingDetails,
+    handleAddProperty,
     sellBuilding,
     calculateBuildingValue,
-    assignSlaves,
-    handlePurchase,
-    availableSlaves
-  } = useRuralPropertiesTab();
+    calculateBuildingValueById 
+  } = useRuralPropertyCalculator(selectedPropertyId);
 
-  // Get property details from rural properties catalog
-  const propertyDetails = selectedPropertyId 
-    ? ruralProperties.find(prop => prop.id === selectedPropertyId) || null 
-    : null;
+  const { balance, availableSlaves, toggleMaintenance, performMaintenance, assignSlaves } = usePatrimoine();
 
-  // Create a synchronous wrapper for the async handlePurchase function
-  const adaptedHandlePurchase = (
-    buildingId: string, 
-    buildingType: "urban" | "rural" | "religious" | "public", 
-    location: string, 
+  const handleSelectProperty = (id: string) => {
+    setSelectedPropertyId(id);
+    const propertyDetails = getBuildingDetails(id);
+    setSelectedProperty(propertyDetails);
+  };
+
+  // This function wraps the async handleAddProperty to make it synchronous for the component
+  const handleAddPropertySync = (
+    buildingId: string,
+    buildingType: "urban" | "rural" | "religious" | "public",
+    location: string,
     customName?: string
   ): boolean => {
-    // Convert the async call to a synchronous one
-    const options: BuildingPurchaseOptions = {
-      buildingId,
-      type: buildingType,
-      name: customName || `Propriété ${buildingType}`,
-      location,
-      initialCost: propertyDetails?.initialCost || 5000,
-      maintenanceCost: propertyDetails?.maintenanceCost || 500,
-      customName
-    };
-
-    // Start the purchase process but return true immediately
-    handlePurchase(options);
+    handleAddProperty(buildingId, buildingType, location, customName);
     return true;
   };
 
   return (
-    <div>
-      <Tabs defaultValue="catalogue" className="space-y-4">
-        <TabsList className="border border-rome-gold/30 bg-white">
-          <TabsTrigger value="catalogue">Catalogue</TabsTrigger>
-          <TabsTrigger value="owned">Mes Propriétés</TabsTrigger>
-        </TabsList>
-        
-        {/* Catalogue de propriétés rurales */}
-        <TabsContent value="catalogue">
-          <RuralCatalogueSection 
-            selectedPropertyId={selectedPropertyId}
-            setSelectedPropertyId={setSelectedPropertyId}
-            propertyDetails={propertyDetails}
-            purchaseDialogOpen={purchaseDialogOpen}
-            setPurchaseDialogOpen={setPurchaseDialogOpen}
-            propertySize={propertySize}
-            setPropertySize={setPropertySize}
-            propertyLocation={propertyLocation}
-            setPropertyLocation={setPropertyLocation}
-          />
-        </TabsContent>
-        
-        {/* Propriétés rurales possédées */}
-        <TabsContent value="owned">
-          <OwnedRuralPropertiesSection 
-            ownedRuralProperties={ownedRuralProperties}
-            ruralProperties={ruralProperties.reduce((acc, curr) => {
-              acc[curr.id] = curr;
-              return acc;
-            }, {} as Record<string, typeof ruralProperties[0]>)}
-            toggleMaintenance={toggleMaintenance}
-            performMaintenance={performMaintenance}
-            assignSlaves={assignSlaves}
-            sellBuilding={sellBuilding}
-            calculateBuildingValue={calculateBuildingValue}
-            availableSlaves={availableSlaves}
-            balance={balance}
-            setPurchaseDialogOpen={setPurchaseDialogOpen}
-          />
-        </TabsContent>
-      </Tabs>
+    <Tabs defaultValue="owned" className="w-full">
+      <TabsList className="grid w-full grid-cols-2">
+        <TabsTrigger value="owned">Mes Propriétés</TabsTrigger>
+        <TabsTrigger value="catalogue">Catalogue</TabsTrigger>
+      </TabsList>
       
-      {/* Dialogue d'achat */}
-      {propertyDetails && selectedPropertyId && (
-        <PropertyPurchaseDialog
-          open={purchaseDialogOpen}
-          onOpenChange={setPurchaseDialogOpen}
-          building={propertyDetails}
-          buildingId={selectedPropertyId}
-          buildingType="rural"
-          onPurchase={adaptedHandlePurchase}
+      <TabsContent value="owned" className="space-y-4 mt-4">
+        <OwnedRuralPropertiesSection 
+          filteredOwnedBuildings={buildings}
+          setPurchaseDialogOpen={setPurchaseDialogOpen}
           balance={balance}
+          availableSlaves={availableSlaves}
+          toggleMaintenance={toggleMaintenance}
+          performMaintenance={performMaintenance}
+          assignSlaves={assignSlaves}
+          sellBuilding={sellBuilding}
+          calculateBuildingValue={calculateBuildingValue}
         />
-      )}
-    </div>
+      </TabsContent>
+      
+      <TabsContent value="catalogue" className="space-y-4 mt-4">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div className="md:col-span-1">
+            <h3 className="font-cinzel text-lg text-rome-navy mb-4">Types de propriétés</h3>
+            <RuralPropertySelector
+              selectedId={selectedPropertyId}
+              onSelect={handleSelectProperty}
+              propertySize={propertySize}
+              setPropertySize={setPropertySize}
+              propertyLocation={propertyLocation}
+              setPropertyLocation={setPropertyLocation}
+            />
+          </div>
+          
+          <div className="md:col-span-2">
+            <h3 className="font-cinzel text-lg text-rome-navy mb-4">Détails de la propriété</h3>
+            <RuralPropertyDetails propertyDetails={selectedProperty} />
+          </div>
+        </div>
+      </TabsContent>
+      
+      <PropertyPurchaseDialog
+        open={purchaseDialogOpen}
+        onOpenChange={setPurchaseDialogOpen}
+        propertyCategory="rural"
+        handleAddProperty={handleAddPropertySync}
+        balance={balance}
+      />
+    </Tabs>
   );
 };

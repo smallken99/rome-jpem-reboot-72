@@ -19,7 +19,7 @@ export const useRuralPropertyCalculator = (buildingId?: string) => {
 
   const handleAddProperty = (
     buildingId: string,
-    buildingType: "rural" | "urban" | "religious" | "public",
+    buildingType: "urban" | "rural" | "religious" | "public",
     location: string,
     customName?: string
   ): boolean => {

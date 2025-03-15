@@ -1,153 +1,118 @@
 
 import React, { useState } from 'react';
-import { TabsContent } from '@/components/ui/tabs';
-import { UrbanPropertySelector } from './urban/UrbanPropertySelector';
-import { UrbanPropertyDetails } from './urban/UrbanPropertyDetails';
-import { OwnedUrbanPropertiesSection } from './urban/owned/OwnedUrbanPropertiesSection';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { UrbanCatalogueSection } from './urban/catalogue/UrbanCatalogueSection';
-import { useUrbanPropertiesTab } from './urban/hooks/useUrbanPropertiesTab';
-import { BuildingDescription } from '../data/types/buildingTypes';
-import { OwnedBuilding } from '../hooks/building/types';
+import { OwnedUrbanPropertiesSection } from './urban/owned/OwnedUrbanPropertiesSection';
+import { PropertyPurchaseDialog } from './dialogs/PropertyPurchaseDialog';
+import { useBuildingInventory } from '../hooks/building/useBuildingInventory';
+import { useBuildingSale } from '../hooks/building/useBuildingSale';
+import { usePatrimoine } from '@/hooks/usePatrimoine';
 
-// For type safety, define the allowed building types
-type AllowedBuildingType = 'residential' | 'religious' | 'public' | 'military';
-
-const UrbanPropertiesTab = () => {
-  const {
-    selectedBuildingType,
-    setSelectedBuildingType,
-    selectedBuildingId,
-    setSelectedBuildingId,
-    selectedBuildingDetails,
-    isPurchaseDialogOpen,
-    setIsPurchaseDialogOpen,
-    balance,
-    availableSlaves,
-    filteredOwnedBuildings,
-    sellBuilding: handleSellBuilding,
-    calculateBuildingValue: handleCalcBuildingValue,
-    toggleMaintenance: handleToggleMaintenance,
-    performMaintenance: handlePerformMaintenance,
-    assignSlaves: handleAssignSlaves,
-  } = useUrbanPropertiesTab();
-
-  const [isViewingCatalogue, setIsViewingCatalogue] = useState(false);
-
-  // Create properly typed adapter functions
-  const handleBuildingTypeChange = (type: AllowedBuildingType) => {
-    setSelectedBuildingType(type as any);
-  };
-
-  const handleBuildingSelect = (id: string) => {
-    setSelectedBuildingId(id);
-  };
-
-  const toggleMaintenance = (buildingId: number): boolean => {
-    handleToggleMaintenance(buildingId, true);
-    return true;
-  };
-
-  const performMaintenance = (buildingId: number): boolean => {
-    handlePerformMaintenance(buildingId);
-    return true;
-  };
-
-  const sellBuilding = (buildingId: number, estimatedValue: number): boolean => {
-    handleSellBuilding(buildingId);
-    return true;
-  };
-
-  const calculateBuildingValue = (buildingId: number): number => {
-    // Find the building by ID
-    const building = filteredOwnedBuildings.find(b => Number(b.id) === buildingId);
-    if (building) {
-      return handleCalcBuildingValue(building);
+export const UrbanPropertiesTab = () => {
+  const [purchaseDialogOpen, setPurchaseDialogOpen] = useState(false);
+  const [selectedBuildingType, setSelectedBuildingType] = useState<'residential' | 'religious' | 'public' | 'military'>('residential');
+  
+  const { ownedBuildings, addBuilding } = useBuildingInventory();
+  const { sellBuilding, calculateBuildingValue } = useBuildingSale();
+  const { balance, availableSlaves, toggleMaintenance, performMaintenance, assignSlaves } = usePatrimoine();
+  
+  // Filtrer les bâtiments selon le type sélectionné
+  const filteredOwnedBuildings = ownedBuildings.filter(building => {
+    switch(selectedBuildingType) {
+      case 'residential': return building.buildingType === 'urban';
+      case 'religious': return building.buildingType === 'religious';
+      case 'public': return building.buildingType === 'public';
+      case 'military': return building.buildingType === 'military';
+      default: return false;
     }
-    return 0;
+  });
+  
+  // Fonction pour gérer l'achat de propriété
+  const handleAddProperty = (
+    buildingId: string,
+    buildingType: "urban" | "rural" | "religious" | "public",
+    location: string,
+    customName?: string
+  ) => {
+    return addBuilding({
+      buildingId,
+      type: buildingType,
+      name: customName || buildingId,
+      location,
+    });
   };
-
-  const assignSlaves = (buildingId: number, slaveCount: number): void => {
-    handleAssignSlaves(buildingId, slaveCount);
-  };
-
-  // Extract building details for compatibility
-  const getBuildingDetailsForDisplay = (building: OwnedBuilding): BuildingDescription => {
-    return {
-      id: building.buildingId,
-      name: building.name,
-      description: `Description for ${building.name}`,
-      basePrice: 10000,
-      maintenanceCost: building.maintenanceCost,
-      type: building.buildingType,
-      advantages: ['Advantage 1', 'Advantage 2'],
-      initialCost: 10000,
-      prestige: 5,
-      slaves: {
-        required: 2,
-        optimal: 5,
-        maxProfit: 10
-      }
-    };
-  };
-
-  const adaptedSelectedBuildingDetails = selectedBuildingDetails 
-    ? getBuildingDetailsForDisplay(selectedBuildingDetails as OwnedBuilding)
-    : null;
-
+  
   return (
-    <TabsContent value="urban" className="space-y-6">
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Left panel: Building selector */}
-        <div className="lg:col-span-1 space-y-6">
-          <UrbanPropertySelector
-            buildingType={selectedBuildingType as AllowedBuildingType}
-            selectedId={selectedBuildingId || ''}
-            onSelect={handleBuildingSelect}
-            isViewingCatalogue={isViewingCatalogue}
-            setIsViewingCatalogue={setIsViewingCatalogue}
-          />
-          
-          {isViewingCatalogue ? (
-            <UrbanCatalogueSection 
-              selectedBuildingType={selectedBuildingType as AllowedBuildingType}
-              setSelectedBuildingType={handleBuildingTypeChange}
-              selectedBuildingId={selectedBuildingId}
-              setSelectedBuildingId={handleBuildingSelect}
-              selectedBuildingDetails={adaptedSelectedBuildingDetails}
-              purchaseDialogOpen={isPurchaseDialogOpen}
-              setPurchaseDialogOpen={setIsPurchaseDialogOpen}
-            />
-          ) : (
-            <OwnedUrbanPropertiesSection
-              selectedBuildingType={selectedBuildingType as "religious" | "public" | "residential" | "military"}
-              filteredOwnedBuildings={filteredOwnedBuildings || []}
-              balance={balance}
-              availableSlaves={availableSlaves}
-              setPurchaseDialogOpen={setIsPurchaseDialogOpen}
-              toggleMaintenance={toggleMaintenance}
-              performMaintenance={performMaintenance}
-              assignSlaves={assignSlaves}
-              sellBuilding={sellBuilding}
-              calculateBuildingValue={calculateBuildingValue}
-            />
-          )}
+    <Tabs defaultValue="owned" className="w-full">
+      <TabsList className="grid w-full grid-cols-2">
+        <TabsTrigger value="owned">Mes Propriétés</TabsTrigger>
+        <TabsTrigger value="catalogue">Catalogue</TabsTrigger>
+      </TabsList>
+      
+      <TabsContent value="owned" className="space-y-4 mt-4">
+        <div className="flex justify-start mb-4">
+          <TabsList className="inline-flex">
+            <TabsTrigger 
+              value="residential" 
+              onClick={() => setSelectedBuildingType('residential')}
+              className={selectedBuildingType === 'residential' ? 'data-[state=active]' : ''}
+            >
+              Résidentielles
+            </TabsTrigger>
+            <TabsTrigger 
+              value="religious" 
+              onClick={() => setSelectedBuildingType('religious')}
+              className={selectedBuildingType === 'religious' ? 'data-[state=active]' : ''}
+            >
+              Religieuses
+            </TabsTrigger>
+            <TabsTrigger 
+              value="public" 
+              onClick={() => setSelectedBuildingType('public')}
+              className={selectedBuildingType === 'public' ? 'data-[state=active]' : ''}
+            >
+              Publiques
+            </TabsTrigger>
+            <TabsTrigger 
+              value="military" 
+              onClick={() => setSelectedBuildingType('military')}
+              className={selectedBuildingType === 'military' ? 'data-[state=active]' : ''}
+            >
+              Militaires
+            </TabsTrigger>
+          </TabsList>
         </div>
         
-        {/* Right panel: Building details */}
-        <div className="lg:col-span-2">
-          {adaptedSelectedBuildingDetails ? (
-            <UrbanPropertyDetails 
-              buildingDetails={adaptedSelectedBuildingDetails as any}
-            />
-          ) : (
-            <div className="border rounded-lg p-6 bg-card text-center text-muted-foreground">
-              <p>Sélectionnez une propriété pour voir les détails</p>
-            </div>
-          )}
-        </div>
-      </div>
-    </TabsContent>
+        <OwnedUrbanPropertiesSection
+          selectedBuildingType={selectedBuildingType}
+          filteredOwnedBuildings={filteredOwnedBuildings}
+          balance={balance}
+          availableSlaves={availableSlaves}
+          setPurchaseDialogOpen={setPurchaseDialogOpen}
+          toggleMaintenance={toggleMaintenance}
+          performMaintenance={performMaintenance}
+          assignSlaves={assignSlaves}
+          sellBuilding={sellBuilding}
+          calculateBuildingValue={calculateBuildingValue}
+        />
+      </TabsContent>
+      
+      <TabsContent value="catalogue" className="space-y-4 mt-4">
+        <UrbanCatalogueSection 
+          handleAddProperty={handleAddProperty} 
+          balance={balance}
+        />
+      </TabsContent>
+      
+      <PropertyPurchaseDialog
+        open={purchaseDialogOpen}
+        onOpenChange={setPurchaseDialogOpen}
+        propertyCategory={selectedBuildingType === 'residential' ? 'residential' : 
+                          selectedBuildingType === 'religious' ? 'religious' : 
+                          selectedBuildingType === 'public' ? 'public' : 'military'}
+        handleAddProperty={handleAddProperty}
+        balance={balance}
+      />
+    </Tabs>
   );
 };
-
-export default UrbanPropertiesTab;
