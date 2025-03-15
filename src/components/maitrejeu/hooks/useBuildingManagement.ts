@@ -1,238 +1,270 @@
 
-import { useState } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { v4 as uuidv4 } from 'uuid';
-import { toast } from 'sonner';
-import { Building, ConstructionProject, MaintenanceTask, BuildingRevenue, BuildingType, BuildingCondition } from '../types/batiments';
+import { useMaitreJeu } from '../context/MaitreJeuContext';
+import { 
+  Building, 
+  ConstructionProject, 
+  MaintenanceRecord, 
+  MaintenanceTask,
+  BuildingRevenueRecord
+} from '../types/batiments';
 import { GameDate } from '../types/common';
 
-// Types d'actions possibles
-type Action = 'view' | 'add' | 'edit' | 'delete' | 'maintain' | 'revenue';
-
-interface UseBuildingManagementProps {
-  initialBuildings?: Building[];
-  initialConstructions?: ConstructionProject[];
-  initialMaintenanceTasks?: MaintenanceTask[];
-  initialRevenues?: BuildingRevenue[];
-  currentDate: GameDate;
-}
-
-export function useBuildingManagement({
-  initialBuildings = [],
-  initialConstructions = [],
-  initialMaintenanceTasks = [],
-  initialRevenues = [],
-  currentDate
-}: UseBuildingManagementProps) {
-  // État des bâtiments et projets
-  const [buildings, setBuildings] = useState<Building[]>(initialBuildings);
-  const [constructions, setConstructions] = useState<ConstructionProject[]>(initialConstructions);
-  const [maintenanceTasks, setMaintenanceTasks] = useState<MaintenanceTask[]>(initialMaintenanceTasks);
-  const [revenues, setRevenues] = useState<BuildingRevenue[]>(initialRevenues);
+export const useBuildingManagement = () => {
+  const { currentYear, currentSeason } = useMaitreJeu();
   
-  // État de l'interface
-  const [selectedBuilding, setSelectedBuilding] = useState<Building | null>(null);
-  const [selectedConstruction, setSelectedConstruction] = useState<ConstructionProject | null>(null);
-  const [selectedTask, setSelectedTask] = useState<MaintenanceTask | null>(null);
-  const [currentAction, setCurrentAction] = useState<Action>('view');
-  
-  // Ajouter un nouveau projet de construction
-  const addConstructionProject = (project: Omit<ConstructionProject, 'id' | 'progress' | 'approved'>) => {
+  // États
+  const [buildings, setBuildings] = useState<Building[]>([]);
+  const [constructionProjects, setConstructionProjects] = useState<ConstructionProject[]>([]);
+  const [maintenanceRecords, setMaintenanceRecords] = useState<MaintenanceRecord[]>([]);
+  const [maintenanceTasks, setMaintenanceTasks] = useState<MaintenanceTask[]>([]);
+  const [revenueRecords, setRevenueRecords] = useState<BuildingRevenueRecord[]>([]);
+
+  // Charger les données (simulation)
+  useEffect(() => {
+    // Dans une vraie application, les données seraient chargées depuis une API
+    // Pour l'instant, nous utilisons des données fictives
+    setBuildings([
+      // Exemple de bâtiments
+      {
+        id: "b1",
+        name: "Forum Romanum",
+        type: "forum",
+        location: "Centre de Rome",
+        status: "good",
+        constructionYear: 650,
+        description: "Centre civique et politique de Rome",
+        cost: 500000,
+        maintenanceCost: 20000,
+        revenue: 30000,
+        capacity: 5000,
+        owner: "république"
+      },
+      // ... autres bâtiments
+    ]);
+  }, []);
+
+  // Créer un nouveau projet de construction
+  const createConstructionProject = useCallback((projectData: Omit<ConstructionProject, "id" | "approved" | "progress">) => {
     const newProject: ConstructionProject = {
-      ...project,
       id: uuidv4(),
+      ...projectData,
       progress: 0,
       approved: false,
-      payments: []
+      expectedCompletionYear: projectData.estimatedCompletionDate.year
     };
     
-    setConstructions(prev => [...prev, newProject]);
-    toast.success(`Projet de construction de ${project.buildingName} ajouté`);
+    setConstructionProjects(prev => [...prev, newProject]);
+    
     return newProject.id;
-  };
-  
-  // Approuver un projet de construction
-  const approveConstruction = (projectId: string) => {
-    setConstructions(prev => 
-      prev.map(proj => 
-        proj.id === projectId 
-          ? { ...proj, approved: true, startDate: currentDate }
-          : proj
-      )
+  }, []);
+
+  // Mettre à jour un projet de construction
+  const updateConstructionProject = useCallback((id: string, updates: Partial<ConstructionProject>) => {
+    setConstructionProjects(prev => 
+      prev.map(project => project.id === id ? { ...project, ...updates } : project)
     );
-    toast.success('Projet de construction approuvé');
-  };
-  
-  // Mettre à jour la progression d'un projet
-  const updateConstructionProgress = (projectId: string, progress: number) => {
-    setConstructions(prev => 
-      prev.map(proj => 
-        proj.id === projectId 
-          ? { ...proj, progress: Math.max(0, Math.min(100, progress)) }
-          : proj
-      )
-    );
-    
-    const project = constructions.find(p => p.id === projectId);
-    if (progress >= 100 && project) {
-      completeConstruction(projectId);
-    }
-  };
-  
-  // Terminer un projet de construction
-  const completeConstruction = (projectId: string) => {
-    const project = constructions.find(p => p.id === projectId);
-    if (!project) return;
-    
-    // Créer le nouveau bâtiment
-    const newBuilding: Building = {
+  }, []);
+
+  // Ajouter un nouvel enregistrement de maintenance
+  const addMaintenanceRecord = useCallback((buildingId: string, data: Omit<MaintenanceRecord, "id">) => {
+    const newRecord: MaintenanceRecord = {
       id: uuidv4(),
-      name: project.buildingName,
-      type: project.buildingType,
-      description: project.description,
-      location: project.location,
-      condition: 'excellent',
-      constructionYear: currentDate.year,
-      lastMaintenance: currentDate,
-      maintenanceCost: Math.round(project.totalCost * 0.05), // 5% du coût initial
-      maintenanceInterval: 12, // 1 an par défaut
-      revenue: 0, // À définir
-      cost: 0, // À définir
-      capacity: 0, // À définir
-      isPublic: true,
-      ownerId: null,
-      slaves: 0,
-      slaveCost: 0,
-      tags: [],
-      attributes: {}
+      buildingId,
+      ...data
     };
     
-    // Ajouter le bâtiment et marquer le projet comme terminé
-    setBuildings(prev => [...prev, newBuilding]);
-    setConstructions(prev => 
-      prev.map(proj => 
-        proj.id === projectId 
-          ? { ...proj, progress: 100, endDate: currentDate }
-          : proj
-      )
-    );
+    setMaintenanceRecords(prev => [...prev, newRecord]);
     
-    toast.success(`Construction de ${project.buildingName} terminée`);
-    return newBuilding.id;
-  };
-  
-  // Planifier une tâche de maintenance
-  const scheduleMaintenance = (task: Omit<MaintenanceTask, 'id'>) => {
-    const newTask: MaintenanceTask = {
-      ...task,
-      id: uuidv4()
-    };
-    
-    setMaintenanceTasks(prev => [...prev, newTask]);
-    
-    // Mettre à jour la date de dernière maintenance du bâtiment
-    updateBuilding(task.buildingId, {
-      lastMaintenance: task.startDate
-    });
-    
-    toast.success('Maintenance planifiée');
-    return newTask.id;
-  };
-  
-  // Ajouter un nouveau bâtiment
-  const addBuilding = (building: Omit<Building, 'id'>) => {
-    const newBuilding: Building = {
-      ...building,
-      id: uuidv4()
-    };
-    
-    setBuildings(prev => [...prev, newBuilding]);
-    toast.success(`Bâtiment ${building.name} ajouté`);
-    return newBuilding.id;
-  };
-  
-  // Mettre à jour un bâtiment
-  const updateBuilding = (buildingId: string, updates: Partial<Building>) => {
+    // Mettre à jour l'état du bâtiment concerné
     setBuildings(prev => 
       prev.map(building => 
         building.id === buildingId 
-          ? { ...building, ...updates }
+          ? { 
+              ...building, 
+              status: data.newStatus,
+              lastMaintenance: data.date,
+              condition: 'good'
+            } 
           : building
       )
     );
     
-    toast.success('Bâtiment mis à jour');
-  };
-  
-  // Supprimer un bâtiment
-  const deleteBuilding = (buildingId: string) => {
-    setBuildings(prev => prev.filter(b => b.id !== buildingId));
-    toast.success('Bâtiment supprimé');
-  };
-  
-  // Enregistrer un revenu pour un bâtiment
-  const recordRevenue = (revenueData: Omit<BuildingRevenue, 'id'>) => {
-    const newRevenue: BuildingRevenue = {
-      ...revenueData,
-      id: uuidv4()
+    return newRecord.id;
+  }, []);
+
+  // Planifier une tâche de maintenance
+  const scheduleMaintenanceTask = useCallback((data: Omit<MaintenanceTask, "id">) => {
+    const newTask: MaintenanceTask = {
+      id: uuidv4(),
+      ...data,
+      startDate: data.startDate || { year: currentYear, season: currentSeason }
     };
     
-    setRevenues(prev => [...prev, newRevenue]);
-    toast.success('Revenu enregistré');
-    return newRevenue.id;
-  };
-  
-  // Calculer les revenus totaux d'un bâtiment pour une période donnée
-  const calculateTotalRevenue = (buildingId: string, startDate: GameDate, endDate: GameDate) => {
-    const buildingRevenues = revenues.filter(r => 
-      r.buildingId === buildingId && 
-      r.collected && 
-      ((r.year > startDate.year) || (r.year === startDate.year && r.season >= startDate.season)) &&
-      ((r.year < endDate.year) || (r.year === endDate.year && r.season <= endDate.season))
+    setMaintenanceTasks(prev => [...prev, newTask]);
+    
+    return newTask.id;
+  }, [currentYear, currentSeason]);
+
+  // Terminer une tâche de maintenance
+  const completeMaintenanceTask = useCallback((taskId: string, performance?: string) => {
+    setMaintenanceTasks(prev => 
+      prev.map(task => 
+        task.id === taskId 
+          ? { ...task, status: 'completed' } 
+          : task
+      )
     );
     
-    return buildingRevenues.reduce((total, r) => total + r.amount, 0);
-  };
-  
-  // Sélectionner un bâtiment pour une action
-  const selectBuilding = (building: Building, action: Action = 'view') => {
-    setSelectedBuilding(building);
-    setCurrentAction(action);
-  };
-  
+    // Récupérer la tâche
+    const task = maintenanceTasks.find(t => t.id === taskId);
+    
+    if (task) {
+      // Créer un enregistrement de maintenance correspondant
+      const record: Omit<MaintenanceRecord, "id"> = {
+        buildingId: task.buildingId,
+        date: { year: currentYear, season: currentSeason },
+        cost: task.estimatedCost,
+        description: `Maintenance planifiée: ${task.description}`,
+        performedBy: "Équipe de maintenance",
+        repairLevel: task.priority === 'critical' ? 'major' : 
+                    task.priority === 'high' ? 'moderate' : 'minor',
+        previousStatus: 'poor',
+        newStatus: 'good'
+      };
+      
+      addMaintenanceRecord(task.buildingId, record);
+    }
+  }, [maintenanceTasks, currentYear, currentSeason, addMaintenanceRecord]);
+
+  // Ajouter un enregistrement de revenu de bâtiment
+  const addRevenueRecord = useCallback((data: Omit<BuildingRevenueRecord, "id">) => {
+    const newRecord: BuildingRevenueRecord = {
+      id: uuidv4(),
+      ...data
+    };
+    
+    setRevenueRecords(prev => [...prev, newRecord]);
+    
+    return newRecord.id;
+  }, []);
+
+  // Calculer le revenu pour un bâtiment spécifique
+  const calculateBuildingRevenue = useCallback((buildingId: string, year: number, season: string) => {
+    const building = buildings.find(b => b.id === buildingId);
+    
+    if (!building) return 0;
+    
+    // Prendre en compte l'état du bâtiment pour le calcul du revenu
+    let modifier = 1.0;
+    
+    switch (building.status) {
+      case 'excellent':
+        modifier = 1.2;
+        break;
+      case 'good':
+        modifier = 1.0;
+        break;
+      case 'damaged':
+        modifier = 0.7;
+        break;
+      case 'poor':
+        modifier = 0.4;
+        break;
+      case 'ruined':
+        modifier = 0.0;
+        break;
+      default:
+        modifier = 1.0;
+    }
+    
+    const calculatedRevenue = Math.round(building.revenue * modifier);
+    
+    return calculatedRevenue;
+  }, [buildings]);
+
+  // Simuler l'avancement du temps pour les projets de construction
+  const advanceConstructionProjects = useCallback(() => {
+    setConstructionProjects(prev => 
+      prev.map(project => {
+        if (project.progress >= 100) return project;
+        
+        // Calculer la progression en fonction de la saison et d'autres facteurs
+        const progressIncrement = Math.random() * 10 + 5; // Entre 5 et 15%
+        const newProgress = Math.min(100, project.progress + progressIncrement);
+        
+        // Si le projet est maintenant terminé, créer le bâtiment correspondant
+        if (newProgress >= 100 && project.buildingType) {
+          // Créer le bâtiment
+          const newBuilding: Building = {
+            id: uuidv4(),
+            name: project.buildingName || project.name,
+            type: project.buildingType,
+            location: project.location,
+            status: 'excellent',
+            constructionYear: currentYear,
+            description: project.description,
+            cost: project.totalCost || project.cost,
+            maintenanceCost: Math.round(project.cost * 0.02),
+            revenue: ['market', 'port', 'warehouse', 'forum'].includes(project.buildingType) 
+              ? Math.round(project.cost * 0.05)
+              : 0,
+            capacity: Math.round(project.cost / 100),
+            owner: project.sponsor === 'République' ? 'république' : 'private'
+          };
+          
+          setBuildings(prev => [...prev, newBuilding]);
+        }
+        
+        return {
+          ...project,
+          progress: newProgress
+        };
+      })
+    );
+  }, [currentYear]);
+
+  // Ajout d'un nouveau bâtiment
+  const addBuilding = useCallback((buildingData: Omit<Building, "id">) => {
+    const newBuilding: Building = {
+      id: uuidv4(),
+      ...buildingData
+    };
+    
+    setBuildings(prev => [...prev, newBuilding]);
+    
+    return newBuilding.id;
+  }, []);
+
+  // Suppression d'un bâtiment
+  const deleteBuilding = useCallback((buildingId: string) => {
+    setBuildings(prev => prev.filter(building => building.id !== buildingId));
+  }, []);
+
+  // Mettre à jour un bâtiment
+  const updateBuilding = useCallback((id: string, updates: Partial<Building>) => {
+    setBuildings(prev => 
+      prev.map(building => building.id === id ? { ...building, ...updates } : building)
+    );
+  }, []);
+
   return {
-    // État
     buildings,
-    constructions,
+    constructionProjects,
+    maintenanceRecords,
     maintenanceTasks,
-    revenues,
-    selectedBuilding,
-    selectedConstruction,
-    selectedTask,
-    currentAction,
-    
-    // Actions bâtiments
+    revenueRecords,
+    createConstructionProject,
+    updateConstructionProject,
+    addMaintenanceRecord,
+    scheduleMaintenanceTask,
+    completeMaintenanceTask,
+    addRevenueRecord,
+    calculateBuildingRevenue,
+    advanceConstructionProjects,
     addBuilding,
-    updateBuilding,
     deleteBuilding,
-    selectBuilding,
-    
-    // Actions construction
-    addConstructionProject,
-    approveConstruction,
-    updateConstructionProgress,
-    completeConstruction,
-    
-    // Actions maintenance
-    scheduleMaintenance,
-    
-    // Actions revenus
-    recordRevenue,
-    calculateTotalRevenue,
-    
-    // Actions UI
-    setCurrentAction,
-    setSelectedBuilding,
-    setSelectedConstruction,
-    setSelectedTask
+    updateBuilding
   };
-}
+};

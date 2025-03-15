@@ -6,7 +6,7 @@ export type EconomieSource =
   'tax' | 'trade' | 'war' | 'donation' | 'fine' | 'sale' | 'purchase' | 'salary' | 'rent' | 
   'manual_entry' | 'other' | 'Impôts' | 'Armée' | 'Commerce extérieur' | 'Construction' | 
   'Trésor Public' | 'Services d\'entretien' | 'Vente immobilière' | 'Marché aux esclaves' | 
-  'Perception fiscale';
+  'Perception fiscale' | string;
 
 export type EconomieCategory = 
   'military' | 'administration' | 'construction' | 'religion' | 'slaves' | 'entertainment' | 
@@ -77,15 +77,18 @@ export interface EconomieCreationData {
 export interface TreasuryStatus {
   id: string;
   balance: number;
-  totalIncome?: number;
-  totalExpenses?: number;
-  surplus?: number;
-  projectedBalance?: number;
+  totalIncome: number;
+  totalExpenses: number;
+  surplus: number;
+  projectedBalance: number;
   lastUpdated: GameDate | string;
-  inflationRate?: number;
-  taxRate?: number;
-  comments?: string;
+  inflationRate: number;
+  taxRate: number;
+  comments: string;
   previousBalance?: number;
+  income?: number;
+  expenses?: number;
+  debt?: number;
 }
 
 export interface TreasuryData {
@@ -116,6 +119,7 @@ export interface EconomicFactors {
     income: number;
     trade: number;
     luxury: number;
+    average?: number;
   };
 }
 

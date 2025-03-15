@@ -375,6 +375,7 @@ export const initialEconomieRecords: EconomieRecord[] = [
     isRecurring: true,
     recurringInterval: "seasonal",
     tags: ["impôts", "revenus réguliers"],
+    approved: true,
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString()
   },
@@ -388,6 +389,7 @@ export const initialEconomieRecords: EconomieRecord[] = [
     type: "expense",
     isRecurring: false,
     tags: ["militaire", "campagne"],
+    approved: true,
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString()
   },
@@ -402,6 +404,7 @@ export const initialEconomieRecords: EconomieRecord[] = [
     isRecurring: true,
     recurringInterval: "seasonal",
     tags: ["commerce", "taxes"],
+    approved: true,
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString()
   },
@@ -415,6 +418,7 @@ export const initialEconomieRecords: EconomieRecord[] = [
     type: "expense",
     isRecurring: false,
     tags: ["religion", "construction"],
+    approved: true,
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString()
   }
@@ -461,7 +465,7 @@ export const initialEquilibre: Equilibre = {
   
   // Political alignment
   populaires: 35,
-  populares: 35,
+  populaires: 35,
   optimates: 40,
   moderates: 25,
   

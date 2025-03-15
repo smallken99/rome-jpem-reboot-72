@@ -1,247 +1,272 @@
 
-import { useState, useEffect } from 'react';
-import { useMaitreJeu } from '../context';
+import { useState, useEffect, useCallback, useMemo } from 'react';
+import { v4 as uuidv4 } from 'uuid';
 import { 
   EconomieRecord, 
+  EconomieCreationData, 
   EconomieFilter, 
-  EconomieSort, 
-  EconomieCreationData 
+  EconomieSort,
+  TreasuryStatus,
+  EconomicFactors
 } from '../types/economie';
-import { v4 as uuidv4 } from 'uuid';
+import { useMaitreJeu } from '../context/MaitreJeuContext';
+import { GameDate } from '../types/common';
 
 export const useEconomieManagement = () => {
+  // Obtenir le contexte du jeu
   const { 
     economieRecords, 
-    setEconomieRecords,
+    setEconomieRecords, 
+    addEconomieRecord: addRecord,
     treasury, 
-    setTreasury,
+    setTreasury, 
     economicFactors, 
     setEconomicFactors,
-    currentSeason,
-    currentYear
+    currentYear,
+    currentSeason
   } = useMaitreJeu();
 
-  // État local pour les filtres, le tri et le modal
-  const [filter, setFilter] = useState<EconomieFilter>({
-    searchTerm: '',
-    type: 'all'
-  });
-  
-  const [sort, setSort] = useState<EconomieSort>({
-    field: 'date',
-    direction: 'desc'
-  });
-  
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [selectedRecord, setSelectedRecord] = useState<EconomieRecord | null>(null);
+  // États
+  const [filter, setFilter] = useState<EconomieFilter>({});
+  const [sort, setSort] = useState<EconomieSort>({ field: 'date', direction: 'desc' });
 
-  // Filtrer les enregistrements économiques
-  const filteredRecords = economieRecords.filter(record => {
-    // Filtre par terme de recherche
-    if (filter.searchTerm && !record.description.toLowerCase().includes(filter.searchTerm.toLowerCase())) {
-      return false;
-    }
-
-    // Filtre par type
-    if (filter.type && filter.type !== 'all' && record.type !== filter.type) {
-      return false;
-    }
-
-    // Filtre par catégorie
-    if (filter.categories && filter.categories.length > 0 && !filter.categories.includes(record.category)) {
-      return false;
-    }
-
-    // Filtre par montant
-    if (filter.minAmount !== undefined && record.amount < filter.minAmount) {
-      return false;
-    }
-    if (filter.maxAmount !== undefined && record.amount > filter.maxAmount) {
-      return false;
-    }
-
-    // Filtre par entité affectée
-    if (filter.affectedEntity) {
-      const hasMatchingEntity = 
-        (record.affectedSenateurId === filter.affectedEntity) || 
-        (record.affectedProvinceId === filter.affectedEntity);
-      
-      if (!hasMatchingEntity) {
-        return false;
-      }
-    }
-
-    // Filtre par plage de dates
-    if (filter.dateRange?.start && filter.dateRange?.end) {
-      // Logique pour vérifier si la date est dans la plage
-      // Cette logique dépendra de la façon dont les dates sont stockées
-      // Pour l'instant, nous allons simplement laisser passer tous les enregistrements
-    }
-
-    return true;
-  });
-
-  // Trier les enregistrements filtrés
-  const sortedRecords = [...filteredRecords].sort((a, b) => {
-    const fieldA = a[sort.field as keyof EconomieRecord];
-    const fieldB = b[sort.field as keyof EconomieRecord];
+  // Créer un nouvel enregistrement économique
+  const createEconomieRecord = useCallback((data: EconomieCreationData) => {
+    const id = addRecord(data);
     
-    // Traitement spécial pour les dates
-    if (sort.field === 'date') {
-      const dateA = typeof a.date === 'string' ? a.date : `${a.date.year}-${a.date.season}`;
-      const dateB = typeof b.date === 'string' ? b.date : `${b.date.year}-${b.date.season}`;
-      
-      return sort.direction === 'asc' 
-        ? dateA.localeCompare(dateB) 
-        : dateB.localeCompare(dateA);
-    }
+    // Mettre à jour les facteurs économiques et le trésor en fonction du type d'enregistrement
+    updateEconomicStats(data);
     
-    // Traitement pour les autres champs
-    if (typeof fieldA === 'string' && typeof fieldB === 'string') {
-      return sort.direction === 'asc' 
-        ? fieldA.localeCompare(fieldB) 
-        : fieldB.localeCompare(fieldA);
-    }
-    
-    // Champs numériques
-    if (typeof fieldA === 'number' && typeof fieldB === 'number') {
-      return sort.direction === 'asc' 
-        ? fieldA - fieldB 
-        : fieldB - fieldA;
-    }
-    
-    return 0;
-  });
+    return id;
+  }, [addRecord]);
 
-  // Gestionnaires d'événements
-  const handleFilterChange = (key: string, value: any) => {
-    setFilter(prev => ({ ...prev, [key]: value }));
-  };
-
-  const handleResetFilters = () => {
-    setFilter({
-      searchTerm: '',
-      type: 'all'
-    });
-  };
-
-  const handleSortChange = (field: string) => {
-    setSort(prev => ({
-      field: field as 'date' | 'amount' | 'category' | 'source' | 'description',
-      direction: prev.field === field && prev.direction === 'asc' ? 'desc' : 'asc'
-    }));
-  };
-
-  const handleAddTransaction = () => {
-    setSelectedRecord(null);
-    setIsModalOpen(true);
-  };
-
-  const handleEditTransaction = (record: EconomieRecord) => {
-    setSelectedRecord(record);
-    setIsModalOpen(true);
-  };
-
-  const handleDeleteTransaction = (id: string) => {
-    if (window.confirm('Êtes-vous sûr de vouloir supprimer cette transaction ?')) {
-      const updatedRecords = economieRecords.filter(record => record.id !== id);
-      setEconomieRecords(updatedRecords);
-      recalculateTreasury(updatedRecords);
-    }
-  };
-
-  const handleSaveTransaction = (data: EconomieCreationData) => {
-    if (selectedRecord) {
-      // Mise à jour d'une transaction existante
-      const updatedRecords = economieRecords.map(record => 
-        record.id === selectedRecord.id ? { ...record, ...data } : record
-      );
-      setEconomieRecords(updatedRecords);
-      recalculateTreasury(updatedRecords);
-    } else {
-      // Ajout d'une nouvelle transaction
-      const newRecord: EconomieRecord = {
-        id: uuidv4(),
-        ...data,
-        approved: data.approved || true,
-        tags: data.tags || [],
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString()
+  // Mise à jour des statistiques économiques après une transaction
+  const updateEconomicStats = useCallback((data: EconomieCreationData) => {
+    // Mise à jour du trésor
+    setTreasury(prev => {
+      const amount = data.type === 'income' ? data.amount : -data.amount;
+      return {
+        ...prev,
+        balance: prev.balance + amount,
+        totalIncome: data.type === 'income' ? prev.totalIncome + data.amount : prev.totalIncome,
+        totalExpenses: data.type === 'expense' ? prev.totalExpenses + data.amount : prev.totalExpenses,
+        surplus: prev.surplus + amount,
+        lastUpdated: { year: currentYear, season: currentSeason }
       };
-      const updatedRecords = [...economieRecords, newRecord];
-      setEconomieRecords(updatedRecords);
-      recalculateTreasury(updatedRecords);
-    }
-    setIsModalOpen(false);
-    setSelectedRecord(null);
-  };
-
-  // Recalculer le trésor après des modifications
-  const recalculateTreasury = (records: EconomieRecord[]) => {
-    const totalIncome = records
-      .filter(record => record.type === 'income')
-      .reduce((sum, record) => sum + record.amount, 0);
-      
-    const totalExpenses = records
-      .filter(record => record.type === 'expense')
-      .reduce((sum, record) => sum + record.amount, 0);
-      
-    const balance = totalIncome - totalExpenses;
+    });
     
-    setTreasury({
-      ...treasury,
+    // Mise à jour conditionnelle des facteurs économiques selon la catégorie
+    setEconomicFactors(prev => {
+      const updates: Partial<EconomicFactors> = {};
+      
+      if (data.category === 'tax' || data.category === 'Impôts') {
+        updates.taxCollection = prev.taxCollection + (data.type === 'income' ? data.amount : 0);
+      } else if (data.category === 'trade' || data.category === 'Commerce') {
+        updates.tradeRevenue = prev.tradeRevenue + (data.type === 'income' ? data.amount : 0);
+      } else if (data.category === 'military' || data.category === 'Armée') {
+        updates.militaryExpense = prev.militaryExpense + (data.type === 'expense' ? data.amount : 0);
+      }
+      
+      return { ...prev, ...updates };
+    });
+  }, [currentYear, currentSeason, setTreasury, setEconomicFactors]);
+
+  // Transactions filtrées selon les critères actuels
+  const filteredRecords = useMemo(() => {
+    if (!economieRecords) return [];
+
+    let results = [...economieRecords];
+    
+    // Filtrer par type
+    if (filter.type && filter.type !== 'all') {
+      results = results.filter(record => record.type === filter.type);
+    }
+    
+    // Filtrer par catégories
+    if (filter.categories && filter.categories.length > 0 && !filter.categories.includes('all')) {
+      results = results.filter(record => filter.categories?.includes(record.category));
+    }
+    
+    // Filtrer par montant
+    if (filter.minAmount !== undefined) {
+      results = results.filter(record => record.amount >= (filter.minAmount || 0));
+    }
+    if (filter.maxAmount !== undefined) {
+      results = results.filter(record => record.amount <= (filter.maxAmount || Infinity));
+    }
+    
+    // Filtrer par entité affectée
+    if (filter.affectedEntity) {
+      results = results.filter(record => 
+        record.affectedSenateurId === filter.affectedEntity || 
+        record.affectedProvinceId === filter.affectedEntity
+      );
+    }
+    
+    // Filtrer par plage de dates
+    if (filter.dateRange?.start) {
+      // Implémenter la logique de filtrage par date
+      // Cette partie est plus complexe car il faut comparer les GameDate
+    }
+    
+    // Filtrer par terme de recherche
+    if (filter.searchTerm) {
+      const searchLower = filter.searchTerm.toLowerCase();
+      results = results.filter(record => 
+        record.description.toLowerCase().includes(searchLower) ||
+        record.category.toString().toLowerCase().includes(searchLower) ||
+        record.source.toString().toLowerCase().includes(searchLower)
+      );
+    }
+    
+    return results;
+  }, [economieRecords, filter]);
+
+  // Transactions triées après filtrage
+  const sortedRecords = useMemo(() => {
+    if (!filteredRecords) return [];
+
+    return [...filteredRecords].sort((a, b) => {
+      // Trier par date
+      if (sort.field === 'date') {
+        // Convertir les dates en formats comparables
+        const dateA = typeof a.date === 'string' ? a.date : `${a.date.year}-${a.date.season}`;
+        const dateB = typeof b.date === 'string' ? b.date : `${b.date.year}-${b.date.season}`;
+        
+        return sort.direction === 'asc' 
+          ? dateA.localeCompare(dateB) 
+          : dateB.localeCompare(dateA);
+      }
+      
+      // Trier par montant
+      if (sort.field === 'amount') {
+        return sort.direction === 'asc' 
+          ? a.amount - b.amount 
+          : b.amount - a.amount;
+      }
+      
+      // Trier par description, catégorie ou source
+      const aValue = String(a[sort.field]);
+      const bValue = String(b[sort.field]);
+      
+      return sort.direction === 'asc' 
+        ? aValue.localeCompare(bValue) 
+        : bValue.localeCompare(aValue);
+    });
+  }, [filteredRecords, sort]);
+
+  // Mettre à jour les critères de filtrage
+  const updateFilter = useCallback((key: string, value: any) => {
+    setFilter(prev => ({ ...prev, [key]: value }));
+  }, []);
+
+  // Réinitialiser les filtres
+  const resetFilters = useCallback(() => {
+    setFilter({});
+  }, []);
+
+  // Mettre à jour les critères de tri
+  const updateSort = useCallback((field: string) => {
+    setSort(prevSort => ({
+      field: field as 'date' | 'amount' | 'category' | 'source' | 'description',
+      direction: prevSort.field === field && prevSort.direction === 'asc' ? 'desc' : 'asc'
+    }));
+  }, []);
+
+  // Génération de rapports financiers
+  const generateFinancialReport = useCallback((startDate?: GameDate, endDate?: GameDate) => {
+    // Filtrer les transactions par date si nécessaire
+    let reportRecords = economieRecords;
+    
+    // Calcul des totaux
+    const incomeByCategory: Record<string, number> = {};
+    const expensesByCategory: Record<string, number> = {};
+    let totalIncome = 0;
+    let totalExpenses = 0;
+    
+    reportRecords.forEach(record => {
+      if (record.type === 'income') {
+        totalIncome += record.amount;
+        incomeByCategory[record.category] = (incomeByCategory[record.category] || 0) + record.amount;
+      } else if (record.type === 'expense') {
+        totalExpenses += record.amount;
+        expensesByCategory[record.category] = (expensesByCategory[record.category] || 0) + record.amount;
+      }
+    });
+    
+    return {
+      treasury: { ...treasury },
       totalIncome,
       totalExpenses,
-      balance: treasury.balance + balance,
-      lastUpdated: { year: currentYear, season: currentSeason }
-    });
-  };
+      balance: totalIncome - totalExpenses,
+      incomeByCategory,
+      expensesByCategory,
+      economicFactors: { ...economicFactors },
+      totalTransactions: reportRecords.length,
+      reportDate: { year: currentYear, season: currentSeason }
+    };
+  }, [economieRecords, treasury, economicFactors, currentYear, currentSeason]);
 
-  // Fonctions supplémentaires
-  const handleGenerateReport = () => {
-    console.log('Generating economic report...');
-    // Logique pour générer un rapport économique
-  };
-
-  const handleCalculateProjections = () => {
-    console.log('Calculating economic projections...');
-    // Logique pour calculer des projections économiques
-  };
-
-  const handleRefreshData = () => {
-    console.log('Refreshing economic data...');
-    // Logique pour rafraîchir les données économiques
-  };
-
-  // Effet pour la mise à jour des facteurs économiques
-  useEffect(() => {
-    setEconomicFactors({
-      ...economicFactors,
-      currentYear,
-      currentSeason
-    });
-  }, [currentYear, currentSeason]);
+  // Projection des revenus et dépenses futurs
+  const generateFinancialProjection = useCallback((quarters: number = 4) => {
+    // Analyser les transactions récurrentes
+    const recurringIncome = economieRecords.filter(r => r.isRecurring && r.type === 'income');
+    const recurringExpenses = economieRecords.filter(r => r.isRecurring && r.type === 'expense');
+    
+    // Calculer les moyennes d'entrées/sorties par saison
+    const incomePerQuarter = recurringIncome.reduce((sum, record) => sum + record.amount, 0);
+    const expensesPerQuarter = recurringExpenses.reduce((sum, record) => sum + record.amount, 0);
+    
+    // Prendre en compte d'autres facteurs (croissance, inflation, etc.)
+    const growthRate = economicFactors.growthRate || 1.02;
+    const inflationRate = economicFactors.inflationRate || 1.01;
+    
+    // Projections par trimestre
+    const projections = [];
+    let projectedBalance = treasury.balance;
+    
+    for (let i = 0; i < quarters; i++) {
+      const quarterIncome = Math.round(incomePerQuarter * Math.pow(growthRate, i));
+      const quarterExpenses = Math.round(expensesPerQuarter * Math.pow(inflationRate, i));
+      
+      projectedBalance += (quarterIncome - quarterExpenses);
+      
+      projections.push({
+        quarter: i + 1,
+        income: quarterIncome,
+        expenses: quarterExpenses,
+        balance: quarterIncome - quarterExpenses,
+        cumulativeBalance: projectedBalance
+      });
+    }
+    
+    return {
+      currentBalance: treasury.balance,
+      projections,
+      estimatedEndBalance: projectedBalance,
+      growthAssumption: growthRate,
+      inflationAssumption: inflationRate
+    };
+  }, [economieRecords, treasury, economicFactors]);
 
   return {
-    economieRecords: sortedRecords,
+    records: economieRecords,
+    filteredRecords,
+    sortedRecords,
     filter,
     sort,
-    isModalOpen,
-    selectedRecord,
     treasury,
     economicFactors,
-    handleFilterChange,
-    handleResetFilters,
-    handleSortChange,
-    handleAddTransaction,
-    handleEditTransaction,
-    handleDeleteTransaction,
-    handleSaveTransaction,
-    handleGenerateReport,
-    handleCalculateProjections,
-    handleRefreshData,
-    setIsModalOpen
+    currentYear,
+    currentSeason,
+    createEconomieRecord,
+    updateFilter,
+    resetFilters,
+    updateSort,
+    generateFinancialReport,
+    generateFinancialProjection,
+    setEconomieRecords,
+    setTreasury,
+    setEconomicFactors
   };
 };
-
-export default useEconomieManagement;

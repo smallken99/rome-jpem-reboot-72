@@ -13,17 +13,18 @@ export const formatDate = (date: GameDate | string): string => {
 
 // Format a season name for display
 export const formatSeasonDisplay = (season: string): string => {
-  switch (season) {
-    case 'Ver':
+  switch (season.toUpperCase()) {
+    case 'VER':
     case 'SPRING':
       return 'Printemps';
-    case 'Aestas':
+    case 'AESTAS':
     case 'SUMMER':
       return 'Été';
-    case 'Autumnus':
+    case 'AUTUMNUS':
     case 'FALL':
+    case 'AUTUMN':
       return 'Automne';
-    case 'Hiems':
+    case 'HIEMS':
     case 'WINTER':
       return 'Hiver';
     default:

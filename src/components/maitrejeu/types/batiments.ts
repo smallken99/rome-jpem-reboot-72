@@ -71,6 +71,7 @@ export interface MaintenanceTask {
   priority: 'low' | 'medium' | 'high' | 'critical';
   status: 'scheduled' | 'in_progress' | 'completed' | 'overdue';
   description: string;
+  startDate?: GameDate;
 }
 
 export interface BuildingRevenueRecord {
@@ -134,4 +135,18 @@ export interface BuildingsListProps {
   onEdit: (id: string) => void;
   onDelete?: (id: string) => void;
   onSelect?: (id: string) => void;
+}
+
+export interface PublicBuildingData {
+  name: string;
+  type: BuildingType;
+  location: string;
+  status: 'good' | 'poor' | 'average';
+  constructionYear: number;
+  description: string;
+  cost: number;
+  maintenanceCost: number;
+  revenue: number;
+  capacity: number;
+  owner: BuildingOwner;
 }

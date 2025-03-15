@@ -10,13 +10,12 @@ export interface Province {
   ressource: string;
   revenue: number;
   stabilite: number;
-  loyauté?: number;
-  richesse?: number;
-  armée?: number;
-  impôts?: number;
-  revenuAnnuel?: number;
-  loyautéVariation?: number;
-  variationLoyauté?: number;
+  loyauté: number;
+  richesse: number;
+  armée: number;
+  impôts: number;
+  revenuAnnuel: number;
+  variationLoyauté: number;
 }
 
 export interface ProvinceCardProps {

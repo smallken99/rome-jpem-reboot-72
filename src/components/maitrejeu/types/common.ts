@@ -31,18 +31,19 @@ export const generateId = (): string => {
 
 // Utility function to format season display
 export const formatSeasonDisplay = (season: string): string => {
-  switch (season) {
+  switch (season.toUpperCase()) {
     case 'SPRING':
-    case 'Ver':
+    case 'VER':
       return 'Printemps';
     case 'SUMMER':
-    case 'Aestas':
+    case 'AESTAS':
       return 'Été';
     case 'AUTUMN':
-    case 'Autumnus':
+    case 'FALL':
+    case 'AUTUMNUS':
       return 'Automne';
     case 'WINTER':
-    case 'Hiems':
+    case 'HIEMS':
       return 'Hiver';
     default:
       return season;

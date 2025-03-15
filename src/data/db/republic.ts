@@ -21,6 +21,7 @@ export interface TreasuryData {
   loans: Loan[];
   fiscalYear: string;
   taxRate: number;
+  taxCollection?: number;
 }
 
 export interface Loan {
@@ -87,7 +88,8 @@ export const treasuryData: TreasuryData = {
     }
   ],
   fiscalYear: "705 AUC",
-  taxRate: 5
+  taxRate: 5,
+  taxCollection: 1000000
 };
 
 export const buildingsData: BuildingCategory[] = [
