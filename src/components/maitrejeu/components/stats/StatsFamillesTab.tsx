@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useMaitreJeu } from '../../context';
@@ -7,20 +6,15 @@ import { PieChart, BarChart, LineChart } from 'lucide-react';
 export const StatsFamillesTab: React.FC = () => {
   const { familles, membres } = useMaitreJeu();
   
-  // Analyse des données familiales
-  const totalFamilles = familles.length;
-  const totalMembres = membres.length;
+  // Corriger les filtres pour correspondre aux types réels
+  const hommes = membres.filter(m => m.genre === "male").length;
+  const femmes = membres.filter(m => m.genre === "female").length;
   
-  // Répartition par genre (en utilisant la propriété genre qui devrait exister)
-  const hommes = membres.filter(membre => membre.genre === 'homme').length;
-  const femmes = membres.filter(membre => membre.genre === 'femme').length;
+  const ages = membres.map(m => m.age);
+  const ageMoyen = ages.length ? Math.round(ages.reduce((sum, age) => sum + age, 0) / ages.length) : 0;
   
-  // Calcul de l'âge moyen (si l'âge est disponible)
-  const ageMoyen = membres.reduce((sum, membre) => sum + (membre.age || 0), 0) / totalMembres || 0;
-  
-  // Répartition par statut
-  const famillesPatriciennes = familles.filter(famille => famille.statut === 'patricienne').length;
-  const famillesPlebeennes = familles.filter(famille => famille.statut === 'plébéienne').length;
+  const famillePat = familles.filter(f => f.statut === "Patricien").length;
+  const famillePleb = familles.filter(f => f.statut === "Plébéien").length;
   
   return (
     <div className="space-y-4">
@@ -72,8 +66,8 @@ export const StatsFamillesTab: React.FC = () => {
           <CardContent className="h-64 flex items-center justify-center">
             <div className="text-center text-muted-foreground">
               <PieChart className="h-16 w-16 mx-auto mb-4 opacity-20" />
-              <p>Familles Patriciennes: {famillesPatriciennes}</p>
-              <p>Familles Plébéiennes: {famillesPlebeennes}</p>
+              <p>Familles Patriciennes: {famillePat}</p>
+              <p>Familles Plébéiennes: {famillePleb}</p>
             </div>
           </CardContent>
         </Card>

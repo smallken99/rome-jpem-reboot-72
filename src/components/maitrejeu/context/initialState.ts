@@ -1,4 +1,3 @@
-
 import { SenateurJouable, Province, Evenement, Election, HistoireEntry, Loi, Equilibre } from '../types';
 import { EconomieRecord, TreasuryStatus, EconomicFactors, EconomieCategory } from '../types/economie';
 import { GameDate, Season, GamePhase } from '../types/common';
@@ -457,6 +456,8 @@ export const initialEvenements: Evenement[] = [];
 export const initialElections: Election[] = [];
 export const initialHistoireEntries: HistoireEntry[] = [];
 export const initialLois: Loi[] = [];
+
+// Ajustement de l'initialEquilibre pour inclure à la fois populaires et populares
 export const initialEquilibre: Equilibre = {
   facteurSenat: 60,
   facteurPlebs: 40,

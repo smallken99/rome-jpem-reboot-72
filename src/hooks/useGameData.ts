@@ -31,7 +31,7 @@ export const useGameData = (role: UserRole = 'player') => {
 
   const getFilteredProvinces = () => {
     if (role === 'mj') return provinces;
-    return provinces.filter(p => p.status === 'public' || p.gouverneur === 'player');
+    return provinces.filter(p => p.status === 'Pacifiée' || p.gouverneur === 'player');
   };
 
   const getFilteredEvenements = () => {

@@ -1,75 +1,96 @@
-
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Progress } from '@/components/ui/progress';
+import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend } from 'recharts';
 import { useMaitreJeu } from '../../context';
-import { 
-  BarChart3, 
-  Users, 
-  Building, 
-  CandlestickChart,
-  Landmark,
-  ScrollText,
-  Calendar
-} from 'lucide-react';
 
 export const StatsGeneralTab: React.FC = () => {
   const { 
     senateurs, 
-    familles, 
+    provinces, 
     lois, 
-    histoireEntries, 
+    equilibre, 
     clients, 
-    currentDate
+    familles, 
+    economieRecords, 
+    treasury 
   } = useMaitreJeu();
 
-  // Calcul de statistiques générales
-  const totalSenateurs = senateurs.length;
-  const totalFamilles = familles.length;
-  const totalLois = lois.length;
-  const totalClients = clients.length;
-  const actifsClients = clients.filter(c => c.statut === 'active').length;
-  const totalHistoire = histoireEntries.length;
-  const currentYear = currentDate.year;
-
-  // Statistiques pour le graphique (simulées)
-  const stats = [
-    { title: "Sénateurs", value: totalSenateurs, icon: <Users className="h-4 w-4" /> },
-    { title: "Familles", value: totalFamilles, icon: <Landmark className="h-4 w-4" /> },
-    { title: "Lois", value: totalLois, icon: <ScrollText className="h-4 w-4" /> },
-    { title: "Clients", value: totalClients, icon: <Users className="h-4 w-4" /> },
-    { title: "Clients Actifs", value: actifsClients, icon: <CandlestickChart className="h-4 w-4" /> },
-    { title: "Événements historiques", value: totalHistoire, icon: <Calendar className="h-4 w-4" /> }
-  ];
-
+  // Remplacer client.statut par client.activeStatus
+  const clientsActifs = clients.filter(c => c.activeStatus === "active").length;
+  const loyauteTotale = clients.reduce((sum, c) => {
+    if (c.loyalty === "forte") return sum + 3;
+    if (c.loyalty === "moyenne") return sum + 2;
+    if (c.loyalty === "faible") return sum + 1;
+    return sum;
+  }, 0);
+  
+  const loyauteMoyenne = clients.length ? loyauteTotale / clients.length : 0;
+  
   return (
     <div className="space-y-4">
-      <h3 className="text-xl font-semibold">Vue d'ensemble de Rome - An {currentYear} AUC</h3>
-      
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        {stats.map((stat, index) => (
-          <Card key={index}>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">
-                {stat.title}
-              </CardTitle>
-              {stat.icon}
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{stat.value}</div>
-            </CardContent>
-          </Card>
-        ))}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm font-medium">Sénateurs Actifs</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{senateurs.length}</div>
+            <p className="text-xs text-muted-foreground">
+              {senateurs.filter(s => s.joueur).length} contrôlés par des joueurs
+            </p>
+          </CardContent>
+        </Card>
+        
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm font-medium">Provinces</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{provinces.length}</div>
+            <p className="text-xs text-muted-foreground">
+              {provinces.length} provinces sous contrôle romain
+            </p>
+          </CardContent>
+        </Card>
+        
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm font-medium">Lois Actives</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{lois.filter(l => l.status === "Promulguée").length}</div>
+            <p className="text-xs text-muted-foreground">
+              {lois.filter(l => l.status === "proposed").length} lois en délibération
+            </p>
+          </CardContent>
+        </Card>
+        
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm font-medium">Clients Actifs</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{clientsActifs}</div>
+            <p className="text-xs text-muted-foreground">
+              Loyauté moyenne: {loyauteMoyenne.toFixed(1)}
+            </p>
+          </CardContent>
+        </Card>
       </div>
       
-      <Card className="col-span-full">
+      <Card>
         <CardHeader>
-          <CardTitle>Évolution globale</CardTitle>
+          <CardTitle className="text-lg">Analyse Générale</CardTitle>
         </CardHeader>
-        <CardContent className="h-80 flex items-center justify-center">
-          <div className="text-center text-muted-foreground">
-            <BarChart3 className="h-16 w-16 mx-auto mb-4 opacity-20" />
-            <p>Les données d'évolution seront disponibles lorsque plus d'années se seront écoulées.</p>
-          </div>
+        <CardContent>
+          <p className="mb-4">État actuel de la République:</p>
+          <ul className="list-disc list-inside space-y-1 text-sm text-muted-foreground">
+            <li>Nombre de sénateurs: {senateurs.length}</li>
+            <li>Nombre de provinces: {provinces.length}</li>
+            <li>Nombre de lois actives: {lois.filter(l => l.status === "Promulguée").length}</li>
+            <li>Nombre de clients actifs: {clientsActifs}</li>
+          </ul>
         </CardContent>
       </Card>
     </div>

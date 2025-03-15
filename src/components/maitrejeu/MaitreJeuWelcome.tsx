@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -53,7 +52,7 @@ export const MaitreJeuWelcome: React.FC = () => {
             <Scroll className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{lois.filter(l => l.status === "enacted").length}</div>
+            <div className="text-2xl font-bold">{lois.filter(l => l.status === "Promulguée").length}</div>
             <p className="text-xs text-muted-foreground">
               {lois.filter(l => l.status === "proposed").length} lois en délibération
             </p>

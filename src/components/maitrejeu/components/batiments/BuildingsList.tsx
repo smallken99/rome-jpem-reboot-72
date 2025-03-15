@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
@@ -36,13 +35,31 @@ export const BuildingsList: React.FC<BuildingsListProps> = ({
       case 'damaged':
         return <Badge variant="outline" className="text-amber-600">Endommagé</Badge>;
       case 'poor':
-        return <Badge variant="warning" className="bg-amber-100 text-amber-800">Mauvais</Badge>;
+        return <Badge variant="secondary" className="bg-amber-100 text-amber-800">Mauvais</Badge>;
       case 'ruined':
         return <Badge variant="destructive">Ruiné</Badge>;
       case 'under_construction':
         return <Badge variant="outline" className="text-blue-600">En construction</Badge>;
       default:
         return <Badge variant="outline">{status}</Badge>;
+    }
+  };
+  
+  const getBadgeVariant = (status: BuildingStatus) => {
+    switch (status) {
+      case 'excellent':
+      case 'good':
+        return 'success';
+      case 'damaged':
+      case 'average':
+        return 'secondary';
+      case 'poor':
+      case 'ruined':
+        return 'destructive';
+      case 'under_construction':
+        return 'outline';
+      default:
+        return 'default';
     }
   };
   

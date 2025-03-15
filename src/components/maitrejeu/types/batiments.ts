@@ -1,4 +1,3 @@
-
 import { GameDate } from './common';
 
 export type BuildingType = 
@@ -7,7 +6,7 @@ export type BuildingType =
   'villa' | 'road' | 'port' | 'warehouse' | 'other';
 
 export type BuildingStatus = 
-  'excellent' | 'good' | 'damaged' | 'poor' | 'ruined' | 'under_construction';
+  'excellent' | 'good' | 'damaged' | 'poor' | 'ruined' | 'under_construction' | 'average';
 
 export type BuildingOwner = 
   'république' | 'sénat' | 'censeur' | 'édile' | 'private' | string;
@@ -28,6 +27,7 @@ export interface Building {
   lastMaintenance?: GameDate;
   nextMaintenanceNeeded?: GameDate;
   condition?: 'good' | 'fair' | 'poor' | 'critical';
+  totalCost?: number;
 }
 
 export interface ConstructionProject {

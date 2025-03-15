@@ -19,12 +19,13 @@ export const createEconomieOperations = (
       source: data.source || 'manual_entry',
       approved: data.approved !== undefined ? data.approved : true,
       tags: data.tags || [],
-      impactFactors: data.impactFactors || {},
       type: data.type,
-      isRecurring: data.isRecurring,
+      isRecurring: data.isRecurring || false,
       recurringInterval: data.recurringInterval,
-      createdAt: new Date(),
-      updatedAt: new Date()
+      affectedSenateurId: data.affectedSenateurId,
+      affectedProvinceId: data.affectedProvinceId,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString()
     };
     
     setEconomieRecords(prev => [newRecord, ...prev]);
@@ -36,7 +37,11 @@ export const createEconomieOperations = (
     setEconomieRecords(prev => 
       prev.map(record => 
         record.id === id 
-          ? { ...record, ...updates, updatedAt: new Date() } 
+          ? { 
+              ...record, 
+              ...updates, 
+              updatedAt: new Date().toISOString() 
+            } 
           : record
       )
     );

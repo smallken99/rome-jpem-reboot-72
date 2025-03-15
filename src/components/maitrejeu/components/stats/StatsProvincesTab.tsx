@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useMaitreJeu } from '../../context';
@@ -7,10 +6,9 @@ import { Map, BarChart3, PieChart } from 'lucide-react';
 export const StatsProvincesTab: React.FC = () => {
   const { provinces } = useMaitreJeu();
   
-  // Analyse des données des provinces
-  const totalProvinces = provinces.length;
-  const provincesStables = provinces.filter(p => (p.stabilité || 0) > 70).length;
-  const provincesInstables = provinces.filter(p => (p.stabilité || 0) < 30).length;
+  // Remplacer toutes les occurrences de 'stabilité' par 'stabilite'
+  const provincesStables = provinces.filter(p => p.stabilite >= 70).length;
+  const provincesInstables = provinces.filter(p => p.stabilite < 70).length;
   
   // Calcul des revenus totaux des provinces
   const revenuTotal = provinces.reduce((sum, province) => sum + (province.revenuAnnuel || 0), 0);
@@ -25,7 +23,7 @@ export const StatsProvincesTab: React.FC = () => {
     <div className="space-y-4">
       <h3 className="text-xl font-semibold">Statistiques des Provinces</h3>
       
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
         <Card>
           <CardHeader className="pb-2">
             <CardTitle className="text-sm font-medium">Nombre de Provinces</CardTitle>
@@ -37,12 +35,16 @@ export const StatsProvincesTab: React.FC = () => {
         
         <Card>
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium">Provinces Stables</CardTitle>
+            <CardTitle className="text-sm font-medium">Stabilité Moyenne</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{provincesStables}</div>
-            <p className="text-xs text-muted-foreground mt-1">
-              {((provincesStables / totalProvinces) * 100).toFixed(1)}% du total
+            <div className="text-2xl font-bold">
+              {provinces.length > 0 
+                ? Math.round(provinces.reduce((sum, p) => sum + p.stabilite, 0) / provinces.length) 
+                : 0}%
+            </div>
+            <p className="text-xs text-muted-foreground">
+              {provinces.filter(p => p.stabilite >= 70).length} provinces stables
             </p>
           </CardContent>
         </Card>
@@ -115,16 +117,16 @@ export const StatsProvincesTab: React.FC = () => {
                 <div className="flex-1">
                   <div className="flex justify-between">
                     <span className="font-medium">{province.nom}</span>
-                    <span>{province.stabilité || 0}%</span>
+                    <span>{province.stabilite || 0}%</span>
                   </div>
                   <div className="w-full bg-muted rounded-full h-2 mt-1">
                     <div 
-                      className={`h-2 rounded-full ${(province.stabilité || 0) > 70 
+                      className={`h-2 rounded-full ${(province.stabilite || 0) > 70 
                         ? 'bg-green-500' 
-                        : (province.stabilité || 0) > 30 
+                        : (province.stabilite || 0) > 30 
                           ? 'bg-amber-500' 
                           : 'bg-red-500'}`}
-                      style={{ width: `${province.stabilité || 0}%` }}
+                      style={{ width: `${province.stabilite || 0}%` }}
                     />
                   </div>
                 </div>

@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -50,7 +49,6 @@ export const GestionHistoire: React.FC = () => {
       
       // Pour la compatibilité avec le code existant
       description: contenu,
-      season: currentDate.season,
       type: categorie
     };
     

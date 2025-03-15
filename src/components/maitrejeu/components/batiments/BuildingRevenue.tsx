@@ -1,269 +1,181 @@
 
 import React, { useState } from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { 
-  ArrowUpRight, 
-  ArrowDownRight, 
-  Calendar, 
-  Filter, 
-  Search,
-  TrendingUp,
-  Building,
-  Landmark
-} from 'lucide-react';
-import { useBatimentsManagement } from '../../hooks/useBatimentsManagement';
-import { formatCurrency } from '@/utils/formatUtils';
-import { GameDate, Season } from '../../types/common';
-import { Building, BuildingRevenueRecord } from '../../types/batiments';
-import { UnderDevelopmentSection } from '../UnderDevelopmentSection';
+import { TrendingUp, TrendingDown, Coins } from 'lucide-react';
+import { useMaitreJeu } from '../../context';
+import { Building } from '../../types/batiments';
+import { formatCurrency } from '@/utils/currencyUtils';
+import { EconomieRecord } from '../../types/economie';
 
-interface BuildingRevenueProps {
-  currentYear: number;
-  currentSeason: Season;
+interface RevenuRecord {
+  id: string;
+  buildingId: string;
+  buildingName: string;
+  year: number;
+  season: string;
+  amount: number;
+  taxRate: number;
+  collectionDate: string;
 }
 
-export const BuildingRevenue: React.FC<BuildingRevenueProps> = ({
-  currentYear,
-  currentSeason
-}) => {
-  const { buildings, revenueRecords, addBuildingRevenue } = useBatimentsManagement();
-  const [searchTerm, setSearchTerm] = useState('');
+interface BuildingRevenueProps {
+  buildings: Building[];
+  onAddRevenue: (buildingId: string, amount: number) => void;
+}
+
+export const BuildingRevenue: React.FC<BuildingRevenueProps> = ({ buildings, onAddRevenue }) => {
+  const { economieRecords } = useMaitreJeu();
+  const [selectedBuilding, setSelectedBuilding] = useState('');
+  const [revenueAmount, setRevenueAmount] = useState<number>(0);
   
-  // Si nous n'avons pas encore implémenté la fonctionnalité complète
-  if (buildings.length === 0) {
-    return (
-      <UnderDevelopmentSection 
-        title="Revenus des bâtiments"
-        description="Ajoutez des bâtiments pour commencer à suivre leurs revenus."
-      />
-    );
-  }
-  
-  // Filtrer les bâtiments en fonction de la recherche
-  const filteredBuildings = buildings.filter(building => 
-    building.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    building.location.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    building.type.toLowerCase().includes(searchTerm.toLowerCase())
+  // Filtrer les enregistrements économiques liés aux bâtiments
+  const buildingRevenues = economieRecords.filter(record => 
+    record.type === 'income' && 
+    record.source === 'building' && 
+    buildings.some(b => b.id === record.affectedSenateurId) // Dans cet exemple, on détourne la propriété affectedSenateurId
   );
   
-  // Calculer les revenus totaux
-  const totalRevenue = buildings.reduce((total, building) => total + building.revenue, 0);
-  const totalMaintenanceCost = buildings.reduce((total, building) => total + building.maintenanceCost, 0);
-  const netRevenue = totalRevenue - totalMaintenanceCost;
-  
-  // Grouper les bâtiments par type pour l'analyse
-  const buildingTypeRevenue = buildings.reduce((acc, building) => {
-    const type = building.type;
-    if (!acc[type]) acc[type] = { count: 0, revenue: 0, maintenance: 0 };
-    acc[type].count += 1;
-    acc[type].revenue += building.revenue;
-    acc[type].maintenance += building.maintenanceCost;
-    return acc;
-  }, {} as Record<string, { count: number, revenue: number, maintenance: number }>);
-  
-  const handleCollectRevenue = (building: Building) => {
-    addBuildingRevenue(
-      building.id,
-      building.revenue,
-      "Revenus trimestriels",
-      10, // Taux d'imposition standard
-      "Maître du Jeu"
-    );
+  const handleAddRevenue = () => {
+    if (selectedBuilding && revenueAmount) {
+      onAddRevenue(selectedBuilding, revenueAmount);
+      setRevenueAmount(0);
+    }
   };
   
-  const handleCollectAllRevenues = () => {
-    buildings.forEach(building => {
-      if (building.revenue > 0) {
-        handleCollectRevenue(building);
-      }
-    });
+  const building = buildings.find(b => b.id === selectedBuilding);
+  const totalRevenue = buildingRevenues.reduce((sum, record) => sum + record.amount, 0);
+  
+  const getRevenueStatus = () => {
+    if (!building) return null;
+    
+    const buildingRevenue = buildingRevenues.filter(r => r.affectedSenateurId === building.id);
+    const totalForBuilding = buildingRevenue.reduce((sum, r) => sum + r.amount, 0);
+    
+    const expectedRevenue = building.revenue * 4; // Revenu annuel estimé (4 saisons)
+    
+    if (totalForBuilding >= expectedRevenue) {
+      return { status: 'above', difference: totalForBuilding - expectedRevenue };
+    } else {
+      return { status: 'below', difference: expectedRevenue - totalForBuilding };
+    }
   };
+  
+  const revenueStatus = getRevenueStatus();
   
   return (
-    <div className="space-y-6">
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <Card>
-          <CardHeader className="pb-3">
-            <CardTitle className="text-base font-semibold flex items-center">
-              <TrendingUp className="h-4 w-4 mr-2 text-green-500" />
-              Revenus totaux
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="pt-0">
-            <div className="text-2xl font-bold text-green-600">
-              {formatCurrency(totalRevenue)}
+    <Card className="w-full">
+      <CardHeader>
+        <CardTitle className="text-xl flex items-center">
+          <Coins className="h-5 w-5 mr-2 text-amber-500" />
+          Revenus des Bâtiments Publics
+        </CardTitle>
+      </CardHeader>
+      <CardContent>
+        <div className="space-y-4">
+          <div className="flex flex-col md:flex-row gap-4">
+            <div className="flex-1">
+              <Select value={selectedBuilding} onValueChange={setSelectedBuilding}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Sélectionner un bâtiment" />
+                </SelectTrigger>
+                <SelectContent>
+                  {buildings.map(building => (
+                    <SelectItem key={building.id} value={building.id}>
+                      {building.name} - Revenu estimé: {formatCurrency(building.revenue)}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
-            <p className="text-xs text-muted-foreground mt-1">
-              Par saison, tous bâtiments confondus
-            </p>
-          </CardContent>
-        </Card>
-        
-        <Card>
-          <CardHeader className="pb-3">
-            <CardTitle className="text-base font-semibold flex items-center">
-              <Building className="h-4 w-4 mr-2 text-red-500" />
-              Coûts d'entretien
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="pt-0">
-            <div className="text-2xl font-bold text-red-600">
-              {formatCurrency(totalMaintenanceCost)}
+            <div className="flex-1 flex items-center gap-2">
+              <Input
+                type="number"
+                placeholder="Montant du revenu"
+                value={revenueAmount || ''}
+                onChange={(e) => setRevenueAmount(Number(e.target.value))}
+              />
+              <Button onClick={handleAddRevenue} disabled={!selectedBuilding || !revenueAmount}>
+                Ajouter
+              </Button>
             </div>
-            <p className="text-xs text-muted-foreground mt-1">
-              Par saison, tous bâtiments confondus
-            </p>
-          </CardContent>
-        </Card>
-        
-        <Card>
-          <CardHeader className="pb-3">
-            <CardTitle className="text-base font-semibold flex items-center">
-              <Landmark className="h-4 w-4 mr-2 text-blue-500" />
-              Revenu net
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="pt-0">
-            <div className={`text-2xl font-bold ${netRevenue >= 0 ? 'text-blue-600' : 'text-red-600'}`}>
-              {formatCurrency(netRevenue)}
-              {netRevenue >= 0 ? 
-                <ArrowUpRight className="inline h-4 w-4 ml-1" /> : 
-                <ArrowDownRight className="inline h-4 w-4 ml-1" />
-              }
+          </div>
+          
+          {building && revenueStatus && (
+            <div className="bg-muted p-4 rounded-md">
+              <h3 className="font-medium">{building.name} - Analyse des revenus</h3>
+              <div className="flex items-center mt-2">
+                <div className="mr-4">
+                  <p>Revenu estimé: {formatCurrency(building.revenue * 4)}/an</p>
+                  <p>Revenu collecté: {formatCurrency(buildingRevenues
+                    .filter(r => r.affectedSenateurId === building.id)
+                    .reduce((sum, r) => sum + r.amount, 0))}
+                  </p>
+                </div>
+                <div className="flex items-center">
+                  {revenueStatus.status === 'above' ? (
+                    <>
+                      <TrendingUp className="h-5 w-5 text-green-500 mr-1" />
+                      <span className="text-green-500">+{formatCurrency(revenueStatus.difference)} au-dessus des attentes</span>
+                    </>
+                  ) : (
+                    <>
+                      <TrendingDown className="h-5 w-5 text-red-500 mr-1" />
+                      <span className="text-red-500">-{formatCurrency(revenueStatus.difference)} en dessous des attentes</span>
+                    </>
+                  )}
+                </div>
+              </div>
             </div>
-            <p className="text-xs text-muted-foreground mt-1">
-              Revenus - Coûts d'entretien
-            </p>
-          </CardContent>
-        </Card>
-      </div>
-      
-      <div className="flex justify-between items-center">
-        <div className="relative flex-1 max-w-md">
-          <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-          <Input
-            placeholder="Rechercher un bâtiment..."
-            className="pl-8"
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-          />
-        </div>
-        <div className="flex gap-2">
-          <Button variant="outline" size="sm" className="gap-1">
-            <Filter className="h-4 w-4" />
-            Filtrer
-          </Button>
-          <Button size="sm" onClick={handleCollectAllRevenues}>
-            Collecter tout
-          </Button>
-        </div>
-      </div>
-      
-      <div className="border rounded-md">
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>Bâtiment</TableHead>
-              <TableHead>Type</TableHead>
-              <TableHead>Revenus</TableHead>
-              <TableHead>Coûts d'entretien</TableHead>
-              <TableHead>Revenu net</TableHead>
-              <TableHead className="text-right">Actions</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {filteredBuildings.length === 0 ? (
-              <TableRow>
-                <TableCell colSpan={6} className="text-center py-4 text-muted-foreground">
-                  Aucun bâtiment ne correspond à votre recherche
-                </TableCell>
-              </TableRow>
-            ) : (
-              filteredBuildings.map((building) => {
-                const netBuildingRevenue = building.revenue - building.maintenanceCost;
-                return (
-                  <TableRow key={building.id}>
-                    <TableCell className="font-medium">{building.name}</TableCell>
-                    <TableCell>
-                      {building.type.charAt(0).toUpperCase() + building.type.slice(1).replace('_', ' ')}
-                    </TableCell>
-                    <TableCell className="text-green-600 font-medium">
-                      {formatCurrency(building.revenue)}
-                    </TableCell>
-                    <TableCell className="text-red-600 font-medium">
-                      {formatCurrency(building.maintenanceCost)}
-                    </TableCell>
-                    <TableCell className={netBuildingRevenue >= 0 ? 'text-blue-600' : 'text-red-600'}>
-                      {formatCurrency(netBuildingRevenue)}
-                    </TableCell>
-                    <TableCell className="text-right">
-                      <Button 
-                        variant="outline" 
-                        size="sm"
-                        onClick={() => handleCollectRevenue(building)}
-                        disabled={building.revenue <= 0}
-                      >
-                        <Calendar className="h-4 w-4 mr-2" />
-                        Collecter
-                      </Button>
+          )}
+          
+          <div className="border rounded-md">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Bâtiment</TableHead>
+                  <TableHead>Année</TableHead>
+                  <TableHead>Saison</TableHead>
+                  <TableHead className="text-right">Montant</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {buildingRevenues.length === 0 ? (
+                  <TableRow>
+                    <TableCell colSpan={4} className="text-center py-6 text-muted-foreground">
+                      Aucun revenu enregistré pour le moment
                     </TableCell>
                   </TableRow>
-                );
-              })
-            )}
-          </TableBody>
-        </Table>
-      </div>
-      
-      <div className="flex justify-between items-center">
-        <h3 className="text-lg font-semibold">Historique des revenus</h3>
-        <Button variant="outline" size="sm">Exporter</Button>
-      </div>
-      
-      <div className="border rounded-md">
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>Date</TableHead>
-              <TableHead>Bâtiment</TableHead>
-              <TableHead>Montant</TableHead>
-              <TableHead>Source</TableHead>
-              <TableHead>Collecté par</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {revenueRecords.length === 0 ? (
-              <TableRow>
-                <TableCell colSpan={5} className="text-center py-4 text-muted-foreground">
-                  Aucun revenu n'a encore été enregistré
-                </TableCell>
-              </TableRow>
-            ) : (
-              revenueRecords.map((record) => {
-                const building = buildings.find(b => b.id === record.buildingId);
-                return (
-                  <TableRow key={record.id}>
-                    <TableCell>
-                      {`${record.season} ${record.year}`}
-                    </TableCell>
-                    <TableCell className="font-medium">
-                      {building ? building.name : 'Bâtiment inconnu'}
-                    </TableCell>
-                    <TableCell className="text-green-600 font-medium">
-                      {formatCurrency(record.amount)}
-                    </TableCell>
-                    <TableCell>{record.source}</TableCell>
-                    <TableCell>{record.collectedBy}</TableCell>
-                  </TableRow>
-                );
-              })
-            )}
-          </TableBody>
-        </Table>
-      </div>
-    </div>
+                ) : (
+                  buildingRevenues.map(record => {
+                    const building = buildings.find(b => b.id === record.affectedSenateurId);
+                    return (
+                      <TableRow key={record.id}>
+                        <TableCell>{building ? building.name : 'Inconnu'}</TableCell>
+                        <TableCell>{typeof record.date === 'object' ? record.date.year : 'Inconnu'}</TableCell>
+                        <TableCell>{typeof record.date === 'object' ? 
+                          (record.date.season === 'SPRING' ? 'Printemps' : 
+                           record.date.season === 'SUMMER' ? 'Été' : 
+                           record.date.season === 'AUTUMN' ? 'Automne' : 'Hiver') : 'Inconnu'}
+                        </TableCell>
+                        <TableCell className="text-right font-medium">{formatCurrency(record.amount)}</TableCell>
+                      </TableRow>
+                    );
+                  })
+                )}
+              </TableBody>
+            </Table>
+          </div>
+          
+          <div className="bg-muted p-3 rounded-md flex justify-between items-center">
+            <span className="font-medium">Revenu total des bâtiments:</span>
+            <span className="font-bold text-lg">{formatCurrency(totalRevenue)}</span>
+          </div>
+        </div>
+      </CardContent>
+    </Card>
   );
 };
