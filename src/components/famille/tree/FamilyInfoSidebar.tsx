@@ -1,123 +1,170 @@
 
-import React, { useState } from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import React from 'react';
 import { Character } from '@/types/character';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { InfoIcon } from 'lucide-react';
+import { 
+  User,
+  UsersRound,
+  GraduationCap,
+  Heart,
+  Baby
+} from 'lucide-react';
+import { 
+  Alert,
+  AlertTitle,
+  AlertDescription
+} from '@/components/ui/alert';
+import { Separator } from '@/components/ui/separator';
 import { Badge } from '@/components/ui/badge';
-import { getFamilyMembers } from './familyHelpers';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { calculateAge, getMaritalStatus } from './familyHelpers';
+import { useGameTime } from '@/hooks/useGameTime';
 
 interface FamilyInfoSidebarProps {
   characters: Character[];
 }
 
 export const FamilyInfoSidebar: React.FC<FamilyInfoSidebarProps> = ({ characters }) => {
-  const [activeTab, setActiveTab] = useState('info');
-  const { paterFamilias, materFamilias, children, otherRelatives } = getFamilyMembers(characters);
+  const { year } = useGameTime(); 
   
-  // Fonction utilitaire pour afficher le nom complet
+  // Helper function to display full name with fallbacks
   const displayFullName = (character: Character) => {
-    // Si firstName et lastName sont définis, les utiliser
     if (character.firstName && character.lastName) {
       return `${character.firstName} ${character.lastName}`;
     }
-    // Sinon, utiliser le champ name
     return character.name;
   };
   
+  // Check if characters data is valid
+  if (!characters || characters.length === 0) {
+    return (
+      <Alert variant="destructive">
+        <AlertTitle>Aucune donnée</AlertTitle>
+        <AlertDescription>
+          Aucune information familiale disponible.
+        </AlertDescription>
+      </Alert>
+    );
+  }
+  
+  // Find the head of family
+  const familyHead = characters.find(c => 
+    (c.role?.includes('Chef') || c.role?.includes('pater familias')) && c.gender === 'male'
+  );
+  
+  // Find the matriarch
+  const familyMatriarch = characters.find(c => 
+    (c.role?.includes('Épouse') || c.role?.includes('mater familias')) && c.gender === 'female'
+  );
+  
+  // Count children
+  const childrenCount = characters.filter(c => 
+    c.role?.includes('Fils') || 
+    c.role?.includes('Fille') || 
+    c.role?.includes('fils') || 
+    c.role?.includes('filia')
+  ).length;
+  
+  // Get family name
+  const familyName = familyHead?.lastName || characters[0]?.lastName || 'Famille'; 
+  
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>Informations familiales</CardTitle>
-        <CardDescription>Détails sur votre famille et sa lignée</CardDescription>
-      </CardHeader>
-      <CardContent>
-        <Tabs value={activeTab} onValueChange={setActiveTab}>
-          <TabsList className="grid w-full grid-cols-2">
-            <TabsTrigger value="info">Sommaire</TabsTrigger>
-            <TabsTrigger value="stats">Statistiques</TabsTrigger>
-          </TabsList>
+    <div className="family-sidebar space-y-4">
+      <Alert>
+        <User className="h-4 w-4" />
+        <AlertTitle>Famille {familyName}</AlertTitle>
+        <AlertDescription>
+          {childrenCount} membres dans la famille
+        </AlertDescription>
+      </Alert>
+      
+      {/* Chef de famille */}
+      {familyHead && (
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm font-medium flex items-center gap-2">
+              <User className="h-4 w-4 text-amber-600" />
+              Chef de Famille
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="flex items-center gap-3">
+              {familyHead.portrait ? (
+                <img 
+                  src={familyHead.portrait} 
+                  alt={displayFullName(familyHead)} 
+                  className="w-10 h-10 rounded-full object-cover border border-amber-200"
+                />
+              ) : (
+                <div className="w-10 h-10 bg-amber-100 rounded-full flex items-center justify-center">
+                  <User className="h-5 w-5 text-amber-800" />
+                </div>
+              )}
+              <div>
+                <p className="font-medium">{displayFullName(familyHead)}</p>
+                <div className="flex items-center text-xs text-muted-foreground">
+                  <span>{familyHead.age} ans</span>
+                  <span className="mx-1">•</span>
+                  <span>{familyHead.title || 'Citoyen'}</span>
+                </div>
+              </div>
+            </div>
+            
+            <div className="mt-2 text-xs">
+              <div className="flex justify-between">
+                <span>Statut Marital:</span>
+                <Badge variant="secondary">{getMaritalStatus(familyHead)}</Badge>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+      
+      {/* Statistiques Familiales */}
+      <Card>
+        <CardHeader className="pb-2">
+          <CardTitle className="text-sm font-medium flex items-center gap-2">
+            <UsersRound className="h-4 w-4 text-blue-600" />
+            Statistiques Familiales
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-3">
+          <div className="grid grid-cols-2 gap-2 text-xs">
+            <div className="flex items-center gap-1">
+              <User className="h-3 w-3" />
+              <span>Membres:</span>
+            </div>
+            <span className="text-right font-medium">{characters.length}</span>
+            
+            <div className="flex items-center gap-1">
+              <Baby className="h-3 w-3" />
+              <span>Enfants:</span>
+            </div>
+            <span className="text-right font-medium">{childrenCount}</span>
+            
+            <div className="flex items-center gap-1">
+              <Heart className="h-3 w-3" />
+              <span>Mariages:</span>
+            </div>
+            <span className="text-right font-medium">
+              {characters.filter(c => c.marriageStatus === 'married').length}
+            </span>
+            
+            <div className="flex items-center gap-1">
+              <GraduationCap className="h-3 w-3" />
+              <span>En éducation:</span>
+            </div>
+            <span className="text-right font-medium">
+              {characters.filter(c => c.education && c.age < 16).length}
+            </span>
+          </div>
           
-          <TabsContent value="info" className="space-y-4">
-            <div>
-              <h3 className="font-medium mb-2">Chef de famille</h3>
-              {paterFamilias ? (
-                <p>{displayFullName(paterFamilias)}</p>
-              ) : (
-                <p className="text-muted-foreground text-sm">Aucun chef de famille</p>
-              )}
-            </div>
-            
-            <div>
-              <h3 className="font-medium mb-2">Matrone</h3>
-              {materFamilias ? (
-                <p>{displayFullName(materFamilias)}</p>
-              ) : (
-                <p className="text-muted-foreground text-sm">Aucune matrone</p>
-              )}
-            </div>
-            
-            <div>
-              <h3 className="font-medium mb-2">Descendants <Badge>{children.length}</Badge></h3>
-              {children.length > 0 ? (
-                <ul className="list-disc pl-5 text-sm">
-                  {children.map((child, index) => (
-                    <li key={child.id || index}>
-                      {displayFullName(child)} ({child.gender === 'male' ? 'Fils' : 'Fille'})
-                    </li>
-                  ))}
-                </ul>
-              ) : (
-                <p className="text-muted-foreground text-sm">Aucun descendant</p>
-              )}
-            </div>
-            
-            <Alert variant="default" className="mt-4">
-              <InfoIcon className="h-4 w-4" />
-              <AlertTitle>Conseil</AlertTitle>
-              <AlertDescription>
-                Avoir des descendants est essentiel pour la perpétuation de votre lignée.
-              </AlertDescription>
-            </Alert>
-          </TabsContent>
+          <Separator />
           
-          <TabsContent value="stats">
-            <div className="space-y-4">
-              <div>
-                <h3 className="font-medium mb-2">Taille de la famille</h3>
-                <p className="text-2xl">{characters.length}</p>
-              </div>
-              
-              <div>
-                <h3 className="font-medium mb-2">Composition</h3>
-                <ul className="space-y-1 text-sm">
-                  <li className="flex justify-between">
-                    <span>Hommes</span>
-                    <span>{characters.filter(c => c.gender === 'male').length}</span>
-                  </li>
-                  <li className="flex justify-between">
-                    <span>Femmes</span>
-                    <span>{characters.filter(c => c.gender === 'female').length}</span>
-                  </li>
-                  <li className="flex justify-between">
-                    <span>Enfants</span>
-                    <span>{children.length}</span>
-                  </li>
-                </ul>
-              </div>
-              
-              <div>
-                <h3 className="font-medium mb-2">Alliances maritales</h3>
-                <p className="text-sm">
-                  {characters.filter(c => c.marriageStatus === 'married' && c.gender === 'female' && c.role !== 'mater familias').length} 
-                  {' '}alliances avec d'autres familles
-                </p>
-              </div>
-            </div>
-          </TabsContent>
-        </Tabs>
-      </CardContent>
-    </Card>
+          <div className="text-xs text-center text-muted-foreground">
+            Année actuelle: {year} AUC
+          </div>
+        </CardContent>
+      </Card>
+    </div>
   );
 };

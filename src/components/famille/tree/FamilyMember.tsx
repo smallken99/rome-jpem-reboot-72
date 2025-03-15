@@ -1,99 +1,119 @@
 
 import React from 'react';
 import { Character } from '@/types/character';
-import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
-import { CalendarDays, Crown } from 'lucide-react';
-
-// Roman-style portraits for characters
-const romanPortraits = {
-  male: [
-    "https://images.unsplash.com/photo-1610216705422-caa3fcb6d158?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8NXx8cm9tYW4lMjBtYW58ZW58MHwwfDB8fHww&auto=format&fit=crop&w=500&q=60",
-    "https://images.unsplash.com/photo-1620522849897-ff3758435af6?auto=format&fit=crop&w=500&q=60",
-    "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=500&q=60",
-    "https://images.unsplash.com/photo-1513956589380-bad6acb9b9d4?auto=format&fit=crop&w=500&q=60"
-  ],
-  female: [
-    "https://images.unsplash.com/photo-1508214751196-bcfd4ca60f91?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80",
-    "https://images.unsplash.com/photo-1544005313-94ddf0286df2?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mnx8d29tYW4lMjBwb3J0cmFpdHxlbnwwfDB8MHx8fDA%3D&auto=format&fit=crop&w=500&q=60",
-    "https://images.unsplash.com/photo-1531123897727-8f129e1688ce?auto=format&fit=crop&w=500&q=60",
-    "https://images.unsplash.com/photo-1509967419530-da38b4704bc6?auto=format&fit=crop&w=500&q=60"
-  ]
-};
+import { 
+  Crown, 
+  User, 
+  Shield, 
+  GraduationCap,
+  Scroll
+} from 'lucide-react';
 
 interface FamilyMemberProps {
-  member: Character;
-  role: string;
+  character: Character;
+  roleLabel?: string;
+  primary?: boolean;
 }
 
-export const FamilyMember: React.FC<FamilyMemberProps> = ({ member, role }) => {
-  const getRoleColor = (role: string) => {
-    switch(role) {
-      case 'Pater Familias':
-        return 'bg-rome-terracotta';
-      case 'Mater Familias':
-        return 'bg-rome-gold';
-      case 'Filius':
-      case 'Filia':
-        return 'bg-rome-navy';
-      default:
-        return 'bg-muted';
-    }
-  };
-  
-  // Get initials for avatar fallback
-  const getInitials = (name: string) => {
-    return name
-      .split(' ')
-      .map(part => part[0])
-      .join('')
-      .toUpperCase();
-  };
-  
-  // Get a roman portrait based on gender
-  const getRomanPortrait = () => {
-    const isFemale = member.gender === 'female';
-    const portraitList = isFemale ? romanPortraits.female : romanPortraits.male;
-    // Use member id to get a consistent portrait
-    const portraitIndex = parseInt(member.id.replace(/[^0-9]/g, '')) % portraitList.length;
-    return portraitList[portraitIndex] || portraitList[0];
-  };
-  
-  // Fonction pour obtenir le nom à afficher
+export const FamilyMember: React.FC<FamilyMemberProps> = ({ 
+  character, 
+  roleLabel, 
+  primary = false 
+}) => {
+  // Get display name with fallback
   const getDisplayName = () => {
-    if (member.firstName && member.lastName) {
-      return `${member.firstName} ${member.lastName}`;
+    if (character.firstName && character.lastName) {
+      return `${character.firstName} ${character.lastName}`;
     }
-    return member.name;
+    return character.name;
+  };
+
+  // Détermine l'icône selon le rôle
+  const getRoleIcon = () => {
+    const role = roleLabel?.toLowerCase() || '';
+    
+    if (role.includes('pater') || role.includes('chef')) {
+      return <Crown className="h-4 w-4 text-amber-600" />;
+    }
+    if (role.includes('mater') || role.includes('épouse')) {
+      return <Crown className="h-4 w-4 text-amber-600" />;
+    }
+    if (role.includes('héritier')) {
+      return <Shield className="h-4 w-4 text-blue-600" />;
+    }
+    if (role.includes('fils') || role.includes('fille')) {
+      return <User className="h-4 w-4 text-emerald-600" />;
+    }
+    
+    return <User className="h-4 w-4 text-gray-600" />;
+  };
+  
+  // Détermine la couleur de bordure selon le rôle
+  const getBorderClass = () => {
+    if (primary) {
+      return 'border-amber-600';
+    }
+    
+    const role = roleLabel?.toLowerCase() || '';
+    
+    if (role.includes('héritier')) {
+      return 'border-blue-600';
+    }
+    
+    return character.gender === 'male' ? 'border-emerald-600' : 'border-purple-600';
   };
   
   return (
-    <div className="roman-card hover:shadow-md transition-all duration-300 w-44 p-3 relative">
-      <div className={`absolute top-2 right-2 w-3 h-3 rounded-full ${getRoleColor(role)}`}></div>
-      
-      <div className="flex flex-col items-center">
-        <Avatar className="w-16 h-16 mb-2">
-          <AvatarImage src={member.portrait || getRomanPortrait()} alt={getDisplayName()} className="object-cover" />
-          <AvatarFallback className="bg-muted text-xl font-cinzel">
-            {getInitials(getDisplayName())}
-          </AvatarFallback>
-        </Avatar>
-        
-        <h3 className="font-cinzel text-center text-sm">{getDisplayName()}</h3>
-        <div className="flex items-center gap-1 mt-1">
-          <span className="text-xs text-muted-foreground">{role}</span>
-          <span className="text-xs mx-1">•</span>
-          <span className="text-xs flex items-center gap-1">
-            <CalendarDays className="h-3 w-3 text-muted-foreground" />
-            {member.age}
-          </span>
+    <div className={`family-member p-3 rounded-lg border-2 ${getBorderClass()} bg-white shadow-sm hover:shadow-md transition-shadow`}>
+      <div className="flex flex-col items-center gap-2">
+        <div className="relative">
+          {character.portrait ? (
+            <img 
+              src={character.portrait} 
+              alt={getDisplayName()} 
+              className="w-16 h-16 rounded-full object-cover border-2 border-amber-100"
+            />
+          ) : (
+            <div className="w-16 h-16 rounded-full bg-gray-200 flex items-center justify-center border-2 border-amber-100">
+              <User className="h-8 w-8 text-gray-400" />
+            </div>
+          )}
+          
+          {character.isPlayer && (
+            <div className="absolute -top-1 -right-1 bg-amber-500 text-white p-1 rounded-full">
+              <User className="h-3 w-3" />
+            </div>
+          )}
         </div>
         
-        {member.title && (
-          <div className="mt-2 text-xs flex items-center gap-1 bg-muted/30 px-2 py-1 rounded-full">
-            <Crown className="h-3 w-3 text-rome-gold" />
-            <span>{member.title}</span>
+        <div className="text-center">
+          <h3 className="font-cinzel font-bold text-sm text-gray-900">
+            {getDisplayName()}
+          </h3>
+          
+          <div className="flex items-center justify-center gap-1 mt-1">
+            {getRoleIcon()}
+            <span className="text-xs text-gray-600">{roleLabel || character.role || "Membre"}</span>
           </div>
-        )}
+          
+          <div className="text-xs text-gray-500 mt-1">
+            {character.age} ans
+          </div>
+          
+          {character.title && (
+            <div className="flex items-center justify-center gap-1 mt-1">
+              <Scroll className="h-3 w-3 text-rome-terracotta" />
+              <span className="text-xs italic text-rome-terracotta">{character.title}</span>
+            </div>
+          )}
+          
+          {character.education?.type && (
+            <div className="flex items-center justify-center gap-1 mt-1">
+              <GraduationCap className="h-3 w-3 text-blue-600" />
+              <span className="text-xs text-blue-600">{character.education.type}</span>
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );

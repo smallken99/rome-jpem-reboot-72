@@ -2,15 +2,15 @@
 export interface Character {
   id: string;
   name: string;
-  firstName?: string; // Ajouté pour compatibilité avec l'arbre généalogique
-  lastName?: string;  // Ajouté pour compatibilité avec l'arbre généalogique
+  firstName?: string;
+  lastName?: string;
   gender: 'male' | 'female';
   age: number;
   isPlayer?: boolean;
   portrait?: string;
   title?: string;
   role?: string;
-  marriageStatus?: string; // Ajouté pour compatibilité avec les fonctions de l'arbre
+  marriageStatus?: string;
   stats: {
     popularity: number | CharacterStat;
     oratory: number | CharacterStat;
