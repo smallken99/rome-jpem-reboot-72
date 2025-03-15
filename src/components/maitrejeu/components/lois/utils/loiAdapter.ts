@@ -1,151 +1,115 @@
 
-import { Loi as LoiRepublique } from '@/components/republique/lois/hooks/useLois';
-import { Loi as LoiMJ, ImportanceType, LoiType, LoiState } from '@/components/maitrejeu/types/lois';
-import { ExtendedLoi } from '../hooks/useLoiModalForm';
+import { Loi, LoiState, LoiType, ImportanceType, Vote } from '@/components/maitrejeu/types/lois';
 
-/**
- * Assure que la loi a toutes les propriétés requises pour l'interface LoiMJ
- */
-export const ensureLoiCompliance = (loi: any): LoiMJ => {
-  // Si la loi est déjà conforme au format LoiMJ, retourner directement
-  if (
-    loi.type !== undefined &&
-    loi.importance !== undefined &&
-    loi.clauses !== undefined &&
-    loi.commentaires !== undefined &&
-    loi.tags !== undefined
-  ) {
-    return loi as LoiMJ;
-  }
+// Interface pour les données du formulaire de loi
+interface LoiFormData {
+  id?: string;
+  titre: string;
+  description: string;
+  catégorie: string;
+  importance: string;
+  proposeur: string;
+  état: string;
+  dateProposition: string;
+  dateVote?: string;
+  datePromulgation?: string;
+  dateExpiration?: string;
+  votes?: {
+    pour: number;
+    contre: number;
+    abstention: number;
+  };
+  conditions?: string[];
+  effets?: string[];
+  pénalités?: string[];
+}
+
+// Fonction pour convertir un état string en LoiState
+const convertToLoiState = (state: string): LoiState => {
+  const stateMap: Record<string, LoiState> = {
+    'proposed': 'proposée',
+    'active': 'promulguée',
+    'rejected': 'rejetée',
+    'expired': 'expirée',
+    'promulguée': 'promulguée',
+    'rejetée': 'rejetée',
+    'proposée': 'proposée',
+    'adoptée': 'votée',
+    'en délibération': 'en_débat',
+    'En délibération': 'en_débat'
+  };
   
-  // Fonction pour s'assurer que le type est valide
-  const ensureValidType = (type: string | undefined): LoiType => {
-    if (!type) return 'Politique' as LoiType;
-    return type as LoiType;
-  };
+  return (stateMap[state] || 'proposée') as LoiState;
+};
 
-  // Fonction pour s'assurer que l'importance est valide
-  const ensureValidImportance = (importance: string | undefined): ImportanceType => {
-    if (!importance) return 'normale' as ImportanceType;
-    return importance as ImportanceType;
-  };
-
-  // Fonction pour s'assurer que l'état est valide
-  const ensureValidState = (state: string | undefined): LoiState => {
-    if (!state) return 'proposed' as LoiState;
-    return state as LoiState;
+// Fonction pour convertir un type string en LoiType
+const convertToLoiType = (type: string): LoiType => {
+  const typeMap: Record<string, LoiType> = {
+    'Agraire': 'agraire',
+    'Politique': 'politique',
+    'Militaire': 'militaire',
+    'Economique': 'economique',
+    'Sociale': 'sociale',
+    'Religieuse': 'religieuse',
+    'Civile': 'civile',
+    'Électorale': 'electorale',
+    'Administrative': 'administrative',
+    'Judiciaire': 'judiciaire',
+    'Fiscale': 'fiscale'
   };
   
-  // Sinon, adapter les propriétés pour assurer la conformité
+  return (typeMap[type] || 'politique') as LoiType;
+};
+
+// Fonction pour convertir une importance string en ImportanceType
+const convertToImportanceType = (importance: string): ImportanceType => {
+  const importanceMap: Record<string, ImportanceType> = {
+    'mineure': 'mineure',
+    'normale': 'normale',
+    'majeure': 'majeure'
+  };
+  
+  return (importanceMap[importance] || 'normale') as ImportanceType;
+};
+
+// Fonction pour convertir les données du formulaire en objet Loi
+export const convertFormDataToLoi = (formData: LoiFormData): Loi => {
   return {
-    ...loi,
-    // Propriétés obligatoires à s'assurer de remplir
-    id: loi.id || `loi-${Date.now()}`,
-    titre: loi.titre || loi.title || '',
-    description: loi.description || '',
-    type: ensureValidType(loi.type),
-    importance: ensureValidImportance(loi.importance),
-    proposeur: loi.proposeur || loi.auteur || loi.proposedBy || '',
-    catégorie: loi.catégorie || loi.categorieId || loi.category || '',
-    état: ensureValidState(loi.état || loi.statut || loi.status || 'proposée'),
-    date: loi.date || loi.dateProposition || { year: new Date().getFullYear(), season: 'SPRING' },
-    votesPositifs: loi.votesPositifs || (loi.votes?.pour || 0),
-    votesNégatifs: loi.votesNégatifs || (loi.votes?.contre || 0),
-    votesAbstention: loi.votesAbstention || (loi.votes?.abstention || 0),
-    clauses: loi.clauses || [],
-    commentaires: loi.commentaires || [],
-    tags: loi.tags || [],
-    effets: loi.effets || {}
+    id: formData.id || Date.now().toString(),
+    titre: formData.titre,
+    description: formData.description,
+    type: convertToLoiType(formData.catégorie),
+    importance: convertToImportanceType(formData.importance),
+    état: convertToLoiState(formData.état),
+    proposeur: formData.proposeur,
+    dateProposition: formData.dateProposition,
+    dateVote: formData.dateVote,
+    datePromulgation: formData.datePromulgation,
+    dateExpiration: formData.dateExpiration,
+    votes: formData.votes as Vote,
+    conditions: formData.conditions || [],
+    effets: formData.effets || [],
+    pénalités: formData.pénalités || []
   };
 };
 
-/**
- * Convertit une loi du format MJ vers le format République
- */
-export const convertMJToRepublique = (loi: LoiMJ): ExtendedLoi => {
-  // Helper to ensure we have a valid status
-  const ensureValidStatus = (status: string | undefined): "proposée" | "en_débat" | "votée" | "rejetée" | "promulguée" => {
-    const validStatuses = ["proposée", "en_débat", "votée", "rejetée", "promulguée"];
-    const normalizedStatus = (status || 'proposée').toLowerCase();
-    
-    if (validStatuses.includes(normalizedStatus as any)) {
-      return normalizedStatus as "proposée" | "en_débat" | "votée" | "rejetée" | "promulguée";
-    }
-    
-    // Map non-standard statuses to valid ones
-    if (normalizedStatus === 'active' || normalizedStatus === 'adoptée' || normalizedStatus === 'promulguée') {
-      return 'promulguée';
-    }
-    if (normalizedStatus === 'rejected' || normalizedStatus === 'rejetée') {
-      return 'rejetée';
-    }
-    if (normalizedStatus === 'proposed' || normalizedStatus === 'en délibération') {
-      return 'proposée';
-    }
-    
-    // Default
-    return 'proposée';
-  };
-  
+// Fonction pour convertir un objet Loi en données de formulaire
+export const convertLoiToFormData = (loi: Loi): LoiFormData => {
   return {
     id: loi.id,
-    titre: loi.titre || loi.title || loi.nom || '',
-    description: loi.description || '',
-    auteur: loi.proposeur || loi.auteur || loi.proposedBy || '',
-    categorieId: loi.catégorie || loi.category || '',
-    dateProposition: typeof loi.date === 'string' ? loi.date : `${loi.date?.year} ${loi.date?.season}`,
-    statut: ensureValidStatus(loi.état || loi.status || ''),
-    votes: {
-      pour: loi.votesPositifs || loi.votesFor || 0,
-      contre: loi.votesNégatifs || loi.votesAgainst || 0,
-      abstention: loi.votesAbstention || 0
-    },
-    tags: loi.tags || [],
-    clauses: loi.clauses || [],
-    commentaires: loi.commentaires || [],
-    type: loi.type as LoiType,
-    importance: loi.importance as ImportanceType
-  };
-};
-
-/**
- * Convertit une loi du format République vers le format MJ
- */
-export const convertRepubliqueToMJ = (loi: ExtendedLoi): LoiMJ => {
-  // Fonctions pour s'assurer que les types sont valides
-  const ensureValidType = (type: string | undefined): LoiType => {
-    if (!type) return 'Politique' as LoiType;
-    return type as LoiType;
-  };
-
-  const ensureValidImportance = (importance: string | undefined): ImportanceType => {
-    if (!importance) return 'normale' as ImportanceType;
-    return importance as ImportanceType;
-  };
-
-  const ensureValidState = (state: string | undefined): LoiState => {
-    if (!state) return 'proposed' as LoiState;
-    return state as LoiState;
-  };
-
-  return {
-    id: loi.id,
-    titre: loi.titre || '',
-    description: loi.description || '',
-    proposeur: loi.auteur || '',
-    catégorie: loi.categorieId || '',
-    date: typeof loi.dateProposition === 'string' 
-      ? { year: parseInt(loi.dateProposition.split(' ')[0]), season: loi.dateProposition.split(' ')[1] } 
-      : loi.dateProposition,
-    état: ensureValidState(loi.statut || 'proposée'),
-    votesPositifs: loi.votes?.pour || 0,
-    votesNégatifs: loi.votes?.contre || 0,
-    votesAbstention: loi.votes?.abstention || 0,
-    tags: loi.tags || [],
-    clauses: loi.clauses || [],
-    commentaires: loi.commentaires || [],
-    type: ensureValidType(loi.type),
-    importance: ensureValidImportance(loi.importance),
-    effets: {},
+    titre: loi.titre,
+    description: loi.description,
+    catégorie: loi.type as string,
+    importance: loi.importance as string,
+    proposeur: loi.proposeur,
+    état: loi.état as string,
+    dateProposition: loi.dateProposition,
+    dateVote: loi.dateVote,
+    datePromulgation: loi.datePromulgation,
+    dateExpiration: loi.dateExpiration,
+    votes: loi.votes,
+    conditions: loi.conditions,
+    effets: loi.effets,
+    pénalités: loi.pénalités
   };
 };

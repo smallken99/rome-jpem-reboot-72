@@ -57,7 +57,7 @@ const Sidebar = () => {
         
         {/* Time */}
         <div className="border-t border-rome-gold/30 p-3 flex justify-center">
-          <TimePanel minimal />
+          <TimePanel minimal={true} />
         </div>
       </div>
     </div>
@@ -76,7 +76,7 @@ const MobileHeader = () => {
           <span className="text-rome-terracotta">ROME</span> JPEM
         </Link>
         <div className="flex items-center gap-2">
-          <TimePanel minimal />
+          <TimePanel minimal={true} />
           <button onClick={toggleMenu} className="p-2 text-rome-navy hover:text-rome-terracotta transition-colors">
             {isMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
           </button>

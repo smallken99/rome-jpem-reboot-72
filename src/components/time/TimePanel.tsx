@@ -9,6 +9,7 @@ interface TimePanelProps {
   season?: 'SPRING' | 'SUMMER' | 'AUTUMN' | 'WINTER' | string;
   phase?: string;
   showTitle?: boolean;
+  minimal?: boolean; // Ajout de la propriété minimal
 }
 
 // Fonction pour formater la saison en français
@@ -60,7 +61,8 @@ export const TimePanel: React.FC<TimePanelProps> = ({
   year,
   season,
   phase,
-  showTitle = true
+  showTitle = true,
+  minimal = false // Définition d'une valeur par défaut
 }) => {
   // Utiliser les données par défaut si aucune n'est fournie
   const timeData = getCurrentTimeData();
@@ -68,6 +70,22 @@ export const TimePanel: React.FC<TimePanelProps> = ({
   const displaySeason = season || timeData.season;
   const displayPhase = phase || timeData.phase;
   
+  // Version minimale pour l'affichage compact dans la sidebar
+  if (minimal) {
+    return (
+      <div className="text-xs flex flex-col items-center">
+        <div className="flex items-center gap-1">
+          <CalendarDays className="h-3 w-3 text-muted-foreground" />
+          <span>An {displayYear} AUC</span>
+        </div>
+        <Badge variant="outline" className="mt-1 text-xs">
+          {formatSeason(displaySeason)}
+        </Badge>
+      </div>
+    );
+  }
+  
+  // Affichage standard
   return (
     <Card className="timeline-card">
       {showTitle && (

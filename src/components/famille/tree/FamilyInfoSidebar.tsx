@@ -11,7 +11,7 @@ interface FamilyInfoSidebarProps {
 export const FamilyInfoSidebar: React.FC<FamilyInfoSidebarProps> = ({ characters }) => {
   return (
     <div>
-      <TimePanel />
+      <TimePanel showTitle={true} />
       
       <div className="mt-4 p-4 bg-rome-parchment/20 rounded-md">
         <h4 className="font-cinzel text-base mb-2 flex items-center gap-2">

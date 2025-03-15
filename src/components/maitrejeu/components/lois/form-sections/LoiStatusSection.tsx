@@ -20,6 +20,12 @@ export const LoiStatusSection: React.FC<LoiStatusSectionProps> = ({
     return state;
   };
 
+  // Fonction pour garantir que les types d'importance sont corrects
+  const getCurrentImportance = (): string => {
+    if (!formData.importance) return 'normale';
+    return formData.importance as string;
+  };
+
   return (
     <div className="grid grid-cols-2 gap-4">
       <div className="space-y-2">
@@ -73,7 +79,7 @@ export const LoiStatusSection: React.FC<LoiStatusSectionProps> = ({
       <div className="space-y-2 col-span-2">
         <Label>Importance</Label>
         <RadioGroup
-          value={formData.importance as string || 'normale'}
+          value={getCurrentImportance()}
           onValueChange={(value) => handleSelectChange('importance', value)}
           className="flex space-x-4"
         >
