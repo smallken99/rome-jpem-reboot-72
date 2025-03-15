@@ -1,260 +1,269 @@
 
 import React, { useState } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { ScrollArea } from '@/components/ui/scroll-area';
-import { Progress } from '@/components/ui/progress';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
+import { 
+  ArrowUpRight, 
+  ArrowDownRight, 
+  Calendar, 
+  Filter, 
+  Search,
+  TrendingUp,
+  Building,
+  Landmark
+} from 'lucide-react';
+import { useBatimentsManagement } from '../../hooks/useBatimentsManagement';
 import { formatCurrency } from '@/utils/formatUtils';
-import {
-  BarChart,
-  Bar,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  Legend,
-  ResponsiveContainer,
-  PieChart,
-  Pie,
-  Cell
-} from 'recharts';
-import { ChevronsUpDown, Download, BarChart2, DollarSign, TrendingUp } from 'lucide-react';
-import { useBatimentsManagement } from '@/components/maitrejeu/hooks/useBatimentsManagement';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { GameDate, Season } from '../../types/common';
+import { Building, BuildingRevenueRecord } from '../../types/batiments';
+import { UnderDevelopmentSection } from '../UnderDevelopmentSection';
 
 interface BuildingRevenueProps {
   currentYear: number;
-  currentSeason: string;
+  currentSeason: Season;
 }
 
-const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#A569BD'];
-
-export const BuildingRevenue: React.FC<BuildingRevenueProps> = ({ 
-  currentYear, 
-  currentSeason 
+export const BuildingRevenue: React.FC<BuildingRevenueProps> = ({
+  currentYear,
+  currentSeason
 }) => {
-  const { buildings } = useBatimentsManagement();
-  const [selectedYear, setSelectedYear] = useState(currentYear);
+  const { buildings, revenueRecords, addBuildingRevenue } = useBatimentsManagement();
+  const [searchTerm, setSearchTerm] = useState('');
   
-  // Données pour le graphique par type de bâtiment
-  const revenueByType = [
-    { name: 'Temples', value: buildings.filter(b => b.type === 'temple').reduce((acc, b) => acc + b.revenue, 0) },
-    { name: 'Bâtiments gouvernementaux', value: buildings.filter(b => ['basilica', 'forum'].includes(b.type)).reduce((acc, b) => acc + b.revenue, 0) },
-    { name: 'Divertissement', value: buildings.filter(b => ['theater', 'amphitheater', 'circus'].includes(b.type)).reduce((acc, b) => acc + b.revenue, 0) },
-    { name: 'Infrastructure', value: buildings.filter(b => ['aqueduct', 'bridge', 'road'].includes(b.type)).reduce((acc, b) => acc + b.revenue, 0) },
-    { name: 'Commercial', value: buildings.filter(b => ['market', 'port', 'warehouse'].includes(b.type)).reduce((acc, b) => acc + b.revenue, 0) }
-  ];
+  // Si nous n'avons pas encore implémenté la fonctionnalité complète
+  if (buildings.length === 0) {
+    return (
+      <UnderDevelopmentSection 
+        title="Revenus des bâtiments"
+        description="Ajoutez des bâtiments pour commencer à suivre leurs revenus."
+      />
+    );
+  }
   
-  // Données pour le graphique de revenus par saison
-  const revenueBySeasonData = [
-    { name: 'Printemps', value: Math.round(buildings.reduce((acc, b) => acc + b.revenue * 0.9, 0)) },
-    { name: 'Été', value: Math.round(buildings.reduce((acc, b) => acc + b.revenue * 1.2, 0)) },
-    { name: 'Automne', value: Math.round(buildings.reduce((acc, b) => acc + b.revenue * 1.1, 0)) },
-    { name: 'Hiver', value: Math.round(buildings.reduce((acc, b) => acc + b.revenue * 0.7, 0)) }
-  ];
+  // Filtrer les bâtiments en fonction de la recherche
+  const filteredBuildings = buildings.filter(building => 
+    building.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    building.location.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    building.type.toLowerCase().includes(searchTerm.toLowerCase())
+  );
   
-  // Les bâtiments les plus rentables
-  const topRevenueBuildingsData = [...buildings]
-    .sort((a, b) => b.revenue - a.revenue)
-    .slice(0, 5)
-    .map(b => ({
-      name: b.name,
-      revenue: b.revenue
-    }));
+  // Calculer les revenus totaux
+  const totalRevenue = buildings.reduce((total, building) => total + building.revenue, 0);
+  const totalMaintenanceCost = buildings.reduce((total, building) => total + building.maintenanceCost, 0);
+  const netRevenue = totalRevenue - totalMaintenanceCost;
   
-  // Calcul du total des revenus et coûts d'entretien
-  const totalRevenue = buildings.reduce((acc, b) => acc + b.revenue, 0);
-  const totalMaintenance = buildings.reduce((acc, b) => acc + b.maintenanceCost, 0);
-  const profitMargin = totalRevenue > 0 ? ((totalRevenue - totalMaintenance) / totalRevenue) * 100 : 0;
+  // Grouper les bâtiments par type pour l'analyse
+  const buildingTypeRevenue = buildings.reduce((acc, building) => {
+    const type = building.type;
+    if (!acc[type]) acc[type] = { count: 0, revenue: 0, maintenance: 0 };
+    acc[type].count += 1;
+    acc[type].revenue += building.revenue;
+    acc[type].maintenance += building.maintenanceCost;
+    return acc;
+  }, {} as Record<string, { count: number, revenue: number, maintenance: number }>);
   
-  const years = Array.from(new Array(10), (_, i) => currentYear - i);
+  const handleCollectRevenue = (building: Building) => {
+    addBuildingRevenue(
+      building.id,
+      building.revenue,
+      "Revenus trimestriels",
+      10, // Taux d'imposition standard
+      "Maître du Jeu"
+    );
+  };
+  
+  const handleCollectAllRevenues = () => {
+    buildings.forEach(building => {
+      if (building.revenue > 0) {
+        handleCollectRevenue(building);
+      }
+    });
+  };
   
   return (
     <div className="space-y-6">
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-        <div>
-          <h3 className="text-lg font-medium">Revenus des bâtiments publics</h3>
-          <p className="text-sm text-muted-foreground">
-            Analyse et suivi des revenus générés par les bâtiments
-          </p>
-        </div>
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <Card>
+          <CardHeader className="pb-3">
+            <CardTitle className="text-base font-semibold flex items-center">
+              <TrendingUp className="h-4 w-4 mr-2 text-green-500" />
+              Revenus totaux
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="pt-0">
+            <div className="text-2xl font-bold text-green-600">
+              {formatCurrency(totalRevenue)}
+            </div>
+            <p className="text-xs text-muted-foreground mt-1">
+              Par saison, tous bâtiments confondus
+            </p>
+          </CardContent>
+        </Card>
         
-        <div className="flex items-center gap-2">
-          <Select value={selectedYear.toString()} onValueChange={(value) => setSelectedYear(parseInt(value))}>
-            <SelectTrigger className="w-[120px]">
-              <SelectValue placeholder="Année" />
-            </SelectTrigger>
-            <SelectContent>
-              {years.map((year) => (
-                <SelectItem key={year} value={year.toString()}>
-                  {year} AUC
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-          
-          <Button variant="outline" size="sm">
-            <Download className="h-4 w-4 mr-1" />
-            Exporter
+        <Card>
+          <CardHeader className="pb-3">
+            <CardTitle className="text-base font-semibold flex items-center">
+              <Building className="h-4 w-4 mr-2 text-red-500" />
+              Coûts d'entretien
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="pt-0">
+            <div className="text-2xl font-bold text-red-600">
+              {formatCurrency(totalMaintenanceCost)}
+            </div>
+            <p className="text-xs text-muted-foreground mt-1">
+              Par saison, tous bâtiments confondus
+            </p>
+          </CardContent>
+        </Card>
+        
+        <Card>
+          <CardHeader className="pb-3">
+            <CardTitle className="text-base font-semibold flex items-center">
+              <Landmark className="h-4 w-4 mr-2 text-blue-500" />
+              Revenu net
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="pt-0">
+            <div className={`text-2xl font-bold ${netRevenue >= 0 ? 'text-blue-600' : 'text-red-600'}`}>
+              {formatCurrency(netRevenue)}
+              {netRevenue >= 0 ? 
+                <ArrowUpRight className="inline h-4 w-4 ml-1" /> : 
+                <ArrowDownRight className="inline h-4 w-4 ml-1" />
+              }
+            </div>
+            <p className="text-xs text-muted-foreground mt-1">
+              Revenus - Coûts d'entretien
+            </p>
+          </CardContent>
+        </Card>
+      </div>
+      
+      <div className="flex justify-between items-center">
+        <div className="relative flex-1 max-w-md">
+          <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+          <Input
+            placeholder="Rechercher un bâtiment..."
+            className="pl-8"
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+          />
+        </div>
+        <div className="flex gap-2">
+          <Button variant="outline" size="sm" className="gap-1">
+            <Filter className="h-4 w-4" />
+            Filtrer
+          </Button>
+          <Button size="sm" onClick={handleCollectAllRevenues}>
+            Collecter tout
           </Button>
         </div>
       </div>
       
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium flex items-center">
-              <DollarSign className="h-4 w-4 mr-2 text-green-500" />
-              Revenus totaux
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{formatCurrency(totalRevenue)}</div>
-            <p className="text-xs text-muted-foreground">Par an</p>
-          </CardContent>
-        </Card>
-        
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium flex items-center">
-              <ChevronsUpDown className="h-4 w-4 mr-2 text-orange-500" />
-              Coûts d'entretien
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{formatCurrency(totalMaintenance)}</div>
-            <p className="text-xs text-muted-foreground">Par an</p>
-          </CardContent>
-        </Card>
-        
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium flex items-center">
-              <TrendingUp className="h-4 w-4 mr-2 text-blue-500" />
-              Marge bénéficiaire
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="flex flex-col space-y-2">
-              <div className="text-2xl font-bold">{profitMargin.toFixed(1)}%</div>
-              <Progress value={profitMargin} className="h-2" />
-            </div>
-          </CardContent>
-        </Card>
+      <div className="border rounded-md">
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead>Bâtiment</TableHead>
+              <TableHead>Type</TableHead>
+              <TableHead>Revenus</TableHead>
+              <TableHead>Coûts d'entretien</TableHead>
+              <TableHead>Revenu net</TableHead>
+              <TableHead className="text-right">Actions</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {filteredBuildings.length === 0 ? (
+              <TableRow>
+                <TableCell colSpan={6} className="text-center py-4 text-muted-foreground">
+                  Aucun bâtiment ne correspond à votre recherche
+                </TableCell>
+              </TableRow>
+            ) : (
+              filteredBuildings.map((building) => {
+                const netBuildingRevenue = building.revenue - building.maintenanceCost;
+                return (
+                  <TableRow key={building.id}>
+                    <TableCell className="font-medium">{building.name}</TableCell>
+                    <TableCell>
+                      {building.type.charAt(0).toUpperCase() + building.type.slice(1).replace('_', ' ')}
+                    </TableCell>
+                    <TableCell className="text-green-600 font-medium">
+                      {formatCurrency(building.revenue)}
+                    </TableCell>
+                    <TableCell className="text-red-600 font-medium">
+                      {formatCurrency(building.maintenanceCost)}
+                    </TableCell>
+                    <TableCell className={netBuildingRevenue >= 0 ? 'text-blue-600' : 'text-red-600'}>
+                      {formatCurrency(netBuildingRevenue)}
+                    </TableCell>
+                    <TableCell className="text-right">
+                      <Button 
+                        variant="outline" 
+                        size="sm"
+                        onClick={() => handleCollectRevenue(building)}
+                        disabled={building.revenue <= 0}
+                      >
+                        <Calendar className="h-4 w-4 mr-2" />
+                        Collecter
+                      </Button>
+                    </TableCell>
+                  </TableRow>
+                );
+              })
+            )}
+          </TableBody>
+        </Table>
       </div>
       
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-base">Revenus par type de bâtiment</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="h-[300px]">
-              <ResponsiveContainer width="100%" height="100%">
-                <PieChart>
-                  <Pie
-                    data={revenueByType}
-                    cx="50%"
-                    cy="50%"
-                    labelLine={false}
-                    outerRadius={100}
-                    fill="#8884d8"
-                    dataKey="value"
-                    label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
-                  >
-                    {revenueByType.map((entry, index) => (
-                      <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                    ))}
-                  </Pie>
-                  <Tooltip formatter={(value) => formatCurrency(value as number)} />
-                  <Legend />
-                </PieChart>
-              </ResponsiveContainer>
-            </div>
-          </CardContent>
-        </Card>
-        
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-base">Revenus par saison</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="h-[300px]">
-              <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={revenueBySeasonData}>
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="name" />
-                  <YAxis />
-                  <Tooltip formatter={(value) => formatCurrency(value as number)} />
-                  <Bar dataKey="value" fill="#4f46e5" />
-                </BarChart>
-              </ResponsiveContainer>
-            </div>
-          </CardContent>
-        </Card>
+      <div className="flex justify-between items-center">
+        <h3 className="text-lg font-semibold">Historique des revenus</h3>
+        <Button variant="outline" size="sm">Exporter</Button>
       </div>
       
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-base">Bâtiments les plus rentables</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="h-[300px]">
-            <ResponsiveContainer width="100%" height="100%">
-              <BarChart
-                data={topRevenueBuildingsData}
-                layout="vertical"
-                margin={{ top: 20, right: 30, left: 100, bottom: 5 }}
-              >
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis type="number" />
-                <YAxis type="category" dataKey="name" />
-                <Tooltip formatter={(value) => formatCurrency(value as number)} />
-                <Bar dataKey="revenue" fill="#22c55e" />
-              </BarChart>
-            </ResponsiveContainer>
-          </div>
-        </CardContent>
-      </Card>
-      
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-base">Détail des revenus annuels</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <ScrollArea className="h-[300px]">
-            <table className="w-full">
-              <thead>
-                <tr className="text-left border-b">
-                  <th className="pb-2 font-medium">Bâtiment</th>
-                  <th className="pb-2 font-medium">Type</th>
-                  <th className="pb-2 font-medium text-right">Revenu annuel</th>
-                  <th className="pb-2 font-medium text-right">Coût d'entretien</th>
-                  <th className="pb-2 font-medium text-right">Bénéfice net</th>
-                </tr>
-              </thead>
-              <tbody>
-                {buildings.map((building) => {
-                  const netProfit = building.revenue - building.maintenanceCost;
-                  return (
-                    <tr key={building.id} className="border-b border-muted">
-                      <td className="py-3">{building.name}</td>
-                      <td className="py-3 capitalize">{building.type}</td>
-                      <td className="py-3 text-right">{formatCurrency(building.revenue)}</td>
-                      <td className="py-3 text-right">{formatCurrency(building.maintenanceCost)}</td>
-                      <td className={`py-3 text-right ${netProfit >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                        {formatCurrency(netProfit)}
-                      </td>
-                    </tr>
-                  )}
-                )}
-              </tbody>
-            </table>
-          </ScrollArea>
-        </CardContent>
-      </Card>
+      <div className="border rounded-md">
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead>Date</TableHead>
+              <TableHead>Bâtiment</TableHead>
+              <TableHead>Montant</TableHead>
+              <TableHead>Source</TableHead>
+              <TableHead>Collecté par</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {revenueRecords.length === 0 ? (
+              <TableRow>
+                <TableCell colSpan={5} className="text-center py-4 text-muted-foreground">
+                  Aucun revenu n'a encore été enregistré
+                </TableCell>
+              </TableRow>
+            ) : (
+              revenueRecords.map((record) => {
+                const building = buildings.find(b => b.id === record.buildingId);
+                return (
+                  <TableRow key={record.id}>
+                    <TableCell>
+                      {`${record.season} ${record.year}`}
+                    </TableCell>
+                    <TableCell className="font-medium">
+                      {building ? building.name : 'Bâtiment inconnu'}
+                    </TableCell>
+                    <TableCell className="text-green-600 font-medium">
+                      {formatCurrency(record.amount)}
+                    </TableCell>
+                    <TableCell>{record.source}</TableCell>
+                    <TableCell>{record.collectedBy}</TableCell>
+                  </TableRow>
+                );
+              })
+            )}
+          </TableBody>
+        </Table>
+      </div>
     </div>
   );
 };
-
-export default BuildingRevenue;

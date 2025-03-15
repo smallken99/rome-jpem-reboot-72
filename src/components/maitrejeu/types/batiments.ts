@@ -127,7 +127,7 @@ export interface PublicBuildingModalProps {
   isOpen: boolean;
   onClose: () => void;
   onSave: (building: BuildingCreationData) => void;
-  building?: Building;
+  building?: Building | PublicBuildingData;
 }
 
 export interface BuildingsListProps {

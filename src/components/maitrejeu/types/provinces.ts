@@ -16,6 +16,7 @@ export interface Province {
   impôts: number;
   revenuAnnuel: number;
   variationLoyauté: number;
+  légions?: number;
 }
 
 export interface ProvinceCardProps {

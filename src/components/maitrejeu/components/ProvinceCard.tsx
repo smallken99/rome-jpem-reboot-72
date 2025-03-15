@@ -3,108 +3,103 @@ import React from 'react';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { ArrowUpIcon, ArrowDownIcon, ShieldIcon, CoinIcon } from 'lucide-react';
 import { Province, ProvinceCardProps } from '../types/provinces';
-import { ChevronRight, MapPin, Users, Coins, Sword, Flag } from 'lucide-react';
 
-export const ProvinceCard: React.FC<ProvinceCardProps> = ({ 
-  province, 
+export const ProvinceCard: React.FC<ProvinceCardProps> = ({
+  province,
+  onEdit,
+  onDelete,
   onSelect,
   selected = false
 }) => {
-  const getLoyauteColor = (loyaute: number) => {
-    if (loyaute >= 80) return 'bg-green-500';
-    if (loyaute >= 60) return 'bg-lime-500';
-    if (loyaute >= 40) return 'bg-amber-500';
-    if (loyaute >= 20) return 'bg-orange-500';
-    return 'bg-red-500';
+  const getStatusColor = (status: Province['status']) => {
+    switch (status) {
+      case 'Pacifiée': return 'bg-green-100 text-green-800 border-green-300';
+      case 'Instable': return 'bg-yellow-100 text-yellow-800 border-yellow-300';
+      case 'En guerre': return 'bg-red-100 text-red-800 border-red-300';
+      case 'Rebelle': return 'bg-purple-100 text-purple-800 border-purple-300';
+      default: return 'bg-gray-100 text-gray-800 border-gray-300';
+    }
   };
 
-  const loyaltyDirection = (province.loyautéVariation || province.variationLoyauté || 0) > 0
-    ? "↑" 
-    : (province.loyautéVariation || province.variationLoyauté || 0) < 0 
-      ? "↓" 
-      : "→";
+  const getLoyaltyTrend = () => {
+    const variation = province.variationLoyauté;
+    if (variation > 0) {
+      return <span className="text-green-600 flex items-center"><ArrowUpIcon className="w-4 h-4 mr-1" />{Math.abs(variation)}%</span>;
+    } else if (variation < 0) {
+      return <span className="text-red-600 flex items-center"><ArrowDownIcon className="w-4 h-4 mr-1" />{Math.abs(variation)}%</span>;
+    } else {
+      return <span className="text-gray-600">Stable</span>;
+    }
+  };
 
   return (
-    <Card 
-      className={`overflow-hidden transition-all ${
-        selected ? 'ring-2 ring-primary' : 'hover:shadow-md'
-      }`}
-    >
+    <Card className={`overflow-hidden transition-all ${selected ? 'ring-2 ring-primary' : 'hover:shadow-md'}`}>
       <CardHeader className="pb-2">
         <div className="flex justify-between items-start">
-          <CardTitle className="text-lg font-bold">{province.nom}</CardTitle>
-          <Badge>{province.région}</Badge>
+          <CardTitle className="text-lg font-semibold">{province.nom}</CardTitle>
+          <Badge className={`${getStatusColor(province.status)}`}>
+            {province.status}
+          </Badge>
         </div>
-        <p className="text-sm text-muted-foreground">
-          Gouverneur: {province.gouverneur || "Aucun"}
-        </p>
+        <p className="text-sm text-muted-foreground">{province.région}</p>
       </CardHeader>
-      
-      <CardContent className="pb-3">
-        <div className="grid grid-cols-2 gap-x-4 gap-y-2 mb-3">
-          <div className="flex items-center gap-1.5">
-            <Users className="h-4 w-4 text-muted-foreground" />
-            <span className="text-sm">{province.population.toLocaleString()}</span>
+      <CardContent className="pb-2">
+        <div className="grid grid-cols-2 gap-2 mb-3">
+          <div className="bg-muted/50 p-2 rounded">
+            <div className="text-xs text-muted-foreground">Population</div>
+            <div className="font-semibold">{province.population.toLocaleString()}</div>
           </div>
-          
-          <div className="flex items-center gap-1.5">
-            <Coins className="h-4 w-4 text-muted-foreground" />
-            <span className="text-sm">{province.impôts} As</span>
-          </div>
-          
-          <div className="flex items-center gap-1.5">
-            <Sword className="h-4 w-4 text-muted-foreground" />
-            <span className="text-sm">{province.armée?.légions || 0} légions</span>
-          </div>
-          
-          <div className="flex items-center gap-1.5">
-            <Flag className="h-4 w-4 text-muted-foreground" />
-            <span className="text-sm">
-              Loyauté: {province.loyauté}% 
-              <span className={`ml-1 ${
-                loyaltyDirection === "↑" ? "text-green-600" : 
-                loyaltyDirection === "↓" ? "text-red-600" : ""
-              }`}>
-                {loyaltyDirection}
-              </span>
-            </span>
-          </div>
-        </div>
-        
-        <div className="mb-2">
-          <div className="text-xs font-medium mb-1">Loyauté:</div>
-          <div className="w-full bg-muted rounded-full h-2">
-            <div 
-              className={`h-2 rounded-full ${getLoyauteColor(province.loyauté)}`} 
-              style={{ width: `${province.loyauté}%` }}
-            />
-          </div>
-        </div>
-        
-        {province.ressources && province.ressources.length > 0 && (
-          <div className="mt-3">
-            <div className="text-xs font-medium mb-1">Ressources:</div>
-            <div className="flex flex-wrap gap-1">
-              {province.ressources.map((resource, index) => (
-                <Badge key={index} variant="outline" className="text-xs">
-                  {resource}
-                </Badge>
-              ))}
+          <div className="bg-muted/50 p-2 rounded">
+            <div className="text-xs text-muted-foreground">Armée</div>
+            <div className="font-semibold flex items-center">
+              <ShieldIcon className="w-3 h-3 mr-1" />
+              {province.armée} {province.armée > 0 ? 'légions' : 'légion'}
             </div>
           </div>
-        )}
+          <div className="bg-muted/50 p-2 rounded">
+            <div className="text-xs text-muted-foreground">Loyauté</div>
+            <div className="font-semibold flex items-center justify-between">
+              <span>{province.loyauté}%</span>
+              <span className="text-xs">{getLoyaltyTrend()}</span>
+            </div>
+          </div>
+          <div className="bg-muted/50 p-2 rounded">
+            <div className="text-xs text-muted-foreground">Richesse</div>
+            <div className="font-semibold flex items-center">
+              <CoinIcon className="w-3 h-3 mr-1" />
+              {province.richesse}
+            </div>
+          </div>
+        </div>
+        <div className="text-sm">
+          <div className="flex justify-between">
+            <span className="text-muted-foreground">Ressource:</span>
+            <span className="font-medium">{province.ressource}</span>
+          </div>
+          <div className="flex justify-between mt-1">
+            <span className="text-muted-foreground">Gouverneur:</span>
+            <span className="font-medium">{province.gouverneur || 'Vacant'}</span>
+          </div>
+        </div>
       </CardContent>
-      
-      <CardFooter className="pt-0">
-        <Button 
-          variant="ghost" 
-          className="w-full justify-between" 
-          onClick={() => onSelect && onSelect(province.id)}
-        >
-          <span>Détails</span>
-          <ChevronRight className="h-4 w-4" />
+      <CardFooter className="pt-2 flex justify-between">
+        <Button variant="outline" size="sm" onClick={onSelect}>
+          Détails
         </Button>
+        <div className="space-x-2">
+          {onEdit && (
+            <Button variant="ghost" size="sm" onClick={() => onEdit(province)}>
+              Éditer
+            </Button>
+          )}
+          {onDelete && (
+            <Button variant="ghost" size="sm" className="text-destructive" onClick={() => onDelete(province.id)}>
+              Supprimer
+            </Button>
+          )}
+        </div>
       </CardFooter>
     </Card>
   );

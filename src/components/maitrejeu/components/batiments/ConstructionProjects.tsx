@@ -1,333 +1,146 @@
 
-import React, { useState } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { ConstructionProject } from '@/components/maitrejeu/types/batiments';
+import React from 'react';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { ScrollArea } from '@/components/ui/scroll-area';
-import { formatCurrency, formatDate } from '@/utils/formatUtils';
-import { Check, X, AlertTriangle, Calendar, Hammer, FileText } from 'lucide-react';
-import { useBatimentsManagement } from '@/components/maitrejeu/hooks/useBatimentsManagement';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { GameDate } from '@/components/maitrejeu/types/common';
+import { CheckIcon, Calendar, User, Coins, HardHat } from 'lucide-react';
+import { useBatimentsManagement } from '../../hooks/useBatimentsManagement';
+import { formatDate } from '@/utils/formatUtils';
+import { formatCurrency } from '@/utils/formatUtils';
+import { GameDate, Season } from '../../types/common';
+import { UnderDevelopmentSection } from '../UnderDevelopmentSection';
 
 interface ConstructionProjectsProps {
   currentYear: number;
-  currentSeason: string;
+  currentSeason: Season;
 }
 
-export const ConstructionProjects: React.FC<ConstructionProjectsProps> = ({ 
-  currentYear, 
-  currentSeason 
+export const ConstructionProjects: React.FC<ConstructionProjectsProps> = ({
+  currentYear,
+  currentSeason
 }) => {
-  const { constructionProjects, updateConstructionProgress, approveConstructionProject } = useBatimentsManagement();
-  const [currentTab, setCurrentTab] = useState('active');
+  const { constructionProjects, approveProject, updateProjectProgress } = useBatimentsManagement();
   
-  // Filtrer les projets en fonction de l'onglet
-  const activeProjects = constructionProjects.filter(
-    project => project.approved && project.progress < 100
-  );
+  if (constructionProjects.length === 0) {
+    return (
+      <UnderDevelopmentSection
+        title="Projets de construction"
+        description="Aucun projet de construction en cours. Utilisez le bouton 'Nouveau projet' pour en créer un."
+      />
+    );
+  }
   
-  const pendingProjects = constructionProjects.filter(
-    project => !project.approved
-  );
-  
-  const completedProjects = constructionProjects.filter(
-    project => project.approved && project.progress >= 100
-  );
-  
-  // Fonction pour vérifier si un projet est en retard
-  const isProjectDelayed = (project: ConstructionProject): boolean => {
-    // Comparer la date actuelle avec la date d'achèvement estimée
-    if (project.estimatedCompletionDate.year < currentYear) {
-      return true;
+  const getRemainingTime = (project: { estimatedCompletionDate: GameDate, progress: number }) => {
+    if (project.progress >= 100) return "Terminé";
+    
+    const currentDate = { year: currentYear, season: currentSeason };
+    const estimatedDate = project.estimatedCompletionDate;
+    
+    if (estimatedDate.year < currentDate.year) return "En retard";
+    if (estimatedDate.year > currentDate.year) {
+      const yearsRemaining = estimatedDate.year - currentDate.year;
+      return yearsRemaining > 1 ? `${yearsRemaining} ans` : "1 an";
     }
     
-    if (project.estimatedCompletionDate.year === currentYear &&
-        seasonToNumber(project.estimatedCompletionDate.season) < seasonToNumber(currentSeason)) {
-      return true;
-    }
+    // Même année, comparer les saisons
+    const seasons = ["SPRING", "SUMMER", "AUTUMN", "WINTER"];
+    const currentSeasonIndex = seasons.indexOf(currentSeason.toString());
+    const estimatedSeasonIndex = seasons.indexOf(estimatedDate.season.toString());
     
-    return false;
-  };
-  
-  // Convertir une saison en nombre pour la comparaison
-  const seasonToNumber = (season: string): number => {
-    const seasons = { 'SPRING': 0, 'SUMMER': 1, 'FALL': 2, 'WINTER': 3 };
-    return seasons[season as keyof typeof seasons] || 0;
-  };
-  
-  // Fonction pour mettre à jour manuellement le progrès d'un projet
-  const handleUpdateProgress = (id: string, newProgress: number) => {
-    if (newProgress >= 0 && newProgress <= 100) {
-      updateConstructionProgress(id, newProgress);
-    }
-  };
-  
-  // Fonction pour approuver un projet
-  const handleApproveProject = (id: string) => {
-    if (window.confirm('Êtes-vous sûr de vouloir approuver ce projet de construction ?')) {
-      approveConstructionProject(id);
-    }
-  };
-  
-  // Fonction pour afficher le temps restant
-  const getRemainingTime = (endDate: GameDate): string => {
-    const remainingYears = endDate.year - currentYear;
+    if (estimatedSeasonIndex < currentSeasonIndex) return "En retard";
+    if (estimatedSeasonIndex === currentSeasonIndex) return "Cette saison";
     
-    if (remainingYears > 1) {
-      return `${remainingYears} ans`;
-    } else if (remainingYears === 1) {
-      const currentSeasonNumber = seasonToNumber(currentSeason);
-      const endSeasonNumber = seasonToNumber(endDate.season);
-      const remainingSeasons = endSeasonNumber - currentSeasonNumber;
-      
-      if (remainingSeasons <= 0) {
-        return `${remainingSeasons + 4} saisons`;
-      } else {
-        return `${remainingSeasons} saisons`;
-      }
-    } else {
-      const currentSeasonNumber = seasonToNumber(currentSeason);
-      const endSeasonNumber = seasonToNumber(endDate.season);
-      const remainingSeasons = endSeasonNumber - currentSeasonNumber;
-      
-      if (remainingSeasons < 0) {
-        return "En retard";
-      } else if (remainingSeasons === 0) {
-        return "Cette saison";
-      } else {
-        return `${remainingSeasons} saisons`;
-      }
-    }
+    const seasonsRemaining = estimatedSeasonIndex - currentSeasonIndex;
+    return seasonsRemaining === 1 ? "Saison prochaine" : `${seasonsRemaining} saisons`;
   };
   
   return (
     <div className="space-y-4">
-      <Tabs value={currentTab} onValueChange={setCurrentTab}>
-        <TabsList className="grid grid-cols-3">
-          <TabsTrigger value="active">
-            En cours <Badge variant="outline" className="ml-2">{activeProjects.length}</Badge>
-          </TabsTrigger>
-          <TabsTrigger value="pending">
-            En attente <Badge variant="outline" className="ml-2">{pendingProjects.length}</Badge>
-          </TabsTrigger>
-          <TabsTrigger value="completed">
-            Terminés <Badge variant="outline" className="ml-2">{completedProjects.length}</Badge>
-          </TabsTrigger>
-        </TabsList>
-        
-        <TabsContent value="active" className="mt-4">
-          <ScrollArea className="h-[400px]">
-            <div className="space-y-4 pr-4">
-              {activeProjects.length > 0 ? (
-                activeProjects.map((project) => (
-                  <Card key={project.id} className={isProjectDelayed(project) ? "border-amber-400" : ""}>
-                    <CardHeader className="pb-2">
-                      <div className="flex justify-between items-start">
-                        <CardTitle className="text-lg">{project.name}</CardTitle>
-                        <Badge variant={isProjectDelayed(project) ? "outline" : "secondary"}>
-                          {isProjectDelayed(project) ? (
-                            <span className="flex items-center text-amber-500">
-                              <AlertTriangle className="h-3 w-3 mr-1" />
-                              En retard
-                            </span>
-                          ) : (
-                            <span>En cours</span>
-                          )}
-                        </Badge>
-                      </div>
-                    </CardHeader>
-                    <CardContent>
-                      <div className="space-y-4">
-                        <div className="flex items-center justify-between text-sm">
-                          <span className="text-muted-foreground">Progrès:</span>
-                          <span className="font-medium">{project.progress}%</span>
-                        </div>
-                        <Progress value={project.progress} className="h-2" />
-                        
-                        <dl className="grid grid-cols-2 gap-x-4 gap-y-2 text-sm">
-                          <div>
-                            <dt className="text-muted-foreground">Emplacement:</dt>
-                            <dd>{project.location}</dd>
-                          </div>
-                          <div>
-                            <dt className="text-muted-foreground">Type:</dt>
-                            <dd className="capitalize">{project.buildingType}</dd>
-                          </div>
-                          <div>
-                            <dt className="text-muted-foreground">Date de début:</dt>
-                            <dd>{formatDate(project.startDate)}</dd>
-                          </div>
-                          <div>
-                            <dt className="text-muted-foreground">Fin estimée:</dt>
-                            <dd className={isProjectDelayed(project) ? "text-amber-500" : ""}>
-                              {formatDate(project.estimatedCompletionDate)}
-                            </dd>
-                          </div>
-                          <div>
-                            <dt className="text-muted-foreground">Coût:</dt>
-                            <dd>{formatCurrency(project.cost)}</dd>
-                          </div>
-                          <div>
-                            <dt className="text-muted-foreground">Travailleurs:</dt>
-                            <dd>{project.workers}</dd>
-                          </div>
-                        </dl>
-                        
-                        <div className="flex items-center justify-between">
-                          <div className="flex items-center gap-1 text-sm">
-                            <Calendar className="h-4 w-4 text-muted-foreground" />
-                            <span>Reste: {getRemainingTime(project.estimatedCompletionDate)}</span>
-                          </div>
-                          <div className="flex gap-2">
-                            <Button size="sm" variant="outline" onClick={() => handleUpdateProgress(project.id, project.progress + 10)}>
-                              <Hammer className="h-4 w-4 mr-1" />
-                              Mise à jour
-                            </Button>
-                          </div>
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
-                ))
-              ) : (
-                <div className="text-center py-8 bg-muted/20 rounded-lg border border-dashed">
-                  <Hammer className="h-12 w-12 mx-auto text-muted-foreground mb-2" />
-                  <p className="text-muted-foreground">
-                    Aucun projet de construction en cours
-                  </p>
+      <div className="flex justify-between items-center">
+        <h3 className="text-lg font-semibold">Projets de construction actifs</h3>
+        <Button size="sm">Nouveau projet</Button>
+      </div>
+      
+      <div className="grid gap-4 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
+        {constructionProjects.map((project) => (
+          <Card key={project.id} className="overflow-hidden">
+            <CardHeader className="pb-3">
+              <div className="flex justify-between items-start">
+                <div>
+                  <CardTitle className="text-base font-semibold">{project.name}</CardTitle>
+                  <CardDescription>{project.location}</CardDescription>
                 </div>
-              )}
-            </div>
-          </ScrollArea>
-        </TabsContent>
-        
-        <TabsContent value="pending" className="mt-4">
-          <ScrollArea className="h-[400px]">
-            <div className="space-y-4 pr-4">
-              {pendingProjects.length > 0 ? (
-                pendingProjects.map((project) => (
-                  <Card key={project.id}>
-                    <CardHeader className="pb-2">
-                      <div className="flex justify-between items-start">
-                        <CardTitle className="text-lg">{project.name}</CardTitle>
-                        <Badge variant="outline">En attente d'approbation</Badge>
-                      </div>
-                    </CardHeader>
-                    <CardContent>
-                      <dl className="grid grid-cols-2 gap-x-4 gap-y-2 text-sm mb-4">
-                        <div>
-                          <dt className="text-muted-foreground">Emplacement:</dt>
-                          <dd>{project.location}</dd>
-                        </div>
-                        <div>
-                          <dt className="text-muted-foreground">Type:</dt>
-                          <dd className="capitalize">{project.buildingType}</dd>
-                        </div>
-                        <div>
-                          <dt className="text-muted-foreground">Coût estimé:</dt>
-                          <dd>{formatCurrency(project.cost)}</dd>
-                        </div>
-                        <div>
-                          <dt className="text-muted-foreground">Achèvement estimé:</dt>
-                          <dd>{project.expectedCompletionYear} AUC</dd>
-                        </div>
-                        <div className="col-span-2">
-                          <dt className="text-muted-foreground">Sponsor:</dt>
-                          <dd>{project.sponsor}</dd>
-                        </div>
-                      </dl>
-                      
-                      <div className="flex justify-end gap-2">
-                        <Button 
-                          variant="outline" 
-                          size="sm"
-                          onClick={() => handleApproveProject(project.id)}
-                        >
-                          <Check className="h-4 w-4 mr-1" />
-                          Approuver
-                        </Button>
-                        <Button 
-                          variant="destructive" 
-                          size="sm"
-                        >
-                          <X className="h-4 w-4 mr-1" />
-                          Rejeter
-                        </Button>
-                      </div>
-                    </CardContent>
-                  </Card>
-                ))
-              ) : (
-                <div className="text-center py-8 bg-muted/20 rounded-lg border border-dashed">
-                  <FileText className="h-12 w-12 mx-auto text-muted-foreground mb-2" />
-                  <p className="text-muted-foreground">
-                    Aucun projet en attente d'approbation
-                  </p>
+                <Badge variant={project.approved ? "default" : "outline"}>
+                  {project.approved ? "Approuvé" : "En attente"}
+                </Badge>
+              </div>
+            </CardHeader>
+            <CardContent className="pt-0 space-y-4">
+              <div className="space-y-2">
+                <div className="flex justify-between text-sm">
+                  <span className="text-muted-foreground">Progression</span>
+                  <span className="font-medium">{project.progress}%</span>
                 </div>
-              )}
-            </div>
-          </ScrollArea>
-        </TabsContent>
-        
-        <TabsContent value="completed" className="mt-4">
-          <ScrollArea className="h-[400px]">
-            <div className="space-y-4 pr-4">
-              {completedProjects.length > 0 ? (
-                completedProjects.map((project) => (
-                  <Card key={project.id}>
-                    <CardHeader className="pb-2">
-                      <div className="flex justify-between items-start">
-                        <CardTitle className="text-lg">{project.name}</CardTitle>
-                        <Badge variant="success">Terminé</Badge>
-                      </div>
-                    </CardHeader>
-                    <CardContent>
-                      <dl className="grid grid-cols-2 gap-x-4 gap-y-2 text-sm">
-                        <div>
-                          <dt className="text-muted-foreground">Emplacement:</dt>
-                          <dd>{project.location}</dd>
-                        </div>
-                        <div>
-                          <dt className="text-muted-foreground">Type:</dt>
-                          <dd className="capitalize">{project.buildingType}</dd>
-                        </div>
-                        <div>
-                          <dt className="text-muted-foreground">Date de début:</dt>
-                          <dd>{formatDate(project.startDate)}</dd>
-                        </div>
-                        <div>
-                          <dt className="text-muted-foreground">Date d'achèvement:</dt>
-                          <dd>{formatDate(project.estimatedCompletionDate)}</dd>
-                        </div>
-                        <div>
-                          <dt className="text-muted-foreground">Coût final:</dt>
-                          <dd>{formatCurrency(project.cost)}</dd>
-                        </div>
-                        <div>
-                          <dt className="text-muted-foreground">Sponsor:</dt>
-                          <dd>{project.sponsor}</dd>
-                        </div>
-                      </dl>
-                    </CardContent>
-                  </Card>
-                ))
-              ) : (
-                <div className="text-center py-8 bg-muted/20 rounded-lg border border-dashed">
-                  <Check className="h-12 w-12 mx-auto text-muted-foreground mb-2" />
-                  <p className="text-muted-foreground">
-                    Aucun projet terminé
-                  </p>
+                <Progress value={project.progress} className="h-2" />
+              </div>
+              
+              <div className="grid grid-cols-2 gap-2 text-sm">
+                <div className="flex items-center">
+                  <Coins className="h-4 w-4 mr-2 text-muted-foreground" />
+                  <span>{formatCurrency(project.cost)}</span>
                 </div>
-              )}
-            </div>
-          </ScrollArea>
-        </TabsContent>
-      </Tabs>
+                <div className="flex items-center">
+                  <Calendar className="h-4 w-4 mr-2 text-muted-foreground" />
+                  <span>{formatDate(project.estimatedCompletionDate)}</span>
+                </div>
+                <div className="flex items-center">
+                  <User className="h-4 w-4 mr-2 text-muted-foreground" />
+                  <span>{project.sponsor}</span>
+                </div>
+                <div className="flex items-center">
+                  <HardHat className="h-4 w-4 mr-2 text-muted-foreground" />
+                  <span>{project.workers} ouvriers</span>
+                </div>
+              </div>
+              
+              <div className="text-sm">
+                <span className="text-muted-foreground">Temps restant: </span>
+                <span className="font-medium">{getRemainingTime(project)}</span>
+              </div>
+              
+              <div className="flex justify-between">
+                {!project.approved ? (
+                  <Button 
+                    className="w-full flex items-center gap-2"
+                    onClick={() => approveProject(project.id)}
+                  >
+                    <CheckIcon className="h-4 w-4" />
+                    Approuver
+                  </Button>
+                ) : (
+                  <>
+                    <Button 
+                      variant="outline" 
+                      className="flex-1"
+                      onClick={() => updateProjectProgress(project.id, Math.min(100, project.progress + 10))}
+                    >
+                      Mettre à jour
+                    </Button>
+                    <Button 
+                      variant="outline" 
+                      className="flex-1 ml-2"
+                      onClick={() => updateProjectProgress(project.id, 100)}
+                    >
+                      Terminer
+                    </Button>
+                  </>
+                )}
+              </div>
+            </CardContent>
+          </Card>
+        ))}
+      </div>
     </div>
   );
 };
-
-export default ConstructionProjects;

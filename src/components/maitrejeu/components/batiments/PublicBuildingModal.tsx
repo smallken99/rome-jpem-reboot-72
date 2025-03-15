@@ -1,61 +1,57 @@
 
-import React, { useEffect, useState } from 'react';
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogFooter
+import React, { useState, useEffect } from 'react';
+import { 
+  Dialog, 
+  DialogContent, 
+  DialogDescription, 
+  DialogFooter, 
+  DialogHeader, 
+  DialogTitle 
 } from '@/components/ui/dialog';
-import { Button } from '@/components/ui/button';
-import { Label } from '@/components/ui/label';
+import { 
+  Form, 
+  FormControl, 
+  FormDescription, 
+  FormField, 
+  FormItem, 
+  FormLabel, 
+  FormMessage 
+} from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
+import { Button } from '@/components/ui/button';
+import { 
+  Select, 
+  SelectContent, 
+  SelectItem, 
+  SelectTrigger, 
+  SelectValue 
 } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
-import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
-import { useMaitreJeu } from '../../context';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { useForm } from 'react-hook-form';
+import * as z from 'zod';
+import { 
+  Building, 
+  BuildingType, 
+  BuildingStatus, 
+  BuildingOwner, 
+  PublicBuildingModalProps, 
+  PublicBuildingData 
+} from '../../types/batiments';
 
-interface PublicBuildingData {
-  id?: string;
-  name: string;
-  type: string;
-  location: string;
-  constructionYear: number;
-  status: 'good' | 'average' | 'poor';
-  description: string;
-  cost: number;
-  maintenanceCost: number;
-  revenue: number;
-  capacity: number;
-  owner: string;
-}
-
-interface PublicBuildingModalProps {
-  isOpen: boolean;
-  onClose: () => void;
-  onSave: (data: PublicBuildingData) => void;
-  building?: PublicBuildingData;
-}
-
-const DEFAULT_BUILDING_DATA: PublicBuildingData = {
-  name: '',
-  type: 'temple',
-  location: 'Forum Romanum',
-  constructionYear: 721,
-  status: 'good',
-  description: '',
-  cost: 0,
-  maintenanceCost: 0,
-  revenue: 0,
-  capacity: 0,
-  owner: 'république'
-};
+const buildingSchema = z.object({
+  name: z.string().min(3, { message: "Le nom doit contenir au moins 3 caractères" }),
+  type: z.string() as z.ZodType<BuildingType>,
+  location: z.string().min(2, { message: "La localisation doit être spécifiée" }),
+  status: z.string() as z.ZodType<BuildingStatus | 'good' | 'poor' | 'average'>,
+  constructionYear: z.number().int().positive(),
+  description: z.string().optional(),
+  cost: z.number().nonnegative(),
+  maintenanceCost: z.number().nonnegative(),
+  revenue: z.number().default(0),
+  capacity: z.number().default(0),
+  owner: z.string() as z.ZodType<BuildingOwner>
+});
 
 export const PublicBuildingModal: React.FC<PublicBuildingModalProps> = ({
   isOpen,
@@ -63,47 +59,77 @@ export const PublicBuildingModal: React.FC<PublicBuildingModalProps> = ({
   onSave,
   building
 }) => {
-  const { currentYear } = useMaitreJeu();
-  const [formData, setFormData] = useState<PublicBuildingData>(DEFAULT_BUILDING_DATA);
-  const [activeTab, setActiveTab] = useState('basic');
+  const form = useForm<z.infer<typeof buildingSchema>>({
+    resolver: zodResolver(buildingSchema),
+    defaultValues: {
+      name: "",
+      type: "temple",
+      location: "",
+      status: "good",
+      constructionYear: new Date().getFullYear() - 50,
+      description: "",
+      cost: 0,
+      maintenanceCost: 0,
+      revenue: 0,
+      capacity: 0,
+      owner: "république"
+    }
+  });
   
   useEffect(() => {
     if (building) {
-      setFormData(building);
+      // Adapter le statut du bâtiment au format attendu par le formulaire
+      let status = building.status;
+      if (status === 'excellent' || status === 'good') status = 'good';
+      else if (status === 'damaged' || status === 'poor') status = 'poor';
+      else if (status === 'ruined') status = 'poor';
+      else if (status === 'under_construction') status = 'good';
+      
+      form.reset({
+        name: building.name,
+        type: building.type,
+        location: building.location,
+        status: status,
+        constructionYear: building.constructionYear,
+        description: building.description,
+        cost: building.cost,
+        maintenanceCost: building.maintenanceCost,
+        revenue: building.revenue,
+        capacity: building.capacity,
+        owner: building.owner
+      });
     } else {
-      setFormData({
-        ...DEFAULT_BUILDING_DATA,
-        constructionYear: currentYear
+      form.reset({
+        name: "",
+        type: "temple",
+        location: "",
+        status: "good",
+        constructionYear: new Date().getFullYear() - 50,
+        description: "",
+        cost: 0,
+        maintenanceCost: 0,
+        revenue: 0,
+        capacity: 0,
+        owner: "république"
       });
     }
-  }, [building, currentYear, isOpen]);
+  }, [building, form]);
   
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    const { name, value } = e.target;
-    setFormData(prev => ({
-      ...prev,
-      [name]: value
-    }));
-  };
-  
-  const handleNumberChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
-    setFormData(prev => ({
-      ...prev,
-      [name]: Number(value)
-    }));
-  };
-  
-  const handleSelectChange = (name: string, value: string) => {
-    setFormData(prev => ({
-      ...prev,
-      [name]: value
-    }));
-  };
-  
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    onSave(formData);
+  const onSubmit = (data: z.infer<typeof buildingSchema>) => {
+    // Convertir le statut "good" ou "poor" en statut BuildingStatus approprié
+    let status: BuildingStatus;
+    if (data.status === 'good') status = 'good';
+    else if (data.status === 'poor') status = 'poor';
+    else if (data.status === 'average') status = 'damaged';
+    else status = data.status as BuildingStatus;
+    
+    const buildingData: PublicBuildingData = {
+      ...data,
+      status: data.status as 'good' | 'poor' | 'average'
+    };
+    
+    onSave(buildingData);
+    onClose();
   };
   
   return (
@@ -111,204 +137,281 @@ export const PublicBuildingModal: React.FC<PublicBuildingModalProps> = ({
       <DialogContent className="sm:max-w-[600px]">
         <DialogHeader>
           <DialogTitle>
-            {building ? `Modifier ${building.name}` : 'Ajouter un bâtiment public'}
+            {building ? "Modifier un bâtiment" : "Ajouter un nouveau bâtiment"}
           </DialogTitle>
+          <DialogDescription>
+            {building 
+              ? "Modifiez les informations du bâtiment existant." 
+              : "Remplissez les informations pour ajouter un nouveau bâtiment public."}
+          </DialogDescription>
         </DialogHeader>
         
-        <form onSubmit={handleSubmit}>
-          <Tabs value={activeTab} onValueChange={setActiveTab}>
-            <TabsList className="grid w-full grid-cols-3">
-              <TabsTrigger value="basic">Informations</TabsTrigger>
-              <TabsTrigger value="financial">Finances</TabsTrigger>
-              <TabsTrigger value="details">Détails</TabsTrigger>
-            </TabsList>
-            
-            <TabsContent value="basic" className="space-y-4 py-4">
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="name">Nom du bâtiment</Label>
-                  <Input
-                    id="name"
-                    name="name"
-                    value={formData.name}
-                    onChange={handleChange}
-                    required
-                  />
-                </div>
-                
-                <div className="space-y-2">
-                  <Label htmlFor="type">Type</Label>
-                  <Select
-                    value={formData.type}
-                    onValueChange={(value) => handleSelectChange('type', value)}
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Sélectionner un type" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="temple">Temple</SelectItem>
-                      <SelectItem value="basilique">Basilique</SelectItem>
-                      <SelectItem value="aqueduc">Aqueduc</SelectItem>
-                      <SelectItem value="thermes">Thermes</SelectItem>
-                      <SelectItem value="forum">Forum</SelectItem>
-                      <SelectItem value="theatre">Théâtre</SelectItem>
-                      <SelectItem value="amphitheatre">Amphithéâtre</SelectItem>
-                      <SelectItem value="marche">Marché</SelectItem>
-                      <SelectItem value="senat">Sénat</SelectItem>
-                      <SelectItem value="autre">Autre</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-              </div>
+        <Form {...form}>
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+            <div className="grid grid-cols-2 gap-4">
+              <FormField
+                control={form.control}
+                name="name"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Nom</FormLabel>
+                    <FormControl>
+                      <Input placeholder="Temple de Jupiter" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
               
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="location">Emplacement</Label>
-                  <Select
-                    value={formData.location}
-                    onValueChange={(value) => handleSelectChange('location', value)}
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Sélectionner un emplacement" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="Forum Romanum">Forum Romanum</SelectItem>
-                      <SelectItem value="Champ de Mars">Champ de Mars</SelectItem>
-                      <SelectItem value="Palatin">Palatin</SelectItem>
-                      <SelectItem value="Capitole">Capitole</SelectItem>
-                      <SelectItem value="Aventin">Aventin</SelectItem>
-                      <SelectItem value="Quirinal">Quirinal</SelectItem>
-                      <SelectItem value="Viminal">Viminal</SelectItem>
-                      <SelectItem value="Esquilin">Esquilin</SelectItem>
-                      <SelectItem value="Caelius">Caelius</SelectItem>
-                      <SelectItem value="Autre">Autre</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-                
-                <div className="space-y-2">
-                  <Label htmlFor="status">État</Label>
-                  <Select
-                    value={formData.status}
-                    onValueChange={(value) => handleSelectChange('status', value as 'good' | 'average' | 'poor')}
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Sélectionner un état" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="good">Bon</SelectItem>
-                      <SelectItem value="average">Moyen</SelectItem>
-                      <SelectItem value="poor">Mauvais</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-              </div>
-              
-              <div className="space-y-2">
-                <Label htmlFor="description">Description</Label>
-                <Textarea
-                  id="description"
-                  name="description"
-                  value={formData.description}
-                  onChange={handleChange}
-                  rows={4}
-                />
-              </div>
-            </TabsContent>
+              <FormField
+                control={form.control}
+                name="type"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Type</FormLabel>
+                    <Select
+                      onValueChange={field.onChange}
+                      defaultValue={field.value}
+                      value={field.value}
+                    >
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Sélectionner un type" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        <SelectItem value="temple">Temple</SelectItem>
+                        <SelectItem value="basilica">Basilique</SelectItem>
+                        <SelectItem value="forum">Forum</SelectItem>
+                        <SelectItem value="market">Marché</SelectItem>
+                        <SelectItem value="aqueduct">Aqueduc</SelectItem>
+                        <SelectItem value="theater">Théâtre</SelectItem>
+                        <SelectItem value="amphitheater">Amphithéâtre</SelectItem>
+                        <SelectItem value="circus">Cirque</SelectItem>
+                        <SelectItem value="bath">Thermes</SelectItem>
+                        <SelectItem value="bridge">Pont</SelectItem>
+                        <SelectItem value="villa">Villa</SelectItem>
+                        <SelectItem value="road">Route</SelectItem>
+                        <SelectItem value="port">Port</SelectItem>
+                        <SelectItem value="warehouse">Entrepôt</SelectItem>
+                        <SelectItem value="other">Autre</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
             
-            <TabsContent value="financial" className="space-y-4 py-4">
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="cost">Coût de construction (as)</Label>
-                  <Input
-                    id="cost"
-                    name="cost"
-                    type="number"
-                    value={formData.cost}
-                    onChange={handleNumberChange}
-                  />
-                </div>
-                
-                <div className="space-y-2">
-                  <Label htmlFor="maintenanceCost">Coût d'entretien par saison (as)</Label>
-                  <Input
-                    id="maintenanceCost"
-                    name="maintenanceCost"
-                    type="number"
-                    value={formData.maintenanceCost}
-                    onChange={handleNumberChange}
-                  />
-                </div>
-              </div>
+            <div className="grid grid-cols-2 gap-4">
+              <FormField
+                control={form.control}
+                name="location"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Emplacement</FormLabel>
+                    <FormControl>
+                      <Input placeholder="Forum Romanum" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
               
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="revenue">Revenu par saison (as)</Label>
-                  <Input
-                    id="revenue"
-                    name="revenue"
-                    type="number"
-                    value={formData.revenue}
-                    onChange={handleNumberChange}
-                  />
-                </div>
-                
-                <div className="space-y-2">
-                  <Label htmlFor="owner">Propriétaire</Label>
-                  <Select
-                    value={formData.owner}
-                    onValueChange={(value) => handleSelectChange('owner', value)}
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Sélectionner un propriétaire" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="république">République</SelectItem>
-                      <SelectItem value="privé">Privé</SelectItem>
-                      <SelectItem value="temple">Temple</SelectItem>
-                      <SelectItem value="collège">Collège</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-              </div>
-            </TabsContent>
+              <FormField
+                control={form.control}
+                name="status"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>État</FormLabel>
+                    <Select
+                      onValueChange={field.onChange}
+                      defaultValue={field.value}
+                      value={field.value}
+                    >
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Sélectionner un état" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        <SelectItem value="good">Bon état</SelectItem>
+                        <SelectItem value="average">État moyen</SelectItem>
+                        <SelectItem value="poor">Mauvais état</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
             
-            <TabsContent value="details" className="space-y-4 py-4">
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="constructionYear">Année de construction (AUC)</Label>
-                  <Input
-                    id="constructionYear"
-                    name="constructionYear"
-                    type="number"
-                    value={formData.constructionYear}
-                    onChange={handleNumberChange}
-                  />
-                </div>
-                
-                <div className="space-y-2">
-                  <Label htmlFor="capacity">Capacité (personnes)</Label>
-                  <Input
-                    id="capacity"
-                    name="capacity"
-                    type="number"
-                    value={formData.capacity}
-                    onChange={handleNumberChange}
-                  />
-                </div>
-              </div>
-            </TabsContent>
-          </Tabs>
-          
-          <DialogFooter className="mt-6">
-            <Button type="button" variant="outline" onClick={onClose}>
-              Annuler
-            </Button>
-            <Button type="submit">
-              {building ? 'Mettre à jour' : 'Ajouter'}
-            </Button>
-          </DialogFooter>
-        </form>
+            <div className="grid grid-cols-3 gap-4">
+              <FormField
+                control={form.control}
+                name="constructionYear"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Année de construction</FormLabel>
+                    <FormControl>
+                      <Input 
+                        type="number" 
+                        {...field}
+                        onChange={e => field.onChange(parseInt(e.target.value))} 
+                      />
+                    </FormControl>
+                    <FormDescription>
+                      AUC
+                    </FormDescription>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              
+              <FormField
+                control={form.control}
+                name="cost"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Coût de construction</FormLabel>
+                    <FormControl>
+                      <Input 
+                        type="number" 
+                        {...field}
+                        onChange={e => field.onChange(parseFloat(e.target.value))} 
+                      />
+                    </FormControl>
+                    <FormDescription>
+                      Deniers
+                    </FormDescription>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              
+              <FormField
+                control={form.control}
+                name="owner"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Propriétaire</FormLabel>
+                    <Select
+                      onValueChange={field.onChange}
+                      defaultValue={field.value}
+                      value={field.value}
+                    >
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Sélectionner un propriétaire" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        <SelectItem value="république">République</SelectItem>
+                        <SelectItem value="sénat">Sénat</SelectItem>
+                        <SelectItem value="censeur">Censeur</SelectItem>
+                        <SelectItem value="édile">Édile</SelectItem>
+                        <SelectItem value="private">Privé</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+            
+            <div className="grid grid-cols-3 gap-4">
+              <FormField
+                control={form.control}
+                name="maintenanceCost"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Coût d'entretien</FormLabel>
+                    <FormControl>
+                      <Input 
+                        type="number" 
+                        {...field}
+                        onChange={e => field.onChange(parseFloat(e.target.value))} 
+                      />
+                    </FormControl>
+                    <FormDescription>
+                      Deniers par saison
+                    </FormDescription>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              
+              <FormField
+                control={form.control}
+                name="revenue"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Revenus</FormLabel>
+                    <FormControl>
+                      <Input 
+                        type="number" 
+                        {...field}
+                        onChange={e => field.onChange(parseFloat(e.target.value))} 
+                      />
+                    </FormControl>
+                    <FormDescription>
+                      Deniers par saison
+                    </FormDescription>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              
+              <FormField
+                control={form.control}
+                name="capacity"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Capacité</FormLabel>
+                    <FormControl>
+                      <Input 
+                        type="number" 
+                        {...field}
+                        onChange={e => field.onChange(parseInt(e.target.value))} 
+                      />
+                    </FormControl>
+                    <FormDescription>
+                      Personnes
+                    </FormDescription>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+            
+            <FormField
+              control={form.control}
+              name="description"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Description</FormLabel>
+                  <FormControl>
+                    <Textarea 
+                      placeholder="Description du bâtiment et de son importance pour Rome"
+                      className="resize-none h-20"
+                      {...field} 
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            
+            <DialogFooter>
+              <Button variant="outline" type="button" onClick={onClose}>
+                Annuler
+              </Button>
+              <Button type="submit">
+                {building ? "Mettre à jour" : "Ajouter"}
+              </Button>
+            </DialogFooter>
+          </form>
+        </Form>
       </DialogContent>
     </Dialog>
   );
