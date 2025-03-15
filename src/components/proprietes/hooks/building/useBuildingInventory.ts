@@ -61,7 +61,7 @@ export function useBuildingInventory() {
   };
 
   // Function to remove a building from inventory
-  const removeBuilding = (buildingId: number) => {
+  const removeBuilding = (buildingId: number | string) => {
     setOwnedBuildings(prev => prev.filter(b => b.id !== buildingId));
   };
 
@@ -76,7 +76,7 @@ export function useBuildingInventory() {
 
   // Function to update a specific property of a building
   const updateBuildingProperty = <K extends keyof OwnedBuilding>(
-    buildingId: number, 
+    buildingId: number | string, 
     property: K, 
     value: OwnedBuilding[K]
   ) => {
@@ -89,11 +89,35 @@ export function useBuildingInventory() {
     );
   };
 
+  // Add the missing methods for compatibility
+  const toggleBuildingMaintenance = (buildingId: number | string) => {
+    const building = ownedBuildings.find(b => b.id === buildingId);
+    if (building) {
+      updateBuildingProperty(buildingId, 'maintenanceEnabled', !building.maintenanceEnabled);
+    }
+  };
+
+  const performBuildingMaintenance = (buildingId: number | string) => {
+    const building = ownedBuildings.find(b => b.id === buildingId);
+    if (building) {
+      updateBuildingProperty(buildingId, 'condition', Math.min(100, building.condition + 20));
+      updateBuildingProperty(buildingId, 'lastMaintenance', new Date());
+      return true;
+    }
+    return false;
+  };
+
+  // Alias buildings to ownedBuildings for compatibility
+  const buildings = ownedBuildings;
+
   return {
     ownedBuildings,
+    buildings,  // Alias for compatibility
     addBuilding,
     removeBuilding,
     updateBuilding,
-    updateBuildingProperty
+    updateBuildingProperty,
+    toggleBuildingMaintenance,
+    performBuildingMaintenance
   };
 }

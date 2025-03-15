@@ -11,7 +11,7 @@ import {
 } from './types/profitabilityTypes';
 
 // Données fictives pour le développement
-const generateMockData = (): ProfitabilityData => {
+const generateMockData = (): Omit<ProfitabilityData, 'activeView' | 'setActiveView'> => {
   // Propriétés rentables
   const profitableProperties: PropertyProfitData[] = [
     { id: 1, name: 'Villa Pompei', type: 'Résidence de luxe', revenue: 12000, expenses: 4500, profit: 7500, profitMargin: 62.5, roi: 12.5 },
@@ -89,9 +89,7 @@ const generateMockData = (): ProfitabilityData => {
     revenueExpenseData,
     revenueSources,
     propertyTypes,
-    optimizationRecommendations,
-    activeView: 'monthly' as ChartViewType,
-    setActiveView: () => {}
+    optimizationRecommendations
   };
 };
 

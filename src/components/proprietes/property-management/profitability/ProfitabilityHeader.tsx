@@ -1,13 +1,8 @@
 
-import { useState } from 'react';
+import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Calendar, ChartBar, TrendingUp } from 'lucide-react';
-import { ChartViewType } from './types/profitabilityTypes';
-
-interface ProfitabilityHeaderProps {
-  activeView: ChartViewType;
-  setActiveView: (view: ChartViewType) => void;
-}
+import { ProfitabilityHeaderProps } from './types/profitabilityTypes';
 
 export const ProfitabilityHeader: React.FC<ProfitabilityHeaderProps> = ({ 
   activeView, 
@@ -43,9 +38,9 @@ export const ProfitabilityHeader: React.FC<ProfitabilityHeaderProps> = ({
             Trimestriel
           </Button>
           <Button 
-            variant={activeView === 'annual' ? 'default' : 'ghost'} 
+            variant={activeView === 'yearly' || activeView === 'annual' ? 'default' : 'ghost'} 
             size="sm"
-            onClick={() => setActiveView('annual')}
+            onClick={() => setActiveView('yearly')}
             className="rounded-l-none"
           >
             <TrendingUp className="h-4 w-4 mr-1" />

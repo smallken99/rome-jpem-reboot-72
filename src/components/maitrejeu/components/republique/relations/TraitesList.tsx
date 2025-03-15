@@ -12,7 +12,7 @@ export const TraitesList: React.FC<TraitesListProps> = ({ traites, searchTerm, f
     // Filtre de recherche
     if (
       searchTerm &&
-      !traite.title.toLowerCase().includes(searchTerm.toLowerCase()) &&
+      !traite.name.toLowerCase().includes(searchTerm.toLowerCase()) &&
       !traite.parties.some(party => party.toLowerCase().includes(searchTerm.toLowerCase())) &&
       !traite.type.toLowerCase().includes(searchTerm.toLowerCase())
     ) {
@@ -25,11 +25,11 @@ export const TraitesList: React.FC<TraitesListProps> = ({ traites, searchTerm, f
     }
     
     // Filtre de date de création
-    if (filters.dateFrom && new Date(traite.dateCreated) < new Date(filters.dateFrom)) {
+    if (filters.dateFrom && new Date(traite.dateCreated || traite.dateCreation || '') < new Date(filters.dateFrom)) {
       return false;
     }
     
-    if (filters.dateTo && new Date(traite.dateCreated) > new Date(filters.dateTo)) {
+    if (filters.dateTo && new Date(traite.dateCreated || traite.dateCreation || '') > new Date(filters.dateTo)) {
       return false;
     }
     
@@ -107,10 +107,10 @@ export const TraitesList: React.FC<TraitesListProps> = ({ traites, searchTerm, f
           ) : (
             filteredTraites.map(traite => (
               <TableRow key={traite.id}>
-                <TableCell className="font-medium">{traite.title}</TableCell>
+                <TableCell className="font-medium">{traite.name}</TableCell>
                 <TableCell>{traite.parties.join(', ')}</TableCell>
                 <TableCell>{getTypeText(traite.type)}</TableCell>
-                <TableCell>{traite.date || traite.dateCreated}</TableCell>
+                <TableCell>{traite.date || traite.dateSignature || traite.dateCreated}</TableCell>
                 <TableCell>
                   <Badge className={getStatusColor(traite.status)}>{getStatusText(traite.status)}</Badge>
                 </TableCell>

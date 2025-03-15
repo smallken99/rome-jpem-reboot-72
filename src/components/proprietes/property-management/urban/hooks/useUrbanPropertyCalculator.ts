@@ -6,8 +6,8 @@ import { useBuildingInventory } from '@/components/proprietes/hooks/building/use
 import { toast } from 'sonner';
 
 export const useUrbanPropertyCalculator = () => {
+  const { ownedBuildings, buildings, addBuilding } = useBuildingInventory();
   const { sellBuilding, calculateBuildingValue, calculateBuildingValueById } = useBuildingSale();
-  const { buildings, addBuilding } = useBuildingInventory();
   
   const urbanBuildings = buildings.filter(b => b.buildingType === 'urban');
 
@@ -19,17 +19,21 @@ export const useUrbanPropertyCalculator = () => {
   ): boolean => {
     try {
       // Générer un ID unique 
-      const newId = `${buildingType}-${Date.now()}`;
+      const newId = Date.now();
       
       // Ajouter le bâtiment à l'inventaire
       addBuilding({
         id: newId,
+        buildingId,
         name: customName || `Bâtiment ${buildingType} à ${location}`,
         buildingType,
         location,
         status: 'good',
-        maintenanceNeeded: false,
-        lastMaintenance: new Date().toISOString()
+        maintenanceEnabled: true,
+        maintenanceCost: 1000, // Default value
+        slaves: 0,
+        condition: 100,
+        purchaseDate: new Date()
       });
       
       toast.success(`Propriété ${buildingType} ajoutée avec succès!`);

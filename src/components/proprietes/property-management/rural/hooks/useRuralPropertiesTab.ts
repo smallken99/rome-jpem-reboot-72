@@ -4,7 +4,7 @@ import { useBuildingInventory } from '@/components/proprietes/hooks/building/use
 import { useBuildingSale } from '@/components/proprietes/hooks/building/useBuildingSale';
 import { useRuralPropertyCalculator } from '@/components/proprietes/property-management/hooks/useRuralPropertyCalculator';
 import { toast } from 'sonner';
-import { BuildingPurchaseOptions } from '@/components/proprietes/hooks/building/types';
+import { BuildingPurchaseOptions, OwnedBuilding } from '@/components/proprietes/hooks/building/types';
 
 export const useRuralPropertiesTab = () => {
   const [selectedPropertyId, setSelectedPropertyId] = useState<string>('');
@@ -13,7 +13,7 @@ export const useRuralPropertiesTab = () => {
   const [purchaseDialogOpen, setPurchaseDialogOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
-  const { buildings, addBuilding, toggleBuildingMaintenance, performBuildingMaintenance } = useBuildingInventory();
+  const { ownedBuildings, buildings, addBuilding, toggleBuildingMaintenance, performBuildingMaintenance } = useBuildingInventory();
   const { sellBuilding, calculateBuildingValue } = useBuildingSale();
   
   // Récupérer les propriétés rurales
@@ -31,13 +31,34 @@ export const useRuralPropertiesTab = () => {
   
   // Liste des propriétés rurales disponibles (simulée)
   const ruralProperties = {
-    'ferme': { name: 'Ferme', description: 'Un domaine agricole' },
-    'vignoble': { name: 'Vignoble', description: 'Produisant du vin' },
-    'oliveraie': { name: 'Oliveraie', description: 'Produisant de l\'huile d\'olive' }
+    'ferme': { 
+      name: 'Ferme', 
+      description: 'Un domaine agricole',
+      advantages: ['Production de céréales', 'Stabilité'],
+      initialCost: 5000,
+      maintenanceCost: 500,
+      prestige: 1
+    },
+    'vignoble': { 
+      name: 'Vignoble', 
+      description: 'Produisant du vin',
+      advantages: ['Production de vin', 'Prestige'],
+      initialCost: 8000,
+      maintenanceCost: 800,
+      prestige: 2
+    },
+    'oliveraie': { 
+      name: 'Oliveraie', 
+      description: 'Produisant de l\'huile d\'olive',
+      advantages: ['Production d\'huile', 'Commerce'],
+      initialCost: 7000,
+      maintenanceCost: 700,
+      prestige: 2
+    }
   };
 
   // Gérer l'achat d'une propriété rurale
-  const handlePurchase = async (options: BuildingPurchaseOptions) => {
+  const handlePurchase = async (options: BuildingPurchaseOptions): Promise<boolean> => {
     setIsLoading(true);
     try {
       // Simuler l'achat
@@ -46,14 +67,18 @@ export const useRuralPropertiesTab = () => {
       if (success) {
         // Ajouter la propriété au bâtiment
         addBuilding({
-          id: options.buildingId,
+          id: Date.now(),
+          buildingId: options.buildingId,
           name: options.customName || ruralProperties[options.buildingId]?.name || 'Propriété rurale',
           buildingType: 'rural',
           location: options.location,
           size: propertySize,
           status: 'good',
-          maintenanceNeeded: false,
-          lastMaintenance: new Date().toISOString()
+          maintenanceEnabled: true,
+          maintenanceCost: options.maintenanceCost,
+          slaves: options.slaves || 0,
+          condition: 100,
+          purchaseDate: new Date()
         });
         
         toast.success(`Propriété rurale achetée avec succès !`);
@@ -73,7 +98,7 @@ export const useRuralPropertiesTab = () => {
   };
 
   // Gérer la vente d'une propriété
-  const handleSell = (buildingId: string) => {
+  const handleSell = (buildingId: string | number) => {
     if (sellBuilding(buildingId)) {
       toast.success("Propriété vendue avec succès !");
     } else {
@@ -82,13 +107,13 @@ export const useRuralPropertiesTab = () => {
   };
 
   // Gérer l'activation/désactivation de la maintenance
-  const handleToggleMaintenance = (buildingId: string) => {
+  const handleToggleMaintenance = (buildingId: string | number) => {
     toggleBuildingMaintenance(buildingId);
     toast.info("Statut de maintenance mis à jour.");
   };
 
   // Gérer la réalisation de la maintenance
-  const handlePerformMaintenance = (buildingId: string) => {
+  const handlePerformMaintenance = (buildingId: string | number) => {
     if (performBuildingMaintenance(buildingId)) {
       toast.success("Maintenance effectuée avec succès !");
     } else {
@@ -96,12 +121,24 @@ export const useRuralPropertiesTab = () => {
     }
   };
 
+  // Add any missing properties that might be used by RuralPropertiesTab
+  const selectedBuildingId = selectedPropertyId;
+  const setSelectedBuildingId = setSelectedPropertyId;
+  const isPurchaseDialogOpen = purchaseDialogOpen;
+  const setIsPurchaseDialogOpen = setPurchaseDialogOpen;
+  const availableSlaves = 10; // Example value
+  const assignSlaves = (buildingId: string | number, slaveCount: number) => {
+    // Implementation for assigning slaves
+    console.log(`Assigning ${slaveCount} slaves to building ${buildingId}`);
+    return true;
+  };
+
   return {
     buildings: ownedRuralProperties,
-    selectedBuildingId: selectedPropertyId,
-    setSelectedBuildingId: setSelectedPropertyId,
-    isPurchaseDialogOpen: purchaseDialogOpen,
-    setIsPurchaseDialogOpen: setPurchaseDialogOpen,
+    selectedBuildingId,
+    setSelectedBuildingId,
+    isPurchaseDialogOpen,
+    setIsPurchaseDialogOpen,
     isLoading,
     propertySize,
     setPropertySize,
@@ -112,9 +149,16 @@ export const useRuralPropertiesTab = () => {
     ruralProperties,
     balance,
     handlePurchase,
-    handleSell,
+    sellBuilding: handleSell,
     toggleMaintenance: handleToggleMaintenance,
     performMaintenance: handlePerformMaintenance,
-    calculateBuildingValue
+    calculateBuildingValue,
+    // For compatibility with RuralPropertiesTab
+    selectedPropertyId,
+    setSelectedPropertyId,
+    purchaseDialogOpen,
+    setPurchaseDialogOpen,
+    assignSlaves,
+    availableSlaves
   };
 };

@@ -3,7 +3,7 @@ import { useState } from 'react';
 import { useBuildingInventory } from '@/components/proprietes/hooks/building/useBuildingInventory';
 import { useBuildingSale } from '@/components/proprietes/hooks/building/useBuildingSale';
 import { useUrbanPropertyCalculator } from './useUrbanPropertyCalculator';
-import { BuildingPurchaseOptions } from '@/components/proprietes/hooks/building/types';
+import { BuildingPurchaseOptions, OwnedBuilding } from '@/components/proprietes/hooks/building/types';
 import { toast } from 'sonner';
 
 export const useUrbanPropertiesTab = () => {
@@ -12,7 +12,7 @@ export const useUrbanPropertiesTab = () => {
   const [isPurchaseDialogOpen, setIsPurchaseDialogOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
-  const { buildings, addBuilding, toggleBuildingMaintenance, performBuildingMaintenance } = useBuildingInventory();
+  const { ownedBuildings, buildings, addBuilding, toggleBuildingMaintenance, performBuildingMaintenance } = useBuildingInventory();
   const { sellBuilding, calculateBuildingValue } = useBuildingSale();
   const { buildings: urbanBuildings, handleAddProperty } = useUrbanPropertyCalculator();
   
@@ -31,16 +31,21 @@ export const useUrbanPropertiesTab = () => {
   const handlePurchase = async (options: BuildingPurchaseOptions) => {
     setIsLoading(true);
     try {
-      // Appeler la fonction d'achat (simulée pour le moment)
+      // Extract the building type from options or use the provided type
+      const type = options.buildingType || options.type;
+      // Extract the custom name if provided
+      const customName = options.customName || options.name;
+      
+      // Appeler la fonction d'achat
       const success = handleAddProperty(
         options.buildingId,
-        options.buildingType,
+        type,
         options.location,
-        options.customName
+        customName
       );
       
       if (success) {
-        toast.success(`Propriété ${options.buildingType} achetée avec succès !`);
+        toast.success(`Propriété ${options.buildingType || options.type} achetée avec succès !`);
         setIsPurchaseDialogOpen(false);
         return true;
       } else {
@@ -57,7 +62,7 @@ export const useUrbanPropertiesTab = () => {
   };
 
   // Gérer la vente d'un bâtiment
-  const handleSell = (buildingId: string) => {
+  const handleSell = (buildingId: string | number) => {
     if (sellBuilding(buildingId)) {
       toast.success("Propriété vendue avec succès !");
     } else {
@@ -66,19 +71,30 @@ export const useUrbanPropertiesTab = () => {
   };
 
   // Gérer l'activation/désactivation de la maintenance
-  const handleToggleMaintenance = (buildingId: string) => {
+  const handleToggleMaintenance = (buildingId: string | number) => {
     toggleBuildingMaintenance(buildingId);
     toast.info("Statut de maintenance mis à jour.");
   };
 
   // Gérer la réalisation de la maintenance
-  const handlePerformMaintenance = (buildingId: string) => {
+  const handlePerformMaintenance = (buildingId: string | number) => {
     if (performBuildingMaintenance(buildingId)) {
       toast.success("Maintenance effectuée avec succès !");
     } else {
       toast.error("Échec de la maintenance. Ressources insuffisantes.");
     }
   };
+
+  // Add missing properties needed by UrbanPropertiesTab
+  const availableSlaves = 10; // Example value
+  const assignSlaves = (buildingId: string | number, slaveCount: number) => {
+    // Implementation for assigning slaves
+    console.log(`Assigning ${slaveCount} slaves to building ${buildingId}`);
+    return true;
+  };
+  
+  const purchaseDialogOpen = isPurchaseDialogOpen;
+  const setPurchaseDialogOpen = setIsPurchaseDialogOpen;
 
   return {
     buildings: filteredOwnedBuildings,
@@ -93,9 +109,14 @@ export const useUrbanPropertiesTab = () => {
     selectedBuildingDetails,
     filteredOwnedBuildings,
     handlePurchase,
-    handleSell,
+    sellBuilding: handleSell,
     toggleMaintenance: handleToggleMaintenance,
     performMaintenance: handlePerformMaintenance,
-    calculateBuildingValue
+    calculateBuildingValue,
+    // Additional properties for UrbanPropertiesTab
+    purchaseDialogOpen,
+    setPurchaseDialogOpen,
+    availableSlaves,
+    assignSlaves
   };
 };

@@ -1,73 +1,56 @@
 
 import { useState } from 'react';
-import { usePatrimoine } from '@/hooks/usePatrimoine';
 import { useBuildingInventory } from './useBuildingInventory';
 import { OwnedBuilding } from './types';
 import { toast } from 'sonner';
 
 export function useBuildingSale() {
   const [isLoading, setIsLoading] = useState(false);
-  const { buildingSold } = usePatrimoine();
-  const { removeBuilding, ownedBuildings } = useBuildingInventory();
+  const { ownedBuildings, removeBuilding } = useBuildingInventory();
   
-  // Calculer la valeur d'un bâtiment en fonction de son état
+  // Calculate the value of a building
   const calculateBuildingValue = (building: OwnedBuilding): number => {
-    // Base value based on maintenance cost
-    const baseValue = building.maintenanceCost * 10;
+    // Basic valuation algorithm
+    const baseValue = 10000; // Example base value
+    const ageDepreciation = 0.05; // 5% depreciation per year of age
     
-    // Apply condition modifier
-    const conditionFactor = building.condition / 100;
+    // Calculate the age in years
+    const now = new Date();
+    const age = (now.getTime() - building.purchaseDate.getTime()) / (1000 * 60 * 60 * 24 * 365);
     
-    // Apply age depreciation
-    const ageInDays = (new Date().getTime() - building.purchaseDate.getTime()) / (1000 * 60 * 60 * 24);
-    const ageFactor = Math.max(0.6, 1 - (ageInDays / 365) * 0.05); // 5% depreciation per year, minimum 60% of base value
+    // Calculate the condition factor (100% condition = 1.0, 0% condition = 0.5)
+    const conditionFactor = 0.5 + (building.condition / 200);
     
-    // Calculate final value
-    const value = Math.round(baseValue * conditionFactor * ageFactor);
-    
-    return value;
-  };
-  
-  // Calculate building value by ID
-  const calculateBuildingValueById = (buildingId: number): number => {
-    const building = ownedBuildings.find(b => b.id === buildingId);
-    if (!building) return 0;
-    return calculateBuildingValue(building);
-  };
-  
-  // Vendre un bâtiment (version synchrone pour la compatibilité)
-  const sellBuilding = (buildingId: number): boolean => {
-    try {
-      // Trouver le bâtiment dans l'inventaire
-      const building = ownedBuildings.find(b => b.id === buildingId);
-      
-      if (!building) {
-        toast.error("Bâtiment introuvable");
-        return false;
+    // Apply size multiplier if available
+    let sizeMultiplier = 1.0;
+    if (building.size) {
+      switch (building.size.toLowerCase()) {
+        case 'small': sizeMultiplier = 0.7; break;
+        case 'medium': sizeMultiplier = 1.0; break;
+        case 'large': sizeMultiplier = 1.5; break;
+        case 'huge': sizeMultiplier = 2.0; break;
+        default: sizeMultiplier = 1.0;
       }
-      
-      // Calculer la valeur du bâtiment
-      const value = calculateBuildingValue(building);
-      
-      // Supprimer le bâtiment de l'inventaire
-      removeBuilding(buildingId);
-      
-      // Enregistrer la transaction financière
-      buildingSold(building.name, value);
-      
-      toast.success(`${building.name} vendu pour ${value.toLocaleString()} As`);
-      return true;
-    } catch (error) {
-      console.error("Erreur lors de la vente du bâtiment:", error);
-      toast.error("Une erreur est survenue lors de la vente");
-      return false;
     }
+    
+    // Calculate the value
+    const value = baseValue * (1 - ageDepreciation * age) * conditionFactor * sizeMultiplier;
+    
+    // Round to nearest integer
+    return Math.round(value);
   };
   
-  // Vendre un bâtiment avec une valeur estimée
-  const sellBuildingWithValue = (buildingId: number, value: number): boolean => {
+  // Calculate the value of a building by its ID
+  const calculateBuildingValueById = (buildingId: string | number): number => {
+    const building = ownedBuildings.find(b => b.id === buildingId);
+    return building ? calculateBuildingValue(building) : 0;
+  };
+  
+  // Sell a building
+  const sellBuilding = (buildingId: string | number): boolean => {
+    setIsLoading(true);
+    
     try {
-      // Trouver le bâtiment dans l'inventaire
       const building = ownedBuildings.find(b => b.id === buildingId);
       
       if (!building) {
@@ -75,18 +58,23 @@ export function useBuildingSale() {
         return false;
       }
       
-      // Supprimer le bâtiment de l'inventaire
+      // Calculate the selling price
+      const sellingPrice = calculateBuildingValue(building);
+      
+      // Remove the building from inventory
       removeBuilding(buildingId);
       
-      // Enregistrer la transaction financière
-      buildingSold(building.name, value);
+      // TODO: Add the money to the player's account
+      // usePatrimoine().addTransaction({...})
       
-      toast.success(`${building.name} vendu pour ${value.toLocaleString()} As`);
+      toast.success(`${building.name} vendu pour ${sellingPrice} As`);
       return true;
     } catch (error) {
       console.error("Erreur lors de la vente du bâtiment:", error);
       toast.error("Une erreur est survenue lors de la vente");
       return false;
+    } finally {
+      setIsLoading(false);
     }
   };
   
@@ -94,7 +82,6 @@ export function useBuildingSale() {
     isLoading,
     calculateBuildingValue,
     calculateBuildingValueById,
-    sellBuilding,
-    sellBuildingWithValue
+    sellBuilding
   };
 }

@@ -1,6 +1,6 @@
 
 export interface OwnedBuilding {
-  id: number;
+  id: number | string;
   buildingId: string;
   buildingType: "urban" | "rural" | "religious" | "public";
   name: string;
@@ -11,6 +11,8 @@ export interface OwnedBuilding {
   condition: number;
   purchaseDate: Date;
   lastMaintenance?: Date;
+  size?: string;
+  status?: string;
 }
 
 export interface BuildingPurchaseOptions {
@@ -21,6 +23,8 @@ export interface BuildingPurchaseOptions {
   initialCost: number;
   maintenanceCost: number;
   slaves?: number;
+  customName?: string; // Added this for the hooks that use it
+  buildingType?: "urban" | "rural" | "religious" | "public"; // Alternative to type
 }
 
 export interface BuildingDescription {
@@ -34,12 +38,15 @@ export interface BuildingDescription {
   requiredSlaves?: number;
   prestigeBonus?: number;
   size?: "small" | "medium" | "large";
+  advantages: string[];  // Required by some code
+  initialCost: number;   // Required by some code
+  prestige: number;      // Required by some code
 }
 
 export interface OwnedBuildingProps {
   building: OwnedBuilding;
-  onMaintenance: (id: number) => void;
-  onSell: (id: number) => void;
-  onRename?: (id: number, newName: string) => void;
+  onMaintenance: (id: number | string) => void;
+  onSell: (id: number | string) => void;
+  onRename?: (id: number | string, newName: string) => void;
   estimatedValue: number;
 }
