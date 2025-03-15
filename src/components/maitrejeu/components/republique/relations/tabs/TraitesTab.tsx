@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { TraitesList } from '../TraitesList';
+import TraitesList from '../TraitesList';
 import { ActionsPanel, ActionItem } from '@/components/ui-custom/ActionsPanel';
 import { Plus } from 'lucide-react';
 import { traitesMock } from '../data/traites';

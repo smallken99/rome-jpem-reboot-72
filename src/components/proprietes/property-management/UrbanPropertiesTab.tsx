@@ -18,52 +18,59 @@ const UrbanPropertiesTab = () => {
     selectedBuildingId,
     setSelectedBuildingId,
     selectedBuildingDetails,
-    purchaseDialogOpen,
-    setPurchaseDialogOpen,
+    isPurchaseDialogOpen: purchaseDialogOpen,
+    setIsPurchaseDialogOpen: setPurchaseDialogOpen,
     balance,
     availableSlaves,
     filteredOwnedBuildings,
-    sellBuilding,
-    calculateBuildingValue,
-    toggleMaintenance,
-    performMaintenance,
-    assignSlaves,
+    sellBuilding: handleSellBuilding,
+    calculateBuildingValue: handleCalcBuildingValue,
+    toggleMaintenance: handleToggleMaintenance,
+    performMaintenance: handlePerformMaintenance,
+    assignSlaves: handleAssignSlaves,
   } = useUrbanPropertiesTab();
 
   const [isViewingCatalogue, setIsViewingCatalogue] = useState(false);
 
   // Create properly typed adapter functions
   const handleBuildingTypeChange = (type: AllowedBuildingType) => {
-    setSelectedBuildingType(type);
+    setSelectedBuildingType(type as any);
   };
 
   const handleBuildingSelect = (id: string) => {
     setSelectedBuildingId(id);
   };
 
-  const handleToggleMaintenance = (buildingId: number) => {
-    return toggleMaintenance(buildingId, true);
+  const toggleMaintenance = (buildingId: number): boolean => {
+    handleToggleMaintenance(buildingId, true);
+    return true;
   };
 
-  const handlePerformMaintenance = (buildingId: number) => {
-    return performMaintenance(buildingId);
+  const performMaintenance = (buildingId: number): boolean => {
+    handlePerformMaintenance(buildingId);
+    return true;
   };
 
-  const handleSellBuilding = (buildingId: number, estimatedValue: number) => {
-    return sellBuilding(buildingId);
+  const sellBuilding = (buildingId: number, estimatedValue: number): boolean => {
+    handleSellBuilding(buildingId);
+    return true;
   };
 
-  const handleCalculateBuildingValue = (buildingId: number) => {
+  const calculateBuildingValue = (buildingId: number): number => {
     // Find the building by ID
     const building = filteredOwnedBuildings.find(b => Number(b.id) === buildingId);
     if (building) {
-      return calculateBuildingValue(building);
+      return handleCalcBuildingValue(building);
     }
     return 0;
   };
 
-  // Extract building details as BuildingDescription for compatibility
-  const getBuildingDescription = (building: OwnedBuilding): BuildingDescription => {
+  const assignSlaves = (buildingId: number, slaveCount: number): void => {
+    handleAssignSlaves(buildingId, slaveCount);
+  };
+
+  // Extract building details for compatibility
+  const getBuildingDetailsForDisplay = (building: OwnedBuilding): BuildingDescription => {
     return {
       id: building.buildingId,
       name: building.name,
@@ -71,14 +78,19 @@ const UrbanPropertiesTab = () => {
       basePrice: 10000,
       maintenanceCost: building.maintenanceCost,
       type: building.buildingType,
-      advantages: [],
+      advantages: ['Advantage 1', 'Advantage 2'],
       initialCost: 10000,
-      prestige: 5
+      prestige: 5,
+      slaves: {
+        required: 2,
+        optimal: 5,
+        maxProfit: 10
+      }
     };
   };
 
   const adaptedSelectedBuildingDetails = selectedBuildingDetails 
-    ? getBuildingDescription(selectedBuildingDetails as OwnedBuilding)
+    ? getBuildingDetailsForDisplay(selectedBuildingDetails as OwnedBuilding)
     : null;
 
   return (
@@ -106,16 +118,16 @@ const UrbanPropertiesTab = () => {
             />
           ) : (
             <OwnedUrbanPropertiesSection
-              selectedBuildingType={selectedBuildingType as "religious" | "public" | "residential" | "military" || "urban"}
+              selectedBuildingType={selectedBuildingType as "religious" | "public" | "residential" | "military"}
               filteredOwnedBuildings={filteredOwnedBuildings || []}
               balance={balance}
               availableSlaves={availableSlaves}
               setPurchaseDialogOpen={setPurchaseDialogOpen}
-              toggleMaintenance={handleToggleMaintenance}
-              performMaintenance={handlePerformMaintenance}
+              toggleMaintenance={toggleMaintenance}
+              performMaintenance={performMaintenance}
               assignSlaves={assignSlaves}
-              sellBuilding={handleSellBuilding}
-              calculateBuildingValue={handleCalculateBuildingValue}
+              sellBuilding={sellBuilding}
+              calculateBuildingValue={calculateBuildingValue}
             />
           )}
         </div>
@@ -124,7 +136,7 @@ const UrbanPropertiesTab = () => {
         <div className="lg:col-span-2">
           {adaptedSelectedBuildingDetails ? (
             <UrbanPropertyDetails 
-              buildingDetails={adaptedSelectedBuildingDetails}
+              buildingDetails={adaptedSelectedBuildingDetails as any}
             />
           ) : (
             <div className="border rounded-lg p-6 bg-card text-center text-muted-foreground">

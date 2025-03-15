@@ -23,7 +23,7 @@ export interface BuildingPurchaseOptions {
   initialCost: number;
   maintenanceCost: number;
   slaves?: number;
-  customName?: string; // Property added for compatibility
+  customName?: string;
   buildingType?: "urban" | "rural" | "religious" | "public"; // Alternative to type
 }
 
@@ -38,12 +38,13 @@ export interface BuildingDescription {
   requiredSlaves?: number;
   prestigeBonus?: number;
   size?: "small" | "medium" | "large";
-  advantages: string[];  // Required by some code
-  initialCost: number;   // Required by some code
-  prestige: number;      // Required by some code
+  advantages: string[];  
+  initialCost: number;   
+  prestige: number;      
   slaves?: {
     required: number;
     optimal: number;
+    maxProfit?: number;
   };
 }
 

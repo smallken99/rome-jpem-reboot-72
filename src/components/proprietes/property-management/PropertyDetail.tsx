@@ -29,7 +29,6 @@ export const PropertyDetail: React.FC = () => {
   const { performMaintenance, toggleMaintenance } = useBuildingMaintenance();
   const { calculateBuildingValue, sellBuilding } = useBuildingSale();
   
-  // Trouver la propriété dans la liste
   const property = ownedBuildings.find(b => b.id.toString() === propertyId);
   
   if (!property) {
@@ -52,6 +51,8 @@ export const PropertyDetail: React.FC = () => {
     );
   }
   
+  const buildingId = property ? (typeof property.id === 'string' ? parseInt(property.id, 10) : property.id) : 0;
+  
   const buildingValue = calculateBuildingValue(property);
   
   const getConditionColor = (condition: number) => {
@@ -62,16 +63,20 @@ export const PropertyDetail: React.FC = () => {
   };
   
   const handleMaintenance = () => {
-    performMaintenance(property.id);
+    if (property) {
+      performMaintenance(buildingId);
+    }
   };
   
   const handleToggleMaintenance = () => {
-    toggleMaintenance(property.id, !property.maintenanceEnabled);
+    if (property) {
+      toggleMaintenance(buildingId, !property.maintenanceEnabled);
+    }
   };
   
   const handleSell = () => {
-    if (window.confirm(`Êtes-vous sûr de vouloir vendre cette propriété pour ${formatMoney(buildingValue)} ?`)) {
-      sellBuilding(property.id);
+    if (window.confirm(`Êtes-vous sûr de vouloir vendre cette propriété?`)) {
+      sellBuilding(buildingId);
       navigate('/patrimoine/proprietes');
     }
   };

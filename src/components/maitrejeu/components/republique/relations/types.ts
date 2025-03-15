@@ -1,39 +1,68 @@
 
-// Types pour les nations
+// Types pour les relations diplomatiques
+
 export interface Nation {
   id: string;
   name: string;
   region: string;
-  status: 'ally' | 'neutral' | 'enemy' | 'tributary';
-  power?: number;
-  relation?: number;
-  founded?: string;
-  leaderTitle?: string;
-  // Additional properties needed by the NationModal
+  status: "ally" | "neutral" | "hostile" | "vassal" | "tributary";
+  relationScore: number;
+  flag?: string;
+  color?: string;
   leader?: string;
-  description?: string;
+  leaders?: string[];
   population?: number;
+  description?: string;
   militaryStrength?: number;
   diplomaticInfluence?: number;
   tradeValue?: number;
   lastContact?: string;
-  leaders?: string[];
-  relationLevel?: number;
 }
 
-export interface NationsListProps {
-  nations: Nation[];
+export interface Traite {
+  id: string;
+  name: string;
+  type: "commercial" | "peace" | "military" | "territorial";
+  parties: string[];
+  status: "active" | "draft" | "expired" | "revoked";
+  description: string;
+  dateSignature: string;
+  dateExpiration: string;
+  clauses: string[];
+  benefits: string | string[];
+  obligations: string | string[];
+  dateCreation?: string;
+  terms?: string[];
+}
+
+export interface Alliance {
+  id: string;
+  name: string;
+  type: "military" | "economic" | "cultural" | "political";
+  parties: string[];
+  status: "active" | "pending" | "expired" | "broken";
+  description: string;
+  dateCreated: string;
+  dateEnds: string;
+  terms: string[];
+  benefits: string[] | string;
+  requirements: string[] | string;
+}
+
+export interface DiplomaticFiltersProps {
   searchTerm: string;
+  setSearchTerm: (value: string) => void;
   filters: {
     status?: string;
     region?: string;
+    type?: string;
     dateFrom?: string;
     dateTo?: string;
   };
-  isEditable: boolean;
+  setFilters: (filters: any) => void;
+  activeTab: string;
 }
 
-// Types for modal props
 export interface AddNationModalProps {
   isOpen: boolean;
   onClose: () => void;
@@ -43,81 +72,13 @@ export interface AddNationModalProps {
 export interface AddTraiteModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onSave: (traite: Traite) => void;
   nations: Nation[];
+  onSave: (traite: Traite) => void;
 }
 
 export interface AddAllianceModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onSave: (alliance: Alliance) => void;
   nations: Nation[];
-}
-
-export interface DiplomaticFiltersProps {
-  activeTab: string;
-  onFilterChange: (filters: any) => void;
-  onReset: () => void;
-  onSearch?: (term: string) => void;
-  onFilter?: (filters: any) => void;
-}
-
-// Types pour les traités
-export interface Traite {
-  id: string;
-  name: string;
-  title?: string;  // For backward compatibility
-  type: 'commercial' | 'peace' | 'military' | 'tribute';
-  parties: string[];
-  status: 'active' | 'draft' | 'expired' | 'revoked';
-  description: string;
-  dateSignature: string;
-  dateExpiration: string;
-  dateCreation?: string;
-  clauses: string[];
-  benefits: string;
-  obligations: string;
-  date?: string;
-  dateCreated?: string;
-  terms?: string[];  // For backward compatibility
-}
-
-export interface TraitesListProps {
-  traites: Traite[];
-  searchTerm: string;
-  filters: {
-    status?: string;
-    dateFrom?: string;
-    dateTo?: string;
-  };
-  isEditable: boolean;
-}
-
-// Types pour les alliances
-export interface Alliance {
-  id: string;
-  name: string;
-  type: 'defensive' | 'offensive' | 'commercial' | 'cultural' | 'trade' | 'military' | 'full';
-  nations: string[];
-  status: 'active' | 'inactive' | 'pending' | 'expired' | 'dissolved';
-  description: string;
-  dateCreation: string;
-  duration: number;
-  members: string[];
-  militarySupport: string;
-  economicBenefits: string;
-  commitments: string;
-  date?: string;
-  dateCreated?: string;
-}
-
-export interface AlliancesMilitairesProps {
-  alliances: Alliance[];
-  searchTerm: string;
-  filters: {
-    status?: string;
-    dateFrom?: string;
-    dateTo?: string;
-  };
-  isEditable: boolean;
+  onSave: (alliance: Alliance) => void;
 }

@@ -13,7 +13,7 @@ interface OwnedUrbanPropertiesSectionProps {
   balance: number;
   availableSlaves: number;
   setPurchaseDialogOpen: (open: boolean) => void;
-  toggleMaintenance: (buildingId: number, enabled: boolean) => void;
+  toggleMaintenance: (buildingId: number) => boolean;
   performMaintenance: (buildingId: number) => boolean;
   assignSlaves: (buildingId: number, slaveCount: number) => void;
   sellBuilding: (buildingId: number, estimatedValue: number) => boolean;
@@ -41,6 +41,11 @@ export const OwnedUrbanPropertiesSection: React.FC<OwnedUrbanPropertiesSectionPr
       case 'military': return 'Militaires';
       default: return '';
     }
+  };
+
+  // Fonction auxiliaire pour adapter l'ID de type string en numérique
+  const adaptId = (id: string | number): number => {
+    return typeof id === 'string' ? parseInt(id, 10) : id;
   };
 
   return (
@@ -88,18 +93,21 @@ export const OwnedUrbanPropertiesSection: React.FC<OwnedUrbanPropertiesSectionPr
               buildingDetails = publicBuildings[building.buildingId] || null;
             }
             
+            // Adapter l'ID pour les fonctions attendant un nombre
+            const numericId = adaptId(building.id);
+            
             return (
               <PropertyCard
                 key={building.id}
                 building={building}
                 buildingDetails={buildingDetails}
-                onToggleMaintenance={toggleMaintenance}
-                onPerformMaintenance={performMaintenance}
-                onAssignSlaves={assignSlaves}
-                onSell={sellBuilding}
+                onToggleMaintenance={() => toggleMaintenance(numericId)}
+                onPerformMaintenance={() => performMaintenance(numericId)}
+                onAssignSlaves={(slaveCount) => assignSlaves(numericId, slaveCount)}
+                onSell={() => sellBuilding(numericId, calculateBuildingValue(numericId))}
                 balance={balance}
                 totalAvailableSlaves={availableSlaves + building.slaves}
-                buildingValue={calculateBuildingValue(building.id)}
+                buildingValue={calculateBuildingValue(numericId)}
               />
             );
           })}

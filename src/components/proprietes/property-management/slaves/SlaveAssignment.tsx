@@ -19,6 +19,11 @@ export const SlaveAssignment: React.FC<SlaveAssignmentProps> = ({
   availableSlaves,
   onAssignSlaves
 }) => {
+  // Fonction utilitaire pour convertir un ID en nombre si c'est une chaîne
+  const getNumericId = (id: string | number): number => {
+    return typeof id === 'string' ? parseInt(id, 10) : id;
+  };
+
   // Fonction utilitaire pour obtenir le statut d'une propriété en fonction des esclaves assignés
   const getPropertyStatus = (assigned: number, required: number, optimal: number) => {
     if (assigned < required) return "insuffisant";

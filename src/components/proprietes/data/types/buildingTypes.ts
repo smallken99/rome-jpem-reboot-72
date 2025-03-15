@@ -19,6 +19,9 @@ export interface BuildingDescription {
   slaves?: {
     required: number;
     optimal: number;
-    maxProfit: number;
+    maxProfit?: number;
   };
+  id?: string;
+  basePrice?: number;
+  type?: "urban" | "rural" | "religious" | "public";
 }

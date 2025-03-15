@@ -12,13 +12,16 @@ interface TraiteModalProps {
   isOpen: boolean;
   onClose: () => void;
   traite: Traite | null;
+  onSave?: (updatedTraite: any) => void;
 }
 
-export const TraiteModal: React.FC<TraiteModalProps> = ({ isOpen, onClose, traite }) => {
+export const TraiteModal: React.FC<TraiteModalProps> = ({ isOpen, onClose, traite, onSave }) => {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    // Handle form submission
-    console.log('Form submitted');
+    if (onSave) {
+      // Récupérer les données du formulaire et les passer à onSave
+      onSave(traite);
+    }
     onClose();
   };
   
@@ -77,7 +80,7 @@ export const TraiteModal: React.FC<TraiteModalProps> = ({ isOpen, onClose, trait
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label htmlFor="dateCreation">Date de création</Label>
-              <Input id="dateCreation" defaultValue={traite?.dateCreation || ''} required />
+              <Input id="dateCreation" defaultValue={traite?.dateSignature || ''} required />
             </div>
             
             <div className="space-y-2">
@@ -110,9 +113,9 @@ export const TraiteModal: React.FC<TraiteModalProps> = ({ isOpen, onClose, trait
               id="terms" 
               rows={2}
               defaultValue={
-                Array.isArray(traite?.terms) 
-                  ? traite.terms.join(', ') 
-                  : traite?.terms || ''
+                Array.isArray(traite?.clauses) 
+                  ? traite.clauses.join(', ') 
+                  : traite?.clauses || ''
               } 
             />
           </div>

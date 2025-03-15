@@ -70,6 +70,11 @@ const TraitesList: React.FC<TraitesListProps> = ({ traites, searchTerm, filters,
     setIsTraiteModalOpen(true);
   };
 
+  const handleSaveTraite = (updatedTraite: any) => {
+    console.log('Saving updated traite:', updatedTraite);
+    setIsTraiteModalOpen(false);
+  };
+
   return (
     <>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -90,7 +95,7 @@ const TraitesList: React.FC<TraitesListProps> = ({ traites, searchTerm, filters,
                     <CardTitle className="text-lg font-cinzel">{traite.name}</CardTitle>
                     <CardDescription className="flex items-center mt-1">
                       <Calendar className="h-3 w-3 mr-1" />
-                      {new Date(traite.dateSignature).toLocaleDateString()}
+                      {traite.dateSignature}
                     </CardDescription>
                   </div>
                   <div className="flex flex-col gap-1 items-end">
@@ -111,7 +116,7 @@ const TraitesList: React.FC<TraitesListProps> = ({ traites, searchTerm, filters,
               <CardFooter className="flex justify-between pt-2">
                 <div className="text-xs text-muted-foreground flex items-center">
                   <FileText className="h-3 w-3 mr-1" />
-                  <span>{traite.clauses.length} clauses</span>
+                  <span>{traite.clauses ? traite.clauses.length : '0'} clauses</span>
                 </div>
                 <Button variant="ghost" size="sm" className="p-0 h-auto">
                   <ExternalLink className="h-4 w-4" />
@@ -125,14 +130,10 @@ const TraitesList: React.FC<TraitesListProps> = ({ traites, searchTerm, filters,
 
       {selectedTraite && (
         <TraiteModal
-          open={isTraiteModalOpen}
-          onOpenChange={setIsTraiteModalOpen}
+          isOpen={isTraiteModalOpen} 
+          onClose={() => setIsTraiteModalOpen(false)}
           traite={selectedTraite}
-          isEditable={isEditable}
-          onSave={(updatedTraite) => {
-            console.log('Saving updated traite:', updatedTraite);
-            setIsTraiteModalOpen(false);
-          }}
+          onSave={handleSaveTraite}
         />
       )}
     </>

@@ -27,12 +27,20 @@ export interface RevenueExpenseData {
 
 export interface RevenueExpenseChartData extends RevenueExpenseData {
   profit: number;
+  month?: string;
+}
+
+export interface RevenueExpenseChartProps {
+  data: RevenueExpenseChartData[];
+  activeView: ChartViewType;
 }
 
 export interface RevenueSourceData {
   name: string;
   value: number;
   percent: number;
+  source?: string;
+  percentage?: number;
 }
 
 export interface PropertyTypeData {
@@ -40,31 +48,22 @@ export interface PropertyTypeData {
   count: number;
   revenue: number;
   percent: number;
+  type?: string;
+  value?: number;
+  percentage?: number;
 }
 
 export interface Recommendation {
-  id: string;
+  id: string | number;
   title: string;
   description: string;
   impact: 'high' | 'medium' | 'low';
   propertyId?: string | number;
   propertyName?: string;
   potentialIncrease?: number;
-}
-
-export interface ProfitabilityData {
-  totalRevenue: number;
-  totalExpenses: number;
-  totalProfit: number;
-  profitMargin: number;
-  roi: number;
-  mostProfitable: PropertyProfitData | null;
-  leastProfitable: PropertyProfitData | null;
-  timeSeriesData: RevenueExpenseData[];
-  propertiesData: PropertyProfitData[];
-  revenueSources: RevenueSourceData[];
-  propertyTypes: PropertyTypeData[];
-  recommendations: Recommendation[];
+  property?: string;
+  action?: string;
+  estimatedBenefit?: number;
 }
 
 export interface PropertyDistributionPieProps {
@@ -84,4 +83,25 @@ export interface ProfitablePropertiesTableProps {
 export interface OptimizationRecommendationsProps {
   recommendations: Recommendation[];
   onSelectProperty?: (propertyId: string | number) => void;
+}
+
+export interface ProfitabilityData {
+  totalRevenue: number;
+  totalExpenses: number;
+  totalProfit: number;
+  profitMargin: number;
+  roi: number;
+  mostProfitable: PropertyProfitData | null;
+  leastProfitable: PropertyProfitData | null;
+  timeSeriesData: RevenueExpenseData[];
+  propertiesData: PropertyProfitData[];
+  revenueSources: RevenueSourceData[];
+  propertyTypes: PropertyTypeData[];
+  recommendations: Recommendation[];
+  activeView: ChartViewType;
+  setActiveView: (view: ChartViewType) => void;
+  // Aliases pour la compatibilité
+  profitableProperties?: PropertyProfitData[];
+  revenueExpenseData?: RevenueExpenseChartData[];
+  optimizationRecommendations?: Recommendation[];
 }

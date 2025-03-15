@@ -30,37 +30,15 @@ export const RuralPropertiesTab: React.FC = () => {
     availableSlaves
   } = useRuralPropertiesTab();
 
-  // Create adapters for function signatures
-  const handleToggleMaintenance = (buildingId: number) => {
-    return toggleMaintenance(buildingId, true);
-  };
-
-  const handlePerformMaintenance = (buildingId: number) => {
-    return performMaintenance(buildingId);
-  };
-
-  const handleSellBuilding = (buildingId: number, value: number) => {
-    return sellBuilding(buildingId);
-  };
-
-  const handleCalculateBuildingValue = (buildingId: number) => {
-    // Find the building by ID
-    const building = ownedRuralProperties.find(b => Number(b.id) === buildingId);
-    if (building) {
-      return calculateBuildingValue(building);
-    }
-    return 0;
-  };
-
   const adaptedHandlePurchase = (buildingId: string, buildingType: "urban" | "rural" | "religious" | "public", location: string, customName?: string) => {
-    // Adapt to BuildingPurchaseOptions
+    // Adapter à BuildingPurchaseOptions
     const options: BuildingPurchaseOptions = {
       buildingId,
       type: buildingType,
       name: customName || `Propriété ${buildingType}`,
       location,
-      initialCost: 5000, // Default value
-      maintenanceCost: 500, // Default value
+      initialCost: 5000, // Valeur par défaut
+      maintenanceCost: 500, // Valeur par défaut
       customName
     };
 
@@ -95,11 +73,11 @@ export const RuralPropertiesTab: React.FC = () => {
           <OwnedRuralPropertiesSection 
             ownedRuralProperties={ownedRuralProperties}
             ruralProperties={ruralProperties}
-            toggleMaintenance={handleToggleMaintenance}
-            performMaintenance={handlePerformMaintenance}
+            toggleMaintenance={toggleMaintenance}
+            performMaintenance={performMaintenance}
             assignSlaves={assignSlaves}
-            sellBuilding={handleSellBuilding}
-            calculateBuildingValue={handleCalculateBuildingValue}
+            sellBuilding={sellBuilding}
+            calculateBuildingValue={calculateBuildingValue}
             availableSlaves={availableSlaves}
             balance={balance}
             setPurchaseDialogOpen={setPurchaseDialogOpen}
