@@ -10,7 +10,12 @@ import { Loi } from '@/components/republique/lois/hooks/useLois';
 interface LoiFormTabsProps {
   activeTab: string;
   setActiveTab: (value: string) => void;
-  formData: Loi;
+  formData: Loi & {
+    type?: string;
+    importance?: string;
+    clauses?: string[];
+    commentaires?: string[];
+  };
   handleChange: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => void;
   handleSelectChange: (name: string, value: string) => void;
   effetInput: string;

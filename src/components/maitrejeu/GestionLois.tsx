@@ -10,7 +10,7 @@ import { LoiModal } from './components/lois/LoiModal';
 import { LoiTimeline } from './components/lois/LoiTimeline';
 import { useLoisFiltering } from './hooks/useLoisFiltering';
 import { useLoisUI } from './hooks/useLoisUI';
-import { convertRepubliqueToMJLoi, convertMJToRepubliqueLoi } from './types/loisAdapter';
+import { convertMJToRepublique, convertRepubliqueToMJ } from './components/lois/utils/loiAdapter';
 
 export const GestionLois = () => {
   const { lois, addLoi } = useMaitreJeu();
@@ -35,7 +35,7 @@ export const GestionLois = () => {
   } = useLoisUI();
   
   const handleSaveLoi = (loiData: any) => {
-    const mjLoi = convertRepubliqueToMJLoi(loiData);
+    const mjLoi = convertRepubliqueToMJ(loiData);
     addLoi(mjLoi);
     handleCloseModal();
   };
@@ -101,7 +101,7 @@ export const GestionLois = () => {
         isOpen={isModalOpen} 
         onClose={handleCloseModal} 
         onSave={handleSaveLoi}
-        loi={selectedLoi ? convertMJToRepubliqueLoi(selectedLoi) : undefined}
+        loi={selectedLoi ? selectedLoi : undefined}
       />
     </div>
   );

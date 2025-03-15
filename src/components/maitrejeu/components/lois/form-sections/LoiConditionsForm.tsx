@@ -6,7 +6,9 @@ import { Label } from '@/components/ui/label';
 import { Loi } from '@/components/republique/lois/hooks/useLois';
 
 interface LoiConditionsFormProps {
-  formData: Loi;
+  formData: Loi & {
+    clauses?: string[];
+  };
   conditionInput: string;
   setConditionInput: (value: string) => void;
   addCondition: () => void;
@@ -21,7 +23,7 @@ export const LoiConditionsForm: React.FC<LoiConditionsFormProps> = ({
   removeCondition
 }) => {
   // Access extended properties safely
-  const clauses = (formData as any).clauses || [];
+  const clauses = formData.clauses || [];
   
   return (
     <div className="space-y-4">

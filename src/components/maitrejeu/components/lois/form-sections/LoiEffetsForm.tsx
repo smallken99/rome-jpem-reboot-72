@@ -6,7 +6,9 @@ import { Label } from '@/components/ui/label';
 import { Loi } from '@/components/republique/lois/hooks/useLois';
 
 interface LoiEffetsFormProps {
-  formData: Loi;
+  formData: Loi & {
+    commentaires?: string[];
+  };
   effetInput: string;
   setEffetInput: (value: string) => void;
   addEffet: () => void;
@@ -21,7 +23,7 @@ export const LoiEffetsForm: React.FC<LoiEffetsFormProps> = ({
   removeEffet
 }) => {
   // Access extended properties safely
-  const commentaires = (formData as any).commentaires || [];
+  const commentaires = formData.commentaires || [];
 
   return (
     <div className="space-y-4">

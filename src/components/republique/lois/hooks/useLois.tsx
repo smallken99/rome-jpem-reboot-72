@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 
 export interface Loi {
@@ -16,6 +15,10 @@ export interface Loi {
   };
   categorieId: string;
   tags: string[];
+  type?: string;
+  importance?: string;
+  clauses?: string[];
+  commentaires?: string[];
 }
 
 export interface CategorieLoi {
