@@ -1,45 +1,70 @@
 
 import React from 'react';
 import { Badge } from '@/components/ui/badge';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+
+type ConditionType = 'excellent' | 'bon' | 'moyen' | 'mauvais' | 'critique';
 
 interface ConditionBadgeProps {
-  condition: number;
+  condition: ConditionType;
+  showTooltip?: boolean;
 }
 
-export const ConditionBadge: React.FC<ConditionBadgeProps> = ({ condition }) => {
-  let color: "default" | "secondary" | "destructive" | "outline" | "success" = "default";
-  let label = "";
-  
-  if (condition >= 80) {
-    color = "success";
-    label = "Excellent";
-  } else if (condition >= 60) {
-    color = "secondary";
-    label = "Bon";
-  } else if (condition >= 30) {
-    color = "outline";
-    label = "Moyen";
-  } else {
-    color = "destructive";
-    label = "Critique";
+export const ConditionBadge: React.FC<ConditionBadgeProps> = ({ condition, showTooltip = true }) => {
+  const getBadgeVariant = (): "default" | "destructive" | "outline" | "secondary" | "success" => {
+    switch (condition) {
+      case 'excellent':
+        return 'success';
+      case 'bon':
+        return 'secondary';
+      case 'moyen':
+        return 'default';
+      case 'mauvais':
+        return 'outline';
+      case 'critique':
+        return 'destructive';
+      default:
+        return 'default';
+    }
+  };
+
+  const getTooltipContent = (): string => {
+    switch (condition) {
+      case 'excellent':
+        return 'Le bâtiment est en parfait état, ne nécessite aucune maintenance.';
+      case 'bon':
+        return 'Le bâtiment est en bon état, nécessite une maintenance minimale.';
+      case 'moyen':
+        return 'Le bâtiment est en état fonctionnel, mais nécessite une maintenance régulière.';
+      case 'mauvais':
+        return 'Le bâtiment est en mauvais état, nécessite des réparations importantes.';
+      case 'critique':
+        return 'Le bâtiment est en état critique, risque d\'effondrement ou d\'accident.';
+      default:
+        return '';
+    }
+  };
+
+  const badge = (
+    <Badge variant={getBadgeVariant()} className="capitalize">
+      {condition}
+    </Badge>
+  );
+
+  if (!showTooltip) {
+    return badge;
   }
-  
+
   return (
-    <div className="flex items-center">
-      <div className="w-full bg-muted rounded-full h-2 mr-2">
-        <div 
-          className={`h-2 rounded-full ${getBgColorClass(condition)}`}
-          style={{ width: `${condition}%` }}
-        />
-      </div>
-      <Badge variant={color}>{label}</Badge>
-    </div>
+    <TooltipProvider>
+      <Tooltip>
+        <TooltipTrigger asChild>
+          {badge}
+        </TooltipTrigger>
+        <TooltipContent>
+          <p>{getTooltipContent()}</p>
+        </TooltipContent>
+      </Tooltip>
+    </TooltipProvider>
   );
 };
-
-function getBgColorClass(condition: number): string {
-  if (condition >= 80) return "bg-green-500";
-  if (condition >= 60) return "bg-blue-500";
-  if (condition >= 30) return "bg-amber-500";
-  return "bg-red-500";
-}

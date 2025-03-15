@@ -29,7 +29,7 @@ export const GestionHistoire: React.FC = () => {
   // Filtrage des entrées d'histoire
   const filteredEntries = searchTerm 
     ? histoireEntries.filter(
-        entry => (entry.titre || entry.title || '').toLowerCase().includes(searchTerm.toLowerCase()) || 
+        entry => (entry.titre || '').toLowerCase().includes(searchTerm.toLowerCase()) || 
                 (entry.contenu || entry.description || '').toLowerCase().includes(searchTerm.toLowerCase())
       )
     : histoireEntries;
@@ -49,7 +49,6 @@ export const GestionHistoire: React.FC = () => {
       personnagesImpliqués: personnagesImpliqués.split(',').map(p => p.trim()).filter(p => p),
       
       // Pour la compatibilité avec le code existant
-      title: titre,
       description: contenu,
       year: currentDate.year,
       season: currentDate.season,

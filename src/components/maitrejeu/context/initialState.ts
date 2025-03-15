@@ -200,7 +200,7 @@ export const initialAlliances = [
     famille1Id: "f1",
     famille2Id: "f2",
     type: "politique" as const,
-    dateDebut: "710-01-01",
+    dateDebut: new Date("710-01-01").toISOString(),
     termes: "Alliance politique entre les Julii et les Claudii pour soutenir mutuellement leurs candidats au Sénat.",
     benefices: ["Soutien politique", "Partage d'informations"],
     statut: "active" as const,
@@ -217,7 +217,7 @@ export const initialMariages = [
     familleEpoux: "f1",
     familleEpouse: "f1", // Même famille dans ce cas
     dot: 10000,
-    date: "695-05-15",
+    date: new Date("695-05-15").toISOString(),
     statut: "actif" as const
   },
   {
@@ -227,7 +227,7 @@ export const initialMariages = [
     familleEpoux: "f2",
     familleEpouse: "f2", // Même famille dans ce cas
     dot: 8000,
-    date: "690-07-20",
+    date: new Date("690-07-20").toISOString(),
     statut: "actif" as const
   }
 ];
@@ -434,7 +434,6 @@ export const initialTreasury: TreasuryStatus = {
 };
 
 export const initialEconomicFactors: EconomicFactors = {
-  id: "factors-1",
   tradeStability: 85,
   militaryExpense: 450000,
   publicWorksExpense: 200000,
@@ -498,9 +497,9 @@ export const initialEquilibre: Equilibre = {
   notes: "Équilibre initial de la République"
 };
 
-export const initialDate = {
+export const initialDate: GameDate = {
   year: 752,
-  season: 'Ver'
+  season: 'SPRING'
 };
 
 export const initialPhase: GamePhase = "SENATE";

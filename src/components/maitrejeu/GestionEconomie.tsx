@@ -35,6 +35,9 @@ export const GestionEconomie: React.FC = () => {
     handleGenerateReport,
     handleCalculateProjections,
     handleRefreshData,
+    handleManageBuildings,
+    handleManageSlaves,
+    handleManageTaxes,
     setIsModalOpen
   } = useEconomieManagement();
   
@@ -77,6 +80,9 @@ export const GestionEconomie: React.FC = () => {
                 onGenerateReport={handleGenerateReport}
                 onCalculateProjections={handleCalculateProjections}
                 onRefreshData={handleRefreshData}
+                onManageBuildings={handleManageBuildings}
+                onManageSlaves={handleManageSlaves} 
+                onManageTaxes={handleManageTaxes}
               />
               
               <EconomieFilters
@@ -106,8 +112,21 @@ export const GestionEconomie: React.FC = () => {
                 Gérez les finances du trésor public, surveillez les dépenses et ajustez les politiques fiscales.
               </p>
               
-              <div className="bg-muted p-4 rounded-md">
-                <p>Cette fonctionnalité sera disponible prochainement.</p>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                <div className="bg-muted rounded-md p-4">
+                  <h4 className="font-semibold">Balance actuelle</h4>
+                  <p className="text-2xl font-bold">{treasury.balance.toLocaleString()} As</p>
+                </div>
+                
+                <div className="bg-muted rounded-md p-4">
+                  <h4 className="font-semibold">Revenus totaux</h4>
+                  <p className="text-2xl font-bold text-green-600">{treasury.totalIncome.toLocaleString()} As</p>
+                </div>
+                
+                <div className="bg-muted rounded-md p-4">
+                  <h4 className="font-semibold">Dépenses totales</h4>
+                  <p className="text-2xl font-bold text-red-600">{treasury.totalExpenses.toLocaleString()} As</p>
+                </div>
               </div>
             </CardContent>
           </Card>
@@ -122,7 +141,9 @@ export const GestionEconomie: React.FC = () => {
               </p>
               
               <div className="bg-muted p-4 rounded-md">
-                <p>Cette fonctionnalité sera disponible prochainement.</p>
+                <p>Projection pour le prochain cycle : <strong>{treasury.projectedBalance.toLocaleString()} As</strong></p>
+                <p>Taux d'inflation actuel : <strong>{treasury.inflationRate}%</strong></p>
+                <p>Dernier bilan : <strong>Année {treasury.lastUpdated.year}, {treasury.lastUpdated.season}</strong></p>
               </div>
             </CardContent>
           </Card>
@@ -137,7 +158,8 @@ export const GestionEconomie: React.FC = () => {
               </p>
               
               <div className="bg-muted p-4 rounded-md">
-                <p>Cette fonctionnalité sera disponible prochainement.</p>
+                <h4 className="font-semibold mb-2">Notes du questeur :</h4>
+                <p className="italic">{treasury.comments}</p>
               </div>
             </CardContent>
           </Card>

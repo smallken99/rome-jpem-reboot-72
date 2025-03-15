@@ -1,162 +1,95 @@
 
-import React, { useState } from 'react';
-import { Card, CardContent } from '@/components/ui/card';
-import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from '@/components/ui/table';
+import React from 'react';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { SearchIcon, Filter, AlertTriangle, Building, Tool } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
-import { 
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger
-} from '@/components/ui/dropdown-menu';
-import { PublicBuilding } from '@/components/republique/batiments/types/buildingTypes';
+import { Edit, Trash2, PlusCircle, Wrench } from 'lucide-react';
 import { ConditionBadge } from './ConditionBadge';
+import { Building } from '@/components/maitrejeu/types/batiments';
 
 interface BuildingsListProps {
-  buildings: PublicBuilding[];
-  balance: number;
-  onMaintain: (buildingId: string, cost: number) => void;
+  buildings: Building[];
+  onEdit: (building: Building) => void;
+  onDelete: (buildingId: string) => void;
+  onAddBuilding: () => void;
+  onMaintenance: (building: Building) => void;
 }
 
-export const BuildingsList: React.FC<BuildingsListProps> = ({ 
-  buildings, 
-  balance,
-  onMaintain 
+export const BuildingsList: React.FC<BuildingsListProps> = ({
+  buildings,
+  onEdit,
+  onDelete,
+  onAddBuilding,
+  onMaintenance
 }) => {
-  const [searchTerm, setSearchTerm] = useState('');
-  const [filter, setFilter] = useState<string>('all');
-  
-  // Filter buildings
-  const filteredBuildings = buildings
-    .filter(building => {
-      // Filter by search term
-      if (searchTerm && !building.name.toLowerCase().includes(searchTerm.toLowerCase())) {
-        return false;
-      }
-      
-      // Filter by condition
-      if (filter === 'needs_maintenance' && building.condition > 60) {
-        return false;
-      }
-      
-      if (filter === 'critical' && building.condition > 30) {
-        return false;
-      }
-      
-      if (filter === 'good' && building.condition < 80) {
-        return false;
-      }
-      
-      return true;
-    })
-    .sort((a, b) => a.condition - b.condition); // Sort by condition ascending (worst first)
-  
   return (
-    <Card>
-      <CardContent className="p-6">
-        <div className="flex items-center justify-between mb-6">
-          <div className="flex items-center space-x-4">
-            <div className="relative">
-              <SearchIcon className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-              <Input
-                placeholder="Rechercher un bâtiment..."
-                className="pl-9 w-64"
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-              />
-            </div>
-            
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="outline" className="flex items-center">
-                  <Filter className="h-4 w-4 mr-2" />
-                  Filtrer
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent>
-                <DropdownMenuItem onClick={() => setFilter('all')}>
-                  Tous les bâtiments
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => setFilter('needs_maintenance')}>
-                  Nécessite maintenance
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => setFilter('critical')}>
-                  État critique
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => setFilter('good')}>
-                  Bon état
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
-          </div>
-          
-          <div className="flex items-center space-x-2">
-            <span className="text-sm text-muted-foreground">
-              Total: {buildings.length} bâtiments
-            </span>
-          </div>
+    <div>
+      <div className="flex justify-between items-center mb-4">
+        <h3 className="text-lg font-semibold">Liste des Bâtiments</h3>
+        <Button onClick={onAddBuilding}>
+          <PlusCircle className="h-4 w-4 mr-2" />
+          Nouveau Bâtiment
+        </Button>
+      </div>
+      
+      {buildings.length === 0 ? (
+        <div className="text-center py-10 bg-muted/40 rounded-md">
+          <p className="text-muted-foreground">Aucun bâtiment enregistré</p>
+          <Button variant="outline" className="mt-4" onClick={onAddBuilding}>
+            <PlusCircle className="h-4 w-4 mr-2" />
+            Ajouter un bâtiment
+          </Button>
         </div>
-        
+      ) : (
         <Table>
           <TableHeader>
             <TableRow>
               <TableHead>Nom</TableHead>
               <TableHead>Type</TableHead>
-              <TableHead>Lieu</TableHead>
-              <TableHead>Condition</TableHead>
-              <TableHead>Coût maintenance</TableHead>
-              <TableHead>Actions</TableHead>
+              <TableHead>Localisation</TableHead>
+              <TableHead>État</TableHead>
+              <TableHead>Revenu/Coût</TableHead>
+              <TableHead>Statut</TableHead>
+              <TableHead className="text-right">Actions</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
-            {filteredBuildings.length === 0 ? (
-              <TableRow>
-                <TableCell colSpan={6} className="text-center py-6 text-muted-foreground">
-                  Aucun bâtiment trouvé
+            {buildings.map((building) => (
+              <TableRow key={building.id}>
+                <TableCell className="font-medium">{building.name}</TableCell>
+                <TableCell>{building.type}</TableCell>
+                <TableCell>{building.location}</TableCell>
+                <TableCell>
+                  <ConditionBadge condition={building.condition} />
+                </TableCell>
+                <TableCell>
+                  {building.revenue > 0 ? (
+                    <span className="text-green-600">+{building.revenue} As</span>
+                  ) : (
+                    <span className="text-red-600">{building.cost} As</span>
+                  )}
+                </TableCell>
+                <TableCell>
+                  <Badge variant={building.isPublic ? "default" : "secondary"}>
+                    {building.isPublic ? "Public" : "Privé"}
+                  </Badge>
+                </TableCell>
+                <TableCell className="text-right">
+                  <Button variant="ghost" size="icon" onClick={() => onMaintenance(building)}>
+                    <Wrench className="h-4 w-4" />
+                  </Button>
+                  <Button variant="ghost" size="icon" onClick={() => onEdit(building)}>
+                    <Edit className="h-4 w-4" />
+                  </Button>
+                  <Button variant="ghost" size="icon" onClick={() => onDelete(building.id)}>
+                    <Trash2 className="h-4 w-4" />
+                  </Button>
                 </TableCell>
               </TableRow>
-            ) : (
-              filteredBuildings.map((building) => (
-                <TableRow key={building.id} className={building.condition < 30 ? "bg-red-50" : ""}>
-                  <TableCell className="font-medium">
-                    <div className="flex items-center">
-                      <Building className="h-4 w-4 mr-2 text-amber-600" />
-                      {building.name}
-                      {building.condition < 30 && (
-                        <AlertTriangle className="h-4 w-4 ml-2 text-red-500" />
-                      )}
-                    </div>
-                  </TableCell>
-                  <TableCell>
-                    <Badge variant="secondary">{building.buildingTypeId}</Badge>
-                  </TableCell>
-                  <TableCell>{building.location}</TableCell>
-                  <TableCell>
-                    <ConditionBadge condition={building.condition} />
-                  </TableCell>
-                  <TableCell>
-                    {building.maintenanceCost.toLocaleString()} As
-                  </TableCell>
-                  <TableCell>
-                    <Button 
-                      variant="outline" 
-                      size="sm"
-                      onClick={() => onMaintain(building.id, building.maintenanceCost)}
-                      disabled={balance < building.maintenanceCost}
-                    >
-                      <Tool className="h-3.5 w-3.5 mr-1.5" />
-                      Maintenance
-                    </Button>
-                  </TableCell>
-                </TableRow>
-              ))
-            )}
+            ))}
           </TableBody>
         </Table>
-      </CardContent>
-    </Card>
+      )}
+    </div>
   );
 };

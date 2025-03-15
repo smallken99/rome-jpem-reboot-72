@@ -13,7 +13,8 @@ import {
   Users2,
   ScrollText,
   Landmark,
-  BarChart2
+  BarChart2,
+  Home
 } from 'lucide-react';
 
 interface MaitreJeuTabsProps {
@@ -24,7 +25,11 @@ interface MaitreJeuTabsProps {
 export const MaitreJeuTabs: React.FC<MaitreJeuTabsProps> = ({ activeTab, onTabChange }) => {
   return (
     <Tabs value={activeTab} onValueChange={onTabChange} className="w-full">
-      <TabsList className="grid grid-cols-3 lg:grid-cols-6 xl:grid-cols-12 w-full">
+      <TabsList className="grid grid-cols-4 lg:grid-cols-6 xl:grid-cols-13 w-full">
+        <TabsTrigger value="accueil" className="flex items-center gap-2">
+          <Home className="h-4 w-4" />
+          <span className="hidden md:inline">Accueil</span>
+        </TabsTrigger>
         <TabsTrigger value="senateurs" className="flex items-center gap-2">
           <Users className="h-4 w-4" />
           <span className="hidden md:inline">Sénateurs</span>

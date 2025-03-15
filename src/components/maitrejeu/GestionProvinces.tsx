@@ -33,7 +33,7 @@ export const GestionProvinces = () => {
   };
   
   const handleSaveProvince = (updatedProvince: Province) => {
-    updateProvince(updatedProvince);
+    updateProvince(updatedProvince.id, updatedProvince);
     handleCloseModal();
   };
   
