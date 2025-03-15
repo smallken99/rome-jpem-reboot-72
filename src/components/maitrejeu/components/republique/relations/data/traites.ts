@@ -4,7 +4,7 @@ import { Traite } from '../types';
 export const traitesMock: Traite[] = [
   {
     id: 'traite-egypt-1',
-    title: 'Accord Commercial d\'Alexandrie',
+    name: 'Accord Commercial d\'Alexandrie',
     type: 'commercial',
     parties: ['rome', 'egypt'],
     status: 'active',
@@ -21,7 +21,7 @@ export const traitesMock: Traite[] = [
   },
   {
     id: 'traite-numidia-1',
-    title: 'Alliance Romano-Numide',
+    name: 'Alliance Romano-Numide',
     type: 'military',
     parties: ['rome', 'numidia'],
     status: 'active',
@@ -38,7 +38,7 @@ export const traitesMock: Traite[] = [
   },
   {
     id: 'traite-macedon-1',
-    title: 'Pacte de Non-Agression de l\'Adriatique',
+    name: 'Pacte de Non-Agression de l\'Adriatique',
     type: 'commercial',
     parties: ['rome', 'macedon'],
     status: 'expired',
@@ -55,10 +55,10 @@ export const traitesMock: Traite[] = [
   },
   {
     id: 'traite-seleucid-1',
-    title: 'Traité d\'Apamée',
+    name: 'Traité d\'Apamée',
     type: 'peace',
     parties: ['rome', 'seleucid'],
-    status: 'violated',
+    status: 'revoked',
     description: 'Traité imposé à l\'Empire Séleucide après sa défaite, limitant sa flotte et son armée.',
     dateSignature: '688 AUC',
     dateExpiration: '∞',
@@ -73,7 +73,7 @@ export const traitesMock: Traite[] = [
   },
   {
     id: 'traite-parthia-1',
-    title: 'Accord de l\'Euphrate',
+    name: 'Accord de l\'Euphrate',
     type: 'peace',
     parties: ['rome', 'parthia'],
     status: 'active',

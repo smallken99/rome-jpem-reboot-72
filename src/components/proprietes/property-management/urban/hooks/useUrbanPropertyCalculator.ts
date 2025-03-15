@@ -1,13 +1,15 @@
 
+import { useState } from 'react';
 import { OwnedBuilding } from '@/components/proprietes/hooks/building/types';
 import { useBuildingSale } from '@/components/proprietes/hooks/building/useBuildingSale';
 import { useBuildingInventory } from '@/components/proprietes/hooks/building/useBuildingInventory';
+import { toast } from 'sonner';
 
 export const useUrbanPropertyCalculator = () => {
   const { sellBuilding, calculateBuildingValue, calculateBuildingValueById } = useBuildingSale();
-  const { ownedBuildings } = useBuildingInventory();
+  const { buildings, addBuilding } = useBuildingInventory();
   
-  const urbanBuildings = ownedBuildings.filter(b => b.buildingType === 'urban');
+  const urbanBuildings = buildings.filter(b => b.buildingType === 'urban');
 
   const handleAddProperty = (
     buildingId: string,
@@ -15,8 +17,28 @@ export const useUrbanPropertyCalculator = () => {
     location: string,
     customName?: string
   ): boolean => {
-    // Implémentation fictive
-    return true;
+    try {
+      // Générer un ID unique 
+      const newId = `${buildingType}-${Date.now()}`;
+      
+      // Ajouter le bâtiment à l'inventaire
+      addBuilding({
+        id: newId,
+        name: customName || `Bâtiment ${buildingType} à ${location}`,
+        buildingType,
+        location,
+        status: 'good',
+        maintenanceNeeded: false,
+        lastMaintenance: new Date().toISOString()
+      });
+      
+      toast.success(`Propriété ${buildingType} ajoutée avec succès!`);
+      return true;
+    } catch (error) {
+      console.error("Erreur lors de l'ajout de la propriété:", error);
+      toast.error("Échec de l'ajout de la propriété");
+      return false;
+    }
   };
 
   return {
