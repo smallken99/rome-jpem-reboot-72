@@ -26,7 +26,7 @@ export const LoiBasicInfoForm: React.FC<LoiBasicInfoFormProps> = ({
         <Input
           id="title"
           name="titre"
-          value={formData.titre || formData.title || ''}
+          value={formData.titre || ''}
           onChange={handleChange}
           placeholder="Lex Julia de..."
         />
@@ -48,7 +48,7 @@ export const LoiBasicInfoForm: React.FC<LoiBasicInfoFormProps> = ({
         <div className="space-y-2">
           <Label htmlFor="category">Catégorie</Label>
           <Select
-            value={formData.categorieId || formData.catégorie || formData.category || ''}
+            value={formData.categorieId || ''}
             onValueChange={(value) => handleSelectChange('categorieId', value)}
           >
             <SelectTrigger>
@@ -69,7 +69,7 @@ export const LoiBasicInfoForm: React.FC<LoiBasicInfoFormProps> = ({
           <Input
             id="proposedBy"
             name="auteur"
-            value={formData.auteur || formData.proposeur || formData.proposedBy || ''}
+            value={formData.auteur || ''}
             onChange={handleChange}
             placeholder="Nom du sénateur"
           />
@@ -81,7 +81,7 @@ export const LoiBasicInfoForm: React.FC<LoiBasicInfoFormProps> = ({
           <div className="space-y-2">
             <Label htmlFor="status">Statut</Label>
             <Select
-              value={formData.statut || formData.état || ''}
+              value={formData.statut || ''}
               onValueChange={(value) => handleSelectChange('statut', value)}
             >
               <SelectTrigger>
