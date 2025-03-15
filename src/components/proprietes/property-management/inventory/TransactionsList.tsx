@@ -3,10 +3,10 @@ import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
-import { Transaction } from './data/types';
+import { ResourceTransaction } from './data/types';
 
 interface TransactionsListProps {
-  transactions: Transaction[];
+  transactions: ResourceTransaction[];
 }
 
 export const TransactionsList: React.FC<TransactionsListProps> = ({ transactions }) => {
@@ -38,19 +38,19 @@ export const TransactionsList: React.FC<TransactionsListProps> = ({ transactions
                   <TableCell>
                     <Badge 
                       variant={
-                        transaction.type === 'buy' ? 'destructive' : 
-                        transaction.type === 'sell' ? 'default' : 
+                        transaction.type === 'purchase' ? 'destructive' : 
+                        transaction.type === 'sale' ? 'default' : 
                         'secondary'
                       }
                     >
-                      {transaction.type === 'buy' && 'Achat'}
-                      {transaction.type === 'sell' && 'Vente'}
-                      {transaction.type === 'transfer' && 'Transfert'}
+                      {transaction.type === 'purchase' && 'Achat'}
+                      {transaction.type === 'sale' && 'Vente'}
+                      {transaction.type === 'harvest' && 'Récolte'}
                     </Badge>
                   </TableCell>
                   <TableCell className="font-medium">{transaction.resourceName}</TableCell>
                   <TableCell>{transaction.quantity}</TableCell>
-                  <TableCell>{transaction.unitPrice} as</TableCell>
+                  <TableCell>{transaction.price} as</TableCell>
                   <TableCell className="text-right font-bold">{transaction.total} as</TableCell>
                 </TableRow>
               ))}

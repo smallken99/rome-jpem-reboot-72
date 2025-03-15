@@ -1,161 +1,158 @@
 
 import React from 'react';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
+import { Button } from '@/components/ui/button';
+import { Filter } from 'lucide-react';
+import { Sheet, SheetClose, SheetContent, SheetDescription, SheetFooter, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Search, Filter } from 'lucide-react';
+import { Label } from '@/components/ui/label';
+import { DatePicker } from '@/components/ui/date-picker';
 
-interface DiplomaticFiltersProps {
-  onSearch: (term: string) => void;
-  onFilter: (filters: any) => void;
+export interface DiplomaticFiltersProps {
   activeTab: string;
+  onFilterChange: (filters: any) => void;
+  onReset: () => void;
+  onSearch?: (term: string) => void;
+  onFilter?: (filters: any) => void;
 }
 
 export const DiplomaticFilters: React.FC<DiplomaticFiltersProps> = ({
+  activeTab,
+  onFilterChange,
+  onReset,
   onSearch,
-  onFilter,
-  activeTab
+  onFilter
 }) => {
-  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    onSearch(e.target.value);
+  const [status, setStatus] = React.useState('');
+  const [region, setRegion] = React.useState('');
+  const [dateFrom, setDateFrom] = React.useState<Date | undefined>(undefined);
+  const [dateTo, setDateTo] = React.useState<Date | undefined>(undefined);
+  
+  const handleApplyFilters = () => {
+    const filters = {
+      status,
+      region,
+      dateFrom: dateFrom ? dateFrom.toISOString().split('T')[0] : '',
+      dateTo: dateTo ? dateTo.toISOString().split('T')[0] : ''
+    };
+    
+    onFilterChange(filters);
+    
+    // Pour la compatibilité
+    if (onFilter) {
+      onFilter(filters);
+    }
   };
   
-  const handleFilterChange = (value: string, type: string) => {
-    onFilter({ [type]: value || null });
+  const handleReset = () => {
+    setStatus('');
+    setRegion('');
+    setDateFrom(undefined);
+    setDateTo(undefined);
+    onReset();
   };
   
   return (
-    <div className="space-y-4">
-      <div className="flex items-center border rounded-md px-3 py-2">
-        <Search className="h-4 w-4 text-muted-foreground mr-2" />
-        <Input
-          placeholder="Rechercher..."
-          onChange={handleSearchChange}
-          className="border-0 p-0 focus-visible:ring-0 h-8"
-        />
-      </div>
-      
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-        {activeTab === 'nations' && (
-          <>
-            <div className="space-y-2">
-              <Label htmlFor="status-filter" className="text-xs flex items-center gap-1">
-                <Filter className="h-3 w-3" /> Statut
-              </Label>
-              <Select onValueChange={(value) => handleFilterChange(value, 'status')}>
-                <SelectTrigger id="status-filter">
-                  <SelectValue placeholder="Tous les statuts" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="">Tous les statuts</SelectItem>
-                  <SelectItem value="ally">Allié</SelectItem>
-                  <SelectItem value="enemy">Ennemi</SelectItem>
-                  <SelectItem value="neutral">Neutre</SelectItem>
-                  <SelectItem value="tributary">Tributaire</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-            
-            <div className="space-y-2">
-              <Label htmlFor="region-filter" className="text-xs flex items-center gap-1">
-                <Filter className="h-3 w-3" /> Région
-              </Label>
-              <Select onValueChange={(value) => handleFilterChange(value, 'region')}>
-                <SelectTrigger id="region-filter">
-                  <SelectValue placeholder="Toutes les régions" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="">Toutes les régions</SelectItem>
-                  <SelectItem value="Afrique du Nord">Afrique du Nord</SelectItem>
-                  <SelectItem value="Grèce">Grèce</SelectItem>
-                  <SelectItem value="Asie">Asie</SelectItem>
-                  <SelectItem value="Gaule">Gaule</SelectItem>
-                  <SelectItem value="Afrique / Asie">Afrique / Asie</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-          </>
-        )}
+    <Sheet>
+      <SheetTrigger asChild>
+        <Button variant="outline" size="icon">
+          <Filter className="h-4 w-4" />
+        </Button>
+      </SheetTrigger>
+      <SheetContent className="sm:max-w-md">
+        <SheetHeader>
+          <SheetTitle>Filtres</SheetTitle>
+          <SheetDescription>
+            Affinez les résultats en utilisant les filtres ci-dessous
+          </SheetDescription>
+        </SheetHeader>
         
-        {activeTab === 'traites' && (
-          <>
+        <div className="space-y-6 py-6">
+          {/* Statut */}
+          <div className="space-y-2">
+            <Label htmlFor="status">Statut</Label>
+            <Select value={status} onValueChange={setStatus}>
+              <SelectTrigger id="status">
+                <SelectValue placeholder="Tous les statuts" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="">Tous les statuts</SelectItem>
+                {activeTab === 'nations' && (
+                  <>
+                    <SelectItem value="ally">Allié</SelectItem>
+                    <SelectItem value="neutral">Neutre</SelectItem>
+                    <SelectItem value="enemy">Ennemi</SelectItem>
+                    <SelectItem value="tributary">Tributaire</SelectItem>
+                  </>
+                )}
+                {activeTab === 'traites' && (
+                  <>
+                    <SelectItem value="active">En vigueur</SelectItem>
+                    <SelectItem value="draft">Brouillon</SelectItem>
+                    <SelectItem value="expired">Expiré</SelectItem>
+                    <SelectItem value="revoked">Révoqué</SelectItem>
+                  </>
+                )}
+                {activeTab === 'alliances' && (
+                  <>
+                    <SelectItem value="active">Active</SelectItem>
+                    <SelectItem value="inactive">Inactive</SelectItem>
+                    <SelectItem value="pending">En attente</SelectItem>
+                  </>
+                )}
+              </SelectContent>
+            </Select>
+          </div>
+          
+          {/* Région */}
+          <div className="space-y-2">
+            <Label htmlFor="region">Région</Label>
+            <Select value={region} onValueChange={setRegion}>
+              <SelectTrigger id="region">
+                <SelectValue placeholder="Toutes les régions" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="">Toutes les régions</SelectItem>
+                <SelectItem value="gaule">Gaule</SelectItem>
+                <SelectItem value="hispanie">Hispanie</SelectItem>
+                <SelectItem value="germanie">Germanie</SelectItem>
+                <SelectItem value="illyrie">Illyrie</SelectItem>
+                <SelectItem value="grèce">Grèce</SelectItem>
+                <SelectItem value="asie">Asie Mineure</SelectItem>
+                <SelectItem value="levant">Levant</SelectItem>
+                <SelectItem value="egypte">Égypte</SelectItem>
+                <SelectItem value="afrique">Afrique</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+          
+          {/* Datepickers pour la période */}
+          <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="type-filter" className="text-xs flex items-center gap-1">
-                <Filter className="h-3 w-3" /> Type
-              </Label>
-              <Select onValueChange={(value) => handleFilterChange(value, 'type')}>
-                <SelectTrigger id="type-filter">
-                  <SelectValue placeholder="Tous les types" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="">Tous les types</SelectItem>
-                  <SelectItem value="peace">Paix</SelectItem>
-                  <SelectItem value="trade">Commerce</SelectItem>
-                  <SelectItem value="military">Militaire</SelectItem>
-                  <SelectItem value="tribute">Tribut</SelectItem>
-                  <SelectItem value="other">Autre</SelectItem>
-                </SelectContent>
-              </Select>
+              <Label htmlFor="dateFrom">Date début</Label>
+              <DatePicker 
+                date={dateFrom}
+                setDate={setDateFrom}
+              />
             </div>
-            
             <div className="space-y-2">
-              <Label htmlFor="treaty-status-filter" className="text-xs flex items-center gap-1">
-                <Filter className="h-3 w-3" /> Statut
-              </Label>
-              <Select onValueChange={(value) => handleFilterChange(value, 'status')}>
-                <SelectTrigger id="treaty-status-filter">
-                  <SelectValue placeholder="Tous les statuts" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="">Tous les statuts</SelectItem>
-                  <SelectItem value="active">Actif</SelectItem>
-                  <SelectItem value="expired">Expiré</SelectItem>
-                  <SelectItem value="violated">Violé</SelectItem>
-                  <SelectItem value="canceled">Annulé</SelectItem>
-                </SelectContent>
-              </Select>
+              <Label htmlFor="dateTo">Date fin</Label>
+              <DatePicker 
+                date={dateTo}
+                setDate={setDateTo}
+              />
             </div>
-          </>
-        )}
+          </div>
+        </div>
         
-        {activeTab === 'alliances' && (
-          <>
-            <div className="space-y-2">
-              <Label htmlFor="alliance-type-filter" className="text-xs flex items-center gap-1">
-                <Filter className="h-3 w-3" /> Type
-              </Label>
-              <Select onValueChange={(value) => handleFilterChange(value, 'type')}>
-                <SelectTrigger id="alliance-type-filter">
-                  <SelectValue placeholder="Tous les types" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="">Tous les types</SelectItem>
-                  <SelectItem value="defensive">Défensive</SelectItem>
-                  <SelectItem value="offensive">Offensive</SelectItem>
-                  <SelectItem value="full">Complète</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-            
-            <div className="space-y-2">
-              <Label htmlFor="alliance-status-filter" className="text-xs flex items-center gap-1">
-                <Filter className="h-3 w-3" /> Statut
-              </Label>
-              <Select onValueChange={(value) => handleFilterChange(value, 'status')}>
-                <SelectTrigger id="alliance-status-filter">
-                  <SelectValue placeholder="Tous les statuts" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="">Tous les statuts</SelectItem>
-                  <SelectItem value="active">Actif</SelectItem>
-                  <SelectItem value="expired">Expiré</SelectItem>
-                  <SelectItem value="dissolved">Dissout</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-          </>
-        )}
-      </div>
-    </div>
+        <SheetFooter className="flex justify-between">
+          <Button variant="ghost" onClick={handleReset}>
+            Réinitialiser
+          </Button>
+          <SheetClose asChild>
+            <Button onClick={handleApplyFilters}>Appliquer</Button>
+          </SheetClose>
+        </SheetFooter>
+      </SheetContent>
+    </Sheet>
   );
 };

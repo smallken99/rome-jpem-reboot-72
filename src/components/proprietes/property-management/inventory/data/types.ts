@@ -25,6 +25,9 @@ export interface PropertyResource {
   value?: number;
   trend?: 'up' | 'down' | 'stable';
   trendPercentage?: number;
+  category?: string;
+  location?: string;
+  lastUpdated?: string;
 }
 
 export interface ResourceTransaction {
@@ -36,6 +39,7 @@ export interface ResourceTransaction {
   price: number;
   total: number;
   date: string;
+  unitPrice?: number;
 }
 
 export interface ResourceInventoryProps {
@@ -58,5 +62,10 @@ export interface ResourceTransactionsProps {
 
 // Compatibility aliases
 export type Resource = PropertyResource;
-export type ResourceType = string;
+export type ResourceType = {
+  id: string;
+  name: string;
+  unit: string;
+  categories: string[];
+};
 export type Transaction = ResourceTransaction;

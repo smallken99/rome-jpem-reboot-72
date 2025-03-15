@@ -1,15 +1,15 @@
 
 import { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
-import { Resource, ResourceType, Transaction, MarketPrice } from '../data/types';
+import { PropertyResource, ResourceType, ResourceTransaction, MarketPrice } from '../data/types';
 
 export const useInventoryData = () => {
   const { propertyId } = useParams<{ propertyId: string }>();
   
   const [property, setProperty] = useState<any | null>(null);
-  const [resources, setResources] = useState<Resource[]>([]);
+  const [resources, setResources] = useState<PropertyResource[]>([]);
   const [resourceTypes, setResourceTypes] = useState<ResourceType[]>([]);
-  const [transactions, setTransactions] = useState<Transaction[]>([]);
+  const [transactions, setTransactions] = useState<ResourceTransaction[]>([]);
   const [marketPrices, setMarketPrices] = useState<MarketPrice[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   
@@ -37,33 +37,42 @@ export const useInventoryData = () => {
         ];
         
         // Ressources stockées
-        const mockResources: Resource[] = [
+        const mockResources: PropertyResource[] = [
           {
             id: 'r1',
+            propertyId: propertyId || '',
             name: 'Blé',
+            type: 'Céréales',
             quantity: 1200,
             unit: 'modii',
             value: 24000,
+            marketValue: 24000,
             category: 'Céréales',
             location: 'Grenier principal',
             lastUpdated: '15 Jul 45 AUC'
           },
           {
             id: 'r2',
+            propertyId: propertyId || '',
             name: 'Vin de qualité',
+            type: 'Vin',
             quantity: 80,
             unit: 'amphores',
             value: 16000,
+            marketValue: 16000,
             category: 'Vin',
             location: 'Cave',
             lastUpdated: '10 Jul 45 AUC'
           },
           {
             id: 'r3',
+            propertyId: propertyId || '',
             name: 'Huile d\'olive',
+            type: 'Huile',
             quantity: 40,
             unit: 'amphores',
             value: 8000,
+            marketValue: 8000,
             category: 'Huile',
             location: 'Entrepôt',
             lastUpdated: '12 Jul 45 AUC'
@@ -71,32 +80,35 @@ export const useInventoryData = () => {
         ];
         
         // Transactions
-        const mockTransactions: Transaction[] = [
+        const mockTransactions: ResourceTransaction[] = [
           {
             id: 't1',
+            propertyId: propertyId || '',
             date: '15 Jul 45 AUC',
-            type: 'sell',
+            type: 'sale',
             resourceName: 'Blé',
             quantity: 500,
-            unitPrice: 20,
+            price: 20,
             total: 10000
           },
           {
             id: 't2',
+            propertyId: propertyId || '',
             date: '10 Jul 45 AUC',
-            type: 'buy',
+            type: 'purchase',
             resourceName: 'Semences',
             quantity: 100,
-            unitPrice: 30,
+            price: 30,
             total: 3000
           },
           {
             id: 't3',
+            propertyId: propertyId || '',
             date: '5 Jul 45 AUC',
-            type: 'transfer',
+            type: 'harvest',
             resourceName: 'Vin',
             quantity: 20,
-            unitPrice: 0,
+            price: 0,
             total: 0
           }
         ];
@@ -108,6 +120,8 @@ export const useInventoryData = () => {
             resourceName: 'Blé',
             basePrice: 18,
             currentPrice: 20,
+            buyPrice: 22,
+            sellPrice: 18,
             trend: 'up',
             volatility: 0.2
           },
@@ -116,6 +130,8 @@ export const useInventoryData = () => {
             resourceName: 'Vin',
             basePrice: 190,
             currentPrice: 200,
+            buyPrice: 220,
+            sellPrice: 180,
             trend: 'stable',
             volatility: 0.1
           },
@@ -124,6 +140,8 @@ export const useInventoryData = () => {
             resourceName: 'Huile d\'olive',
             basePrice: 210,
             currentPrice: 200,
+            buyPrice: 220,
+            sellPrice: 180,
             trend: 'down',
             volatility: 0.15
           }

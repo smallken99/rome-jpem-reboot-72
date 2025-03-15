@@ -28,8 +28,8 @@ export function useBuildingSale() {
     return value;
   };
   
-  // Vendre un bâtiment
-  const sellBuilding = async (buildingId: number): Promise<boolean> => {
+  // Vendre un bâtiment (version synchrone pour la compatibilité)
+  const sellBuilding = (buildingId: number): boolean => {
     setIsLoading(true);
     
     try {

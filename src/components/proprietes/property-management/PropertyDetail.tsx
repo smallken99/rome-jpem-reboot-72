@@ -54,7 +54,7 @@ export const PropertyDetail: React.FC = () => {
     );
   }
   
-  const buildingValue = calculateBuildingValue(property.id);
+  const buildingValue = calculateBuildingValue(property);
   
   const getConditionColor = (condition: number) => {
     if (condition >= 80) return 'bg-green-500';
@@ -73,7 +73,7 @@ export const PropertyDetail: React.FC = () => {
   
   const handleSell = () => {
     if (window.confirm(`Êtes-vous sûr de vouloir vendre cette propriété pour ${formatMoney(buildingValue)} ?`)) {
-      sellBuilding(property.id, buildingValue);
+      sellBuilding(property.id);
       navigate('/patrimoine/proprietes');
     }
   };
