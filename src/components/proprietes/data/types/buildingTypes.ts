@@ -1,6 +1,7 @@
 
 // Common building description interface
 export interface BuildingDescription {
+  id: string;  // Making id required to match the other definition
   name: string;
   description: string;
   advantages: string[];
@@ -19,9 +20,8 @@ export interface BuildingDescription {
   slaves?: {
     required: number;
     optimal: number;
-    maxProfit?: number;
+    maxProfit: number;
   };
-  id?: string;
   basePrice?: number;
   type?: "urban" | "rural" | "religious" | "public";
 }

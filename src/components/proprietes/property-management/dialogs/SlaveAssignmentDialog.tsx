@@ -1,33 +1,34 @@
 
 import React, { useState, useEffect } from 'react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
+import { Label } from '@/components/ui/label';
 import { Slider } from '@/components/ui/slider';
-import { OwnedBuilding, BuildingDescription } from '@/components/proprietes/hooks/building/types';
+import { Users, AlertCircle } from 'lucide-react';
+import { OwnedBuilding } from '../../hooks/building/types';
 
 export interface SlaveAssignmentDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   building: OwnedBuilding;
-  buildingDetails: BuildingDescription;
-  totalAvailableSlaves: number;
   onAssignSlaves: (buildingId: number | string, slaveCount: number) => void;
+  totalAvailableSlaves: number;
 }
 
 export const SlaveAssignmentDialog: React.FC<SlaveAssignmentDialogProps> = ({
   open,
   onOpenChange,
   building,
-  buildingDetails,
-  totalAvailableSlaves,
-  onAssignSlaves
+  onAssignSlaves,
+  totalAvailableSlaves
 }) => {
   const [slaveCount, setSlaveCount] = useState(building.slaves);
-  const maxSlaves = buildingDetails.slaves?.optimal || 0;
-  const requiredSlaves = buildingDetails.slaves?.required || 0;
-  
-  // Recalculate available slaves + current slaves
-  const availableForAssignment = totalAvailableSlaves + building.slaves;
   
   // Reset slave count when dialog opens
   useEffect(() => {
@@ -36,78 +37,91 @@ export const SlaveAssignmentDialog: React.FC<SlaveAssignmentDialogProps> = ({
     }
   }, [open, building.slaves]);
   
-  const handleConfirm = () => {
-    // Call the parent's onAssignSlaves function with the selected slave count
+  const handleSave = () => {
     onAssignSlaves(building.id, slaveCount);
     onOpenChange(false);
   };
   
+  const actualAvailableSlaves = totalAvailableSlaves - building.slaves + slaveCount;
+
+  // Recommended slave count (for optimal efficiency)
+  const recommendedSlaves = 5; // This would ideally come from building details
+  
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[425px]">
+      <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <DialogTitle>Assigner des esclaves</DialogTitle>
-          <DialogDescription>
-            Assignez des esclaves à cette propriété pour augmenter sa productivité.
-          </DialogDescription>
+          <DialogTitle className="font-cinzel">
+            Gestion des esclaves - {building.name}
+          </DialogTitle>
         </DialogHeader>
         
-        <div className="py-4 space-y-6">
+        <div className="space-y-6 py-4">
           <div className="space-y-2">
-            <div className="flex justify-between text-sm mb-2">
-              <div className="font-medium">Esclaves disponibles</div>
-              <div>{availableForAssignment} esclaves</div>
-            </div>
-            
-            <div className="flex justify-between text-sm mb-2">
-              <div className="font-medium">Esclaves requis</div>
-              <div>{requiredSlaves} esclaves</div>
-            </div>
-            
-            <div className="flex justify-between text-sm mb-2">
-              <div className="font-medium">Esclaves optimaux</div>
-              <div>{maxSlaves} esclaves</div>
-            </div>
-          </div>
-          
-          <div className="space-y-4">
-            <div className="flex justify-between">
-              <div className="font-medium">Esclaves assignés</div>
-              <div className="font-bold text-rome-gold">{slaveCount} esclaves</div>
+            <div className="flex justify-between items-center text-sm">
+              <span>Esclaves assignés:</span>
+              <span className="font-semibold">{slaveCount}</span>
             </div>
             
             <Slider
               value={[slaveCount]}
               min={0}
-              max={Math.min(maxSlaves, availableForAssignment)}
+              max={Math.max(totalAvailableSlaves, building.slaves)}
               step={1}
-              onValueChange={(value) => setSlaveCount(value[0])}
-              className="w-full"
+              onValueChange={(values) => setSlaveCount(values[0])}
+              className="mt-2"
             />
             
-            <div className="flex justify-between text-sm">
-              <div>0</div>
-              <div>{Math.min(maxSlaves, availableForAssignment)}</div>
+            <div className="text-sm text-muted-foreground mt-2">
+              Déplacez le curseur pour ajuster le nombre d'esclaves
             </div>
           </div>
           
-          <div className="bg-amber-50 border border-amber-200 rounded-md p-3 text-sm text-amber-800">
-            {slaveCount < requiredSlaves ? (
-              <p>Attention : Le nombre d'esclaves est insuffisant pour le fonctionnement optimal de cette propriété.</p>
-            ) : slaveCount > maxSlaves * 0.8 ? (
-              <p>Ce nombre d'esclaves est proche de l'optimal pour maximiser la production.</p>
-            ) : (
-              <p>Augmenter le nombre d'esclaves améliorera significativement la production.</p>
+          <div className="space-y-2 border-t border-border pt-4">
+            <Label>Informations:</Label>
+            
+            <div className="text-sm space-y-2">
+              <div className="flex justify-between">
+                <span>Esclaves actuels:</span>
+                <span className="font-medium">{building.slaves}</span>
+              </div>
+              
+              <div className="flex justify-between">
+                <span>Esclaves disponibles:</span>
+                <span className="font-medium">{actualAvailableSlaves}</span>
+              </div>
+              
+              <div className="flex justify-between">
+                <span>Recommandé:</span>
+                <span className="font-medium">{recommendedSlaves}</span>
+              </div>
+            </div>
+            
+            {slaveCount < recommendedSlaves && (
+              <div className="flex items-start gap-2 p-3 mt-2 bg-amber-50 border border-amber-200 rounded-md text-amber-800 text-sm">
+                <AlertCircle className="h-5 w-5 flex-shrink-0 text-amber-500" />
+                <div>
+                  <p className="font-medium">Attention</p>
+                  <p>Un nombre insuffisant d'esclaves peut réduire l'efficacité et les revenus.</p>
+                </div>
+              </div>
             )}
           </div>
         </div>
         
         <DialogFooter>
-          <Button variant="outline" onClick={() => onOpenChange(false)}>
+          <Button 
+            variant="outline" 
+            onClick={() => onOpenChange(false)}
+          >
             Annuler
           </Button>
-          <Button onClick={handleConfirm}>
-            Confirmer
+          <Button 
+            className="roman-btn"
+            onClick={handleSave}
+          >
+            <Users className="mr-2 h-4 w-4" />
+            Assigner
           </Button>
         </DialogFooter>
       </DialogContent>

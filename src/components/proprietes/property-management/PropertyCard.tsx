@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -8,19 +7,41 @@ import {
   DropdownMenu, DropdownMenuContent, DropdownMenuItem, 
   DropdownMenuTrigger, DropdownMenuSeparator 
 } from '@/components/ui/dropdown-menu';
-import { OwnedBuilding } from '../hooks/useBuildingManagement';
+import { OwnedBuilding } from '../hooks/building/types';
 import { MaintenanceDialog } from './dialogs/MaintenanceDialog';
 import { SlaveAssignmentDialog } from './dialogs/SlaveAssignmentDialog';
 import { PropertySaleDialog } from './dialogs/PropertySaleDialog';
-import { BuildingDescription } from '../data/types/buildingTypes';
+import { BuildingDescription as DataBuildingDescription } from '../data/types/buildingTypes';
+import { BuildingDescription as HookBuildingDescription } from '../hooks/building/types';
+
+function adaptBuildingDescription(buildingDetails: DataBuildingDescription | HookBuildingDescription | null): HookBuildingDescription | null {
+  if (!buildingDetails) return null;
+  
+  return {
+    id: buildingDetails.id || '',
+    name: buildingDetails.name,
+    description: buildingDetails.description,
+    basePrice: buildingDetails.basePrice || buildingDetails.initialCost,
+    maintenanceCost: buildingDetails.maintenanceCost,
+    type: buildingDetails.type || "rural",
+    advantages: buildingDetails.advantages,
+    initialCost: buildingDetails.initialCost,
+    prestige: buildingDetails.prestige,
+    slaves: buildingDetails.slaves ? {
+      required: buildingDetails.slaves.required,
+      optimal: buildingDetails.slaves.optimal,
+      maxProfit: buildingDetails.slaves.maxProfit || 0
+    } : undefined
+  };
+}
 
 interface PropertyCardProps {
   building: OwnedBuilding;
-  buildingDetails: BuildingDescription | null;
-  onToggleMaintenance: (buildingId: number, enabled: boolean) => void;
-  onPerformMaintenance: (buildingId: number) => boolean;
-  onAssignSlaves: (buildingId: number, slaveCount: number) => void;
-  onSell: (buildingId: number, value: number) => boolean;
+  buildingDetails: DataBuildingDescription | HookBuildingDescription | null;
+  onToggleMaintenance: (buildingId: number | string, enabled: boolean) => void;
+  onPerformMaintenance: (buildingId: number | string) => boolean;
+  onAssignSlaves: (buildingId: number | string, slaveCount: number) => void;
+  onSell: (buildingId: number | string, value: number) => boolean;
   balance: number;
   totalAvailableSlaves: number;
   buildingValue: number;
@@ -41,14 +62,14 @@ export const PropertyCard: React.FC<PropertyCardProps> = ({
   const [slaveDialogOpen, setSlaveDialogOpen] = useState(false);
   const [saleDialogOpen, setSaleDialogOpen] = useState(false);
   
-  // Obtenir la classe CSS pour la condition
+  const adaptedBuildingDetails = adaptBuildingDescription(buildingDetails);
+
   const getConditionClass = () => {
     if (building.condition > 75) return 'bg-green-100 text-green-800 border-green-200';
     if (building.condition > 50) return 'bg-amber-100 text-amber-800 border-amber-200';
     return 'bg-red-100 text-red-800 border-red-200';
   };
   
-  // Obtenir le texte pour la condition
   const getConditionText = () => {
     if (building.condition > 90) return 'Excellent';
     if (building.condition > 75) return 'Bon';
@@ -73,7 +94,7 @@ export const PropertyCard: React.FC<PropertyCardProps> = ({
                 <Wrench className="mr-2 h-4 w-4" />
                 <span>Gérer l'entretien</span>
               </DropdownMenuItem>
-              {buildingDetails?.slaves && (
+              {adaptedBuildingDetails?.slaves && (
                 <DropdownMenuItem onClick={() => setSlaveDialogOpen(true)}>
                   <Users className="mr-2 h-4 w-4" />
                   <span>Gérer les esclaves</span>
@@ -112,11 +133,11 @@ export const PropertyCard: React.FC<PropertyCardProps> = ({
               <span className="font-medium">{building.maintenanceCost.toLocaleString()} As/an</span>
             </div>
             
-            {buildingDetails?.slaves && (
+            {adaptedBuildingDetails?.slaves && (
               <div className="flex justify-between">
                 <span className="text-muted-foreground">Esclaves assignés:</span>
                 <span className="font-medium">
-                  {building.slaves} / {buildingDetails.slaves.optimal}
+                  {building.slaves} / {adaptedBuildingDetails.slaves.optimal}
                 </span>
               </div>
             )}
@@ -138,7 +159,7 @@ export const PropertyCard: React.FC<PropertyCardProps> = ({
               Entretien
             </Button>
             
-            {buildingDetails?.slaves && (
+            {adaptedBuildingDetails?.slaves && (
               <Button 
                 variant="outline" 
                 size="sm" 
@@ -163,7 +184,6 @@ export const PropertyCard: React.FC<PropertyCardProps> = ({
         </CardContent>
       </Card>
       
-      {/* Dialogues pour les actions */}
       <MaintenanceDialog 
         open={maintenanceDialogOpen}
         onOpenChange={setMaintenanceDialogOpen}
@@ -173,14 +193,13 @@ export const PropertyCard: React.FC<PropertyCardProps> = ({
         balance={balance}
       />
       
-      {buildingDetails?.slaves && (
+      {adaptedBuildingDetails?.slaves && (
         <SlaveAssignmentDialog 
           open={slaveDialogOpen}
           onOpenChange={setSlaveDialogOpen}
           building={building}
-          buildingDetails={buildingDetails}
-          totalAvailableSlaves={totalAvailableSlaves}
           onAssignSlaves={onAssignSlaves}
+          totalAvailableSlaves={totalAvailableSlaves}
         />
       )}
       

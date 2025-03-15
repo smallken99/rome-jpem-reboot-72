@@ -6,7 +6,8 @@ import { UrbanPropertyDetails } from './urban/UrbanPropertyDetails';
 import { OwnedUrbanPropertiesSection } from './urban/owned/OwnedUrbanPropertiesSection';
 import { UrbanCatalogueSection } from './urban/catalogue/UrbanCatalogueSection';
 import { useUrbanPropertiesTab } from './urban/hooks/useUrbanPropertiesTab';
-import { BuildingDescription, OwnedBuilding } from '../hooks/building/types';
+import { BuildingDescription } from '../data/types/buildingTypes';
+import { OwnedBuilding } from '../hooks/building/types';
 
 // For type safety, define the allowed building types
 type AllowedBuildingType = 'residential' | 'religious' | 'public' | 'military';

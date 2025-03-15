@@ -3,6 +3,7 @@ import { useState } from 'react';
 import { OwnedBuilding } from '@/components/proprietes/hooks/building/types';
 import { useBuildingSale } from '@/components/proprietes/hooks/building/useBuildingSale';
 import { useBuildingInventory } from '@/components/proprietes/hooks/building/useBuildingInventory';
+import { BuildingDescription } from '@/components/proprietes/data/types/buildingTypes';
 import { toast } from 'sonner';
 
 export const useUrbanPropertyCalculator = () => {

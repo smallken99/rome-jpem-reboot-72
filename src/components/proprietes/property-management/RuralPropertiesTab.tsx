@@ -6,6 +6,7 @@ import { RuralCatalogueSection } from './rural/catalogue/RuralCatalogueSection';
 import { OwnedRuralPropertiesSection } from './rural/owned/OwnedRuralPropertiesSection';
 import { useRuralPropertiesTab } from './rural/hooks/useRuralPropertiesTab';
 import { OwnedBuilding, BuildingPurchaseOptions } from '../hooks/building/types';
+import { ruralProperties } from '../data/buildings/ruralProperties';
 
 export const RuralPropertiesTab: React.FC = () => {
   const {
@@ -17,9 +18,7 @@ export const RuralPropertiesTab: React.FC = () => {
     setPropertySize,
     propertyLocation,
     setPropertyLocation,
-    propertyDetails,
     ownedRuralProperties,
-    ruralProperties,
     balance,
     toggleMaintenance,
     performMaintenance,
@@ -30,19 +29,32 @@ export const RuralPropertiesTab: React.FC = () => {
     availableSlaves
   } = useRuralPropertiesTab();
 
-  const adaptedHandlePurchase = (buildingId: string, buildingType: "urban" | "rural" | "religious" | "public", location: string, customName?: string) => {
-    // Adapter à BuildingPurchaseOptions
+  // Get property details from rural properties catalog
+  const propertyDetails = selectedPropertyId 
+    ? ruralProperties.find(prop => prop.id === selectedPropertyId) || null 
+    : null;
+
+  // Create a synchronous wrapper for the async handlePurchase function
+  const adaptedHandlePurchase = (
+    buildingId: string, 
+    buildingType: "urban" | "rural" | "religious" | "public", 
+    location: string, 
+    customName?: string
+  ): boolean => {
+    // Convert the async call to a synchronous one
     const options: BuildingPurchaseOptions = {
       buildingId,
       type: buildingType,
       name: customName || `Propriété ${buildingType}`,
       location,
-      initialCost: 5000, // Valeur par défaut
-      maintenanceCost: 500, // Valeur par défaut
+      initialCost: propertyDetails?.initialCost || 5000,
+      maintenanceCost: propertyDetails?.maintenanceCost || 500,
       customName
     };
 
-    return handlePurchase(options);
+    // Start the purchase process but return true immediately
+    handlePurchase(options);
+    return true;
   };
 
   return (
@@ -72,7 +84,10 @@ export const RuralPropertiesTab: React.FC = () => {
         <TabsContent value="owned">
           <OwnedRuralPropertiesSection 
             ownedRuralProperties={ownedRuralProperties}
-            ruralProperties={ruralProperties}
+            ruralProperties={ruralProperties.reduce((acc, curr) => {
+              acc[curr.id] = curr;
+              return acc;
+            }, {} as Record<string, typeof ruralProperties[0]>)}
             toggleMaintenance={toggleMaintenance}
             performMaintenance={performMaintenance}
             assignSlaves={assignSlaves}
