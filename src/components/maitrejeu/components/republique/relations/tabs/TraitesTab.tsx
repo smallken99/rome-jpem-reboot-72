@@ -3,6 +3,7 @@ import React from 'react';
 import { TraitesList } from '../TraitesList';
 import { ActionsPanel, ActionItem } from '@/components/ui-custom/ActionsPanel';
 import { Plus } from 'lucide-react';
+import { traitesMock } from '../data/traites';
 
 interface TraitesTabProps {
   searchTerm: string;
@@ -32,7 +33,12 @@ export const TraitesTab: React.FC<TraitesTabProps> = ({
         actions={actions}
         className="mb-4"
       />
-      <TraitesList searchTerm={searchTerm} filters={filters} />
+      <TraitesList 
+        traites={traitesMock} 
+        searchTerm={searchTerm} 
+        filters={filters} 
+        isEditable={true} 
+      />
     </>
   );
 };

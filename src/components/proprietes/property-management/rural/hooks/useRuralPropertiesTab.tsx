@@ -1,70 +1,50 @@
 
 import { useState } from 'react';
-import { ruralProperties } from '../../../data/buildings';
-import { useBuildingManagement } from '../../../hooks/useBuildingManagement';
-import { usePatrimoine } from '@/hooks/usePatrimoine';
-import { BuildingDescription } from '../../../data/types/buildingTypes';
+import { useBuildingSale } from './useBuildingSale';
+
+interface OwnedBuilding {
+  id: number;
+  name: string;
+  location: string;
+  type: string;
+  value: number;
+}
 
 export const useRuralPropertiesTab = () => {
-  const [selectedPropertyId, setSelectedPropertyId] = useState<string | null>(null);
-  const [purchaseDialogOpen, setPurchaseDialogOpen] = useState(false);
-  const [propertySize, setPropertySize] = useState('medium');
-  const [propertyLocation, setPropertyLocation] = useState('countryside');
-  
-  const { 
-    ownedBuildings, 
-    purchaseBuilding, 
-    sellBuilding, 
-    toggleMaintenance, 
-    performMaintenance, 
-    calculateBuildingValue,
-    assignSlaves 
-  } = useBuildingManagement();
-  
-  const { balance } = usePatrimoine();
-  
-  // Récupération des détails de la propriété sélectionnée
-  const propertyDetails = selectedPropertyId ? ruralProperties[selectedPropertyId] || null : null;
-  
-  // Filtrer les propriétés rurales possédées
-  const ownedRuralProperties = ownedBuildings.filter(building => building.buildingType === 'rural');
-  
-  // Fonction pour traiter l'achat
-  const handlePurchase = (
+  const [buildings, setBuildings] = useState<OwnedBuilding[]>([
+    { id: 1, name: 'Ferme d\'olives', location: 'Latium', type: 'rural', value: 50000 },
+    { id: 2, name: 'Vignoble', location: 'Campanie', type: 'rural', value: 75000 },
+    { id: 3, name: 'Ferme de blé', location: 'Sicile', type: 'rural', value: 100000 },
+  ]);
+
+  const { saleBuilding, estimateBuildingValue, sellBuilding } = useBuildingSale();
+
+  const handleAddProperty = (
     buildingId: string, 
-    buildingType: 'urban' | 'rural' | 'religious' | 'public', 
+    buildingType: "urban" | "rural" | "religious" | "public", 
     location: string, 
     customName?: string
-  ) => {
-    if (!propertyDetails) return false;
+  ): boolean => {
+    // Pour cet exemple, on retourne toujours true
+    if (!buildingId || !location) return false;
     
-    return purchaseBuilding(propertyDetails, buildingId, buildingType, location, customName);
+    const newBuilding: OwnedBuilding = {
+      id: Date.now(),
+      name: customName || `Nouvelle propriété ${buildings.length + 1}`,
+      location,
+      type: buildingType,
+      value: 50000
+    };
+    
+    setBuildings(prev => [...prev, newBuilding]);
+    return true;
   };
-  
-  // Nombre total d'esclaves disponibles
-  const totalAssignedSlaves = ownedBuildings.reduce((sum, building) => sum + building.slaves, 0);
-  const totalSlaves = 25; // Simulé - à remplacer par la source réelle
-  const availableSlaves = totalSlaves - totalAssignedSlaves;
 
   return {
-    selectedPropertyId,
-    setSelectedPropertyId,
-    purchaseDialogOpen,
-    setPurchaseDialogOpen,
-    propertySize,
-    setPropertySize,
-    propertyLocation,
-    setPropertyLocation,
-    propertyDetails,
-    ownedRuralProperties,
-    ruralProperties,
-    balance,
-    toggleMaintenance,
-    performMaintenance,
+    buildings,
+    handleAddProperty,
+    saleBuilding,
     sellBuilding,
-    calculateBuildingValue,
-    assignSlaves,
-    handlePurchase,
-    availableSlaves
+    estimateBuildingValue
   };
 };

@@ -6,27 +6,20 @@ import { Sheet, SheetClose, SheetContent, SheetDescription, SheetFooter, SheetHe
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Label } from '@/components/ui/label';
 import { DatePicker } from '@/components/ui/date-picker';
+import { DiplomaticFiltersProps } from './types';
 
-export interface DiplomaticFiltersProps {
-  activeTab: string;
-  onFilterChange: (filters: any) => void;
-  onReset: () => void;
-  onSearch?: (term: string) => void;
-  onFilter?: (filters: any) => void;
-}
-
-export const DiplomaticFilters: React.FC<DiplomaticFiltersProps> = ({
-  activeTab,
-  onFilterChange,
-  onReset,
-  onSearch,
-  onFilter
+export const DiplomaticFilters: React.FC<DiplomaticFiltersProps> = ({ 
+  activeTab, 
+  onFilterChange, 
+  onReset, 
+  onSearch, 
+  onFilter 
 }) => {
   const [status, setStatus] = React.useState('');
   const [region, setRegion] = React.useState('');
   const [dateFrom, setDateFrom] = React.useState<Date | undefined>(undefined);
   const [dateTo, setDateTo] = React.useState<Date | undefined>(undefined);
-  
+
   const handleApplyFilters = () => {
     const filters = {
       status,
@@ -42,7 +35,7 @@ export const DiplomaticFilters: React.FC<DiplomaticFiltersProps> = ({
       onFilter(filters);
     }
   };
-  
+
   const handleReset = () => {
     setStatus('');
     setRegion('');
@@ -50,7 +43,7 @@ export const DiplomaticFilters: React.FC<DiplomaticFiltersProps> = ({
     setDateTo(undefined);
     onReset();
   };
-  
+
   return (
     <Sheet>
       <SheetTrigger asChild>
@@ -58,6 +51,7 @@ export const DiplomaticFilters: React.FC<DiplomaticFiltersProps> = ({
           <Filter className="h-4 w-4" />
         </Button>
       </SheetTrigger>
+      
       <SheetContent className="sm:max-w-md">
         <SheetHeader>
           <SheetTitle>Filtres</SheetTitle>
@@ -67,7 +61,6 @@ export const DiplomaticFilters: React.FC<DiplomaticFiltersProps> = ({
         </SheetHeader>
         
         <div className="space-y-6 py-6">
-          {/* Statut */}
           <div className="space-y-2">
             <Label htmlFor="status">Statut</Label>
             <Select value={status} onValueChange={setStatus}>
@@ -76,6 +69,7 @@ export const DiplomaticFilters: React.FC<DiplomaticFiltersProps> = ({
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="">Tous les statuts</SelectItem>
+                
                 {activeTab === 'nations' && (
                   <>
                     <SelectItem value="ally">Allié</SelectItem>
@@ -84,6 +78,7 @@ export const DiplomaticFilters: React.FC<DiplomaticFiltersProps> = ({
                     <SelectItem value="tributary">Tributaire</SelectItem>
                   </>
                 )}
+                
                 {activeTab === 'traites' && (
                   <>
                     <SelectItem value="active">En vigueur</SelectItem>
@@ -92,6 +87,7 @@ export const DiplomaticFilters: React.FC<DiplomaticFiltersProps> = ({
                     <SelectItem value="revoked">Révoqué</SelectItem>
                   </>
                 )}
+                
                 {activeTab === 'alliances' && (
                   <>
                     <SelectItem value="active">Active</SelectItem>
@@ -103,7 +99,6 @@ export const DiplomaticFilters: React.FC<DiplomaticFiltersProps> = ({
             </Select>
           </div>
           
-          {/* Région */}
           <div className="space-y-2">
             <Label htmlFor="region">Région</Label>
             <Select value={region} onValueChange={setRegion}>
@@ -125,21 +120,15 @@ export const DiplomaticFilters: React.FC<DiplomaticFiltersProps> = ({
             </Select>
           </div>
           
-          {/* Datepickers pour la période */}
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label htmlFor="dateFrom">Date début</Label>
-              <DatePicker 
-                date={dateFrom}
-                setDate={setDateFrom}
-              />
+              <DatePicker date={dateFrom} setDate={setDateFrom} />
             </div>
+            
             <div className="space-y-2">
               <Label htmlFor="dateTo">Date fin</Label>
-              <DatePicker 
-                date={dateTo}
-                setDate={setDateTo}
-              />
+              <DatePicker date={dateTo} setDate={setDateTo} />
             </div>
           </div>
         </div>
@@ -149,7 +138,9 @@ export const DiplomaticFilters: React.FC<DiplomaticFiltersProps> = ({
             Réinitialiser
           </Button>
           <SheetClose asChild>
-            <Button onClick={handleApplyFilters}>Appliquer</Button>
+            <Button onClick={handleApplyFilters}>
+              Appliquer
+            </Button>
           </SheetClose>
         </SheetFooter>
       </SheetContent>

@@ -5,23 +5,17 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { formatMoney } from '@/utils/formatUtils';
 
 export interface PropertyDistributionPieProps {
-  urbanProperties: number;
-  ruralProperties: number;
-  otherProperties: number;
+  data: Array<{
+    name: string;
+    value: number;
+    color: string;
+  }>;
 }
 
 export const PropertyDistributionPie: React.FC<PropertyDistributionPieProps> = ({
-  urbanProperties,
-  ruralProperties,
-  otherProperties
+  data
 }) => {
-  const data = [
-    { name: 'Propriétés urbaines', value: urbanProperties, color: '#10b981' },
-    { name: 'Propriétés rurales', value: ruralProperties, color: '#6366f1' },
-    { name: 'Autres propriétés', value: otherProperties, color: '#f59e0b' },
-  ];
-
-  const total = urbanProperties + ruralProperties + otherProperties;
+  const total = data.reduce((sum, item) => sum + item.value, 0);
 
   const formatTooltip = (value: number) => {
     return [formatMoney(value), `${((value / total) * 100).toFixed(1)}%`];

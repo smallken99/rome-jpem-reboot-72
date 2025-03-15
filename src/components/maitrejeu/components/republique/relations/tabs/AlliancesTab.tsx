@@ -3,6 +3,7 @@ import React from 'react';
 import { AlliancesMilitaires } from '../AlliancesMilitaires';
 import { ActionsPanel, ActionItem } from '@/components/ui-custom/ActionsPanel';
 import { Plus } from 'lucide-react';
+import { alliancesMock } from '../data/alliances';
 
 interface AlliancesTabProps {
   searchTerm: string;
@@ -32,7 +33,12 @@ export const AlliancesTab: React.FC<AlliancesTabProps> = ({
         actions={actions}
         className="mb-4"
       />
-      <AlliancesMilitaires searchTerm={searchTerm} filters={filters} />
+      <AlliancesMilitaires 
+        alliances={alliancesMock} 
+        searchTerm={searchTerm} 
+        filters={filters} 
+        isEditable={true} 
+      />
     </>
   );
 };

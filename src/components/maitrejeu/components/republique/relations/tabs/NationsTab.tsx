@@ -3,6 +3,7 @@ import React from 'react';
 import { NationsList } from '../NationsList';
 import { ActionsPanel, ActionItem } from '@/components/ui-custom/ActionsPanel';
 import { Plus } from 'lucide-react';
+import { nationsMock } from '../data/nations';
 
 interface NationsTabProps {
   searchTerm: string;
@@ -32,7 +33,12 @@ export const NationsTab: React.FC<NationsTabProps> = ({
         actions={actions}
         className="mb-4"
       />
-      <NationsList searchTerm={searchTerm} filters={filters} />
+      <NationsList 
+        nations={nationsMock} 
+        searchTerm={searchTerm} 
+        filters={filters} 
+        isEditable={true} 
+      />
     </>
   );
 };

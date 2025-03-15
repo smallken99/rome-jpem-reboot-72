@@ -13,6 +13,13 @@ export interface Nation {
   flag?: string;
   relation?: string;
   power?: number;
+  // Ajout des propriétés manquantes
+  population?: number;
+  militaryStrength?: number;
+  diplomaticInfluence?: number;
+  tradeValue?: number;
+  lastContact?: string;
+  leaders?: string[];
 }
 
 export interface Traite {
@@ -20,12 +27,18 @@ export interface Traite {
   title: string;
   parties: string[];
   type: 'commercial' | 'peace' | 'military' | 'tribute';
-  status: 'active' | 'draft' | 'expired' | 'revoked';
+  status: 'active' | 'draft' | 'expired' | 'revoked' | 'violated';
   description: string;
   dateCreated: string;
   dateExpires?: string;
   date?: string;
   terms?: string[];
+  // Ajout des propriétés manquantes
+  dateSignature?: string;
+  dateExpiration?: string;
+  clauses?: string[];
+  benefits?: string[];
+  obligations?: string[];
 }
 
 export interface Alliance {
@@ -33,12 +46,19 @@ export interface Alliance {
   name: string;
   nations: string[];
   type: 'defensive' | 'offensive' | 'commercial' | 'full';
-  status: 'active' | 'inactive' | 'pending';
+  status: 'active' | 'inactive' | 'pending' | 'expired' | 'dissolved';
   description: string;
   date?: string;
   dateCreated: string;
   dateExpires?: string;
   terms?: string[];
+  // Ajout des propriétés manquantes
+  members?: string[];
+  dateCreation?: string;
+  duration?: number;
+  militarySupport?: number;
+  economicBenefits?: string[];
+  commitments?: string[];
 }
 
 export interface NationsListProps {
@@ -60,4 +80,12 @@ export interface AlliancesMilitairesProps {
   searchTerm: string;
   filters: any;
   isEditable: boolean;
+}
+
+export interface DiplomaticFiltersProps {
+  activeTab: string;
+  onFilterChange: (filters: any) => void;
+  onReset: () => void;
+  onSearch?: (term: string) => void;
+  onFilter?: (filters: any) => void;
 }

@@ -2,9 +2,9 @@
 import React, { useState } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { nations } from './data/nations';
-import { traites } from './data/traites';
-import { alliances } from './data/alliances';
+import { nationsMock } from './data/nations';
+import { traitesMock } from './data/traites';
+import { alliancesMock } from './data/alliances';
 import { NationsList } from './NationsList';
 import { TraitesList } from './TraitesList';
 import { AlliancesMilitaires } from './AlliancesMilitaires';
@@ -15,9 +15,9 @@ import { Nation, Traite, Alliance } from './types';
 export const RelationsDiplomatiques: React.FC = () => {
   const [activeTab, setActiveTab] = useState('nations');
   const [searchTerm, setSearchTerm] = useState('');
-  const [nations, setNations] = useState<Nation[]>([...nations]);
-  const [traites, setTraites] = useState<Traite[]>([...traites]);
-  const [alliances, setAlliances] = useState<Alliance[]>([...alliances]);
+  const [nationsData, setNationsData] = useState<Nation[]>([...nationsMock]);
+  const [traitesData, setTraitesData] = useState<Traite[]>([...traitesMock]);
+  const [alliancesData, setAlliancesData] = useState<Alliance[]>([...alliancesMock]);
   const [filters, setFilters] = useState({
     status: '',
     region: '',
@@ -51,17 +51,17 @@ export const RelationsDiplomatiques: React.FC = () => {
   };
   
   const openAddNationModal = () => {
-    // TODO: Implement nation modal
+    // Implémentation à venir
     console.log('Open add nation modal');
   };
   
   const openAddTraiteModal = () => {
-    // TODO: Implement traité modal
+    // Implémentation à venir
     console.log('Open add traité modal');
   };
   
   const openAddAllianceModal = () => {
-    // TODO: Implement alliance modal
+    // Implémentation à venir
     console.log('Open add alliance modal');
   };
   
@@ -91,7 +91,7 @@ export const RelationsDiplomatiques: React.FC = () => {
           
           <TabsContent value="nations">
             <NationsList 
-              nations={nations} 
+              nations={nationsData} 
               searchTerm={searchTerm} 
               filters={filters}
               isEditable={true}
@@ -100,7 +100,7 @@ export const RelationsDiplomatiques: React.FC = () => {
           
           <TabsContent value="traites">
             <TraitesList 
-              traites={traites} 
+              traites={traitesData} 
               searchTerm={searchTerm} 
               filters={filters}
               isEditable={true}
@@ -109,7 +109,7 @@ export const RelationsDiplomatiques: React.FC = () => {
           
           <TabsContent value="alliances">
             <AlliancesMilitaires 
-              alliances={alliances} 
+              alliances={alliancesData} 
               searchTerm={searchTerm} 
               filters={filters}
               isEditable={true}

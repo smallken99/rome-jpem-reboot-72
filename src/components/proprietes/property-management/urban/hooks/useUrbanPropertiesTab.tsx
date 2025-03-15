@@ -1,98 +1,50 @@
 
 import { useState } from 'react';
-import { urbanResidentialBuildings, religiousBuildings, publicBuildings, militaryBuildings } from '../../../data/buildings';
-import { useBuildingManagement } from '../../../hooks/useBuildingManagement';
-import { usePatrimoine } from '@/hooks/usePatrimoine';
-import { BuildingDescription } from '../../../data/types/buildingTypes';
+import { useBuildingSale } from '../../rural/hooks/useBuildingSale';
+
+interface OwnedBuilding {
+  id: number;
+  name: string;
+  location: string;
+  type: string;
+  value: number;
+}
 
 export const useUrbanPropertiesTab = () => {
-  const [selectedBuildingType, setSelectedBuildingType] = useState<'residential' | 'religious' | 'public' | 'military'>('residential');
-  const [selectedBuildingId, setSelectedBuildingId] = useState<string | null>(null);
-  const [purchaseDialogOpen, setPurchaseDialogOpen] = useState(false);
-  
-  const { 
-    ownedBuildings, 
-    purchaseBuilding, 
-    sellBuilding, 
-    toggleMaintenance, 
-    performMaintenance, 
-    calculateBuildingValue,
-    assignSlaves 
-  } = useBuildingManagement();
-  
-  const { balance } = usePatrimoine();
-  
-  // Récupération des données du bâtiment sélectionné
-  const getBuildingDetails = (): BuildingDescription | null => {
-    if (!selectedBuildingId) return null;
-    
-    switch (selectedBuildingType) {
-      case 'residential':
-        return urbanResidentialBuildings[selectedBuildingId] || null;
-      case 'religious':
-        return religiousBuildings[selectedBuildingId] || null;
-      case 'public':
-        return publicBuildings[selectedBuildingId] || null;
-      case 'military':
-        return militaryBuildings[selectedBuildingId] || null;
-      default:
-        return null;
-    }
-  };
-  
-  const selectedBuildingDetails = getBuildingDetails();
-  
-  // Filtrer les bâtiments possédés selon le type
-  const filteredOwnedBuildings = ownedBuildings.filter(building => {
-    switch (selectedBuildingType) {
-      case 'residential':
-        return building.buildingType === 'urban';
-      case 'religious':
-        return building.buildingType === 'religious';
-      case 'public':
-        return building.buildingType === 'public';
-      case 'military':
-        return building.buildingType === 'military';
-      default:
-        return false;
-    }
-  });
-  
-  // Fonction pour traiter l'achat
-  const handlePurchase = (
+  const [buildings, setBuildings] = useState<OwnedBuilding[]>([
+    { id: 1, name: 'Domus du Palatin', location: 'Rome', type: 'urban', value: 120000 },
+    { id: 2, name: 'Insula près du forum', location: 'Rome', type: 'urban', value: 80000 },
+    { id: 3, name: 'Villa à Baïes', location: 'Campanie', type: 'urban', value: 200000 },
+  ]);
+
+  const { saleBuilding, estimateBuildingValue, sellBuilding } = useBuildingSale();
+
+  const handleAddProperty = (
     buildingId: string, 
-    buildingType: 'urban' | 'rural' | 'religious' | 'public' | 'military', 
+    buildingType: "urban" | "rural" | "religious" | "public", 
     location: string, 
     customName?: string
-  ) => {
-    const buildingDetails = getBuildingDetails();
+  ): boolean => {
+    // Pour cet exemple, on retourne toujours true
+    if (!buildingId || !location) return false;
     
-    if (!buildingDetails) return false;
+    const newBuilding: OwnedBuilding = {
+      id: Date.now(),
+      name: customName || `Nouvelle propriété ${buildings.length + 1}`,
+      location,
+      type: buildingType,
+      value: 100000
+    };
     
-    return purchaseBuilding(buildingDetails, buildingId, buildingType, location, customName);
+    setBuildings(prev => [...prev, newBuilding]);
+    return true;
   };
-  
-  // Nombre total d'esclaves disponibles
-  const totalAssignedSlaves = ownedBuildings.reduce((sum, building) => sum + building.slaves, 0);
-  const totalSlaves = 25; // Simulé - à remplacer par la source réelle
-  const availableSlaves = totalSlaves - totalAssignedSlaves;
-  
+
   return {
-    selectedBuildingType,
-    setSelectedBuildingType,
-    selectedBuildingId,
-    setSelectedBuildingId,
-    purchaseDialogOpen,
-    setPurchaseDialogOpen,
-    selectedBuildingDetails,
-    filteredOwnedBuildings,
-    handlePurchase,
-    balance,
-    toggleMaintenance,
-    performMaintenance,
+    buildings,
+    handleAddProperty,
+    saleBuilding,
     sellBuilding,
-    calculateBuildingValue,
-    assignSlaves,
-    availableSlaves
+    estimateBuildingValue
   };
 };
