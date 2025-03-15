@@ -1,297 +1,283 @@
 
 import React, { useState } from 'react';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table';
+import { BarChart3, PieChart, TrendingUp, Filter, CalendarRange, Download } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { CheckCircle2, XCircle, Download, Filter } from 'lucide-react';
-import { toast } from 'sonner';
+import { Input } from '@/components/ui/input';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
-
-// Mock data
-const mockRevenueData = [
-  {
-    id: 'rev-1',
-    buildingId: '1',
-    buildingName: 'Temple de Jupiter',
-    year: 705,
-    season: 'Hiems',
-    amount: 1500,
-    details: 'Offrandes et donations des citoyens',
-    collected: true,
-    collectedDate: { year: 705, season: 'Hiems', day: 60 }
-  },
-  {
-    id: 'rev-2',
-    buildingId: '2',
-    buildingName: 'Thermes de Caracalla',
-    year: 706,
-    season: 'Ver',
-    amount: 3000,
-    details: 'Droits d\'entrée',
-    collected: false,
-    collectedDate: null
-  },
-  {
-    id: 'rev-3',
-    buildingId: '4',
-    buildingName: 'Entrepôt du Port',
-    year: 706,
-    season: 'Ver',
-    amount: 5000,
-    details: 'Location d\'espaces de stockage',
-    collected: false,
-    collectedDate: null
-  },
-  {
-    id: 'rev-4',
-    buildingId: '5',
-    buildingName: 'Amphithéâtre',
-    year: 706,
-    season: 'Ver',
-    amount: 8000,
-    details: 'Vente de billets pour les jeux',
-    collected: false,
-    collectedDate: null
-  },
-  {
-    id: 'rev-5',
-    buildingId: '1',
-    buildingName: 'Temple de Jupiter',
-    year: 706,
-    season: 'Ver',
-    amount: 2000,
-    details: 'Offrandes et donations des citoyens',
-    collected: false,
-    collectedDate: null
-  }
-];
-
-// Mock chart data
-const chartData = [
-  { name: 'Hiems 705', Temple: 1500, Thermes: 2800, Entrepot: 4500, Amphitheatre: 7000 },
-  { name: 'Ver 706', Temple: 2000, Thermes: 3000, Entrepot: 5000, Amphitheatre: 8000 },
-  { name: 'Aestas 706 (prév.)', Temple: 2500, Thermes: 4000, Entrepot: 5500, Amphitheatre: 10000 },
-  { name: 'Autumnus 706 (prév.)', Temple: 3000, Thermes: 3500, Entrepot: 6000, Amphitheatre: 9000 },
-  { name: 'Hiems 706 (prév.)', Temple: 1800, Thermes: 2500, Entrepot: 4000, Amphitheatre: 6000 },
-];
 
 interface BuildingRevenueProps {
   currentYear: number;
   currentSeason: string;
 }
 
+interface BuildingRevenue {
+  id: string;
+  buildingId: string;
+  buildingName: string;
+  buildingType: string;
+  year: number;
+  season: string;
+  amount: number;
+  trend: 'up' | 'down' | 'stable';
+  source: string;
+  taxRate: number;
+}
+
 export const BuildingRevenue: React.FC<BuildingRevenueProps> = ({
   currentYear,
   currentSeason
 }) => {
-  const [revenues, setRevenues] = useState(mockRevenueData);
-  const [seasonFilter, setSeasonFilter] = useState('all');
-  const [collectedFilter, setCollectedFilter] = useState('all');
+  const [activeTab, setActiveTab] = useState('details');
+  const [selectedYear, setSelectedYear] = useState(currentYear);
 
-  const handleCollectRevenue = (id: string) => {
-    setRevenues(prev => 
-      prev.map(revenue => 
-        revenue.id === id 
-          ? { 
-              ...revenue, 
-              collected: true, 
-              collectedDate: { year: currentYear, season: currentSeason, day: 1 }
-            } 
-          : revenue
-      )
-    );
-    toast.success('Revenu collecté avec succès!');
-  };
-
-  const handleExportData = () => {
-    toast.success('Export des données de revenus en cours...');
-  };
-
-  const totalExpectedRevenue = revenues
-    .filter(r => r.year === currentYear && r.season === currentSeason)
-    .reduce((sum, r) => sum + r.amount, 0);
-  
-  const totalCollectedRevenue = revenues
-    .filter(r => r.year === currentYear && r.season === currentSeason && r.collected)
-    .reduce((sum, r) => sum + r.amount, 0);
-
-  const filteredRevenues = revenues.filter(revenue => {
-    if (seasonFilter !== 'all') {
-      const seasonYear = `${revenue.season}-${revenue.year}`;
-      if (seasonFilter !== seasonYear) return false;
+  // Données fictives pour la démonstration
+  const revenueData: BuildingRevenue[] = [
+    {
+      id: '1',
+      buildingId: '1',
+      buildingName: 'Temple de Jupiter',
+      buildingType: 'Temple',
+      year: 721,
+      season: 'Ver',
+      amount: 3200,
+      trend: 'up',
+      source: 'Dons',
+      taxRate: 0
+    },
+    {
+      id: '2',
+      buildingId: '2',
+      buildingName: 'Basilique Aemilia',
+      buildingType: 'Basilique',
+      year: 721,
+      season: 'Ver',
+      amount: 6500,
+      trend: 'stable',
+      source: 'Loyers commerciaux',
+      taxRate: 5
+    },
+    {
+      id: '3',
+      buildingId: '3',
+      buildingName: 'Aqueduc Appien',
+      buildingType: 'Aqueduc',
+      year: 721,
+      season: 'Ver',
+      amount: 8900,
+      trend: 'up',
+      source: 'Taxes hydrauliques',
+      taxRate: 8
+    },
+    {
+      id: '4',
+      buildingId: '4',
+      buildingName: 'Bains publics',
+      buildingType: 'Bains',
+      year: 721,
+      season: 'Ver',
+      amount: 5200,
+      trend: 'down',
+      source: 'Entrées',
+      taxRate: 3
     }
-    
-    if (collectedFilter === 'collected' && !revenue.collected) return false;
-    if (collectedFilter === 'pending' && revenue.collected) return false;
-    
-    return true;
-  });
+  ];
 
-  // Get unique season-year combinations for filter
-  const seasonOptions = Array.from(
-    new Set(revenues.map(r => `${r.season}-${r.year}`))
-  ).map(val => {
-    const [season, year] = val.split('-');
-    return { value: val, label: `${season} ${year}` };
-  });
+  const chartData = [
+    { name: 'Ver', Temple: 3200, Basilique: 6500, Aqueduc: 8900, Bains: 5200 },
+    { name: 'Aestas', Temple: 2800, Basilique: 6500, Aqueduc: 9500, Bains: 4800 },
+    { name: 'Autumnus', Temple: 3500, Basilique: 6300, Aqueduc: 9200, Bains: 5100 },
+    { name: 'Hiems', Temple: 4000, Basilique: 6100, Aqueduc: 8700, Bains: 4500 }
+  ];
+
+  const summaryByType = {
+    Temple: 3200,
+    Basilique: 6500,
+    Aqueduc: 8900,
+    Bains: 5200,
+    Marché: 7300,
+    'Maison du Sénat': 2100
+  };
+
+  const getTrendBadge = (trend: 'up' | 'down' | 'stable') => {
+    switch (trend) {
+      case 'up':
+        return <Badge variant="outline" className="bg-green-100 text-green-800">↑ Hausse</Badge>;
+      case 'down':
+        return <Badge variant="outline" className="bg-red-100 text-red-800">↓ Baisse</Badge>;
+      case 'stable':
+        return <Badge variant="outline" className="bg-blue-100 text-blue-800">→ Stable</Badge>;
+      default:
+        return <Badge variant="outline">Inconnu</Badge>;
+    }
+  };
+
+  // Calculer le revenu total
+  const totalRevenue = revenueData.reduce((sum, item) => sum + item.amount, 0);
 
   return (
-    <div className="space-y-6">
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-lg">Revenus attendus</CardTitle>
-            <CardDescription>Saison actuelle</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{totalExpectedRevenue} deniers</div>
-          </CardContent>
-        </Card>
+    <div className="space-y-4">
+      <div className="flex justify-between items-center flex-wrap gap-2">
+        <div className="flex items-center gap-2">
+          <TrendingUp className="h-5 w-5 text-muted-foreground" />
+          <h2 className="text-xl font-semibold">Revenus des bâtiments</h2>
+        </div>
         
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-lg">Revenus collectés</CardTitle>
-            <CardDescription>Saison actuelle</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{totalCollectedRevenue} deniers</div>
-          </CardContent>
-        </Card>
-        
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-lg">Taux de collecte</CardTitle>
-            <CardDescription>Saison actuelle</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">
-              {totalExpectedRevenue > 0 
-                ? Math.round((totalCollectedRevenue / totalExpectedRevenue) * 100) 
-                : 0}%
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-      
-      <Card>
-        <CardHeader>
-          <CardTitle>Prévisions de revenus</CardTitle>
-          <CardDescription>
-            Projection des revenus par type de bâtiment
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="h-[300px]">
-            <ResponsiveContainer width="100%" height="100%">
-              <BarChart
-                data={chartData}
-                margin={{ top: 20, right: 30, left: 20, bottom: 5 }}
-              >
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="name" />
-                <YAxis />
-                <Tooltip />
-                <Legend />
-                <Bar dataKey="Temple" fill="#8884d8" />
-                <Bar dataKey="Thermes" fill="#82ca9d" />
-                <Bar dataKey="Entrepot" fill="#ffc658" />
-                <Bar dataKey="Amphitheatre" fill="#ff8042" />
-              </BarChart>
-            </ResponsiveContainer>
-          </div>
-        </CardContent>
-      </Card>
-      
-      <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-        <h3 className="text-lg font-medium">Détail des revenus</h3>
-        
-        <div className="flex gap-2">
-          <Select value={seasonFilter} onValueChange={setSeasonFilter}>
-            <SelectTrigger className="w-[180px]">
-              <SelectValue placeholder="Saison" />
+        <div className="flex items-center gap-2">
+          <CalendarRange className="h-4 w-4 text-muted-foreground" />
+          <Select 
+            value={selectedYear.toString()} 
+            onValueChange={(value) => setSelectedYear(parseInt(value))}
+          >
+            <SelectTrigger className="w-[120px]">
+              <SelectValue placeholder="Année" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">Toutes les saisons</SelectItem>
-              {seasonOptions.map(option => (
-                <SelectItem key={option.value} value={option.value}>
-                  {option.label}
-                </SelectItem>
-              ))}
+              <SelectItem value="719">719 AUC</SelectItem>
+              <SelectItem value="720">720 AUC</SelectItem>
+              <SelectItem value="721">721 AUC</SelectItem>
             </SelectContent>
           </Select>
           
-          <Select value={collectedFilter} onValueChange={setCollectedFilter}>
-            <SelectTrigger className="w-[180px]">
-              <SelectValue placeholder="Statut" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">Tous les statuts</SelectItem>
-              <SelectItem value="collected">Collectés</SelectItem>
-              <SelectItem value="pending">En attente</SelectItem>
-            </SelectContent>
-          </Select>
-          
-          <Button variant="outline" className="flex items-center gap-2" onClick={handleExportData}>
-            <Download className="h-4 w-4" />
+          <Button variant="outline" className="ml-2">
+            <Download className="h-4 w-4 mr-2" />
             Exporter
           </Button>
         </div>
       </div>
       
-      <div className="rounded-md border">
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>Bâtiment</TableHead>
-              <TableHead>Période</TableHead>
-              <TableHead>Montant</TableHead>
-              <TableHead>Détails</TableHead>
-              <TableHead>Statut</TableHead>
-              <TableHead className="text-right">Actions</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {filteredRevenues.map((revenue) => (
-              <TableRow key={revenue.id}>
-                <TableCell className="font-medium">
-                  {revenue.buildingName}
-                </TableCell>
-                <TableCell>
-                  {revenue.season} {revenue.year}
-                </TableCell>
-                <TableCell>{revenue.amount} deniers</TableCell>
-                <TableCell>{revenue.details}</TableCell>
-                <TableCell>
-                  {revenue.collected ? (
-                    <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">
-                      <CheckCircle2 className="h-3 w-3 mr-1" />
-                      Collecté
-                    </Badge>
-                  ) : (
-                    <Badge variant="outline" className="bg-amber-50 text-amber-700 border-amber-200">
-                      <XCircle className="h-3 w-3 mr-1" />
-                      En attente
-                    </Badge>
-                  )}
-                </TableCell>
-                <TableCell className="text-right">
-                  {!revenue.collected && (
-                    <Button 
-                      variant="outline" 
-                      size="sm" 
-                      onClick={() => handleCollectRevenue(revenue.id)}
-                    >
-                      Collecter
-                    </Button>
-                  )}
-                </TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm font-medium text-muted-foreground">
+              Revenu total (Ver)
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{totalRevenue} as</div>
+            <p className="text-xs text-muted-foreground mt-1">
+              +12% par rapport à l'année précédente
+            </p>
+          </CardContent>
+        </Card>
+        
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm font-medium text-muted-foreground">
+              Bâtiment le plus rentable
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">Aqueduc Appien</div>
+            <p className="text-xs text-muted-foreground mt-1">
+              8,900 as par saison
+            </p>
+          </CardContent>
+        </Card>
+        
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm font-medium text-muted-foreground">
+              Projections annuelles
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">95,000 as</div>
+            <p className="text-xs text-muted-foreground mt-1">
+              Basé sur les tendances actuelles
+            </p>
+          </CardContent>
+        </Card>
       </div>
+      
+      <Tabs value={activeTab} onValueChange={setActiveTab}>
+        <TabsList className="grid grid-cols-2">
+          <TabsTrigger value="details" className="flex items-center gap-2">
+            <Table className="h-4 w-4" />
+            Détails
+          </TabsTrigger>
+          <TabsTrigger value="charts" className="flex items-center gap-2">
+            <BarChart3 className="h-4 w-4" />
+            Graphiques
+          </TabsTrigger>
+        </TabsList>
+        
+        <TabsContent value="details" className="mt-4">
+          <Card>
+            <CardContent className="p-0">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Bâtiment</TableHead>
+                    <TableHead>Type</TableHead>
+                    <TableHead>Source</TableHead>
+                    <TableHead>Taux</TableHead>
+                    <TableHead>Montant</TableHead>
+                    <TableHead>Tendance</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {revenueData.map(revenue => (
+                    <TableRow key={revenue.id}>
+                      <TableCell className="font-medium">{revenue.buildingName}</TableCell>
+                      <TableCell>{revenue.buildingType}</TableCell>
+                      <TableCell>{revenue.source}</TableCell>
+                      <TableCell>{revenue.taxRate}%</TableCell>
+                      <TableCell className="font-semibold">{revenue.amount} as</TableCell>
+                      <TableCell>{getTrendBadge(revenue.trend)}</TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </CardContent>
+          </Card>
+        </TabsContent>
+        
+        <TabsContent value="charts" className="mt-4">
+          <Card>
+            <CardHeader>
+              <CardTitle>Revenus saisonniers par type de bâtiment</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="h-80">
+                <ResponsiveContainer width="100%" height="100%">
+                  <BarChart
+                    data={chartData}
+                    margin={{ top: 20, right: 30, left: 20, bottom: 5 }}
+                  >
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis dataKey="name" />
+                    <YAxis />
+                    <Tooltip />
+                    <Legend />
+                    <Bar dataKey="Temple" fill="#8884d8" />
+                    <Bar dataKey="Basilique" fill="#82ca9d" />
+                    <Bar dataKey="Aqueduc" fill="#ffc658" />
+                    <Bar dataKey="Bains" fill="#ff8042" />
+                  </BarChart>
+                </ResponsiveContainer>
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+      </Tabs>
     </div>
   );
 };

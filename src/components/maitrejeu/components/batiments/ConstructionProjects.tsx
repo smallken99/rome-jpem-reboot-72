@@ -1,59 +1,29 @@
 
-import React, { useState } from 'react';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Button } from '@/components/ui/button';
+import React from 'react';
+import { Card, CardContent } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
-import { Checkbox } from '@/components/ui/checkbox';
 import { Badge } from '@/components/ui/badge';
-import { Plus, CheckCircle2, XCircle, Play, Pause } from 'lucide-react';
-import { toast } from 'sonner';
-import { GameDate } from '../../types/common';
+import { Button } from '@/components/ui/button';
+import { Pencil, Play, Pause, AlertTriangle } from 'lucide-react';
 
-// Mock data
-const mockProjects = [
-  {
-    id: 'proj-1',
-    buildingName: 'Nouveau Forum',
-    buildingType: 'forum',
-    location: 'Centre-ville',
-    totalCost: 50000,
-    expectedCompletionYear: 707,
-    expectedCompletionSeason: 'Ver',
-    startDate: { year: 705, season: 'Ver' },
-    progress: 25,
-    responsible: 'Quintus Fabius',
-    approved: true,
-    sponsors: ['Marcus Aurelius', 'Lucius Verus']
-  },
-  {
-    id: 'proj-2',
-    buildingName: 'Aqueduc Clodia',
-    buildingType: 'aqueduc',
-    location: 'Nord de Rome',
-    totalCost: 30000,
-    expectedCompletionYear: 708,
-    expectedCompletionSeason: 'Aestas',
-    startDate: { year: 706, season: 'Hiems' },
-    progress: 10,
-    responsible: 'Marcus Agrippa',
-    approved: false,
-    sponsors: ['Claudius Nero']
-  },
-  {
-    id: 'proj-3',
-    buildingName: 'Temple de Vénus',
-    buildingType: 'temple',
-    location: 'Forum Boarium',
-    totalCost: 20000,
-    expectedCompletionYear: 707,
-    expectedCompletionSeason: 'Autumnus',
-    startDate: { year: 706, season: 'Ver' },
-    progress: 60,
-    responsible: 'Publius Cornelius',
-    approved: true,
-    sponsors: ['Julia Augusta', 'Livia Drusilla']
-  }
-];
+interface Project {
+  id: string;
+  name: string;
+  type: string;
+  location: string;
+  startYear: number;
+  startSeason: string;
+  estimatedEndYear: number;
+  estimatedEndSeason: string;
+  progress: number;
+  status: 'planning' | 'in_progress' | 'paused' | 'delayed';
+  cost: {
+    estimated: number;
+    spent: number;
+    remaining: number;
+  };
+  issues: string[];
+}
 
 interface ConstructionProjectsProps {
   currentYear: number;
@@ -64,123 +34,170 @@ export const ConstructionProjects: React.FC<ConstructionProjectsProps> = ({
   currentYear,
   currentSeason
 }) => {
-  const [projects, setProjects] = useState(mockProjects);
+  // Données fictives pour la démonstration
+  const projects: Project[] = [
+    {
+      id: '1',
+      name: 'Nouvelle Basilique',
+      type: 'Basilique',
+      location: 'Forum Romanum',
+      startYear: 720,
+      startSeason: 'Ver',
+      estimatedEndYear: 722,
+      estimatedEndSeason: 'Aestas',
+      progress: 25,
+      status: 'in_progress',
+      cost: {
+        estimated: 100000,
+        spent: 30000,
+        remaining: 70000
+      },
+      issues: []
+    },
+    {
+      id: '2',
+      name: 'Rénovation du Temple de Vesta',
+      type: 'Temple',
+      location: 'Forum Romanum',
+      startYear: 719,
+      startSeason: 'Hiems',
+      estimatedEndYear: 721,
+      estimatedEndSeason: 'Ver',
+      progress: 75,
+      status: 'delayed',
+      cost: {
+        estimated: 50000,
+        spent: 40000,
+        remaining: 10000
+      },
+      issues: ['Problèmes structurels découverts', 'Matériaux en retard']
+    },
+    {
+      id: '3',
+      name: 'Extension de l\'Aqueduc',
+      type: 'Aqueduc',
+      location: 'Colline Quirinal',
+      startYear: 721,
+      startSeason: 'Ver',
+      estimatedEndYear: 723,
+      estimatedEndSeason: 'Hiems',
+      progress: 5,
+      status: 'planning',
+      cost: {
+        estimated: 200000,
+        spent: 10000,
+        remaining: 190000
+      },
+      issues: []
+    }
+  ];
 
-  const handleApproveProject = (id: string) => {
-    setProjects(prev => 
-      prev.map(project => 
-        project.id === id ? { ...project, approved: true } : project
-      )
-    );
-    toast.success('Projet approuvé !');
+  const getStatusBadge = (status: Project['status']) => {
+    switch (status) {
+      case 'planning':
+        return <Badge variant="outline" className="bg-blue-100 text-blue-800">Planification</Badge>;
+      case 'in_progress':
+        return <Badge variant="outline" className="bg-green-100 text-green-800">En cours</Badge>;
+      case 'paused':
+        return <Badge variant="outline" className="bg-yellow-100 text-yellow-800">En pause</Badge>;
+      case 'delayed':
+        return <Badge variant="outline" className="bg-red-100 text-red-800">Retardé</Badge>;
+      default:
+        return <Badge variant="outline">Inconnu</Badge>;
+    }
   };
 
-  const handleAdvanceProgress = (id: string, amount: number) => {
-    setProjects(prev => 
-      prev.map(project => {
-        if (project.id === id) {
-          const newProgress = Math.min(100, project.progress + amount);
-          if (newProgress === 100) {
-            toast.success(`Construction de ${project.buildingName} terminée !`);
-          } else {
-            toast.success(`Progression de ${project.buildingName} mise à jour.`);
-          }
-          return { ...project, progress: newProgress };
-        }
-        return project;
-      })
-    );
+  const handleEdit = (id: string) => {
+    console.log('Editing project with ID:', id);
+    // Logique d'édition à implémenter
   };
 
-  const handleNewProject = () => {
-    toast.info('Formulaire de nouveau projet ouvert');
+  const handleToggleStatus = (id: string, currentStatus: Project['status']) => {
+    console.log('Toggling status for project with ID:', id);
+    // Logique de changement de statut à implémenter
   };
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-6">
       <div className="flex justify-between items-center">
-        <h3 className="text-lg font-medium">Projets de construction en cours</h3>
-        <Button onClick={handleNewProject} className="flex items-center gap-2">
-          <Plus className="h-4 w-4" />
-          Nouveau projet
-        </Button>
+        <h2 className="text-xl font-semibold">Projets de construction</h2>
+        <Button variant="outline">+ Nouveau projet</Button>
       </div>
 
-      <div className="rounded-md border">
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>Approuvé</TableHead>
-              <TableHead>Projet</TableHead>
-              <TableHead>Type</TableHead>
-              <TableHead>Coût</TableHead>
-              <TableHead>Progression</TableHead>
-              <TableHead>Fin estimée</TableHead>
-              <TableHead>Responsable</TableHead>
-              <TableHead className="text-right">Actions</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {projects.map((project) => (
-              <TableRow key={project.id}>
-                <TableCell>
-                  <Checkbox checked={project.approved} disabled />
-                </TableCell>
-                <TableCell className="font-medium">
-                  {project.buildingName}
-                  <div className="text-xs text-muted-foreground">{project.location}</div>
-                </TableCell>
-                <TableCell className="capitalize">{project.buildingType}</TableCell>
-                <TableCell>{project.totalCost} deniers</TableCell>
-                <TableCell>
-                  <div className="flex items-center gap-2">
-                    <Progress value={project.progress} className="w-[80px]" />
-                    <span className="text-xs">{project.progress}%</span>
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
+        {projects.map(project => (
+          <Card key={project.id} className="overflow-hidden">
+            <div className="bg-slate-100 p-4">
+              <div className="flex justify-between items-start">
+                <div>
+                  <h3 className="font-bold text-lg">{project.name}</h3>
+                  <p className="text-sm text-muted-foreground">{project.type} - {project.location}</p>
+                </div>
+                {getStatusBadge(project.status)}
+              </div>
+            </div>
+            <CardContent className="p-4 space-y-4">
+              <div>
+                <div className="flex justify-between text-sm mb-1">
+                  <span>Progression: {project.progress}%</span>
+                  <span>{project.cost.spent} / {project.cost.estimated} as</span>
+                </div>
+                <Progress value={project.progress} className="h-2" />
+              </div>
+              
+              <div className="text-sm grid grid-cols-2 gap-2">
+                <div>
+                  <p className="text-muted-foreground">Début</p>
+                  <p>{project.startYear} AUC, {project.startSeason}</p>
+                </div>
+                <div>
+                  <p className="text-muted-foreground">Fin estimée</p>
+                  <p>{project.estimatedEndYear} AUC, {project.estimatedEndSeason}</p>
+                </div>
+              </div>
+              
+              {project.issues.length > 0 && (
+                <div className="border-t pt-2">
+                  <div className="flex items-center text-amber-600 mb-1">
+                    <AlertTriangle className="h-4 w-4 mr-1" />
+                    <span className="text-sm font-medium">Problèmes à résoudre</span>
                   </div>
-                </TableCell>
-                <TableCell>
-                  {project.expectedCompletionYear} ({project.expectedCompletionSeason})
-                </TableCell>
-                <TableCell>{project.responsible}</TableCell>
-                <TableCell className="text-right">
-                  <div className="flex justify-end gap-2">
-                    {!project.approved ? (
-                      <Button 
-                        variant="outline" 
-                        size="icon" 
-                        onClick={() => handleApproveProject(project.id)}
-                        title="Approuver"
-                      >
-                        <CheckCircle2 className="h-4 w-4 text-green-500" />
-                      </Button>
-                    ) : (
-                      <Button 
-                        variant="outline" 
-                        size="icon" 
-                        onClick={() => handleAdvanceProgress(project.id, 10)}
-                        title="Avancer la construction"
-                        disabled={project.progress >= 100}
-                      >
-                        <Play className="h-4 w-4" />
-                      </Button>
-                    )}
-                    <Button variant="outline" size="icon" title="Pauser">
-                      <Pause className="h-4 w-4" />
-                    </Button>
-                    <Button variant="outline" size="icon" title="Annuler">
-                      <XCircle className="h-4 w-4 text-red-500" />
-                    </Button>
-                  </div>
-                </TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      </div>
-
-      <div className="text-sm text-muted-foreground border-t pt-4 mt-4">
-        <p>Date actuelle: An {currentYear}, {currentSeason}</p>
-        <p>Les projets de construction avancent automatiquement à chaque saison, mais vous pouvez accélérer ou ralentir leur progression manuellement.</p>
+                  <ul className="text-sm space-y-1">
+                    {project.issues.map((issue, index) => (
+                      <li key={index} className="flex items-start">
+                        <span className="mr-2">•</span>
+                        <span>{issue}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+              
+              <div className="flex space-x-2 pt-2">
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  className="flex-1"
+                  onClick={() => handleEdit(project.id)}
+                >
+                  <Pencil className="h-4 w-4 mr-1" /> Détails
+                </Button>
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  className="flex-1"
+                  onClick={() => handleToggleStatus(project.id, project.status)}
+                >
+                  {project.status === 'in_progress' ? (
+                    <><Pause className="h-4 w-4 mr-1" /> Pause</>
+                  ) : (
+                    <><Play className="h-4 w-4 mr-1" /> Reprendre</>
+                  )}
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        ))}
       </div>
     </div>
   );

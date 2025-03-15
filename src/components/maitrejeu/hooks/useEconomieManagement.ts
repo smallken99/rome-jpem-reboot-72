@@ -167,7 +167,7 @@ export const useEconomieManagement = () => {
   
   const handleManageTaxes = () => {
     toast('Gestion des impôts', {
-      description: 'Cette fonctionnalité permet de gérer les taux d'imposition et leurs revenus.',
+      description: 'Cette fonctionnalité permet de gérer les taux d\'imposition et leurs revenus.',
       action: {
         label: 'Configurer',
         onClick: () => console.log('Configurer les impôts'),

@@ -5,6 +5,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
 import { Plus, FileText, Wrench, ChartBar } from 'lucide-react';
 import { useMaitreJeu } from './context';
+import { useBatimentsManagement } from './hooks/useBatimentsManagement';
 import { BuildingManagement } from './components/batiments/BuildingManagement';
 import { BuildingsList } from './components/batiments/BuildingsList';
 import { ConstructionProjects } from './components/batiments/ConstructionProjects';
@@ -14,8 +15,45 @@ import { PublicBuildingModal } from './components/batiments/PublicBuildingModal'
 
 export const GestionBatiments = () => {
   const [activeTab, setActiveTab] = useState<string>('liste');
-  const [isAddBuildingModalOpen, setIsAddBuildingModalOpen] = useState(false);
   const { currentYear, currentSeason } = useMaitreJeu();
+  const {
+    isAddBuildingModalOpen,
+    setIsAddBuildingModalOpen,
+    selectedBuilding,
+    setSelectedBuilding,
+    addBuilding,
+    updateBuilding
+  } = useBatimentsManagement();
+
+  const handleEditBuilding = (buildingId: string) => {
+    // Dans une implémentation réelle, il faudrait récupérer le bâtiment depuis l'état
+    console.log("Édition du bâtiment", buildingId);
+    setSelectedBuilding({
+      id: buildingId,
+      name: "Bâtiment exemple",
+      type: "temple",
+      location: "Forum Romanum",
+      status: "good",
+      constructionYear: 720,
+      description: "Un exemple de bâtiment",
+      cost: 50000,
+      maintenanceCost: 1000,
+      revenue: 2000,
+      capacity: 500,
+      owner: "république"
+    });
+    setIsAddBuildingModalOpen(true);
+  };
+
+  const handleSaveBuilding = (data: any) => {
+    if (selectedBuilding) {
+      updateBuilding(selectedBuilding.id, data);
+    } else {
+      addBuilding(data);
+    }
+    setIsAddBuildingModalOpen(false);
+    setSelectedBuilding(undefined);
+  };
 
   return (
     <div className="p-6 space-y-6">
@@ -61,7 +99,7 @@ export const GestionBatiments = () => {
             </TabsList>
 
             <TabsContent value="liste" className="pt-2">
-              <BuildingsList onEdit={() => console.log("Edit building")} />
+              <BuildingsList onEdit={handleEditBuilding} />
             </TabsContent>
 
             <TabsContent value="construction" className="pt-2">
@@ -90,10 +128,8 @@ export const GestionBatiments = () => {
       <PublicBuildingModal 
         isOpen={isAddBuildingModalOpen} 
         onClose={() => setIsAddBuildingModalOpen(false)} 
-        onSave={(data) => {
-          console.log("Save building:", data);
-          setIsAddBuildingModalOpen(false);
-        }}
+        onSave={handleSaveBuilding}
+        building={selectedBuilding}
       />
     </div>
   );

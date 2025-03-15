@@ -1,64 +1,91 @@
 
-import { useState, useEffect } from 'react';
-import { useMaitreJeu } from '@/components/maitrejeu/context';
-import { 
-  Building, 
-  BuildingCondition,
-  MaintenanceTask,
-  ConstructionProject,
-  BuildingRevenue 
-} from '@/components/maitrejeu/types/batiments';
+import { useState } from 'react';
+import { useMaitreJeu } from '../context';
 import { toast } from 'sonner';
 
-// Données fictives pour l'exemple
-const mockBuildings: Building[] = [
-  {
-    id: 'bld-1',
-    name: 'Temple de Jupiter',
-    type: 'temple',
-    description: 'Le plus grand temple de Rome dédié à Jupiter Optimus Maximus',
-    location: 'Forum Romanum',
-    condition: 'excellent',
-    constructionYear: 705,
-    lastMaintenance: { year: 705, season: 'Ver' },
-    maintenanceCost: 5000,
-    maintenanceInterval: 12,
-    revenue: 2000,
-    cost: 50000,
-    capacity: 1000,
-    isPublic: true,
-    ownerId: null,
-    slaves: 20,
-    slaveCost: 1000,
-    tags: ['religieux', 'prestige'],
-    attributes: {
-      piete: 10,
-      influence: 5
-    }
-  },
-  // ...autres bâtiments
-];
+// Types pour la gestion des bâtiments
+interface Building {
+  id: string;
+  name: string;
+  type: string;
+  location: string;
+  status: 'good' | 'average' | 'poor';
+  constructionYear: number;
+  description: string;
+  cost: number;
+  maintenanceCost: number;
+  revenue: number;
+  lastMaintenance?: string;
+  capacity: number;
+  owner: string;
+}
+
+interface ConstructionProject {
+  id: string;
+  buildingType: string;
+  name: string;
+  location: string;
+  startDate: {
+    year: number;
+    season: string;
+  };
+  estimatedEndDate: {
+    year: number;
+    season: string;
+  };
+  status: 'planning' | 'in_progress' | 'paused' | 'completed' | 'cancelled';
+  cost: {
+    estimated: number;
+    spent: number;
+    remaining: number;
+  };
+  progress: number;
+  description: string;
+}
+
+interface MaintenanceTask {
+  id: string;
+  buildingId: string;
+  type: 'routine' | 'repair' | 'emergency';
+  description: string;
+  scheduledDate: {
+    year: number;
+    season: string;
+  };
+  completedDate?: {
+    year: number;
+    season: string;
+  };
+  status: 'scheduled' | 'in_progress' | 'completed' | 'overdue';
+  cost: {
+    estimated: number;
+    actual?: number;
+  };
+  priority: 'low' | 'medium' | 'high' | 'critical';
+}
 
 export const useBatimentsManagement = () => {
   const { currentYear, currentSeason } = useMaitreJeu();
-  const [buildings, setBuildings] = useState<Building[]>(mockBuildings);
-  const [selectedBuilding, setSelectedBuilding] = useState<Building | null>(null);
-  const [maintenanceTasks, setMaintenanceTasks] = useState<MaintenanceTask[]>([]);
+  
+  // États
+  const [buildings, setBuildings] = useState<Building[]>([]);
   const [constructionProjects, setConstructionProjects] = useState<ConstructionProject[]>([]);
-  const [buildingRevenues, setBuildingRevenues] = useState<BuildingRevenue[]>([]);
-
-  // Ajouter un nouveau bâtiment
-  const addBuilding = (building: Omit<Building, 'id'>) => {
+  const [maintenanceTasks, setMaintenanceTasks] = useState<MaintenanceTask[]>([]);
+  const [isAddBuildingModalOpen, setIsAddBuildingModalOpen] = useState(false);
+  const [selectedBuilding, setSelectedBuilding] = useState<Building | undefined>(undefined);
+  
+  // Gestion des bâtiments
+  const addBuilding = (buildingData: Omit<Building, 'id'>) => {
     const newBuilding: Building = {
-      ...building,
-      id: `bld-${Date.now()}`,
+      ...buildingData,
+      id: crypto.randomUUID(),
     };
+    
     setBuildings(prev => [...prev, newBuilding]);
-    toast.success(`Le bâtiment ${building.name} a été ajouté avec succès`);
-    return newBuilding;
+    toast.success(`Bâtiment "${newBuilding.name}" ajouté avec succès`);
+    return newBuilding.id;
   };
-
-  // Mettre à jour un bâtiment existant
+  
   const updateBuilding = (id: string, updates: Partial<Building>) => {
     setBuildings(prev => 
       prev.map(building => 
@@ -67,66 +94,150 @@ export const useBatimentsManagement = () => {
     );
     toast.success('Bâtiment mis à jour avec succès');
   };
-
-  // Supprimer un bâtiment
+  
   const deleteBuilding = (id: string) => {
     setBuildings(prev => prev.filter(building => building.id !== id));
     toast.success('Bâtiment supprimé avec succès');
   };
-
-  // Planifier une tâche de maintenance
-  const scheduleMaintenance = (task: Omit<MaintenanceTask, 'id'>) => {
-    const newTask: MaintenanceTask = {
-      ...task,
-      id: `task-${Date.now()}`
-    };
-    setMaintenanceTasks(prev => [...prev, newTask]);
-    toast.success(`Maintenance planifiée pour ${task.description}`);
-    return newTask;
-  };
-
-  // Démarrer un projet de construction
-  const startConstruction = (project: Omit<ConstructionProject, 'id'>) => {
+  
+  // Gestion des projets de construction
+  const addConstructionProject = (projectData: Omit<ConstructionProject, 'id'>) => {
     const newProject: ConstructionProject = {
-      ...project,
-      id: `proj-${Date.now()}`
+      ...projectData,
+      id: crypto.randomUUID(),
     };
-    setConstructionProjects(prev => [...prev, newProject]);
-    toast.success(`Projet de construction ${project.buildingName} démarré`);
-    return newProject;
-  };
-
-  // Appliquer une dégradation naturelle à tous les bâtiments
-  const applyNaturalDegradation = () => {
-    const conditionOrder: BuildingCondition[] = [
-      'excellent', 'bon', 'moyen', 'mauvais', 'critique'
-    ];
     
+    setConstructionProjects(prev => [...prev, newProject]);
+    toast.success(`Projet de construction "${newProject.name}" ajouté avec succès`);
+    return newProject.id;
+  };
+  
+  const updateConstructionProject = (id: string, updates: Partial<ConstructionProject>) => {
+    setConstructionProjects(prev => 
+      prev.map(project => 
+        project.id === id ? { ...project, ...updates } : project
+      )
+    );
+    toast.success('Projet de construction mis à jour avec succès');
+  };
+  
+  const completeConstructionProject = (id: string, finalBuildingData: Partial<Building>) => {
+    // Trouver le projet
+    const project = constructionProjects.find(p => p.id === id);
+    
+    if (project) {
+      // Créer un nouveau bâtiment
+      const newBuilding: Building = {
+        id: crypto.randomUUID(),
+        name: project.name,
+        type: project.buildingType,
+        location: project.location,
+        status: 'good',
+        constructionYear: currentYear,
+        description: project.description,
+        cost: project.cost.spent,
+        maintenanceCost: 0,
+        revenue: 0,
+        capacity: 0,
+        owner: 'république',
+        ...finalBuildingData
+      };
+      
+      // Ajouter le bâtiment
+      setBuildings(prev => [...prev, newBuilding]);
+      
+      // Marquer le projet comme terminé
+      updateConstructionProject(id, {
+        status: 'completed',
+        progress: 100,
+        cost: {
+          ...project.cost,
+          remaining: 0
+        }
+      });
+      
+      toast.success(`Construction de "${project.name}" terminée avec succès`);
+    }
+  };
+  
+  // Gestion des tâches de maintenance
+  const addMaintenanceTask = (taskData: Omit<MaintenanceTask, 'id'>) => {
+    const newTask: MaintenanceTask = {
+      ...taskData,
+      id: crypto.randomUUID(),
+    };
+    
+    setMaintenanceTasks(prev => [...prev, newTask]);
+    toast.success('Tâche de maintenance ajoutée avec succès');
+    return newTask.id;
+  };
+  
+  const updateMaintenanceTask = (id: string, updates: Partial<MaintenanceTask>) => {
+    setMaintenanceTasks(prev => 
+      prev.map(task => 
+        task.id === id ? { ...task, ...updates } : task
+      )
+    );
+    toast.success('Tâche de maintenance mise à jour avec succès');
+  };
+  
+  const completeMaintenanceTask = (id: string, actualCost: number) => {
+    // Mettre à jour la tâche de maintenance
+    updateMaintenanceTask(id, {
+      status: 'completed',
+      completedDate: {
+        year: currentYear,
+        season: currentSeason
+      },
+      cost: {
+        ...maintenanceTasks.find(t => t.id === id)?.cost || { estimated: 0 },
+        actual: actualCost
+      }
+    });
+    
+    // Mettre à jour le bâtiment
+    const task = maintenanceTasks.find(t => t.id === id);
+    if (task) {
+      const building = buildings.find(b => b.id === task.buildingId);
+      if (building) {
+        updateBuilding(building.id, {
+          status: 'good',
+          lastMaintenance: `${currentYear} AUC, ${currentSeason}`
+        });
+      }
+    }
+    
+    toast.success('Tâche de maintenance terminée avec succès');
+  };
+  
+  // Calculer les revenus et dépenses des bâtiments
+  const calculateFinancials = () => {
+    const totalRevenue = buildings.reduce((sum, building) => sum + building.revenue, 0);
+    const totalMaintenanceCost = buildings.reduce((sum, building) => sum + building.maintenanceCost, 0);
+    const constructionCosts = constructionProjects
+      .filter(p => p.status === 'in_progress')
+      .reduce((sum, p) => sum + (p.cost.estimated / 4), 0); // Divisé par 4 pour obtenir le coût trimestriel
+    
+    return {
+      totalRevenue,
+      totalMaintenanceCost,
+      constructionCosts,
+      netIncome: totalRevenue - totalMaintenanceCost - constructionCosts
+    };
+  };
+  
+  // Appliquer la dégradation naturelle des bâtiments
+  const applyNaturalDegradation = () => {
     setBuildings(prev => 
       prev.map(building => {
-        // Calcul basé sur l'âge du bâtiment et le temps écoulé depuis la dernière maintenance
-        const yearsSinceConstruction = currentYear - building.constructionYear;
-        const yearsSinceMaintenance = building.lastMaintenance 
-          ? currentYear - building.lastMaintenance.year 
-          : yearsSinceConstruction;
+        // Déterminer si le bâtiment se dégrade
+        const shouldDegrade = Math.random() < 0.3; // 30% de chance de dégradation
         
-        let degradationChance = 0.1; // 10% de base
-        
-        // Augmenter la chance en fonction de l'âge
-        degradationChance += yearsSinceConstruction * 0.01;
-        degradationChance += yearsSinceMaintenance * 0.05;
-        
-        // Limiter à 50%
-        degradationChance = Math.min(0.5, degradationChance);
-        
-        if (Math.random() < degradationChance) {
-          const currentIndex = conditionOrder.indexOf(building.condition);
-          if (currentIndex < conditionOrder.length - 1) {
-            // Dégrader d'un niveau
-            return {
-              ...building,
-              condition: conditionOrder[currentIndex + 1]
-            };
+        if (shouldDegrade) {
+          if (building.status === 'good') {
+            return { ...building, status: 'average' };
+          } else if (building.status === 'average') {
+            return { ...building, status: 'poor' };
           }
         }
         
@@ -134,39 +245,27 @@ export const useBatimentsManagement = () => {
       })
     );
     
-    toast.success('Dégradation naturelle appliquée à tous les bâtiments');
+    toast.success('Dégradation naturelle des bâtiments appliquée');
   };
-
-  // Générer des revenus pour la période actuelle
-  const generateCurrentRevenues = () => {
-    const newRevenues = buildings.map(building => ({
-      id: `rev-${Date.now()}-${building.id}`,
-      buildingId: building.id,
-      year: currentYear,
-      season: currentSeason,
-      amount: building.revenue,
-      details: `Revenus standards de ${building.name}`,
-      collected: false,
-      collectedDate: null
-    }));
-    
-    setBuildingRevenues(prev => [...prev, ...newRevenues]);
-    toast.success('Revenus générés pour la période actuelle');
-  };
-
+  
   return {
     buildings,
-    selectedBuilding,
-    setSelectedBuilding,
-    maintenanceTasks,
     constructionProjects,
-    buildingRevenues,
+    maintenanceTasks,
+    isAddBuildingModalOpen,
+    selectedBuilding,
+    setIsAddBuildingModalOpen,
+    setSelectedBuilding,
     addBuilding,
     updateBuilding,
     deleteBuilding,
-    scheduleMaintenance,
-    startConstruction,
-    applyNaturalDegradation,
-    generateCurrentRevenues
+    addConstructionProject,
+    updateConstructionProject,
+    completeConstructionProject,
+    addMaintenanceTask,
+    updateMaintenanceTask,
+    completeMaintenanceTask,
+    calculateFinancials,
+    applyNaturalDegradation
   };
 };

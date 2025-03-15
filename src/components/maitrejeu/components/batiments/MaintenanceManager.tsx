@@ -1,253 +1,270 @@
 
 import React, { useState } from 'react';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Wrench, AlertTriangle, Calendar, CheckCircle2, AlertCircle } from 'lucide-react';
+import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
+import { Wrench, AlertCircle, Wallet, CalendarDays, CheckCircle, Filter } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
-import { ConditionBadge } from './ConditionBadge';
-import { toast } from 'sonner';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 
-// Mock data
-const mockMaintenanceTasks = [
-  {
-    id: 'task-1',
-    buildingId: '1',
-    buildingName: 'Temple de Jupiter',
-    description: 'Réparation de la toiture',
-    cost: 1200,
-    duration: 30,
-    startDate: { year: 706, season: 'Ver', day: 15 },
-    endDate: null,
-    status: 'planned',
-    priority: 'high',
-    responsibleId: null,
-    notes: 'Matériaux commandés, en attente de livraison.'
-  },
-  {
-    id: 'task-2',
-    buildingId: '3',
-    buildingName: 'Aqueduc Claudien',
-    description: 'Nettoyage du canal principal',
-    cost: 800,
-    duration: 15,
-    startDate: { year: 706, season: 'Ver', day: 20 },
-    endDate: null,
-    status: 'ongoing',
-    priority: 'medium',
-    responsibleId: 'resp-1',
-    responsibleName: 'Marcus Valerius',
-    notes: 'Travaux en cours, progresse comme prévu.'
-  },
-  {
-    id: 'task-3',
-    buildingId: '5',
-    buildingName: 'Amphithéâtre',
-    description: 'Renforcement structural urgent',
-    cost: 5000,
-    duration: 60,
-    startDate: { year: 706, season: 'Ver', day: 10 },
-    endDate: null,
-    status: 'planned',
-    priority: 'urgent',
-    responsibleId: null,
-    notes: 'Risque d\'effondrement si les travaux ne sont pas effectués rapidement.'
-  },
-  {
-    id: 'task-4',
-    buildingId: '2',
-    buildingName: 'Thermes de Caracalla',
-    description: 'Maintenance du système de chauffage',
-    cost: 1500,
-    duration: 45,
-    startDate: { year: 705, season: 'Hiems', day: 5 },
-    endDate: { year: 705, season: 'Hiems', day: 50 },
-    status: 'completed',
-    priority: 'medium',
-    responsibleId: 'resp-2',
-    responsibleName: 'Lucius Cornelius',
-    notes: 'Travaux terminés avec succès, performance améliorée.'
-  }
-];
+interface MaintenanceTask {
+  id: string;
+  buildingId: string;
+  buildingName: string;
+  type: 'routine' | 'repair' | 'emergency';
+  status: 'scheduled' | 'in_progress' | 'completed' | 'overdue';
+  priority: 'low' | 'medium' | 'high' | 'critical';
+  estimatedCost: number;
+  actualCost?: number;
+  scheduledDate: string;
+  completedDate?: string;
+  description: string;
+}
 
 export const MaintenanceManager: React.FC = () => {
-  const [tasks, setTasks] = useState(mockMaintenanceTasks);
   const [activeTab, setActiveTab] = useState('scheduled');
-  const [priorityFilter, setPriorityFilter] = useState('all');
+  const [filter, setFilter] = useState('all');
 
-  const getFilteredTasks = () => {
-    return tasks.filter(task => {
-      if (activeTab === 'scheduled' && task.status !== 'planned') return false;
-      if (activeTab === 'ongoing' && task.status !== 'ongoing') return false;
-      if (activeTab === 'completed' && task.status !== 'completed') return false;
-      
-      if (priorityFilter !== 'all' && task.priority !== priorityFilter) return false;
-      
-      return true;
-    });
-  };
+  // Données fictives pour la démonstration
+  const maintenanceTasks: MaintenanceTask[] = [
+    {
+      id: '1',
+      buildingId: '1',
+      buildingName: 'Temple de Jupiter',
+      type: 'routine',
+      status: 'scheduled',
+      priority: 'medium',
+      estimatedCost: 5000,
+      scheduledDate: '721 AUC, Aestas',
+      description: 'Inspection et nettoyage des colonnes extérieures'
+    },
+    {
+      id: '2',
+      buildingId: '3',
+      buildingName: 'Aqueduc Appien',
+      type: 'repair',
+      status: 'in_progress',
+      priority: 'high',
+      estimatedCost: 12000,
+      actualCost: 8000,
+      scheduledDate: '721 AUC, Ver',
+      description: 'Réparation de la structure endommagée par les intempéries'
+    },
+    {
+      id: '3',
+      buildingId: '2',
+      buildingName: 'Basilique Aemilia',
+      type: 'emergency',
+      status: 'completed',
+      priority: 'critical',
+      estimatedCost: 8000,
+      actualCost: 9500,
+      scheduledDate: '720 AUC, Hiems',
+      completedDate: '720 AUC, Hiems',
+      description: 'Renforcement urgent du toit qui menaçait de s\'effondrer'
+    },
+    {
+      id: '4',
+      buildingId: '1',
+      buildingName: 'Temple de Jupiter',
+      type: 'routine',
+      status: 'overdue',
+      priority: 'low',
+      estimatedCost: 3000,
+      scheduledDate: '720 AUC, Autumnus',
+      description: 'Rénovation des décorations intérieures'
+    }
+  ];
 
-  const handleStartTask = (id: string) => {
-    setTasks(prev => 
-      prev.map(task => 
-        task.id === id ? { ...task, status: 'ongoing' } : task
-      )
-    );
-    toast.success('Tâche de maintenance démarrée !');
-  };
+  // Filtrer les tâches selon l'onglet actif
+  const filteredTasks = maintenanceTasks.filter(task => {
+    // Filtrer par statut (onglet)
+    const statusMatch = activeTab === 'all' || task.status === activeTab;
+    
+    // Filtrer par type (sélecteur)
+    const typeMatch = filter === 'all' || task.type === filter;
+    
+    return statusMatch && typeMatch;
+  });
 
-  const handleCompleteTask = (id: string) => {
-    setTasks(prev => 
-      prev.map(task => 
-        task.id === id ? { 
-          ...task, 
-          status: 'completed', 
-          endDate: { year: 706, season: 'Ver', day: 30 } 
-        } : task
-      )
-    );
-    toast.success('Tâche de maintenance terminée !');
-  };
-
-  const getPriorityBadge = (priority: string) => {
-    switch (priority) {
-      case 'low':
-        return <Badge variant="outline" className="capitalize">Faible</Badge>;
-      case 'medium':
-        return <Badge variant="secondary" className="capitalize">Moyenne</Badge>;
-      case 'high':
-        return <Badge variant="default" className="capitalize">Élevée</Badge>;
-      case 'urgent':
-        return <Badge variant="destructive" className="capitalize">Urgente</Badge>;
+  const getStatusBadge = (status: MaintenanceTask['status']) => {
+    switch (status) {
+      case 'scheduled':
+        return <Badge variant="outline" className="bg-blue-100 text-blue-800">Planifiée</Badge>;
+      case 'in_progress':
+        return <Badge variant="outline" className="bg-orange-100 text-orange-800">En cours</Badge>;
+      case 'completed':
+        return <Badge variant="outline" className="bg-green-100 text-green-800">Terminée</Badge>;
+      case 'overdue':
+        return <Badge variant="outline" className="bg-red-100 text-red-800">En retard</Badge>;
       default:
-        return <Badge variant="outline" className="capitalize">{priority}</Badge>;
+        return <Badge variant="outline">Inconnu</Badge>;
     }
   };
 
-  const filteredTasks = getFilteredTasks();
+  const getPriorityBadge = (priority: MaintenanceTask['priority']) => {
+    switch (priority) {
+      case 'low':
+        return <Badge variant="outline" className="bg-gray-100 text-gray-800">Basse</Badge>;
+      case 'medium':
+        return <Badge variant="outline" className="bg-blue-100 text-blue-800">Moyenne</Badge>;
+      case 'high':
+        return <Badge variant="outline" className="bg-orange-100 text-orange-800">Haute</Badge>;
+      case 'critical':
+        return <Badge variant="outline" className="bg-red-100 text-red-800">Critique</Badge>;
+      default:
+        return <Badge variant="outline">Inconnue</Badge>;
+    }
+  };
+
+  const handleStartTask = (id: string) => {
+    console.log('Starting task with ID:', id);
+    // Logique de démarrage à implémenter
+  };
+
+  const handleCompleteTask = (id: string) => {
+    console.log('Completing task with ID:', id);
+    // Logique de complétion à implémenter
+  };
 
   return (
     <div className="space-y-4">
-      <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-        <h3 className="text-lg font-medium">Gestion de la Maintenance</h3>
+      <div className="flex justify-between items-center flex-wrap gap-2">
+        <div className="flex items-center gap-2">
+          <Wrench className="h-5 w-5 text-muted-foreground" />
+          <h2 className="text-xl font-semibold">Maintenance des bâtiments</h2>
+        </div>
         
-        <div className="flex gap-2">
-          <Select value={priorityFilter} onValueChange={setPriorityFilter}>
+        <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2">
+            <Filter className="h-4 w-4 text-muted-foreground" />
+            <span className="text-sm">Type:</span>
+          </div>
+          <Select value={filter} onValueChange={setFilter}>
             <SelectTrigger className="w-[180px]">
-              <SelectValue placeholder="Priorité" />
+              <SelectValue placeholder="Tous les types" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">Toutes priorités</SelectItem>
-              <SelectItem value="low">Faible</SelectItem>
-              <SelectItem value="medium">Moyenne</SelectItem>
-              <SelectItem value="high">Élevée</SelectItem>
-              <SelectItem value="urgent">Urgente</SelectItem>
+              <SelectItem value="all">Tous les types</SelectItem>
+              <SelectItem value="routine">Entretien régulier</SelectItem>
+              <SelectItem value="repair">Réparation</SelectItem>
+              <SelectItem value="emergency">Urgence</SelectItem>
             </SelectContent>
           </Select>
           
-          <Button variant="outline" className="flex items-center gap-2">
-            <Wrench className="h-4 w-4" />
-            Nouvelle tâche
+          <Button variant="outline" className="ml-2">
+            + Nouvelle tâche
           </Button>
         </div>
       </div>
       
       <Tabs value={activeTab} onValueChange={setActiveTab}>
-        <TabsList className="grid w-full grid-cols-3">
-          <TabsTrigger value="scheduled" className="flex items-center gap-2">
-            <Calendar className="h-4 w-4" />
-            Planifiées
-          </TabsTrigger>
-          <TabsTrigger value="ongoing" className="flex items-center gap-2">
-            <AlertCircle className="h-4 w-4" />
-            En cours
-          </TabsTrigger>
-          <TabsTrigger value="completed" className="flex items-center gap-2">
-            <CheckCircle2 className="h-4 w-4" />
-            Terminées
-          </TabsTrigger>
+        <TabsList className="grid grid-cols-5">
+          <TabsTrigger value="all">Toutes</TabsTrigger>
+          <TabsTrigger value="scheduled">Planifiées</TabsTrigger>
+          <TabsTrigger value="in_progress">En cours</TabsTrigger>
+          <TabsTrigger value="completed">Terminées</TabsTrigger>
+          <TabsTrigger value="overdue">En retard</TabsTrigger>
         </TabsList>
         
-        <TabsContent value={activeTab} className="pt-4">
-          <div className="rounded-md border">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Bâtiment</TableHead>
-                  <TableHead>Description</TableHead>
-                  <TableHead>Priorité</TableHead>
-                  <TableHead>Coût</TableHead>
-                  <TableHead>Durée (jours)</TableHead>
-                  <TableHead>Responsable</TableHead>
-                  <TableHead className="text-right">Actions</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {filteredTasks.length === 0 ? (
+        <TabsContent value={activeTab} className="mt-4">
+          <Card>
+            <CardContent className="p-0">
+              <Table>
+                <TableHeader>
                   <TableRow>
-                    <TableCell colSpan={7} className="text-center py-4 text-muted-foreground">
-                      Aucune tâche {activeTab === 'scheduled' ? 'planifiée' : 
-                                    activeTab === 'ongoing' ? 'en cours' : 'terminée'}
-                    </TableCell>
+                    <TableHead>Bâtiment</TableHead>
+                    <TableHead>Type</TableHead>
+                    <TableHead>Priorité</TableHead>
+                    <TableHead>Statut</TableHead>
+                    <TableHead>Date</TableHead>
+                    <TableHead>Coût estimé</TableHead>
+                    <TableHead className="text-right">Actions</TableHead>
                   </TableRow>
-                ) : (
-                  filteredTasks.map((task) => (
-                    <TableRow key={task.id}>
-                      <TableCell className="font-medium">
-                        {task.buildingName}
+                </TableHeader>
+                <TableBody>
+                  {filteredTasks.length === 0 ? (
+                    <TableRow>
+                      <TableCell colSpan={7} className="h-24 text-center">
+                        Aucune tâche trouvée.
                       </TableCell>
-                      <TableCell>{task.description}</TableCell>
-                      <TableCell>{getPriorityBadge(task.priority)}</TableCell>
-                      <TableCell>{task.cost} deniers</TableCell>
-                      <TableCell>{task.duration}</TableCell>
-                      <TableCell>
-                        {task.responsibleName || 'Non assigné'}
-                      </TableCell>
-                      <TableCell className="text-right">
-                        <div className="flex justify-end gap-2">
-                          {task.status === 'planned' && (
+                    </TableRow>
+                  ) : (
+                    filteredTasks.map(task => (
+                      <TableRow key={task.id}>
+                        <TableCell className="font-medium">{task.buildingName}</TableCell>
+                        <TableCell>
+                          {task.type === 'routine' ? 'Entretien' : 
+                           task.type === 'repair' ? 'Réparation' : 'Urgence'}
+                        </TableCell>
+                        <TableCell>{getPriorityBadge(task.priority)}</TableCell>
+                        <TableCell>{getStatusBadge(task.status)}</TableCell>
+                        <TableCell>
+                          <div className="flex items-center">
+                            <CalendarDays className="h-4 w-4 mr-1 text-muted-foreground" />
+                            <span>{task.scheduledDate}</span>
+                          </div>
+                        </TableCell>
+                        <TableCell>
+                          <div className="flex items-center">
+                            <Wallet className="h-4 w-4 mr-1 text-muted-foreground" />
+                            <span>{task.estimatedCost} as</span>
+                          </div>
+                        </TableCell>
+                        <TableCell className="text-right">
+                          {task.status === 'scheduled' && (
                             <Button 
                               variant="outline" 
-                              size="sm" 
+                              size="sm"
                               onClick={() => handleStartTask(task.id)}
                             >
                               Démarrer
                             </Button>
                           )}
-                          {task.status === 'ongoing' && (
+                          {task.status === 'in_progress' && (
                             <Button 
                               variant="outline" 
-                              size="sm" 
+                              size="sm"
                               onClick={() => handleCompleteTask(task.id)}
                             >
+                              <CheckCircle className="h-4 w-4 mr-1" />
                               Terminer
                             </Button>
                           )}
-                          {task.status === 'completed' && (
-                            <Badge variant="outline" className="bg-green-50">
-                              Terminée
-                            </Badge>
+                          {task.status === 'overdue' && (
+                            <Button 
+                              variant="destructive" 
+                              size="sm"
+                              onClick={() => handleStartTask(task.id)}
+                            >
+                              <AlertCircle className="h-4 w-4 mr-1" />
+                              Traiter
+                            </Button>
                           )}
-                        </div>
-                      </TableCell>
-                    </TableRow>
-                  ))
-                )}
-              </TableBody>
-            </Table>
-          </div>
+                        </TableCell>
+                      </TableRow>
+                    ))
+                  )}
+                </TableBody>
+              </Table>
+            </CardContent>
+          </Card>
         </TabsContent>
       </Tabs>
-      
-      {activeTab === 'scheduled' && filteredTasks.some(t => t.priority === 'urgent') && (
-        <div className="bg-red-50 p-4 rounded-md border border-red-200 flex items-center gap-3 mt-4">
-          <AlertTriangle className="h-5 w-5 text-red-500" />
-          <p className="text-red-700 text-sm">
-            Il y a des tâches de maintenance urgentes qui nécessitent une attention immédiate.
-          </p>
-        </div>
-      )}
     </div>
   );
 };
