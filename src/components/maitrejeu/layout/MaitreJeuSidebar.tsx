@@ -16,10 +16,14 @@ import {
   Users2,
   Building,
   ScrollText,
-  Landmark
+  Landmark,
+  Construction,
+  AlertTriangle
 } from 'lucide-react';
 import { useMaitreJeu } from '@/components/maitrejeu/context';
 import { formatDate } from '@/utils/formatUtils';
+import { Badge } from '@/components/ui/badge';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 
 export interface MaitreJeuSidebarProps {
   activeTab: string;
@@ -33,17 +37,18 @@ export const MaitreJeuSidebar: React.FC<MaitreJeuSidebarProps> = ({
   const { currentDate, currentPhase, advanceTime, changePhase } = useMaitreJeu();
   
   const navItems = [
-    { id: 'senateurs', label: 'Sénateurs', icon: <Users className="h-4 w-4" /> },
-    { id: 'clients', label: 'Clients', icon: <UserPlus className="h-4 w-4" /> },
-    { id: 'familles', label: 'Familles', icon: <Users2 className="h-4 w-4" /> },
-    { id: 'politique', label: 'Politique', icon: <Gavel className="h-4 w-4" /> },
-    { id: 'equilibre', label: 'Équilibre', icon: <Scale className="h-4 w-4" /> },
-    { id: 'provinces', label: 'Provinces', icon: <Globe className="h-4 w-4" /> },
-    { id: 'histoire', label: 'Histoire', icon: <BookText className="h-4 w-4" /> },
-    { id: 'economie', label: 'Économie', icon: <Coins className="h-4 w-4" /> },
-    { id: 'republique', label: 'République', icon: <Landmark className="h-4 w-4" /> },
-    { id: 'batiments', label: 'Bâtiments', icon: <Building className="h-4 w-4" /> },
-    { id: 'lois', label: 'Lois', icon: <ScrollText className="h-4 w-4" /> }
+    { id: 'senateurs', label: 'Sénateurs', icon: <Users className="h-4 w-4" />, developed: true },
+    { id: 'clients', label: 'Clients', icon: <UserPlus className="h-4 w-4" />, developed: true },
+    { id: 'familles', label: 'Familles', icon: <Users2 className="h-4 w-4" />, developed: true },
+    { id: 'politique', label: 'Politique', icon: <Gavel className="h-4 w-4" />, developed: false },
+    { id: 'equilibre', label: 'Équilibre', icon: <Scale className="h-4 w-4" />, developed: false },
+    { id: 'provinces', label: 'Provinces', icon: <Globe className="h-4 w-4" />, developed: false },
+    { id: 'histoire', label: 'Histoire', icon: <BookText className="h-4 w-4" />, developed: false },
+    { id: 'economie', label: 'Économie', icon: <Coins className="h-4 w-4" />, developed: false },
+    { id: 'republique', label: 'République', icon: <Landmark className="h-4 w-4" />, developed: true },
+    { id: 'batiments', label: 'Bâtiments', icon: <Building className="h-4 w-4" />, developed: false },
+    { id: 'lois', label: 'Lois', icon: <ScrollText className="h-4 w-4" />, developed: true },
+    { id: 'statistiques', label: 'Statistiques', icon: <BarChart2 className="h-4 w-4" />, developed: false }
   ];
   
   return (
@@ -77,14 +82,32 @@ export const MaitreJeuSidebar: React.FC<MaitreJeuSidebarProps> = ({
         <ul className="space-y-1">
           {navItems.map(item => (
             <li key={item.id}>
-              <Button
-                variant={activeTab === item.id ? "default" : "ghost"}
-                className={`w-full justify-start ${activeTab === item.id ? "" : "text-muted-foreground"}`}
-                onClick={() => setActiveTab(item.id)}
-              >
-                {item.icon}
-                <span className="ml-2">{item.label}</span>
-              </Button>
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button
+                      variant={activeTab === item.id ? "default" : "ghost"}
+                      className={`w-full justify-start ${activeTab === item.id ? "" : "text-muted-foreground"}`}
+                      onClick={() => setActiveTab(item.id)}
+                    >
+                      {item.icon}
+                      <span className="ml-2">{item.label}</span>
+                      
+                      {!item.developed && (
+                        <Badge variant="outline" className="ml-auto flex items-center gap-0.5 h-5 text-amber-500 border-amber-500">
+                          <Construction className="h-3 w-3" />
+                          <span className="text-xs">Dév</span>
+                        </Badge>
+                      )}
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent side="right">
+                    {item.developed ? 
+                      "Section fonctionnelle" : 
+                      "Section en cours de développement"}
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
             </li>
           ))}
         </ul>
@@ -107,7 +130,7 @@ export const MaitreJeuSidebar: React.FC<MaitreJeuSidebarProps> = ({
           variant="outline" 
           size="sm" 
           className="w-full flex items-center gap-2"
-          onClick={() => console.log("Statistiques globales")}
+          onClick={() => setActiveTab('statistiques')}
         >
           <BarChart2 className="h-4 w-4" />
           Statistiques
