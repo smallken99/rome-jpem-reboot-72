@@ -7,6 +7,7 @@ export interface Transaction {
   quantity: number;
   unitPrice: number;
   total: number;
+  propertyId?: string;
 }
 
 export interface Resource {
@@ -28,10 +29,39 @@ export interface ResourceType {
 }
 
 export interface MarketPrice {
-  resourceId: string;
+  resourceId?: string;
   resourceName: string;
   basePrice: number;
   currentPrice: number;
+  buyPrice: number;
+  sellPrice: number;
   trend: 'up' | 'down' | 'stable';
   volatility: number;
+  trendPercentage?: number;
+}
+
+export interface PropertyResource {
+  id: number;
+  propertyId: number;
+  name: string;
+  type: string;
+  quantity: number;
+  unit: string;
+  value: number;
+  trend: 'up' | 'down' | 'stable';
+  trendPercentage?: number;
+}
+
+export interface ResourceTransaction {
+  id: string;
+  date: Date | string;
+  type: 'achat' | 'vente' | 'transfert';
+  resourceName: string;
+  quantity: number;
+  unit?: string;
+  price?: number;
+  total?: number;
+  propertyId?: string;
+  destination?: string;
+  source?: string;
 }

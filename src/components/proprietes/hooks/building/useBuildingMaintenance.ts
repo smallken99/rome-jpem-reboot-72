@@ -6,7 +6,7 @@ import { toast } from 'sonner';
 
 export function useBuildingMaintenance() {
   const [isLoading, setIsLoading] = useState(false);
-  const { makePayment } = usePatrimoine();
+  const { addTransaction } = usePatrimoine();
   const { updateBuildingProperty } = useBuildingInventory();
   
   // Activer ou désactiver l'entretien automatique
@@ -39,16 +39,12 @@ export function useBuildingMaintenance() {
       const maintenanceCost = Math.round(building.maintenanceCost * maintenanceFactor);
       
       // Effectuer le paiement
-      const success = makePayment(
-        maintenanceCost,
-        `Entretien: ${building.name}`,
-        'Entretien'
-      );
-      
-      if (!success) {
-        toast.error("Fonds insuffisants pour l'entretien");
-        return false;
-      }
+      addTransaction({
+        amount: -maintenanceCost,
+        description: `Entretien: ${building.name}`,
+        category: 'Entretien',
+        type: 'expense'
+      });
       
       // Améliorer l'état du bâtiment
       const newCondition = Math.min(100, building.condition + 20);

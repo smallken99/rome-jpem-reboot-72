@@ -45,7 +45,7 @@ export const MarketPrices: React.FC<MarketPricesProps> = ({ prices }) => {
                     {price.trend === 'up' && <ArrowUp className="h-3 w-3" />}
                     {price.trend === 'down' && <ArrowDown className="h-3 w-3" />}
                     {price.trend === 'stable' && <Minus className="h-3 w-3" />}
-                    {price.trendPercentage}%
+                    {price.trendPercentage || 0}%
                   </Badge>
                 </TableCell>
                 <TableCell className="text-right">
