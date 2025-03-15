@@ -1,100 +1,91 @@
 
 import React, { useState } from 'react';
-import { Button } from '@/components/ui/button';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { RuralPropertySelector } from './rural/RuralPropertySelector';
-import { RuralPropertyDetails } from './rural/RuralPropertyDetails';
-import { useRuralPropertyCalculator } from './rural/hooks/useRuralPropertyCalculator';
-import { OwnedRuralPropertiesSection } from './rural/owned/OwnedRuralPropertiesSection';
-import { PropertyPurchaseDialog } from './dialogs/PropertyPurchaseDialog';
 import { usePatrimoine } from '@/hooks/usePatrimoine';
-import { Separator } from '@/components/ui/separator';
-import { BuildingDescription } from '../data/types/buildingTypes';
+import { Button } from '@/components/ui/button';
+import { Plus } from 'lucide-react';
+import { OwnedRuralPropertiesSection } from './rural/owned/OwnedRuralPropertiesSection';
+import { RuralCatalogueSection } from './rural/catalogue/RuralCatalogueSection';
+import { PropertyPurchaseDialog } from './dialogs/PropertyPurchaseDialog';
+import { OwnedBuilding } from '../hooks/building/types';
+import { useBuildingManagement } from '../hooks/useBuildingManagement';
 
-export const RuralPropertiesTab = () => {
-  const [selectedPropertyId, setSelectedPropertyId] = useState<string>('');
-  const [selectedProperty, setSelectedProperty] = useState<BuildingDescription | null>(null);
-  const [propertySize, setPropertySize] = useState<string>('moyen');
-  const [propertyLocation, setPropertyLocation] = useState<string>('campagne_latium');
+export const RuralPropertiesTab: React.FC = () => {
   const [purchaseDialogOpen, setPurchaseDialogOpen] = useState(false);
-
+  const patrimoine = usePatrimoine();
+  
   const { 
-    buildings, 
-    getBuildingDetails,
+    buildings,
     handleAddProperty,
     sellBuilding,
     calculateBuildingValue,
-    calculateBuildingValueById 
-  } = useRuralPropertyCalculator(selectedPropertyId);
+    ruralBuildings,
+    balance
+  } = useBuildingManagement();
 
-  const { balance, availableSlaves, toggleMaintenance, performMaintenance, assignSlaves } = usePatrimoine();
+  // Filter only rural properties
+  const ownedRuralBuildings = buildings.filter(building => 
+    building.buildingType === "rural"
+  );
 
-  const handleSelectProperty = (id: string) => {
-    setSelectedPropertyId(id);
-    const propertyDetails = getBuildingDetails(id);
-    setSelectedProperty(propertyDetails);
+  // Create a function to get calculated values
+  const getEstimatedValue = (building: OwnedBuilding) => {
+    return calculateBuildingValue(building);
   };
 
-  // This function wraps the async handleAddProperty to make it synchronous for the component
-  const handleAddPropertySync = (
-    buildingId: string,
-    buildingType: "urban" | "rural" | "religious" | "public",
-    location: string,
-    customName?: string
-  ): boolean => {
-    handleAddProperty(buildingId, buildingType, location, customName);
-    return true;
+  // Handle the property sale
+  const handleSellProperty = (id: number | string) => {
+    // Find the building to get its value before selling
+    const building = buildings.find(b => b.id === id);
+    
+    if (building) {
+      const value = calculateBuildingValue(building);
+      const success = sellBuilding(id);
+      
+      if (success && patrimoine.buildingSold) {
+        patrimoine.buildingSold(building.buildingType, value);
+      }
+      
+      return success;
+    }
+    
+    return false;
   };
 
   return (
-    <Tabs defaultValue="owned" className="w-full">
-      <TabsList className="grid w-full grid-cols-2">
-        <TabsTrigger value="owned">Mes Propriétés</TabsTrigger>
-        <TabsTrigger value="catalogue">Catalogue</TabsTrigger>
-      </TabsList>
-      
-      <TabsContent value="owned" className="space-y-4 mt-4">
-        <OwnedRuralPropertiesSection 
-          filteredOwnedBuildings={buildings}
-          setPurchaseDialogOpen={setPurchaseDialogOpen}
-          balance={balance}
-          availableSlaves={availableSlaves}
-          toggleMaintenance={toggleMaintenance}
-          performMaintenance={performMaintenance}
-          assignSlaves={assignSlaves}
-          sellBuilding={sellBuilding}
-          calculateBuildingValue={calculateBuildingValue}
-        />
-      </TabsContent>
-      
-      <TabsContent value="catalogue" className="space-y-4 mt-4">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <div className="md:col-span-1">
-            <h3 className="font-cinzel text-lg text-rome-navy mb-4">Types de propriétés</h3>
-            <RuralPropertySelector
-              selectedId={selectedPropertyId}
-              onSelect={handleSelectProperty}
-              propertySize={propertySize}
-              setPropertySize={setPropertySize}
-              propertyLocation={propertyLocation}
-              setPropertyLocation={setPropertyLocation}
-            />
-          </div>
-          
-          <div className="md:col-span-2">
-            <h3 className="font-cinzel text-lg text-rome-navy mb-4">Détails de la propriété</h3>
-            <RuralPropertyDetails propertyDetails={selectedProperty} />
-          </div>
-        </div>
-      </TabsContent>
-      
+    <div className="space-y-8">
+      <div className="flex justify-between items-center">
+        <h2 className="text-2xl font-semibold">Propriétés Rurales</h2>
+        <Button onClick={() => setPurchaseDialogOpen(true)} className="bg-green-700 hover:bg-green-800">
+          <Plus className="mr-2 h-4 w-4" />
+          Acquérir un nouveau domaine
+        </Button>
+      </div>
+
+      {/* Section for owned properties */}
+      <OwnedRuralPropertiesSection 
+        buildings={ownedRuralBuildings}
+        onSell={handleSellProperty}
+        estimatedValue={getEstimatedValue}
+      />
+
+      {/* Section for available properties to purchase */}
+      <RuralCatalogueSection 
+        onPurchase={(buildingId, buildingType, location, customName) => 
+          handleAddProperty(buildingId, buildingType, location, customName)
+        }
+        balance={balance}
+      />
+
+      {/* Purchase dialog */}
       <PropertyPurchaseDialog
         open={purchaseDialogOpen}
         onOpenChange={setPurchaseDialogOpen}
-        propertyCategory="rural"
-        handleAddProperty={handleAddPropertySync}
+        buildingType="rural"
+        onPurchase={(buildingId, buildingType, location, customName) => 
+          handleAddProperty(buildingId, buildingType, location, customName)
+        }
         balance={balance}
       />
-    </Tabs>
+    </div>
   );
 };
