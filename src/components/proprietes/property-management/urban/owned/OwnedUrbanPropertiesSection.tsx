@@ -2,7 +2,7 @@
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { PlusCircle } from 'lucide-react';
-import { PropertyCard } from '../../PropertyCard';
+import { PropertyCard } from '../../../../PropertyCard';
 import { OwnedBuilding, BuildingDescription } from '../../../hooks/building/types';
 
 interface OwnedUrbanPropertiesSectionProps {
@@ -50,7 +50,7 @@ export const OwnedUrbanPropertiesSection: React.FC<OwnedUrbanPropertiesSectionPr
                 name={building.name}
                 location={building.location}
                 value={`${value.toLocaleString()} As`}
-                type={"Résidence principale" as any}
+                type={"villa"}
                 status={building.condition > 90 ? "Excellent" : building.condition > 70 ? "Bon" : building.condition > 50 ? "Moyen" : "Mauvais"}
                 revenue={`${(value * 0.05).toLocaleString()} As/an`}
                 maintenance={`${building.maintenanceCost.toLocaleString()} As/an`}
