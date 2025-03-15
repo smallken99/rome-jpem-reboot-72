@@ -1,56 +1,96 @@
 
-import React from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { Calendar, Clock, ArrowRight } from 'lucide-react';
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { AlertCircle, Calendar, FastForward, Clock } from 'lucide-react';
 import { useMaitreJeu } from '../context';
-import { formatSeasonDisplay } from '@/utils/timeSystem';
 
 export const TimePanel: React.FC = () => {
-  const { currentDate, currentPhase, advanceTime } = useMaitreJeu();
+  const { currentDate, currentPhase, advanceTime, changePhase } = useMaitreJeu();
+  const [confirmDialogOpen, setConfirmDialogOpen] = useState(false);
   
-  // Formatage de la date actuelle
-  const formattedDate = `An ${currentDate.year}, ${formatSeasonDisplay(currentDate.season)}`;
+  const handleAdvanceTime = () => {
+    setConfirmDialogOpen(true);
+  };
+  
+  const confirmAdvance = () => {
+    advanceTime();
+    setConfirmDialogOpen(false);
+  };
+  
+  const translatePhase = (phase: string) => {
+    const phaseMap: Record<string, string> = {
+      'SENATE': 'Sénat',
+      'ECONOMY': 'Économie',
+      'ELECTIONS': 'Élections',
+      'DIPLOMACY': 'Diplomatie',
+      'MILITARY': 'Militaire',
+      'RELIGION': 'Religion'
+    };
+    return phaseMap[phase] || phase;
+  };
+  
+  const translateSeason = (season: string) => {
+    const seasonMap: Record<string, string> = {
+      'SPRING': 'Printemps',
+      'SUMMER': 'Été',
+      'AUTUMN': 'Automne',
+      'WINTER': 'Hiver',
+      'Ver': 'Printemps',
+      'Aestas': 'Été',
+      'Autumnus': 'Automne',
+      'Hiems': 'Hiver'
+    };
+    return seasonMap[season] || season;
+  };
   
   return (
-    <Card className="mb-6">
-      <CardHeader className="pb-3">
-        <CardTitle className="text-lg font-semibold flex items-center">
-          <Clock className="mr-2 h-5 w-5" />
-          Avancement du Temps
-        </CardTitle>
-      </CardHeader>
-      <CardContent>
-        <div className="flex flex-col md:flex-row justify-between items-center">
-          <div className="flex items-center space-x-3 mb-4 md:mb-0">
-            <div className="flex flex-col">
-              <span className="text-sm text-muted-foreground">Date actuelle</span>
-              <span className="font-medium flex items-center mt-1">
-                <Calendar className="mr-2 h-4 w-4 text-muted-foreground" />
-                {formattedDate}
-              </span>
-            </div>
-            
-            <div className="h-10 w-px bg-gray-200 mx-2 hidden md:block" />
-            
-            <div className="flex flex-col">
-              <span className="text-sm text-muted-foreground">Phase</span>
-              <span className="font-medium flex items-center mt-1">
-                <Clock className="mr-2 h-4 w-4 text-muted-foreground" />
-                {currentPhase}
-              </span>
-            </div>
-          </div>
-          
-          <Button 
-            onClick={() => advanceTime()}
-            className="flex items-center gap-1"
-          >
-            Avancer au tour suivant
-            <ArrowRight className="ml-1 h-4 w-4" />
-          </Button>
+    <div className="flex items-center justify-between p-4 bg-muted/40 border-b rounded-t-lg">
+      <div className="flex items-center gap-3">
+        <div className="flex items-center gap-1">
+          <Calendar className="h-5 w-5 text-primary" />
+          <span className="font-medium">
+            An {currentDate.year} AUC - {translateSeason(currentDate.season)}
+          </span>
         </div>
-      </CardContent>
-    </Card>
+        <div className="h-6 border-l border-muted-foreground/20"></div>
+        <div className="flex items-center gap-1">
+          <Clock className="h-5 w-5 text-primary" />
+          <span className="font-medium">
+            Phase: {translatePhase(currentPhase)}
+          </span>
+        </div>
+      </div>
+      
+      <Button onClick={handleAdvanceTime} className="gap-1">
+        <FastForward className="h-4 w-4" />
+        <span>Avancer le temps</span>
+      </Button>
+      
+      <Dialog open={confirmDialogOpen} onOpenChange={setConfirmDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Avancer le temps</DialogTitle>
+            <DialogDescription>
+              Voulez-vous vraiment passer à la saison suivante? Cette action ne peut pas être annulée.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="flex items-center gap-2 py-3 text-amber-500 bg-amber-500/10 px-4 rounded-md">
+            <AlertCircle className="h-5 w-5" />
+            <p className="text-sm">
+              Tous les événements non résolus de la saison actuelle seront automatiquement résolus.
+            </p>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setConfirmDialogOpen(false)}>
+              Annuler
+            </Button>
+            <Button onClick={confirmAdvance}>
+              Confirmer
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    </div>
   );
 };

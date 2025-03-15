@@ -1,7 +1,16 @@
 
-export { EconomieStats } from './EconomieStats';
-export { EconomieTable } from './EconomieTable';
-export { EconomieFilters } from './EconomieFilters';
-export { EconomieModal } from './EconomieModal';
-export { EconomieActions } from './EconomieActions';
-export { useEconomieManagement } from './useEconomieManagement';
+import { EconomieStats } from './EconomieStats';
+import { EconomieTable } from './EconomieTable';
+import { EconomieFilters } from './EconomieFilters';
+import { EconomieModal } from './EconomieModal';
+import { EconomieActions } from './EconomieActions';
+import { useEconomieManagement } from './useEconomieManagement';
+
+export {
+  EconomieStats,
+  EconomieTable,
+  EconomieFilters,
+  EconomieModal,
+  EconomieActions,
+  useEconomieManagement
+};

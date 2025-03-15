@@ -1,144 +1,95 @@
 
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { StatBox } from '@/components/ui-custom/StatBox';
-import { Coins, TrendingUp, TrendingDown, Scale } from 'lucide-react';
-import { useMaitreJeu } from '@/components/maitrejeu/context';
-import { formatMoney } from '@/utils/formatUtils';
-import { GameDate } from '@/components/maitrejeu/types/common';
-import { parseGameDate } from '@/utils/dateConverters';
+import { useMaitreJeu } from '../../context';
+import { TrendingDown, TrendingUp, Wallet, Landmark, ArrowRight, CreditCard } from 'lucide-react';
 
 export const EconomieStats: React.FC = () => {
-  const { economieRecords, treasury } = useMaitreJeu();
+  const { treasury, economicFactors, economieRecords } = useMaitreJeu();
   
-  const calculateTrend = (current: number, previous: number): { trend: 'up' | 'down' | 'neutral', percentage: string } => {
-    if (previous === 0) return { trend: 'neutral', percentage: '0%' };
-    
-    const diff = current - previous;
-    const percentChange = (diff / previous) * 100;
-    
-    if (Math.abs(percentChange) < 0.5) return { trend: 'neutral', percentage: '0%' };
-    return {
-      trend: percentChange > 0 ? 'up' : 'down',
-      percentage: `${Math.abs(percentChange).toFixed(1)}%`
-    };
-  };
-  
-  // Convert any date type to GameDate
-  const safeParseGameDate = (date: any): GameDate => {
-    try {
-      if (date instanceof Date) {
-        return {
-          year: date.getFullYear(),
-          season: 'SPRING' // Default season
-        };
-      }
-      return parseGameDate(date);
-    } catch (e) {
-      console.error("Error parsing date:", e);
-      return { year: new Date().getFullYear(), season: 'SPRING' };
-    }
-  };
-  
-  // Calculate income and expenses for the last 2 seasons for trends
-  const currentIncome = economieRecords
-    .filter(record => {
-      const recordDate = safeParseGameDate(record.date);
-      const treasuryDate = safeParseGameDate(treasury.lastUpdated);
-      
-      return record.type === 'income' && 
-        recordDate.year === treasuryDate.year && 
-        recordDate.season === treasuryDate.season;
-    })
-    .reduce((sum, record) => sum + record.amount, 0);
-    
-  const currentExpenses = economieRecords
-    .filter(record => {
-      const recordDate = safeParseGameDate(record.date);
-      const treasuryDate = safeParseGameDate(treasury.lastUpdated);
-      
-      return record.type === 'expense' && 
-        recordDate.year === treasuryDate.year && 
-        recordDate.season === treasuryDate.season;
-    })
+  // Calculer les revenus et dépenses totaux
+  const totalIncome = economieRecords
+    .filter(record => record.type === 'income')
     .reduce((sum, record) => sum + record.amount, 0);
   
-  // Get the previous season
-  const getSeasonAndYear = (date: GameDate): {year: number, season: string} => {
-    const seasons = ['WINTER', 'SPRING', 'SUMMER', 'AUTUMN'];
-    const season = String(date.season);
-    const idx = seasons.indexOf(season);
-    if (idx <= 0) return { year: date.year - 1, season: 'AUTUMN' };
-    return { year: date.year, season: seasons[idx - 1] };
-  };
+  const totalExpense = economieRecords
+    .filter(record => record.type === 'expense')
+    .reduce((sum, record) => sum + Math.abs(record.amount), 0);
   
-  const treasuryDate = safeParseGameDate(treasury.lastUpdated);
-  const prevPeriod = getSeasonAndYear(treasuryDate);
-  
-  const previousIncome = economieRecords
-    .filter(record => {
-      const recordDate = safeParseGameDate(record.date);
-      
-      return record.type === 'income' && 
-        recordDate.year === prevPeriod.year && 
-        String(recordDate.season) === prevPeriod.season;
-    })
-    .reduce((sum, record) => sum + record.amount, 0);
-    
-  const previousExpenses = economieRecords
-    .filter(record => {
-      const recordDate = safeParseGameDate(record.date);
-      
-      return record.type === 'expense' && 
-        recordDate.year === prevPeriod.year && 
-        String(recordDate.season) === prevPeriod.season;
-    })
-    .reduce((sum, record) => sum + record.amount, 0);
-  
-  const incomeTrend = calculateTrend(currentIncome, previousIncome);
-  const expenseTrend = calculateTrend(currentExpenses, previousExpenses);
-  const balanceTrend = calculateTrend(treasury.balance, treasury.balance - (currentIncome - currentExpenses));
-  
-  const formatTreasuryDate = () => {
-    const date = safeParseGameDate(treasury.lastUpdated);
-    return `${date.season} ${date.year}`;
-  };
+  // Calculer la variation par rapport au solde précédent
+  const balanceChange = treasury.balance - (treasury.previousBalance || 0);
+  const balanceChangePercent = treasury.previousBalance 
+    ? Math.round((balanceChange / treasury.previousBalance) * 100) 
+    : 0;
   
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-      <StatBox
-        title="Trésor Public"
-        value={formatMoney(treasury.balance)}
-        description={`Dernière mise à jour: ${formatTreasuryDate()}`}
-        icon={<Coins className="h-5 w-5" />}
-        trend={balanceTrend.trend}
-        trendValue={balanceTrend.percentage}
-      />
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+      <Card>
+        <CardHeader className="flex flex-row items-center justify-between pb-2">
+          <CardTitle className="text-sm font-medium">Trésor Public</CardTitle>
+          <Wallet className="h-4 w-4 text-muted-foreground" />
+        </CardHeader>
+        <CardContent>
+          <div className="text-2xl font-bold">{treasury.balance.toLocaleString()} As</div>
+          <div className="flex items-center mt-1">
+            {balanceChange > 0 ? (
+              <>
+                <TrendingUp className="h-4 w-4 text-green-500 mr-1" />
+                <span className="text-xs text-green-500">+{balanceChange.toLocaleString()} As ({balanceChangePercent}%)</span>
+              </>
+            ) : balanceChange < 0 ? (
+              <>
+                <TrendingDown className="h-4 w-4 text-red-500 mr-1" />
+                <span className="text-xs text-red-500">{balanceChange.toLocaleString()} As ({balanceChangePercent}%)</span>
+              </>
+            ) : (
+              <>
+                <ArrowRight className="h-4 w-4 text-muted-foreground mr-1" />
+                <span className="text-xs text-muted-foreground">Pas de changement</span>
+              </>
+            )}
+          </div>
+        </CardContent>
+      </Card>
       
-      <StatBox
-        title="Revenus (saison actuelle)"
-        value={formatMoney(currentIncome)}
-        description="Total des revenus de la saison en cours"
-        icon={<TrendingUp className="h-5 w-5" />}
-        trend={incomeTrend.trend}
-        trendValue={incomeTrend.percentage}
-      />
+      <Card>
+        <CardHeader className="flex flex-row items-center justify-between pb-2">
+          <CardTitle className="text-sm font-medium">Revenus</CardTitle>
+          <CreditCard className="h-4 w-4 text-muted-foreground" />
+        </CardHeader>
+        <CardContent>
+          <div className="text-2xl font-bold">{totalIncome.toLocaleString()} As</div>
+          <p className="text-xs text-muted-foreground mt-1">
+            {economieRecords.filter(r => r.type === 'income').length} transactions
+          </p>
+        </CardContent>
+      </Card>
       
-      <StatBox
-        title="Dépenses (saison actuelle)"
-        value={formatMoney(currentExpenses)}
-        description="Total des dépenses de la saison en cours"
-        icon={<TrendingDown className="h-5 w-5" />}
-        trend={expenseTrend.trend === 'up' ? 'down' : expenseTrend.trend === 'down' ? 'up' : 'neutral'}
-        trendValue={expenseTrend.percentage}
-      />
+      <Card>
+        <CardHeader className="flex flex-row items-center justify-between pb-2">
+          <CardTitle className="text-sm font-medium">Dépenses</CardTitle>
+          <CreditCard className="h-4 w-4 text-muted-foreground" />
+        </CardHeader>
+        <CardContent>
+          <div className="text-2xl font-bold">{totalExpense.toLocaleString()} As</div>
+          <p className="text-xs text-muted-foreground mt-1">
+            {economieRecords.filter(r => r.type === 'expense').length} transactions
+          </p>
+        </CardContent>
+      </Card>
       
-      <StatBox
-        title="Taux d'inflation"
-        value={`${treasury.inflationRate?.toFixed(1) || '0.0'}%`}
-        description="Impact sur les prix et l'économie"
-        icon={<Scale className="h-5 w-5" />}
-      />
+      <Card>
+        <CardHeader className="flex flex-row items-center justify-between pb-2">
+          <CardTitle className="text-sm font-medium">Inflation</CardTitle>
+          <Landmark className="h-4 w-4 text-muted-foreground" />
+        </CardHeader>
+        <CardContent>
+          <div className="text-2xl font-bold">{economicFactors?.inflationRate || 0}%</div>
+          <p className="text-xs text-muted-foreground mt-1">
+            Croissance: {economicFactors?.growthRate || 0}%
+          </p>
+        </CardContent>
+      </Card>
     </div>
   );
 };

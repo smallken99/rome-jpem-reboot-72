@@ -4,253 +4,283 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Label } from '@/components/ui/label';
-import { Province } from '../types/provinces';
-
-interface ProvinceModalProps {
-  province: Province;
-  isOpen: boolean;
-  onClose: () => void;
-  onSave: (updatedProvince: Province) => void;
-}
+import { Slider } from '@/components/ui/slider';
+import { Province, ProvinceModalProps } from '../types/provinces';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Users, Coins, Flag, ShieldAlert, Anchor, Map } from 'lucide-react';
 
 export const ProvinceModal: React.FC<ProvinceModalProps> = ({
-  province,
   isOpen,
+  province,
   onClose,
   onSave
 }) => {
-  const [editedProvince, setEditedProvince] = useState<Province>({...province});
+  const [activeTab, setActiveTab] = useState('general');
+  const [editedProvince, setEditedProvince] = useState<Province | null>(province);
   
-  const handleChange = (field: keyof Province, value: any) => {
-    setEditedProvince(prev => ({
-      ...prev,
-      [field]: value
-    }));
+  if (!editedProvince) return null;
+  
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    const { name, value } = e.target;
+    setEditedProvince(prev => {
+      if (!prev) return null;
+      return { ...prev, [name]: value };
+    });
   };
   
-  const handleResourceChange = (index: number, value: string) => {
-    const newResources = [...editedProvince.ressources];
-    newResources[index] = value;
-    setEditedProvince(prev => ({
-      ...prev,
-      ressources: newResources
-    }));
+  const handleNumberChange = (name: string, value: number) => {
+    setEditedProvince(prev => {
+      if (!prev) return null;
+      return { ...prev, [name]: value };
+    });
   };
   
-  const handleAddResource = () => {
-    setEditedProvince(prev => ({
-      ...prev,
-      ressources: [...prev.ressources, 'Nouvelle ressource']
-    }));
+  const handleSliderChange = (name: string, value: number[]) => {
+    setEditedProvince(prev => {
+      if (!prev) return null;
+      return { ...prev, [name]: value[0] };
+    });
   };
   
-  const handleRemoveResource = (index: number) => {
-    const newResources = [...editedProvince.ressources];
-    newResources.splice(index, 1);
-    setEditedProvince(prev => ({
-      ...prev,
-      ressources: newResources
-    }));
-  };
-  
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    onSave(editedProvince);
+  const handleSave = () => {
+    if (onSave && editedProvince) {
+      onSave(editedProvince);
+    }
   };
   
   return (
-    <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
-      <DialogContent className="sm:max-w-[650px]">
+    <Dialog open={isOpen} onOpenChange={onClose}>
+      <DialogContent className="max-w-3xl max-h-[90vh] overflow-auto">
         <DialogHeader>
-          <DialogTitle>Province: {province.nom}</DialogTitle>
+          <DialogTitle className="text-2xl font-bold">
+            {editedProvince.nom}
+          </DialogTitle>
         </DialogHeader>
         
-        <form onSubmit={handleSubmit} className="space-y-4 py-4 max-h-[70vh] overflow-y-auto">
-          <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="nom">Nom</Label>
-              <Input
-                id="nom"
-                value={editedProvince.nom}
-                onChange={(e) => handleChange('nom', e.target.value)}
-              />
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="mt-4">
+          <TabsList className="grid grid-cols-3 mb-4">
+            <TabsTrigger value="general">Général</TabsTrigger>
+            <TabsTrigger value="military">Militaire</TabsTrigger>
+            <TabsTrigger value="economy">Économie</TabsTrigger>
+          </TabsList>
+          
+          <TabsContent value="general" className="space-y-4">
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="nom">Nom de la province</Label>
+                <Input 
+                  id="nom" 
+                  name="nom" 
+                  value={editedProvince.nom} 
+                  onChange={handleInputChange} 
+                />
+              </div>
+              
+              <div className="space-y-2">
+                <Label htmlFor="région">Région</Label>
+                <Input 
+                  id="région" 
+                  name="région" 
+                  value={editedProvince.région} 
+                  onChange={handleInputChange}
+                />
+              </div>
+              
+              <div className="space-y-2">
+                <Label htmlFor="gouverneur">Gouverneur</Label>
+                <Input 
+                  id="gouverneur" 
+                  name="gouverneur" 
+                  value={editedProvince.gouverneur} 
+                  onChange={handleInputChange}
+                />
+              </div>
+              
+              <div className="space-y-2">
+                <Label htmlFor="status">Statut</Label>
+                <Input 
+                  id="status" 
+                  name="status" 
+                  value={editedProvince.status} 
+                  onChange={handleInputChange}
+                />
+              </div>
             </div>
             
             <div className="space-y-2">
-              <Label htmlFor="région">Région</Label>
-              <Input
-                id="région"
-                value={editedProvince.région}
-                onChange={(e) => handleChange('région', e.target.value)}
-              />
-            </div>
-          </div>
-          
-          <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="gouverneur">Gouverneur</Label>
-              <Input
-                id="gouverneur"
-                value={editedProvince.gouverneur}
-                onChange={(e) => handleChange('gouverneur', e.target.value)}
+              <Label htmlFor="description">Description</Label>
+              <Textarea 
+                id="description" 
+                name="description" 
+                value={editedProvince.description} 
+                onChange={handleInputChange}
+                rows={3}
               />
             </div>
             
-            <div className="space-y-2">
-              <Label htmlFor="status">Statut</Label>
-              <Select
-                value={editedProvince.status}
-                onValueChange={(value) => handleChange('status', value)}
-              >
-                <SelectTrigger id="status">
-                  <SelectValue placeholder="Statut" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="pacifiée">Pacifiée</SelectItem>
-                  <SelectItem value="instable">Instable</SelectItem>
-                  <SelectItem value="rebelle">Rebelle</SelectItem>
-                </SelectContent>
-              </Select>
+            <div className="space-y-3">
+              <div className="flex justify-between items-center">
+                <Label>Loyauté ({editedProvince.loyauté}%)</Label>
+                <div className="text-sm text-muted-foreground">
+                  Variation: {editedProvince.loyautéVariation || editedProvince.variationLoyauté || 0}%
+                </div>
+              </div>
+              <Slider 
+                min={0} 
+                max={100} 
+                step={1}
+                value={[editedProvince.loyauté]} 
+                onValueChange={(values) => handleSliderChange('loyauté', values)}
+              />
             </div>
-          </div>
-          
-          <div className="grid grid-cols-2 gap-4">
+            
             <div className="space-y-2">
               <Label htmlFor="population">Population</Label>
-              <Input
-                id="population"
-                type="number"
-                value={editedProvince.population}
-                onChange={(e) => handleChange('population', parseInt(e.target.value))}
+              <Input 
+                id="population" 
+                name="population" 
+                type="number" 
+                value={editedProvince.population} 
+                onChange={(e) => handleNumberChange('population', Number(e.target.value))}
               />
             </div>
             
             <div className="space-y-2">
-              <Label htmlFor="richesse">Richesse (deniers)</Label>
-              <Input
-                id="richesse"
-                type="number"
-                value={editedProvince.richesse}
-                onChange={(e) => handleChange('richesse', parseInt(e.target.value))}
+              <Label htmlFor="dernierEvenement">Dernier événement</Label>
+              <Input 
+                id="dernierEvenement" 
+                name="dernierEvenement" 
+                value={editedProvince.dernierEvenement || editedProvince.dernierEvénement || ''} 
+                onChange={handleInputChange}
               />
             </div>
-          </div>
+          </TabsContent>
           
-          <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="loyauté">Loyauté (%)</Label>
-              <Input
-                id="loyauté"
-                type="number"
-                min={0}
-                max={100}
-                value={editedProvince.loyauté}
-                onChange={(e) => handleChange('loyauté', parseInt(e.target.value))}
-              />
-            </div>
-            
-            <div className="space-y-2">
-              <Label htmlFor="impôts">Impôts annuels</Label>
-              <Input
-                id="impôts"
-                type="number"
-                value={editedProvince.impôts}
-                onChange={(e) => handleChange('impôts', parseInt(e.target.value))}
-              />
-            </div>
-          </div>
-          
-          <div className="space-y-2">
-            <Label htmlFor="description">Description</Label>
-            <Textarea
-              id="description"
-              rows={3}
-              value={editedProvince.description}
-              onChange={(e) => handleChange('description', e.target.value)}
-            />
-          </div>
-          
-          <div className="space-y-2">
-            <div className="flex items-center justify-between">
-              <Label>Ressources</Label>
-              <Button type="button" variant="outline" size="sm" onClick={handleAddResource}>
-                Ajouter une ressource
-              </Button>
-            </div>
-            
-            <div className="space-y-2 mt-2">
-              {editedProvince.ressources.map((ressource, index) => (
-                <div key={index} className="flex gap-2">
-                  <Input
-                    value={ressource}
-                    onChange={(e) => handleResourceChange(index, e.target.value)}
+          <TabsContent value="military" className="space-y-4">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <ShieldAlert className="h-5 w-5" />
+                  Forces militaires
+                </CardTitle>
+                <CardDescription>
+                  Troupes stationnées dans la province
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="space-y-2">
+                  <Label htmlFor="légions">Légions</Label>
+                  <Input 
+                    id="légions" 
+                    name="armée.légions" 
+                    type="number" 
+                    value={editedProvince.armée?.légions || 0} 
+                    onChange={(e) => {
+                      const newProvince = { ...editedProvince };
+                      if (!newProvince.armée) newProvince.armée = { légions: 0, auxiliaires: 0, navires: 0 };
+                      newProvince.armée.légions = Number(e.target.value);
+                      setEditedProvince(newProvince);
+                    }}
                   />
-                  <Button 
-                    type="button" 
-                    variant="destructive" 
-                    size="sm"
-                    onClick={() => handleRemoveResource(index)}
-                  >
-                    Supprimer
-                  </Button>
                 </div>
-              ))}
-            </div>
-          </div>
+                
+                <div className="space-y-2">
+                  <Label htmlFor="auxiliaires">Auxiliaires</Label>
+                  <Input 
+                    id="auxiliaires" 
+                    name="armée.auxiliaires" 
+                    type="number" 
+                    value={editedProvince.armée?.auxiliaires || 0} 
+                    onChange={(e) => {
+                      const newProvince = { ...editedProvince };
+                      if (!newProvince.armée) newProvince.armée = { légions: 0, auxiliaires: 0, navires: 0 };
+                      newProvince.armée.auxiliaires = Number(e.target.value);
+                      setEditedProvince(newProvince);
+                    }}
+                  />
+                </div>
+                
+                <div className="space-y-2">
+                  <Label htmlFor="navires">Navires</Label>
+                  <Input 
+                    id="navires" 
+                    name="armée.navires" 
+                    type="number" 
+                    value={editedProvince.armée?.navires || 0} 
+                    onChange={(e) => {
+                      const newProvince = { ...editedProvince };
+                      if (!newProvince.armée) newProvince.armée = { légions: 0, auxiliaires: 0, navires: 0 };
+                      newProvince.armée.navires = Number(e.target.value);
+                      setEditedProvince(newProvince);
+                    }}
+                  />
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
           
-          <div className="space-y-2">
-            <Label>Armée</Label>
-            <div className="grid grid-cols-3 gap-4">
-              <div>
-                <Label htmlFor="légions">Légions</Label>
-                <Input
-                  id="légions"
-                  type="number"
-                  value={editedProvince.armée.légions}
-                  onChange={(e) => handleChange('armée', {
-                    ...editedProvince.armée,
-                    légions: parseInt(e.target.value)
-                  })}
-                />
-              </div>
-              
-              <div>
-                <Label htmlFor="auxiliaires">Auxiliaires</Label>
-                <Input
-                  id="auxiliaires"
-                  type="number"
-                  value={editedProvince.armée.auxiliaires}
-                  onChange={(e) => handleChange('armée', {
-                    ...editedProvince.armée,
-                    auxiliaires: parseInt(e.target.value)
-                  })}
-                />
-              </div>
-              
-              <div>
-                <Label htmlFor="navires">Navires</Label>
-                <Input
-                  id="navires"
-                  type="number"
-                  value={editedProvince.armée.navires}
-                  onChange={(e) => handleChange('armée', {
-                    ...editedProvince.armée,
-                    navires: parseInt(e.target.value)
-                  })}
-                />
-              </div>
-            </div>
-          </div>
-          
-          <DialogFooter>
-            <Button type="button" variant="outline" onClick={onClose}>
-              Annuler
-            </Button>
-            <Button type="submit">Enregistrer</Button>
-          </DialogFooter>
-        </form>
+          <TabsContent value="economy" className="space-y-4">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Coins className="h-5 w-5" />
+                  Économie
+                </CardTitle>
+                <CardDescription>
+                  Ressources et revenus de la province
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="space-y-2">
+                  <Label htmlFor="richesse">Richesse</Label>
+                  <Slider 
+                    min={0} 
+                    max={100} 
+                    step={1}
+                    value={[editedProvince.richesse]} 
+                    onValueChange={(values) => handleSliderChange('richesse', values)}
+                  />
+                  <div className="flex justify-between text-xs">
+                    <span>Pauvre</span>
+                    <span>Moyenne</span>
+                    <span>Riche</span>
+                  </div>
+                </div>
+                
+                <div className="space-y-2">
+                  <Label htmlFor="impôts">Impôts (en As)</Label>
+                  <Input 
+                    id="impôts" 
+                    name="impôts" 
+                    type="number" 
+                    value={editedProvince.impôts} 
+                    onChange={(e) => handleNumberChange('impôts', Number(e.target.value))}
+                  />
+                </div>
+                
+                <div className="space-y-2">
+                  <Label htmlFor="ressources">Ressources (séparées par des virgules)</Label>
+                  <Input 
+                    id="ressources" 
+                    name="ressources" 
+                    value={editedProvince.ressources?.join(', ') || ''} 
+                    onChange={(e) => {
+                      const ressources = e.target.value.split(',').map(r => r.trim()).filter(Boolean);
+                      setEditedProvince(prev => prev ? { ...prev, ressources } : null);
+                    }}
+                  />
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+        </Tabs>
+        
+        <DialogFooter className="flex justify-between mt-4">
+          <Button variant="outline" onClick={onClose}>Annuler</Button>
+          <Button onClick={handleSave}>Sauvegarder les modifications</Button>
+        </DialogFooter>
       </DialogContent>
     </Dialog>
   );

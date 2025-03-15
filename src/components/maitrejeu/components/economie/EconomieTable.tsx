@@ -1,92 +1,91 @@
 
 import React from 'react';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Pencil, Trash2, ArrowUp, ArrowDown } from 'lucide-react';
-import { EconomieRecord } from '../../types/economie';
-import { formatCurrency, formatDate } from '@/utils/formatUtils';
+import { 
+  ArrowUpDown, 
+  ChevronDown, 
+  ChevronUp, 
+  MoreHorizontal, 
+  Pencil, 
+  Trash2 
+} from 'lucide-react';
+import { 
+  DropdownMenu, 
+  DropdownMenuContent, 
+  DropdownMenuItem, 
+  DropdownMenuTrigger 
+} from '@/components/ui/dropdown-menu';
+import { Badge } from '@/components/ui/badge';
+import { EconomieRecord, EconomieSort } from '../../types/economie';
 
 interface EconomieTableProps {
   records: EconomieRecord[];
   onEdit: (id: string) => void;
   onDelete: (id: string) => void;
-  sort?: {
-    field: keyof EconomieRecord;
-    direction: 'asc' | 'desc';
-  };
-  onSortChange?: (field: keyof EconomieRecord) => void;
+  sort: EconomieSort;
+  onSortChange: (field: keyof EconomieRecord) => void;
 }
 
-export const EconomieTable: React.FC<EconomieTableProps> = ({ 
-  records, 
-  onEdit, 
+export const EconomieTable: React.FC<EconomieTableProps> = ({
+  records,
+  onEdit,
   onDelete,
   sort,
   onSortChange
 }) => {
-  const getStatusBadge = (status: string) => {
-    switch(status) {
-      case 'income':
-        return <Badge className="bg-green-500">Revenu</Badge>;
-      case 'expense':
-        return <Badge className="bg-red-500">Dépense</Badge>;
-      case 'transfer':
-        return <Badge className="bg-blue-500">Transfert</Badge>;
-      case 'tax':
-        return <Badge className="bg-purple-500">Impôt</Badge>;
-      default:
-        return <Badge>Autre</Badge>;
-    }
-  };
-  
-  const getSourceDisplay = (source: string) => {
-    switch(source) {
-      case 'treasury':
-        return 'Trésor Public';
-      case 'province':
-        return 'Province';
-      case 'trade':
-        return 'Commerce';
-      case 'tax':
-        return 'Taxation';
-      default:
-        return source;
-    }
-  };
-  
-  const renderSortIcon = (field: keyof EconomieRecord) => {
-    if (!sort || sort.field !== field) return null;
-    return sort.direction === 'asc' ? <ArrowUp className="h-3 w-3 ml-1" /> : <ArrowDown className="h-3 w-3 ml-1" />;
-  };
-  
-  const handleHeaderClick = (field: keyof EconomieRecord) => {
-    if (onSortChange) {
-      onSortChange(field);
-    }
-  };
-  
-  const renderTableHeader = (label: string, field: keyof EconomieRecord, sortable: boolean = true) => {
-    return (
-      <TableHead 
-        className={sortable && onSortChange ? "cursor-pointer" : ""}
-        onClick={sortable && onSortChange ? () => handleHeaderClick(field) : undefined}
-      >
-        <div className="flex items-center">
-          {label}
-          {sortable && renderSortIcon(field)}
-        </div>
-      </TableHead>
-    );
-  };
-  
-  const formatDateField = (date: string | any) => {
-    if (typeof date === 'string') {
-      return date;
+  // Fonction pour formater la date
+  const formatDate = (date: string | any) => {
+    if (typeof date === 'string' && date.includes('T')) {
+      // Si c'est une date ISO standard
+      return new Date(date).toLocaleDateString('fr-FR');
     } else if (date && typeof date === 'object' && 'year' in date && 'season' in date) {
-      return formatDate(date);
+      // Si c'est un objet GameDate
+      const seasonMap: Record<string, string> = {
+        'SPRING': 'Printemps',
+        'SUMMER': 'Été',
+        'AUTUMN': 'Automne',
+        'WINTER': 'Hiver',
+        'Ver': 'Printemps',
+        'Aestas': 'Été',
+        'Autumnus': 'Automne',
+        'Hiems': 'Hiver'
+      };
+      
+      return `An ${date.year} - ${seasonMap[date.season] || date.season}`;
     }
-    return String(date);
+    
+    return 'Date inconnue';
+  };
+  
+  // Fonction pour rendre le type de transaction avec une couleur
+  const renderTransactionType = (type: string) => {
+    if (type === 'income' || type === 'tax') {
+      return <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">Revenu</Badge>;
+    } else if (type === 'expense') {
+      return <Badge variant="outline" className="bg-red-50 text-red-700 border-red-200">Dépense</Badge>;
+    } else {
+      return <Badge variant="outline">{type}</Badge>;
+    }
+  };
+  
+  // Fonction pour rendre le montant avec couleur
+  const renderAmount = (amount: number) => {
+    if (amount > 0) {
+      return <span className="text-green-600">+{amount.toLocaleString()} As</span>;
+    } else if (amount < 0) {
+      return <span className="text-red-600">{amount.toLocaleString()} As</span>;
+    } else {
+      return <span>0 As</span>;
+    }
+  };
+  
+  // Fonction pour rendre l'icône de tri
+  const renderSortIcon = (field: keyof EconomieRecord) => {
+    if (sort.field !== field) return <ArrowUpDown className="h-4 w-4" />;
+    return sort.direction === 'asc' ? 
+      <ChevronUp className="h-4 w-4" /> : 
+      <ChevronDown className="h-4 w-4" />;
   };
   
   return (
@@ -94,47 +93,70 @@ export const EconomieTable: React.FC<EconomieTableProps> = ({
       <Table>
         <TableHeader>
           <TableRow>
-            {renderTableHeader("Description", "description")}
-            {renderTableHeader("Type", "type")}
-            {renderTableHeader("Source", "source")}
-            {renderTableHeader("Montant", "amount")}
-            {renderTableHeader("Date", "date")}
-            <TableHead className="text-right">Actions</TableHead>
+            <TableHead>
+              <Button variant="ghost" size="sm" onClick={() => onSortChange('date')}>
+                Date {renderSortIcon('date')}
+              </Button>
+            </TableHead>
+            <TableHead>
+              <Button variant="ghost" size="sm" onClick={() => onSortChange('description')}>
+                Description {renderSortIcon('description')}
+              </Button>
+            </TableHead>
+            <TableHead>
+              <Button variant="ghost" size="sm" onClick={() => onSortChange('category')}>
+                Catégorie {renderSortIcon('category')}
+              </Button>
+            </TableHead>
+            <TableHead>
+              <Button variant="ghost" size="sm" onClick={() => onSortChange('type')}>
+                Type {renderSortIcon('type')}
+              </Button>
+            </TableHead>
+            <TableHead>
+              <Button variant="ghost" size="sm" onClick={() => onSortChange('amount')}>
+                Montant {renderSortIcon('amount')}
+              </Button>
+            </TableHead>
+            <TableHead className="w-[80px]">Actions</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
-          {records.length === 0 ? (
-            <TableRow>
-              <TableCell colSpan={6} className="text-center h-24 text-muted-foreground">
-                Aucun enregistrement économique trouvé.
-              </TableCell>
-            </TableRow>
-          ) : (
+          {records.length > 0 ? (
             records.map((record) => (
               <TableRow key={record.id}>
-                <TableCell className="font-medium">{record.description}</TableCell>
-                <TableCell>{getStatusBadge(record.type)}</TableCell>
-                <TableCell>{getSourceDisplay(record.source)}</TableCell>
-                <TableCell>{formatCurrency(record.amount)}</TableCell>
-                <TableCell>{formatDateField(record.date)}</TableCell>
-                <TableCell className="text-right space-x-2">
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={() => onEdit(record.id)}
-                  >
-                    <Pencil className="h-4 w-4" />
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={() => onDelete(record.id)}
-                  >
-                    <Trash2 className="h-4 w-4" />
-                  </Button>
+                <TableCell>{formatDate(record.date)}</TableCell>
+                <TableCell className="max-w-[300px] truncate">{record.description}</TableCell>
+                <TableCell>{record.category}</TableCell>
+                <TableCell>{renderTransactionType(record.type)}</TableCell>
+                <TableCell>{renderAmount(record.amount)}</TableCell>
+                <TableCell>
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button variant="ghost" size="icon">
+                        <MoreHorizontal className="h-4 w-4" />
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end">
+                      <DropdownMenuItem onClick={() => onEdit(record.id)}>
+                        <Pencil className="h-4 w-4 mr-2" />
+                        Modifier
+                      </DropdownMenuItem>
+                      <DropdownMenuItem onClick={() => onDelete(record.id)}>
+                        <Trash2 className="h-4 w-4 mr-2" />
+                        Supprimer
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
                 </TableCell>
               </TableRow>
             ))
+          ) : (
+            <TableRow>
+              <TableCell colSpan={6} className="h-24 text-center">
+                Aucune transaction trouvée.
+              </TableCell>
+            </TableRow>
           )}
         </TableBody>
       </Table>

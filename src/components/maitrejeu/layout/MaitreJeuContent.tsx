@@ -11,15 +11,22 @@ import { GestionFamilles } from '../GestionFamilles';
 import { GestionRepublique } from '../GestionRepublique';
 import { GestionBatiments } from '../GestionBatiments';
 import { GestionLois } from '../GestionLois';
+import { MaitreJeuStats } from '../MaitreJeuStats';
+import { TimePanel } from '../components/TimePanel';
 
 interface MaitreJeuContentProps {
   activeTab: string;
 }
 
 export const MaitreJeuContent: React.FC<MaitreJeuContentProps> = ({ activeTab }) => {
-  // Rendu conditionnel en fonction de l'onglet actif
+  // Détecter si la section active nécessite le TimePanel
+  const showTimePanel = activeTab !== 'accueil';
+  
   return (
-    <div className="bg-background border rounded-lg shadow">
+    <div className="bg-background border rounded-lg shadow overflow-hidden">
+      {showTimePanel && <TimePanel />}
+      
+      {/* Sections existantes */}
       {activeTab === 'senateurs' && <GestionSenateurs />}
       {activeTab === 'provinces' && <GestionProvinces />}
       {activeTab === 'politique' && <GestionPolitique />}
@@ -31,6 +38,7 @@ export const MaitreJeuContent: React.FC<MaitreJeuContentProps> = ({ activeTab })
       {activeTab === 'republique' && <GestionRepublique />}
       {activeTab === 'batiments' && <GestionBatiments />}
       {activeTab === 'lois' && <GestionLois />}
+      {activeTab === 'statistiques' && <MaitreJeuStats />}
     </div>
   );
 };
