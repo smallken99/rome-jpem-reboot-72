@@ -16,6 +16,16 @@ export const FamilyInfoSidebar: React.FC<FamilyInfoSidebarProps> = ({ characters
   const [activeTab, setActiveTab] = useState('info');
   const { paterFamilias, materFamilias, children, otherRelatives } = getFamilyMembers(characters);
   
+  // Fonction utilitaire pour afficher le nom complet
+  const displayFullName = (character: Character) => {
+    // Si firstName et lastName sont définis, les utiliser
+    if (character.firstName && character.lastName) {
+      return `${character.firstName} ${character.lastName}`;
+    }
+    // Sinon, utiliser le champ name
+    return character.name;
+  };
+  
   return (
     <Card>
       <CardHeader>
@@ -33,7 +43,7 @@ export const FamilyInfoSidebar: React.FC<FamilyInfoSidebarProps> = ({ characters
             <div>
               <h3 className="font-medium mb-2">Chef de famille</h3>
               {paterFamilias ? (
-                <p>{paterFamilias.firstName} {paterFamilias.lastName}</p>
+                <p>{displayFullName(paterFamilias)}</p>
               ) : (
                 <p className="text-muted-foreground text-sm">Aucun chef de famille</p>
               )}
@@ -42,7 +52,7 @@ export const FamilyInfoSidebar: React.FC<FamilyInfoSidebarProps> = ({ characters
             <div>
               <h3 className="font-medium mb-2">Matrone</h3>
               {materFamilias ? (
-                <p>{materFamilias.firstName} {materFamilias.lastName}</p>
+                <p>{displayFullName(materFamilias)}</p>
               ) : (
                 <p className="text-muted-foreground text-sm">Aucune matrone</p>
               )}
@@ -54,7 +64,7 @@ export const FamilyInfoSidebar: React.FC<FamilyInfoSidebarProps> = ({ characters
                 <ul className="list-disc pl-5 text-sm">
                   {children.map((child, index) => (
                     <li key={child.id || index}>
-                      {child.firstName} ({child.gender === 'male' ? 'Fils' : 'Fille'})
+                      {displayFullName(child)} ({child.gender === 'male' ? 'Fils' : 'Fille'})
                     </li>
                   ))}
                 </ul>
@@ -63,7 +73,7 @@ export const FamilyInfoSidebar: React.FC<FamilyInfoSidebarProps> = ({ characters
               )}
             </div>
             
-            <Alert variant="outline" className="mt-4">
+            <Alert variant="default" className="mt-4">
               <InfoIcon className="h-4 w-4" />
               <AlertTitle>Conseil</AlertTitle>
               <AlertDescription>

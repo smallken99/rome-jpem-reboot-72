@@ -58,19 +58,27 @@ export const FamilyMember: React.FC<FamilyMemberProps> = ({ member, role }) => {
     return portraitList[portraitIndex] || portraitList[0];
   };
   
+  // Fonction pour obtenir le nom à afficher
+  const getDisplayName = () => {
+    if (member.firstName && member.lastName) {
+      return `${member.firstName} ${member.lastName}`;
+    }
+    return member.name;
+  };
+  
   return (
     <div className="roman-card hover:shadow-md transition-all duration-300 w-44 p-3 relative">
       <div className={`absolute top-2 right-2 w-3 h-3 rounded-full ${getRoleColor(role)}`}></div>
       
       <div className="flex flex-col items-center">
         <Avatar className="w-16 h-16 mb-2">
-          <AvatarImage src={member.portrait || getRomanPortrait()} alt={member.name} className="object-cover" />
+          <AvatarImage src={member.portrait || getRomanPortrait()} alt={getDisplayName()} className="object-cover" />
           <AvatarFallback className="bg-muted text-xl font-cinzel">
-            {getInitials(member.name)}
+            {getInitials(getDisplayName())}
           </AvatarFallback>
         </Avatar>
         
-        <h3 className="font-cinzel text-center text-sm">{member.name}</h3>
+        <h3 className="font-cinzel text-center text-sm">{getDisplayName()}</h3>
         <div className="flex items-center gap-1 mt-1">
           <span className="text-xs text-muted-foreground">{role}</span>
           <span className="text-xs mx-1">•</span>
