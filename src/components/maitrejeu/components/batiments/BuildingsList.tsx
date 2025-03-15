@@ -1,219 +1,178 @@
 
-import React from 'react';
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import React, { useState } from 'react';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { BuildingsListProps, Building, BuildingStatus } from '@/components/maitrejeu/types/batiments';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Edit, Trash2, ArrowUpDown, Search } from 'lucide-react';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Search, Edit2, Trash2, Building2, Settings } from 'lucide-react';
 import { Input } from '@/components/ui/input';
-import { Building, BuildingStatus, BuildingType } from '../../types/batiments';
-import { formatCurrency } from '@/utils/currencyUtils';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { formatCurrency } from '@/utils/formatUtils';
+import { useBatimentsManagement } from '@/components/maitrejeu/hooks/useBatimentsManagement';
 
-interface BuildingsListProps {
-  onEdit: (buildingId: string) => void;
-}
-
-export const BuildingsList: React.FC<BuildingsListProps> = ({ onEdit }) => {
-  const [buildings, setBuildings] = React.useState<Building[]>([
-    {
-      id: '1',
-      name: 'Temple de Jupiter',
-      type: 'temple',
-      location: 'Forum Romanum',
-      status: 'good',
-      constructionYear: 720,
-      description: 'Temple principal dédié à Jupiter sur le Capitole',
-      cost: 50000,
-      maintenanceCost: 1000,
-      revenue: 500,
-      capacity: 1000,
-      owner: 'république'
-    },
-    {
-      id: '2',
-      name: 'Basilique Aemilia',
-      type: 'basilica',
-      location: 'Forum Romanum',
-      status: 'excellent',
-      constructionYear: 735,
-      description: 'Bâtiment administratif et centre commercial',
-      cost: 35000,
-      maintenanceCost: 750,
-      revenue: 2000,
-      capacity: 800,
-      owner: 'sénat'
-    },
-    {
-      id: '3',
-      name: 'Aqueduc Appien',
-      type: 'aqueduct',
-      location: 'Via Appia',
-      status: 'damaged',
-      constructionYear: 710,
-      description: 'Aqueduc amenant l\'eau à Rome depuis les montagnes',
-      cost: 80000,
-      maintenanceCost: 1500,
-      revenue: 0,
-      capacity: 0,
-      owner: 'censeur'
-    }
-  ]);
-
-  const [filter, setFilter] = React.useState('');
-  const [typeFilter, setTypeFilter] = React.useState<BuildingType | 'all'>('all');
-  const [statusFilter, setStatusFilter] = React.useState<BuildingStatus | 'all'>('all');
-
-  const filteredBuildings = buildings.filter(b => {
-    const matchesSearch = b.name.toLowerCase().includes(filter.toLowerCase()) ||
-                         b.description.toLowerCase().includes(filter.toLowerCase()) ||
-                         b.location.toLowerCase().includes(filter.toLowerCase());
+export const BuildingsList: React.FC<BuildingsListProps> = ({ 
+  onEdit, 
+  onDelete,
+  onSelect
+}) => {
+  const { buildings, getBuildingsByType } = useBatimentsManagement();
+  const [searchTerm, setSearchTerm] = useState('');
+  const [currentTab, setCurrentTab] = useState('all');
+  
+  // Filtrer les bâtiments en fonction de la recherche et de l'onglet
+  const filteredBuildings = buildings.filter(building => {
+    const matchesSearch = 
+      building.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      building.location.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      building.description.toLowerCase().includes(searchTerm.toLowerCase());
+      
+    if (!matchesSearch) return false;
     
-    const matchesType = typeFilter === 'all' || b.type === typeFilter;
-    const matchesStatus = statusFilter === 'all' || b.status === statusFilter;
+    if (currentTab === 'all') return true;
+    if (currentTab === 'temples' && building.type === 'temple') return true;
+    if (currentTab === 'government' && ['basilica', 'forum'].includes(building.type)) return true;
+    if (currentTab === 'entertainment' && ['theater', 'amphitheater', 'circus'].includes(building.type)) return true;
+    if (currentTab === 'infrastructure' && ['aqueduct', 'bridge', 'road'].includes(building.type)) return true;
+    if (currentTab === 'commercial' && ['market', 'port', 'warehouse'].includes(building.type)) return true;
+    if (currentTab === 'other' && (building.type === 'other' || building.type === 'villa')) return true;
     
-    return matchesSearch && matchesType && matchesStatus;
+    return false;
   });
-
-  const getBadgeVariant = (status: BuildingStatus) => {
-    switch (status) {
-      case 'excellent': return 'success';
-      case 'good': return 'default';
-      case 'damaged': return 'warning';
-      case 'poor': return 'destructive';
-      case 'ruined': return 'outline';
-      case 'under_construction': return 'secondary';
-      default: return 'default';
+  
+  // Obtenir les bâtiments par type pour les statistiques
+  const buildingsByType = getBuildingsByType();
+  
+  // Fonction pour afficher une badge en fonction du statut
+  const getStatusBadge = (status: BuildingStatus) => {
+    switch(status) {
+      case 'excellent':
+        return <Badge variant="success">Excellent</Badge>;
+      case 'good':
+        return <Badge>Bon</Badge>;
+      case 'damaged':
+        return <Badge variant="secondary">Endommagé</Badge>;
+      case 'poor':
+        return <Badge variant="warning">Mauvais état</Badge>;
+      case 'ruined':
+        return <Badge variant="destructive">En ruine</Badge>;
+      case 'under_construction':
+        return <Badge variant="outline">En construction</Badge>;
+      default:
+        return <Badge>{status}</Badge>;
     }
   };
-
-  const formatType = (type: BuildingType) => {
-    const typeMapping: Record<BuildingType, string> = {
-      'temple': 'Temple',
-      'basilica': 'Basilique',
-      'forum': 'Forum',
-      'market': 'Marché',
-      'aqueduct': 'Aqueduc',
-      'theater': 'Théâtre',
-      'amphitheater': 'Amphithéâtre',
-      'circus': 'Cirque',
-      'bath': 'Thermes',
-      'bridge': 'Pont',
-      'villa': 'Villa',
-      'road': 'Route',
-      'port': 'Port',
-      'warehouse': 'Entrepôt',
-      'other': 'Autre'
-    };
-    return typeMapping[type] || type;
+  
+  // Fonction pour afficher une icône en fonction du type
+  const getBuildingTypeIcon = (type: string) => {
+    return <Building2 className="h-4 w-4" />;
   };
-
-  const formatStatus = (status: BuildingStatus) => {
-    const statusMapping: Record<BuildingStatus, string> = {
-      'excellent': 'Excellent',
-      'good': 'Bon',
-      'damaged': 'Endommagé',
-      'poor': 'Mauvais',
-      'ruined': 'En ruine',
-      'under_construction': 'En construction'
-    };
-    return statusMapping[status] || status;
-  };
-
+  
   return (
-    <div className="space-y-6">
+    <div className="space-y-4">
       <div className="flex flex-col sm:flex-row gap-4">
         <div className="relative flex-1">
           <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
           <Input
             placeholder="Rechercher un bâtiment..."
-            value={filter}
-            onChange={(e) => setFilter(e.target.value)}
             className="pl-8"
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
           />
         </div>
-        
-        <Select value={typeFilter} onValueChange={(value) => setTypeFilter(value as BuildingType | 'all')}>
-          <SelectTrigger className="w-[180px]">
-            <SelectValue placeholder="Type de bâtiment" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">Tous les types</SelectItem>
-            <SelectItem value="temple">Temple</SelectItem>
-            <SelectItem value="basilica">Basilique</SelectItem>
-            <SelectItem value="forum">Forum</SelectItem>
-            <SelectItem value="market">Marché</SelectItem>
-            <SelectItem value="aqueduct">Aqueduc</SelectItem>
-            <SelectItem value="theater">Théâtre</SelectItem>
-            <SelectItem value="amphitheater">Amphithéâtre</SelectItem>
-            <SelectItem value="bath">Thermes</SelectItem>
-            <SelectItem value="other">Autres</SelectItem>
-          </SelectContent>
-        </Select>
-        
-        <Select value={statusFilter} onValueChange={(value) => setStatusFilter(value as BuildingStatus | 'all')}>
-          <SelectTrigger className="w-[180px]">
-            <SelectValue placeholder="État" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">Tous les états</SelectItem>
-            <SelectItem value="excellent">Excellent</SelectItem>
-            <SelectItem value="good">Bon</SelectItem>
-            <SelectItem value="damaged">Endommagé</SelectItem>
-            <SelectItem value="poor">Mauvais</SelectItem>
-            <SelectItem value="ruined">En ruine</SelectItem>
-            <SelectItem value="under_construction">En construction</SelectItem>
-          </SelectContent>
-        </Select>
       </div>
-
-      {filteredBuildings.length === 0 ? (
-        <div className="text-center py-10 text-muted-foreground">
-          Aucun bâtiment ne correspond aux critères de recherche
-        </div>
-      ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {filteredBuildings.map((building) => (
-            <Card key={building.id}>
-              <CardHeader className="pb-2">
-                <div className="flex justify-between items-start">
-                  <CardTitle className="text-lg">{building.name}</CardTitle>
-                  <Badge variant={getBadgeVariant(building.status)}>
-                    {formatStatus(building.status)}
-                  </Badge>
-                </div>
-                <CardDescription>{formatType(building.type)} - {building.location}</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <p className="text-sm mb-4">{building.description}</p>
-                <div className="grid grid-cols-2 gap-2 text-sm">
-                  <div>
-                    <p className="text-muted-foreground">Construction:</p>
-                    <p>{building.constructionYear} AUC</p>
-                  </div>
-                  <div>
-                    <p className="text-muted-foreground">Propriétaire:</p>
-                    <p>{building.owner}</p>
-                  </div>
-                  <div>
-                    <p className="text-muted-foreground">Coût d'entretien:</p>
-                    <p>{formatCurrency(building.maintenanceCost)}</p>
-                  </div>
-                  <div>
-                    <p className="text-muted-foreground">Revenus:</p>
-                    <p>{formatCurrency(building.revenue)}</p>
-                  </div>
-                </div>
-              </CardContent>
-              <CardFooter className="flex justify-end gap-2 pt-2">
-                <Button variant="outline" size="sm" onClick={() => onEdit(building.id)}>
-                  <Edit className="h-3.5 w-3.5 mr-1.5" />
-                  Éditer
-                </Button>
-              </CardFooter>
-            </Card>
-          ))}
-        </div>
-      )}
+      
+      <Tabs value={currentTab} onValueChange={setCurrentTab}>
+        <TabsList className="grid grid-cols-4 lg:grid-cols-7">
+          <TabsTrigger value="all">Tous <span className="ml-1 text-xs">({buildings.length})</span></TabsTrigger>
+          <TabsTrigger value="temples">Temples <span className="ml-1 text-xs">({buildingsByType.temples.length})</span></TabsTrigger>
+          <TabsTrigger value="government">Gouvernement <span className="ml-1 text-xs">({buildingsByType.government.length})</span></TabsTrigger>
+          <TabsTrigger value="entertainment">Divertissement <span className="ml-1 text-xs">({buildingsByType.entertainment.length})</span></TabsTrigger>
+          <TabsTrigger value="infrastructure">Infrastructure <span className="ml-1 text-xs">({buildingsByType.infrastructure.length})</span></TabsTrigger>
+          <TabsTrigger value="commercial">Commercial <span className="ml-1 text-xs">({buildingsByType.commercial.length})</span></TabsTrigger>
+          <TabsTrigger value="other">Autres <span className="ml-1 text-xs">({buildingsByType.other.length})</span></TabsTrigger>
+        </TabsList>
+        
+        <TabsContent value={currentTab} className="mt-4">
+          {filteredBuildings.length > 0 ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {filteredBuildings.map((building) => (
+                <Card key={building.id} className="overflow-hidden">
+                  <CardHeader className="pb-3">
+                    <div className="flex justify-between items-start">
+                      <div>
+                        <CardTitle className="flex items-center gap-2">
+                          {getBuildingTypeIcon(building.type)}
+                          {building.name}
+                        </CardTitle>
+                        <CardDescription>{building.location}</CardDescription>
+                      </div>
+                      {getStatusBadge(building.status)}
+                    </div>
+                  </CardHeader>
+                  <CardContent>
+                    <dl className="space-y-2 text-sm">
+                      <div className="flex justify-between">
+                        <dt className="text-muted-foreground">Année de construction:</dt>
+                        <dd>{building.constructionYear} AUC</dd>
+                      </div>
+                      <div className="flex justify-between">
+                        <dt className="text-muted-foreground">Coût d'entretien:</dt>
+                        <dd>{formatCurrency(building.maintenanceCost)}</dd>
+                      </div>
+                      <div className="flex justify-between">
+                        <dt className="text-muted-foreground">Revenu:</dt>
+                        <dd>{formatCurrency(building.revenue)}</dd>
+                      </div>
+                      <div className="flex justify-between">
+                        <dt className="text-muted-foreground">Propriétaire:</dt>
+                        <dd className="capitalize">{building.owner}</dd>
+                      </div>
+                    </dl>
+                    
+                    <div className="mt-4 flex space-x-2 justify-end">
+                      <Button 
+                        variant="outline" 
+                        size="sm"
+                        onClick={() => onSelect && onSelect(building.id)}
+                      >
+                        Détails
+                      </Button>
+                      <Button 
+                        variant="outline" 
+                        size="sm"
+                        onClick={() => onEdit(building.id)}
+                      >
+                        <Edit2 className="h-4 w-4 mr-1" />
+                        Modifier
+                      </Button>
+                      {onDelete && (
+                        <Button 
+                          variant="destructive" 
+                          size="sm"
+                          onClick={() => onDelete(building.id)}
+                        >
+                          <Trash2 className="h-4 w-4 mr-1" />
+                          Supprimer
+                        </Button>
+                      )}
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          ) : (
+            <div className="text-center py-12 bg-muted/20 rounded-lg border border-dashed">
+              <Settings className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
+              <h3 className="text-lg font-medium">Aucun bâtiment trouvé</h3>
+              <p className="text-muted-foreground mt-1">
+                Aucun bâtiment ne correspond à vos critères de recherche.
+              </p>
+            </div>
+          )}
+        </TabsContent>
+      </Tabs>
     </div>
   );
 };
+
+export default BuildingsList;

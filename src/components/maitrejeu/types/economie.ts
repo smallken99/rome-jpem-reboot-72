@@ -2,8 +2,16 @@
 import { GameDate } from './common';
 
 export type EconomieType = 'income' | 'expense' | 'tax' | 'trade' | 'military' | 'construction' | 'slaves' | 'other' | 'all';
-export type EconomieSource = 'tax' | 'trade' | 'war' | 'donation' | 'fine' | 'sale' | 'purchase' | 'salary' | 'rent' | 'manual_entry' | 'other';
-export type EconomieCategory = 'military' | 'administration' | 'construction' | 'religion' | 'slaves' | 'entertainment' | 'tax' | 'trade' | 'diplomacy' | 'other' | 'all';
+export type EconomieSource = 
+  'tax' | 'trade' | 'war' | 'donation' | 'fine' | 'sale' | 'purchase' | 'salary' | 'rent' | 
+  'manual_entry' | 'other' | 'Impôts' | 'Armée' | 'Commerce extérieur' | 'Construction' | 
+  'Trésor Public' | 'Services d\'entretien' | 'Vente immobilière' | 'Marché aux esclaves' | 
+  'Perception fiscale';
+
+export type EconomieCategory = 
+  'military' | 'administration' | 'construction' | 'religion' | 'slaves' | 'entertainment' | 
+  'tax' | 'trade' | 'diplomacy' | 'other' | 'all' | 'Impôts' | 'Armée' | 'Commerce' | 
+  'Construction' | 'maintenance' | 'sale';
 
 export interface EconomieFilter {
   searchTerm?: string;
@@ -43,11 +51,11 @@ export interface EconomieRecord {
   affectedProvinceId?: string;
   approved: boolean;
   tags: string[];
-  impactFactors: ImpactFactors;
+  impactFactors?: ImpactFactors;
   isRecurring?: boolean;
-  recurringInterval?: number;
-  createdAt: Date;
-  updatedAt: Date;
+  recurringInterval?: string | number;
+  createdAt: string | Date;
+  updatedAt: string | Date;
 }
 
 export interface EconomieCreationData {
@@ -63,16 +71,29 @@ export interface EconomieCreationData {
   tags?: string[];
   impactFactors?: ImpactFactors;
   isRecurring?: boolean;
-  recurringInterval?: number;
+  recurringInterval?: number | string;
 }
 
 export interface TreasuryStatus {
+  id: string;
+  balance: number;
+  totalIncome?: number;
+  totalExpenses?: number;
+  surplus?: number;
+  projectedBalance?: number;
+  lastUpdated: GameDate | string;
+  inflationRate?: number;
+  taxRate?: number;
+  comments?: string;
+  previousBalance?: number;
+}
+
+export interface TreasuryData {
   balance: number;
   income: number;
   expenses: number;
   reserves: number;
-  debt: number;
-  lastUpdated: Date;
+  taxCollection?: number;
 }
 
 export interface EconomicFactors {
@@ -86,12 +107,22 @@ export interface EconomicFactors {
   adminExpense: number;
   currentYear?: number;
   currentSeason?: string;
+  loanInterestRate?: number;
+  tradeStability?: number;
+  inflationRate?: number;
+  growthRate?: number;
+  taxRates?: {
+    land: number;
+    income: number;
+    trade: number;
+    luxury: number;
+  };
 }
 
 export interface EconomieTableProps {
   records: EconomieRecord[];
   sort: EconomieSort;
-  onSortChange: (field: keyof EconomieRecord) => void;
+  onSortChange: (field: string) => void;
   onEdit: (record: EconomieRecord) => void;
   onDelete: (id: string) => void;
 }
@@ -106,4 +137,20 @@ export interface EconomieModalProps {
 export interface EconomieStatsProps {
   treasury: TreasuryStatus;
   economicFactors: EconomicFactors;
+}
+
+export interface EconomieActionsProps {
+  onAddTransaction: () => void;
+  onGenerateReport: () => void;
+  onRefreshData: () => void;
+  onManageBuildings?: () => void;
+  onManageTaxes?: () => void;
+  onManageSlaves?: () => void;
+  onCalculateProjections?: () => void;
+}
+
+export interface EconomieFiltersProps {
+  filter: EconomieFilter;
+  onFilterChange: (key: string, value: any) => void;
+  onResetFilters: () => void;
 }
