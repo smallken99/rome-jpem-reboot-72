@@ -1,315 +1,140 @@
-import React, { useState } from 'react';
+
+import React from 'react';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Badge } from '@/components/ui/badge';
 import { Nation } from './types';
-import { nationsMock } from './data';
-import { MoreHorizontal, Edit, Trash, Eye, Shield, Building, Map } from 'lucide-react';
-import { 
-  DropdownMenu, 
-  DropdownMenuContent, 
-  DropdownMenuItem, 
-  DropdownMenuTrigger,
-  DropdownMenuSeparator
-} from '@/components/ui/dropdown-menu';
+import { Card } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
+import { Eye, Edit, Trash } from 'lucide-react';
+
+// Mock data for the Nations
+const mockNations: Nation[] = [
+  {
+    id: '1',
+    name: 'Carthage',
+    region: 'North Africa',
+    status: 'enemy',
+    population: 700000,
+    militaryStrength: 75,
+    diplomaticInfluence: 65,
+    tradeValue: 1000000,
+    lastContact: '15 Mars 705 AUC',
+    description: 'Ancienne colonie phénicienne, principale rivale de Rome en Méditerranée occidentale.',
+    leaders: ['Hamilcar Barca', 'Hasdrubal']
+  },
+  {
+    id: '2',
+    name: 'Ptolemaic Egypt',
+    region: 'North Africa',
+    status: 'ally',
+    population: 4000000,
+    militaryStrength: 60,
+    diplomaticInfluence: 80,
+    tradeValue: 3000000,
+    lastContact: '5 Février 705 AUC',
+    description: 'Royaume hellénistique dirigé par les Ptolémées, riche en ressources et culture.',
+    leaders: ['Ptolémée XIII', 'Cléopâtre VII']
+  },
+  {
+    id: '3',
+    name: 'Parthian Empire',
+    region: 'Asia',
+    status: 'neutral',
+    population: 8000000,
+    militaryStrength: 85,
+    diplomaticInfluence: 70,
+    tradeValue: 2000000,
+    lastContact: '20 Janvier 705 AUC',
+    description: 'Empire iranien succédant aux Séleucides en Perse. Connu pour sa cavalerie redoutable.',
+    leaders: ['Orodes II']
+  }
+];
 
 interface NationsListProps {
-  searchTerm?: string;
-  filters?: {
-    status: string;
-    region: string;
-    dateFrom: string;
-    dateTo: string;
-  };
+  searchTerm: string;
+  filters: any;
 }
 
 export const NationsList: React.FC<NationsListProps> = ({ 
-  searchTerm = '',
-  filters = {
-    status: '',
-    region: '',
-    dateFrom: '',
-    dateTo: ''
-  }
+  searchTerm, 
+  filters
 }) => {
-  const [isViewOpen, setIsViewOpen] = useState(false);
-  const [isDeleteConfirmOpen, setIsDeleteConfirmOpen] = useState(false);
-  const [selectedNation, setSelectedNation] = useState<Nation | null>(null);
-  
-  // Filter nations based on searchTerm and filters
-  const filteredNations = nationsMock.filter(nation => {
-    // Search filter
-    const matchesSearch = searchTerm === '' || 
-      nation.nom.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      nation.région.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      nation.gouvernement.toLowerCase().includes(searchTerm.toLowerCase());
-      
-    // Status filter
-    const matchesStatus = !filters.status || nation.statut === filters.status;
+  // Simple filtering logic
+  const filteredNations = mockNations.filter(nation => {
+    const matchesSearch = nation.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
+                         nation.region.toLowerCase().includes(searchTerm.toLowerCase());
     
-    // Region filter
-    const matchesRegion = !filters.region || nation.région === filters.region;
+    const matchesStatus = !filters.status || nation.status === filters.status;
+    const matchesRegion = !filters.region || nation.region === filters.region;
     
-    // Date filters - assuming dateDernierTraité is in a format like "200 av. J.-C."
-    // For demonstration, we'll do a simple string comparison
-    const matchesDateFrom = !filters.dateFrom || 
-      (nation.dateDernierTraité && nation.dateDernierTraité >= filters.dateFrom);
-      
-    const matchesDateTo = !filters.dateTo || 
-      (nation.dateDernierTraité && nation.dateDernierTraité <= filters.dateTo);
-    
-    return matchesSearch && matchesStatus && matchesRegion && matchesDateFrom && matchesDateTo;
+    return matchesSearch && matchesStatus && matchesRegion;
   });
-    
-  const handleViewNation = (nation: Nation) => {
-    setSelectedNation(nation);
-    setIsViewOpen(true);
-  };
   
-  const handleEditNation = (nation: Nation) => {
-    console.log("Éditer nation:", nation.nom);
-    // Implémentation à venir
-  };
-  
-  const handleDeletePrompt = (nation: Nation) => {
-    setSelectedNation(nation);
-    setIsDeleteConfirmOpen(true);
-  };
-  
-  const handleDeleteConfirm = () => {
-    if (selectedNation) {
-      console.log("Supprimer nation:", selectedNation.nom);
-      // Implémentation à venir
-      setIsDeleteConfirmOpen(false);
-    }
-  };
-    
-  const getStatusColor = (status: string): string => {
+  // Status badge style helper
+  const getStatusBadge = (status: Nation['status']) => {
     switch(status) {
-      case "Allié": return "bg-green-500";
-      case "Neutre": return "bg-gray-500";
-      case "Ennemi": return "bg-red-500";
-      case "Soumis": return "bg-blue-500";
-      default: return "bg-gray-400";
+      case 'ally':
+        return <Badge className="bg-green-100 text-green-800 hover:bg-green-200">Allié</Badge>;
+      case 'enemy':
+        return <Badge className="bg-red-100 text-red-800 hover:bg-red-200">Ennemi</Badge>;
+      case 'neutral':
+        return <Badge className="bg-blue-100 text-blue-800 hover:bg-blue-200">Neutre</Badge>;
+      case 'tributary':
+        return <Badge className="bg-amber-100 text-amber-800 hover:bg-amber-200">Tributaire</Badge>;
     }
   };
-    
+
   return (
-    <>
+    <Card>
       {filteredNations.length === 0 ? (
-        <div className="text-center py-8 text-muted-foreground">
-          Aucune nation ne correspond aux critères de recherche ou aux filtres appliqués.
+        <div className="p-8 text-center text-muted-foreground">
+          Aucune nation ne correspond à vos critères de recherche
         </div>
       ) : (
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>Nom</TableHead>
+              <TableHead>Nation</TableHead>
               <TableHead>Région</TableHead>
               <TableHead>Statut</TableHead>
-              <TableHead>Puissance</TableHead>
-              <TableHead>Richesse</TableHead>
-              <TableHead>Relation</TableHead>
-              <TableHead>Actions</TableHead>
+              <TableHead>Force Militaire</TableHead>
+              <TableHead>Dernier Contact</TableHead>
+              <TableHead className="text-right">Actions</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {filteredNations.map(nation => (
-              <TableRow key={nation.id}>
-                <TableCell className="font-medium">{nation.nom}</TableCell>
-                <TableCell>{nation.région}</TableCell>
-                <TableCell>
-                  <Badge className={getStatusColor(nation.statut)}>
-                    {nation.statut}
-                  </Badge>
-                </TableCell>
+              <TableRow key={nation.id} className="hover:bg-muted/50">
+                <TableCell className="font-medium">{nation.name}</TableCell>
+                <TableCell>{nation.region}</TableCell>
+                <TableCell>{getStatusBadge(nation.status)}</TableCell>
                 <TableCell>
                   <div className="w-full bg-gray-200 rounded-full h-2.5">
                     <div 
-                      className="bg-red-600 h-2.5 rounded-full"
-                      style={{ width: `${nation.puissanceMilitaire * 10}%` }}
+                      className="bg-rome-navy h-2.5 rounded-full" 
+                      style={{ width: `${nation.militaryStrength}%` }}
                     ></div>
                   </div>
                 </TableCell>
-                <TableCell>
-                  <div className="w-full bg-gray-200 rounded-full h-2.5">
-                    <div 
-                      className="bg-yellow-400 h-2.5 rounded-full"
-                      style={{ width: `${nation.richesse * 10}%` }}
-                    ></div>
+                <TableCell>{nation.lastContact}</TableCell>
+                <TableCell className="text-right">
+                  <div className="flex justify-end gap-2">
+                    <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+                      <Eye className="h-4 w-4" />
+                    </Button>
+                    <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+                      <Edit className="h-4 w-4" />
+                    </Button>
+                    <Button variant="ghost" size="sm" className="h-8 w-8 p-0 text-destructive">
+                      <Trash className="h-4 w-4" />
+                    </Button>
                   </div>
-                </TableCell>
-                <TableCell>
-                  <div className="w-full bg-gray-200 rounded-full h-2.5">
-                    <div 
-                      className={`h-2.5 rounded-full ${
-                        nation.relationAvecRome > 6 ? "bg-green-500" : 
-                        nation.relationAvecRome > 3 ? "bg-yellow-400" : 
-                        "bg-red-600"
-                      }`}
-                      style={{ width: `${nation.relationAvecRome * 10}%` }}
-                    ></div>
-                  </div>
-                </TableCell>
-                <TableCell>
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <Button variant="ghost" className="h-8 w-8 p-0">
-                        <span className="sr-only">Ouvrir menu</span>
-                        <MoreHorizontal className="h-4 w-4" />
-                      </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end">
-                      <DropdownMenuItem onClick={() => handleViewNation(nation)}>
-                        <Eye className="mr-2 h-4 w-4" /> Voir détails
-                      </DropdownMenuItem>
-                      <DropdownMenuItem onClick={() => handleEditNation(nation)}>
-                        <Edit className="mr-2 h-4 w-4" /> Modifier
-                      </DropdownMenuItem>
-                      <DropdownMenuSeparator />
-                      <DropdownMenuItem>
-                        <Shield className="mr-2 h-4 w-4" /> Gérer relations
-                      </DropdownMenuItem>
-                      <DropdownMenuItem>
-                        <Building className="mr-2 h-4 w-4" /> Ambassade
-                      </DropdownMenuItem>
-                      <DropdownMenuItem>
-                        <Map className="mr-2 h-4 w-4" /> Voir sur carte
-                      </DropdownMenuItem>
-                      <DropdownMenuSeparator />
-                      <DropdownMenuItem 
-                        onClick={() => handleDeletePrompt(nation)}
-                        className="text-red-600 hover:text-red-800 focus:text-red-800"
-                      >
-                        <Trash className="mr-2 h-4 w-4" /> Supprimer
-                      </DropdownMenuItem>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
                 </TableCell>
               </TableRow>
             ))}
           </TableBody>
         </Table>
       )}
-      
-      {/* Modal détails de la nation */}
-      <Dialog open={isViewOpen} onOpenChange={setIsViewOpen}>
-        <DialogContent className="max-w-2xl">
-          <DialogHeader>
-            <DialogTitle>{selectedNation?.nom}</DialogTitle>
-            <DialogDescription>
-              {selectedNation?.région} • {selectedNation?.capitale}
-            </DialogDescription>
-          </DialogHeader>
-          
-          {selectedNation && (
-            <div className="space-y-4 mt-4">
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <h4 className="font-semibold text-sm mb-1">Statut diplomatique</h4>
-                  <Badge className={getStatusColor(selectedNation.statut)}>
-                    {selectedNation.statut}
-                  </Badge>
-                </div>
-                <div>
-                  <h4 className="font-semibold text-sm mb-1">Type de gouvernement</h4>
-                  <p>{selectedNation.gouvernement}</p>
-                </div>
-                <div>
-                  <h4 className="font-semibold text-sm mb-1">Dernier traité</h4>
-                  <p>{selectedNation.dateDernierTraité}</p>
-                </div>
-              </div>
-              
-              <div className="space-y-3 mt-2">
-                <div>
-                  <div className="flex justify-between mb-1">
-                    <h4 className="font-semibold text-sm">Puissance militaire</h4>
-                    <span>{selectedNation.puissanceMilitaire}/10</span>
-                  </div>
-                  <div className="w-full bg-gray-200 rounded-full h-2.5">
-                    <div 
-                      className="bg-red-600 h-2.5 rounded-full"
-                      style={{ width: `${selectedNation.puissanceMilitaire * 10}%` }}
-                    ></div>
-                  </div>
-                </div>
-                
-                <div>
-                  <div className="flex justify-between mb-1">
-                    <h4 className="font-semibold text-sm">Richesse</h4>
-                    <span>{selectedNation.richesse}/10</span>
-                  </div>
-                  <div className="w-full bg-gray-200 rounded-full h-2.5">
-                    <div 
-                      className="bg-yellow-400 h-2.5 rounded-full"
-                      style={{ width: `${selectedNation.richesse * 10}%` }}
-                    ></div>
-                  </div>
-                </div>
-                
-                <div>
-                  <div className="flex justify-between mb-1">
-                    <h4 className="font-semibold text-sm">Relation avec Rome</h4>
-                    <span>{selectedNation.relationAvecRome}/10</span>
-                  </div>
-                  <div className="w-full bg-gray-200 rounded-full h-2.5">
-                    <div 
-                      className={`h-2.5 rounded-full ${
-                        selectedNation.relationAvecRome > 6 ? "bg-green-500" : 
-                        selectedNation.relationAvecRome > 3 ? "bg-yellow-400" : 
-                        "bg-red-600"
-                      }`}
-                      style={{ width: `${selectedNation.relationAvecRome * 10}%` }}
-                    ></div>
-                  </div>
-                </div>
-              </div>
-              
-              <div>
-                <h4 className="font-semibold text-sm mb-1">Notes</h4>
-                <p className="text-sm text-gray-600">{selectedNation.notes}</p>
-              </div>
-              
-              <div className="flex justify-end space-x-2 pt-4">
-                <Button variant="outline" onClick={() => setIsViewOpen(false)}>
-                  Fermer
-                </Button>
-                <Button onClick={() => {
-                  setIsViewOpen(false);
-                  handleEditNation(selectedNation);
-                }}>
-                  <Edit className="mr-2 h-4 w-4" /> Modifier
-                </Button>
-              </div>
-            </div>
-          )}
-        </DialogContent>
-      </Dialog>
-      
-      {/* Modal confirmation suppression */}
-      <Dialog open={isDeleteConfirmOpen} onOpenChange={setIsDeleteConfirmOpen}>
-        <DialogContent className="max-w-md">
-          <DialogHeader>
-            <DialogTitle>Confirmer la suppression</DialogTitle>
-            <DialogDescription>
-              Êtes-vous sûr de vouloir supprimer cette nation? Cette action est irréversible.
-            </DialogDescription>
-          </DialogHeader>
-          
-          <div className="space-y-4 mt-4">
-            <div className="flex justify-end space-x-2">
-              <Button variant="outline" onClick={() => setIsDeleteConfirmOpen(false)}>
-                Annuler
-              </Button>
-              <Button variant="destructive" onClick={handleDeleteConfirm}>
-                Supprimer
-              </Button>
-            </div>
-          </div>
-        </DialogContent>
-      </Dialog>
-    </>
+    </Card>
   );
 };

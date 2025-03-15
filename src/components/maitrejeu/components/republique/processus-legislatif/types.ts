@@ -5,6 +5,13 @@ export interface ProjetLoi {
   auteur: string;
   date: string;
   statut: string;
+  description?: string;
+  contenu?: string;
+  votes?: {
+    pour: number;
+    contre: number;
+    abstention: number;
+  };
 }
 
 export interface VoteLoi {
@@ -13,6 +20,8 @@ export interface VoteLoi {
   auteur: string;
   dateDebut: string;
   dateFin: string;
+  description?: string;
+  contenu?: string;
   pour: number;
   contre: number;
   abstention: number;
@@ -23,6 +32,7 @@ export interface HistoriqueLoi {
   titre: string;
   auteur: string;
   date: string;
-  resultat: string;
+  resultat: 'Adoptée' | 'Rejetée';
   votes: string;
+  description?: string;
 }

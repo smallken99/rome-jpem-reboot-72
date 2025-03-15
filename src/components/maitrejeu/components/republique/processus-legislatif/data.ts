@@ -1,37 +1,123 @@
 
-import { ProjetLoi, VoteLoi, HistoriqueLoi } from './types';
+export interface ProjetLoi {
+  id: string;
+  titre: string;
+  auteur: string;
+  date: string;
+  statut: string;
+  description?: string;
+  contenu?: string;
+  votes?: {
+    pour: number;
+    contre: number;
+    abstention: number;
+  };
+}
 
+export interface VoteLoi {
+  id: string;
+  titre: string;
+  auteur: string;
+  dateDebut: string;
+  dateFin: string;
+  description?: string;
+  contenu?: string;
+  pour: number;
+  contre: number;
+  abstention: number;
+}
+
+export interface HistoriqueLoi {
+  id: string;
+  titre: string;
+  auteur: string;
+  date: string;
+  resultat: 'Adoptée' | 'Rejetée';
+  votes: string;
+  description?: string;
+}
+
+// Projets de loi en cours
 export const projetsData: ProjetLoi[] = [
-  { id: '1', titre: 'Lex Agraria', auteur: 'Gaius Gracchus', date: '05/06/230 av. J.-C.', statut: 'En rédaction' },
-  { id: '2', titre: 'Lex de Maiestate', auteur: 'Julius Caesar', date: '12/08/230 av. J.-C.', statut: 'En examen' },
-  { id: '3', titre: 'Lex Frumentaria', auteur: 'Marcus Aurelius', date: '23/09/230 av. J.-C.', statut: 'Prêt pour vote' }
-];
-
-export const votesData: VoteLoi[] = [
-  { 
-    id: '1', 
-    titre: 'Lex Militaris', 
-    auteur: 'Lucius Quinctius Cincinnatus', 
-    dateDebut: '01/10/230 av. J.-C.', 
-    dateFin: '08/10/230 av. J.-C.',
-    pour: 65,
-    contre: 35,
-    abstention: 10
+  {
+    id: "proj-1",
+    titre: "Lex Agraria de coloniis",
+    auteur: "Marcus Licinius Crassus",
+    date: "5 Mai 705 AUC",
+    statut: "En révision",
+    description: "Loi sur la distribution des terres aux vétérans des légions ayant servi plus de 16 ans."
   },
-  { 
-    id: '2', 
-    titre: 'Lex Justitiae', 
-    auteur: 'Cicero', 
-    dateDebut: '03/10/230 av. J.-C.', 
-    dateFin: '10/10/230 av. J.-C.',
-    pour: 45,
-    contre: 55,
-    abstention: 5
+  {
+    id: "proj-2",
+    titre: "Lex Gabinia de provinciis",
+    auteur: "Aulus Gabinius",
+    date: "12 Mai 705 AUC",
+    statut: "Prêt pour vote",
+    description: "Loi organisant l'administration des nouvelles provinces orientales."
+  },
+  {
+    id: "proj-3",
+    titre: "Lex de maiestate minuta",
+    auteur: "Quintus Lutatius Catulus",
+    date: "18 Mai 705 AUC",
+    statut: "Brouillon",
+    description: "Loi redéfinissant les crimes de lèse-majesté et leurs sanctions."
   }
 ];
 
+// Votes de loi en cours
+export const votesData: VoteLoi[] = [
+  {
+    id: "vote-1",
+    titre: "Lex Porcia de provocatione",
+    auteur: "Marcus Porcius Cato",
+    dateDebut: "1 Mai 705 AUC",
+    dateFin: "8 Mai 705 AUC",
+    description: "Extension du droit d'appel aux citoyens romains dans les provinces.",
+    pour: 87,
+    contre: 32,
+    abstention: 11
+  },
+  {
+    id: "vote-2",
+    titre: "Lex Manlia de tributis",
+    auteur: "Titus Manlius Torquatus",
+    dateDebut: "3 Mai 705 AUC",
+    dateFin: "10 Mai 705 AUC",
+    description: "Réforme du système de taxation des provinces asiatiques.",
+    pour: 65,
+    contre: 58,
+    abstention: 7
+  }
+];
+
+// Historique des lois votées
 export const historiqueData: HistoriqueLoi[] = [
-  { id: '1', titre: 'Lex Porcia', auteur: "Cato l'Ancien", date: '12/03/230 av. J.-C.', resultat: 'Adoptée', votes: '95/15/5' },
-  { id: '2', titre: 'Lex Publilia', auteur: 'Publilius Philo', date: '05/04/230 av. J.-C.', resultat: 'Rejetée', votes: '35/75/5' },
-  { id: '3', titre: 'Lex Hortensia', auteur: 'Quintus Hortensius', date: '27/06/230 av. J.-C.', resultat: 'Adoptée', votes: '85/25/5' }
+  {
+    id: "hist-1",
+    titre: "Lex Julia de repetundis",
+    auteur: "Gaius Julius Caesar",
+    date: "15 Avril 705 AUC",
+    resultat: "Adoptée",
+    votes: "142-35-13",
+    description: "Réforme des procédures judiciaires concernant l'extorsion par les gouverneurs de province."
+  },
+  {
+    id: "hist-2",
+    titre: "Lex Claudia de sociis",
+    auteur: "Appius Claudius Pulcher",
+    date: "8 Avril 705 AUC",
+    resultat: "Rejetée",
+    votes: "45-125-20",
+    description: "Proposition d'extension de la citoyenneté romaine aux alliés italiens ayant servi dans les légions pendant 10 ans."
+  },
+  {
+    id: "hist-3",
+    titre: "Lex Caecilia de vectigalibus",
+    auteur: "Quintus Caecilius Metellus",
+    date: "1 Avril 705 AUC",
+    resultat: "Adoptée",
+    votes: "156-24-10",
+    description: "Révision des taxes douanières sur les importations de luxe d'Orient."
+  }
 ];

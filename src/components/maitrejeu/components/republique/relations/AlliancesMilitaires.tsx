@@ -1,276 +1,145 @@
-import React, { useState } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+
+import React from 'react';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Badge } from '@/components/ui/badge';
-import { Shield, MoreHorizontal, Edit, Trash, Eye, Users, SwordIcon } from 'lucide-react';
 import { Alliance } from './types';
-import { alliancesMock } from './data';
-import { 
-  DropdownMenu, 
-  DropdownMenuContent, 
-  DropdownMenuItem, 
-  DropdownMenuTrigger,
-  DropdownMenuSeparator 
-} from '@/components/ui/dropdown-menu';
+import { Card } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
+import { Eye, Edit, Shield } from 'lucide-react';
+
+// Mock data for the Alliances
+const mockAlliances: Alliance[] = [
+  {
+    id: '1',
+    name: 'Ligue Latine',
+    members: ['Rome', 'Latium', 'Campanie'],
+    type: 'full',
+    dateCreation: '12 Avril 700 AUC',
+    duration: 25,
+    status: 'active',
+    militarySupport: 5000,
+    economicBenefits: ['Accès aux marchés', 'Tarifs douaniers préférentiels'],
+    commitments: ['Assistance militaire mutuelle', 'Partage du butin de guerre'],
+    description: 'Alliance historique entre Rome et les peuples latins'
+  },
+  {
+    id: '2',
+    name: 'Pacte Hellénique',
+    members: ['Rome', 'Athènes', 'Sparte', 'Corinthe'],
+    type: 'defensive',
+    dateCreation: '3 Mai 702 AUC',
+    duration: 10,
+    status: 'active',
+    militarySupport: 3000,
+    economicBenefits: ['Libre-échange des biens culturels', 'Protection des philosophes'],
+    commitments: ['Défense contre les invasions macédoniennes', 'Maintien de la paix en mer Égée'],
+    description: 'Alliance défensive avec les cités-États grecques'
+  },
+  {
+    id: '3',
+    name: 'Coalition Anti-Parthe',
+    members: ['Rome', 'Armenia', 'Pontus', 'Cappadocia'],
+    type: 'offensive',
+    dateCreation: '28 Juin 703 AUC',
+    duration: 5,
+    status: 'expired',
+    militarySupport: 8000,
+    economicBenefits: ['Partage des ressources des territoires conquis', 'Ouverture des routes commerciales'],
+    commitments: ['Campagnes militaires coordonnées', 'Partage des frais de guerre'],
+    description: 'Alliance offensive contre l\'Empire parthe'
+  }
+];
 
 interface AlliancesMilitairesProps {
-  searchTerm?: string;
-  filters?: {
-    status: string;
-    region: string;
-    dateFrom: string;
-    dateTo: string;
-  };
+  searchTerm: string;
+  filters: any;
 }
 
 export const AlliancesMilitaires: React.FC<AlliancesMilitairesProps> = ({ 
-  searchTerm = '',
-  filters = {
-    status: '',
-    region: '',
-    dateFrom: '',
-    dateTo: ''
-  }
+  searchTerm, 
+  filters
 }) => {
-  const [isViewOpen, setIsViewOpen] = useState(false);
-  const [isDeleteConfirmOpen, setIsDeleteConfirmOpen] = useState(false);
-  const [selectedAlliance, setSelectedAlliance] = useState<Alliance | null>(null);
-  
-  // Filter alliances based on searchTerm and filters
-  const filteredAlliances = alliancesMock.filter(alliance => {
-    // Search filter
-    const matchesSearch = searchTerm === '' || 
-      alliance.nom.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      alliance.type?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      alliance.membres.some(member => member.toLowerCase().includes(searchTerm.toLowerCase()));
-      
-    // Status filter
-    const matchesStatus = !filters.status || alliance.statut === filters.status;
+  // Simple filtering logic
+  const filteredAlliances = mockAlliances.filter(alliance => {
+    const matchesSearch = alliance.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
+                         alliance.members.some(m => m.toLowerCase().includes(searchTerm.toLowerCase()));
     
-    // Region filter - Not applicable for alliances unless we have region data for each alliance
-    const matchesRegion = !filters.region || true; // Placeholder
+    const matchesType = !filters.status || alliance.type === filters.status;
+    const matchesStatus = !filters.region || alliance.status === filters.region;
     
-    // Date filters
-    const matchesDateFrom = !filters.dateFrom || 
-      (alliance.dateFormation && alliance.dateFormation >= filters.dateFrom);
-      
-    const matchesDateTo = !filters.dateTo || 
-      (alliance.dateFormation && alliance.dateFormation <= filters.dateTo);
-    
-    return matchesSearch && matchesStatus && matchesRegion && matchesDateFrom && matchesDateTo;
+    return matchesSearch && matchesType && matchesStatus;
   });
   
-  const handleViewAlliance = (alliance: Alliance) => {
-    setSelectedAlliance(alliance);
-    setIsViewOpen(true);
-  };
-  
-  const handleEditAlliance = (alliance: Alliance) => {
-    console.log("Éditer alliance:", alliance.nom);
-    // Implémentation à venir
-  };
-  
-  const handleDeletePrompt = (alliance: Alliance) => {
-    setSelectedAlliance(alliance);
-    setIsDeleteConfirmOpen(true);
-  };
-  
-  const handleDeleteConfirm = () => {
-    if (selectedAlliance) {
-      console.log("Supprimer alliance:", selectedAlliance.nom);
-      // Implémentation à venir
-      setIsDeleteConfirmOpen(false);
-    }
-  };
-  
-  const getStatusColor = (status: string): string => {
+  // Status badge style helper
+  const getStatusBadge = (status: Alliance['status']) => {
     switch(status) {
-      case "Actif": return "bg-green-500";
-      case "Inactif": return "bg-yellow-500";
-      case "Dissous": return "bg-gray-500";
-      default: return "bg-gray-400";
+      case 'active':
+        return <Badge className="bg-green-100 text-green-800 hover:bg-green-200">Active</Badge>;
+      case 'expired':
+        return <Badge className="bg-gray-100 text-gray-800 hover:bg-gray-200">Expirée</Badge>;
+      case 'dissolved':
+        return <Badge className="bg-red-100 text-red-800 hover:bg-red-200">Dissoute</Badge>;
     }
   };
-    
+  
+  // Type badge style helper
+  const getTypeBadge = (type: Alliance['type']) => {
+    switch(type) {
+      case 'defensive':
+        return <Badge className="bg-blue-100 text-blue-800 hover:bg-blue-200">Défensive</Badge>;
+      case 'offensive':
+        return <Badge className="bg-red-100 text-red-800 hover:bg-red-200">Offensive</Badge>;
+      case 'full':
+        return <Badge className="bg-purple-100 text-purple-800 hover:bg-purple-200">Complète</Badge>;
+    }
+  };
+
   return (
-    <>
-      <Card className="w-full mt-6">
-        <CardHeader className="flex flex-row items-center gap-2">
-          <Shield className="h-5 w-5" />
-          <CardTitle>Alliances Militaires</CardTitle>
-        </CardHeader>
-        <CardContent>
-          {filteredAlliances.length === 0 ? (
-            <div className="text-center py-8 text-muted-foreground">
-              Aucune alliance ne correspond aux critères de recherche ou aux filtres appliqués.
-            </div>
-          ) : (
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Nom</TableHead>
-                  <TableHead>Type</TableHead>
-                  <TableHead>Membres</TableHead>
-                  <TableHead>Formation</TableHead>
-                  <TableHead>Forces</TableHead>
-                  <TableHead>Statut</TableHead>
-                  <TableHead>Actions</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {filteredAlliances.map(alliance => (
-                  <TableRow key={alliance.id}>
-                    <TableCell className="font-medium">{alliance.nom}</TableCell>
-                    <TableCell>
-                      <Badge variant="outline">{alliance.type}</Badge>
-                    </TableCell>
-                    <TableCell>{alliance.membres.join(', ')}</TableCell>
-                    <TableCell>{alliance.dateFormation}</TableCell>
-                    <TableCell>
-                      <div className="flex flex-col">
-                        <span>{alliance.forces?.legions || 0} légions</span>
-                        <span className="text-xs text-muted-foreground">{alliance.forces?.auxiliaires || 0} auxiliaires</span>
-                      </div>
-                    </TableCell>
-                    <TableCell>
-                      <Badge className={getStatusColor(alliance.statut)}>
-                        {alliance.statut}
-                      </Badge>
-                    </TableCell>
-                    <TableCell>
-                      <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                          <Button variant="ghost" className="h-8 w-8 p-0">
-                            <span className="sr-only">Ouvrir menu</span>
-                            <MoreHorizontal className="h-4 w-4" />
-                          </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end">
-                          <DropdownMenuItem onClick={() => handleViewAlliance(alliance)}>
-                            <Eye className="mr-2 h-4 w-4" /> Voir détails
-                          </DropdownMenuItem>
-                          <DropdownMenuItem onClick={() => handleEditAlliance(alliance)}>
-                            <Edit className="mr-2 h-4 w-4" /> Modifier
-                          </DropdownMenuItem>
-                          <DropdownMenuSeparator />
-                          <DropdownMenuItem>
-                            <Users className="mr-2 h-4 w-4" /> Gérer membres
-                          </DropdownMenuItem>
-                          <DropdownMenuItem>
-                            <SwordIcon className="mr-2 h-4 w-4" /> Opérations militaires
-                          </DropdownMenuItem>
-                          <DropdownMenuSeparator />
-                          <DropdownMenuItem 
-                            onClick={() => handleDeletePrompt(alliance)}
-                            className="text-red-600 hover:text-red-800 focus:text-red-800"
-                          >
-                            <Trash className="mr-2 h-4 w-4" /> Supprimer
-                          </DropdownMenuItem>
-                        </DropdownMenuContent>
-                      </DropdownMenu>
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          )}
-        </CardContent>
-      </Card>
-      
-      {/* Modal détails de l'alliance */}
-      <Dialog open={isViewOpen} onOpenChange={setIsViewOpen}>
-        <DialogContent className="max-w-2xl">
-          <DialogHeader>
-            <DialogTitle>{selectedAlliance?.nom}</DialogTitle>
-            <DialogDescription>
-              Alliance formée en {selectedAlliance?.dateFormation}
-            </DialogDescription>
-          </DialogHeader>
-          
-          {selectedAlliance && (
-            <div className="space-y-4 mt-4">
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <h4 className="font-semibold text-sm mb-1">Type d'alliance</h4>
-                  <Badge variant="outline">{selectedAlliance.type}</Badge>
-                </div>
-                <div>
-                  <h4 className="font-semibold text-sm mb-1">Statut</h4>
-                  <Badge className={getStatusColor(selectedAlliance.statut)}>
-                    {selectedAlliance.statut}
-                  </Badge>
-                </div>
-                <div>
-                  <h4 className="font-semibold text-sm mb-1">Commandement</h4>
-                  <p>{selectedAlliance.commandement || "Non spécifié"}</p>
-                </div>
-                <div>
-                  <h4 className="font-semibold text-sm mb-1">Forces combinées</h4>
-                  <div className="flex items-center gap-4">
-                    <div className="flex items-center">
-                      <SwordIcon className="h-4 w-4 mr-1" />
-                      <span>{selectedAlliance.forces?.legions || 0} légions</span>
-                    </div>
-                    <div>
-                      <span>{selectedAlliance.forces?.auxiliaires || 0} auxiliaires</span>
-                    </div>
+    <Card>
+      {filteredAlliances.length === 0 ? (
+        <div className="p-8 text-center text-muted-foreground">
+          Aucune alliance ne correspond à vos critères de recherche
+        </div>
+      ) : (
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead>Nom</TableHead>
+              <TableHead>Membres</TableHead>
+              <TableHead>Type</TableHead>
+              <TableHead>Statut</TableHead>
+              <TableHead>Force Militaire</TableHead>
+              <TableHead className="text-right">Actions</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {filteredAlliances.map(alliance => (
+              <TableRow key={alliance.id} className="hover:bg-muted/50">
+                <TableCell className="font-medium">{alliance.name}</TableCell>
+                <TableCell>{alliance.members.join(', ')}</TableCell>
+                <TableCell>{getTypeBadge(alliance.type)}</TableCell>
+                <TableCell>{getStatusBadge(alliance.status)}</TableCell>
+                <TableCell>
+                  <div className="flex items-center">
+                    <Shield className="h-4 w-4 mr-2 text-rome-navy" />
+                    <span>{alliance.militarySupport} hommes</span>
                   </div>
-                </div>
-              </div>
-              
-              <div>
-                <h4 className="font-semibold text-sm mb-1">Membres de l'alliance</h4>
-                <div className="grid grid-cols-2 gap-2 mt-2">
-                  {selectedAlliance.membres.map((membre, idx) => (
-                    <div key={idx} className="flex items-center">
-                      <Shield className="h-4 w-4 mr-2 text-gray-500" />
-                      <span>{membre}</span>
-                      {membre === "Rome" && <span className="ml-1 text-xs text-muted-foreground">(Leader)</span>}
-                    </div>
-                  ))}
-                </div>
-              </div>
-              
-              <div className="flex justify-end space-x-2 pt-4">
-                <Button variant="outline" onClick={() => setIsViewOpen(false)}>
-                  Fermer
-                </Button>
-                <Button onClick={() => {
-                  setIsViewOpen(false);
-                  handleEditAlliance(selectedAlliance);
-                }}>
-                  <Edit className="mr-2 h-4 w-4" /> Modifier
-                </Button>
-              </div>
-            </div>
-          )}
-        </DialogContent>
-      </Dialog>
-      
-      {/* Modal confirmation suppression */}
-      <Dialog open={isDeleteConfirmOpen} onOpenChange={setIsDeleteConfirmOpen}>
-        <DialogContent className="max-w-md">
-          <DialogHeader>
-            <DialogTitle>Confirmer la suppression</DialogTitle>
-            <DialogDescription>
-              Êtes-vous sûr de vouloir supprimer cette alliance? Cette action est irréversible.
-            </DialogDescription>
-          </DialogHeader>
-          
-          <div className="space-y-4 mt-4">
-            <div className="flex justify-end space-x-2">
-              <Button variant="outline" onClick={() => setIsDeleteConfirmOpen(false)}>
-                Annuler
-              </Button>
-              <Button variant="destructive" onClick={handleDeleteConfirm}>
-                Supprimer
-              </Button>
-            </div>
-          </div>
-        </DialogContent>
-      </Dialog>
-    </>
+                </TableCell>
+                <TableCell className="text-right">
+                  <div className="flex justify-end gap-2">
+                    <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+                      <Eye className="h-4 w-4" />
+                    </Button>
+                    <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+                      <Edit className="h-4 w-4" />
+                    </Button>
+                  </div>
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      )}
+    </Card>
   );
 };

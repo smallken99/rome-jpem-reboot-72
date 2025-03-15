@@ -1,218 +1,201 @@
 
-import React from 'react';
-import { Filter, X, Search } from 'lucide-react';
-import { Label } from '@/components/ui/label';
-import { Input } from '@/components/ui/input';
-import { 
-  Select, 
-  SelectContent, 
-  SelectItem, 
-  SelectTrigger, 
-  SelectValue 
-} from '@/components/ui/select';
+import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { 
-  Popover,
-  PopoverContent,
-  PopoverTrigger
-} from '@/components/ui/popover';
-
-interface FilterOptions {
-  status: string;
-  region: string;
-  dateFrom: string;
-  dateTo: string;
-  searchTerm: string;
-}
+import { Filter, X } from 'lucide-react';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 
 interface DiplomaticFiltersProps {
   activeTab: string;
-  onFilterChange: (filters: FilterOptions) => void;
+  onFilterChange: (filters: any) => void;
   onReset: () => void;
 }
 
-export const DiplomaticFilters: React.FC<DiplomaticFiltersProps> = ({ 
-  activeTab, 
+export const DiplomaticFilters: React.FC<DiplomaticFiltersProps> = ({
+  activeTab,
   onFilterChange,
   onReset
 }) => {
-  const [filters, setFilters] = React.useState<FilterOptions>({
+  const [isOpen, setIsOpen] = useState(false);
+  const [localFilters, setLocalFilters] = useState({
     status: '',
     region: '',
     dateFrom: '',
-    dateTo: '',
-    searchTerm: ''
+    dateTo: ''
   });
   
-  const [isOpen, setIsOpen] = React.useState(false);
-  
-  const handleFilterChange = (key: keyof FilterOptions, value: string) => {
-    const newFilters = { ...filters, [key]: value };
-    setFilters(newFilters);
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setLocalFilters(prev => ({ ...prev, [name]: value }));
   };
   
-  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const searchTerm = e.target.value;
-    setFilters(prev => ({ ...prev, searchTerm }));
-    onFilterChange({ ...filters, searchTerm });
+  const handleSelectChange = (name: string, value: string) => {
+    setLocalFilters(prev => ({ ...prev, [name]: value }));
   };
   
-  const applyFilters = () => {
-    onFilterChange(filters);
+  const handleApplyFilters = () => {
+    onFilterChange(localFilters);
     setIsOpen(false);
   };
   
-  const resetFilters = () => {
-    setFilters({
+  const handleReset = () => {
+    setLocalFilters({
       status: '',
       region: '',
       dateFrom: '',
-      dateTo: '',
-      searchTerm: ''
+      dateTo: ''
     });
     onReset();
     setIsOpen(false);
   };
   
+  // Dynamic options based on active tab
   const getStatusOptions = () => {
     switch (activeTab) {
       case 'nations':
         return [
-          { value: 'Allié', label: 'Allié' },
-          { value: 'Neutre', label: 'Neutre' },
-          { value: 'Ennemi', label: 'Ennemi' },
-          { value: 'Soumis', label: 'Soumis' }
+          { value: 'ally', label: 'Allié' },
+          { value: 'enemy', label: 'Ennemi' },
+          { value: 'neutral', label: 'Neutre' },
+          { value: 'tributary', label: 'Tributaire' }
         ];
       case 'traites':
         return [
-          { value: 'Actif', label: 'Actif' },
-          { value: 'Expiré', label: 'Expiré' },
-          { value: 'En négociation', label: 'En négociation' },
-          { value: 'Rompu', label: 'Rompu' }
+          { value: 'peace', label: 'Paix' },
+          { value: 'trade', label: 'Commerce' },
+          { value: 'military', label: 'Militaire' },
+          { value: 'tribute', label: 'Tribut' }
         ];
       case 'alliances':
         return [
-          { value: 'Actif', label: 'Actif' },
-          { value: 'Inactif', label: 'Inactif' },
-          { value: 'Dissous', label: 'Dissous' }
+          { value: 'defensive', label: 'Défensive' },
+          { value: 'offensive', label: 'Offensive' },
+          { value: 'full', label: 'Complète' }
         ];
       default:
         return [];
     }
   };
   
-  const regions = [
-    { value: 'Europe', label: 'Europe' },
-    { value: 'Afrique', label: 'Afrique' },
-    { value: 'Asie Mineure', label: 'Asie Mineure' },
-    { value: 'Égypte', label: 'Égypte' },
-    { value: 'Gaule', label: 'Gaule' },
-    { value: 'Hispanie', label: 'Hispanie' },
-    { value: 'Grèce', label: 'Grèce' }
-  ];
+  const getRegionOptions = () => {
+    switch (activeTab) {
+      case 'nations':
+        return [
+          { value: 'North Africa', label: 'Afrique du Nord' },
+          { value: 'Asia', label: 'Asie' },
+          { value: 'Europe', label: 'Europe' },
+          { value: 'Middle East', label: 'Moyen-Orient' }
+        ];
+      case 'traites':
+      case 'alliances':
+        return [
+          { value: 'active', label: 'Actif' },
+          { value: 'expired', label: 'Expiré' },
+          { value: 'violated', label: 'Violé' },
+          { value: 'dissolved', label: 'Dissout' }
+        ];
+      default:
+        return [];
+    }
+  };
   
+  const statusLabel = activeTab === 'nations' ? 'Statut' : 
+                     activeTab === 'traites' ? 'Type' : 'Type';
+  
+  const regionLabel = activeTab === 'nations' ? 'Région' : 'Statut';
+
   return (
-    <div className="flex items-center space-x-2">
-      <div className="relative w-full max-w-sm">
-        <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-        <Input
-          type="search"
-          placeholder="Rechercher..."
-          className="w-full pl-8"
-          value={filters.searchTerm}
-          onChange={handleSearchChange}
-        />
-      </div>
-      
-      <Popover open={isOpen} onOpenChange={setIsOpen}>
-        <PopoverTrigger asChild>
-          <Button 
-            variant="outline" 
-            className="flex items-center gap-2"
-            aria-label="Filtres avancés"
-          >
-            <Filter size={16} />
-            <span>Filtres avancés</span>
-          </Button>
-        </PopoverTrigger>
-        <PopoverContent className="w-80 p-4" align="end">
-          <div className="space-y-4">
-            <div className="flex items-center justify-between">
-              <h3 className="font-medium">Filtres</h3>
-              <Button variant="ghost" size="icon" onClick={resetFilters}>
-                <X size={16} />
+    <DropdownMenu open={isOpen} onOpenChange={setIsOpen}>
+      <DropdownMenuTrigger asChild>
+        <Button variant="outline" size="sm">
+          <Filter className="h-4 w-4 mr-2" />
+          Filtres
+        </Button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent className="w-56">
+        <DropdownMenuLabel>Filtres diplomatiques</DropdownMenuLabel>
+        <DropdownMenuSeparator />
+        
+        <div className="px-2 py-2">
+          <Label htmlFor="status" className="text-xs">{statusLabel}</Label>
+          <div className="grid grid-cols-2 gap-1 mt-1">
+            {getStatusOptions().map(option => (
+              <Button 
+                key={option.value}
+                variant={localFilters.status === option.value ? "default" : "outline"}
+                size="sm"
+                className="h-7 text-xs"
+                onClick={() => handleSelectChange('status', option.value)}
+              >
+                {option.label}
               </Button>
-            </div>
-            
-            <div className="space-y-2">
-              <Label htmlFor="status">Statut</Label>
-              <Select 
-                value={filters.status} 
-                onValueChange={(value) => handleFilterChange('status', value)}
-              >
-                <SelectTrigger id="status">
-                  <SelectValue placeholder="Tous les statuts" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="">Tous les statuts</SelectItem>
-                  {getStatusOptions().map(option => (
-                    <SelectItem key={option.value} value={option.value}>
-                      {option.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-            
-            <div className="space-y-2">
-              <Label htmlFor="region">Région</Label>
-              <Select 
-                value={filters.region} 
-                onValueChange={(value) => handleFilterChange('region', value)}
-              >
-                <SelectTrigger id="region">
-                  <SelectValue placeholder="Toutes les régions" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="">Toutes les régions</SelectItem>
-                  {regions.map(region => (
-                    <SelectItem key={region.value} value={region.value}>
-                      {region.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-            
-            <div className="grid grid-cols-2 gap-2">
-              <div className="space-y-2">
-                <Label htmlFor="dateFrom">Date (de)</Label>
-                <Input
-                  id="dateFrom"
-                  type="text"
-                  placeholder="Ex: 200 av. J.-C."
-                  value={filters.dateFrom}
-                  onChange={(e) => handleFilterChange('dateFrom', e.target.value)}
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="dateTo">Date (à)</Label>
-                <Input
-                  id="dateTo"
-                  type="text"
-                  placeholder="Ex: 100 av. J.-C."
-                  value={filters.dateTo}
-                  onChange={(e) => handleFilterChange('dateTo', e.target.value)}
-                />
-              </div>
-            </div>
-            
-            <div className="flex justify-end">
-              <Button onClick={applyFilters}>Appliquer</Button>
-            </div>
+            ))}
           </div>
-        </PopoverContent>
-      </Popover>
-    </div>
+        </div>
+        
+        <DropdownMenuSeparator />
+        
+        <div className="px-2 py-2">
+          <Label htmlFor="region" className="text-xs">{regionLabel}</Label>
+          <div className="grid grid-cols-2 gap-1 mt-1">
+            {getRegionOptions().map(option => (
+              <Button 
+                key={option.value}
+                variant={localFilters.region === option.value ? "default" : "outline"}
+                size="sm"
+                className="h-7 text-xs"
+                onClick={() => handleSelectChange('region', option.value)}
+              >
+                {option.label}
+              </Button>
+            ))}
+          </div>
+        </div>
+        
+        <DropdownMenuSeparator />
+        
+        <div className="px-2 py-2">
+          <Label htmlFor="dateFrom" className="text-xs">Date (de)</Label>
+          <Input
+            id="dateFrom"
+            name="dateFrom"
+            type="date"
+            value={localFilters.dateFrom}
+            onChange={handleInputChange}
+            className="h-7 mt-1"
+          />
+        </div>
+        
+        <div className="px-2 py-2">
+          <Label htmlFor="dateTo" className="text-xs">Date (à)</Label>
+          <Input
+            id="dateTo"
+            name="dateTo"
+            type="date"
+            value={localFilters.dateTo}
+            onChange={handleInputChange}
+            className="h-7 mt-1"
+          />
+        </div>
+        
+        <DropdownMenuSeparator />
+        
+        <div className="px-2 py-2 flex justify-between">
+          <Button variant="ghost" size="sm" onClick={handleReset}>
+            <X className="h-4 w-4 mr-1" />
+            Réinitialiser
+          </Button>
+          <Button size="sm" onClick={handleApplyFilters}>Appliquer</Button>
+        </div>
+      </DropdownMenuContent>
+    </DropdownMenu>
   );
 };

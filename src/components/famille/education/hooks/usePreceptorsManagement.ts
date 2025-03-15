@@ -3,8 +3,8 @@ import { useState, useCallback } from 'react';
 import { Preceptor } from '../types/educationTypes';
 import { toast } from 'sonner';
 
-// Temporary mock data
-import { preceptors as mockPreceptors } from '../data/preceptors';
+// Import the correct export
+import { preceptorsList as mockPreceptors } from '../data/preceptors';
 
 export const usePreceptorsManagement = () => {
   const [preceptors, setPreceptors] = useState<Preceptor[]>(mockPreceptors);

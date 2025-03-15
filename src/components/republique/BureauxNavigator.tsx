@@ -1,32 +1,33 @@
 
 import React from 'react';
-import { useNavigate } from 'react-router-dom';
-import { Button } from '@/components/ui/button';
+import { NavLink } from 'react-router-dom';
 import { magistracies } from '@/data/magistracies';
 
-export const BureauxNavigator: React.FC<{ currentBureau?: string }> = ({ currentBureau }) => {
-  const navigate = useNavigate();
-  
+interface BureauxNavigatorProps {
+  currentBureau?: string;
+}
+
+export const BureauxNavigator: React.FC<BureauxNavigatorProps> = ({ currentBureau }) => {
   return (
-    <div className="grid grid-cols-2 md:grid-cols-5 gap-2 mb-6">
-      {magistracies.map(magistrate => {
-        const MagIcon = magistrate.icon;
-        const isActive = currentBureau === magistrate.id;
-        
-        return (
-          <Button
-            key={magistrate.id}
-            variant={isActive ? "default" : "outline"}
-            className={`flex items-center gap-2 ${isActive ? "" : "border-rome-gold/30 hover:border-rome-gold/60"}`}
-            onClick={() => navigate(`/republique/bureaux/${magistrate.id}`)}
-          >
-            <div className={`p-1 rounded-full ${magistrate.iconBgColor}`}>
-              <MagIcon className={`h-4 w-4 ${magistrate.iconColor}`} />
-            </div>
-            <span className="text-sm">{magistrate.name}</span>
-          </Button>
-        );
-      })}
+    <div className="flex overflow-x-auto space-x-2 py-2 pb-4">
+      {magistracies.map(magistracy => (
+        <NavLink
+          key={magistracy.id}
+          to={`/republique/bureaux/${magistracy.id}`}
+          className={({ isActive }) => 
+            `px-4 py-2 rounded-md whitespace-nowrap transition-colors duration-200 ${
+              isActive || currentBureau === magistracy.id
+                ? 'bg-rome-gold/20 text-rome-navy font-medium'
+                : 'bg-white hover:bg-muted/50 text-muted-foreground'
+            }`
+          }
+        >
+          <div className="flex items-center gap-2">
+            {React.createElement(magistracy.icon, { className: 'h-4 w-4' })}
+            <span>{magistracy.name}</span>
+          </div>
+        </NavLink>
+      ))}
     </div>
   );
 };

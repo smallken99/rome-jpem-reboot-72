@@ -1,49 +1,63 @@
 
 import { Preceptor } from '../types/educationTypes';
-import { romanNames } from './romanNames';
-import { educationSpecialties } from './specialties';
 
-// Générer des précepteurs (mentors) pour le système d'éducation
-export const generatePreceptors = (): Record<string, Preceptor[]> => {
-  const preceptorsByType: Record<string, Preceptor[]> = {};
-  
-  // Créer une copie des noms pour éviter de modifier l'original
-  const availableNames = [...romanNames];
-  
-  // Créer les précepteurs pour chaque type d'éducation
-  Object.keys(educationSpecialties).forEach(type => {
-    preceptorsByType[type] = [];
-    
-    // Générer 3 précepteurs pour chaque type
-    for (let i = 0; i < 3; i++) {
-      const reputation = i === 0 ? "Excellent" : i === 1 ? "Bon" : "Moyen";
-      const quality = i === 0 ? 5 : i === 1 ? 4 : 3;
-      const cost = i === 0 ? 10000 : i === 1 ? 7000 : 4000;
-      
-      // Choisir aléatoirement un nom et une spécialité
-      const nameIndex = Math.floor(Math.random() * availableNames.length);
-      const specialtyIndex = Math.floor(Math.random() * educationSpecialties[type].length);
-      
-      const preceptor: Preceptor = {
-        id: `${type}-${i}`,
-        name: `${availableNames[nameIndex]} ${i === 0 ? 'le Sage' : i === 1 ? 'l\'Érudit' : ''}`,
-        specialty: educationSpecialties[type][specialtyIndex],
-        quality,
-        cost,
-        available: true,
-        skill: i === 0 ? 85 : i === 1 ? 70 : 55,
-        price: cost,
-        status: 'available',
-        background: `Un éducateur expérimenté, spécialisé en ${educationSpecialties[type][specialtyIndex]}.`,
-        childId: null
-      };
-      
-      preceptorsByType[type].push(preceptor);
-      
-      // Éviter les doublons de noms
-      availableNames.splice(nameIndex, 1);
-    }
-  });
-  
-  return preceptorsByType;
-};
+export const preceptorsList: Preceptor[] = [
+  {
+    id: 'prec-1',
+    name: 'Lucius Cornelius',
+    specialty: 'rhetoric',
+    experience: 12,
+    rating: 4.7,
+    cost: 1200,
+    available: true,
+    description: 'Ancien orateur du Sénat, spécialiste en rhétorique et argumentation.',
+    status: 'available'
+  },
+  {
+    id: 'prec-2',
+    name: 'Marcus Porcius',
+    specialty: 'military',
+    experience: 15,
+    rating: 4.5,
+    cost: 1500,
+    available: true,
+    description: 'Vétéran des légions, enseigne les tactiques militaires et l\'art de la guerre.',
+    status: 'available'
+  },
+  {
+    id: 'prec-3',
+    name: 'Publius Vergilius',
+    specialty: 'literature',
+    experience: 8,
+    rating: 4.8,
+    cost: 1000,
+    available: true,
+    description: 'Poète et écrivain reconnu, spécialiste en littérature et poésie.',
+    status: 'available'
+  },
+  {
+    id: 'prec-4',
+    name: 'Titus Lucretius',
+    specialty: 'philosophy',
+    experience: 20,
+    rating: 4.9,
+    cost: 1800,
+    available: true,
+    description: 'Philosophe stoïcien expérimenté, formé à Athènes.',
+    status: 'available'
+  },
+  {
+    id: 'prec-5',
+    name: 'Gaius Sempronius',
+    specialty: 'law',
+    experience: 14,
+    rating: 4.6,
+    cost: 1400,
+    available: true,
+    description: 'Juriste réputé, spécialisé dans le droit romain et les procédures légales.',
+    status: 'available'
+  }
+];
+
+// For backward compatibility
+export const preceptors = preceptorsList;
