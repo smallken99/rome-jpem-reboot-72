@@ -1,5 +1,5 @@
 
-import { Loi as LoiMaitreJeu, LoiState, ImportanceType } from './lois';
+import { Loi as LoiMaitreJeu, LoiState, ImportanceType, LoiType } from './lois';
 import { Loi as LoiRepublique } from '@/components/republique/lois/hooks/useLois';
 import { GameDate } from './common';
 
@@ -40,15 +40,15 @@ function parseStringToGameDate(dateString: string): GameDate | undefined {
 /**
  * Safe accessor for type property
  */
-function getType(loi: LoiMaitreJeu): string {
-  return loi.type || 'Politique';
+function getType(loi: LoiMaitreJeu): LoiType {
+  return (loi.type || 'Politique') as LoiType;
 }
 
 /**
  * Safe accessor for importance property
  */
 function getImportance(loi: LoiMaitreJeu): ImportanceType {
-  return (loi.importance as ImportanceType) || 'normale';
+  return (loi.importance || 'normale') as ImportanceType;
 }
 
 /**
@@ -114,18 +114,18 @@ function mapMJStatusToRepublique(status: string): 'proposée' | 'en_débat' | 'v
 /**
  * Map Republique status to MJ status
  */
-function mapRepubliqueStatusToMJ(status: string): 'proposed' | 'active' | 'rejected' | 'expired' {
+function mapRepubliqueStatusToMJ(status: string): LoiState {
   switch (status.toLowerCase()) {
     case 'proposée':
     case 'en_débat':
-      return 'proposed';
+      return 'proposed' as LoiState;
     case 'votée':
     case 'promulguée':
-      return 'active';
+      return 'active' as LoiState;
     case 'rejetée':
-      return 'rejected';
+      return 'rejected' as LoiState;
     default:
-      return 'proposed';
+      return 'proposed' as LoiState;
   }
 }
 
@@ -178,8 +178,8 @@ export function convertRepubliqueToMJLoi(loi: LoiRepublique): LoiMaitreJeu {
     votesPositifs: loi.votes?.pour || 0,
     votesNégatifs: loi.votes?.contre || 0,
     votesAbstention: loi.votes?.abstention || 0,
-    type: loi.type || 'Politique',
-    importance: loi.importance || 'normale',
+    type: (loi.type || 'Politique') as LoiType,
+    importance: (loi.importance || 'normale') as ImportanceType,
     clauses: loi.clauses || [],
     commentaires: loi.commentaires || [],
     tags: loi.tags || [],

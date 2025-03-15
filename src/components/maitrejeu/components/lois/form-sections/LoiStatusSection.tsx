@@ -3,8 +3,7 @@ import React from 'react';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
-import { Loi, LoiState } from '../../../types/lois';
-import { ImportanceType } from '../../../types/common';
+import { Loi, LoiState, ImportanceType, LoiType } from '@/components/maitrejeu/types/lois';
 
 interface LoiStatusSectionProps {
   formData: Omit<Loi, 'id'>;
@@ -28,13 +27,16 @@ export const LoiStatusSection: React.FC<LoiStatusSectionProps> = ({
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="Agraire">Agraire</SelectItem>
+            <SelectItem value="Politique">Politique</SelectItem>
+            <SelectItem value="Militaire">Militaire</SelectItem>
+            <SelectItem value="Economique">Economique</SelectItem>
+            <SelectItem value="Sociale">Sociale</SelectItem>
+            <SelectItem value="Religieuse">Religieuse</SelectItem>
+            <SelectItem value="Civile">Civile</SelectItem>
             <SelectItem value="Électorale">Électorale</SelectItem>
             <SelectItem value="Administrative">Administrative</SelectItem>
             <SelectItem value="Judiciaire">Judiciaire</SelectItem>
-            <SelectItem value="Militaire">Militaire</SelectItem>
             <SelectItem value="Fiscale">Fiscale</SelectItem>
-            <SelectItem value="Religieuse">Religieuse</SelectItem>
-            <SelectItem value="Sociale">Sociale</SelectItem>
           </SelectContent>
         </Select>
       </div>
@@ -42,18 +44,22 @@ export const LoiStatusSection: React.FC<LoiStatusSectionProps> = ({
       <div className="space-y-2">
         <Label htmlFor="état">État</Label>
         <Select
-          value={formData.état}
-          onValueChange={(value) => handleSelectChange('état', value as LoiState)}
+          value={formData.état as string}
+          onValueChange={(value) => handleSelectChange('état', value)}
         >
           <SelectTrigger id="état">
             <SelectValue placeholder="Sélectionner un état" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="En délibération">En délibération</SelectItem>
-            <SelectItem value="Promulguée">Promulguée</SelectItem>
-            <SelectItem value="Rejetée">Rejetée</SelectItem>
+            <SelectItem value="proposed">En délibération</SelectItem>
+            <SelectItem value="active">Promulguée</SelectItem>
+            <SelectItem value="rejected">Rejetée</SelectItem>
+            <SelectItem value="expired">Expirée</SelectItem>
+            <SelectItem value="promulguée">Promulguée</SelectItem>
+            <SelectItem value="rejetée">Rejetée</SelectItem>
             <SelectItem value="proposée">Proposée</SelectItem>
             <SelectItem value="adoptée">Adoptée</SelectItem>
+            <SelectItem value="En délibération">En délibération</SelectItem>
           </SelectContent>
         </Select>
       </div>
@@ -61,8 +67,8 @@ export const LoiStatusSection: React.FC<LoiStatusSectionProps> = ({
       <div className="space-y-2 col-span-2">
         <Label>Importance</Label>
         <RadioGroup
-          value={formData.importance}
-          onValueChange={(value) => handleSelectChange('importance', value as ImportanceType)}
+          value={formData.importance as string}
+          onValueChange={(value) => handleSelectChange('importance', value)}
           className="flex space-x-4"
         >
           <div className="flex items-center space-x-2">
