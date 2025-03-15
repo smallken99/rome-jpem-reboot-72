@@ -26,8 +26,10 @@ const ChildEducationCard: React.FC<ChildEducationCardProps> = ({ child }) => {
   // Check if female with military education (invalid in Roman times)
   const hasInvalidEducation = child.gender === 'female' && child.currentEducation?.type === 'military';
   
-  // Check if education is in progress
-  const isEducating = educatingChildren.includes(child.id);
+  // Check if education is in progress - handle both object and array types
+  const isEducating = typeof educatingChildren === 'object' && !Array.isArray(educatingChildren) 
+    ? educatingChildren[child.id] 
+    : (Array.isArray(educatingChildren) ? educatingChildren.includes(child.id) : false);
   
   // Handle advancing education by a year
   const handleAdvanceYear = () => {
