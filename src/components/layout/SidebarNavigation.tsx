@@ -39,7 +39,8 @@ export const SidebarNavigation: React.FC<SidebarNavigationProps> = ({ isExpanded
   
   const subNavItems = {
     '/famille': [
-      { path: '/famille/arbre', label: 'Arbre Généalogique' },
+      { path: '/famille/dashboard', label: 'Tableau de bord' },
+      { path: '/famille/arbre-genealogique', label: 'Arbre Généalogique' },
       { path: '/famille/alliances', label: 'Alliances' },
       { path: '/famille/education', label: 'Éducation' },
       { path: '/famille/heritage', label: 'Héritage' },

@@ -5,8 +5,12 @@ import { PageHeader } from '@/components/ui-custom/PageHeader';
 import { FamilyTree } from '@/components/famille/FamilyTree';
 import { characters } from '@/data/characters';
 import { Card } from '@/components/ui/card';
+import { useCharacters } from '../hooks/useCharacters';
 
 export const ArbreGenealogique: React.FC = () => {
+  const { localCharacters } = useCharacters();
+  const displayCharacters = localCharacters.length > 0 ? localCharacters : characters;
+
   return (
     <Layout>
       <PageHeader 
@@ -14,7 +18,7 @@ export const ArbreGenealogique: React.FC = () => {
         subtitle="Visualisez les liens familiaux et l'histoire de votre lignée"
       />
       <Card className="roman-card p-6">
-        <FamilyTree characters={characters} />
+        <FamilyTree characters={displayCharacters} />
       </Card>
     </Layout>
   );

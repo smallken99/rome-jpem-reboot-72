@@ -18,17 +18,24 @@ export const getFamilyMembers = (characters: Character[]): FamilyMembers => {
 
   // Trouver le pater familias (chef de famille masculin)
   const paterFamilias = characters.find(
-    char => char.gender === 'male' && char.role === 'pater familias'
+    char => char.gender === 'male' && 
+    (char.role === 'pater familias' || char.role === 'Chef de la Gens' || 
+     char.role === 'Chef de famille' || char.role === 'Chef de la Gens Aurelia')
   );
 
   // Trouver la mater familias (épouse principale)
   const materFamilias = characters.find(
-    char => char.gender === 'female' && char.role === 'mater familias'
+    char => char.gender === 'female' && 
+    (char.role === 'mater familias' || char.role === 'Épouse du Chef de la Gens' || 
+     char.role === 'Matrone' || char.role === 'Épouse du Chef')
   );
 
   // Identifier les enfants (fils et filles)
   const children = characters.filter(
-    char => char.role === 'son' || char.role === 'daughter' || char.role === 'filius' || char.role === 'filia'
+    char => char.role === 'son' || char.role === 'daughter' || 
+    char.role === 'filius' || char.role === 'filia' || 
+    char.role === 'Fils aîné et héritier' || char.role === 'Fille cadette' ||
+    char.role === 'Fils' || char.role === 'Fille'
   );
 
   // Autres membres de la famille
