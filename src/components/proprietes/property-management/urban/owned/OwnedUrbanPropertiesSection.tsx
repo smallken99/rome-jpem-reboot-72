@@ -2,7 +2,7 @@
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { PlusCircle } from 'lucide-react';
-import { PropertyCard } from '../../../../PropertyCard';
+import { PropertyCard } from '@/components/proprietes/PropertyCard';
 import { OwnedBuilding, BuildingDescription } from '../../../hooks/building/types';
 
 interface OwnedUrbanPropertiesSectionProps {
