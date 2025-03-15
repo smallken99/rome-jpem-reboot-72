@@ -2,111 +2,83 @@
 import { GameDate } from './common';
 
 export type BuildingType = 
-  | 'temple'
-  | 'forum'
-  | 'aqueduc'
-  | 'thermes'
-  | 'theatre'
-  | 'amphitheatre'
-  | 'cirque'
-  | 'marche'
-  | 'port'
-  | 'entrepot'
-  | 'caserne'
-  | 'residence'
-  | 'villa'
-  | 'ferme'
-  | 'atelier'
-  | 'mine'
-  | 'autre';
+  'temple' | 'basilica' | 'forum' | 'market' | 'aqueduct' | 
+  'theater' | 'amphitheater' | 'circus' | 'bath' | 'bridge' | 
+  'villa' | 'road' | 'port' | 'warehouse' | 'other';
 
-export type BuildingCondition = 
-  | 'excellent' 
-  | 'bon' 
-  | 'moyen' 
-  | 'mauvais' 
-  | 'critique';
+export type BuildingStatus = 
+  'excellent' | 'good' | 'damaged' | 'poor' | 'ruined' | 'under_construction';
+
+export type BuildingOwner = 
+  'république' | 'sénat' | 'censeur' | 'édile' | 'private' | string;
 
 export interface Building {
   id: string;
   name: string;
   type: BuildingType;
-  description: string;
   location: string;
-  condition: BuildingCondition;
+  status: BuildingStatus;
   constructionYear: number;
-  lastMaintenance: GameDate | null;
-  maintenanceCost: number;
-  maintenanceInterval: number; // en mois
-  revenue: number;
-  cost: number;
-  capacity: number;
-  isPublic: boolean;
-  ownerId: string | null;
-  slaves: number;
-  slaveCost: number;
-  tags: string[];
-  attributes: Record<string, any>;
-}
-
-export interface MaintenanceTask {
-  id: string;
-  buildingId: string;
   description: string;
   cost: number;
-  duration: number; // en jours
-  startDate: GameDate;
-  endDate: GameDate | null;
-  status: 'planned' | 'ongoing' | 'completed' | 'cancelled';
-  priority: 'low' | 'medium' | 'high' | 'urgent';
-  responsibleId: string | null;
-  notes: string;
+  maintenanceCost: number;
+  revenue: number;
+  capacity: number;
+  owner: BuildingOwner;
+  lastMaintenance?: GameDate;
+  nextMaintenanceNeeded?: GameDate;
 }
 
 export interface ConstructionProject {
   id: string;
-  buildingName: string;
+  buildingId?: string;
   buildingType: BuildingType;
+  name: string;
   location: string;
   description: string;
-  totalCost: number;
-  expectedCompletionYear: number;
-  expectedCompletionSeason: string;
+  cost: number;
+  estimatedCompletionDate: GameDate;
   startDate: GameDate;
-  endDate: GameDate | null;
-  progress: number; // 0-100%
-  responsible: string | null;
-  sponsors: string[];
+  progress: number; // 0-100
   approved: boolean;
-  payments: {
-    date: GameDate;
-    amount: number;
-    description: string;
-  }[];
+  sponsor: string;
+  workers: number;
+  expectedCompletionYear: number;
 }
 
-export interface BuildingRevenue {
+export interface MaintenanceRecord {
+  id: string;
+  buildingId: string;
+  date: GameDate;
+  cost: number;
+  description: string;
+  performedBy: string;
+  repairLevel: 'minor' | 'moderate' | 'major' | 'restoration';
+  previousStatus: BuildingStatus;
+  newStatus: BuildingStatus;
+}
+
+export interface RevenueRecord {
   id: string;
   buildingId: string;
   year: number;
   season: string;
   amount: number;
-  details: string;
-  collected: boolean;
-  collectedDate: GameDate | null;
+  source: string;
+  taxRate: number;
+  collectedBy: string;
 }
 
-export interface Slave {
-  id: string;
-  name: string | null;
-  buildingId: string | null;
-  ownerId: string | null;
-  age: number | null;
-  origin: string | null;
-  purchasePrice: number;
-  purchaseDate: GameDate;
-  specialization: string | null;
-  efficiency: number; // 0-100%
-  monthlyCost: number;
-  status: 'active' | 'sick' | 'escaped' | 'deceased';
+export interface BuildingCreationData {
+  name: string;
+  type: BuildingType;
+  location: string;
+  status: BuildingStatus;
+  constructionYear: number;
+  description: string;
+  cost: number;
+  maintenanceCost: number;
+  revenue: number;
+  capacity: number;
+  owner: BuildingOwner;
 }

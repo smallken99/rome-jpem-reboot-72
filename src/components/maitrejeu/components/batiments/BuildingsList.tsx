@@ -1,232 +1,219 @@
 
-import React, { useState } from 'react';
-import { 
-  Table, 
-  TableHeader, 
-  TableRow, 
-  TableHead, 
-  TableBody, 
-  TableCell 
-} from '@/components/ui/table';
-import { Button } from '@/components/ui/button';
-import { 
-  DropdownMenu, 
-  DropdownMenuContent, 
-  DropdownMenuItem, 
-  DropdownMenuTrigger 
-} from '@/components/ui/dropdown-menu';
-import { Input } from '@/components/ui/input';
+import React from 'react';
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { MoreHorizontal, Edit, Trash2, Building, ArrowUpDown } from 'lucide-react';
-
-// Types fictifs pour la démonstration
-interface Building {
-  id: string;
-  name: string;
-  type: string;
-  location: string;
-  status: 'good' | 'average' | 'poor';
-  yearBuilt: number;
-  lastMaintenance: string;
-  owner: string;
-}
+import { Button } from '@/components/ui/button';
+import { Edit, Trash2, ArrowUpDown, Search } from 'lucide-react';
+import { Input } from '@/components/ui/input';
+import { Building, BuildingStatus, BuildingType } from '../../types/batiments';
+import { formatCurrency } from '@/utils/currencyUtils';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 interface BuildingsListProps {
   onEdit: (buildingId: string) => void;
 }
 
 export const BuildingsList: React.FC<BuildingsListProps> = ({ onEdit }) => {
-  const [searchTerm, setSearchTerm] = useState('');
-  const [sortField, setSortField] = useState<keyof Building>('name');
-  const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
-  
-  // Données fictives pour la démonstration
-  const buildings: Building[] = [
+  const [buildings, setBuildings] = React.useState<Building[]>([
     {
       id: '1',
       name: 'Temple de Jupiter',
-      type: 'Temple',
+      type: 'temple',
       location: 'Forum Romanum',
       status: 'good',
-      yearBuilt: 650,
-      lastMaintenance: '720 AUC, Ver',
-      owner: 'République'
+      constructionYear: 720,
+      description: 'Temple principal dédié à Jupiter sur le Capitole',
+      cost: 50000,
+      maintenanceCost: 1000,
+      revenue: 500,
+      capacity: 1000,
+      owner: 'république'
     },
     {
       id: '2',
       name: 'Basilique Aemilia',
-      type: 'Basilique',
+      type: 'basilica',
       location: 'Forum Romanum',
-      status: 'average',
-      yearBuilt: 690,
-      lastMaintenance: '715 AUC, Aestas',
-      owner: 'République'
+      status: 'excellent',
+      constructionYear: 735,
+      description: 'Bâtiment administratif et centre commercial',
+      cost: 35000,
+      maintenanceCost: 750,
+      revenue: 2000,
+      capacity: 800,
+      owner: 'sénat'
     },
     {
       id: '3',
       name: 'Aqueduc Appien',
-      type: 'Aqueduc',
+      type: 'aqueduct',
       location: 'Via Appia',
-      status: 'poor',
-      yearBuilt: 675,
-      lastMaintenance: '710 AUC, Hiems',
-      owner: 'République'
+      status: 'damaged',
+      constructionYear: 710,
+      description: 'Aqueduc amenant l\'eau à Rome depuis les montagnes',
+      cost: 80000,
+      maintenanceCost: 1500,
+      revenue: 0,
+      capacity: 0,
+      owner: 'censeur'
     }
-  ];
-  
-  // Filtrer et trier les bâtiments
-  const filteredBuildings = buildings
-    .filter(building => 
-      building.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      building.type.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      building.location.toLowerCase().includes(searchTerm.toLowerCase())
-    )
-    .sort((a, b) => {
-      const valueA = a[sortField];
-      const valueB = b[sortField];
-      
-      if (typeof valueA === 'string' && typeof valueB === 'string') {
-        return sortDirection === 'asc' 
-          ? valueA.localeCompare(valueB) 
-          : valueB.localeCompare(valueA);
-      }
-      
-      if (typeof valueA === 'number' && typeof valueB === 'number') {
-        return sortDirection === 'asc' ? valueA - valueB : valueB - valueA;
-      }
-      
-      return 0;
-    });
-  
-  const handleSort = (field: keyof Building) => {
-    setSortDirection(prev => sortField === field && prev === 'asc' ? 'desc' : 'asc');
-    setSortField(field);
-  };
-  
-  const getStatusColor = (status: Building['status']) => {
+  ]);
+
+  const [filter, setFilter] = React.useState('');
+  const [typeFilter, setTypeFilter] = React.useState<BuildingType | 'all'>('all');
+  const [statusFilter, setStatusFilter] = React.useState<BuildingStatus | 'all'>('all');
+
+  const filteredBuildings = buildings.filter(b => {
+    const matchesSearch = b.name.toLowerCase().includes(filter.toLowerCase()) ||
+                         b.description.toLowerCase().includes(filter.toLowerCase()) ||
+                         b.location.toLowerCase().includes(filter.toLowerCase());
+    
+    const matchesType = typeFilter === 'all' || b.type === typeFilter;
+    const matchesStatus = statusFilter === 'all' || b.status === statusFilter;
+    
+    return matchesSearch && matchesType && matchesStatus;
+  });
+
+  const getBadgeVariant = (status: BuildingStatus) => {
     switch (status) {
-      case 'good': return 'bg-green-500';
-      case 'average': return 'bg-yellow-500';
-      case 'poor': return 'bg-red-500';
-      default: return 'bg-gray-500';
+      case 'excellent': return 'success';
+      case 'good': return 'default';
+      case 'damaged': return 'warning';
+      case 'poor': return 'destructive';
+      case 'ruined': return 'outline';
+      case 'under_construction': return 'secondary';
+      default: return 'default';
     }
   };
-  
-  const handleDelete = (id: string) => {
-    console.log('Deleting building with ID:', id);
-    // Logique de suppression à implémenter
+
+  const formatType = (type: BuildingType) => {
+    const typeMapping: Record<BuildingType, string> = {
+      'temple': 'Temple',
+      'basilica': 'Basilique',
+      'forum': 'Forum',
+      'market': 'Marché',
+      'aqueduct': 'Aqueduc',
+      'theater': 'Théâtre',
+      'amphitheater': 'Amphithéâtre',
+      'circus': 'Cirque',
+      'bath': 'Thermes',
+      'bridge': 'Pont',
+      'villa': 'Villa',
+      'road': 'Route',
+      'port': 'Port',
+      'warehouse': 'Entrepôt',
+      'other': 'Autre'
+    };
+    return typeMapping[type] || type;
   };
-  
+
+  const formatStatus = (status: BuildingStatus) => {
+    const statusMapping: Record<BuildingStatus, string> = {
+      'excellent': 'Excellent',
+      'good': 'Bon',
+      'damaged': 'Endommagé',
+      'poor': 'Mauvais',
+      'ruined': 'En ruine',
+      'under_construction': 'En construction'
+    };
+    return statusMapping[status] || status;
+  };
+
   return (
-    <div className="space-y-4">
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <Building className="h-5 w-5 text-muted-foreground" />
-          <h2 className="text-xl font-semibold">Bâtiments publics</h2>
+    <div className="space-y-6">
+      <div className="flex flex-col sm:flex-row gap-4">
+        <div className="relative flex-1">
+          <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+          <Input
+            placeholder="Rechercher un bâtiment..."
+            value={filter}
+            onChange={(e) => setFilter(e.target.value)}
+            className="pl-8"
+          />
         </div>
-        <Input
-          placeholder="Rechercher un bâtiment..."
-          className="max-w-sm"
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-        />
+        
+        <Select value={typeFilter} onValueChange={(value) => setTypeFilter(value as BuildingType | 'all')}>
+          <SelectTrigger className="w-[180px]">
+            <SelectValue placeholder="Type de bâtiment" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">Tous les types</SelectItem>
+            <SelectItem value="temple">Temple</SelectItem>
+            <SelectItem value="basilica">Basilique</SelectItem>
+            <SelectItem value="forum">Forum</SelectItem>
+            <SelectItem value="market">Marché</SelectItem>
+            <SelectItem value="aqueduct">Aqueduc</SelectItem>
+            <SelectItem value="theater">Théâtre</SelectItem>
+            <SelectItem value="amphitheater">Amphithéâtre</SelectItem>
+            <SelectItem value="bath">Thermes</SelectItem>
+            <SelectItem value="other">Autres</SelectItem>
+          </SelectContent>
+        </Select>
+        
+        <Select value={statusFilter} onValueChange={(value) => setStatusFilter(value as BuildingStatus | 'all')}>
+          <SelectTrigger className="w-[180px]">
+            <SelectValue placeholder="État" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">Tous les états</SelectItem>
+            <SelectItem value="excellent">Excellent</SelectItem>
+            <SelectItem value="good">Bon</SelectItem>
+            <SelectItem value="damaged">Endommagé</SelectItem>
+            <SelectItem value="poor">Mauvais</SelectItem>
+            <SelectItem value="ruined">En ruine</SelectItem>
+            <SelectItem value="under_construction">En construction</SelectItem>
+          </SelectContent>
+        </Select>
       </div>
-      
-      <Table>
-        <TableHeader>
-          <TableRow>
-            <TableHead className="w-[200px] cursor-pointer" onClick={() => handleSort('name')}>
-              <div className="flex items-center gap-1">
-                Nom
-                {sortField === 'name' && (
-                  <ArrowUpDown className={`h-4 w-4 ${sortDirection === 'asc' ? 'rotate-0' : 'rotate-180'}`} />
-                )}
-              </div>
-            </TableHead>
-            <TableHead className="cursor-pointer" onClick={() => handleSort('type')}>
-              <div className="flex items-center gap-1">
-                Type
-                {sortField === 'type' && (
-                  <ArrowUpDown className={`h-4 w-4 ${sortDirection === 'asc' ? 'rotate-0' : 'rotate-180'}`} />
-                )}
-              </div>
-            </TableHead>
-            <TableHead className="cursor-pointer" onClick={() => handleSort('location')}>
-              <div className="flex items-center gap-1">
-                Emplacement
-                {sortField === 'location' && (
-                  <ArrowUpDown className={`h-4 w-4 ${sortDirection === 'asc' ? 'rotate-0' : 'rotate-180'}`} />
-                )}
-              </div>
-            </TableHead>
-            <TableHead className="cursor-pointer" onClick={() => handleSort('status')}>
-              <div className="flex items-center gap-1">
-                État
-                {sortField === 'status' && (
-                  <ArrowUpDown className={`h-4 w-4 ${sortDirection === 'asc' ? 'rotate-0' : 'rotate-180'}`} />
-                )}
-              </div>
-            </TableHead>
-            <TableHead className="cursor-pointer" onClick={() => handleSort('yearBuilt')}>
-              <div className="flex items-center gap-1">
-                Construction
-                {sortField === 'yearBuilt' && (
-                  <ArrowUpDown className={`h-4 w-4 ${sortDirection === 'asc' ? 'rotate-0' : 'rotate-180'}`} />
-                )}
-              </div>
-            </TableHead>
-            <TableHead>Dernière maintenance</TableHead>
-            <TableHead className="text-right">Actions</TableHead>
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {filteredBuildings.length === 0 ? (
-            <TableRow>
-              <TableCell colSpan={7} className="h-24 text-center">
-                Aucun bâtiment trouvé.
-              </TableCell>
-            </TableRow>
-          ) : (
-            filteredBuildings.map(building => (
-              <TableRow key={building.id}>
-                <TableCell className="font-medium">{building.name}</TableCell>
-                <TableCell>{building.type}</TableCell>
-                <TableCell>{building.location}</TableCell>
-                <TableCell>
-                  <div className="flex items-center gap-2">
-                    <div className={`w-2 h-2 rounded-full ${getStatusColor(building.status)}`} />
-                    <span className="capitalize">
-                      {building.status === 'good' ? 'Bon' : building.status === 'average' ? 'Moyen' : 'Mauvais'}
-                    </span>
+
+      {filteredBuildings.length === 0 ? (
+        <div className="text-center py-10 text-muted-foreground">
+          Aucun bâtiment ne correspond aux critères de recherche
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          {filteredBuildings.map((building) => (
+            <Card key={building.id}>
+              <CardHeader className="pb-2">
+                <div className="flex justify-between items-start">
+                  <CardTitle className="text-lg">{building.name}</CardTitle>
+                  <Badge variant={getBadgeVariant(building.status)}>
+                    {formatStatus(building.status)}
+                  </Badge>
+                </div>
+                <CardDescription>{formatType(building.type)} - {building.location}</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <p className="text-sm mb-4">{building.description}</p>
+                <div className="grid grid-cols-2 gap-2 text-sm">
+                  <div>
+                    <p className="text-muted-foreground">Construction:</p>
+                    <p>{building.constructionYear} AUC</p>
                   </div>
-                </TableCell>
-                <TableCell>{building.yearBuilt} AUC</TableCell>
-                <TableCell>{building.lastMaintenance}</TableCell>
-                <TableCell className="text-right">
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <Button variant="ghost" className="h-8 w-8 p-0">
-                        <span className="sr-only">Ouvrir menu</span>
-                        <MoreHorizontal className="h-4 w-4" />
-                      </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end">
-                      <DropdownMenuItem onClick={() => onEdit(building.id)}>
-                        <Edit className="mr-2 h-4 w-4" />
-                        Modifier
-                      </DropdownMenuItem>
-                      <DropdownMenuItem onClick={() => handleDelete(building.id)}>
-                        <Trash2 className="mr-2 h-4 w-4" />
-                        Supprimer
-                      </DropdownMenuItem>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
-                </TableCell>
-              </TableRow>
-            ))
-          )}
-        </TableBody>
-      </Table>
+                  <div>
+                    <p className="text-muted-foreground">Propriétaire:</p>
+                    <p>{building.owner}</p>
+                  </div>
+                  <div>
+                    <p className="text-muted-foreground">Coût d'entretien:</p>
+                    <p>{formatCurrency(building.maintenanceCost)}</p>
+                  </div>
+                  <div>
+                    <p className="text-muted-foreground">Revenus:</p>
+                    <p>{formatCurrency(building.revenue)}</p>
+                  </div>
+                </div>
+              </CardContent>
+              <CardFooter className="flex justify-end gap-2 pt-2">
+                <Button variant="outline" size="sm" onClick={() => onEdit(building.id)}>
+                  <Edit className="h-3.5 w-3.5 mr-1.5" />
+                  Éditer
+                </Button>
+              </CardFooter>
+            </Card>
+          ))}
+        </div>
+      )}
     </div>
   );
 };

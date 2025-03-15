@@ -1,54 +1,19 @@
 
-import { GameDate } from './common';
-
 export interface Province {
   id: string;
   nom: string;
+  région: string;
   description: string;
   gouverneur: string;
-  région: string;
+  status: 'Pacifiée' | 'Instable' | 'En guerre' | 'Rebelle';
   population: number;
-  status: string;
-  richesse: number;
-  loyauté: number;
-  loyautéVariation: number;
-  ressources: string[];
-  impôts: number;
-  dernierEvenement: string;
-  armée: {
-    légions: number;
-    auxiliaires: number;
-    navires: number;
-  };
-  position: { x: number; y: number };
-  // Propriétés de compatibilité
-  variationLoyauté?: number;
-  dernierEvénement?: string;
-  coordonnées?: { x: number; y: number };
+  ressource: string;
+  revenue: number;
+  stabilite: number;
 }
 
 export interface ProvinceCardProps {
   province: Province;
-  onSelect?: (id: string) => void;
-  selected?: boolean;
-  onViewProvince?: (provinceId: string) => void;
-}
-
-export interface ProvinceModalProps {
-  isOpen: boolean;
-  province: Province | null;
-  onClose: () => void;
-  onUpdate: (province: Province) => void;
-}
-
-export interface ProvincesMapProps {
-  provinces: Province[];
-  onSelectProvince: (id: string) => void;
-  selectedProvinceId?: string;
-}
-
-export interface ProvincesDataProps {
-  provinces: Province[];
-  onSelectProvince: (id: string) => void;
-  selectedProvinceId?: string;
+  onEdit: (province: Province) => void;
+  onDelete: (id: string) => void;
 }

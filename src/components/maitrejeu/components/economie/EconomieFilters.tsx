@@ -3,22 +3,23 @@ import React from 'react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { 
-  Filter, 
-  Search, 
-  X 
-} from 'lucide-react';
-import { 
   Select, 
   SelectContent, 
   SelectItem, 
   SelectTrigger, 
   SelectValue 
 } from '@/components/ui/select';
-import { EconomieFilter } from '../../types/economie';
+import { Search, X, Filter } from 'lucide-react';
+import { 
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from '@/components/ui/popover';
+import { EconomieFilter, EconomieType, EconomieCategory } from '../../types/economie';
 
 interface EconomieFiltersProps {
   filter: EconomieFilter;
-  onFilterChange: (filter: EconomieFilter) => void;
+  onFilterChange: (newFilter: Partial<EconomieFilter>) => void;
   onResetFilters: () => void;
 }
 
@@ -27,63 +28,128 @@ export const EconomieFilters: React.FC<EconomieFiltersProps> = ({
   onFilterChange,
   onResetFilters
 }) => {
-  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    onFilterChange({
-      ...filter,
-      searchTerm: e.target.value
-    });
-  };
-  
-  const handleTypeChange = (value: string) => {
-    onFilterChange({
-      ...filter,
-      type: value
-    });
-  };
-  
   return (
-    <div className="space-y-4">
-      <div className="flex items-center justify-between">
-        <h3 className="text-sm font-medium flex items-center gap-1.5">
-          <Filter className="h-4 w-4" />
-          Filtres
-        </h3>
-        
-        <Button 
-          variant="ghost" 
-          size="sm" 
-          onClick={onResetFilters}
-          disabled={!filter.searchTerm && filter.type === 'all'}
-        >
-          <X className="h-4 w-4 mr-1" />
-          Réinitialiser
-        </Button>
-      </div>
-      
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <div className="relative">
+    <div className="flex flex-col sm:flex-row gap-2 items-start sm:items-center justify-between">
+      <div className="flex flex-1 w-full sm:w-auto gap-2">
+        <div className="relative flex-1">
           <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
           <Input
             placeholder="Rechercher..."
+            value={filter.searchTerm || ''}
+            onChange={(e) => onFilterChange({ searchTerm: e.target.value })}
             className="pl-8"
-            value={filter.searchTerm}
-            onChange={handleSearchChange}
           />
+          {filter.searchTerm && (
+            <button
+              onClick={() => onFilterChange({ searchTerm: '' })}
+              className="absolute right-2.5 top-2.5 text-muted-foreground hover:text-foreground"
+            >
+              <X className="h-4 w-4" />
+            </button>
+          )}
         </div>
-        
-        <Select value={filter.type} onValueChange={handleTypeChange}>
-          <SelectTrigger>
-            <SelectValue placeholder="Type de transaction" />
+
+        <Select
+          value={filter.type || 'all'}
+          onValueChange={(value) => onFilterChange({ type: value as EconomieType })}
+        >
+          <SelectTrigger className="w-[180px]">
+            <SelectValue placeholder="Type" />
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="all">Tous les types</SelectItem>
             <SelectItem value="income">Revenus</SelectItem>
             <SelectItem value="expense">Dépenses</SelectItem>
-            <SelectItem value="tax">Taxes</SelectItem>
-            <SelectItem value="transfer">Transferts</SelectItem>
+            <SelectItem value="tax">Impôts</SelectItem>
+            <SelectItem value="trade">Commerce</SelectItem>
+            <SelectItem value="military">Militaire</SelectItem>
+            <SelectItem value="construction">Construction</SelectItem>
+            <SelectItem value="slaves">Esclaves</SelectItem>
+            <SelectItem value="other">Autres</SelectItem>
           </SelectContent>
         </Select>
+
+        <Popover>
+          <PopoverTrigger asChild>
+            <Button variant="outline" size="sm" className="flex items-center gap-2">
+              <Filter className="h-4 w-4" />
+              <span>Filtres</span>
+            </Button>
+          </PopoverTrigger>
+          <PopoverContent className="w-80 p-4">
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <h4 className="font-medium">Catégories</h4>
+                <Select
+                  value={(filter.categories && filter.categories.length > 0) ? filter.categories[0] : 'all'}
+                  onValueChange={(value) => {
+                    if (value === 'all') {
+                      onFilterChange({ categories: undefined });
+                    } else {
+                      onFilterChange({ categories: [value as EconomieCategory] });
+                    }
+                  }}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Toutes les catégories" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">Toutes les catégories</SelectItem>
+                    <SelectItem value="military">Militaire</SelectItem>
+                    <SelectItem value="administration">Administration</SelectItem>
+                    <SelectItem value="construction">Construction</SelectItem>
+                    <SelectItem value="religion">Religion</SelectItem>
+                    <SelectItem value="slaves">Esclaves</SelectItem>
+                    <SelectItem value="entertainment">Divertissement</SelectItem>
+                    <SelectItem value="tax">Impôts</SelectItem>
+                    <SelectItem value="trade">Commerce</SelectItem>
+                    <SelectItem value="diplomacy">Diplomatie</SelectItem>
+                    <SelectItem value="other">Autres</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="space-y-2">
+                <h4 className="font-medium">Montant minimum</h4>
+                <Input
+                  type="number"
+                  placeholder="Montant min"
+                  value={filter.minAmount || ''}
+                  onChange={(e) => onFilterChange({ minAmount: e.target.value ? Number(e.target.value) : undefined })}
+                />
+              </div>
+
+              <div className="space-y-2">
+                <h4 className="font-medium">Montant maximum</h4>
+                <Input
+                  type="number"
+                  placeholder="Montant max"
+                  value={filter.maxAmount || ''}
+                  onChange={(e) => onFilterChange({ maxAmount: e.target.value ? Number(e.target.value) : undefined })}
+                />
+              </div>
+
+              <Button 
+                variant="outline" 
+                size="sm" 
+                className="w-full mt-2"
+                onClick={onResetFilters}
+              >
+                Réinitialiser les filtres
+              </Button>
+            </div>
+          </PopoverContent>
+        </Popover>
       </div>
+
+      <Button 
+        variant="outline" 
+        size="sm" 
+        onClick={onResetFilters}
+        className="sm:hidden w-full"
+      >
+        Réinitialiser
+      </Button>
     </div>
   );
 };

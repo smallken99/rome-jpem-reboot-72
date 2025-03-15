@@ -1,18 +1,18 @@
 
 import { useState } from 'react';
 import { useMaitreJeu } from '@/components/maitrejeu/context';
-import { EconomieFilter, EconomieRecord, EconomieSort } from '@/components/maitrejeu/types/economie';
+import { EconomieFilter, EconomieRecord, EconomieSort, EconomieCreationData } from '@/components/maitrejeu/types/economie';
 import { toast } from 'sonner';
 import { v4 as uuidv4 } from 'uuid';
+import { GameDate } from '@/components/maitrejeu/types/common';
 
 export const useEconomieManagement = () => {
-  const { economieRecords, addEconomieRecord, updateEconomieRecord, deleteEconomieRecord } = useMaitreJeu();
+  const { economieRecords, addEconomieRecord, updateEconomieRecord, deleteEconomieRecord, treasury, economicFactors } = useMaitreJeu();
   
   // États
   const [filter, setFilter] = useState<EconomieFilter>({
     type: 'all',
-    category: 'all',
-    dateRange: { start: null, end: null }
+    searchTerm: ''
   });
   const [sort, setSort] = useState<EconomieSort>({
     field: 'date',
@@ -24,9 +24,26 @@ export const useEconomieManagement = () => {
   // Filtrer les enregistrements
   const filteredRecords = economieRecords.filter(record => {
     if (filter.type !== 'all' && record.type !== filter.type) return false;
-    if (filter.category !== 'all' && record.category !== filter.category) return false;
-    if (filter.dateRange.start && record.date.year < filter.dateRange.start.year) return false;
-    if (filter.dateRange.end && record.date.year > filter.dateRange.end.year) return false;
+    if (filter.categories && filter.categories.length > 0 && !filter.categories.includes(record.category)) return false;
+    
+    if (filter.dateRange?.start && typeof record.date === 'object') {
+      const dateStart = filter.dateRange.start;
+      if (record.date.year < dateStart.year) return false;
+      if (record.date.year === dateStart.year && 
+          getSeasonsOrder(record.date.season) < getSeasonsOrder(dateStart.season)) return false;
+    }
+    
+    if (filter.dateRange?.end && typeof record.date === 'object') {
+      const dateEnd = filter.dateRange.end;
+      if (record.date.year > dateEnd.year) return false;
+      if (record.date.year === dateEnd.year && 
+          getSeasonsOrder(record.date.season) > getSeasonsOrder(dateEnd.season)) return false;
+    }
+    
+    if (filter.searchTerm && !record.description.toLowerCase().includes(filter.searchTerm.toLowerCase())) {
+      return false;
+    }
+    
     return true;
   });
   
@@ -34,26 +51,33 @@ export const useEconomieManagement = () => {
   const sortedRecords = [...filteredRecords].sort((a, b) => {
     const direction = sort.direction === 'asc' ? 1 : -1;
     
-    switch (sort.field) {
-      case 'date':
+    if (sort.field === 'date') {
+      if (typeof a.date === 'object' && typeof b.date === 'object') {
         if (a.date.year !== b.date.year) {
           return (a.date.year - b.date.year) * direction;
         } else {
-          const seasons = ['WINTER', 'SPRING', 'SUMMER', 'FALL'];
-          const seasonA = seasons.indexOf(a.date.season);
-          const seasonB = seasons.indexOf(b.date.season);
-          return (seasonA - seasonB) * direction;
+          return (getSeasonsOrder(a.date.season) - getSeasonsOrder(b.date.season)) * direction;
         }
-      case 'amount':
-        return (a.amount - b.amount) * direction;
-      case 'category':
-        return a.category.localeCompare(b.category) * direction;
-      case 'source':
-        return a.source.localeCompare(b.source) * direction;
-      default:
-        return 0;
+      }
+      return 0;
+    } else if (sort.field === 'amount') {
+      return (a.amount - b.amount) * direction;
+    } else {
+      // @ts-ignore
+      return String(a[sort.field]).localeCompare(String(b[sort.field])) * direction;
     }
   });
+  
+  // Utilitaire pour obtenir l'ordre des saisons
+  const getSeasonsOrder = (season: string): number => {
+    const seasons: Record<string, number> = { 
+      'Ver': 0, 
+      'Aestas': 1, 
+      'Autumnus': 2, 
+      'Hiems': 3 
+    };
+    return seasons[season] ?? 0;
+  };
   
   // Handlers
   const handleFilterChange = (newFilter: Partial<EconomieFilter>) => {
@@ -63,12 +87,11 @@ export const useEconomieManagement = () => {
   const handleResetFilters = () => {
     setFilter({
       type: 'all',
-      category: 'all',
-      dateRange: { start: null, end: null }
+      searchTerm: ''
     });
   };
   
-  const handleSortChange = (field: keyof EconomieSort['field']) => {
+  const handleSortChange = (field: keyof EconomieRecord) => {
     setSort(prev => ({
       field,
       direction: prev.field === field && prev.direction === 'desc' ? 'asc' : 'desc'
@@ -95,7 +118,7 @@ export const useEconomieManagement = () => {
     }
   };
   
-  const handleSaveTransaction = (data: Partial<EconomieRecord>) => {
+  const handleSaveTransaction = (data: EconomieCreationData) => {
     try {
       if (selectedRecord) {
         // Mise à jour d'un enregistrement existant
@@ -103,11 +126,9 @@ export const useEconomieManagement = () => {
         toast.success('Transaction mise à jour avec succès');
       } else {
         // Création d'un nouvel enregistrement
-        const newRecord = {
+        const newRecord: EconomieCreationData = {
           ...data,
-          id: uuidv4(),
-          createdAt: new Date().toISOString(),
-          updatedAt: new Date().toISOString()
+          date: data.date || new Date().toISOString()
         };
         addEconomieRecord(newRecord);
         toast.success('Transaction ajoutée avec succès');
@@ -145,42 +166,14 @@ export const useEconomieManagement = () => {
     }, 1000);
   };
   
-  const handleManageBuildings = () => {
-    toast('Gestion des bâtiments', {
-      description: 'Cette fonctionnalité permet de gérer les bâtiments publics et leurs revenus.',
-      action: {
-        label: 'Configurer',
-        onClick: () => console.log('Configurer les bâtiments'),
-      },
-    });
-  };
-  
-  const handleManageSlaves = () => {
-    toast('Gestion des esclaves', {
-      description: 'Cette fonctionnalité permet de gérer les esclaves publics et leurs coûts.',
-      action: {
-        label: 'Configurer',
-        onClick: () => console.log('Configurer les esclaves'),
-      },
-    });
-  };
-  
-  const handleManageTaxes = () => {
-    toast('Gestion des impôts', {
-      description: 'Cette fonctionnalité permet de gérer les taux d\'imposition et leurs revenus.',
-      action: {
-        label: 'Configurer',
-        onClick: () => console.log('Configurer les impôts'),
-      },
-    });
-  };
-  
   return {
     economieRecords: sortedRecords,
     filter,
     sort,
     isModalOpen,
     selectedRecord,
+    treasury,
+    economicFactors,
     handleFilterChange,
     handleResetFilters,
     handleSortChange,
@@ -191,9 +184,6 @@ export const useEconomieManagement = () => {
     handleGenerateReport,
     handleCalculateProjections,
     handleRefreshData,
-    handleManageBuildings,
-    handleManageSlaves,
-    handleManageTaxes,
     setIsModalOpen
   };
 };
