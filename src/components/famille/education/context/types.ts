@@ -6,7 +6,7 @@ export interface EducationContextType {
   children: Child[];
   preceptors: Preceptor[];
   hiredPreceptors: Preceptor[];
-  educatingChildren: string[];
+  educatingChildren: {[childId: string]: boolean} | string[];
   isHiringPreceptor: boolean;
   loadPreceptorsByType: (type: string) => Preceptor[];
   refreshPreceptors: () => void;

@@ -3,7 +3,7 @@ import React from 'react';
 import { Progress } from '@/components/ui/progress';
 import { EducationStatusProps } from '../types/educationTypes';
 import { Scroll, User, AlertTriangle } from 'lucide-react';
-import { getEducationPath } from '../data';
+import { educationPaths } from '../data/educationPaths';
 
 export const EducationStatus: React.FC<EducationStatusProps> = ({ 
   child,
@@ -22,6 +22,10 @@ export const EducationStatus: React.FC<EducationStatusProps> = ({
   };
   
   // Get the education path for more details
+  const getEducationPath = (type: string) => {
+    return educationPaths.find(path => path.type === type);
+  };
+  
   const educationPath = child.currentEducation?.type ? 
     getEducationPath(child.currentEducation.type) : undefined;
   

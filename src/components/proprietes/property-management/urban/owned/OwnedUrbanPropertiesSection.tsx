@@ -3,8 +3,7 @@ import React from 'react';
 import { Button } from '@/components/ui/button';
 import { PlusCircle } from 'lucide-react';
 import { PropertyCard } from '@/components/proprietes/property-management/PropertyCard';
-import { OwnedBuilding, BuildingDescription } from '../../../hooks/building/types';
-import { PropertyCondition } from '../../card/PropertyCondition';
+import { OwnedBuilding } from '../../../hooks/building/types';
 
 interface OwnedUrbanPropertiesSectionProps {
   buildings: OwnedBuilding[];
@@ -53,7 +52,7 @@ export const OwnedUrbanPropertiesSection: React.FC<OwnedUrbanPropertiesSectionPr
                 onToggleMaintenance={() => {}}
                 onPerformMaintenance={() => false}
                 onAssignSlaves={() => {}}
-                onSell={(id, value) => handleSell(id)}
+                onSell={(id) => handleSell(id)}
                 balance={0}
                 totalAvailableSlaves={0}
                 buildingValue={value}
