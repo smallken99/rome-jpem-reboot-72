@@ -1,179 +1,156 @@
 
-import React from 'react';
-import { Card, CardContent } from '@/components/ui/card';
+import React, { useState } from 'react';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { AlertTriangle, ChevronDown, ChevronUp } from 'lucide-react';
-import { Button } from '@/components/ui/button';
 import { 
-  EconomieStats, 
-  EconomieTable, 
-  EconomieFilters, 
-  EconomieModal, 
-  EconomieActions,
-  useEconomieManagement
-} from '@/components/maitrejeu/components/economie';
-import { useMaitreJeu } from '@/components/maitrejeu/context';
+  Coins, 
+  TrendingUp, 
+  BarChart2, 
+  FileText, 
+  Settings, 
+  Store, 
+  Building
+} from 'lucide-react';
+import { useEconomieManagement } from './components/economie/useEconomieManagement';
+import { EconomieStats } from './components/economie/EconomieStats';
+import { EconomieTable } from './components/economie/EconomieTable';
+import { EconomieFilters } from './components/economie/EconomieFilters';
+import { EconomieModal } from './components/economie/EconomieModal';
+import { EconomieActions } from './components/economie/EconomieActions';
+import { TransactionManagement } from './components/economie/TransactionManagement';
 
-export const GestionEconomie: React.FC = () => {
-  const [activeTab, setActiveTab] = React.useState('transactions');
-  const [showAlert, setShowAlert] = React.useState(true);
-  
-  const {
-    economieRecords,
-    filter,
-    sort,
-    isModalOpen,
-    selectedRecord,
-    handleFilterChange,
-    handleResetFilters,
-    handleSortChange,
-    handleAddTransaction,
-    handleEditTransaction,
-    handleDeleteTransaction,
-    handleSaveTransaction,
-    handleGenerateReport,
-    handleCalculateProjections,
-    handleRefreshData,
-    handleManageBuildings,
-    handleManageSlaves,
-    handleManageTaxes,
-    setIsModalOpen
-  } = useEconomieManagement();
-  
-  const { treasury } = useMaitreJeu();
+export const GestionEconomie = () => {
+  const [activeTab, setActiveTab] = useState('apercu');
+  const economie = useEconomieManagement();
   
   return (
-    <div className="space-y-6">
-      {showAlert && treasury.balance < 0 && (
-        <Alert variant="destructive" className="mb-4">
-          <AlertTriangle className="h-4 w-4" />
-          <AlertTitle>Trésor en déficit</AlertTitle>
-          <AlertDescription className="flex justify-between items-center">
-            <span>Le trésor public est actuellement en déficit. Des mesures doivent être prises pour rétablir l'équilibre financier.</span>
-            <Button 
-              variant="outline" 
-              size="sm" 
-              onClick={() => setShowAlert(false)}
-            >
-              Fermer
-            </Button>
-          </AlertDescription>
-        </Alert>
-      )}
-      
-      <EconomieStats />
-      
-      <Tabs value={activeTab} onValueChange={setActiveTab}>
-        <TabsList className="w-full">
-          <TabsTrigger value="transactions" className="flex-1">Transactions</TabsTrigger>
-          <TabsTrigger value="treasury" className="flex-1">Trésor Public</TabsTrigger>
-          <TabsTrigger value="projections" className="flex-1">Projections</TabsTrigger>
-          <TabsTrigger value="reports" className="flex-1">Rapports</TabsTrigger>
-        </TabsList>
+    <div className="p-6 space-y-6">
+      <div className="flex justify-between items-center">
+        <div>
+          <h1 className="text-2xl font-bold">Gestion Économique</h1>
+          <p className="text-muted-foreground">
+            Gérez le trésor public, les taxes, les dépenses et les revenus de Rome
+          </p>
+        </div>
         
-        <TabsContent value="transactions" className="space-y-4 pt-4">
-          <Card>
-            <CardContent className="pt-6">
-              <EconomieActions
-                onAddTransaction={handleAddTransaction}
-                onGenerateReport={handleGenerateReport}
-                onCalculateProjections={handleCalculateProjections}
-                onRefreshData={handleRefreshData}
-                onManageBuildings={handleManageBuildings}
-                onManageSlaves={handleManageSlaves} 
-                onManageTaxes={handleManageTaxes}
-              />
-              
-              <EconomieFilters
-                filter={filter}
-                onFilterChange={handleFilterChange}
-                onResetFilters={handleResetFilters}
-              />
-              
-              <div className="mt-6">
-                <EconomieTable
-                  records={economieRecords}
-                  onEdit={handleEditTransaction}
-                  onDelete={handleDeleteTransaction}
-                  sort={sort}
-                  onSortChange={handleSortChange}
+        <EconomieActions 
+          onAddTransaction={economie.handleAddTransaction}
+          onGenerateReport={economie.handleGenerateReport}
+          onRefreshData={economie.handleRefreshData}
+        />
+      </div>
+      
+      <EconomieStats treasury={economie.treasury} economicFactors={economie.economicFactors} />
+      
+      <Card>
+        <CardHeader className="px-6 pt-6 pb-3 border-b">
+          <CardTitle>Gestion Économique</CardTitle>
+          <CardDescription>
+            Suivez et gérez les transactions, impôts et projections économiques
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="p-0">
+          <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+            <div className="border-b px-6">
+              <TabsList className="grid w-full grid-cols-6">
+                <TabsTrigger value="apercu" className="flex items-center gap-2">
+                  <BarChart2 className="h-4 w-4" />
+                  <span className="hidden sm:inline">Aperçu</span>
+                </TabsTrigger>
+                <TabsTrigger value="transactions" className="flex items-center gap-2">
+                  <Coins className="h-4 w-4" />
+                  <span className="hidden sm:inline">Transactions</span>
+                </TabsTrigger>
+                <TabsTrigger value="impots" className="flex items-center gap-2">
+                  <FileText className="h-4 w-4" />
+                  <span className="hidden sm:inline">Impôts</span>
+                </TabsTrigger>
+                <TabsTrigger value="projections" className="flex items-center gap-2">
+                  <TrendingUp className="h-4 w-4" />
+                  <span className="hidden sm:inline">Projections</span>
+                </TabsTrigger>
+                <TabsTrigger value="batiments" className="flex items-center gap-2">
+                  <Building className="h-4 w-4" />
+                  <span className="hidden sm:inline">Bâtiments</span>
+                </TabsTrigger>
+                <TabsTrigger value="parametres" className="flex items-center gap-2">
+                  <Settings className="h-4 w-4" />
+                  <span className="hidden sm:inline">Paramètres</span>
+                </TabsTrigger>
+              </TabsList>
+            </div>
+            
+            <TabsContent value="apercu" className="p-6 pt-6">
+              <TransactionManagement />
+            </TabsContent>
+            
+            <TabsContent value="transactions" className="p-6 pt-4">
+              <div className="space-y-4">
+                <EconomieFilters 
+                  filter={economie.filter}
+                  onFilterChange={economie.handleFilterChange}
+                  onResetFilters={economie.handleResetFilters}
+                />
+                
+                <EconomieTable 
+                  economieRecords={economie.economieRecords}
+                  sort={economie.sort}
+                  onSortChange={economie.handleSortChange}
+                  onEdit={economie.handleEditTransaction}
+                  onDelete={economie.handleDeleteTransaction}
                 />
               </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
-        
-        <TabsContent value="treasury" className="space-y-4 pt-4">
-          <Card>
-            <CardContent className="pt-6">
-              <h3 className="text-lg font-semibold mb-4">Trésor Public</h3>
-              <p className="text-muted-foreground mb-6">
-                Gérez les finances du trésor public, surveillez les dépenses et ajustez les politiques fiscales.
-              </p>
-              
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                <div className="bg-muted rounded-md p-4">
-                  <h4 className="font-semibold">Balance actuelle</h4>
-                  <p className="text-2xl font-bold">{treasury.balance.toLocaleString()} As</p>
-                </div>
-                
-                <div className="bg-muted rounded-md p-4">
-                  <h4 className="font-semibold">Revenus totaux</h4>
-                  <p className="text-2xl font-bold text-green-600">{treasury.totalIncome.toLocaleString()} As</p>
-                </div>
-                
-                <div className="bg-muted rounded-md p-4">
-                  <h4 className="font-semibold">Dépenses totales</h4>
-                  <p className="text-2xl font-bold text-red-600">{treasury.totalExpenses.toLocaleString()} As</p>
-                </div>
+            </TabsContent>
+            
+            <TabsContent value="impots" className="p-6 pt-4">
+              <div className="flex flex-col items-center justify-center h-40">
+                <Store className="h-12 w-12 text-muted-foreground mb-4" />
+                <h3 className="text-lg font-medium mb-2">Gestion des Impôts</h3>
+                <p className="text-sm text-muted-foreground text-center max-w-md">
+                  Définissez les taux d'imposition, gérez les collectes et visualisez les recettes fiscales
+                </p>
               </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
-        
-        <TabsContent value="projections" className="space-y-4 pt-4">
-          <Card>
-            <CardContent className="pt-6">
-              <h3 className="text-lg font-semibold mb-4">Projections Économiques</h3>
-              <p className="text-muted-foreground mb-6">
-                Analysez les tendances économiques futures et préparez-vous aux changements à venir.
-              </p>
-              
-              <div className="bg-muted p-4 rounded-md">
-                <p>Projection pour le prochain cycle : <strong>{treasury.projectedBalance.toLocaleString()} As</strong></p>
-                <p>Taux d'inflation actuel : <strong>{treasury.inflationRate}%</strong></p>
-                <p>Dernier bilan : <strong>Année {treasury.lastUpdated.year}, {treasury.lastUpdated.season}</strong></p>
+            </TabsContent>
+            
+            <TabsContent value="projections" className="p-6 pt-4">
+              <div className="flex flex-col items-center justify-center h-40">
+                <TrendingUp className="h-12 w-12 text-muted-foreground mb-4" />
+                <h3 className="text-lg font-medium mb-2">Projections Économiques</h3>
+                <p className="text-sm text-muted-foreground text-center max-w-md">
+                  Analysez les tendances futures des finances de la République basées sur les données actuelles
+                </p>
               </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
-        
-        <TabsContent value="reports" className="space-y-4 pt-4">
-          <Card>
-            <CardContent className="pt-6">
-              <h3 className="text-lg font-semibold mb-4">Rapports Économiques</h3>
-              <p className="text-muted-foreground mb-6">
-                Consultez et générez des rapports détaillés sur l'état de l'économie.
-              </p>
-              
-              <div className="bg-muted p-4 rounded-md">
-                <h4 className="font-semibold mb-2">Notes du questeur :</h4>
-                <p className="italic">{treasury.comments}</p>
+            </TabsContent>
+            
+            <TabsContent value="batiments" className="p-6 pt-4">
+              <div className="flex flex-col items-center justify-center h-40">
+                <Building className="h-12 w-12 text-muted-foreground mb-4" />
+                <h3 className="text-lg font-medium mb-2">Économie des Bâtiments</h3>
+                <p className="text-sm text-muted-foreground text-center max-w-md">
+                  Gérez les revenus et coûts associés aux bâtiments publics de la République
+                </p>
               </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
-      </Tabs>
+            </TabsContent>
+            
+            <TabsContent value="parametres" className="p-6 pt-4">
+              <div className="flex flex-col items-center justify-center h-40">
+                <Settings className="h-12 w-12 text-muted-foreground mb-4" />
+                <h3 className="text-lg font-medium mb-2">Paramètres Économiques</h3>
+                <p className="text-sm text-muted-foreground text-center max-w-md">
+                  Configurez les facteurs économiques, les taux d'inflation et autres paramètres monétaires
+                </p>
+              </div>
+            </TabsContent>
+          </Tabs>
+        </CardContent>
+      </Card>
       
-      {isModalOpen && (
-        <EconomieModal
-          isOpen={isModalOpen}
-          onClose={() => setIsModalOpen(false)}
-          onSave={handleSaveTransaction}
-          editRecord={selectedRecord}
-        />
-      )}
+      <EconomieModal
+        isOpen={economie.isModalOpen}
+        onClose={() => economie.setIsModalOpen(false)}
+        onSave={economie.handleSaveTransaction}
+        record={economie.selectedRecord}
+      />
     </div>
   );
 };

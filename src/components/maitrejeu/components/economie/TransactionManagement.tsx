@@ -1,171 +1,146 @@
 
-import React, { useState } from 'react';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { 
-  Select, 
-  SelectContent, 
-  SelectItem, 
-  SelectTrigger, 
-  SelectValue 
-} from '@/components/ui/select';
-import { Textarea } from '@/components/ui/textarea';
-import { TreasuryStatus, EconomieCreationData } from '../../types/economie';
-import { useToast } from '@/components/ui/use-toast';
-import { Coins, Building, Users, ReceiptText } from 'lucide-react';
+import React from 'react';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { useEconomieManagement } from './useEconomieManagement';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 
-interface TransactionManagementProps {
-  onCreateTransaction: (data: EconomieCreationData) => void;
-  treasury: TreasuryStatus;
-}
+const mockChartData = [
+  { name: 'Hiems 705', Revenus: 25000, Dépenses: 18000, Balance: 7000 },
+  { name: 'Ver 706', Revenus: 30000, Dépenses: 22000, Balance: 8000 },
+  { name: 'Aestas 706', Revenus: 35000, Dépenses: 28000, Balance: 7000 },
+  { name: 'Autumnus 706', Revenus: 32000, Dépenses: 30000, Balance: 2000 },
+  { name: 'Hiems 706', Revenus: 28000, Dépenses: 25000, Balance: 3000 },
+  { name: 'Ver 707', Revenus: 33000, Dépenses: 27000, Balance: 6000 },
+];
 
-export const TransactionManagement: React.FC<TransactionManagementProps> = ({
-  onCreateTransaction,
-  treasury
-}) => {
-  const [transactionType, setTransactionType] = useState<string>('income');
-  const [amount, setAmount] = useState<number>(0);
-  const [description, setDescription] = useState<string>('');
-  const [category, setCategory] = useState<string>('general');
-  const [source, setSource] = useState<string>('');
-  const { toast } = useToast();
+export const TransactionManagement: React.FC = () => {
+  const economie = useEconomieManagement();
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
+  // Calculer les statistiques
+  const totalRevenues = economie.economieRecords
+    .filter(r => r.type === 'income')
+    .reduce((sum, r) => sum + r.amount, 0);
 
-    // Validation
-    if (amount <= 0) {
-      toast({
-        title: "Montant invalide",
-        description: "Le montant doit être supérieur à zéro.",
-        variant: "destructive"
-      });
-      return;
+  const totalExpenses = economie.economieRecords
+    .filter(r => r.type === 'expense')
+    .reduce((sum, r) => sum + r.amount, 0);
+
+  const balance = totalRevenues - totalExpenses;
+
+  // Calculer les catégories principales
+  const categoryData = economie.economieRecords.reduce((acc, record) => {
+    const category = record.category || 'Non catégorisé';
+    if (!acc[category]) {
+      acc[category] = { income: 0, expense: 0 };
     }
+    if (record.type === 'income') {
+      acc[category].income += record.amount;
+    } else {
+      acc[category].expense += record.amount;
+    }
+    return acc;
+  }, {} as Record<string, { income: number; expense: number; }>);
 
-    // Adjust negative amounts for expenses
-    const adjustedAmount = transactionType === 'expense' ? -Math.abs(amount) : Math.abs(amount);
-
-    // Create transaction data
-    const transactionData: EconomieCreationData = {
-      amount: adjustedAmount,
-      description,
-      category,
-      type: transactionType as string,
-      date: new Date(),
-      source: source || 'manual',
-      approved: true,
-    };
-
-    // Submit transaction
-    onCreateTransaction(transactionData);
-
-    // Reset form
-    setAmount(0);
-    setDescription('');
-    setSource('');
-    toast({
-      title: "Transaction créée",
-      description: `Transaction de ${Math.abs(adjustedAmount)} As enregistrée.`
-    });
-  };
+  const categoryChartData = Object.entries(categoryData).map(([name, data]) => ({
+    name,
+    Revenus: data.income,
+    Dépenses: data.expense,
+    Solde: data.income - data.expense
+  }));
 
   return (
-    <Card className="mb-6">
-      <CardHeader>
-        <CardTitle className="flex items-center">
-          <Coins className="h-5 w-5 mr-2" />
-          Nouvelle Transaction
-        </CardTitle>
-      </CardHeader>
-      <CardContent>
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="transactionType">Type de transaction</Label>
-              <Select 
-                value={transactionType} 
-                onValueChange={setTransactionType}
-              >
-                <SelectTrigger id="transactionType">
-                  <SelectValue placeholder="Type de transaction" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="income">Revenu</SelectItem>
-                  <SelectItem value="expense">Dépense</SelectItem>
-                  <SelectItem value="tax">Impôt</SelectItem>
-                  <SelectItem value="transfer">Transfert</SelectItem>
-                </SelectContent>
-              </Select>
+    <div className="space-y-6">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-lg">Revenus Totaux</CardTitle>
+            <CardDescription>Cumul de toutes les transactions</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{totalRevenues.toLocaleString()} deniers</div>
+          </CardContent>
+        </Card>
+        
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-lg">Dépenses Totales</CardTitle>
+            <CardDescription>Cumul de toutes les transactions</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{totalExpenses.toLocaleString()} deniers</div>
+          </CardContent>
+        </Card>
+        
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-lg">Solde Actuel</CardTitle>
+            <CardDescription>Revenus - Dépenses</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className={`text-2xl font-bold ${balance >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+              {balance.toLocaleString()} deniers
             </div>
-            
-            <div className="space-y-2">
-              <Label htmlFor="amount">Montant (As)</Label>
-              <Input 
-                id="amount" 
-                type="number" 
-                min="0"
-                value={amount} 
-                onChange={(e) => setAmount(Number(e.target.value))}
-              />
+          </CardContent>
+        </Card>
+      </div>
+      
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <Card>
+          <CardHeader>
+            <CardTitle>Évolution Temporelle</CardTitle>
+            <CardDescription>
+              Tendances des revenus et dépenses au fil du temps
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="h-[300px]">
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart
+                  data={mockChartData}
+                  margin={{ top: 20, right: 30, left: 20, bottom: 5 }}
+                >
+                  <CartesianGrid strokeDasharray="3 3" />
+                  <XAxis dataKey="name" />
+                  <YAxis />
+                  <Tooltip />
+                  <Legend />
+                  <Bar dataKey="Revenus" fill="#4ade80" />
+                  <Bar dataKey="Dépenses" fill="#f87171" />
+                  <Bar dataKey="Balance" fill="#60a5fa" />
+                </BarChart>
+              </ResponsiveContainer>
             </div>
-          </div>
-          
-          <div className="space-y-2">
-            <Label htmlFor="description">Description</Label>
-            <Textarea 
-              id="description" 
-              placeholder="Description détaillée de la transaction"
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
-            />
-          </div>
-          
-          <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="category">Catégorie</Label>
-              <Select 
-                value={category} 
-                onValueChange={setCategory}
-              >
-                <SelectTrigger id="category">
-                  <SelectValue placeholder="Catégorie" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="general">Général</SelectItem>
-                  <SelectItem value="military">Militaire</SelectItem>
-                  <SelectItem value="buildings">Bâtiments</SelectItem>
-                  <SelectItem value="slaves">Esclaves</SelectItem>
-                  <SelectItem value="tax">Taxes</SelectItem>
-                  <SelectItem value="politics">Politique</SelectItem>
-                  <SelectItem value="religion">Religion</SelectItem>
-                </SelectContent>
-              </Select>
+          </CardContent>
+        </Card>
+        
+        <Card>
+          <CardHeader>
+            <CardTitle>Répartition par Catégorie</CardTitle>
+            <CardDescription>
+              Distribution des revenus et dépenses par type
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="h-[300px]">
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart
+                  data={categoryChartData}
+                  margin={{ top: 20, right: 30, left: 20, bottom: 5 }}
+                  layout="vertical"
+                >
+                  <CartesianGrid strokeDasharray="3 3" />
+                  <XAxis type="number" />
+                  <YAxis dataKey="name" type="category" width={100} />
+                  <Tooltip />
+                  <Legend />
+                  <Bar dataKey="Revenus" fill="#4ade80" />
+                  <Bar dataKey="Dépenses" fill="#f87171" />
+                </BarChart>
+              </ResponsiveContainer>
             </div>
-            
-            <div className="space-y-2">
-              <Label htmlFor="source">Source / Destinataire</Label>
-              <Input 
-                id="source" 
-                placeholder="Nom de la personne ou institution"
-                value={source}
-                onChange={(e) => setSource(e.target.value)}
-              />
-            </div>
-          </div>
-          
-          <div className="flex justify-between items-center pt-2">
-            <div className="text-sm text-muted-foreground">
-              Solde actuel: <span className="font-medium">{treasury.balance.toLocaleString()} As</span>
-            </div>
-            <Button type="submit">
-              {transactionType === 'income' ? 'Enregistrer le revenu' : 'Enregistrer la dépense'}
-            </Button>
-          </div>
-        </form>
-      </CardContent>
-    </Card>
+          </CardContent>
+        </Card>
+      </div>
+    </div>
   );
 };

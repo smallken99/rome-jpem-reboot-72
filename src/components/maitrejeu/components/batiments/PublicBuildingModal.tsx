@@ -3,286 +3,223 @@ import React, { useState } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { 
-  Select, 
-  SelectContent, 
-  SelectItem, 
-  SelectTrigger, 
-  SelectValue 
-} from '@/components/ui/select';
-import { Coins, Calendar, Construction } from 'lucide-react';
-import { Card, CardContent } from '@/components/ui/card';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Label } from '@/components/ui/label';
+import { Building } from '@/components/maitrejeu/types/batiments';
 
 interface PublicBuildingModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onCreateProject: (data: any) => void;
-  balance: number;
+  onSave: (building: Partial<Building>) => void;
+  building?: Building;
 }
 
 export const PublicBuildingModal: React.FC<PublicBuildingModalProps> = ({
   isOpen,
   onClose,
-  onCreateProject,
-  balance
+  onSave,
+  building
 }) => {
-  const [buildingType, setBuildingType] = useState<string>('');
-  const [name, setName] = useState<string>('');
-  const [location, setLocation] = useState<string>('Rome');
-  const [constructionTime, setConstructionTime] = useState<number>(4);
-  const [customCost, setCustomCost] = useState<string>('');
+  const isEditMode = !!building;
   
-  // Get building info based on type
-  const getBuildingInfo = (type: string) => {
-    const buildingTypes: Record<string, { name: string, cost: number, time: number, benefits: string[] }> = {
-      'forum': {
-        name: 'Forum',
-        cost: 50000,
-        time: 8,
-        benefits: ['Augmente le prestige', 'Favorise le commerce']
-      },
-      'temple': {
-        name: 'Temple',
-        cost: 30000,
-        time: 4,
-        benefits: ['Augmente la piété', 'Diminue les troubles civils']
-      },
-      'market': {
-        name: 'Marché',
-        cost: 25000,
-        time: 3,
-        benefits: ['Augmente les revenus', 'Améliore l\'approvisionnement']
-      },
-      'aqueduct': {
-        name: 'Aqueduc',
-        cost: 80000,
-        time: 10,
-        benefits: ['Améliore la santé publique', 'Réduit les risques d\'incendie']
-      },
-      'bath': {
-        name: 'Thermes',
-        cost: 40000,
-        time: 6,
-        benefits: ['Augmente le bonheur', 'Améliore la santé publique']
-      },
-      'granary': {
-        name: 'Grenier',
-        cost: 20000,
-        time: 2,
-        benefits: ['Stockage de nourriture', 'Réduit les risques de famine']
-      },
-      'theater': {
-        name: 'Théâtre',
-        cost: 35000,
-        time: 5,
-        benefits: ['Augmente le divertissement', 'Améliore la culture']
-      },
-      'barracks': {
-        name: 'Caserne',
-        cost: 30000,
-        time: 4,
-        benefits: ['Améliore le recrutement militaire', 'Renforce la sécurité']
-      }
-    };
-    
-    return buildingTypes[type] || { name: 'Bâtiment personnalisé', cost: 20000, time: 3, benefits: [] };
-  };
-  
-  const selectedBuildingInfo = buildingType ? getBuildingInfo(buildingType) : null;
-  
-  // Calculate upfront cost (30% of total)
-  const totalCost = customCost 
-    ? parseInt(customCost) 
-    : (selectedBuildingInfo?.cost || 0);
-  const upfrontCost = Math.round(totalCost * 0.3);
-  
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    
-    if (!buildingType || !name || !location) {
-      return;
+  const [formData, setFormData] = useState<Partial<Building>>(
+    building || {
+      name: '',
+      type: 'temple',
+      description: '',
+      location: '',
+      condition: 'excellent',
+      constructionYear: new Date().getFullYear() - 2000,
+      maintenanceCost: 1000,
+      maintenanceInterval: 12,
+      revenue: 0,
+      cost: 0,
+      capacity: 0,
+      isPublic: true,
+      ownerId: null,
+      slaves: 0,
+      slaveCost: 0,
+      tags: []
     }
-    
-    const buildingData = {
-      name,
-      typeId: buildingType,
-      buildingType: 'public',
-      location,
-      cost: totalCost,
-      constructionTime,
-      benefits: selectedBuildingInfo?.benefits || [],
-    };
-    
-    onCreateProject(buildingData);
-    onClose();
+  );
+
+  const handleChange = (field: keyof Building, value: any) => {
+    setFormData(prev => ({ ...prev, [field]: value }));
   };
-  
+
+  const handleSave = () => {
+    onSave(formData);
+  };
+
   return (
-    <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-2xl">
+    <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
+      <DialogContent className="sm:max-w-[550px]">
         <DialogHeader>
-          <DialogTitle className="flex items-center">
-            <Construction className="mr-2 h-5 w-5" />
-            Nouveau Projet de Construction
+          <DialogTitle>
+            {isEditMode ? 'Modifier un bâtiment' : 'Ajouter un nouveau bâtiment'}
           </DialogTitle>
         </DialogHeader>
         
-        <form onSubmit={handleSubmit} className="space-y-6">
-          <div className="grid grid-cols-2 gap-6">
-            <div className="space-y-6">
-              <div className="space-y-2">
-                <Label htmlFor="buildingType">Type de bâtiment</Label>
-                <Select 
-                  value={buildingType} 
-                  onValueChange={setBuildingType}
-                >
-                  <SelectTrigger id="buildingType">
-                    <SelectValue placeholder="Sélectionner un type" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="forum">Forum</SelectItem>
-                    <SelectItem value="temple">Temple</SelectItem>
-                    <SelectItem value="market">Marché</SelectItem>
-                    <SelectItem value="aqueduct">Aqueduc</SelectItem>
-                    <SelectItem value="bath">Thermes</SelectItem>
-                    <SelectItem value="granary">Grenier</SelectItem>
-                    <SelectItem value="theater">Théâtre</SelectItem>
-                    <SelectItem value="barracks">Caserne</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              
-              <div className="space-y-2">
-                <Label htmlFor="name">Nom du bâtiment</Label>
-                <Input 
-                  id="name" 
-                  placeholder="ex: Forum Romanum" 
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
-                />
-              </div>
-              
-              <div className="space-y-2">
-                <Label htmlFor="location">Emplacement</Label>
-                <Select 
-                  value={location} 
-                  onValueChange={setLocation}
-                >
-                  <SelectTrigger id="location">
-                    <SelectValue placeholder="Sélectionner un emplacement" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="Rome">Rome</SelectItem>
-                    <SelectItem value="Ostie">Ostie</SelectItem>
-                    <SelectItem value="Capoue">Capoue</SelectItem>
-                    <SelectItem value="Pompéi">Pompéi</SelectItem>
-                    <SelectItem value="Naples">Naples</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="cost">Coût estimé (As)</Label>
-                  <Input 
-                    id="cost" 
-                    type="number" 
-                    placeholder={selectedBuildingInfo?.cost.toString() || "0"}
-                    value={customCost}
-                    onChange={(e) => setCustomCost(e.target.value)}
-                  />
-                </div>
-                
-                <div className="space-y-2">
-                  <Label htmlFor="time">Durée (saisons)</Label>
-                  <Input 
-                    id="time" 
-                    type="number" 
-                    value={constructionTime}
-                    onChange={(e) => setConstructionTime(parseInt(e.target.value))}
-                    min={1}
-                    max={20}
-                  />
-                </div>
-              </div>
+        <div className="grid gap-4 py-4">
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="name">Nom du bâtiment</Label>
+              <Input 
+                id="name" 
+                value={formData.name} 
+                onChange={(e) => handleChange('name', e.target.value)} 
+                placeholder="Ex: Temple de Jupiter"
+              />
             </div>
             
-            {selectedBuildingInfo && (
-              <div>
-                <Card>
-                  <CardContent className="p-6">
-                    <h3 className="font-semibold text-lg mb-4">Détails du projet</h3>
-                    
-                    <div className="space-y-3">
-                      <div className="flex justify-between">
-                        <span className="text-muted-foreground">Type:</span>
-                        <span className="font-medium">{selectedBuildingInfo.name}</span>
-                      </div>
-                      
-                      <div className="flex justify-between">
-                        <span className="text-muted-foreground">Coût total:</span>
-                        <span className="font-medium">{totalCost.toLocaleString()} As</span>
-                      </div>
-                      
-                      <div className="flex justify-between">
-                        <span className="text-muted-foreground">Paiement initial (30%):</span>
-                        <span className="font-medium">{upfrontCost.toLocaleString()} As</span>
-                      </div>
-                      
-                      <div className="flex justify-between">
-                        <span className="text-muted-foreground">Solde disponible:</span>
-                        <span className={`font-medium ${balance < upfrontCost ? 'text-red-500' : ''}`}>
-                          {balance.toLocaleString()} As
-                        </span>
-                      </div>
-                      
-                      <div className="flex justify-between">
-                        <span className="text-muted-foreground">Durée estimée:</span>
-                        <span className="font-medium">{constructionTime} saisons</span>
-                      </div>
-                    </div>
-                    
-                    <div className="mt-4">
-                      <h4 className="font-medium mb-2">Avantages:</h4>
-                      <ul className="text-sm space-y-1">
-                        {selectedBuildingInfo.benefits.map((benefit, index) => (
-                          <li key={index} className="flex items-center">
-                            <span className="h-1.5 w-1.5 rounded-full bg-amber-500 mr-2" />
-                            {benefit}
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-                  </CardContent>
-                </Card>
-              </div>
-            )}
+            <div className="space-y-2">
+              <Label htmlFor="type">Type de bâtiment</Label>
+              <Select 
+                value={formData.type} 
+                onValueChange={(value) => handleChange('type', value)}
+              >
+                <SelectTrigger id="type">
+                  <SelectValue placeholder="Sélectionner un type" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="temple">Temple</SelectItem>
+                  <SelectItem value="forum">Forum</SelectItem>
+                  <SelectItem value="aqueduc">Aqueduc</SelectItem>
+                  <SelectItem value="thermes">Thermes</SelectItem>
+                  <SelectItem value="theatre">Théâtre</SelectItem>
+                  <SelectItem value="amphitheatre">Amphithéâtre</SelectItem>
+                  <SelectItem value="cirque">Cirque</SelectItem>
+                  <SelectItem value="marche">Marché</SelectItem>
+                  <SelectItem value="port">Port</SelectItem>
+                  <SelectItem value="entrepot">Entrepôt</SelectItem>
+                  <SelectItem value="caserne">Caserne</SelectItem>
+                  <SelectItem value="residence">Résidence</SelectItem>
+                  <SelectItem value="autre">Autre</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
           </div>
           
-          <DialogFooter>
-            <div className="flex items-center justify-between w-full">
-              <div className="flex items-center text-sm">
-                <Coins className="h-4 w-4 mr-1.5 text-amber-500" />
-                <span>Paiement initial: <strong>{upfrontCost.toLocaleString()} As</strong></span>
-              </div>
-              
-              <div className="space-x-2">
-                <Button variant="outline" type="button" onClick={onClose}>
-                  Annuler
-                </Button>
-                <Button 
-                  type="submit"
-                  disabled={!buildingType || !name || !location || balance < upfrontCost}
-                >
-                  <Construction className="h-4 w-4 mr-1.5" />
-                  Démarrer le projet
-                </Button>
-              </div>
+          <div className="space-y-2">
+            <Label htmlFor="description">Description</Label>
+            <Textarea 
+              id="description" 
+              value={formData.description} 
+              onChange={(e) => handleChange('description', e.target.value)} 
+              placeholder="Description du bâtiment et de son usage"
+              rows={3}
+            />
+          </div>
+          
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="location">Localisation</Label>
+              <Input 
+                id="location" 
+                value={formData.location} 
+                onChange={(e) => handleChange('location', e.target.value)} 
+                placeholder="Ex: Forum Romanum"
+              />
             </div>
-          </DialogFooter>
-        </form>
+            
+            <div className="space-y-2">
+              <Label htmlFor="condition">État</Label>
+              <Select 
+                value={formData.condition} 
+                onValueChange={(value: any) => handleChange('condition', value)}
+              >
+                <SelectTrigger id="condition">
+                  <SelectValue placeholder="Sélectionner un état" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="excellent">Excellent</SelectItem>
+                  <SelectItem value="bon">Bon</SelectItem>
+                  <SelectItem value="moyen">Moyen</SelectItem>
+                  <SelectItem value="mauvais">Mauvais</SelectItem>
+                  <SelectItem value="critique">Critique</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+          
+          <div className="grid grid-cols-3 gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="constructionYear">Année de construction</Label>
+              <Input 
+                id="constructionYear" 
+                type="number" 
+                value={formData.constructionYear} 
+                onChange={(e) => handleChange('constructionYear', parseInt(e.target.value))} 
+                placeholder="Ex: 705"
+              />
+            </div>
+            
+            <div className="space-y-2">
+              <Label htmlFor="capacity">Capacité</Label>
+              <Input 
+                id="capacity" 
+                type="number" 
+                value={formData.capacity} 
+                onChange={(e) => handleChange('capacity', parseInt(e.target.value))} 
+                placeholder="Ex: 1000"
+              />
+            </div>
+            
+            <div className="space-y-2">
+              <Label htmlFor="maintenanceCost">Coût d'entretien</Label>
+              <Input 
+                id="maintenanceCost" 
+                type="number" 
+                value={formData.maintenanceCost} 
+                onChange={(e) => handleChange('maintenanceCost', parseInt(e.target.value))} 
+                placeholder="Deniers par an"
+              />
+            </div>
+          </div>
+          
+          <div className="grid grid-cols-3 gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="revenue">Revenu</Label>
+              <Input 
+                id="revenue" 
+                type="number" 
+                value={formData.revenue} 
+                onChange={(e) => handleChange('revenue', parseInt(e.target.value))} 
+                placeholder="Deniers par an"
+              />
+            </div>
+            
+            <div className="space-y-2">
+              <Label htmlFor="slaves">Esclaves</Label>
+              <Input 
+                id="slaves" 
+                type="number" 
+                value={formData.slaves} 
+                onChange={(e) => handleChange('slaves', parseInt(e.target.value))} 
+                placeholder="Nombre d'esclaves"
+              />
+            </div>
+            
+            <div className="space-y-2">
+              <Label htmlFor="slaveCost">Coût des esclaves</Label>
+              <Input 
+                id="slaveCost" 
+                type="number" 
+                value={formData.slaveCost} 
+                onChange={(e) => handleChange('slaveCost', parseInt(e.target.value))} 
+                placeholder="Deniers par an"
+              />
+            </div>
+          </div>
+        </div>
+        
+        <DialogFooter>
+          <Button variant="outline" onClick={onClose}>Annuler</Button>
+          <Button onClick={handleSave}>
+            {isEditMode ? 'Mettre à jour' : 'Ajouter le bâtiment'}
+          </Button>
+        </DialogFooter>
       </DialogContent>
     </Dialog>
   );

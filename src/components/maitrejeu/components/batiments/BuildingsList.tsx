@@ -1,46 +1,134 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { Edit, Trash2, PlusCircle, Wrench } from 'lucide-react';
+import { Input } from '@/components/ui/input';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Edit, Trash2, Eye } from 'lucide-react';
 import { ConditionBadge } from './ConditionBadge';
-import { Building } from '@/components/maitrejeu/types/batiments';
+
+// Données factices pour la démonstration
+const mockBuildings = [
+  {
+    id: '1',
+    name: 'Temple de Jupiter',
+    type: 'temple',
+    location: 'Forum Romanum',
+    condition: 'excellent',
+    constructionYear: 705,
+    maintenanceCost: 5000,
+    isPublic: true
+  },
+  {
+    id: '2',
+    name: 'Thermes de Caracalla',
+    type: 'thermes',
+    location: 'Via Appia',
+    condition: 'bon',
+    constructionYear: 700,
+    maintenanceCost: 3000,
+    isPublic: true
+  },
+  {
+    id: '3',
+    name: 'Aqueduc Claudien',
+    type: 'aqueduc',
+    location: 'Suburra',
+    condition: 'moyen',
+    constructionYear: 695,
+    maintenanceCost: 2000,
+    isPublic: true
+  },
+  {
+    id: '4',
+    name: 'Entrepôt du Port',
+    type: 'entrepot',
+    location: 'Ostie',
+    condition: 'mauvais',
+    constructionYear: 685,
+    maintenanceCost: 1500,
+    isPublic: true
+  },
+  {
+    id: '5',
+    name: 'Amphithéâtre',
+    type: 'amphitheatre',
+    location: 'Champ de Mars',
+    condition: 'critique',
+    constructionYear: 680,
+    maintenanceCost: 8000,
+    isPublic: true
+  }
+];
 
 interface BuildingsListProps {
-  buildings: Building[];
-  onEdit: (building: Building) => void;
-  onDelete: (buildingId: string) => void;
-  onAddBuilding: () => void;
-  onMaintenance: (building: Building) => void;
+  onEdit: (id: string) => void;
 }
 
-export const BuildingsList: React.FC<BuildingsListProps> = ({
-  buildings,
-  onEdit,
-  onDelete,
-  onAddBuilding,
-  onMaintenance
-}) => {
+export const BuildingsList: React.FC<BuildingsListProps> = ({ onEdit }) => {
+  const [searchTerm, setSearchTerm] = useState('');
+  const [typeFilter, setTypeFilter] = useState('all');
+  const [conditionFilter, setConditionFilter] = useState('all');
+
+  const filteredBuildings = mockBuildings.filter(building => {
+    if (searchTerm && !building.name.toLowerCase().includes(searchTerm.toLowerCase()) && 
+                     !building.location.toLowerCase().includes(searchTerm.toLowerCase())) {
+      return false;
+    }
+    
+    if (typeFilter !== 'all' && building.type !== typeFilter) {
+      return false;
+    }
+    
+    if (conditionFilter !== 'all' && building.condition !== conditionFilter) {
+      return false;
+    }
+    
+    return true;
+  });
+
   return (
-    <div>
-      <div className="flex justify-between items-center mb-4">
-        <h3 className="text-lg font-semibold">Liste des Bâtiments</h3>
-        <Button onClick={onAddBuilding}>
-          <PlusCircle className="h-4 w-4 mr-2" />
-          Nouveau Bâtiment
-        </Button>
+    <div className="space-y-4">
+      <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+        <Input
+          placeholder="Rechercher un bâtiment..."
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+          className="max-w-sm"
+        />
+        
+        <div className="flex gap-2">
+          <Select value={typeFilter} onValueChange={setTypeFilter}>
+            <SelectTrigger className="w-[180px]">
+              <SelectValue placeholder="Type de bâtiment" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">Tous les types</SelectItem>
+              <SelectItem value="temple">Temples</SelectItem>
+              <SelectItem value="thermes">Thermes</SelectItem>
+              <SelectItem value="aqueduc">Aqueducs</SelectItem>
+              <SelectItem value="entrepot">Entrepôts</SelectItem>
+              <SelectItem value="amphitheatre">Amphithéâtres</SelectItem>
+            </SelectContent>
+          </Select>
+          
+          <Select value={conditionFilter} onValueChange={setConditionFilter}>
+            <SelectTrigger className="w-[180px]">
+              <SelectValue placeholder="État" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">Tous les états</SelectItem>
+              <SelectItem value="excellent">Excellent</SelectItem>
+              <SelectItem value="bon">Bon</SelectItem>
+              <SelectItem value="moyen">Moyen</SelectItem>
+              <SelectItem value="mauvais">Mauvais</SelectItem>
+              <SelectItem value="critique">Critique</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
       </div>
       
-      {buildings.length === 0 ? (
-        <div className="text-center py-10 bg-muted/40 rounded-md">
-          <p className="text-muted-foreground">Aucun bâtiment enregistré</p>
-          <Button variant="outline" className="mt-4" onClick={onAddBuilding}>
-            <PlusCircle className="h-4 w-4 mr-2" />
-            Ajouter un bâtiment
-          </Button>
-        </div>
-      ) : (
+      <div className="rounded-md border">
         <Table>
           <TableHeader>
             <TableRow>
@@ -48,48 +136,40 @@ export const BuildingsList: React.FC<BuildingsListProps> = ({
               <TableHead>Type</TableHead>
               <TableHead>Localisation</TableHead>
               <TableHead>État</TableHead>
-              <TableHead>Revenu/Coût</TableHead>
-              <TableHead>Statut</TableHead>
+              <TableHead>Année de construction</TableHead>
+              <TableHead>Coût d'entretien</TableHead>
               <TableHead className="text-right">Actions</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
-            {buildings.map((building) => (
+            {filteredBuildings.map((building) => (
               <TableRow key={building.id}>
                 <TableCell className="font-medium">{building.name}</TableCell>
-                <TableCell>{building.type}</TableCell>
+                <TableCell className="capitalize">{building.type}</TableCell>
                 <TableCell>{building.location}</TableCell>
                 <TableCell>
-                  <ConditionBadge condition={building.condition} />
+                  <ConditionBadge condition={building.condition as any} />
                 </TableCell>
-                <TableCell>
-                  {building.revenue > 0 ? (
-                    <span className="text-green-600">+{building.revenue} As</span>
-                  ) : (
-                    <span className="text-red-600">{building.cost} As</span>
-                  )}
-                </TableCell>
-                <TableCell>
-                  <Badge variant={building.isPublic ? "default" : "secondary"}>
-                    {building.isPublic ? "Public" : "Privé"}
-                  </Badge>
-                </TableCell>
+                <TableCell>{building.constructionYear} AUC</TableCell>
+                <TableCell>{building.maintenanceCost} deniers</TableCell>
                 <TableCell className="text-right">
-                  <Button variant="ghost" size="icon" onClick={() => onMaintenance(building)}>
-                    <Wrench className="h-4 w-4" />
-                  </Button>
-                  <Button variant="ghost" size="icon" onClick={() => onEdit(building)}>
-                    <Edit className="h-4 w-4" />
-                  </Button>
-                  <Button variant="ghost" size="icon" onClick={() => onDelete(building.id)}>
-                    <Trash2 className="h-4 w-4" />
-                  </Button>
+                  <div className="flex justify-end gap-2">
+                    <Button variant="outline" size="icon" onClick={() => onEdit(building.id)}>
+                      <Edit className="h-4 w-4" />
+                    </Button>
+                    <Button variant="outline" size="icon">
+                      <Eye className="h-4 w-4" />
+                    </Button>
+                    <Button variant="outline" size="icon">
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  </div>
                 </TableCell>
               </TableRow>
             ))}
           </TableBody>
         </Table>
-      )}
+      </div>
     </div>
   );
 };
