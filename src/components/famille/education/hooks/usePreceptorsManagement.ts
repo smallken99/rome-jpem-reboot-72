@@ -1,84 +1,114 @@
 
-import { useState, useCallback, useEffect } from 'react';
+import { useState, useCallback } from 'react';
 import { Preceptor } from '../types/educationTypes';
-import { preceptorDatabase } from '../data/preceptorDatabase';
+import { toast } from 'sonner';
+
+// Temporary mock data
+import { preceptors as mockPreceptors } from '../data/preceptors';
 
 export const usePreceptorsManagement = () => {
-  const [preceptors, setPreceptors] = useState<Preceptor[]>([]);
+  const [preceptors, setPreceptors] = useState<Preceptor[]>(mockPreceptors);
   const [hiredPreceptors, setHiredPreceptors] = useState<Preceptor[]>([]);
   const [isHiringPreceptor, setIsHiringPreceptor] = useState(false);
 
-  // Initialize preceptors
-  useEffect(() => {
-    refreshPreceptors();
-  }, []);
+  // Load preceptors by type
+  const loadPreceptorsByType = useCallback((type: string): Preceptor[] => {
+    return preceptors.filter(p => p.specialty === type && p.available);
+  }, [preceptors]);
 
   // Refresh preceptors list
   const refreshPreceptors = useCallback(() => {
-    const freshPreceptors = preceptorDatabase.getPreceptors();
-    
-    // Exclude already hired preceptors
-    const availablePreceptors = freshPreceptors.filter(p => 
-      !hiredPreceptors.some(hired => hired.id === p.id)
-    );
-    
-    setPreceptors(availablePreceptors);
-  }, [hiredPreceptors]);
+    // In a real app, this would fetch from an API
+    setPreceptors(mockPreceptors);
+  }, []);
 
-  // Load preceptors by type
-  const loadPreceptorsByType = useCallback((type: string) => {
-    if (type === 'all') {
-      return preceptors;
-    }
-    return preceptors.filter(p => p.specialty === type);
-  }, [preceptors]);
-
-  // Hire preceptor
-  const hirePreceptor = useCallback((preceptorId: string) => {
+  // Hire a preceptor
+  const hirePreceptor = useCallback((id: string) => {
     setIsHiringPreceptor(true);
-    
-    // Find preceptor in available list
-    const preceptor = preceptors.find(p => p.id === preceptorId);
-    
-    if (preceptor) {
-      // Add to hired list with updated status
-      setHiredPreceptors(prev => [
-        ...prev, 
-        { ...preceptor, status: 'hired', available: false }
-      ]);
+
+    try {
+      // Find the preceptor
+      const preceptor = preceptors.find(p => p.id === id);
       
-      // Remove from available list
-      setPreceptors(prev => prev.filter(p => p.id !== preceptorId));
+      if (!preceptor) {
+        toast.error("Précepteur introuvable");
+        return;
+      }
+      
+      // Update available status
+      setPreceptors(prev => 
+        prev.map(p => 
+          p.id === id ? { ...p, available: false } : p
+        )
+      );
+      
+      // Add to hired preceptors
+      const hiredPreceptor = { ...preceptor, available: false, status: 'hired' as const };
+      setHiredPreceptors(prev => [...prev, hiredPreceptor]);
+      
+      toast.success(`${preceptor.name} a été engagé`);
+    } catch (error) {
+      console.error("Error hiring preceptor:", error);
+      toast.error("Une erreur est survenue");
+    } finally {
+      setIsHiringPreceptor(false);
     }
-    
-    setIsHiringPreceptor(false);
   }, [preceptors]);
 
-  // Fire preceptor
-  const firePreceptor = useCallback((preceptorId: string) => {
-    // Find preceptor in hired list
-    const preceptor = hiredPreceptors.find(p => p.id === preceptorId);
-    
-    if (preceptor) {
-      // Remove from hired list
-      setHiredPreceptors(prev => prev.filter(p => p.id !== preceptorId));
+  // Fire a preceptor
+  const firePreceptor = useCallback((id: string) => {
+    try {
+      // Find the preceptor
+      const preceptor = hiredPreceptors.find(p => p.id === id);
       
-      // Add back to available list with updated status
-      if (preceptor.status !== 'assigned') {
-        setPreceptors(prev => [
-          ...prev, 
-          { ...preceptor, status: 'available', available: true, childId: null }
-        ]);
+      if (!preceptor) {
+        toast.error("Précepteur introuvable");
+        return;
       }
+      
+      // Update available status in main list
+      setPreceptors(prev => 
+        prev.map(p => 
+          p.id === id ? { ...p, available: true } : p
+        )
+      );
+      
+      // Remove from hired preceptors
+      setHiredPreceptors(prev => prev.filter(p => p.id !== id));
+      
+      toast.success(`${preceptor.name} a été renvoyé`);
+    } catch (error) {
+      console.error("Error firing preceptor:", error);
+      toast.error("Une erreur est survenue");
     }
   }, [hiredPreceptors]);
 
   // Assign preceptor to child
   const assignPreceptorToChild = useCallback((preceptorId: string, childId: string) => {
-    setHiredPreceptors(prev => prev.map(p => 
-      p.id === preceptorId ? { ...p, status: 'assigned', childId } : p
-    ));
-  }, []);
+    try {
+      // First, unassign any preceptor currently assigned to this child
+      setHiredPreceptors(prev => 
+        prev.map(p => 
+          p.childId === childId ? { ...p, status: 'hired', childId: null } : p
+        )
+      );
+      
+      // Then assign the new preceptor
+      setHiredPreceptors(prev => 
+        prev.map(p => 
+          p.id === preceptorId ? { ...p, status: 'assigned', childId } : p
+        )
+      );
+      
+      const preceptor = hiredPreceptors.find(p => p.id === preceptorId);
+      if (preceptor) {
+        toast.success(`${preceptor.name} a été assigné à l'éducation`);
+      }
+    } catch (error) {
+      console.error("Error assigning preceptor:", error);
+      toast.error("Une erreur est survenue");
+    }
+  }, [hiredPreceptors]);
 
   return {
     preceptors,

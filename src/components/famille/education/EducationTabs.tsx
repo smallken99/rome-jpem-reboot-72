@@ -20,6 +20,11 @@ export const EducationTabs: React.FC = () => {
     }
   }, [location.state]);
   
+  // Call refreshPreceptors once on mount
+  useEffect(() => {
+    refreshPreceptors();
+  }, [refreshPreceptors]);
+  
   return (
     <Tabs value={activeTab} onValueChange={setActiveTab} className="mt-6">
       <TabsNavigation />

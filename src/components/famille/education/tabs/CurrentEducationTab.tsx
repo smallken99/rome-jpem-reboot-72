@@ -12,7 +12,7 @@ export const CurrentEducationTab: React.FC = () => {
     <TabsContent value="current">
       <div className="children-education">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {children.length > 0 ? (
+          {children && children.length > 0 ? (
             children.map(child => (
               <ChildEducationCard 
                 key={child.id} 

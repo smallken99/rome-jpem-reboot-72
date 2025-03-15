@@ -8,25 +8,33 @@ export const useChildrenManagement = (characters: Character[] = []) => {
   
   // Convert Characters to Children for the education system
   useEffect(() => {
-    if (!characters.length) return;
+    if (!characters || !characters.length) return;
     
     const childrenArray: Child[] = characters
       .filter(char => char.age < 18)
       .map(char => ({
         id: char.id,
-        name: char.name,
+        name: char.name || `${char.firstName || ''} ${char.lastName || ''}`.trim(),
         age: char.age,
         gender: char.gender,
         status: 'child',
-        currentEducation: {
-          type: char.education?.type || 'none',
-          mentor: char.education?.mentor || null,
+        currentEducation: char.currentEducation ? {
+          type: char.currentEducation.type || char.education?.type || 'none',
+          mentor: char.currentEducation.mentor || char.education?.mentor || null,
+          progress: char.currentEducation.progress || 0,
+          skills: char.currentEducation.skills || char.education?.specialties || [],
+          yearsCompleted: char.currentEducation.yearsCompleted || 0,
+          totalYears: char.currentEducation.totalYears || 3,
+          statBonus: char.currentEducation.statBonus || 0,
+          mentorId: char.currentEducation.mentorId || null
+        } : {
+          type: 'none',
+          mentor: null,
           progress: 0,
-          skills: char.education?.specialties || [],
-          // Add additional education fields
+          skills: [],
           yearsCompleted: 0,
-          totalYears: char.education?.type ? 2 : 0,
-          statBonus: 20
+          totalYears: 3,
+          statBonus: 0
         }
       }));
     
@@ -35,16 +43,18 @@ export const useChildrenManagement = (characters: Character[] = []) => {
 
   // Update child name
   const updateChildName = (childId: string, newName: string) => {
-    const childIndex = educationChildren.findIndex(c => c.id === childId);
-    if (childIndex === -1) return;
-    
-    const updatedChildren = [...educationChildren];
-    updatedChildren[childIndex] = {
-      ...updatedChildren[childIndex],
-      name: newName
-    };
-    
-    setEducationChildren(updatedChildren);
+    setEducationChildren(prev => {
+      const childIndex = prev.findIndex(c => c.id === childId);
+      if (childIndex === -1) return prev;
+      
+      const updatedChildren = [...prev];
+      updatedChildren[childIndex] = {
+        ...updatedChildren[childIndex],
+        name: newName
+      };
+      
+      return updatedChildren;
+    });
   };
 
   return {

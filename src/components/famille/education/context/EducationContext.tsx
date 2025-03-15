@@ -1,5 +1,5 @@
 
-import React, { createContext, useContext } from 'react';
+import React, { createContext, useContext, useState } from 'react';
 import { useChildrenManagement } from '../hooks/useChildrenManagement';
 import { useEducationManagement } from '../hooks/useEducationManagement';
 import { usePreceptorsManagement } from '../hooks/usePreceptorsManagement';
@@ -12,6 +12,9 @@ export const EducationProvider: React.FC<EducationProviderProps> = ({
   onCharacterUpdate, 
   children 
 }) => {
+  // State to track if we're initializing to prevent infinite loops
+  const [isInitialized, setIsInitialized] = useState(false);
+  
   // Hooks for managing different parts of the education system
   const { 
     educationChildren, 
@@ -43,8 +46,13 @@ export const EducationProvider: React.FC<EducationProviderProps> = ({
     onCharacterUpdate
   );
   
-  // Sync hired preceptors with the education management hook
-  setHiredPreceptors(hiredPreceptors);
+  // Use useEffect to sync hired preceptors only once per render cycle
+  React.useEffect(() => {
+    if (hiredPreceptors.length > 0 && !isInitialized) {
+      setHiredPreceptors(hiredPreceptors);
+      setIsInitialized(true);
+    }
+  }, [hiredPreceptors, isInitialized, setHiredPreceptors]);
   
   return (
     <EducationContext.Provider value={{

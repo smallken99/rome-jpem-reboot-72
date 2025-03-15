@@ -1,35 +1,5 @@
 
-export interface Transaction {
-  id: string;
-  date: string;
-  type: 'buy' | 'sell' | 'transfer';
-  resourceName: string;
-  quantity: number;
-  unitPrice: number;
-  total: number;
-  propertyId?: string;
-}
-
-export interface Resource {
-  id: string;
-  name: string;
-  quantity: number;
-  unit: string;
-  value: number;
-  category: string;
-  location: string;
-  lastUpdated: string;
-}
-
-export interface ResourceType {
-  id: string;
-  name: string;
-  unit: string;
-  categories: string[];
-}
-
 export interface MarketPrice {
-  resourceId?: string;
   resourceName: string;
   basePrice: number;
   currentPrice: number;
@@ -41,27 +11,42 @@ export interface MarketPrice {
 }
 
 export interface PropertyResource {
-  id: number;
+  id: string;
   propertyId: number;
   name: string;
   type: string;
   quantity: number;
-  unit: string;
-  value: number;
-  trend: 'up' | 'down' | 'stable';
-  trendPercentage?: number;
+  quality: 'low' | 'medium' | 'high';
+  harvestDate?: string;
+  expirationDate?: string;
+  marketValue: number;
 }
 
 export interface ResourceTransaction {
   id: string;
-  date: Date | string;
-  type: 'achat' | 'vente' | 'transfert';
+  propertyId: string;
   resourceName: string;
+  type: 'purchase' | 'sale' | 'harvest';
   quantity: number;
-  unit?: string;
-  price?: number;
-  total?: number;
-  propertyId?: string;
-  destination?: string;
-  source?: string;
+  price: number;
+  total: number;
+  date: string;
+}
+
+export interface ResourceInventoryProps {
+  resources: PropertyResource[];
+  propertyId?: number;
+}
+
+export interface ResourcesListProps {
+  resources: PropertyResource[];
+  propertyId?: number;
+}
+
+export interface MarketPricesProps {
+  prices: MarketPrice[];
+}
+
+export interface ResourceTransactionsProps {
+  transactions: ResourceTransaction[];
 }

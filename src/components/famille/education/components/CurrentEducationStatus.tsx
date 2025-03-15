@@ -15,8 +15,8 @@ export const CurrentEducationStatus: React.FC<CurrentEducationStatusProps> = ({
     ? (education.currentYear / education.totalYears) * 100
     : currentEducation?.progress || 0;
   const years = education?.currentYear || currentEducation?.yearsCompleted || 0;
-  const totalYears = education?.totalYears || currentEducation?.totalYears || 0;
-  const status = education?.status || (currentEducation?.type !== 'none' ? 'in_progress' : 'not_started');
+  const totalYears = education?.totalYears || currentEducation?.totalYears || 3;
+  const status = education?.status || (currentEducation?.type && currentEducation.type !== 'none' ? 'in_progress' : 'not_started');
   
   // Helper to get education type display name
   const getEducationTypeName = (type: string) => {

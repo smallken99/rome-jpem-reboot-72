@@ -1,5 +1,5 @@
 
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useRef } from 'react';
 import { Child, Preceptor, ChildEducation } from '../types/educationTypes';
 import { Character } from '@/types/character';
 import { getEducationPath } from '../data';
@@ -10,6 +10,8 @@ export const useEducationManagement = (
   characters: Character[] = [],
   onCharacterUpdate?: (characterId: string, updatedCharacter: Partial<Character>) => void
 ) => {
+  // Use useRef to prevent state updates from triggering too many renders
+  const educatingChildrenRef = useRef<string[]>([]);
   const [educatingChildren, setEducatingChildren] = useState<string[]>([]);
   const [hiredPreceptors, setHiredPreceptors] = useState<Preceptor[]>([]);
 
@@ -48,8 +50,9 @@ export const useEducationManagement = (
       return child;
     }));
     
-    // Add child to educating list
-    setEducatingChildren(prev => [...prev, childId]);
+    // Add child to educating list using ref
+    educatingChildrenRef.current = [...educatingChildrenRef.current, childId];
+    setEducatingChildren(educatingChildrenRef.current);
     
     // If mentor assigned, update preceptor status
     if (mentorId) {
@@ -167,8 +170,9 @@ export const useEducationManagement = (
       }
     }
     
-    // Remove from educating list
-    setEducatingChildren(prev => prev.filter(id => id !== childId));
+    // Remove from educating list using ref
+    educatingChildrenRef.current = educatingChildrenRef.current.filter(id => id !== childId);
+    setEducatingChildren(educatingChildrenRef.current);
   }, [setChildren, hiredPreceptors, characters, onCharacterUpdate]);
 
   return {
