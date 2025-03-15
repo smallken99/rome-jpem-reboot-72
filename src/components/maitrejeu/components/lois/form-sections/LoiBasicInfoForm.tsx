@@ -5,6 +5,7 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { ExtendedLoi } from '../hooks/useLoiModalForm';
+import { ImportanceType } from '@/components/maitrejeu/types/lois';
 
 interface LoiBasicInfoFormProps {
   formData: ExtendedLoi;
@@ -99,7 +100,7 @@ export const LoiBasicInfoForm: React.FC<LoiBasicInfoFormProps> = ({
             <Label htmlFor="importance">Importance</Label>
             <Select
               value={formData.importance || 'normale'}
-              onValueChange={(value) => handleSelectChange('importance', value)}
+              onValueChange={(value) => handleSelectChange('importance', value as ImportanceType)}
             >
               <SelectTrigger>
                 <SelectValue placeholder="Niveau d'importance" />

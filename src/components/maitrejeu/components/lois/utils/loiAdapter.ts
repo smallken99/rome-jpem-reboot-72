@@ -1,6 +1,6 @@
 
 import { Loi as LoiRepublique } from '@/components/republique/lois/hooks/useLois';
-import { Loi as LoiMJ } from '@/components/maitrejeu/types/lois';
+import { Loi as LoiMJ, ImportanceType, LoiType } from '@/components/maitrejeu/types/lois';
 import { ExtendedLoi } from '../hooks/useLoiModalForm';
 
 /**
@@ -25,8 +25,8 @@ export const ensureLoiCompliance = (loi: any): LoiMJ => {
     id: loi.id || `loi-${Date.now()}`,
     titre: loi.titre || loi.title || '',
     description: loi.description || '',
-    type: loi.type || 'Politique',
-    importance: loi.importance || 'normale',
+    type: (loi.type as LoiType) || 'Politique',
+    importance: (loi.importance as ImportanceType) || 'normale',
     proposeur: loi.proposeur || loi.auteur || loi.proposedBy || '',
     catégorie: loi.catégorie || loi.categorieId || loi.category || '',
     état: loi.état || loi.statut || loi.status || 'proposée',

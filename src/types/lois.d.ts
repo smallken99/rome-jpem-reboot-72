@@ -1,4 +1,6 @@
 
+import { ImportanceType, LoiType, LoiState } from '@/components/maitrejeu/types/lois';
+
 export interface Loi {
   id: string;
   titre: string;
@@ -9,15 +11,15 @@ export interface Loi {
     year: number;
     season: string;
   };
-  état: 'Public' | 'Privé' | 'En délibération' | 'proposée' | 'en_débat' | 'votée' | 'rejetée' | 'promulguée' | 'adoptée';
-  importance: string;
+  état: LoiState;
+  importance: ImportanceType;
   votesPositifs: number;
   votesNégatifs: number;
   votesAbstention: number;
   effets: Record<string, any>;
   
   // Propriétés requises par LoiModal et loisAdapter
-  type: string;
+  type: LoiType;
   clauses: any[];
   commentaires: string[];
   tags: string[];

@@ -1,67 +1,65 @@
 
 import { GameDate } from './common';
 
-export interface Loi {
+// Base interface with common properties shared by all loi types
+interface BaseLoi {
   id: string;
-  // Propriétés de titre (différentes conventions de nommage)
+  description: string;
+  tags: string[];
+  
+  // Optional properties with different naming conventions
   title?: string;
   titre?: string;
   nom?: string;
   
-  // Propriétés principales
-  description: string;
-  
-  // Propriétés d'auteur/proposeur (différentes conventions de nommage)
   proposedBy?: string;
   proposeur?: string;
   auteur?: string;
   
-  // Propriétés de date
+  category?: string;
+  categorieId?: string;
+  catégorie?: string;
+}
+
+// Core loi type with all required properties
+export interface Loi extends BaseLoi {
+  // Core required properties
+  type: LoiType;
+  importance: ImportanceType;
+  clauses: any[];
+  commentaires: string[];
+  
+  // Date properties
   date?: GameDate | string;
   dateProposition?: string | GameDate;
+  implementationDate?: GameDate;
+  expirationDate?: GameDate;
   
-  // Propriétés de statut (différentes conventions de nommage)
+  // Status properties with different naming conventions
   status?: LoiState;
   statut?: string;
   état?: string;
   
-  // Propriétés de catégorie (différentes conventions de nommage)
-  category?: string;
-  categorieId?: string;
-  catégorie?: string;
-  
-  // Propriétés de vote (différentes conventions de nommage)
+  // Vote properties with different naming conventions
   votesFor?: number;
   votesAgainst?: number;
   votesPositifs?: number;
   votesNégatifs?: number;
   votesAbstention?: number;
-  
-  // Propriétés de période de validité
-  implementationDate?: GameDate;
-  expirationDate?: GameDate;
-  
-  // Propriétés OBLIGATOIRES manquantes qui causent des erreurs
-  type: string | LoiType;
-  importance: string;
-  clauses: any[];
-  commentaires: string[];
-  tags: string[];
-  
-  // Propriétés facultatives
   votes?: {
     pour: number;
     contre: number;
     abstention: number;
   };
   
-  // Propriétés supplémentaires
+  // Additional properties
   notes?: string;
   effets?: string[] | Record<string, any>;
   conditions?: string[];
   penalites?: string[];
 }
 
+// Type aliases for better type safety
 export type LoiType = 
   | 'Agraire' 
   | 'Politique' 
@@ -70,6 +68,8 @@ export type LoiType =
   | 'Sociale' 
   | 'Religieuse' 
   | 'Civile';
+
+export type ImportanceType = 'mineure' | 'normale' | 'majeure';
 
 export type LoiState = 
   | 'proposed' 
@@ -85,12 +85,14 @@ export type LoiState =
   | 'votée' 
   | 'promulguée';
 
+// Category-related types
 export interface CategorieLoi {
   id: string;
   name: string;
   description: string;
 }
 
+// Vote-related types
 export interface LoiVote {
   id: string;
   loiId: string;
@@ -100,6 +102,7 @@ export interface LoiVote {
   date: GameDate;
 }
 
+// Filtering and sorting types
 export interface LoiFilters {
   status?: LoiState;
   category?: string;
@@ -113,19 +116,13 @@ export interface LoiSorting {
   direction: 'asc' | 'desc';
 }
 
-export interface LoiCreate {
-  title?: string;
-  titre?: string;
-  description: string;
-  proposedBy?: string;
-  auteur?: string;
-  category?: string;
-  categorieId?: string;
+// Creation and update types
+export interface LoiCreate extends BaseLoi {
+  type?: LoiType;
   effets?: string[];
   conditions?: string[];
   penalites?: string[];
   notes?: string;
-  type?: string | LoiType;
 }
 
 export interface LoiUpdate extends Partial<LoiCreate> {
@@ -137,6 +134,7 @@ export interface LoiUpdate extends Partial<LoiCreate> {
   expirationDate?: GameDate;
 }
 
+// Individual clause
 export interface Clause {
   id: string;
   type: 'effet' | 'condition' | 'penalite';

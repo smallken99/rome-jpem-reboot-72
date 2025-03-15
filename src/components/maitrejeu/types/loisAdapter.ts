@@ -1,5 +1,5 @@
 
-import { Loi as LoiMaitreJeu } from './lois';
+import { Loi as LoiMaitreJeu, LoiState, ImportanceType } from './lois';
 import { Loi as LoiRepublique } from '@/components/republique/lois/hooks/useLois';
 import { GameDate } from './common';
 
@@ -47,8 +47,8 @@ function getType(loi: LoiMaitreJeu): string {
 /**
  * Safe accessor for importance property
  */
-function getImportance(loi: LoiMaitreJeu): string {
-  return loi.importance || 'normale';
+function getImportance(loi: LoiMaitreJeu): ImportanceType {
+  return (loi.importance as ImportanceType) || 'normale';
 }
 
 /**
@@ -82,25 +82,33 @@ function getVotes(loi: LoiMaitreJeu): { pour: number; contre: number; abstention
  * Map MJ status to Republique status
  */
 function mapMJStatusToRepublique(status: string): 'proposée' | 'en_débat' | 'votée' | 'rejetée' | 'promulguée' {
-  switch (status.toLowerCase()) {
-    case 'proposed':
-    case 'proposée': 
-    case 'en délibération':
-      return 'proposée';
-    case 'active':
-    case 'promulguée':
-    case 'adoptée': 
-      return 'promulguée';
-    case 'rejected':
-    case 'rejetée':
-      return 'rejetée';
-    case 'expired':
-      return 'rejetée'; // Closest equivalent
-    case 'votée':
-      return 'votée';
-    default:
-      return 'en_débat';
+  const statusLower = status.toLowerCase();
+  
+  if (['proposed', 'proposée', 'en délibération'].includes(statusLower)) {
+    return 'proposée';
   }
+  
+  if (['active', 'promulguée', 'adoptée'].includes(statusLower)) {
+    return 'promulguée';
+  }
+  
+  if (['rejected', 'rejetée'].includes(statusLower)) {
+    return 'rejetée';
+  }
+  
+  if (statusLower === 'expired') {
+    return 'rejetée'; // Closest equivalent
+  }
+  
+  if (statusLower === 'votée') {
+    return 'votée';
+  }
+  
+  if (statusLower === 'en_débat') {
+    return 'en_débat';
+  }
+  
+  return 'proposée'; // Default
 }
 
 /**
