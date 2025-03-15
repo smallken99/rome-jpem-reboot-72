@@ -3,7 +3,7 @@ import React from 'react';
 import { NationsList } from '../NationsList';
 import { ActionsPanel, ActionItem } from '@/components/ui-custom/ActionsPanel';
 import { Plus } from 'lucide-react';
-import { nationsMock } from '../data';
+import { nationsMock } from '../data/nations';
 
 interface NationsTabProps {
   searchTerm: string;
@@ -29,7 +29,7 @@ export const NationsTab: React.FC<NationsTabProps> = ({
     <>
       <ActionsPanel
         title="Actions disponibles"
-        description="Gérez les relations avec les nations étrangères"
+        description="Gérez les nations étrangères et leurs relations avec Rome"
         actions={actions}
         className="mb-4"
       />

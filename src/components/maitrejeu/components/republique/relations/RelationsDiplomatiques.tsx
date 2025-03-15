@@ -10,16 +10,14 @@ import { AddNationModal } from './modals/AddNationModal';
 import { AddTraiteModal } from './modals/AddTraiteModal';
 import { AddAllianceModal } from './modals/AddAllianceModal';
 import { nationsMock } from './data/nations';
-import { traitesMock } from './data/traites';
-import { alliancesMock } from './data/alliances';
 
 export const RelationsDiplomatiques = () => {
   const [activeTab, setActiveTab] = useState('nations');
   const [searchTerm, setSearchTerm] = useState('');
   const [filters, setFilters] = useState({});
-  const [addNationModalOpen, setAddNationModalOpen] = useState(false);
-  const [addTraiteModalOpen, setAddTraiteModalOpen] = useState(false);
-  const [addAllianceModalOpen, setAddAllianceModalOpen] = useState(false);
+  const [isAddNationModalOpen, setIsAddNationModalOpen] = useState(false);
+  const [isAddTraiteModalOpen, setIsAddTraiteModalOpen] = useState(false);
+  const [isAddAllianceModalOpen, setIsAddAllianceModalOpen] = useState(false);
 
   const resetFilters = () => {
     setFilters({});
@@ -56,7 +54,7 @@ export const RelationsDiplomatiques = () => {
           <NationsTab
             searchTerm={searchTerm}
             filters={filters}
-            openAddNationModal={() => setAddNationModalOpen(true)}
+            openAddNationModal={() => setIsAddNationModalOpen(true)}
           />
         </TabsContent>
         
@@ -64,7 +62,7 @@ export const RelationsDiplomatiques = () => {
           <TraitesTab
             searchTerm={searchTerm}
             filters={filters}
-            openAddTraiteModal={() => setAddTraiteModalOpen(true)}
+            openAddTraiteModal={() => setIsAddTraiteModalOpen(true)}
           />
         </TabsContent>
         
@@ -72,25 +70,25 @@ export const RelationsDiplomatiques = () => {
           <AlliancesTab
             searchTerm={searchTerm}
             filters={filters}
-            openAddAllianceModal={() => setAddAllianceModalOpen(true)}
+            openAddAllianceModal={() => setIsAddAllianceModalOpen(true)}
           />
         </TabsContent>
       </Tabs>
       
       <AddNationModal
-        open={addNationModalOpen}
-        onOpenChange={setAddNationModalOpen}
+        isOpen={isAddNationModalOpen}
+        onOpenChange={setIsAddNationModalOpen}
       />
       
       <AddTraiteModal
-        open={addTraiteModalOpen}
-        onOpenChange={setAddTraiteModalOpen}
+        isOpen={isAddTraiteModalOpen}
+        onOpenChange={setIsAddTraiteModalOpen}
         nations={nationsMock}
       />
       
       <AddAllianceModal
-        open={addAllianceModalOpen}
-        onOpenChange={setAddAllianceModalOpen}
+        isOpen={isAddAllianceModalOpen}
+        onOpenChange={setIsAddAllianceModalOpen}
         nations={nationsMock}
       />
     </div>

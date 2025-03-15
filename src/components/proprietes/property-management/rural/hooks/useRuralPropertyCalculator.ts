@@ -1,11 +1,13 @@
 
 import { OwnedBuilding } from '@/components/proprietes/hooks/building/types';
-import { useBuildingSale } from './useBuildingSale';
+import { useBuildingSale } from '@/components/proprietes/hooks/building/useBuildingSale';
+import { useBuildingInventory } from '@/components/proprietes/hooks/building/useBuildingInventory';
 
 export const useRuralPropertyCalculator = () => {
-  const { saleBuilding, estimateBuildingValue, sellBuilding } = useBuildingSale();
+  const { sellBuilding, calculateBuildingValue, calculateBuildingValueById } = useBuildingSale();
+  const { ownedBuildings } = useBuildingInventory();
   
-  const buildings: OwnedBuilding[] = [];
+  const ruralBuildings = ownedBuildings.filter(b => b.buildingType === 'rural');
 
   const handleAddProperty = (
     buildingId: string,
@@ -18,10 +20,10 @@ export const useRuralPropertyCalculator = () => {
   };
 
   return {
-    buildings,
+    buildings: ruralBuildings,
     handleAddProperty,
-    saleBuilding,
     sellBuilding,
-    estimateBuildingValue
+    calculateBuildingValue,
+    calculateBuildingValueById
   };
 };

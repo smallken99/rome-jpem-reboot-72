@@ -8,7 +8,7 @@ import { toast } from 'sonner';
 export function useBuildingSale() {
   const [isLoading, setIsLoading] = useState(false);
   const { buildingSold } = usePatrimoine();
-  const { removeBuilding } = useBuildingInventory();
+  const { removeBuilding, ownedBuildings } = useBuildingInventory();
   
   // Calculer la valeur d'un bâtiment en fonction de son état
   const calculateBuildingValue = (building: OwnedBuilding): number => {
@@ -30,18 +30,16 @@ export function useBuildingSale() {
   
   // Calculate building value by ID
   const calculateBuildingValueById = (buildingId: number): number => {
-    const building = useBuildingInventory().ownedBuildings.find(b => b.id === buildingId);
+    const building = ownedBuildings.find(b => b.id === buildingId);
     if (!building) return 0;
     return calculateBuildingValue(building);
   };
   
   // Vendre un bâtiment (version synchrone pour la compatibilité)
   const sellBuilding = (buildingId: number): boolean => {
-    setIsLoading(true);
-    
     try {
       // Trouver le bâtiment dans l'inventaire
-      const building = useBuildingInventory().ownedBuildings.find(b => b.id === buildingId);
+      const building = ownedBuildings.find(b => b.id === buildingId);
       
       if (!building) {
         toast.error("Bâtiment introuvable");
@@ -63,18 +61,14 @@ export function useBuildingSale() {
       console.error("Erreur lors de la vente du bâtiment:", error);
       toast.error("Une erreur est survenue lors de la vente");
       return false;
-    } finally {
-      setIsLoading(false);
     }
   };
   
   // Vendre un bâtiment avec une valeur estimée
   const sellBuildingWithValue = (buildingId: number, value: number): boolean => {
-    setIsLoading(true);
-    
     try {
       // Trouver le bâtiment dans l'inventaire
-      const building = useBuildingInventory().ownedBuildings.find(b => b.id === buildingId);
+      const building = ownedBuildings.find(b => b.id === buildingId);
       
       if (!building) {
         toast.error("Bâtiment introuvable");
@@ -93,8 +87,6 @@ export function useBuildingSale() {
       console.error("Erreur lors de la vente du bâtiment:", error);
       toast.error("Une erreur est survenue lors de la vente");
       return false;
-    } finally {
-      setIsLoading(false);
     }
   };
   
