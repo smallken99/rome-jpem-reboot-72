@@ -1,65 +1,40 @@
 
 import React from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { ResponsivePie } from '@nivo/pie';
-import { RevenueSourceData } from '../types/profitabilityTypes';
+import { PieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip } from 'recharts';
+import { RevenueSourcesChartProps } from './types/profitabilityTypes';
 
-interface RevenueSourcesChartProps {
-  data: RevenueSourceData[];
-}
+const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#A569BD', '#EC7063'];
 
 export const RevenueSourcesChart: React.FC<RevenueSourcesChartProps> = ({ data }) => {
   return (
-    <Card className="border-rome-gold/30">
-      <CardHeader className="pb-2">
-        <CardTitle className="font-cinzel text-lg">Sources de Revenus</CardTitle>
-      </CardHeader>
-      <CardContent>
-        <div className="h-[300px]">
-          <ResponsivePie
+    <div className="h-64">
+      <ResponsiveContainer width="100%" height="100%">
+        <PieChart>
+          <Pie
             data={data}
-            margin={{ top: 30, right: 80, bottom: 30, left: 80 }}
-            innerRadius={0.5}
-            padAngle={0.7}
-            cornerRadius={3}
-            activeOuterRadiusOffset={8}
-            borderWidth={1}
-            borderColor={{ from: 'color', modifiers: [['darker', 0.2]] }}
-            arcLinkLabelsSkipAngle={10}
-            arcLinkLabelsTextColor="#333333"
-            arcLinkLabelsThickness={2}
-            arcLinkLabelsColor={{ from: 'color' }}
-            arcLabelsSkipAngle={10}
-            arcLabelsTextColor={{ from: 'color', modifiers: [['darker', 2]] }}
-            colors={{ scheme: 'nivo' }}
-            legends={[
-              {
-                anchor: 'right',
-                direction: 'column',
-                justify: false,
-                translateX: 70,
-                translateY: 0,
-                itemsSpacing: 2,
-                itemWidth: 100,
-                itemHeight: 20,
-                itemTextColor: '#999',
-                itemDirection: 'left-to-right',
-                itemOpacity: 1,
-                symbolSize: 10,
-                symbolShape: 'circle',
-                effects: [
-                  {
-                    on: 'hover',
-                    style: {
-                      itemTextColor: '#000',
-                    },
-                  },
-                ],
-              },
-            ]}
+            cx="50%"
+            cy="50%"
+            labelLine={false}
+            outerRadius={80}
+            fill="#8884d8"
+            dataKey="value"
+            nameKey="source"
+            label={({ source, percentage }) => `${source}: ${percentage.toFixed(0)}%`}
+          >
+            {data.map((entry, index) => (
+              <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+            ))}
+          </Pie>
+          <Tooltip 
+            formatter={(value, name, props) => [`${value} As (${props.payload.percentage.toFixed(1)}%)`, name]}
           />
-        </div>
-      </CardContent>
-    </Card>
+          <Legend 
+            layout="horizontal" 
+            verticalAlign="bottom" 
+            align="center"
+          />
+        </PieChart>
+      </ResponsiveContainer>
+    </div>
   );
 };

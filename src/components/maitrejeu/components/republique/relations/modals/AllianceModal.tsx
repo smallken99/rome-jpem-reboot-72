@@ -94,7 +94,11 @@ export const AllianceModal: React.FC<AllianceModalProps> = ({ isOpen, onClose, a
             <Label htmlFor="members">Membres (séparés par des virgules)</Label>
             <Input 
               id="members" 
-              defaultValue={alliance?.members?.join(', ') || ''} 
+              defaultValue={
+                Array.isArray(alliance?.members) 
+                  ? alliance.members.join(', ') 
+                  : alliance?.members || ''
+              } 
               required
             />
           </div>
@@ -125,7 +129,11 @@ export const AllianceModal: React.FC<AllianceModalProps> = ({ isOpen, onClose, a
               <Textarea 
                 id="economicBenefits" 
                 rows={2}
-                defaultValue={alliance?.economicBenefits?.join(', ') || ''} 
+                defaultValue={
+                  Array.isArray(alliance?.economicBenefits) 
+                    ? alliance.economicBenefits.join(', ') 
+                    : alliance?.economicBenefits || ''
+                } 
               />
             </div>
             
@@ -134,7 +142,11 @@ export const AllianceModal: React.FC<AllianceModalProps> = ({ isOpen, onClose, a
               <Textarea 
                 id="commitments" 
                 rows={2}
-                defaultValue={alliance?.commitments?.join(', ') || ''} 
+                defaultValue={
+                  Array.isArray(alliance?.commitments) 
+                    ? alliance.commitments.join(', ') 
+                    : alliance?.commitments || ''
+                } 
               />
             </div>
           </div>

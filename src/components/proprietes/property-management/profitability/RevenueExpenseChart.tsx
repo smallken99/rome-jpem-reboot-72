@@ -1,87 +1,34 @@
 
 import React from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { ResponsiveBar } from '@nivo/bar';
-import { RevenueExpenseChartProps } from '../types/profitabilityTypes';
-
-// Ajout de l'interface pour résoudre l'erreur TS2322
-interface BarDatum {
-  [key: string]: string | number;
-}
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
+import { RevenueExpenseChartProps } from './types/profitabilityTypes';
 
 export const RevenueExpenseChart: React.FC<RevenueExpenseChartProps> = ({ data, activeView }) => {
+  // Adapter les données selon la vue
+  const chartData = data.slice(0, activeView === 'monthly' ? 12 : activeView === 'quarterly' ? 4 : 1);
+
   return (
-    <Card className="border-rome-gold/30">
-      <CardHeader className="pb-2">
-        <CardTitle className="font-cinzel text-lg">
-          {activeView === 'yearly' ? 'Revenus et Dépenses Annuels' : 'Revenus et Dépenses Mensuels'}
-        </CardTitle>
-      </CardHeader>
-      <CardContent>
-        <div className="h-[300px]">
-          <ResponsiveBar
-            data={data as unknown as BarDatum[]}
-            keys={['revenus', 'dépenses', 'profit']}
-            indexBy="name"
-            margin={{ top: 10, right: 15, bottom: 50, left: 60 }}
-            padding={0.3}
-            valueScale={{ type: 'linear' }}
-            indexScale={{ type: 'band', round: true }}
-            colors={['#84cc16', '#ef4444', '#60a5fa']}
-            borderWidth={1}
-            borderColor={{ from: 'color', modifiers: [['darker', 0.2]] }}
-            axisBottom={{
-              tickSize: 5,
-              tickPadding: 5,
-              tickRotation: 0,
-              legend: activeView === 'yearly' ? 'Année' : 'Mois',
-              legendPosition: 'middle',
-              legendOffset: 40
-            }}
-            axisLeft={{
-              tickSize: 5,
-              tickPadding: 5,
-              tickRotation: 0,
-              legend: 'Montant (As)',
-              legendPosition: 'middle',
-              legendOffset: -50
-            }}
-            labelSkipWidth={12}
-            labelSkipHeight={12}
-            labelTextColor={{ from: 'color', modifiers: [['darker', 1.6]] }}
-            legends={[
-              {
-                dataFrom: 'keys',
-                anchor: 'bottom',
-                direction: 'row',
-                justify: false,
-                translateX: 0,
-                translateY: 50,
-                itemsSpacing: 2,
-                itemWidth: 100,
-                itemHeight: 20,
-                itemDirection: 'left-to-right',
-                itemOpacity: 0.85,
-                symbolSize: 10,
-                symbolShape: 'circle',
-                effects: [
-                  {
-                    on: 'hover',
-                    style: {
-                      itemOpacity: 1
-                    }
-                  }
-                ]
-              }
-            ]}
-            role="application"
-            ariaLabel="Revenus et dépenses"
-            barAriaLabel={function(e) {
-              return e.id + ': ' + e.formattedValue + ' As en ' + e.indexValue;
-            }}
-          />
-        </div>
-      </CardContent>
-    </Card>
+    <div className="h-72">
+      <ResponsiveContainer width="100%" height="100%">
+        <BarChart
+          data={chartData}
+          margin={{
+            top: 5,
+            right: 30,
+            left: 20,
+            bottom: 5,
+          }}
+        >
+          <CartesianGrid strokeDasharray="3 3" />
+          <XAxis dataKey="month" />
+          <YAxis />
+          <Tooltip formatter={(value) => [`${value} As`, '']} />
+          <Legend />
+          <Bar dataKey="revenue" name="Revenus" fill="#22c55e" />
+          <Bar dataKey="expenses" name="Dépenses" fill="#ef4444" />
+          <Bar dataKey="profit" name="Profit" fill="#3b82f6" />
+        </BarChart>
+      </ResponsiveContainer>
+    </div>
   );
 };

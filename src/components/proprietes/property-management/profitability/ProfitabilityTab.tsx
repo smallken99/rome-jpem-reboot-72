@@ -1,47 +1,96 @@
 
-import React, { useState } from 'react';
-import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import React from 'react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { ProfitablePropertiesTable } from './ProfitablePropertiesTable';
+import { RevenueExpenseChart } from './RevenueExpenseChart';
+import { PropertyDistributionPie } from './PropertyDistributionPie';
+import { RevenueSourcesChart } from './RevenueSourcesChart';
+import { OptimizationRecommendations } from './OptimizationRecommendations';
 import { useProfitabilityData } from './useProfitabilityData';
 import { ProfitabilityHeader } from './ProfitabilityHeader';
-import { RevenueExpenseChart } from './RevenueExpenseChart';
-import { RevenueSourcesChart } from './RevenueSourcesChart';
-import { ProfitablePropertiesTable } from './ProfitablePropertiesTable';
-import { OptimizationRecommendations } from './OptimizationRecommendations';
-import { ChartViewType } from '../types/profitabilityTypes';
 
-export const ProfitabilityTab: React.FC = () => {
-  const [activeView, setActiveView] = useState<ChartViewType>("yearly");
-  const { 
-    chartData, 
-    revenueSourcesData, 
-    profitableProperties, 
-    recommendations 
+export const ProfitabilityTab = () => {
+  const {
+    profitableProperties,
+    revenueExpenseData,
+    revenueSources,
+    propertyTypes,
+    optimizationRecommendations,
+    activeView,
+    setActiveView
   } = useProfitabilityData();
-  
+
   return (
     <div className="space-y-6">
       <ProfitabilityHeader 
-        activeView={activeView}
-        setActiveView={setActiveView}
+        activeView={activeView} 
+        setActiveView={setActiveView} 
       />
       
-      <div className="flex justify-end mb-4">
-        <Tabs defaultValue="yearly" value={activeView} onValueChange={(value) => setActiveView(value as ChartViewType)}>
-          <TabsList className="border border-rome-gold/30 bg-white">
-            <TabsTrigger value="yearly">Annuel</TabsTrigger>
-            <TabsTrigger value="monthly">Mensuel</TabsTrigger>
-          </TabsList>
-        </Tabs>
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <Card className="col-span-2">
+          <CardHeader>
+            <CardTitle>Revenus et Dépenses</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <RevenueExpenseChart 
+              data={revenueExpenseData} 
+              activeView={activeView} 
+            />
+          </CardContent>
+        </Card>
+        
+        <Card>
+          <CardHeader>
+            <CardTitle>Distribution des Propriétés</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <PropertyDistributionPie data={propertyTypes} />
+          </CardContent>
+        </Card>
       </div>
       
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <RevenueExpenseChart data={chartData} activeView={activeView} />
-        <RevenueSourcesChart data={revenueSourcesData} />
-      </div>
-      
-      <ProfitablePropertiesTable properties={profitableProperties} activeView={activeView} />
-      
-      <OptimizationRecommendations recommendations={recommendations} />
+      <Tabs defaultValue="properties">
+        <TabsList className="grid w-full grid-cols-3">
+          <TabsTrigger value="properties">Propriétés Rentables</TabsTrigger>
+          <TabsTrigger value="sources">Sources de Revenus</TabsTrigger>
+          <TabsTrigger value="recommendations">Recommandations</TabsTrigger>
+        </TabsList>
+        
+        <TabsContent value="properties">
+          <Card>
+            <CardHeader>
+              <CardTitle>Propriétés les Plus Rentables</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <ProfitablePropertiesTable data={profitableProperties} />
+            </CardContent>
+          </Card>
+        </TabsContent>
+        
+        <TabsContent value="sources">
+          <Card>
+            <CardHeader>
+              <CardTitle>Sources de Revenus</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <RevenueSourcesChart data={revenueSources} />
+            </CardContent>
+          </Card>
+        </TabsContent>
+        
+        <TabsContent value="recommendations">
+          <Card>
+            <CardHeader>
+              <CardTitle>Recommandations d'Optimisation</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <OptimizationRecommendations recommendations={optimizationRecommendations} />
+            </CardContent>
+          </Card>
+        </TabsContent>
+      </Tabs>
     </div>
   );
 };

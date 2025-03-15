@@ -1,165 +1,139 @@
 
-import React, { useState } from 'react';
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/dialog';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
+import React from 'react';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
+import { Label } from '@/components/ui/label';
+import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { AddNationModalProps } from '../types';
 
-interface AddNationModalProps {
-  isOpen: boolean;
-  onClose: () => void;
-  onAdd: (type: 'nation' | 'traite' | 'alliance') => void;
-}
-
-export const AddNationModal: React.FC<AddNationModalProps> = ({
-  isOpen,
-  onClose,
-  onAdd
-}) => {
-  const [formData, setFormData] = useState({
-    name: '',
-    region: '',
-    status: '',
-    population: '',
-    militaryStrength: '',
-    description: '',
-    leaders: ''
-  });
-  
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
-  };
-  
-  const handleSelectChange = (name: string, value: string) => {
-    setFormData(prev => ({ ...prev, [name]: value }));
-  };
-  
+export const AddNationModal: React.FC<AddNationModalProps> = ({ isOpen, onClose }) => {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    onAdd('nation');
+    // Traitement du formulaire
+    onClose();
   };
-  
+
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-[500px]">
+      <DialogContent className="sm:max-w-[550px]">
         <DialogHeader>
           <DialogTitle>Ajouter une nouvelle nation</DialogTitle>
           <DialogDescription>
-            Créez une nouvelle nation étrangère dans le système diplomatique romain.
+            Saisissez les informations pour ajouter une nouvelle nation.
           </DialogDescription>
         </DialogHeader>
         
-        <form onSubmit={handleSubmit}>
-          <div className="grid gap-4 py-4">
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="name">Nom</Label>
-                <Input
-                  id="name"
-                  name="name"
-                  value={formData.name}
-                  onChange={handleInputChange}
-                  required
-                />
-              </div>
-              
-              <div className="space-y-2">
-                <Label htmlFor="region">Région</Label>
-                <Select value={formData.region} onValueChange={(value) => handleSelectChange('region', value)}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Sélectionner" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="North Africa">Afrique du Nord</SelectItem>
-                    <SelectItem value="Asia">Asie</SelectItem>
-                    <SelectItem value="Europe">Europe</SelectItem>
-                    <SelectItem value="Middle East">Moyen-Orient</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
-            
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="status">Statut</Label>
-                <Select value={formData.status} onValueChange={(value) => handleSelectChange('status', value)}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Sélectionner" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="ally">Allié</SelectItem>
-                    <SelectItem value="enemy">Ennemi</SelectItem>
-                    <SelectItem value="neutral">Neutre</SelectItem>
-                    <SelectItem value="tributary">Tributaire</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              
-              <div className="space-y-2">
-                <Label htmlFor="population">Population estimée</Label>
-                <Input
-                  id="population"
-                  name="population"
-                  type="number"
-                  value={formData.population}
-                  onChange={handleInputChange}
-                />
-              </div>
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="name">Nom</Label>
+              <Input id="name" required />
             </div>
             
             <div className="space-y-2">
-              <Label htmlFor="militaryStrength">Force militaire (0-100)</Label>
-              <Input
-                id="militaryStrength"
-                name="militaryStrength"
-                type="number"
-                min="0"
-                max="100"
-                value={formData.militaryStrength}
-                onChange={handleInputChange}
-              />
+              <Label htmlFor="region">Région</Label>
+              <Input id="region" required />
+            </div>
+          </div>
+          
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="status">Statut</Label>
+              <Select defaultValue="neutral">
+                <SelectTrigger id="status">
+                  <SelectValue placeholder="Statut" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="ally">Allié</SelectItem>
+                  <SelectItem value="enemy">Ennemi</SelectItem>
+                  <SelectItem value="neutral">Neutre</SelectItem>
+                  <SelectItem value="tributary">Tributaire</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
             
             <div className="space-y-2">
-              <Label htmlFor="leaders">Dirigeants (séparés par des virgules)</Label>
-              <Input
-                id="leaders"
-                name="leaders"
-                value={formData.leaders}
-                onChange={handleInputChange}
-              />
-            </div>
-            
-            <div className="space-y-2">
-              <Label htmlFor="description">Description</Label>
-              <Textarea
-                id="description"
-                name="description"
-                rows={3}
-                value={formData.description}
-                onChange={handleInputChange}
+              <Label htmlFor="population">Population</Label>
+              <Input 
+                id="population" 
+                type="number" 
+                defaultValue={100000}
+                required 
               />
             </div>
           </div>
           
+          <div className="space-y-2">
+            <Label htmlFor="description">Description</Label>
+            <Textarea 
+              id="description" 
+              rows={3}
+            />
+          </div>
+          
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="leader">Dirigeant</Label>
+              <Input id="leader" required />
+            </div>
+            
+            <div className="space-y-2">
+              <Label htmlFor="leaderTitle">Titre du dirigeant</Label>
+              <Input id="leaderTitle" required />
+            </div>
+          </div>
+          
+          <div className="grid grid-cols-3 gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="militaryStrength">Force militaire (1-100)</Label>
+              <Input 
+                id="militaryStrength" 
+                type="number" 
+                min="1" 
+                max="100"
+                defaultValue={50}
+              />
+            </div>
+            
+            <div className="space-y-2">
+              <Label htmlFor="diplomaticInfluence">Influence (1-100)</Label>
+              <Input 
+                id="diplomaticInfluence" 
+                type="number" 
+                min="1" 
+                max="100"
+                defaultValue={50}
+              />
+            </div>
+            
+            <div className="space-y-2">
+              <Label htmlFor="tradeValue">Commerce (1-100)</Label>
+              <Input 
+                id="tradeValue" 
+                type="number" 
+                min="1" 
+                max="100"
+                defaultValue={50}
+              />
+            </div>
+          </div>
+          
+          <div className="space-y-2">
+            <Label htmlFor="lastContact">Dernier contact</Label>
+            <Input id="lastContact" />
+          </div>
+          
+          <div className="space-y-2">
+            <Label htmlFor="leaders">Dirigeants (séparés par des virgules)</Label>
+            <Input id="leaders" />
+          </div>
+          
           <DialogFooter>
-            <Button type="button" variant="outline" onClick={onClose}>Annuler</Button>
+            <Button type="button" variant="outline" onClick={onClose}>
+              Annuler
+            </Button>
             <Button type="submit">Enregistrer</Button>
           </DialogFooter>
         </form>

@@ -3,11 +3,11 @@ import React from 'react';
 import { PieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip } from 'recharts';
 import { PropertyDistributionPieProps } from './types/profitabilityTypes';
 
-const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884d8'];
+const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#A569BD', '#EC7063'];
 
 export const PropertyDistributionPie: React.FC<PropertyDistributionPieProps> = ({ data }) => {
   return (
-    <div className="h-80 w-full">
+    <div className="h-64">
       <ResponsiveContainer width="100%" height="100%">
         <PieChart>
           <Pie
@@ -18,15 +18,21 @@ export const PropertyDistributionPie: React.FC<PropertyDistributionPieProps> = (
             outerRadius={80}
             fill="#8884d8"
             dataKey="value"
-            nameKey="label"
-            label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}
+            nameKey="type"
+            label={({ type, percentage }) => `${type}: ${percentage.toFixed(0)}%`}
           >
             {data.map((entry, index) => (
-              <Cell key={`cell-${index}`} fill={entry.color || COLORS[index % COLORS.length]} />
+              <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
             ))}
           </Pie>
-          <Tooltip formatter={(value) => `${value}%`} />
-          <Legend />
+          <Tooltip 
+            formatter={(value, name, props) => [`${value} As`, name]}
+          />
+          <Legend 
+            layout="horizontal" 
+            verticalAlign="bottom" 
+            align="center"
+          />
         </PieChart>
       </ResponsiveContainer>
     </div>

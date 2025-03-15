@@ -129,7 +129,7 @@ export const NationModal: React.FC<NationModalProps> = ({ isOpen, onClose, natio
             <Label htmlFor="leaders">Dirigeants (séparés par des virgules)</Label>
             <Input 
               id="leaders" 
-              defaultValue={nation?.leaders?.join(', ') || ''} 
+              defaultValue={Array.isArray(nation?.leaders) ? nation?.leaders.join(', ') : ''} 
             />
           </div>
           

@@ -77,18 +77,18 @@ export const RelationsDiplomatiques = () => {
       
       <AddNationModal
         isOpen={isAddNationModalOpen}
-        onOpenChange={setIsAddNationModalOpen}
+        onClose={() => setIsAddNationModalOpen(false)}
       />
       
       <AddTraiteModal
         isOpen={isAddTraiteModalOpen}
-        onOpenChange={setIsAddTraiteModalOpen}
+        onClose={() => setIsAddTraiteModalOpen(false)}
         nations={nationsMock}
       />
       
       <AddAllianceModal
         isOpen={isAddAllianceModalOpen}
-        onOpenChange={setIsAddAllianceModalOpen}
+        onClose={() => setIsAddAllianceModalOpen(false)}
         nations={nationsMock}
       />
     </div>

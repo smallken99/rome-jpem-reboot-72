@@ -1,37 +1,57 @@
 
-import React from 'react';
+import { useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { ProfitabilityHeaderProps } from '../types/profitabilityTypes';
+import { Calendar, ChartBar, TrendingUp } from 'lucide-react';
+import { ChartViewType } from './types/profitabilityTypes';
 
-export const ProfitabilityHeader: React.FC<ProfitabilityHeaderProps> = ({
-  activeView,
-  setActiveView
+interface ProfitabilityHeaderProps {
+  activeView: ChartViewType;
+  setActiveView: (view: ChartViewType) => void;
+}
+
+export const ProfitabilityHeader: React.FC<ProfitabilityHeaderProps> = ({ 
+  activeView, 
+  setActiveView 
 }) => {
   return (
-    <div className="flex flex-col md:flex-row justify-between gap-4 items-start md:items-center mb-4">
+    <div className="flex justify-between items-center">
       <div>
-        <h3 className="font-cinzel text-lg text-rome-navy">Analyse de Rentabilité</h3>
+        <h2 className="text-2xl font-bold">Rentabilité des Propriétés</h2>
         <p className="text-sm text-muted-foreground">
-          Examinez la performance financière de vos propriétés pour optimiser votre patrimoine.
+          Analysez la performance économique de vos propriétés
         </p>
       </div>
-      <div className="flex gap-2">
-        <Button 
-          variant={activeView === 'yearly' ? 'default' : 'outline'} 
-          size="sm"
-          className={activeView === 'yearly' ? 'roman-btn' : 'roman-btn-outline'}
-          onClick={() => setActiveView('yearly')}
-        >
-          Annuel
-        </Button>
-        <Button 
-          variant={activeView === 'monthly' ? 'default' : 'outline'} 
-          size="sm"
-          className={activeView === 'monthly' ? 'roman-btn' : 'roman-btn-outline'}
-          onClick={() => setActiveView('monthly')}
-        >
-          Mensuel
-        </Button>
+      
+      <div className="flex items-center gap-2">
+        <div className="bg-card border rounded-lg p-1 flex">
+          <Button 
+            variant={activeView === 'monthly' ? 'default' : 'ghost'} 
+            size="sm"
+            onClick={() => setActiveView('monthly')}
+            className="rounded-r-none"
+          >
+            <Calendar className="h-4 w-4 mr-1" />
+            Mensuel
+          </Button>
+          <Button 
+            variant={activeView === 'quarterly' ? 'default' : 'ghost'} 
+            size="sm"
+            onClick={() => setActiveView('quarterly')}
+            className="rounded-none"
+          >
+            <ChartBar className="h-4 w-4 mr-1" />
+            Trimestriel
+          </Button>
+          <Button 
+            variant={activeView === 'annual' ? 'default' : 'ghost'} 
+            size="sm"
+            onClick={() => setActiveView('annual')}
+            className="rounded-l-none"
+          >
+            <TrendingUp className="h-4 w-4 mr-1" />
+            Annuel
+          </Button>
+        </div>
       </div>
     </div>
   );

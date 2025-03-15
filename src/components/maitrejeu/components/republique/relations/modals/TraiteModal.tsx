@@ -38,23 +38,22 @@ export const TraiteModal: React.FC<TraiteModalProps> = ({ isOpen, onClose, trait
         
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="title">Titre</Label>
-            <Input id="title" defaultValue={traite?.title || ''} required />
+            <Label htmlFor="name">Nom</Label>
+            <Input id="name" defaultValue={traite?.name || ''} required />
           </div>
           
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label htmlFor="type">Type</Label>
-              <Select defaultValue={traite?.type || 'peace'}>
+              <Select defaultValue={traite?.type || 'commercial'}>
                 <SelectTrigger id="type">
                   <SelectValue placeholder="Type" />
                 </SelectTrigger>
                 <SelectContent>
+                  <SelectItem value="commercial">Commercial</SelectItem>
                   <SelectItem value="peace">Paix</SelectItem>
-                  <SelectItem value="trade">Commerce</SelectItem>
                   <SelectItem value="military">Militaire</SelectItem>
-                  <SelectItem value="tribute">Tribut</SelectItem>
-                  <SelectItem value="other">Autre</SelectItem>
+                  <SelectItem value="territorial">Territorial</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -67,9 +66,9 @@ export const TraiteModal: React.FC<TraiteModalProps> = ({ isOpen, onClose, trait
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="active">Actif</SelectItem>
+                  <SelectItem value="draft">Brouillon</SelectItem>
                   <SelectItem value="expired">Expiré</SelectItem>
-                  <SelectItem value="violated">Violé</SelectItem>
-                  <SelectItem value="canceled">Annulé</SelectItem>
+                  <SelectItem value="revoked">Révoqué</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -77,13 +76,13 @@ export const TraiteModal: React.FC<TraiteModalProps> = ({ isOpen, onClose, trait
           
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="dateSignature">Date de signature</Label>
-              <Input id="dateSignature" defaultValue={traite?.dateSignature || ''} required />
+              <Label htmlFor="dateCreation">Date de création</Label>
+              <Input id="dateCreation" defaultValue={traite?.dateCreation || ''} required />
             </div>
             
             <div className="space-y-2">
-              <Label htmlFor="dateExpiration">Date d'expiration (optionnel)</Label>
-              <Input id="dateExpiration" defaultValue={traite?.dateExpiration || ''} />
+              <Label htmlFor="dateExpiration">Date d'expiration</Label>
+              <Input id="dateExpiration" defaultValue={traite?.dateExpiration || ''} required />
             </div>
           </div>
           
@@ -91,7 +90,7 @@ export const TraiteModal: React.FC<TraiteModalProps> = ({ isOpen, onClose, trait
             <Label htmlFor="parties">Parties (séparées par des virgules)</Label>
             <Input 
               id="parties" 
-              defaultValue={traite?.parties?.join(', ') || ''} 
+              defaultValue={Array.isArray(traite?.parties) ? traite?.parties.join(', ') : traite?.parties || ''} 
               required
             />
           </div>
@@ -106,11 +105,15 @@ export const TraiteModal: React.FC<TraiteModalProps> = ({ isOpen, onClose, trait
           </div>
           
           <div className="space-y-2">
-            <Label htmlFor="clauses">Clauses (séparées par des points-virgules)</Label>
+            <Label htmlFor="terms">Termes (séparés par des virgules)</Label>
             <Textarea 
-              id="clauses" 
-              rows={3}
-              defaultValue={traite?.clauses?.join('; ') || ''} 
+              id="terms" 
+              rows={2}
+              defaultValue={
+                Array.isArray(traite?.terms) 
+                  ? traite.terms.join(', ') 
+                  : traite?.terms || ''
+              } 
             />
           </div>
           
@@ -120,7 +123,11 @@ export const TraiteModal: React.FC<TraiteModalProps> = ({ isOpen, onClose, trait
               <Textarea 
                 id="benefits" 
                 rows={2}
-                defaultValue={traite?.benefits?.join(', ') || ''} 
+                defaultValue={
+                  Array.isArray(traite?.benefits) 
+                    ? traite.benefits.join(', ') 
+                    : traite?.benefits || ''
+                } 
               />
             </div>
             
@@ -129,7 +136,11 @@ export const TraiteModal: React.FC<TraiteModalProps> = ({ isOpen, onClose, trait
               <Textarea 
                 id="obligations" 
                 rows={2}
-                defaultValue={traite?.obligations?.join(', ') || ''} 
+                defaultValue={
+                  Array.isArray(traite?.obligations) 
+                    ? traite.obligations.join(', ') 
+                    : traite?.obligations || ''
+                } 
               />
             </div>
           </div>

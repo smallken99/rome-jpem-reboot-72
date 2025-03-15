@@ -1,102 +1,116 @@
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { 
-  PropertyProfitData, 
-  RevenueExpenseChartData, 
-  PropertyTypeData,
+  ProfitabilityData,
+  PropertyProfitData,
+  RevenueExpenseChartData,
   RevenueSourceData,
+  PropertyTypeData,
   Recommendation,
-  ChartViewType 
+  ChartViewType
 } from './types/profitabilityTypes';
 
-export const useProfitabilityData = () => {
-  const [activeView, setActiveView] = useState<ChartViewType>('monthly');
-  
-  // Données de profitabilité des propriétés
+// Données fictives pour le développement
+const generateMockData = (): ProfitabilityData => {
+  // Propriétés rentables
   const profitableProperties: PropertyProfitData[] = [
-    { id: 1, name: 'Insula de la Via Sacra', type: 'Urbain', revenue: 20000, expenses: 12000, profitMargin: 40, roi: 15 },
-    { id: 2, name: 'Domaine viticole de Campanie', type: 'Rural', revenue: 35000, expenses: 18000, profitMargin: 48.6, roi: 22 },
-    { id: 3, name: 'Villa Urbana du Palatin', type: 'Urbain', revenue: 18000, expenses: 11000, profitMargin: 38.9, roi: 12 },
-    { id: 4, name: 'Ferme en Sicile', type: 'Rural', revenue: 27000, expenses: 12000, profitMargin: 55.6, roi: 25 },
-    { id: 5, name: 'Oliveraie en Hispanie', type: 'Rural', revenue: 32000, expenses: 15000, profitMargin: 53.1, roi: 28 }
+    { id: 1, name: 'Villa Pompei', type: 'Résidence de luxe', revenue: 12000, expenses: 4500, profit: 7500, profitMargin: 62.5, roi: 12.5 },
+    { id: 2, name: 'Ferme de Tusculum', type: 'Domaine agricole', revenue: 8500, expenses: 3200, profit: 5300, profitMargin: 62.4, roi: 10.6 },
+    { id: 3, name: 'Oliveraie de Campanie', type: 'Plantation', revenue: 6700, expenses: 2800, profit: 3900, profitMargin: 58.2, roi: 9.8 },
+    { id: 4, name: 'Vignoble de Falerne', type: 'Vignoble', revenue: 7800, expenses: 3500, profit: 4300, profitMargin: 55.1, roi: 8.6 },
+    { id: 5, name: 'Boutique du Forum', type: 'Commerce', revenue: 5200, expenses: 1800, profit: 3400, profitMargin: 65.4, roi: 13.6 }
   ];
   
-  // Données pour le graphique des revenus et dépenses
+  // Données de revenus et dépenses
   const revenueExpenseData: RevenueExpenseChartData[] = [
-    { month: 'Janvier', revenue: 12000, expenses: 8000, profit: 4000 },
-    { month: 'Février', revenue: 14000, expenses: 7500, profit: 6500 },
-    { month: 'Mars', revenue: 15000, expenses: 9000, profit: 6000 },
-    { month: 'Avril', revenue: 17000, expenses: 8200, profit: 8800 },
-    { month: 'Mai', revenue: 18500, expenses: 10000, profit: 8500 },
-    { month: 'Juin', revenue: 20000, expenses: 9500, profit: 10500 }
+    { month: 'Jan', revenue: 18500, expenses: 8200, profit: 10300 },
+    { month: 'Fév', revenue: 17800, expenses: 8000, profit: 9800 },
+    { month: 'Mar', revenue: 19200, expenses: 8300, profit: 10900 },
+    { month: 'Avr', revenue: 20100, expenses: 8500, profit: 11600 },
+    { month: 'Mai', revenue: 21000, expenses: 8800, profit: 12200 },
+    { month: 'Juin', revenue: 22300, expenses: 9100, profit: 13200 },
+    { month: 'Juil', revenue: 24500, expenses: 9300, profit: 15200 },
+    { month: 'Aoû', revenue: 26000, expenses: 9500, profit: 16500 },
+    { month: 'Sep', revenue: 24800, expenses: 9200, profit: 15600 },
+    { month: 'Oct', revenue: 23500, expenses: 9000, profit: 14500 },
+    { month: 'Nov', revenue: 21800, expenses: 8700, profit: 13100 },
+    { month: 'Déc', revenue: 20500, expenses: 8500, profit: 12000 }
   ];
   
-  // Données pour le graphique de distribution des sources de revenus
+  // Sources de revenus
   const revenueSources: RevenueSourceData[] = [
-    { id: "loyers", value: 35, name: "Loyers" },
-    { id: "agriculture", value: 30, name: "Agriculture" },
-    { id: "commerce", value: 20, name: "Commerce" },
-    { id: "autres", value: 15, name: "Autres" }
+    { source: 'Agriculture', value: 45000, percentage: 35 },
+    { source: 'Viticulture', value: 30000, percentage: 23 },
+    { source: 'Résidences', value: 25000, percentage: 19 },
+    { source: 'Commerce', value: 15000, percentage: 12 },
+    { source: 'Élevage', value: 10000, percentage: 8 },
+    { source: 'Autres', value: 5000, percentage: 3 }
   ];
   
-  // Données pour le graphique de distribution des types de propriétés
+  // Types de propriétés
   const propertyTypes: PropertyTypeData[] = [
-    { label: "Urbain", value: 45 },
-    { label: "Rural", value: 35 },
-    { label: "Religieux", value: 10 },
-    { label: "Public", value: 5 },
-    { label: "Autres", value: 5 }
+    { type: 'Domaines agricoles', count: 3, value: 120000, percentage: 40 },
+    { type: 'Résidences urbaines', count: 2, value: 90000, percentage: 30 },
+    { type: 'Vignobles', count: 1, value: 45000, percentage: 15 },
+    { type: 'Commerces', count: 2, value: 30000, percentage: 10 },
+    { type: 'Entrepôts', count: 1, value: 15000, percentage: 5 }
   ];
   
   // Recommandations d'optimisation
   const optimizationRecommendations: Recommendation[] = [
-    {
-      id: '1',
-      title: 'Améliorer la gestion des esclaves',
-      description: 'Réaffecter les esclaves pour optimiser la production dans le domaine viticole',
-      type: 'high',
-      impact: 'Augmentation de 15% de la production'
+    { 
+      id: 1, 
+      property: 'Oliveraie de Campanie', 
+      action: 'Augmenter la production', 
+      impact: 'high', 
+      description: 'Intensifier la plantation d\'oliviers dans les zones non utilisées pourrait augmenter la production de 20%.',
+      estimatedBenefit: 2000 
     },
-    {
-      id: '2',
-      title: 'Rénovation des insulae',
-      description: 'Investir dans la rénovation pour augmenter les loyers',
-      type: 'medium',
-      impact: 'Augmentation de 10% des revenus locatifs'
+    { 
+      id: 2, 
+      property: 'Boutique du Forum', 
+      action: 'Élargir la gamme de produits', 
+      impact: 'medium', 
+      description: 'Ajouter des produits de luxe importés permettrait d\'attirer une clientèle plus aisée.',
+      estimatedBenefit: 1200 
     },
-    {
-      id: '3',
-      title: 'Diversification agricole',
-      description: 'Ajouter des cultures plus rentables dans la ferme sicilienne',
-      type: 'high',
-      impact: 'Amélioration du ROI de 25%'
+    { 
+      id: 3, 
+      property: 'Ferme de Tusculum', 
+      action: 'Réduire les coûts de main-d\'œuvre', 
+      impact: 'low', 
+      description: 'Acquérir 3 esclaves supplémentaires réduirait les coûts à long terme.',
+      estimatedBenefit: 800 
     }
   ];
   
-  // Filtrer les données en fonction de la vue active
-  const getFilteredRevenueData = () => {
-    if (activeView === 'monthly') {
-      return revenueExpenseData;
-    } else if (activeView === 'quarterly') {
-      // Données regroupées par trimestre
-      return [
-        { month: 'T1', revenue: 41000, expenses: 24500, profit: 16500 },
-        { month: 'T2', revenue: 55500, expenses: 27700, profit: 27800 }
-      ];
-    } else { // yearly
-      // Données annuelles
-      return [
-        { month: 'Année courante', revenue: 96500, expenses: 52200, profit: 44300 }
-      ];
-    }
-  };
-  
   return {
     profitableProperties,
-    revenueExpenseData: getFilteredRevenueData(),
+    revenueExpenseData,
     revenueSources,
     propertyTypes,
     optimizationRecommendations,
+    activeView: 'monthly' as ChartViewType,
+    setActiveView: () => {}
+  };
+};
+
+export const useProfitabilityData = (): ProfitabilityData => {
+  const [data, setData] = useState<Omit<ProfitabilityData, 'activeView' | 'setActiveView'>>(generateMockData());
+  const [activeView, setActiveView] = useState<ChartViewType>('monthly');
+  
+  // Dans une application réelle, nous chargerions les données depuis une API
+  useEffect(() => {
+    // Simulation d'un chargement de données
+    const timer = setTimeout(() => {
+      setData(generateMockData());
+    }, 500);
+    
+    return () => clearTimeout(timer);
+  }, []);
+  
+  return {
+    ...data,
     activeView,
     setActiveView
   };

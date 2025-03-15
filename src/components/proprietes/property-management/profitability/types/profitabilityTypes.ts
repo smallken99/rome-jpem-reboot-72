@@ -1,10 +1,15 @@
 
+import { Dispatch, SetStateAction } from 'react';
+
+export type ChartViewType = 'monthly' | 'quarterly' | 'annual';
+
 export interface PropertyProfitData {
   id: number;
   name: string;
   type: string;
   revenue: number;
   expenses: number;
+  profit: number;
   profitMargin: number;
   roi: number;
 }
@@ -17,23 +22,39 @@ export interface RevenueExpenseChartData {
 }
 
 export interface RevenueSourceData {
-  id: string;
+  source: string;
   value: number;
-  name?: string;
-  color?: string;
+  percentage: number;
 }
 
 export interface PropertyTypeData {
-  label: string;
+  type: string;
+  count: number;
   value: number;
-  color?: string;
+  percentage: number;
 }
 
-export type ChartViewType = 'monthly' | 'quarterly' | 'yearly';
+export interface Recommendation {
+  id: number;
+  property: string;
+  action: string;
+  impact: 'high' | 'medium' | 'low';
+  description: string;
+  estimatedBenefit: number;
+}
 
-export interface ProfitabilityHeaderProps {
+export interface ProfitabilityData {
+  profitableProperties: PropertyProfitData[];
+  revenueExpenseData: RevenueExpenseChartData[];
+  revenueSources: RevenueSourceData[];
+  propertyTypes: PropertyTypeData[];
+  optimizationRecommendations: Recommendation[];
   activeView: ChartViewType;
-  setActiveView: (view: ChartViewType) => void;
+  setActiveView: Dispatch<SetStateAction<ChartViewType>>;
+}
+
+export interface PropertyDistributionPieProps {
+  data: PropertyTypeData[];
 }
 
 export interface RevenueExpenseChartProps {
@@ -41,27 +62,14 @@ export interface RevenueExpenseChartProps {
   activeView: ChartViewType;
 }
 
-export interface PropertyDistributionPieProps {
-  data: PropertyTypeData[];
+export interface RevenueSourcesChartProps {
+  data: RevenueSourceData[];
 }
 
 export interface ProfitablePropertiesTableProps {
-  properties: PropertyProfitData[];
-  activeView: ChartViewType;
-}
-
-export interface Recommendation {
-  id: string;
-  title: string;
-  description: string;
-  type: 'high' | 'medium' | 'low';
-  impact?: string;
+  data: PropertyProfitData[];
 }
 
 export interface OptimizationRecommendationsProps {
   recommendations: Recommendation[];
-}
-
-export interface RevenueSourcesPieProps {
-  data: RevenueSourceData[];
 }
