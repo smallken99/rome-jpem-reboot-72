@@ -1,20 +1,45 @@
 
-import { PropertyResource } from './types';
-import { ResourceTransaction } from '../../../storage/types';
-import { propertyResources } from './propertyResources';
-import { transactions } from './transactions';
+import { ResourceTransaction } from './types';
 
-export const getResourcesByPropertyId = (propertyId: number | string): PropertyResource[] => {
-  const id = typeof propertyId === 'string' ? parseInt(propertyId, 10) : propertyId;
-  return propertyResources.filter(resource => resource.propertyId === id);
+export const calculateTransactionTotal = (transaction: ResourceTransaction): number => {
+  return transaction.quantity * transaction.price;
 };
 
-export const getResourceTypes = (): string[] => {
-  const types = new Set(propertyResources.map(resource => resource.type));
-  return Array.from(types);
+export const getTransactionTypeColor = (type: 'purchase' | 'sale' | 'harvest'): string => {
+  switch (type) {
+    case 'purchase':
+      return 'text-amber-600';
+    case 'sale':
+      return 'text-green-600';
+    case 'harvest':
+      return 'text-blue-600';
+    default:
+      return 'text-gray-600';
+  }
 };
 
-export const getTransactionsByPropertyId = (propertyId: number | string): ResourceTransaction[] => {
-  const id = typeof propertyId === 'string' ? propertyId.toString() : propertyId.toString();
-  return transactions.filter(transaction => transaction.propertyId === id);
+export const getTrendIcon = (trend: 'up' | 'down' | 'stable'): string => {
+  switch (trend) {
+    case 'up':
+      return '↑';
+    case 'down':
+      return '↓';
+    case 'stable':
+      return '→';
+    default:
+      return '-';
+  }
+};
+
+export const getTrendColor = (trend: 'up' | 'down' | 'stable'): string => {
+  switch (trend) {
+    case 'up':
+      return 'text-green-600';
+    case 'down':
+      return 'text-red-600';
+    case 'stable':
+      return 'text-gray-600';
+    default:
+      return 'text-gray-600';
+  }
 };

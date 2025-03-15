@@ -9,6 +9,13 @@ export const formatCurrency = (value: number): string => {
 };
 
 /**
+ * Format money in a standardized way for the application
+ */
+export const formatMoney = (value: number): string => {
+  return `${value.toLocaleString()} as`;
+};
+
+/**
  * Format a date in Roman style
  */
 export const formatDate = (date: any): string => {

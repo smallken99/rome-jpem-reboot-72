@@ -6,7 +6,7 @@ export const preceptorsList: Preceptor[] = [
     id: 'prec-1',
     name: 'Lucius Cornelius',
     specialty: 'rhetoric',
-    years: 12, // Changed from experience to years
+    years: 12,
     rating: 4.7,
     cost: 1200,
     available: true,
@@ -17,7 +17,7 @@ export const preceptorsList: Preceptor[] = [
     id: 'prec-2',
     name: 'Marcus Porcius',
     specialty: 'military',
-    years: 15, // Changed from experience to years
+    years: 15,
     rating: 4.5,
     cost: 1500,
     available: true,
@@ -28,7 +28,7 @@ export const preceptorsList: Preceptor[] = [
     id: 'prec-3',
     name: 'Publius Vergilius',
     specialty: 'literature',
-    years: 8, // Changed from experience to years
+    years: 8,
     rating: 4.8,
     cost: 1000,
     available: true,
@@ -39,7 +39,7 @@ export const preceptorsList: Preceptor[] = [
     id: 'prec-4',
     name: 'Titus Lucretius',
     specialty: 'philosophy',
-    years: 20, // Changed from experience to years
+    years: 20,
     rating: 4.9,
     cost: 1800,
     available: true,
@@ -50,7 +50,7 @@ export const preceptorsList: Preceptor[] = [
     id: 'prec-5',
     name: 'Gaius Sempronius',
     specialty: 'law',
-    years: 14, // Changed from experience to years
+    years: 14,
     rating: 4.6,
     cost: 1400,
     available: true,

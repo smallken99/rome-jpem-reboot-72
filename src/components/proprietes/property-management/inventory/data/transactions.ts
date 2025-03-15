@@ -1,49 +1,55 @@
 
-import { ResourceTransaction } from '../../../storage/types';
+import { ResourceTransaction } from './types';
 
-export const transactions: ResourceTransaction[] = [
+export const resourceTransactions: ResourceTransaction[] = [
   {
     id: "1",
-    date: new Date('2023-10-15'),
-    type: 'achat',
-    resourceName: 'Blé',
+    propertyId: "1",
+    resourceName: "Blé",
+    type: "sale",
     quantity: 500,
-    unit: 'unités',
-    price: 2.2,
-    total: 1100,
-    propertyId: "1"
+    price: 2,
+    total: 1000,
+    date: "15 Mars 724 AUC"
   },
   {
     id: "2",
-    date: new Date('2023-11-01'),
-    type: 'vente',
-    resourceName: 'Vin',
-    quantity: 200,
-    unit: 'amphores',
-    price: 12,
-    total: 2400,
-    propertyId: "1"
+    propertyId: "1",
+    resourceName: "Vin",
+    type: "sale",
+    quantity: 120,
+    price: 10,
+    total: 1200,
+    date: "2 Avril 724 AUC"
   },
   {
     id: "3",
-    date: new Date('2023-11-10'),
-    type: 'transfert',
-    resourceName: 'Huile d\'olive',
-    quantity: 100,
-    unit: 'amphores',
-    source: 'Villa Tusculum',
-    destination: 'Domus Romae',
-    propertyId: "1"
+    propertyId: "4",
+    resourceName: "Orge",
+    type: "purchase",
+    quantity: 300,
+    price: 1.5,
+    total: 450,
+    date: "10 Mai 724 AUC"
   },
   {
     id: "4",
-    date: new Date('2023-12-01'),
-    type: 'achat',
-    resourceName: 'Laine',
-    quantity: 50,
-    unit: 'rouleaux',
+    propertyId: "1",
+    resourceName: "Huile d'olive",
+    type: "harvest",
+    quantity: 800,
+    price: 0,
+    total: 0,
+    date: "20 Juin 724 AUC"
+  },
+  {
+    id: "5",
+    propertyId: "4",
+    resourceName: "Laine",
+    type: "sale",
+    quantity: 100,
     price: 10,
-    total: 500,
-    propertyId: "4"
+    total: 1000,
+    date: "5 Juillet 724 AUC"
   }
 ];

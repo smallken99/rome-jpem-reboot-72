@@ -88,7 +88,8 @@ export interface Preceptor {
   id: string;
   name: string;
   specialty: EducationPathType | string;
-  quality: number;
+  years?: number;
+  quality?: number;
   cost: number;
   available: boolean;
   skills?: string[];
@@ -100,6 +101,8 @@ export interface Preceptor {
   speciality?: string;
   reputation?: string;
   portrait?: string;
+  rating?: number;
+  description?: string;
 }
 
 export interface PreceptorsByType {
@@ -138,8 +141,6 @@ export interface EducationHistory {
   statBonus?: number;
   skills?: string[];
 }
-
-// Props pour les composants
 
 export interface ChildHeaderProps {
   child: Child;

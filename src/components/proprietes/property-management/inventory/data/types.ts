@@ -8,18 +8,23 @@ export interface MarketPrice {
   trend: 'up' | 'down' | 'stable';
   volatility: number;
   trendPercentage?: number;
+  resourceId?: string;
 }
 
 export interface PropertyResource {
   id: string;
-  propertyId: number;
+  propertyId: number | string;
   name: string;
   type: string;
   quantity: number;
-  quality: 'low' | 'medium' | 'high';
+  quality?: 'low' | 'medium' | 'high';
   harvestDate?: string;
   expirationDate?: string;
   marketValue: number;
+  unit?: string;
+  value?: number;
+  trend?: 'up' | 'down' | 'stable';
+  trendPercentage?: number;
 }
 
 export interface ResourceTransaction {
@@ -50,3 +55,8 @@ export interface MarketPricesProps {
 export interface ResourceTransactionsProps {
   transactions: ResourceTransaction[];
 }
+
+// Compatibility aliases
+export type Resource = PropertyResource;
+export type ResourceType = string;
+export type Transaction = ResourceTransaction;
