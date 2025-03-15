@@ -27,7 +27,7 @@ export const StatsGeneralTab: React.FC = () => {
   const totalFamilles = familles.length;
   const totalLois = lois.length;
   const totalClients = clients.length;
-  const actifs = clients.filter(c => c.status === 'active').length;
+  const actifsClients = clients.filter(c => c.statut === 'active').length;
   const totalHistoire = histoireEntries.length;
   const currentYear = currentDate.year;
 
@@ -37,7 +37,7 @@ export const StatsGeneralTab: React.FC = () => {
     { title: "Familles", value: totalFamilles, icon: <Landmark className="h-4 w-4" /> },
     { title: "Lois", value: totalLois, icon: <ScrollText className="h-4 w-4" /> },
     { title: "Clients", value: totalClients, icon: <Users className="h-4 w-4" /> },
-    { title: "Clients Actifs", value: actifs, icon: <CandlestickChart className="h-4 w-4" /> },
+    { title: "Clients Actifs", value: actifsClients, icon: <CandlestickChart className="h-4 w-4" /> },
     { title: "Événements historiques", value: totalHistoire, icon: <Calendar className="h-4 w-4" /> }
   ];
 
