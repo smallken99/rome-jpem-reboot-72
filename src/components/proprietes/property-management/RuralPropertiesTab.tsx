@@ -70,10 +70,15 @@ export const RuralPropertiesTab: React.FC = () => {
 
       {/* Section for available properties to purchase */}
       <RuralCatalogueSection 
-        onPurchase={(buildingId, buildingType, location, customName) => 
-          handleAddProperty(buildingId, buildingType, location, customName)
-        }
-        balance={balance}
+        selectedPropertyId={null}
+        setSelectedPropertyId={() => {}}
+        propertyDetails={null}
+        purchaseDialogOpen={false}
+        setPurchaseDialogOpen={() => {}}
+        propertySize="moyen"
+        setPropertySize={() => {}}
+        propertyLocation="latium"
+        setPropertyLocation={() => {}}
       />
 
       {/* Purchase dialog */}
@@ -81,6 +86,8 @@ export const RuralPropertiesTab: React.FC = () => {
         open={purchaseDialogOpen}
         onOpenChange={setPurchaseDialogOpen}
         buildingType="rural"
+        building={null}
+        buildingId=""
         onPurchase={(buildingId, buildingType, location, customName) => 
           handleAddProperty(buildingId, buildingType, location, customName)
         }

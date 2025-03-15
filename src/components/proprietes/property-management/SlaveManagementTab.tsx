@@ -1,52 +1,21 @@
 
 import React from 'react';
-import { Users } from 'lucide-react';
-import { useBuildingManagement } from '../hooks/useBuildingManagement';
-import { usePatrimoine } from '@/hooks/usePatrimoine';
-import { SlaveStatistics } from './slaves/SlaveStatistics';
-import { SlaveMarket } from './slaves/SlaveMarket';
-import { SlaveAssignment } from './slaves/SlaveAssignment';
-import { useSlaveManagement } from './slaves/useSlaveManagement';
+import { Card } from '@/components/ui/card';
 
 export const SlaveManagementTab: React.FC = () => {
-  const { ownedBuildings, assignSlaves } = useBuildingManagement();
-  const { balance } = usePatrimoine();
-  const { totalSlaves, slavePrice, purchaseSlaves } = useSlaveManagement();
-  
-  // Calculer le nombre d'esclaves assignés
-  const assignedSlaves = ownedBuildings.reduce((total, prop) => total + prop.slaves, 0);
-  const availableSlaves = totalSlaves - assignedSlaves;
-  
   return (
-    <div className="space-y-6">
-      <div className="flex flex-col md:flex-row justify-between gap-4 items-start md:items-center mb-4">
-        <div>
-          <h3 className="font-cinzel text-lg text-rome-navy">Gestion des Esclaves</h3>
-          <p className="text-sm text-muted-foreground">
-            Attribuez des esclaves à vos propriétés pour optimiser leur fonctionnement et leur rentabilité.
-          </p>
-        </div>
+    <div className="space-y-8">
+      <div className="flex justify-between items-center">
+        <h2 className="text-2xl font-semibold">Gestion des Esclaves</h2>
       </div>
       
-      {/* Statistiques générales */}
-      <SlaveStatistics 
-        totalSlaves={totalSlaves} 
-        assignedSlaves={assignedSlaves} 
-      />
-      
-      {/* Acquisition d'esclaves */}
-      <SlaveMarket 
-        slavePrice={slavePrice} 
-        balance={balance} 
-        onPurchase={purchaseSlaves} 
-      />
-      
-      {/* Attribution aux propriétés */}
-      <SlaveAssignment 
-        buildings={ownedBuildings} 
-        availableSlaves={availableSlaves} 
-        onAssignSlaves={assignSlaves} 
-      />
+      <Card className="p-6">
+        <div className="text-center p-10">
+          <p className="text-muted-foreground">
+            Module de gestion des esclaves en développement.
+          </p>
+        </div>
+      </Card>
     </div>
   );
 };

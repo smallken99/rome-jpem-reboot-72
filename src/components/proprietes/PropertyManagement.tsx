@@ -1,9 +1,10 @@
+
 import React from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Building, Tree, TriangleAlert, Users, Wallet } from 'lucide-react';
+import { Building, Trees, TriangleAlert, Users, Wallet } from 'lucide-react';
 import { UrbanPropertiesTab } from './property-management/UrbanPropertiesTab';
 import { RuralPropertiesTab } from './property-management/RuralPropertiesTab';
-import { SlaveManagementTab } from './property-management/slaves/SlaveManagementTab';
+import { SlaveManagementTab } from './property-management/SlaveManagementTab';
 import { MaintenanceTab } from './property-management/MaintenanceTab';
 import { MonetaryManagementTab } from './property-management/MonetaryManagementTab';
 
@@ -16,7 +17,7 @@ export const PropertyManagement: React.FC = () => {
           Propriétés Urbaines
         </TabsTrigger>
         <TabsTrigger value="rural">
-          <Tree className="mr-2 h-4 w-4" />
+          <Trees className="mr-2 h-4 w-4" />
           Domaines Ruraux
         </TabsTrigger>
         <TabsTrigger value="slaves">

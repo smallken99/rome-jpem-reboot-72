@@ -41,14 +41,35 @@ export function useBuildingManagement() {
   // Combine loading states
   const isLoading = isPurchaseLoading || isSaleLoading || isMaintenanceLoading;
   
+  const buildings = ownedBuildings;
+  const balance = 150000; // Valeur temporaire pour tester
+  
+  // Fonction temporaire pour ajouter des propriétés
+  const handleAddProperty = (
+    buildingId: string,
+    buildingType: "urban" | "rural" | "religious" | "public",
+    location: string,
+    customName?: string
+  ): boolean => {
+    console.log(`Adding property: ${buildingId}, ${buildingType}, ${location}, ${customName}`);
+    return true;
+  };
+  
   return {
     ownedBuildings,
+    buildings,
     isLoading,
     purchaseBuilding,
     sellBuilding,
     toggleMaintenance,
     performMaintenance,
     calculateBuildingValue,
-    assignSlaves
+    assignSlaves,
+    handleAddProperty,
+    balance,
+    ruralBuildings: ownedBuildings.filter(b => b.buildingType === "rural"),
+    urbanBuildings: ownedBuildings.filter(b => b.buildingType === "urban"),
+    religiousBuildings: ownedBuildings.filter(b => b.buildingType === "religious"),
+    publicBuildings: ownedBuildings.filter(b => b.buildingType === "public")
   };
 }

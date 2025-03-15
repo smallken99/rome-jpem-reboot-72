@@ -1,16 +1,21 @@
 
 import { useState, useEffect } from 'react';
-import { ruralProperties } from '../../data/buildings';
+import { ruralProperties } from '../../data/buildings/rural';
 import { BuildingDescription } from '../../data/types/buildingTypes';
 
 export const useRuralPropertyCalculator = (
   selectedProperty: string,
-  propertySize: string,
-  propertyLocation: string
+  propertySize?: string,
+  propertyLocation?: string
 ) => {
   const [propertyDetails, setPropertyDetails] = useState<BuildingDescription | null>(null);
   
   useEffect(() => {
+    if (!selectedProperty) {
+      setPropertyDetails(null);
+      return;
+    }
+    
     const property = ruralProperties[selectedProperty];
     
     if (property) {
@@ -21,7 +26,7 @@ export const useRuralPropertyCalculator = (
         'etrurie': 0.9,
         'apulie': 0.8,
         'sicile': 0.7
-      }[propertyLocation] || 1;
+      }[propertyLocation || 'latium'] || 1;
 
       // Calcul des coûts ajustés
       const adjustedProperty = {

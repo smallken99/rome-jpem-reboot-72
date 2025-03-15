@@ -3,7 +3,7 @@ import { OwnedBuilding } from '@/components/proprietes/hooks/building/types';
 import { useBuildingSale } from '@/components/proprietes/hooks/building/useBuildingSale';
 import { useBuildingInventory } from '@/components/proprietes/hooks/building/useBuildingInventory';
 import { BuildingDescription } from '@/components/proprietes/data/types/buildingTypes';
-import { ruralProperties } from '@/components/proprietes/data/buildings/ruralProperties';
+import { ruralProperties } from '@/components/proprietes/data/buildings/rural';
 
 export const useRuralPropertyCalculator = (buildingId?: string) => {
   const { sellBuilding, calculateBuildingValue } = useBuildingSale();

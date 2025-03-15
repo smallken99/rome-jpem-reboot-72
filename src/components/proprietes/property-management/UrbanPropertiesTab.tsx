@@ -76,17 +76,22 @@ export const UrbanPropertiesTab: React.FC = () => {
 
       {/* Section for available properties to purchase */}
       <UrbanCatalogueSection 
-        onPurchase={(buildingId, buildingType, location, customName) => 
-          handleAddProperty(buildingId, buildingType, location, customName)
-        }
-        balance={balance}
+        selectedPropertyId={null}
+        setSelectedPropertyId={() => {}}
+        propertyDetails={null}
+        purchaseDialogOpen={false}
+        setPurchaseDialogOpen={() => {}}
+        propertyLocation="latium"
+        setPropertyLocation={() => {}}
       />
 
       {/* Purchase dialog */}
       <PropertyPurchaseDialog
         open={purchaseDialogOpen}
         onOpenChange={setPurchaseDialogOpen}
-        buildingType="urban" 
+        buildingType="urban"
+        building={null}
+        buildingId=""
         onPurchase={(buildingId, buildingType, location, customName) => 
           handleAddProperty(buildingId, buildingType, location, customName)
         }
