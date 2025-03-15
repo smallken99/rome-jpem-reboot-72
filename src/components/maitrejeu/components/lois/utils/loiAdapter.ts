@@ -40,7 +40,7 @@ const convertToLoiState = (state: string): LoiState => {
     'expirée': 'expired' as LoiState
   };
   
-  return (stateMap[state] || 'proposée') as LoiState;
+  return (stateMap[state.toLowerCase()] || 'proposée') as LoiState;
 };
 
 // Fonction pour convertir un type string en LoiType
@@ -96,13 +96,13 @@ export const convertFormDataToLoi = (formData: LoiFormData): Loi => {
     état: convertToLoiState(formData.état),
     proposeur: formData.proposeur,
     dateProposition: formData.dateProposition,
-    votes: formData.votes,
+    votes: formData.votes || { pour: 0, contre: 0, abstention: 0 },
     conditions: formData.conditions || [],
-    effets: formData.effets || [],
+    effets: formData.effets ? formData.effets : {},
     pénalités: formData.pénalités || [],
     clauses: [],
     commentaires: [],
-    tags: []  // Adding the required tags property
+    tags: []
   };
   
   return loi;
@@ -119,9 +119,6 @@ export const convertLoiToFormData = (loi: Loi): LoiFormData => {
     proposeur: loi.proposeur || loi.proposedBy || loi.auteur || '',
     état: loi.état as string || loi.status as string || loi.statut || '',
     dateProposition: typeof loi.dateProposition === 'string' ? loi.dateProposition : '',
-    dateVote: loi.dateVote as string,
-    datePromulgation: loi.datePromulgation as string,
-    dateExpiration: loi.dateExpiration as string,
     votes: loi.votes as any,
     conditions: loi.conditions || [],
     effets: Array.isArray(loi.effets) ? loi.effets : [],
@@ -148,9 +145,10 @@ export const ensureLoiCompliance = (loi: any): Loi => {
       contre: loi.votesNégatifs || loi.votesAgainst || 0,
       abstention: loi.votesAbstention || 0
     },
-    effets: loi.effets || [],
+    effets: loi.effets || {},
     conditions: loi.conditions || [],
-    pénalités: loi.pénalités || []
+    pénalités: loi.pénalités || [],
+    dateProposition: loi.dateProposition || { year: new Date().getFullYear() - 1800, season: 'VER' }
   };
   
   return compliantLoi;

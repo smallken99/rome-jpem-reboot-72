@@ -61,7 +61,7 @@ export const formatUptime = (seconds: number): string => {
   }
 };
 
-// Format currency values
+// Format currency values (alias pour formatMoney pour assurer la compatibilité)
 export const formatCurrency = (amount: number): string => {
   return `${amount.toLocaleString()} as`;
 };

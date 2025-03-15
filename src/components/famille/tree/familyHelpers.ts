@@ -1,28 +1,73 @@
 
 import { Character } from '@/types/character';
 
-export const getFamilyMembers = (characters: Character[]) => {
-  const paterFamilias = characters.find(char => 
-    char.isPlayer || 
-    char.role?.toLowerCase().includes('chef') || 
-    char.role?.toLowerCase().includes('pater')
+export interface FamilyMembers {
+  paterFamilias?: Character;
+  materFamilias?: Character;
+  children: Character[];
+  otherRelatives: Character[];
+}
+
+export const getFamilyMembers = (characters: Character[]): FamilyMembers => {
+  if (!characters || !Array.isArray(characters) || characters.length === 0) {
+    return { 
+      children: [],
+      otherRelatives: []
+    };
+  }
+
+  // Trouver le pater familias (chef de famille masculin)
+  const paterFamilias = characters.find(
+    char => char.gender === 'male' && char.role === 'pater familias'
   );
-  
-  const materFamilias = characters.find(char => 
-    char.gender === 'female' && 
-    (char.role?.toLowerCase().includes('épouse') || 
-     char.role?.toLowerCase().includes('mater'))
+
+  // Trouver la mater familias (épouse principale)
+  const materFamilias = characters.find(
+    char => char.gender === 'female' && char.role === 'mater familias'
   );
-  
-  const children = characters.filter(char => 
-    (char.age < 18 || char.role?.toLowerCase().includes('fils') || char.role?.toLowerCase().includes('fille')) &&
-    char.id !== paterFamilias?.id &&
-    char.id !== materFamilias?.id
+
+  // Identifier les enfants (fils et filles)
+  const children = characters.filter(
+    char => char.role === 'son' || char.role === 'daughter' || char.role === 'filius' || char.role === 'filia'
   );
-  
+
+  // Autres membres de la famille
+  const otherRelatives = characters.filter(
+    char => 
+      char !== paterFamilias && 
+      char !== materFamilias && 
+      !children.includes(char)
+  );
+
   return {
     paterFamilias,
     materFamilias,
-    children
+    children,
+    otherRelatives
   };
+};
+
+// Fonction pour calculer l'âge d'un personnage
+export const calculateAge = (birthYear: number, currentYear: number): number => {
+  return currentYear - birthYear;
+};
+
+// Fonction pour obtenir le statut marital
+export const getMaritalStatus = (character: Character): string => {
+  if (!character.marriageStatus) return 'Inconnu';
+  
+  switch(character.marriageStatus.toLowerCase()) {
+    case 'married':
+      return 'Marié(e)';
+    case 'widowed':
+      return 'Veuf/Veuve';
+    case 'divorced':
+      return 'Divorcé(e)';
+    case 'single':
+      return 'Célibataire';
+    case 'betrothed':
+      return 'Fiancé(e)';
+    default:
+      return character.marriageStatus;
+  }
 };

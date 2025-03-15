@@ -43,15 +43,19 @@ export const FamilyTreeVisualization: React.FC<FamilyTreeVisualizationProps> = (
         )}
         
         {/* Second generation - Children */}
-        {children.length > 0 && (
+        {children.length > 0 ? (
           <div className="flex flex-wrap justify-center gap-4">
-            {children.map((child) => (
+            {children.map((child, index) => (
               <FamilyMember 
-                key={child.id} 
+                key={child.id || index} 
                 member={child} 
                 role={child.gender === 'male' ? 'Filius' : 'Filia'} 
               />
             ))}
+          </div>
+        ) : (
+          <div className="text-center text-muted-foreground py-4">
+            <p>Pas encore d'enfants dans cette famille</p>
           </div>
         )}
       </div>
