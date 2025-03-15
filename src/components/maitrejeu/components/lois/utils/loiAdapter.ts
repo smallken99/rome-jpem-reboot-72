@@ -1,5 +1,5 @@
 
-import { Loi, LoiState, LoiType, ImportanceType, Vote } from '@/components/maitrejeu/types/lois';
+import { Loi, LoiState, LoiType, ImportanceType } from '@/components/maitrejeu/types/lois';
 
 // Interface pour les données du formulaire de loi
 interface LoiFormData {
@@ -14,7 +14,11 @@ interface LoiFormData {
   dateVote?: string;
   datePromulgation?: string;
   dateExpiration?: string;
-  votes?: Vote;
+  votes?: {
+    pour: number;
+    contre: number;
+    abstention: number;
+  };
   conditions?: string[];
   effets?: string[];
   pénalités?: string[];
@@ -43,17 +47,28 @@ const convertToLoiState = (state: string): LoiState => {
 const convertToLoiType = (type: string): LoiType => {
   const typeMap: Record<string, LoiType> = {
     'Agraire': 'Agraire' as LoiType,
+    'agraire': 'Agraire' as LoiType,
     'Politique': 'Politique' as LoiType,
+    'politique': 'Politique' as LoiType,
     'Militaire': 'Militaire' as LoiType,
+    'militaire': 'Militaire' as LoiType,
     'Economique': 'Economique' as LoiType,
+    'economique': 'Economique' as LoiType,
     'Sociale': 'Sociale' as LoiType,
+    'sociale': 'Sociale' as LoiType,
     'Religieuse': 'Religieuse' as LoiType,
+    'religieuse': 'Religieuse' as LoiType,
     'Civile': 'Civile' as LoiType,
+    'civile': 'Civile' as LoiType,
     'Électorale': 'Electorale' as LoiType,
     'Electorale': 'Electorale' as LoiType,
+    'electorale': 'Electorale' as LoiType,
     'Administrative': 'Administrative' as LoiType,
+    'administrative': 'Administrative' as LoiType,
     'Judiciaire': 'Judiciaire' as LoiType,
-    'Fiscale': 'Fiscale' as LoiType
+    'judiciaire': 'Judiciaire' as LoiType,
+    'Fiscale': 'Fiscale' as LoiType,
+    'fiscale': 'Fiscale' as LoiType
   };
   
   return (typeMap[type] || 'Politique') as LoiType;
@@ -81,15 +96,13 @@ export const convertFormDataToLoi = (formData: LoiFormData): Loi => {
     état: convertToLoiState(formData.état),
     proposeur: formData.proposeur,
     dateProposition: formData.dateProposition,
-    dateVote: formData.dateVote,
-    datePromulgation: formData.datePromulgation,
-    dateExpiration: formData.dateExpiration,
-    votes: formData.votes as Vote,
+    votes: formData.votes,
     conditions: formData.conditions || [],
     effets: formData.effets || [],
     pénalités: formData.pénalités || [],
     clauses: [],
-    commentaires: []
+    commentaires: [],
+    tags: []  // Adding the required tags property
   };
   
   return loi;
@@ -106,10 +119,10 @@ export const convertLoiToFormData = (loi: Loi): LoiFormData => {
     proposeur: loi.proposeur || loi.proposedBy || loi.auteur || '',
     état: loi.état as string || loi.status as string || loi.statut || '',
     dateProposition: typeof loi.dateProposition === 'string' ? loi.dateProposition : '',
-    dateVote: loi.dateVote,
-    datePromulgation: loi.datePromulgation,
-    dateExpiration: loi.dateExpiration,
-    votes: loi.votes as Vote,
+    dateVote: loi.dateVote as string,
+    datePromulgation: loi.datePromulgation as string,
+    dateExpiration: loi.dateExpiration as string,
+    votes: loi.votes as any,
     conditions: loi.conditions || [],
     effets: Array.isArray(loi.effets) ? loi.effets : [],
     pénalités: loi.pénalités || []
@@ -134,7 +147,10 @@ export const ensureLoiCompliance = (loi: any): Loi => {
       pour: loi.votesPositifs || loi.votesFor || 0,
       contre: loi.votesNégatifs || loi.votesAgainst || 0,
       abstention: loi.votesAbstention || 0
-    }
+    },
+    effets: loi.effets || [],
+    conditions: loi.conditions || [],
+    pénalités: loi.pénalités || []
   };
   
   return compliantLoi;

@@ -67,7 +67,7 @@ export const GestionPolitique = () => {
       tags: [],
       effets: {},
       conditions: [],
-      penalites: []
+      pénalités: []
     };
     
     addLoi(loiWithId);

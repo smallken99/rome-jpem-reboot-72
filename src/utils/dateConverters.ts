@@ -49,3 +49,25 @@ export const parseGameDate = (dateString: string): GameDate | null => {
   
   return null;
 };
+
+// Convert a JavaScript Date to a GameDate object
+export const convertDateToGameDate = (date: Date): GameDate => {
+  // This is a simplified conversion - in a real app you might have more complex logic
+  const year = date.getFullYear() - 1753; // Adjust to Roman calendar (753 BC is year 1 AUC)
+  
+  // Determine season based on month
+  const month = date.getMonth();
+  let season: string;
+  
+  if (month >= 2 && month <= 4) {
+    season = 'VER'; // Spring (March-May)
+  } else if (month >= 5 && month <= 7) {
+    season = 'AESTAS'; // Summer (June-August)
+  } else if (month >= 8 && month <= 10) {
+    season = 'AUTUMNUS'; // Fall (September-November)
+  } else {
+    season = 'HIEMS'; // Winter (December-February)
+  }
+  
+  return { year, season };
+};

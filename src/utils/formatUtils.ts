@@ -45,3 +45,28 @@ export const formatMoney = (amount: number): string => {
 export const formatPercentage = (value: number): string => {
   return `${Math.round(value * 100)}%`;
 };
+
+// Format uptime in human-readable format (days, hours, minutes)
+export const formatUptime = (seconds: number): string => {
+  const days = Math.floor(seconds / 86400);
+  const hours = Math.floor((seconds % 86400) / 3600);
+  const minutes = Math.floor((seconds % 3600) / 60);
+  
+  if (days > 0) {
+    return `${days}j ${hours}h ${minutes}m`;
+  } else if (hours > 0) {
+    return `${hours}h ${minutes}m`;
+  } else {
+    return `${minutes}m`;
+  }
+};
+
+// Format currency values
+export const formatCurrency = (amount: number): string => {
+  return `${amount.toLocaleString()} as`;
+};
+
+// Format numeric values with thousands separators
+export const formatNumber = (num: number): string => {
+  return num.toLocaleString();
+};
