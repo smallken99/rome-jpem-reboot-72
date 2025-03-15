@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { 
   Dialog, DialogContent, DialogHeader, 
@@ -7,14 +6,14 @@ import {
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Coins, AlertTriangle } from 'lucide-react';
-import { OwnedBuilding } from '../../hooks/useBuildingManagement';
+import { OwnedBuilding } from '../../hooks/building/types';
 
 interface PropertySaleDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   building: OwnedBuilding | null;
   estimatedValue: number;
-  onSell: (buildingId: number, value: number) => boolean;
+  onSell: (buildingId: number | string, value: number) => boolean;
 }
 
 export const PropertySaleDialog: React.FC<PropertySaleDialogProps> = ({

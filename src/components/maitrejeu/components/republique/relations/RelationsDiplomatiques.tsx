@@ -10,6 +10,7 @@ import { AddNationModal } from './modals/AddNationModal';
 import { AddTraiteModal } from './modals/AddTraiteModal';
 import { AddAllianceModal } from './modals/AddAllianceModal';
 import { nationsMock } from './data/nations';
+import { Nation, Traite, Alliance } from './types';
 
 export const RelationsDiplomatiques = () => {
   const [activeTab, setActiveTab] = useState('nations');
@@ -21,6 +22,24 @@ export const RelationsDiplomatiques = () => {
 
   const resetFilters = () => {
     setFilters({});
+  };
+
+  const handleSaveNation = (nation: Nation) => {
+    console.log('Saving nation:', nation);
+    // Here you would add the nation to your store/context
+    setIsAddNationModalOpen(false);
+  };
+
+  const handleSaveTraite = (traite: Traite) => {
+    console.log('Saving traite:', traite);
+    // Here you would add the treaty to your store/context
+    setIsAddTraiteModalOpen(false);
+  };
+
+  const handleSaveAlliance = (alliance: Alliance) => {
+    console.log('Saving alliance:', alliance);
+    // Here you would add the alliance to your store/context
+    setIsAddAllianceModalOpen(false);
   };
 
   return (
@@ -78,17 +97,20 @@ export const RelationsDiplomatiques = () => {
       <AddNationModal
         isOpen={isAddNationModalOpen}
         onClose={() => setIsAddNationModalOpen(false)}
+        onSave={handleSaveNation}
       />
       
       <AddTraiteModal
         isOpen={isAddTraiteModalOpen}
         onClose={() => setIsAddTraiteModalOpen(false)}
+        onSave={handleSaveTraite}
         nations={nationsMock}
       />
       
       <AddAllianceModal
         isOpen={isAddAllianceModalOpen}
         onClose={() => setIsAddAllianceModalOpen(false)}
+        onSave={handleSaveAlliance}
         nations={nationsMock}
       />
     </div>

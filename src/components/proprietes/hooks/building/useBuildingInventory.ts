@@ -94,7 +94,9 @@ export function useBuildingInventory() {
     const building = ownedBuildings.find(b => b.id === buildingId);
     if (building) {
       updateBuildingProperty(buildingId, 'maintenanceEnabled', !building.maintenanceEnabled);
+      return true;
     }
+    return false;
   };
 
   const performBuildingMaintenance = (buildingId: number | string) => {

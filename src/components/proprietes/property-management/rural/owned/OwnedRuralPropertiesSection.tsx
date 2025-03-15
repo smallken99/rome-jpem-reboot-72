@@ -3,17 +3,16 @@ import React from 'react';
 import { Button } from '@/components/ui/button';
 import { PlusCircle } from 'lucide-react';
 import { PropertyCard } from '../../PropertyCard';
-import { OwnedBuilding } from '../../../hooks/useBuildingManagement';
-import { BuildingDescription } from '../../../data/types/buildingTypes';
+import { OwnedBuilding, BuildingDescription } from '../../../hooks/building/types';
 
 interface OwnedRuralPropertiesSectionProps {
   ownedRuralProperties: OwnedBuilding[];
   ruralProperties: Record<string, BuildingDescription>;
-  toggleMaintenance: (buildingId: number, enabled: boolean) => void;
-  performMaintenance: (buildingId: number) => boolean;
-  assignSlaves: (buildingId: number, slaveCount: number) => void;
-  sellBuilding: (buildingId: number, value: number) => boolean;
-  calculateBuildingValue: (buildingId: number) => number;
+  toggleMaintenance: (buildingId: number | string, enabled: boolean) => void;
+  performMaintenance: (buildingId: number | string) => boolean;
+  assignSlaves: (buildingId: number | string, slaveCount: number) => void;
+  sellBuilding: (buildingId: number | string, value: number) => boolean;
+  calculateBuildingValue: (buildingId: number | string) => number;
   availableSlaves: number;
   balance: number;
   setPurchaseDialogOpen: (open: boolean) => void;

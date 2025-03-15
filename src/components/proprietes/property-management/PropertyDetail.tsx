@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { RomanCard } from '@/components/ui-custom/RomanCard';
@@ -20,7 +19,6 @@ import {
   Package, 
   Clock 
 } from 'lucide-react';
-import { OwnedBuilding } from '../hooks/building/types';
 import { formatMoney } from '@/utils/formatUtils';
 
 export const PropertyDetail: React.FC = () => {
@@ -32,7 +30,7 @@ export const PropertyDetail: React.FC = () => {
   const { calculateBuildingValue, sellBuilding } = useBuildingSale();
   
   // Trouver la propriété dans la liste
-  const property = ownedBuildings.find(b => b.id === Number(propertyId));
+  const property = ownedBuildings.find(b => b.id.toString() === propertyId);
   
   if (!property) {
     return (

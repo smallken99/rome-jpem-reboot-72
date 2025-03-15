@@ -1,149 +1,188 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { Filter } from 'lucide-react';
-import { Sheet, SheetClose, SheetContent, SheetDescription, SheetFooter, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Label } from '@/components/ui/label';
-import { DatePicker } from '@/components/ui/date-picker';
-import { DiplomaticFiltersProps } from './types';
+import { 
+  DropdownMenu, 
+  DropdownMenuContent, 
+  DropdownMenuGroup, 
+  DropdownMenuItem, 
+  DropdownMenuLabel, 
+  DropdownMenuSeparator, 
+  DropdownMenuTrigger 
+} from '@/components/ui/dropdown-menu';
+import { FilterIcon, X } from 'lucide-react';
 
-export const DiplomaticFilters: React.FC<DiplomaticFiltersProps> = ({ 
-  activeTab, 
-  onFilterChange, 
-  onReset, 
-  onSearch, 
-  onFilter 
+export interface DiplomaticFiltersProps {
+  activeTab: string;
+  onFilterChange: (filters: any) => void;
+  onReset: () => void;
+  onSearch?: (term: string) => void;
+  onFilter?: (filters: any) => void;
+}
+
+export const DiplomaticFilters: React.FC<DiplomaticFiltersProps> = ({
+  activeTab,
+  onFilterChange,
+  onReset,
+  onSearch,
+  onFilter
 }) => {
-  const [status, setStatus] = React.useState('');
-  const [region, setRegion] = React.useState('');
-  const [dateFrom, setDateFrom] = React.useState<Date | undefined>(undefined);
-  const [dateTo, setDateTo] = React.useState<Date | undefined>(undefined);
-
-  const handleApplyFilters = () => {
-    const filters = {
-      status,
-      region,
-      dateFrom: dateFrom ? dateFrom.toISOString().split('T')[0] : '',
-      dateTo: dateTo ? dateTo.toISOString().split('T')[0] : ''
-    };
-    
-    onFilterChange(filters);
-    
-    // Pour la compatibilité
-    if (onFilter) {
-      onFilter(filters);
-    }
+  const [selectedFilters, setSelectedFilters] = useState<Record<string, string>>({});
+  
+  const applyFilter = (category: string, value: string) => {
+    const newFilters = { ...selectedFilters, [category]: value };
+    setSelectedFilters(newFilters);
+    onFilterChange(newFilters);
   };
-
-  const handleReset = () => {
-    setStatus('');
-    setRegion('');
-    setDateFrom(undefined);
-    setDateTo(undefined);
+  
+  const resetFilters = () => {
+    setSelectedFilters({});
     onReset();
   };
-
+  
+  // Nation tab specific filters
+  const renderNationFilters = () => (
+    <>
+      <DropdownMenuGroup>
+        <DropdownMenuLabel>Statut</DropdownMenuLabel>
+        <DropdownMenuItem onClick={() => applyFilter('status', 'ally')}>
+          Allié
+        </DropdownMenuItem>
+        <DropdownMenuItem onClick={() => applyFilter('status', 'enemy')}>
+          Ennemi
+        </DropdownMenuItem>
+        <DropdownMenuItem onClick={() => applyFilter('status', 'neutral')}>
+          Neutre
+        </DropdownMenuItem>
+        <DropdownMenuItem onClick={() => applyFilter('status', 'tributary')}>
+          Tributaire
+        </DropdownMenuItem>
+      </DropdownMenuGroup>
+      <DropdownMenuSeparator />
+      <DropdownMenuGroup>
+        <DropdownMenuLabel>Région</DropdownMenuLabel>
+        <DropdownMenuItem onClick={() => applyFilter('region', 'europe')}>
+          Europe
+        </DropdownMenuItem>
+        <DropdownMenuItem onClick={() => applyFilter('region', 'africa')}>
+          Afrique
+        </DropdownMenuItem>
+        <DropdownMenuItem onClick={() => applyFilter('region', 'asia')}>
+          Asie
+        </DropdownMenuItem>
+      </DropdownMenuGroup>
+    </>
+  );
+  
+  // Traité tab specific filters
+  const renderTraiteFilters = () => (
+    <>
+      <DropdownMenuGroup>
+        <DropdownMenuLabel>Type</DropdownMenuLabel>
+        <DropdownMenuItem onClick={() => applyFilter('type', 'commercial')}>
+          Commercial
+        </DropdownMenuItem>
+        <DropdownMenuItem onClick={() => applyFilter('type', 'peace')}>
+          Paix
+        </DropdownMenuItem>
+        <DropdownMenuItem onClick={() => applyFilter('type', 'military')}>
+          Militaire
+        </DropdownMenuItem>
+        <DropdownMenuItem onClick={() => applyFilter('type', 'tribute')}>
+          Tribut
+        </DropdownMenuItem>
+      </DropdownMenuGroup>
+      <DropdownMenuSeparator />
+      <DropdownMenuGroup>
+        <DropdownMenuLabel>Statut</DropdownMenuLabel>
+        <DropdownMenuItem onClick={() => applyFilter('status', 'active')}>
+          Actif
+        </DropdownMenuItem>
+        <DropdownMenuItem onClick={() => applyFilter('status', 'draft')}>
+          Brouillon
+        </DropdownMenuItem>
+        <DropdownMenuItem onClick={() => applyFilter('status', 'expired')}>
+          Expiré
+        </DropdownMenuItem>
+        <DropdownMenuItem onClick={() => applyFilter('status', 'revoked')}>
+          Révoqué
+        </DropdownMenuItem>
+      </DropdownMenuGroup>
+    </>
+  );
+  
+  // Alliance tab specific filters
+  const renderAllianceFilters = () => (
+    <>
+      <DropdownMenuGroup>
+        <DropdownMenuLabel>Type</DropdownMenuLabel>
+        <DropdownMenuItem onClick={() => applyFilter('type', 'defensive')}>
+          Défensive
+        </DropdownMenuItem>
+        <DropdownMenuItem onClick={() => applyFilter('type', 'offensive')}>
+          Offensive
+        </DropdownMenuItem>
+        <DropdownMenuItem onClick={() => applyFilter('type', 'commercial')}>
+          Commerciale
+        </DropdownMenuItem>
+        <DropdownMenuItem onClick={() => applyFilter('type', 'cultural')}>
+          Culturelle
+        </DropdownMenuItem>
+      </DropdownMenuGroup>
+      <DropdownMenuSeparator />
+      <DropdownMenuGroup>
+        <DropdownMenuLabel>Statut</DropdownMenuLabel>
+        <DropdownMenuItem onClick={() => applyFilter('status', 'active')}>
+          Active
+        </DropdownMenuItem>
+        <DropdownMenuItem onClick={() => applyFilter('status', 'inactive')}>
+          Inactive
+        </DropdownMenuItem>
+        <DropdownMenuItem onClick={() => applyFilter('status', 'pending')}>
+          En attente
+        </DropdownMenuItem>
+        <DropdownMenuItem onClick={() => applyFilter('status', 'dissolved')}>
+          Dissoute
+        </DropdownMenuItem>
+      </DropdownMenuGroup>
+    </>
+  );
+  
+  const getFilterCount = () => Object.keys(selectedFilters).length;
+  
+  const renderActiveFilters = () => {
+    const count = getFilterCount();
+    if (count === 0) return null;
+    
+    return (
+      <div className="ml-2 px-2 py-1 bg-primary text-primary-foreground rounded-full text-xs">
+        {count}
+      </div>
+    );
+  };
+  
   return (
-    <Sheet>
-      <SheetTrigger asChild>
-        <Button variant="outline" size="icon">
-          <Filter className="h-4 w-4" />
-        </Button>
-      </SheetTrigger>
-      
-      <SheetContent className="sm:max-w-md">
-        <SheetHeader>
-          <SheetTitle>Filtres</SheetTitle>
-          <SheetDescription>
-            Affinez les résultats en utilisant les filtres ci-dessous
-          </SheetDescription>
-        </SheetHeader>
-        
-        <div className="space-y-6 py-6">
-          <div className="space-y-2">
-            <Label htmlFor="status">Statut</Label>
-            <Select value={status} onValueChange={setStatus}>
-              <SelectTrigger id="status">
-                <SelectValue placeholder="Tous les statuts" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="">Tous les statuts</SelectItem>
-                
-                {activeTab === 'nations' && (
-                  <>
-                    <SelectItem value="ally">Allié</SelectItem>
-                    <SelectItem value="neutral">Neutre</SelectItem>
-                    <SelectItem value="enemy">Ennemi</SelectItem>
-                    <SelectItem value="tributary">Tributaire</SelectItem>
-                  </>
-                )}
-                
-                {activeTab === 'traites' && (
-                  <>
-                    <SelectItem value="active">En vigueur</SelectItem>
-                    <SelectItem value="draft">Brouillon</SelectItem>
-                    <SelectItem value="expired">Expiré</SelectItem>
-                    <SelectItem value="revoked">Révoqué</SelectItem>
-                  </>
-                )}
-                
-                {activeTab === 'alliances' && (
-                  <>
-                    <SelectItem value="active">Active</SelectItem>
-                    <SelectItem value="inactive">Inactive</SelectItem>
-                    <SelectItem value="pending">En attente</SelectItem>
-                  </>
-                )}
-              </SelectContent>
-            </Select>
-          </div>
-          
-          <div className="space-y-2">
-            <Label htmlFor="region">Région</Label>
-            <Select value={region} onValueChange={setRegion}>
-              <SelectTrigger id="region">
-                <SelectValue placeholder="Toutes les régions" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="">Toutes les régions</SelectItem>
-                <SelectItem value="gaule">Gaule</SelectItem>
-                <SelectItem value="hispanie">Hispanie</SelectItem>
-                <SelectItem value="germanie">Germanie</SelectItem>
-                <SelectItem value="illyrie">Illyrie</SelectItem>
-                <SelectItem value="grèce">Grèce</SelectItem>
-                <SelectItem value="asie">Asie Mineure</SelectItem>
-                <SelectItem value="levant">Levant</SelectItem>
-                <SelectItem value="egypte">Égypte</SelectItem>
-                <SelectItem value="afrique">Afrique</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-          
-          <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="dateFrom">Date début</Label>
-              <DatePicker date={dateFrom} setDate={setDateFrom} />
-            </div>
-            
-            <div className="space-y-2">
-              <Label htmlFor="dateTo">Date fin</Label>
-              <DatePicker date={dateTo} setDate={setDateTo} />
-            </div>
-          </div>
-        </div>
-        
-        <SheetFooter className="flex justify-between">
-          <Button variant="ghost" onClick={handleReset}>
-            Réinitialiser
+    <div className="flex items-center gap-2">
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <Button variant="outline" size="sm" className="flex items-center">
+            <FilterIcon className="mr-2 h-4 w-4" />
+            Filtres
+            {renderActiveFilters()}
           </Button>
-          <SheetClose asChild>
-            <Button onClick={handleApplyFilters}>
-              Appliquer
-            </Button>
-          </SheetClose>
-        </SheetFooter>
-      </SheetContent>
-    </Sheet>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align="end" className="w-56">
+          {activeTab === 'nations' && renderNationFilters()}
+          {activeTab === 'traites' && renderTraiteFilters()}
+          {activeTab === 'alliances' && renderAllianceFilters()}
+          
+          <DropdownMenuSeparator />
+          <DropdownMenuItem onClick={resetFilters} className="justify-center text-muted-foreground">
+            <X className="mr-2 h-4 w-4" />
+            Réinitialiser
+          </DropdownMenuItem>
+        </DropdownMenuContent>
+      </DropdownMenu>
+    </div>
   );
 };

@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { RomanCard } from '@/components/ui-custom/RomanCard';
 import { useBuildingInventory } from './hooks/building/useBuildingInventory';
@@ -6,7 +5,6 @@ import { Button } from '@/components/ui/button';
 import { useNavigate } from 'react-router-dom';
 import { Map, Search, Building, Navigation, Home, Wheat } from 'lucide-react';
 import { Input } from '@/components/ui/input';
-import { OwnedBuilding } from './hooks/building/types';
 
 export const PropertyMap: React.FC = () => {
   const { ownedBuildings } = useBuildingInventory();
@@ -15,7 +13,6 @@ export const PropertyMap: React.FC = () => {
   const [selectedRegion, setSelectedRegion] = useState<string | null>(null);
   
   const regions = [...new Set(ownedBuildings.map(b => {
-    // Extraire la région de l'emplacement (avant le premier tiret)
     const regionPart = b.location.split(' - ')[0];
     return regionPart;
   }))];
@@ -44,7 +41,7 @@ export const PropertyMap: React.FC = () => {
     }
   };
   
-  const handleViewDetails = (propertyId: number) => {
+  const handleViewDetails = (propertyId: number | string) => {
     navigate(`/patrimoine/proprietes/${propertyId}`);
   };
   
@@ -108,20 +105,13 @@ export const PropertyMap: React.FC = () => {
                     <div 
                       key={building.id}
                       className="border border-rome-gold/30 rounded-md p-4 hover:bg-rome-gold/5 transition-colors"
+                      onClick={() => handleViewDetails(building.id)}
                     >
                       <div className="flex items-start gap-3">
                         {getBuildingIcon(building.buildingType)}
                         <div className="flex-1">
                           <h4 className="font-medium">{building.name}</h4>
                           <p className="text-sm text-muted-foreground">{building.location}</p>
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            className="mt-2"
-                            onClick={() => handleViewDetails(building.id)}
-                          >
-                            Voir détails
-                          </Button>
                         </div>
                       </div>
                     </div>

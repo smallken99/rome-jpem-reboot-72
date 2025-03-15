@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { 
   Dialog, DialogContent, DialogHeader, 
@@ -8,14 +7,14 @@ import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import { Wrench, Info, AlertTriangle, Calendar } from 'lucide-react';
-import { OwnedBuilding } from '../../hooks/useBuildingManagement';
+import { OwnedBuilding } from '../../hooks/building/types';
 
 interface MaintenanceDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   building: OwnedBuilding | null;
-  onToggleMaintenance: (buildingId: number, enabled: boolean) => void;
-  onPerformMaintenance: (buildingId: number) => boolean;
+  onToggleMaintenance: (buildingId: number | string, enabled: boolean) => void;
+  onPerformMaintenance: (buildingId: number | string) => boolean;
   balance: number;
 }
 

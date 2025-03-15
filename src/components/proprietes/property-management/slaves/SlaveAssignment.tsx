@@ -4,14 +4,14 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { TrendingUp } from 'lucide-react';
-import { OwnedBuilding } from '../../hooks/useBuildingManagement';
+import { OwnedBuilding } from '../../hooks/building/types';
 import { allBuildingTypes } from '../../data/buildings';
 import { toast } from 'sonner';
 
 interface SlaveAssignmentProps {
   buildings: OwnedBuilding[];
   availableSlaves: number;
-  onAssignSlaves: (propertyId: number, value: number) => void;
+  onAssignSlaves: (propertyId: number | string, value: number) => void;
 }
 
 export const SlaveAssignment: React.FC<SlaveAssignmentProps> = ({
@@ -59,7 +59,7 @@ export const SlaveAssignment: React.FC<SlaveAssignmentProps> = ({
   });
   
   // Mettre à jour l'attribution d'esclaves à une propriété
-  const updateAssignment = (propertyId: number, value: number) => {
+  const updateAssignment = (propertyId: number | string, value: number) => {
     const maxAvailable = availableSlaves + (buildings.find(b => b.id === propertyId)?.slaves || 0);
     
     if (value > maxAvailable) {
