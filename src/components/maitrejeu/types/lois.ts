@@ -34,6 +34,9 @@ export interface Loi extends BaseLoi {
   dateProposition?: string | GameDate;
   implementationDate?: GameDate;
   expirationDate?: GameDate;
+  dateVote?: string; // Added this
+  datePromulgation?: string; // Added this
+  dateExpiration?: string; // Added this
   
   // Status properties with different naming conventions
   status?: LoiState;
@@ -46,17 +49,20 @@ export interface Loi extends BaseLoi {
   votesPositifs?: number;
   votesNégatifs?: number;
   votesAbstention?: number;
-  votes?: {
-    pour: number;
-    contre: number;
-    abstention: number;
-  };
+  votes?: Vote;
   
   // Additional properties
   notes?: string;
   effets?: string[] | Record<string, any>;
   conditions?: string[];
-  penalites?: string[];
+  pénalités?: string[];
+}
+
+// Type for Vote object
+export interface Vote {
+  pour: number;
+  contre: number;
+  abstention: number;
 }
 
 // Type aliases for better type safety
@@ -67,7 +73,11 @@ export type LoiType =
   | 'Economique' 
   | 'Sociale' 
   | 'Religieuse' 
-  | 'Civile';
+  | 'Civile'
+  | 'Electorale'
+  | 'Administrative'
+  | 'Judiciaire'
+  | 'Fiscale';
 
 export type ImportanceType = 'mineure' | 'normale' | 'majeure';
 
@@ -83,7 +93,8 @@ export type LoiState =
   | 'proposée' 
   | 'en_débat' 
   | 'votée' 
-  | 'promulguée';
+  | 'promulguée'
+  | 'expirée';
 
 // Category-related types
 export interface CategorieLoi {

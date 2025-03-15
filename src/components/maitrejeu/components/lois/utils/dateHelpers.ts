@@ -1,45 +1,57 @@
 
 import { GameDate } from '@/components/maitrejeu/types/common';
 
-/**
- * Garantit qu'un objet de date est un GameDate valide
- */
+// Ensure a consistent GameDate structure regardless of input format
 export const ensureGameDate = (date: any): GameDate => {
   if (!date) {
-    // Valeur par défaut si aucune date n'est fournie
-    return { year: new Date().getFullYear(), season: 'Ver' };
+    return { year: new Date().getFullYear() - 1800, season: 'SPRING' };
   }
   
-  // Si c'est déjà un GameDate valide
-  if (typeof date === 'object' && 'year' in date && 'season' in date) {
-    return date as GameDate;
-  }
-  
-  // Si c'est une chaîne, essayons de l'analyser
   if (typeof date === 'string') {
-    try {
-      const [yearPart, seasonPart] = date.split(' ');
-      const year = parseInt(yearPart, 10);
-      
-      if (!isNaN(year)) {
-        return {
-          year,
-          season: seasonPart || 'Ver'
-        };
-      }
-    } catch (error) {
-      console.error('Erreur lors de l\'analyse de la date:', date);
+    const parts = date.split(' ');
+    if (parts.length >= 2) {
+      return {
+        year: parseInt(parts[0], 10),
+        season: parts[1]
+      };
+    }
+    return { year: new Date().getFullYear() - 1800, season: 'SPRING' };
+  }
+  
+  if (date && typeof date === 'object') {
+    if ('year' in date && 'season' in date) {
+      return {
+        year: date.year,
+        season: date.season
+      };
     }
   }
   
-  // Valeur par défaut si aucun cas ci-dessus ne fonctionne
-  return { year: new Date().getFullYear(), season: 'Ver' };
+  return { year: new Date().getFullYear() - 1800, season: 'SPRING' };
 };
 
-/**
- * Formate toute date en une chaîne lisible
- */
+// Format any date representation to a consistent string
 export const formatAnyGameDate = (date: any): string => {
   const gameDate = ensureGameDate(date);
-  return `An ${gameDate.year} - ${gameDate.season}`;
+  return `${gameDate.year} ${gameDate.season}`;
+};
+
+// Format a season name to a human-readable format
+export const formatSeason = (season: string): string => {
+  switch (season.toUpperCase()) {
+    case 'SPRING':
+    case 'VER':
+      return 'Printemps';
+    case 'SUMMER':
+    case 'AESTAS':
+      return 'Été';
+    case 'AUTUMN':
+    case 'AUTUMNUS':
+      return 'Automne';
+    case 'WINTER':
+    case 'HIEMS':
+      return 'Hiver';
+    default:
+      return season;
+  }
 };

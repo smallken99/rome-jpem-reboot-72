@@ -6,7 +6,7 @@ import { LoisProposeesTab } from './tabs/LoisProposeesTab';
 import { LoisRejeteesTab } from './tabs/LoisRejeteesTab';
 import { HistoriqueLoiTab } from './tabs/HistoriqueLoiTab';
 import { Loi } from '../../types/lois';
-import { convertMJArrayToRepublique } from '../../types/loisAdapter';
+import { convertMJArrayToRepublique } from './utils/loiAdapter';
 
 interface LoisTabsContainerProps {
   activeTab: string;
