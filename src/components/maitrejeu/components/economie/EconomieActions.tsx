@@ -37,26 +37,20 @@ export const EconomieActions: React.FC<EconomieActionsProps> = ({
         Nouvelle Transaction
       </Button>
       
-      {onManageBuildings && (
-        <Button variant="outline" onClick={onManageBuildings}>
-          <Building className="h-4 w-4 mr-1.5" />
-          Gérer les Bâtiments
-        </Button>
-      )}
+      <Button variant="outline" onClick={onManageBuildings || (() => {})}>
+        <Building className="h-4 w-4 mr-1.5" />
+        Gérer les Bâtiments
+      </Button>
       
-      {onManageSlaves && (
-        <Button variant="outline" onClick={onManageSlaves}>
-          <Users className="h-4 w-4 mr-1.5" />
-          Gérer les Esclaves
-        </Button>
-      )}
+      <Button variant="outline" onClick={onManageSlaves || (() => {})}>
+        <Users className="h-4 w-4 mr-1.5" />
+        Gérer les Esclaves
+      </Button>
       
-      {onManageTaxes && (
-        <Button variant="outline" onClick={onManageTaxes}>
-          <Receipt className="h-4 w-4 mr-1.5" />
-          Configurer les Impôts
-        </Button>
-      )}
+      <Button variant="outline" onClick={onManageTaxes || (() => {})}>
+        <Receipt className="h-4 w-4 mr-1.5" />
+        Configurer les Impôts
+      </Button>
       
       <Button variant="outline" onClick={onGenerateReport}>
         <FileText className="h-4 w-4 mr-1.5" />

@@ -13,6 +13,7 @@ import { GestionBatiments } from '../GestionBatiments';
 import { GestionLois } from '../GestionLois';
 import { MaitreJeuStats } from '../MaitreJeuStats';
 import { TimePanel } from '../components/TimePanel';
+import { MaitreJeuWelcome } from '../MaitreJeuWelcome';
 
 interface MaitreJeuContentProps {
   activeTab: string;
@@ -26,7 +27,10 @@ export const MaitreJeuContent: React.FC<MaitreJeuContentProps> = ({ activeTab })
     <div className="bg-background border rounded-lg shadow overflow-hidden">
       {showTimePanel && <TimePanel />}
       
-      {/* Sections existantes */}
+      {/* Page d'accueil */}
+      {activeTab === 'accueil' && <MaitreJeuWelcome />}
+      
+      {/* Sections principales */}
       {activeTab === 'senateurs' && <GestionSenateurs />}
       {activeTab === 'provinces' && <GestionProvinces />}
       {activeTab === 'politique' && <GestionPolitique />}
