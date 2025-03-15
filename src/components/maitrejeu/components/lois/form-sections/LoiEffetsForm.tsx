@@ -3,12 +3,10 @@ import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Loi } from '@/components/republique/lois/hooks/useLois';
+import { ExtendedLoi } from '../hooks/useLoiModalForm';
 
 interface LoiEffetsFormProps {
-  formData: Loi & {
-    commentaires?: string[];
-  };
+  formData: ExtendedLoi;
   effetInput: string;
   setEffetInput: (value: string) => void;
   addEffet: () => void;
@@ -22,7 +20,6 @@ export const LoiEffetsForm: React.FC<LoiEffetsFormProps> = ({
   addEffet,
   removeEffet
 }) => {
-  // Access extended properties safely
   const commentaires = formData.commentaires || [];
 
   return (

@@ -3,12 +3,10 @@ import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Loi } from '@/components/republique/lois/hooks/useLois';
+import { ExtendedLoi } from '../hooks/useLoiModalForm';
 
 interface LoiConditionsFormProps {
-  formData: Loi & {
-    clauses?: string[];
-  };
+  formData: ExtendedLoi;
   conditionInput: string;
   setConditionInput: (value: string) => void;
   addCondition: () => void;
@@ -22,7 +20,6 @@ export const LoiConditionsForm: React.FC<LoiConditionsFormProps> = ({
   addCondition,
   removeCondition
 }) => {
-  // Access extended properties safely
   const clauses = formData.clauses || [];
   
   return (

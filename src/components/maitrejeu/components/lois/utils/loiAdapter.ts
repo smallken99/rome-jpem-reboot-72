@@ -1,99 +1,93 @@
 
 import { Loi as LoiRepublique } from '@/components/republique/lois/hooks/useLois';
-import { Loi as LoiMaitreJeu } from '@/components/maitrejeu/types/lois';
+import { Loi as LoiMJ } from '@/components/maitrejeu/types/lois';
+import { ExtendedLoi } from '../hooks/useLoiModalForm';
 
 /**
- * Assure la compatibilité entre les différentes interfaces Loi
- * en fournissant les propriétés manquantes
+ * Assure que la loi a toutes les propriétés requises pour l'interface LoiMJ
  */
-export const ensureLoiCompliance = (loi: any): LoiMaitreJeu => {
-  // Défaut pour les propriétés obligatoires de MJLoi
-  const compliantLoi: LoiMaitreJeu = {
+export const ensureLoiCompliance = (loi: any): LoiMJ => {
+  // Si la loi est déjà conforme au format LoiMJ, retourner directement
+  if (
+    loi.type !== undefined &&
+    loi.importance !== undefined &&
+    loi.clauses !== undefined &&
+    loi.commentaires !== undefined &&
+    loi.tags !== undefined
+  ) {
+    return loi as LoiMJ;
+  }
+  
+  // Sinon, adapter les propriétés pour assurer la conformité
+  return {
     ...loi,
-    id: loi.id,
-    title: loi.titre || loi.title || '',
+    // Propriétés obligatoires à s'assurer de remplir
+    id: loi.id || `loi-${Date.now()}`,
+    titre: loi.titre || loi.title || '',
     description: loi.description || '',
-    proposedBy: loi.auteur || loi.proposeur || loi.proposedBy || '',
-    date: loi.dateProposition || loi.date || '',
-    status: loi.statut || loi.status || loi.état || 'proposée',
-    category: loi.categorieId || loi.category || loi.catégorie || '',
     type: loi.type || 'Politique',
     importance: loi.importance || 'normale',
-    clauses: Array.isArray(loi.clauses) ? loi.clauses : [],
-    commentaires: Array.isArray(loi.commentaires) ? loi.commentaires : [],
-    tags: Array.isArray(loi.tags) ? loi.tags : []
+    proposeur: loi.proposeur || loi.auteur || loi.proposedBy || '',
+    catégorie: loi.catégorie || loi.categorieId || loi.category || '',
+    état: loi.état || loi.statut || loi.status || 'proposée',
+    date: loi.date || loi.dateProposition || { year: new Date().getFullYear(), season: 'SPRING' },
+    votesPositifs: loi.votesPositifs || (loi.votes?.pour || 0),
+    votesNégatifs: loi.votesNégatifs || (loi.votes?.contre || 0),
+    votesAbstention: loi.votesAbstention || (loi.votes?.abstention || 0),
+    clauses: loi.clauses || [],
+    commentaires: loi.commentaires || [],
+    tags: loi.tags || [],
+    effets: loi.effets || {}
   };
-  
-  return compliantLoi;
 };
 
 /**
- * Convertit une LoiRepublique en LoiMaitreJeu
+ * Convertit une loi du format MJ vers le format République
  */
-export const convertRepubliqueToMJ = (loi: LoiRepublique): LoiMaitreJeu => {
-  return ensureLoiCompliance({
-    ...loi,
-    proposeur: loi.auteur,
-    dateProposition: loi.dateProposition,
-    état: loi.statut,
-    catégorie: loi.categorieId,
-    votesPositifs: loi.votes?.pour || 0,
-    votesNégatifs: loi.votes?.contre || 0,
-    votesAbstention: loi.votes?.abstention || 0
-  });
-};
-
-/**
- * Convertit une LoiMaitreJeu en LoiRepublique
- */
-export const convertMJToRepublique = (loi: LoiMaitreJeu): LoiRepublique => {
+export const convertMJToRepublique = (loi: LoiMJ): ExtendedLoi => {
   return {
     id: loi.id,
-    titre: loi.title || loi.titre || '',
+    titre: loi.titre || loi.title || loi.nom || '',
     description: loi.description || '',
-    auteur: loi.proposedBy || loi.proposeur || loi.auteur || '',
-    dateProposition: typeof loi.date === 'string' ? loi.date : typeof loi.dateProposition === 'string' ? loi.dateProposition : '',
-    statut: mapMJStatusToRepublique(loi.status || loi.statut || loi.état || 'proposée'),
-    categorieId: loi.category || loi.categorieId || loi.catégorie || '',
+    auteur: loi.proposeur || loi.auteur || loi.proposedBy || '',
+    categorieId: loi.catégorie || loi.category || '',
+    dateProposition: typeof loi.date === 'string' ? loi.date : `${loi.date?.year} ${loi.date?.season}`,
+    statut: loi.état || loi.status || 'proposée',
     votes: {
-      pour: loi.votesPositifs || loi.votesFor || (loi.votes?.pour || 0),
-      contre: loi.votesNégatifs || loi.votesAgainst || (loi.votes?.contre || 0),
-      abstention: loi.votesAbstention || (loi.votes?.abstention || 0)
+      pour: loi.votesPositifs || loi.votesFor || 0,
+      contre: loi.votesNégatifs || loi.votesAgainst || 0,
+      abstention: loi.votesAbstention || 0
     },
     tags: loi.tags || [],
-    // Ajouter les propriétés étendues pour compatibilité avec le composant LoiFormTabs
-    type: loi.type || 'Politique',
-    importance: loi.importance || 'normale',
     clauses: loi.clauses || [],
-    commentaires: loi.commentaires || []
-  } as LoiRepublique & {
-    type: string;
-    importance: string;
-    clauses: string[];
-    commentaires: string[];
+    commentaires: loi.commentaires || [],
+    type: loi.type || 'Politique',
+    importance: loi.importance || 'normale'
   };
 };
 
-// Helper function to map statuses between formats
-function mapMJStatusToRepublique(status: string): 'proposée' | 'en_débat' | 'votée' | 'rejetée' | 'promulguée' {
-  switch (status) {
-    case 'proposed':
-    case 'proposée': 
-    case 'En délibération':
-      return 'proposée';
-    case 'active':
-    case 'Promulguée':
-    case 'adoptée': 
-    case 'promulguée':
-      return 'promulguée';
-    case 'rejected':
-    case 'rejetée':
-      return 'rejetée';
-    case 'expired':
-      return 'rejetée'; // Closest equivalent
-    case 'votée':
-      return 'votée';
-    default:
-      return 'en_débat';
-  }
-}
+/**
+ * Convertit une loi du format République vers le format MJ
+ */
+export const convertRepubliqueToMJ = (loi: ExtendedLoi): LoiMJ => {
+  return {
+    id: loi.id,
+    titre: loi.titre || '',
+    description: loi.description || '',
+    proposeur: loi.auteur || '',
+    catégorie: loi.categorieId || '',
+    date: typeof loi.dateProposition === 'string' 
+      ? { year: parseInt(loi.dateProposition.split(' ')[0]), season: loi.dateProposition.split(' ')[1] } 
+      : loi.dateProposition,
+    état: loi.statut || 'proposée',
+    votesPositifs: loi.votes?.pour || 0,
+    votesNégatifs: loi.votes?.contre || 0,
+    votesAbstention: loi.votes?.abstention || 0,
+    tags: loi.tags || [],
+    clauses: loi.clauses || [],
+    commentaires: loi.commentaires || [],
+    type: loi.type || 'Politique',
+    importance: loi.importance || 'normale',
+    effets: {},
+  };
+};

@@ -3,10 +3,10 @@ import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Loi } from '@/components/republique/lois/hooks/useLois';
+import { ExtendedLoi } from '../hooks/useLoiModalForm';
 
 interface LoiPenalitesFormProps {
-  formData: Loi;
+  formData: ExtendedLoi;
   penaliteInput: string;
   setPenaliteInput: (value: string) => void;
   addPenalite: () => void;

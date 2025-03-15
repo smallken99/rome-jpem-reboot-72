@@ -5,17 +5,12 @@ import { LoiBasicInfoForm } from './LoiBasicInfoForm';
 import { LoiEffetsForm } from './LoiEffetsForm';
 import { LoiConditionsForm } from './LoiConditionsForm';
 import { LoiPenalitesForm } from './LoiPenalitesForm';
-import { Loi } from '@/components/republique/lois/hooks/useLois';
+import { ExtendedLoi } from '../hooks/useLoiModalForm';
 
 interface LoiFormTabsProps {
   activeTab: string;
   setActiveTab: (value: string) => void;
-  formData: Loi & {
-    type?: string;
-    importance?: string;
-    clauses?: string[];
-    commentaires?: string[];
-  };
+  formData: ExtendedLoi;
   handleChange: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => void;
   handleSelectChange: (name: string, value: string) => void;
   effetInput: string;
