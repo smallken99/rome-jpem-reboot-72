@@ -1,4 +1,4 @@
 
-export { nationsMock } from './nations';
-export { traitesMock } from './traites';
-export { alliancesMock } from './alliances';
+export * from './nations';
+export * from './traites';
+export * from './alliances';

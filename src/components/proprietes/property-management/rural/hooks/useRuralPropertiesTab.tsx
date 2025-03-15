@@ -1,13 +1,13 @@
 
 import { useState } from 'react';
-import { useBuildingInventory } from '../../hooks/building/useBuildingInventory';
-import { useBuildingPurchase } from '../../hooks/building/useBuildingPurchase';
-import { useBuildingSale } from '../hooks/useBuildingSale';
-import { useBuildingMaintenance } from '../../hooks/building/useBuildingMaintenance';
-import { useSlaveAssignment } from '../../hooks/building/useSlaveAssignment';
+import { useBuildingInventory } from '@/components/proprietes/hooks/building/useBuildingInventory';
+import { useBuildingPurchase } from '@/components/proprietes/hooks/building/useBuildingPurchase';
+import { useBuildingSale } from './useBuildingSale';
+import { useBuildingMaintenance } from '@/components/proprietes/hooks/building/useBuildingMaintenance';
+import { useSlaveAssignment } from '@/components/proprietes/hooks/building/useSlaveAssignment';
 import { usePatrimoine } from '@/hooks/usePatrimoine';
-import { OwnedBuilding } from '../../hooks/building/types';
-import { ruralPropertiesMock } from '../../../data/buildings/ruralProperties';
+import { OwnedBuilding } from '@/components/proprietes/hooks/building/types';
+import { ruralProperties } from '../../../data/buildings/ruralProperties';
 
 export const useRuralPropertiesTab = () => {
   // États
@@ -29,14 +29,11 @@ export const useRuralPropertiesTab = () => {
   
   // Trouver les détails d'une propriété sélectionnée
   const propertyDetails = selectedPropertyId 
-    ? ruralPropertiesMock.find(prop => prop.id === selectedPropertyId) 
+    ? ruralProperties.find(prop => prop.id === selectedPropertyId) 
     : null;
 
-  // Fonction d'adaptation pour maintenir la compatibilité avec l'interface
-  const calculateBuildingValue = (buildingId: number) => {
-    // Convertir l'ID en string pour la recherche
-    const building = ownedBuildings.find(b => b.id === buildingId.toString());
-    if (!building) return 0;
+  // Fonction pour calculer la valeur d'un bâtiment
+  const calculateBuildingValue = (buildingId: number): number => {
     return estimateBuildingValue(buildingId);
   };
 
@@ -54,18 +51,16 @@ export const useRuralPropertiesTab = () => {
     // Données
     propertyDetails,
     ownedRuralProperties,
-    ruralProperties: ruralPropertiesMock,
+    ruralProperties,
     balance,
     
     // Fonctions
     toggleMaintenance,
-    performMaintenance: (buildingId: number) => {
+    performMaintenance: (buildingId: number): boolean => {
       performMaintenance(buildingId);
       return true; // Pour la compatibilité avec l'interface
     },
-    sellBuilding: (buildingId: number) => {
-      return saleBuilding(buildingId);
-    },
+    sellBuilding,
     calculateBuildingValue,
     assignSlaves,
     handlePurchase,
@@ -73,7 +68,7 @@ export const useRuralPropertiesTab = () => {
     
     // Compatibilité useRuralPropertyCalculator
     buildings: ownedBuildings,
-    handleAddProperty: (buildingId: string, buildingType: "rural" | "urban" | "religious" | "public", location: string, customName?: string) => {
+    handleAddProperty: (buildingId: string, buildingType: "rural" | "urban" | "religious" | "public", location: string, customName?: string): boolean => {
       // Implémentation simplifiée
       return true;
     }

@@ -1,97 +1,91 @@
 
 import { Traite } from '../types';
-import { generateId } from '@/components/maitrejeu/types/common';
 
-// Données fictives pour les traités
 export const traitesMock: Traite[] = [
   {
-    id: generateId(),
-    title: "Traité Romano-Carthaginois",
-    parties: ["Rome", "Carthage"],
-    type: "peace",
-    dateCreated: "513 AUC",
-    dateSignature: "513 AUC",
-    dateExpiration: "533 AUC",
-    dateExpires: "533 AUC",
-    status: "expired",
+    id: 'traite-egypt-1',
+    title: 'Accord Commercial d\'Alexandrie',
+    type: 'commercial',
+    parties: ['rome', 'egypt'],
+    status: 'active',
+    description: 'Accord commercial garantissant l\'accès privilégié aux ports égyptiens et l\'importation de grain pour Rome.',
+    dateSignature: '690 AUC',
+    dateExpiration: '710 AUC',
     clauses: [
-      "Non-ingérence dans les colonies respectives",
-      "Limitation de la navigation carthaginoise en Italie",
-      "Interdiction aux navires romains de commercer avec les colonies puniques"
+      'Accès privilégié aux ports d\'Alexandrie et de Péluse',
+      'Tarifs préférentiels sur le grain égyptien',
+      'Protection des marchands romains sur le territoire égyptien'
     ],
-    description: "Premier traité signé entre Rome et Carthage, définissant leurs zones d'influence respectives en Méditerranée occidentale.",
-    benefits: ["Sécurisation des routes commerciales", "Reconnaissance diplomatique"],
-    obligations: ["Respect des zones d'influence", "Assistance mutuelle contre les pirates"]
+    benefits: 'Augmentation de 30% des échanges commerciaux, sécurisation de l\'approvisionnement en grain.',
+    obligations: 'Protection des intérêts égyptiens en Méditerranée orientale, assistance navale en cas de piraterie.'
   },
   {
-    id: generateId(),
-    title: "Alliance avec la Ligue Étolienne",
-    parties: ["Rome", "Ligue Étolienne"],
-    type: "military",
-    dateCreated: "565 AUC",
-    dateSignature: "565 AUC",
-    dateExpiration: "575 AUC",
-    dateExpires: "575 AUC",
-    status: "active",
+    id: 'traite-numidia-1',
+    title: 'Alliance Romano-Numide',
+    type: 'military',
+    parties: ['rome', 'numidia'],
+    status: 'active',
+    description: 'Alliance militaire contre Carthage offrant un soutien mutuel et des échanges de troupes.',
+    dateSignature: '685 AUC',
+    dateExpiration: '705 AUC',
     clauses: [
-      "Assistance militaire mutuelle contre Philippe V de Macédoine",
-      "La Ligue conserve les territoires conquis",
-      "Rome conserve le butin mobilier"
+      'Assistance militaire mutuelle contre Carthage',
+      'Fourniture de cavalerie numide aux légions romaines',
+      'Partage du renseignement militaire'
     ],
-    description: "Alliance conclue pour contenir l'expansion macédonienne en Grèce pendant la première guerre macédonienne.",
-    benefits: ["Accès à la Grèce continentale", "Affaiblissement de la Macédoine"],
-    obligations: ["Engagement de troupes", "Soutien logistique"]
+    benefits: 'Renforcement de la position romaine en Afrique du Nord, accès à la cavalerie légère numide.',
+    obligations: 'Protection du royaume numide, aide militaire en cas d\'agression carthaginoise.'
   },
   {
-    id: generateId(),
-    title: "Accord Commercial de Naples",
-    parties: ["Rome", "Naples"],
-    type: "commercial", // Changé de "trade" à "commercial"
-    dateCreated: "520 AUC",
-    dateSignature: "520 AUC",
-    status: "active",
+    id: 'traite-macedon-1',
+    title: 'Pacte de Non-Agression de l\'Adriatique',
+    type: 'commercial',
+    parties: ['rome', 'macedon'],
+    status: 'expired',
+    description: 'Accord temporaire de stabilisation des relations et de commerce entre Rome et la Macédoine.',
+    dateSignature: '679 AUC',
+    dateExpiration: '689 AUC',
     clauses: [
-      "Exemption de taxes pour les marchands romains à Naples",
-      "Protection des navires napolitains par la flotte romaine",
-      "Fourniture annuelle de grain à prix préférentiel"
+      'Non-interférence dans les affaires illyriennes',
+      'Liberté de commerce en mer Adriatique',
+      'Reconnaissance des sphères d\'influence respectives'
     ],
-    description: "Traité commercial garantissant des avantages réciproques et renforçant l'influence romaine en Campanie.",
-    benefits: ["Accès préférentiel au port", "Approvisionnement en grain"],
-    obligations: ["Protection navale", "Réduction des tarifs douaniers"]
+    benefits: 'Stabilité temporaire des frontières orientales, développement du commerce maritime.',
+    obligations: 'Restriction des mouvements navals en mer Adriatique, consultation avant toute alliance avec d\'autres puissances grecques.'
   },
   {
-    id: generateId(),
-    title: "Protectorat de Sagonte",
-    parties: ["Rome", "Sagonte"],
-    type: "tribute",
-    dateCreated: "535 AUC",
-    dateSignature: "535 AUC",
-    status: "active", // Changé de "violated" à "active"
+    id: 'traite-seleucid-1',
+    title: 'Traité d\'Apamée',
+    type: 'peace',
+    parties: ['rome', 'seleucid'],
+    status: 'violated',
+    description: 'Traité imposé à l\'Empire Séleucide après sa défaite, limitant sa flotte et son armée.',
+    dateSignature: '688 AUC',
+    dateExpiration: '∞',
     clauses: [
-      "Protection militaire romaine",
-      "Liberté intérieure de Sagonte",
-      "Tribut annuel à Rome",
-      "Soutien naval aux opérations romaines"
+      'Retrait des forces séleucides d\'Europe et d\'Asie Mineure à l\'ouest du Taurus',
+      'Limitation de la flotte à 10 navires de guerre',
+      'Paiement d\'une indemnité de 15,000 talents sur 12 ans',
+      'Livraison des éléphants de guerre et interdiction d\'en élever de nouveaux'
     ],
-    description: "Accord établissant un protectorat romain sur Sagonte, dont la violation par Hannibal déclencha la Deuxième Guerre Punique.",
-    benefits: ["Position stratégique en Ibérie", "Revenus du tribut"],
-    obligations: ["Défense de la cité", "Intervention militaire si nécessaire"]
+    benefits: 'Élimination de la menace séleucide en Mer Égée, expansion de l\'influence romaine en Asie Mineure.',
+    obligations: 'Garantie de l\'indépendance des cités grecques d\'Asie Mineure.'
   },
   {
-    id: generateId(),
-    title: "Foedus avec les Herniques",
-    parties: ["Rome", "Confédération Hernique"],
-    type: "military",
-    dateCreated: "486 AUC",
-    dateSignature: "486 AUC",
-    status: "active",
+    id: 'traite-parthia-1',
+    title: 'Accord de l\'Euphrate',
+    type: 'peace',
+    parties: ['rome', 'parthia'],
+    status: 'active',
+    description: 'Reconnaissance mutuelle de l\'Euphrate comme frontière entre les deux empires.',
+    dateSignature: '692 AUC',
+    dateExpiration: '712 AUC',
     clauses: [
-      "Défense mutuelle contre les Volsques et les Èques",
-      "Partage du butin de guerre",
-      "Consultation obligatoire avant toute campagne militaire"
+      'Reconnaissance de l\'Euphrate comme frontière naturelle',
+      'Échange d\'ambassadeurs permanents',
+      'Engagement à ne pas interférer dans les affaires internes de l\'autre empire'
     ],
-    description: "Alliance traditionnelle avec les Herniques, peuple italique, pour la défense commune du Latium contre les menaces extérieures.",
-    benefits: ["Sécurisation de la frontière orientale", "Troupes auxiliaires"],
-    obligations: ["Assistance militaire", "Partage des informations stratégiques"]
+    benefits: 'Stabilisation de la frontière orientale, développement des routes commerciales vers l\'Asie.',
+    obligations: 'Consultation mutuelle avant toute action militaire en Mésopotamie ou en Arménie.'
   }
 ];

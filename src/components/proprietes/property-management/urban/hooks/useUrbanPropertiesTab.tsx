@@ -1,16 +1,16 @@
 
 import { useState } from 'react';
-import { useBuildingInventory } from '../../hooks/building/useBuildingInventory';
-import { useBuildingPurchase } from '../../hooks/building/useBuildingPurchase';
-import { useBuildingSale } from '../../hooks/building/useBuildingSale';
-import { useBuildingMaintenance } from '../../hooks/building/useBuildingMaintenance';
-import { useSlaveAssignment } from '../../hooks/building/useSlaveAssignment';
+import { useBuildingInventory } from '@/components/proprietes/hooks/building/useBuildingInventory';
+import { useBuildingPurchase } from '@/components/proprietes/hooks/building/useBuildingPurchase';
+import { useBuildingSale } from '@/components/proprietes/hooks/building/useBuildingSale';
+import { useBuildingMaintenance } from '@/components/proprietes/hooks/building/useBuildingMaintenance';
+import { useSlaveAssignment } from '@/components/proprietes/hooks/building/useSlaveAssignment';
 import { usePatrimoine } from '@/hooks/usePatrimoine';
-import { OwnedBuilding } from '../../hooks/building/types';
-import { urbanResidentialBuildingsMock } from '../../../data/buildings/urbanResidentialBuildings';
-import { publicBuildingsMock } from '../../../data/buildings/publicBuildings';
-import { religiousBuildingsMock } from '../../../data/buildings/religiousBuildings';
-import { militaryBuildingsMock } from '../../../data/buildings/militaryBuildings';
+import { OwnedBuilding } from '@/components/proprietes/hooks/building/types';
+import { urbanResidentialBuildings } from '../../../data/buildings/urbanResidentialBuildings';
+import { publicBuildings } from '../../../data/buildings/publicBuildings';
+import { religiousBuildings } from '../../../data/buildings/religiousBuildings';
+import { militaryBuildings } from '../../../data/buildings/militaryBuildings';
 
 // Type pour les bâtiments urbains
 type AllowedBuildingType = 'residential' | 'religious' | 'public' | 'military';
@@ -34,17 +34,17 @@ export const useUrbanPropertiesTab = () => {
     if (selectedBuildingType === 'residential') return building.buildingType === 'urban';
     if (selectedBuildingType === 'religious') return building.buildingType === 'religious';
     if (selectedBuildingType === 'public') return building.buildingType === 'public';
-    if (selectedBuildingType === 'military') return building.category === 'military';
+    if (selectedBuildingType === 'military') return building.buildingType === 'military';
     return false;
   });
 
   // Obtenir les détails du bâtiment sélectionné
   const getBuildingsList = () => {
     switch (selectedBuildingType) {
-      case 'residential': return urbanResidentialBuildingsMock;
-      case 'religious': return religiousBuildingsMock;
-      case 'public': return publicBuildingsMock;
-      case 'military': return militaryBuildingsMock;
+      case 'residential': return urbanResidentialBuildings;
+      case 'religious': return religiousBuildings;
+      case 'public': return publicBuildings;
+      case 'military': return militaryBuildings;
       default: return [];
     }
   };
@@ -53,10 +53,8 @@ export const useUrbanPropertiesTab = () => {
     ? getBuildingsList().find(b => b.id === selectedBuildingId) 
     : null;
   
-  // Fonction d'adaptation pour maintenir la compatibilité
-  const calculateBuildingValue = (buildingId: number) => {
-    const building = ownedBuildings.find(b => b.id === buildingId.toString());
-    if (!building) return 0;
+  // Fonction pour calculer la valeur d'un bâtiment
+  const calculateBuildingValue = (buildingId: number): number => {
     return estimateBuildingValue(buildingId);
   };
 
@@ -76,12 +74,10 @@ export const useUrbanPropertiesTab = () => {
     filteredOwnedBuildings,
     
     // Fonctions
-    sellBuilding: (buildingId: number) => {
-      return saleBuilding(buildingId);
-    },
+    sellBuilding,
     calculateBuildingValue,
     toggleMaintenance,
-    performMaintenance: (buildingId: number) => {
+    performMaintenance: (buildingId: number): boolean => {
       performMaintenance(buildingId);
       return true; // Pour la compatibilité de l'interface
     },
@@ -89,7 +85,7 @@ export const useUrbanPropertiesTab = () => {
     
     // Compatibilité
     buildings: ownedBuildings,
-    handleAddProperty: (buildingId: string, buildingType: "rural" | "urban" | "religious" | "public", location: string, customName?: string) => {
+    handleAddProperty: (buildingId: string, buildingType: "rural" | "urban" | "religious" | "public", location: string, customName?: string): boolean => {
       // Implémentation simplifiée
       return true;
     }

@@ -3,7 +3,7 @@ import React from 'react';
 import { TraitesList } from '../TraitesList';
 import { ActionsPanel, ActionItem } from '@/components/ui-custom/ActionsPanel';
 import { Plus } from 'lucide-react';
-import { traitesMock } from '../data/traites';
+import { traitesMock } from '../data';
 
 interface TraitesTabProps {
   searchTerm: string;
@@ -29,7 +29,7 @@ export const TraitesTab: React.FC<TraitesTabProps> = ({
     <>
       <ActionsPanel
         title="Actions disponibles"
-        description="Gérez les traités diplomatiques"
+        description="Gérez les traités avec les nations étrangères"
         actions={actions}
         className="mb-4"
       />

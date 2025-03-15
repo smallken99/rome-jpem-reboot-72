@@ -1,64 +1,51 @@
 
-import { ReactNode } from 'react';
-
 export interface Nation {
   id: string;
   name: string;
   region: string;
-  founded?: string;
   status: 'ally' | 'neutral' | 'enemy' | 'tributary';
+  leader: string;
+  leaderTitle: string;
   description: string;
-  leader?: string;
-  capital?: string;
-  flag?: string;
-  relation?: string;
-  power?: number;
+  relationLevel: number;
   // Propriétés supplémentaires
-  population?: number;
-  militaryStrength?: number;
-  diplomaticInfluence?: number;
-  tradeValue?: number;
-  lastContact?: string;
+  population: number;
+  militaryStrength: number;
+  diplomaticInfluence: number;
+  tradeValue: number;
+  lastContact: string;
   leaders?: string[];
 }
 
 export interface Traite {
   id: string;
   title: string;
+  type: 'commercial' | 'peace' | 'military' | 'tribute';
   parties: string[];
-  type: 'commercial' | 'peace' | 'military' | 'tribute' | 'trade';
   status: 'active' | 'draft' | 'expired' | 'revoked' | 'violated';
   description: string;
-  dateCreated: string;
-  dateExpires?: string;
-  date?: string;
-  terms?: string[];
   // Propriétés supplémentaires
-  dateSignature?: string;
-  dateExpiration?: string;
-  clauses?: string[];
-  benefits?: string[];
-  obligations?: string[];
+  dateSignature: string;
+  dateExpiration: string;
+  clauses: string[];
+  benefits: string;
+  obligations: string;
 }
 
 export interface Alliance {
   id: string;
   name: string;
+  type: 'defensive' | 'offensive' | 'trade' | 'cultural';
   nations: string[];
-  type: 'defensive' | 'offensive' | 'commercial' | 'full';
-  status: 'active' | 'inactive' | 'pending' | 'expired' | 'dissolved';
+  status: 'active' | 'inactive' | 'pending' | 'expired';
   description: string;
-  date?: string;
-  dateCreated: string;
-  dateExpires?: string;
-  terms?: string[];
   // Propriétés supplémentaires
-  members?: string[];
-  dateCreation?: string;
-  duration?: number;
-  militarySupport?: number;
-  economicBenefits?: string[];
-  commitments?: string[];
+  dateCreation: string;
+  duration: number;
+  members: string[];
+  militarySupport: string;
+  economicBenefits: string;
+  commitments: string;
 }
 
 export interface NationsListProps {
@@ -80,12 +67,4 @@ export interface AlliancesMilitairesProps {
   searchTerm: string;
   filters: any;
   isEditable: boolean;
-}
-
-export interface DiplomaticFiltersProps {
-  activeTab: string;
-  onFilterChange: (filters: any) => void;
-  onReset: () => void;
-  onSearch?: (term: string) => void;
-  onFilter?: (filters: any) => void;
 }

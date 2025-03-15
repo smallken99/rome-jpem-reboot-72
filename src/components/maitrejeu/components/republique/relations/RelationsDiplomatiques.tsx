@@ -1,122 +1,98 @@
 
 import React, { useState } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { nationsMock } from './data';
-import { traitesMock } from './data';
-import { alliancesMock } from './data';
-import { NationsList } from './NationsList';
-import { TraitesList } from './TraitesList';
-import { AlliancesMilitaires } from './AlliancesMilitaires';
-import { DiplomaticHeader } from './DiplomaticHeader';
+import { Input } from '@/components/ui/input';
 import { DiplomaticFilters } from './DiplomaticFilters';
-import { Nation, Traite, Alliance } from './types';
+import { NationsTab } from './tabs/NationsTab';
+import { TraitesTab } from './tabs/TraitesTab';
+import { AlliancesTab } from './tabs/AlliancesTab';
+import { AddNationModal } from './modals/AddNationModal';
+import { AddTraiteModal } from './modals/AddTraiteModal';
+import { AddAllianceModal } from './modals/AddAllianceModal';
+import { nationsMock } from './data/nations';
+import { traitesMock } from './data/traites';
+import { alliancesMock } from './data/alliances';
 
-export const RelationsDiplomatiques: React.FC = () => {
+export const RelationsDiplomatiques = () => {
   const [activeTab, setActiveTab] = useState('nations');
   const [searchTerm, setSearchTerm] = useState('');
-  const [nationsData, setNationsData] = useState<Nation[]>([...nationsMock]);
-  const [traitesData, setTraitesData] = useState<Traite[]>([...traitesMock]);
-  const [alliancesData, setAlliancesData] = useState<Alliance[]>([...alliancesMock]);
-  const [filters, setFilters] = useState({
-    status: '',
-    region: '',
-    dateFrom: '',
-    dateTo: ''
-  });
-  
-  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setSearchTerm(e.target.value);
-  };
-  
-  const handleFilterChange = (newFilters: any) => {
-    setFilters(newFilters);
-  };
-  
+  const [filters, setFilters] = useState({});
+  const [addNationModalOpen, setAddNationModalOpen] = useState(false);
+  const [addTraiteModalOpen, setAddTraiteModalOpen] = useState(false);
+  const [addAllianceModalOpen, setAddAllianceModalOpen] = useState(false);
+
   const resetFilters = () => {
-    setFilters({
-      status: '',
-      region: '',
-      dateFrom: '',
-      dateTo: ''
-    });
+    setFilters({});
   };
 
-  const handleSearch = (term: string) => {
-    setSearchTerm(term);
-  };
-
-  const handleFilter = (newFilter: any) => {
-    setFilters(newFilter);
-  };
-  
-  const openAddNationModal = () => {
-    // Implémentation à venir
-    console.log('Open add nation modal');
-  };
-  
-  const openAddTraiteModal = () => {
-    // Implémentation à venir
-    console.log('Open add traité modal');
-  };
-  
-  const openAddAllianceModal = () => {
-    // Implémentation à venir
-    console.log('Open add alliance modal');
-  };
-  
   return (
-    <Card>
-      <CardHeader className="p-6">
-        <DiplomaticHeader 
-          activeTab={activeTab}
-          searchTerm={searchTerm}
-          onSearchChange={handleSearchChange}
-          filters={filters}
-          onFilterChange={handleFilterChange}
-          onResetFilters={resetFilters}
-          openAddNationModal={openAddNationModal}
-          openAddTraiteModal={openAddTraiteModal}
-          openAddAllianceModal={openAddAllianceModal}
-        />
-      </CardHeader>
+    <div className="space-y-6">
+      <div className="flex justify-between items-center">
+        <h2 className="text-2xl font-bold tracking-tight">Relations Diplomatiques</h2>
+        <div className="flex items-center gap-2">
+          <Input
+            placeholder="Rechercher..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="max-w-[200px]"
+          />
+          <DiplomaticFilters
+            activeTab={activeTab}
+            onFilterChange={setFilters}
+            onReset={resetFilters}
+            onSearch={setSearchTerm}
+          />
+        </div>
+      </div>
+
+      <Tabs value={activeTab} onValueChange={setActiveTab}>
+        <TabsList className="grid w-full grid-cols-3">
+          <TabsTrigger value="nations">Nations</TabsTrigger>
+          <TabsTrigger value="traites">Traités</TabsTrigger>
+          <TabsTrigger value="alliances">Alliances</TabsTrigger>
+        </TabsList>
+        
+        <TabsContent value="nations">
+          <NationsTab
+            searchTerm={searchTerm}
+            filters={filters}
+            openAddNationModal={() => setAddNationModalOpen(true)}
+          />
+        </TabsContent>
+        
+        <TabsContent value="traites">
+          <TraitesTab
+            searchTerm={searchTerm}
+            filters={filters}
+            openAddTraiteModal={() => setAddTraiteModalOpen(true)}
+          />
+        </TabsContent>
+        
+        <TabsContent value="alliances">
+          <AlliancesTab
+            searchTerm={searchTerm}
+            filters={filters}
+            openAddAllianceModal={() => setAddAllianceModalOpen(true)}
+          />
+        </TabsContent>
+      </Tabs>
       
-      <CardContent className="p-6 pt-0">
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="mb-6 grid w-full grid-cols-3">
-            <TabsTrigger value="nations">Nations</TabsTrigger>
-            <TabsTrigger value="traites">Traités</TabsTrigger>
-            <TabsTrigger value="alliances">Alliances</TabsTrigger>
-          </TabsList>
-          
-          <TabsContent value="nations">
-            <NationsList 
-              nations={nationsData} 
-              searchTerm={searchTerm} 
-              filters={filters}
-              isEditable={true}
-            />
-          </TabsContent>
-          
-          <TabsContent value="traites">
-            <TraitesList 
-              traites={traitesData} 
-              searchTerm={searchTerm} 
-              filters={filters}
-              isEditable={true}
-            />
-          </TabsContent>
-          
-          <TabsContent value="alliances">
-            <AlliancesMilitaires 
-              alliances={alliancesData} 
-              searchTerm={searchTerm} 
-              filters={filters}
-              isEditable={true}
-            />
-          </TabsContent>
-        </Tabs>
-      </CardContent>
-    </Card>
+      <AddNationModal
+        open={addNationModalOpen}
+        onOpenChange={setAddNationModalOpen}
+      />
+      
+      <AddTraiteModal
+        open={addTraiteModalOpen}
+        onOpenChange={setAddTraiteModalOpen}
+        nations={nationsMock}
+      />
+      
+      <AddAllianceModal
+        open={addAllianceModalOpen}
+        onOpenChange={setAddAllianceModalOpen}
+        nations={nationsMock}
+      />
+    </div>
   );
 };

@@ -3,7 +3,7 @@ import React from 'react';
 import { AlliancesMilitaires } from '../AlliancesMilitaires';
 import { ActionsPanel, ActionItem } from '@/components/ui-custom/ActionsPanel';
 import { Plus } from 'lucide-react';
-import { alliancesMock } from '../data/alliances';
+import { alliancesMock } from '../data';
 
 interface AlliancesTabProps {
   searchTerm: string;
@@ -29,7 +29,7 @@ export const AlliancesTab: React.FC<AlliancesTabProps> = ({
     <>
       <ActionsPanel
         title="Actions disponibles"
-        description="Gérez les alliances militaires"
+        description="Gérez les alliances militaires et diplomatiques"
         actions={actions}
         className="mb-4"
       />

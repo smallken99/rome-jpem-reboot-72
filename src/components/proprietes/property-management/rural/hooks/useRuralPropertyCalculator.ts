@@ -1,5 +1,5 @@
 
-import { OwnedBuilding } from '../../hooks/building/types';
+import { OwnedBuilding } from '@/components/proprietes/hooks/building/types';
 import { useBuildingSale } from './useBuildingSale';
 
 export const useRuralPropertyCalculator = () => {
