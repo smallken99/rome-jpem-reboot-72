@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import {
   Dialog,
@@ -10,7 +11,7 @@ import {
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Button } from "@/components/ui/button"
-import { BuildingType, BuildingStatus, BuildingCreationData, PublicBuildingModalProps } from '../../types/batiments';
+import { BuildingType, BuildingStatus, BuildingCreationData, PublicBuildingModalProps, BuildingOwner } from '../../types/batiments';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 const PublicBuildingModal: React.FC<PublicBuildingModalProps> = ({
@@ -29,7 +30,7 @@ const PublicBuildingModal: React.FC<PublicBuildingModalProps> = ({
   const [maintenanceCost, setMaintenanceCost] = useState(building?.maintenanceCost?.toString() || '');
   const [revenue, setRevenue] = useState(building?.revenue?.toString() || '');
   const [capacity, setCapacity] = useState(building?.capacity?.toString() || '');
-  const [owner, setOwner] = useState(building?.owner || '');
+  const [owner, setOwner] = useState<BuildingOwner>(building?.owner || 'république');
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -44,7 +45,7 @@ const PublicBuildingModal: React.FC<PublicBuildingModalProps> = ({
       maintenanceCost: parseInt(maintenanceCost),
       revenue: parseInt(revenue),
       capacity: parseInt(capacity),
-      owner
+      owner: owner as BuildingOwner
     };
     
     onSave(buildingData);
@@ -164,11 +165,21 @@ const PublicBuildingModal: React.FC<PublicBuildingModalProps> = ({
             <Label htmlFor="owner" className="text-right">
               Propriétaire
             </Label>
-            <Input type="text" id="owner" value={owner} onChange={(e) => setOwner(e.target.value)} className="col-span-3" />
+            <Select onValueChange={(value: BuildingOwner) => setOwner(value)} value={owner}>
+              <SelectTrigger className="col-span-3">
+                <SelectValue placeholder="Sélectionner un propriétaire" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="république">République</SelectItem>
+                <SelectItem value="private">Privé</SelectItem>
+                <SelectItem value="temple">Temple</SelectItem>
+                <SelectItem value="military">Militaire</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
         </form>
         <DialogFooter>
-          <Button type="submit">Sauvegarder</Button>
+          <Button type="submit" onClick={handleSubmit}>Sauvegarder</Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>

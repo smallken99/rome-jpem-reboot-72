@@ -1,3 +1,4 @@
+
 import { useState, useCallback } from 'react';
 import { useMaitreJeu } from '../components/maitrejeu/context';
 import { useBatimentsPublics, PublicBuilding, ConstructionProject } from '@/components/republique/batiments/hooks/useBatimentsPublics';
@@ -29,7 +30,7 @@ export const useBuildingManagement = () => {
       duration: buildingData.constructionTime || 4,
       expectedCompletionYear: economicFactors.currentYear + Math.ceil(buildingData.constructionTime / 4),
       benefits: buildingData.benefits || [],
-      buildingTypeId: buildingData.typeId
+      sponsors: [] // Adding the required sponsors property with an empty array
     });
     
     // Record the initial payment in the economy system
