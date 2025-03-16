@@ -2,6 +2,7 @@
 import { useState, useEffect } from 'react';
 import { useEconomy } from '@/hooks/useEconomy';
 import { usePatrimoine } from '@/hooks/usePatrimoine';
+import { toast } from 'sonner';
 import { v4 as uuidv4 } from 'uuid';
 
 export type Transaction = {
@@ -40,7 +41,7 @@ export const useMonetaryManagement = () => {
   // Utiliser la balance du patrimoine
   const balance = patrimoine.balance;
   
-  // Simuler des données de destinataires pour les paiements
+  // Liste des destinataires pour les paiements
   const [recipients] = useState<Recipient[]>([
     { id: '1', name: 'Famille Claudius', type: 'famille' },
     { id: '2', name: 'Marchand Titus Accius', type: 'fournisseur' },
@@ -69,28 +70,62 @@ export const useMonetaryManagement = () => {
     }
   }, [patrimoine.transactions]);
   
-  // Statistiques des revenus
-  const incomeStats: FinancialStats = {
-    total: transactions.filter(t => t.type === 'income').reduce((sum, t) => sum + t.amount, 0),
-    monthly: 42000, // Estimation mensuelle
-    categories: [
-      { name: 'Production agricole', amount: 25000, percentage: 60 },
-      { name: 'Propriétés locatives', amount: 15000, percentage: 35 },
-      { name: 'Autres revenus', amount: 2000, percentage: 5 },
-    ]
+  // Calculer les statistiques des revenus à partir des vraies données
+  const calculateIncomeStats = (): FinancialStats => {
+    const incomeTransactions = transactions.filter(t => t.type === 'income');
+    const total = incomeTransactions.reduce((sum, t) => sum + t.amount, 0);
+    
+    // Grouper par catégorie
+    const categoriesMap = new Map<string, number>();
+    incomeTransactions.forEach(t => {
+      const currentAmount = categoriesMap.get(t.category) || 0;
+      categoriesMap.set(t.category, currentAmount + t.amount);
+    });
+    
+    // Convertir en tableau de catégories avec pourcentages
+    const categories = Array.from(categoriesMap.entries()).map(([name, amount]) => ({
+      name,
+      amount,
+      percentage: total > 0 ? Math.round((amount / total) * 100) : 0
+    }));
+    
+    // Trier par montant décroissant
+    categories.sort((a, b) => b.amount - a.amount);
+    
+    return {
+      total,
+      monthly: Math.round(total / 12), // Estimation mensuelle basée sur le total
+      categories
+    };
   };
   
-  // Statistiques des dépenses
-  const expenseStats: FinancialStats = {
-    total: transactions.filter(t => t.type === 'expense').reduce((sum, t) => sum + Math.abs(t.amount), 0),
-    monthly: 30000, // Estimation mensuelle
-    categories: [
-      { name: 'Entretien des propriétés', amount: 12000, percentage: 40 },
-      { name: 'Personnel', amount: 8000, percentage: 27 },
-      { name: 'Relations clientèle', amount: 5000, percentage: 17 },
-      { name: 'Impôts et taxes', amount: 3000, percentage: 10 },
-      { name: 'Divers', amount: 2000, percentage: 6 },
-    ]
+  // Calculer les statistiques des dépenses à partir des vraies données
+  const calculateExpenseStats = (): FinancialStats => {
+    const expenseTransactions = transactions.filter(t => t.type === 'expense');
+    const total = expenseTransactions.reduce((sum, t) => sum + Math.abs(t.amount), 0);
+    
+    // Grouper par catégorie
+    const categoriesMap = new Map<string, number>();
+    expenseTransactions.forEach(t => {
+      const currentAmount = categoriesMap.get(t.category) || 0;
+      categoriesMap.set(t.category, currentAmount + Math.abs(t.amount));
+    });
+    
+    // Convertir en tableau de catégories avec pourcentages
+    const categories = Array.from(categoriesMap.entries()).map(([name, amount]) => ({
+      name,
+      amount,
+      percentage: total > 0 ? Math.round((amount / total) * 100) : 0
+    }));
+    
+    // Trier par montant décroissant
+    categories.sort((a, b) => b.amount - a.amount);
+    
+    return {
+      total,
+      monthly: Math.round(total / 12), // Estimation mensuelle basée sur le total
+      categories
+    };
   };
   
   // Effectuer un paiement
@@ -100,33 +135,123 @@ export const useMonetaryManagement = () => {
     description: string, 
     category: string
   ): boolean => {
-    if (amount <= 0 || amount > balance) {
-      throw new Error(amount <= 0 
-        ? 'Le montant doit être positif' 
-        : 'Fonds insuffisants pour ce paiement');
+    if (amount <= 0) {
+      toast.error('Le montant doit être positif');
+      return false;
+    }
+    
+    if (amount > balance) {
+      toast.error('Fonds insuffisants pour ce paiement');
+      return false;
     }
     
     const recipient = recipients.find(r => r.id === recipientId);
     if (!recipient) {
-      throw new Error('Destinataire non trouvé');
+      toast.error('Destinataire non trouvé');
+      return false;
     }
     
-    // Enregistrer la transaction dans le patrimoine
-    patrimoine.addTransaction({
-      amount: -amount, // Montant négatif pour une dépense
-      description: `${recipient.name}: ${description}`,
-      category: category,
-      type: 'expense'
+    try {
+      // Enregistrer la transaction dans le patrimoine
+      patrimoine.addTransaction({
+        amount: -amount, // Montant négatif pour une dépense
+        description: `${recipient.name}: ${description}`,
+        category: category,
+        type: 'expense'
+      });
+      
+      // Enregistrer également dans le système d'économie global
+      economy.makePayment(
+        amount,
+        recipient.name,
+        category
+      );
+      
+      toast.success(`Paiement de ${amount.toLocaleString()} As effectué à ${recipient.name}`);
+      return true;
+    } catch (error) {
+      console.error("Erreur lors du paiement:", error);
+      toast.error("Une erreur est survenue lors du paiement");
+      return false;
+    }
+  };
+  
+  // Enregistrer un revenu
+  const recordIncome = (
+    source: string,
+    amount: number,
+    description: string,
+    category: string
+  ): boolean => {
+    if (amount <= 0) {
+      toast.error('Le montant doit être positif');
+      return false;
+    }
+    
+    try {
+      // Enregistrer la transaction dans le patrimoine
+      patrimoine.addTransaction({
+        amount: amount,
+        description: `${source}: ${description}`,
+        category: category,
+        type: 'income'
+      });
+      
+      // Enregistrer également dans le système d'économie global
+      economy.recordIncome(
+        amount,
+        source,
+        category
+      );
+      
+      toast.success(`Revenu de ${amount.toLocaleString()} As enregistré`);
+      return true;
+    } catch (error) {
+      console.error("Erreur lors de l'enregistrement du revenu:", error);
+      toast.error("Une erreur est survenue lors de l'enregistrement du revenu");
+      return false;
+    }
+  };
+  
+  // Filtrer les transactions
+  const filterTransactions = (
+    filters: {
+      startDate?: Date,
+      endDate?: Date,
+      type?: 'income' | 'expense' | 'all',
+      category?: string,
+      minAmount?: number,
+      maxAmount?: number,
+      search?: string
+    }
+  ): Transaction[] => {
+    return transactions.filter(transaction => {
+      // Filtrer par date
+      if (filters.startDate && transaction.date < filters.startDate) return false;
+      if (filters.endDate && transaction.date > filters.endDate) return false;
+      
+      // Filtrer par type
+      if (filters.type && filters.type !== 'all' && transaction.type !== filters.type) return false;
+      
+      // Filtrer par catégorie
+      if (filters.category && transaction.category !== filters.category) return false;
+      
+      // Filtrer par montant
+      if (filters.minAmount !== undefined && Math.abs(transaction.amount) < filters.minAmount) return false;
+      if (filters.maxAmount !== undefined && Math.abs(transaction.amount) > filters.maxAmount) return false;
+      
+      // Filtrer par recherche textuelle
+      if (filters.search) {
+        const searchTerm = filters.search.toLowerCase();
+        if (!transaction.description.toLowerCase().includes(searchTerm) &&
+            !transaction.recipient.toLowerCase().includes(searchTerm) &&
+            !transaction.category.toLowerCase().includes(searchTerm)) {
+          return false;
+        }
+      }
+      
+      return true;
     });
-    
-    // Enregistrer également dans le système d'économie global
-    economy.makePayment(
-      amount,
-      recipient.name,
-      category
-    );
-    
-    return true;
   };
   
   return {
@@ -134,7 +259,9 @@ export const useMonetaryManagement = () => {
     transactions,
     recipients,
     makePayment,
-    incomeStats,
-    expenseStats
+    recordIncome,
+    filterTransactions,
+    incomeStats: calculateIncomeStats(),
+    expenseStats: calculateExpenseStats()
   };
 };

@@ -1,11 +1,10 @@
 
-// Format a number as Roman currency (deniers, as, sesterces)
+// Format a number as Roman currency (As)
 export const formatCurrency = (amount: number): string => {
-  // Simple implementation returning As
   return `${amount.toLocaleString()} As`;
 };
 
-// Convert between different Roman currency units
+// Convert between different Roman currency units (tout est converti en As)
 export const convertCurrency = (amount: number, from: 'as' | 'sestertius' | 'denarius' | 'aureus', 
                                 to: 'as' | 'sestertius' | 'denarius' | 'aureus'): number => {
   // Currency conversion rates
@@ -21,9 +20,8 @@ export const convertCurrency = (amount: number, from: 'as' | 'sestertius' | 'den
   return asAmount / rates[to];
 };
 
-// Format un montant en deniers ou sesterces selon la valeur
+// Format un montant en As (comme demandé)
 export const formatOptimalCurrency = (amount: number): string => {
-  // Pour maintenant, tout afficher en As comme demandé
   return `${amount.toLocaleString()} As`;
 };
 
@@ -32,4 +30,10 @@ export const getCurrencyVariationColor = (amount: number): string => {
   if (amount > 0) return 'text-green-600';
   if (amount < 0) return 'text-red-600';
   return 'text-gray-500';
+};
+
+// Calculate the annual maintenance cost for a building based on its value
+export const calculateMaintenanceCost = (buildingValue: number): number => {
+  // Typically, annual maintenance is 2-5% of a building's value
+  return Math.round(buildingValue * 0.03); // 3% is a reasonable default
 };

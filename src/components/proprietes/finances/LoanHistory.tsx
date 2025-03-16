@@ -1,177 +1,100 @@
 
 import React from 'react';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Badge } from '@/components/ui/badge';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { formatMoney } from '@/utils/formatUtils';
+import { 
+  Table, TableBody, TableCell, TableHead, 
+  TableHeader, TableRow 
+} from '@/components/ui/table';
+import { 
+  Badge 
+} from '@/components/ui/badge';
+import { 
+  Calendar, Check, Clock, TrendingUp
+} from 'lucide-react';
+import { LoanHistory as LoanHistoryType } from './hooks/useLoanManagement';
+import { formatCurrency } from '@/utils/currencyUtils';
 
-interface LoanRecord {
-  id: string;
-  type: 'lent' | 'borrowed';
-  amount: number;
-  interest: number;
-  counterparty: string;
-  startDate: string;
-  endDate: string;
-  status: 'paid' | 'defaulted' | 'forgiven';
-  notes?: string;
+interface LoanHistoryProps {
+  loanHistory: LoanHistoryType[];
 }
 
-export const LoanHistory: React.FC = () => {
-  // Mock data - would come from an API in a real app
-  const loanHistory: LoanRecord[] = [
-    {
-      id: '1',
-      type: 'lent',
-      amount: 8000,
-      interest: 6,
-      counterparty: 'Titus Flavius',
-      startDate: '15 Mars 2022',
-      endDate: '20 Octobre 2022',
-      status: 'paid'
-    },
-    {
-      id: '2',
-      type: 'borrowed',
-      amount: 15000,
-      interest: 10,
-      counterparty: 'Crassus',
-      startDate: '1 Avril 2022',
-      endDate: '1 Avril 2023',
-      status: 'paid',
-      notes: 'Remboursé en avance'
-    },
-    {
-      id: '3',
-      type: 'lent',
-      amount: 3000,
-      interest: 8,
-      counterparty: 'Lucius Vitellius',
-      startDate: '20 Juin 2022',
-      endDate: '15 Janvier 2023',
-      status: 'defaulted',
-      notes: 'Défaut de paiement - procédure légale en cours'
-    },
-    {
-      id: '4',
-      type: 'lent',
-      amount: 2000,
-      interest: 5,
-      counterparty: 'Quintus Fabius',
-      startDate: '10 Septembre 2022',
-      endDate: '10 Mars 2023',
-      status: 'forgiven',
-      notes: 'Dette pardonnée après service rendu à la famille'
-    }
-  ];
-  
-  // Calculer les montants totaux
-  const totalLent = loanHistory
-    .filter(loan => loan.type === 'lent')
-    .reduce((sum, loan) => sum + loan.amount, 0);
-  
-  const totalBorrowed = loanHistory
-    .filter(loan => loan.type === 'borrowed')
-    .reduce((sum, loan) => sum + loan.amount, 0);
-  
-  const totalDefaulted = loanHistory
-    .filter(loan => loan.status === 'defaulted')
-    .reduce((sum, loan) => sum + loan.amount, 0);
-  
-  const getStatusBadge = (status: string) => {
-    switch (status) {
-      case 'paid':
-        return <Badge variant="success">Remboursé</Badge>;
-      case 'defaulted':
-        return <Badge variant="destructive">Défaut de paiement</Badge>;
-      case 'forgiven':
-        return <Badge variant="outline">Dette pardonnée</Badge>;
-      default:
-        return <Badge variant="outline">Inconnu</Badge>;
-    }
-  };
-  
+export const LoanHistory: React.FC<LoanHistoryProps> = ({ loanHistory }) => {
   return (
     <div className="space-y-6">
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium">Total prêté (historique)</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{formatMoney(totalLent)}</div>
-          </CardContent>
-        </Card>
-        
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium">Total emprunté (historique)</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{formatMoney(totalBorrowed)}</div>
-          </CardContent>
-        </Card>
-        
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium">Pertes sur défauts</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-red-600">{formatMoney(totalDefaulted)}</div>
-          </CardContent>
-        </Card>
-      </div>
-      
-      <Card>
-        <CardHeader>
-          <CardTitle>Historique des prêts</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Type</TableHead>
-                <TableHead>Partie</TableHead>
-                <TableHead>Montant</TableHead>
-                <TableHead>Intérêt</TableHead>
-                <TableHead>Période</TableHead>
-                <TableHead>Statut</TableHead>
-                <TableHead>Notes</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {loanHistory.map((loan) => (
+      {loanHistory.length === 0 ? (
+        <div className="text-center py-8">
+          <p className="text-muted-foreground">
+            Vous n'avez pas encore d'historique de prêts.
+          </p>
+        </div>
+      ) : (
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead>Prêteur</TableHead>
+              <TableHead>Montant</TableHead>
+              <TableHead>Intérêt</TableHead>
+              <TableHead>Dates</TableHead>
+              <TableHead>Total payé</TableHead>
+              <TableHead>Statut</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {loanHistory.map((loan) => {
+              const interestPaid = loan.totalPaid - loan.amount;
+              
+              return (
                 <TableRow key={loan.id}>
                   <TableCell>
-                    <Badge variant={loan.type === 'lent' ? 'outline' : 'secondary'}>
-                      {loan.type === 'lent' ? 'Prêté' : 'Emprunté'}
+                    <div className="font-medium">{loan.lender}</div>
+                  </TableCell>
+                  <TableCell>
+                    <div>{formatCurrency(loan.amount)}</div>
+                  </TableCell>
+                  <TableCell>
+                    <div className="flex items-center">
+                      <TrendingUp className="h-4 w-4 text-muted-foreground mr-2" />
+                      <span>{loan.interestRate}%</span>
+                    </div>
+                    <div className="text-xs text-muted-foreground mt-1">
+                      {formatCurrency(interestPaid)} payés en intérêts
+                    </div>
+                  </TableCell>
+                  <TableCell>
+                    <div className="flex items-center">
+                      <Calendar className="h-4 w-4 text-muted-foreground mr-2" />
+                      <span>Contracté le {loan.dateIssued.toLocaleDateString()}</span>
+                    </div>
+                    <div className="flex items-center text-xs text-muted-foreground mt-1">
+                      <Clock className="h-3 w-3 mr-1" />
+                      <span>Remboursé le {loan.dateRepaid.toLocaleDateString()}</span>
+                    </div>
+                  </TableCell>
+                  <TableCell>
+                    <div className="font-medium">{formatCurrency(loan.totalPaid)}</div>
+                  </TableCell>
+                  <TableCell>
+                    <Badge 
+                      variant={loan.status === 'repaid' ? 'outline' : 'destructive'} 
+                      className={
+                        loan.status === 'repaid' 
+                          ? 'bg-green-50 text-green-700 border-green-200' 
+                          : ''
+                      }
+                    >
+                      {loan.status === 'repaid' ? (
+                        <span className="flex items-center">
+                          <Check className="h-3 w-3 mr-1" />
+                          Remboursé
+                        </span>
+                      ) : 'Défaillant'}
                     </Badge>
                   </TableCell>
-                  <TableCell className="font-medium">{loan.counterparty}</TableCell>
-                  <TableCell>{formatMoney(loan.amount)}</TableCell>
-                  <TableCell>{loan.interest}%</TableCell>
-                  <TableCell>
-                    <span className="text-sm">
-                      {loan.startDate} — {loan.endDate}
-                    </span>
-                  </TableCell>
-                  <TableCell>{getStatusBadge(loan.status)}</TableCell>
-                  <TableCell className="text-sm text-muted-foreground">
-                    {loan.notes || '-'}
-                  </TableCell>
                 </TableRow>
-              ))}
-              {loanHistory.length === 0 && (
-                <TableRow>
-                  <TableCell colSpan={7} className="text-center py-4 text-muted-foreground">
-                    Aucun historique de prêt
-                  </TableCell>
-                </TableRow>
-              )}
-            </TableBody>
-          </Table>
-        </CardContent>
-      </Card>
+              );
+            })}
+          </TableBody>
+        </Table>
+      )}
     </div>
   );
 };
