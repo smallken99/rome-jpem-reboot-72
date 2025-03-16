@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
 import { 
@@ -21,9 +21,10 @@ import {
   AlertTriangle
 } from 'lucide-react';
 import { useMaitreJeu } from '@/components/maitrejeu/context';
-import { formatDate } from '@/utils/formatUtils';
 import { Badge } from '@/components/ui/badge';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
+import { toast } from 'sonner';
 
 export interface MaitreJeuSidebarProps {
   activeTab: string;
@@ -34,22 +35,48 @@ export const MaitreJeuSidebar: React.FC<MaitreJeuSidebarProps> = ({
   activeTab,
   setActiveTab
 }) => {
-  const { currentDate, currentPhase, advanceTime, changePhase } = useMaitreJeu();
+  const { currentDate, currentPhase, advanceTime } = useMaitreJeu();
+  const [timeDialogOpen, setTimeDialogOpen] = useState(false);
   
   const navItems = [
+    { id: 'accueil', label: 'Accueil', icon: <Landmark className="h-4 w-4" />, developed: true },
     { id: 'senateurs', label: 'Sénateurs', icon: <Users className="h-4 w-4" />, developed: true },
     { id: 'clients', label: 'Clients', icon: <UserPlus className="h-4 w-4" />, developed: true },
     { id: 'familles', label: 'Familles', icon: <Users2 className="h-4 w-4" />, developed: true },
-    { id: 'politique', label: 'Politique', icon: <Gavel className="h-4 w-4" />, developed: false },
+    { id: 'politique', label: 'Politique', icon: <Gavel className="h-4 w-4" />, developed: true },
     { id: 'equilibre', label: 'Équilibre', icon: <Scale className="h-4 w-4" />, developed: false },
-    { id: 'provinces', label: 'Provinces', icon: <Globe className="h-4 w-4" />, developed: false },
+    { id: 'provinces', label: 'Provinces', icon: <Globe className="h-4 w-4" />, developed: true },
     { id: 'histoire', label: 'Histoire', icon: <BookText className="h-4 w-4" />, developed: false },
-    { id: 'economie', label: 'Économie', icon: <Coins className="h-4 w-4" />, developed: false },
+    { id: 'economie', label: 'Économie', icon: <Coins className="h-4 w-4" />, developed: true },
     { id: 'republique', label: 'République', icon: <Landmark className="h-4 w-4" />, developed: true },
-    { id: 'batiments', label: 'Bâtiments', icon: <Building className="h-4 w-4" />, developed: false },
+    { id: 'batiments', label: 'Bâtiments', icon: <Building className="h-4 w-4" />, developed: true },
     { id: 'lois', label: 'Lois', icon: <ScrollText className="h-4 w-4" />, developed: true },
     { id: 'statistiques', label: 'Statistiques', icon: <BarChart2 className="h-4 w-4" />, developed: false }
   ];
+  
+  const handleAdvanceTime = () => {
+    setTimeDialogOpen(true);
+  };
+  
+  const confirmAdvanceTime = () => {
+    advanceTime();
+    setTimeDialogOpen(false);
+    toast.success("Le temps a avancé à la saison suivante");
+  };
+  
+  const formatDate = (date: { year: number; season: string }) => {
+    const seasonMap: Record<string, string> = {
+      'Ver': 'Printemps',
+      'Aestas': 'Été',
+      'Autumnus': 'Automne',
+      'Hiems': 'Hiver',
+      'SPRING': 'Printemps',
+      'SUMMER': 'Été',
+      'AUTUMN': 'Automne',
+      'WINTER': 'Hiver'
+    };
+    return `An ${date.year} AUC - ${seasonMap[date.season] || date.season}`;
+  };
   
   return (
     <div className="h-full w-56 border-r bg-background flex flex-col">
@@ -120,7 +147,7 @@ export const MaitreJeuSidebar: React.FC<MaitreJeuSidebarProps> = ({
           variant="outline" 
           size="sm" 
           className="w-full flex items-center gap-2"
-          onClick={() => advanceTime()}
+          onClick={handleAdvanceTime}
         >
           <CalendarClock className="h-4 w-4" />
           Avancer le temps
@@ -136,6 +163,31 @@ export const MaitreJeuSidebar: React.FC<MaitreJeuSidebarProps> = ({
           Statistiques
         </Button>
       </div>
+      
+      <Dialog open={timeDialogOpen} onOpenChange={setTimeDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Avancer le temps</DialogTitle>
+            <DialogDescription>
+              Voulez-vous vraiment passer à la saison suivante? Cette action ne peut pas être annulée.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="flex items-center gap-2 py-3 text-amber-500 bg-amber-500/10 px-4 rounded-md">
+            <AlertTriangle className="h-5 w-5" />
+            <p className="text-sm">
+              Tous les événements non résolus de la saison actuelle seront automatiquement résolus.
+            </p>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setTimeDialogOpen(false)}>
+              Annuler
+            </Button>
+            <Button onClick={confirmAdvanceTime}>
+              Confirmer
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };

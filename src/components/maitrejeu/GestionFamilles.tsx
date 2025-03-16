@@ -1,249 +1,198 @@
 
 import React, { useState } from 'react';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { useFamilleGestion } from './components/famille/gestion/useFamilleGestion';
+import { FamilleListe } from './components/famille/gestion/FamilleListe';
+import { FamilleDetail } from './components/famille/gestion/FamilleDetail';
+import { FamilleRelationsOverview } from './components/famille/gestion/FamilleRelationsOverview';
+import { FamilleCreationDialog } from './components/famille/gestion/dialogs/FamilleCreationDialog';
+import { MembreCreationDialog } from './components/famille/gestion/dialogs/MembreCreationDialog';
+import { AllianceCreationDialog } from './components/famille/gestion/dialogs/AllianceCreationDialog';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { FamilleActions } from './components/famille/FamilleActions';
 import { Button } from '@/components/ui/button';
-import { Plus, UserPlus, UsersRound, UserRoundPlus } from 'lucide-react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { useMaitreJeu } from './context';
-import { FamilleInfo, MembreFamille, FamilleAlliance, FamilleCreationData } from './types';
-import { FamillesTabContent } from './components/famille/gestion/FamillesTabContent';
-import { FamilleDetailTabContent } from './components/famille/gestion/FamilleDetailTabContent';
-import { FamilleMembresTabContent } from './components/famille/gestion/FamilleMembresTabContent';
-import { FamilleAlliancesTabContent } from './components/famille/gestion/FamilleAlliancesTabContent';
-import { FamilleModal } from './components/famille/FamilleModal';
-import { MembreFamilleModal } from './components/famille/MembreFamilleModal';
-import { AllianceModal } from './components/famille/AllianceModal';
+import { ArrowLeft, Search } from 'lucide-react';
+import { Input } from '@/components/ui/input';
 
-export const GestionFamilles: React.FC = () => {
-  const { familles, membres, alliances, addFamille, updateFamille, deleteFamille } = useMaitreJeu();
-  
-  const [activeTab, setActiveTab] = useState('familles');
-  const [selectedFamilleId, setSelectedFamilleId] = useState<string | null>(null);
-  const [showFamilleModal, setShowFamilleModal] = useState(false);
-  const [showMembreModal, setShowMembreModal] = useState(false);
-  const [showAllianceModal, setShowAllianceModal] = useState(false);
-  const [familleFilter, setFamilleFilter] = useState({});
-  const [searchTerm, setSearchTerm] = useState('');
-  const [selectedMembre, setSelectedMembre] = useState<MembreFamille | null>(null);
-  const [selectedAlliance, setSelectedAlliance] = useState<FamilleAlliance | null>(null);
-  
-  const selectedFamille = selectedFamilleId ? familles.find(f => f.id === selectedFamilleId) : null;
-  
-  const handleCreateFamille = (familleData: FamilleCreationData) => {
-    const familleId = addFamille(familleData);
-    setSelectedFamilleId(familleId);
-    setShowFamilleModal(false);
-    setActiveTab('detail');
-  };
-  
-  const handleUpdateFamille = (familleData: FamilleCreationData) => {
-    if (selectedFamille) {
-      updateFamille(selectedFamille.id, familleData);
-      setShowFamilleModal(false);
-    }
-  };
-  
-  const handleDeleteFamille = (familleId: string) => {
-    deleteFamille(familleId);
-    setSelectedFamilleId(null);
-    setActiveTab('familles');
-  };
-  
-  const handleSelectFamille = (id: string) => {
-    setSelectedFamilleId(id);
-    setActiveTab('detail');
-  };
-  
-  const handleCreateMembre = (membreData: any) => {
-    console.log('Création membre:', membreData);
-    setShowMembreModal(false);
-  };
-  
-  const handleUpdateMembre = (membreData: any) => {
-    console.log('Mise à jour membre:', membreData);
-    setSelectedMembre(null);
-    setShowMembreModal(false);
-  };
-  
-  const handleDeleteMembre = (membreId: string) => {
-    console.log('Suppression membre:', membreId);
-  };
-  
-  const handleCreateAlliance = (allianceData: any) => {
-    console.log('Création alliance:', allianceData);
-    setShowAllianceModal(false);
-  };
-  
-  const handleUpdateAlliance = (allianceData: any) => {
-    console.log('Mise à jour alliance:', allianceData);
-    setSelectedAlliance(null);
-    setShowAllianceModal(false);
-  };
-  
-  const handleBack = () => {
-    setActiveTab('familles');
-    setSelectedFamilleId(null);
-  };
-  
-  const filteredFamilles = familles.filter(famille => {
-    if (searchTerm && !famille.nom.toLowerCase().includes(searchTerm.toLowerCase())) {
-      return false;
-    }
-    return true;
-  });
-  
-  const familleMembres = selectedFamilleId 
-    ? membres.filter(m => m.familleId === selectedFamilleId)
-    : [];
-  
-  const familleAlliances = selectedFamilleId 
-    ? alliances.filter(a => a.famille1Id === selectedFamilleId || a.famille2Id === selectedFamilleId)
-    : [];
-    
-  const otherFamilles = selectedFamilleId 
-    ? familles.filter(f => f.id !== selectedFamilleId)
-    : [];
-  
+export const GestionFamilles = () => {
+  const {
+    activeTab,
+    setActiveTab,
+    selectedFamilleId,
+    setSelectedFamilleId,
+    showFamilleModal,
+    setShowFamilleModal,
+    showMembreModal,
+    setShowMembreModal,
+    showAllianceModal,
+    setShowAllianceModal,
+    searchTerm,
+    setSearchTerm,
+    familles,
+    selectedFamille,
+    familleMembres,
+    familleAlliances,
+    handleCreateFamille,
+    handleUpdateFamille,
+    handleDeleteFamille,
+    handleCreateMembre,
+    handleUpdateMembre,
+    handleDeleteMembre,
+    handleCreateAlliance,
+    handleUpdateAlliance,
+    handleEditFamille,
+    handleEditMembre,
+    handleEditAlliance
+  } = useFamilleGestion();
+
   return (
-    <div className="p-6 space-y-6">
-      <h1 className="text-3xl font-bold mb-6">Gestion des Familles</h1>
-      
-      <div className="flex justify-between mb-4">
-        <Button
-          onClick={() => {
-            if (activeTab !== 'familles') {
-              handleBack();
-            } else {
-              setShowFamilleModal(true);
-            }
-          }}
-          className="gap-2"
-        >
-          {activeTab !== 'familles' ? (
-            <>Retour à la liste</>
-          ) : (
-            <>
-              <Plus className="h-4 w-4" />
-              Nouvelle Famille
-            </>
-          )}
-        </Button>
-      </div>
-      
-      <Tabs value={activeTab} onValueChange={setActiveTab}>
-        <TabsList className="hidden">
-          <TabsTrigger value="familles">Liste des Familles</TabsTrigger>
-          <TabsTrigger value="detail">Détail de la Famille</TabsTrigger>
-          <TabsTrigger value="membres">Membres</TabsTrigger>
-          <TabsTrigger value="alliances">Alliances</TabsTrigger>
-        </TabsList>
+    <div className="space-y-6 p-6">
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-3xl font-bold">Gestion des Familles</h1>
+          <p className="text-muted-foreground">
+            Gérez les lignées familiales et leurs relations
+          </p>
+        </div>
         
+        {selectedFamilleId && (
+          <Button 
+            variant="outline" 
+            className="flex items-center gap-2"
+            onClick={() => {
+              setSelectedFamilleId(null);
+              setActiveTab('familles');
+            }}
+          >
+            <ArrowLeft className="h-4 w-4" />
+            Retour à la liste
+          </Button>
+        )}
+      </div>
+
+      <Tabs value={activeTab} onValueChange={setActiveTab}>
+        <TabsList>
+          <TabsTrigger value="familles">Familles</TabsTrigger>
+          <TabsTrigger value="detail" disabled={!selectedFamilleId}>Détail</TabsTrigger>
+          <TabsTrigger value="relations">Relations</TabsTrigger>
+        </TabsList>
+
         <TabsContent value="familles">
-          <FamillesTabContent
-            familles={filteredFamilles}
-            searchTerm={searchTerm}
-            setSearchTerm={setSearchTerm}
-            familleFilter={familleFilter}
-            setFamilleFilter={setFamilleFilter}
-            onSelectFamille={handleSelectFamille}
-            onEditFamille={(famille) => {
-              setSelectedFamilleId(famille.id);
-              setShowFamilleModal(true);
-            }}
-            onDeleteFamille={handleDeleteFamille}
-            onAddMembre={(familleId) => {
-              setSelectedFamilleId(familleId);
-              setShowMembreModal(true);
-            }}
-            onAddAlliance={(familleId) => {
-              setSelectedFamilleId(familleId);
-              setShowAllianceModal(true);
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <div className="lg:col-span-2">
+              <Card>
+                <CardHeader className="pb-3 flex flex-row items-center">
+                  <div>
+                    <CardTitle>Familles Romaines</CardTitle>
+                    <CardDescription>
+                      Liste des familles nobles et patriciennes de Rome
+                    </CardDescription>
+                  </div>
+                  <div className="ml-auto flex items-center gap-2">
+                    <div className="relative w-full">
+                      <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+                      <Input
+                        placeholder="Rechercher une famille..."
+                        className="w-[200px] pl-8"
+                        value={searchTerm}
+                        onChange={(e) => setSearchTerm(e.target.value)}
+                      />
+                    </div>
+                    <Button onClick={() => setShowFamilleModal(true)}>
+                      Ajouter
+                    </Button>
+                  </div>
+                </CardHeader>
+                <CardContent>
+                  <FamilleListe
+                    familles={familles.filter(f => 
+                      f.nom.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                      f.gens.toLowerCase().includes(searchTerm.toLowerCase())
+                    )}
+                    onSelectFamille={(id) => {
+                      setSelectedFamilleId(id);
+                      setActiveTab('detail');
+                    }}
+                    onEditFamille={handleEditFamille}
+                    onDeleteFamille={handleDeleteFamille}
+                  />
+                </CardContent>
+              </Card>
+            </div>
+
+            <div className="lg:col-span-1">
+              <FamilleActions 
+                onCreateFamille={() => setShowFamilleModal(true)}
+                onCreateMembre={() => setShowMembreModal(true)}
+                onCreateAlliance={() => setShowAllianceModal(true)}
+                onManageRelations={() => setActiveTab('relations')}
+              />
+            </div>
+          </div>
+        </TabsContent>
+
+        <TabsContent value="detail">
+          {selectedFamille ? (
+            <FamilleDetail
+              famille={selectedFamille}
+              membres={familleMembres}
+              alliances={familleAlliances}
+              onUpdateFamille={handleUpdateFamille}
+              onDeleteFamille={handleDeleteFamille}
+              onAddMembre={() => setShowMembreModal(true)}
+              onEditMembre={handleEditMembre}
+              onDeleteMembre={handleDeleteMembre}
+              onAddAlliance={() => setShowAllianceModal(true)}
+              onEditAlliance={handleEditAlliance}
+            />
+          ) : (
+            <Card>
+              <CardContent className="p-6 text-center text-muted-foreground">
+                Sélectionnez une famille pour voir les détails
+              </CardContent>
+            </Card>
+          )}
+        </TabsContent>
+
+        <TabsContent value="relations">
+          <FamilleRelationsOverview 
+            familles={familles}
+            onSelectFamille={(id) => {
+              setSelectedFamilleId(id);
+              setActiveTab('detail');
             }}
           />
         </TabsContent>
-        
-        <TabsContent value="detail">
-          {selectedFamille && (
-            <FamilleDetailTabContent 
-              famille={selectedFamille}
-              onEditFamille={() => setShowFamilleModal(true)}
-              onDeleteFamille={() => handleDeleteFamille(selectedFamille.id)}
-              onBack={handleBack}
-            />
-          )}
-        </TabsContent>
-        
-        <TabsContent value="membres">
-          {selectedFamille && (
-            <FamilleMembresTabContent
-              membres={familleMembres}
-              famille={selectedFamille}
-              onAddMembre={() => setShowMembreModal(true)}
-              onEditMembre={(membre) => {
-                setSelectedMembre(membre);
-                setShowMembreModal(true);
-              }}
-              onDeleteMembre={handleDeleteMembre}
-              onBack={handleBack}
-            />
-          )}
-        </TabsContent>
-        
-        <TabsContent value="alliances">
-          {selectedFamille && (
-            <FamilleAlliancesTabContent
-              alliances={familleAlliances}
-              famille={selectedFamille}
-              familles={familles}
-              membres={membres}
-              onAddAlliance={() => setShowAllianceModal(true)}
-              onEditAlliance={(alliance) => {
-                setSelectedAlliance(alliance);
-                setShowAllianceModal(true);
-              }}
-              onDeleteAlliance={(id) => console.log('Suppression alliance:', id)}
-              onBack={handleBack}
-            />
-          )}
-        </TabsContent>
       </Tabs>
-      
-      {showFamilleModal && (
-        <FamilleModal
-          isOpen={true}
-          onClose={() => setShowFamilleModal(false)}
-          famille={selectedFamille || undefined}
-          onSave={(data) => selectedFamille ? handleUpdateFamille(data) : handleCreateFamille(data)}
-        />
-      )}
-      
-      {showMembreModal && (
-        <MembreFamilleModal
-          isOpen={true}
-          onClose={() => {
-            setShowMembreModal(false);
-            setSelectedMembre(null);
-          }}
-          membre={selectedMembre || undefined}
-          familles={familles}
-          selectedFamilleId={selectedFamilleId || ''}
-          onSave={(data) => selectedMembre ? handleUpdateMembre(data) : handleCreateMembre(data)}
-        />
-      )}
-      
-      {showAllianceModal && (
-        <AllianceModal
-          isOpen={true}
-          onClose={() => {
-            setShowAllianceModal(false);
-            setSelectedAlliance(null);
-          }}
-          alliance={selectedAlliance || undefined}
-          familles={familles}
-          selectedFamilleId={selectedFamilleId || ''}
-          onSave={(data) => selectedAlliance ? handleUpdateAlliance(data) : handleCreateAlliance(data)}
-        />
-      )}
+
+      {/* Modals */}
+      <FamilleCreationDialog
+        isOpen={showFamilleModal}
+        onClose={() => setShowFamilleModal(false)}
+        onCreateFamille={handleCreateFamille}
+        onUpdateFamille={handleUpdateFamille}
+        famille={selectedFamille}
+      />
+
+      <MembreCreationDialog
+        isOpen={showMembreModal}
+        onClose={() => setShowMembreModal(false)}
+        onCreateMembre={handleCreateMembre}
+        onUpdateMembre={handleUpdateMembre}
+        membre={null}
+        familleId={selectedFamilleId}
+        familles={familles}
+      />
+
+      <AllianceCreationDialog
+        isOpen={showAllianceModal}
+        onClose={() => setShowAllianceModal(false)}
+        onCreateAlliance={handleCreateAlliance}
+        onUpdateAlliance={handleUpdateAlliance}
+        alliance={null}
+        familles={familles}
+        currentFamilleId={selectedFamilleId}
+      />
     </div>
   );
 };

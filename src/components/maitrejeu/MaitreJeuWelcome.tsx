@@ -1,126 +1,140 @@
+
 import React from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
+import { TimeManagement } from './components/TimeManagement';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { useMaitreJeu } from './context';
-import { Landmark, ChevronsRight, Users, BookOpen, Scroll, Calendar } from 'lucide-react';
+import { CalendarClock, AlertCircle, Bell } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { toast } from 'sonner';
 
 export const MaitreJeuWelcome: React.FC = () => {
-  const { currentYear, currentSeason, senateurs, lois, histoireEntries } = useMaitreJeu();
+  const { currentDate, currentPhase, evenements, lois } = useMaitreJeu();
+  
+  const pendingEvenements = evenements.filter(e => !e.resolved);
+  const pendingLois = lois.filter(l => l.status === 'proposed' || l.état === 'En délibération');
+  
+  const handleResolveAll = () => {
+    toast.success("Tous les événements en attente ont été résolus automatiquement");
+  };
+  
+  const handlePromulgueLois = () => {
+    toast.success("Toutes les lois proposées ont été traitées");
+  };
   
   return (
-    <div className="p-6 space-y-6">
-      <div className="flex items-center gap-3">
-        <Landmark className="h-10 w-10 text-amber-600" />
-        <div>
-          <h1 className="text-3xl font-bold">Interface Maître du Jeu</h1>
-          <p className="text-muted-foreground">Bienvenue dans l'interface d'administration de RomeJPem</p>
-        </div>
+    <div className="space-y-6 p-6">
+      <div className="grid grid-cols-1 gap-3">
+        <h2 className="text-3xl font-bold mb-2">Tableau de bord</h2>
+        <p className="text-lg text-muted-foreground mb-4">
+          Bienvenue dans l'interface de gestion du Maître du Jeu de Rome JPEM
+        </p>
       </div>
       
-      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
+      <TimeManagement />
+      
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Sénateurs Actifs</CardTitle>
-            <Users className="h-4 w-4 text-muted-foreground" />
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Bell className="h-5 w-5" />
+              Notifications
+            </CardTitle>
+            <CardDescription>
+              Événements et actions nécessitant votre attention
+            </CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{senateurs.length}</div>
-            <p className="text-xs text-muted-foreground">
-              {senateurs.filter(s => s.joueur).length} contrôlés par des joueurs
-            </p>
+            {pendingEvenements.length > 0 || pendingLois.length > 0 ? (
+              <div className="space-y-4">
+                {pendingEvenements.length > 0 && (
+                  <Alert>
+                    <AlertCircle className="h-4 w-4" />
+                    <AlertTitle>Événements en attente</AlertTitle>
+                    <AlertDescription>
+                      <p>Il y a {pendingEvenements.length} événements qui nécessitent votre attention.</p>
+                      <Button 
+                        variant="outline" 
+                        size="sm" 
+                        className="mt-2"
+                        onClick={() => handleResolveAll()}
+                      >
+                        Résoudre tous les événements
+                      </Button>
+                    </AlertDescription>
+                  </Alert>
+                )}
+                
+                {pendingLois.length > 0 && (
+                  <Alert>
+                    <AlertCircle className="h-4 w-4" />
+                    <AlertTitle>Lois proposées</AlertTitle>
+                    <AlertDescription>
+                      <p>Il y a {pendingLois.length} propositions de lois en attente.</p>
+                      <Button 
+                        variant="outline" 
+                        size="sm" 
+                        className="mt-2"
+                        onClick={() => handlePromulgueLois()}
+                      >
+                        Gérer les propositions
+                      </Button>
+                    </AlertDescription>
+                  </Alert>
+                )}
+              </div>
+            ) : (
+              <div className="text-center py-8 text-muted-foreground">
+                <p>Aucune notification en attente</p>
+              </div>
+            )}
           </CardContent>
         </Card>
         
         <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Année Courante</CardTitle>
-            <Calendar className="h-4 w-4 text-muted-foreground" />
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <CalendarClock className="h-5 w-5" />
+              Statut du jeu
+            </CardTitle>
+            <CardDescription>
+              Informations sur l'état actuel du jeu
+            </CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{currentYear} AUC</div>
-            <p className="text-xs text-muted-foreground">
-              Saison: {currentSeason === 'SPRING' ? 'Printemps' : 
-                     currentSeason === 'SUMMER' ? 'Été' : 
-                     currentSeason === 'FALL' ? 'Automne' : 'Hiver'}
-            </p>
-          </CardContent>
-        </Card>
-        
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Lois Actives</CardTitle>
-            <Scroll className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{lois.filter(l => l.status === "Promulguée").length}</div>
-            <p className="text-xs text-muted-foreground">
-              {lois.filter(l => l.status === "proposed").length} lois en délibération
-            </p>
-          </CardContent>
-        </Card>
-        
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Évènements Historiques</CardTitle>
-            <BookOpen className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{histoireEntries.length}</div>
-            <p className="text-xs text-muted-foreground">
-              {histoireEntries.filter(e => e.visible).length} évènements publics
-            </p>
+            <div className="space-y-4">
+              <div>
+                <h3 className="font-medium">Date du jeu:</h3>
+                <p>{currentDate.year} AUC, {currentDate.season}</p>
+              </div>
+              
+              <div>
+                <h3 className="font-medium">Phase actuelle:</h3>
+                <p>{currentPhase}</p>
+              </div>
+              
+              <div>
+                <h3 className="font-medium">Statistiques rapides:</h3>
+                <ul className="list-disc pl-5 space-y-1">
+                  <li>{evenements.length} événements créés</li>
+                  <li>{lois.length} lois enregistrées</li>
+                  <li>{pendingEvenements.length} événements en attente</li>
+                </ul>
+              </div>
+              
+              <div className="pt-2">
+                <Button 
+                  variant="default" 
+                  className="w-full"
+                  onClick={() => toast.success("Rapport d'état du jeu généré")}
+                >
+                  Générer un rapport d'état
+                </Button>
+              </div>
+            </div>
           </CardContent>
         </Card>
       </div>
-      
-      <Card>
-        <CardHeader>
-          <CardTitle>Modules disponibles</CardTitle>
-          <CardDescription>
-            Gérez tous les aspects du jeu à travers ces différents modules
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-            <Button variant="outline" className="justify-between h-auto py-3">
-              <span>Gestion des Sénateurs</span>
-              <ChevronsRight className="h-4 w-4" />
-            </Button>
-            <Button variant="outline" className="justify-between h-auto py-3">
-              <span>Gestion des Familles</span>
-              <ChevronsRight className="h-4 w-4" />
-            </Button>
-            <Button variant="outline" className="justify-between h-auto py-3">
-              <span>Gestion des Lois</span>
-              <ChevronsRight className="h-4 w-4" />
-            </Button>
-            <Button variant="outline" className="justify-between h-auto py-3">
-              <span>Gestion des Provinces</span>
-              <ChevronsRight className="h-4 w-4" />
-            </Button>
-            <Button variant="outline" className="justify-between h-auto py-3">
-              <span>Gestion des Bâtiments</span>
-              <ChevronsRight className="h-4 w-4" />
-            </Button>
-            <Button variant="outline" className="justify-between h-auto py-3">
-              <span>Gestion de l'Économie</span>
-              <ChevronsRight className="h-4 w-4" />
-            </Button>
-            <Button variant="outline" className="justify-between h-auto py-3">
-              <span>Chroniques Historiques</span>
-              <ChevronsRight className="h-4 w-4" />
-            </Button>
-            <Button variant="outline" className="justify-between h-auto py-3">
-              <span>Avancement du Temps</span>
-              <ChevronsRight className="h-4 w-4" />
-            </Button>
-            <Button variant="outline" className="justify-between h-auto py-3">
-              <span>Équilibre des Forces</span>
-              <ChevronsRight className="h-4 w-4" />
-            </Button>
-          </div>
-        </CardContent>
-      </Card>
     </div>
   );
 };

@@ -11,6 +11,7 @@ import { HistoriqueLoiTab } from './tabs/HistoriqueLoiTab';
 import { LoiModal } from './modals/LoiModal';
 import { ProjetLoi, VoteLoi, HistoriqueLoi } from './types';
 import { toast } from 'sonner';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 
 export interface ProcessusLegislatifProps {
   isEditable?: boolean;
@@ -26,6 +27,10 @@ export const ProcessusLegislatif: React.FC<ProcessusLegislatifProps> = ({
   
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedLoi, setSelectedLoi] = useState<ProjetLoi | null>(null);
+  const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
+  const [loiToDelete, setLoiToDelete] = useState<string | null>(null);
+  const [startVoteConfirmOpen, setStartVoteConfirmOpen] = useState(false);
+  const [loiToStartVote, setLoiToStartVote] = useState<ProjetLoi | null>(null);
   
   const handleAddLoi = () => {
     setSelectedLoi(null);
@@ -54,30 +59,48 @@ export const ProcessusLegislatif: React.FC<ProcessusLegislatifProps> = ({
     setIsModalOpen(false);
   };
   
-  const handleDeleteLoi = (loiId: string) => {
-    setProjets(projets.filter(p => p.id !== loiId));
-    toast.info("Projet de loi supprimé");
+  const handleDeleteRequest = (loiId: string) => {
+    setLoiToDelete(loiId);
+    setDeleteConfirmOpen(true);
   };
   
-  const handleStartVote = (loi: ProjetLoi) => {
-    // Move from projets to votes
-    setProjets(projets.filter(p => p.id !== loi.id));
-    
-    const newVote: VoteLoi = {
-      id: loi.id,
-      titre: loi.titre,
-      auteur: loi.auteur,
-      dateDebut: new Date().toLocaleDateString('fr-FR'),
-      dateFin: "À déterminer",
-      description: loi.description,
-      contenu: loi.contenu,
-      pour: 0,
-      contre: 0,
-      abstention: 0
-    };
-    
-    setVotes([...votes, newVote]);
-    toast.success(`Vote démarré pour la loi "${loi.titre}"`);
+  const confirmDelete = () => {
+    if (loiToDelete) {
+      setProjets(projets.filter(p => p.id !== loiToDelete));
+      toast.info("Projet de loi supprimé");
+      setDeleteConfirmOpen(false);
+      setLoiToDelete(null);
+    }
+  };
+  
+  const handleStartVoteRequest = (loi: ProjetLoi) => {
+    setLoiToStartVote(loi);
+    setStartVoteConfirmOpen(true);
+  };
+  
+  const confirmStartVote = () => {
+    if (loiToStartVote) {
+      // Move from projets to votes
+      setProjets(projets.filter(p => p.id !== loiToStartVote.id));
+      
+      const newVote: VoteLoi = {
+        id: loiToStartVote.id,
+        titre: loiToStartVote.titre,
+        auteur: loiToStartVote.auteur,
+        dateDebut: new Date().toLocaleDateString('fr-FR'),
+        dateFin: "À déterminer",
+        description: loiToStartVote.description,
+        contenu: loiToStartVote.contenu,
+        pour: 0,
+        contre: 0,
+        abstention: 0
+      };
+      
+      setVotes([...votes, newVote]);
+      toast.success(`Vote démarré pour la loi "${loiToStartVote.titre}"`);
+      setStartVoteConfirmOpen(false);
+      setLoiToStartVote(null);
+    }
   };
 
   const handleVote = (voteId: string, voteType: 'pour' | 'contre' | 'abstention', count: number = 1) => {
@@ -118,75 +141,100 @@ export const ProcessusLegislatif: React.FC<ProcessusLegislatifProps> = ({
         contre: vote.contre,
         abstention: vote.abstention
       },
-      statut: isAdopted ? 'adoptée' : 'rejetée',
-      saison: "Été 705"
+      statut: isAdopted ? 'adopté' : 'rejeté'
     };
     
     setHistorique([historyEntry, ...historique]);
     setVotes(votes.filter(v => v.id !== voteId));
     
-    toast.success(`Vote terminé pour "${vote.titre}". La loi a été ${isAdopted ? 'adoptée' : 'rejetée'}.`);
-  };
-  
-  const formatSeason = (season: string): string => {
-    return season; // This would be replaced by a proper formatting function
+    toast.success(`Vote terminé : Loi ${isAdopted ? 'adoptée' : 'rejetée'}`);
   };
   
   return (
-    <div className="space-y-6">
+    <div className="space-y-4">
       <Card>
         <CardHeader className="flex flex-row items-center justify-between">
           <CardTitle>Processus Législatif</CardTitle>
           {isEditable && (
-            <Button onClick={handleAddLoi} size="sm" className="flex items-center gap-2">
-              <Plus className="h-4 w-4" /> Nouvelle proposition
+            <Button onClick={handleAddLoi} size="sm">
+              <Plus className="h-4 w-4 mr-2" />
+              Nouvelle Proposition
             </Button>
           )}
         </CardHeader>
         <CardContent>
           <Tabs value={activeTab} onValueChange={setActiveTab}>
             <TabsList className="grid w-full grid-cols-3">
-              <TabsTrigger value="projets">Projets de loi</TabsTrigger>
-              <TabsTrigger value="votes">Votes en cours</TabsTrigger>
+              <TabsTrigger value="projets">Projets de Loi</TabsTrigger>
+              <TabsTrigger value="votes">Votes en Cours</TabsTrigger>
               <TabsTrigger value="historique">Historique</TabsTrigger>
             </TabsList>
             
             <TabsContent value="projets" className="mt-4">
               <ProjetsLoiTab 
-                projets={projets}
-                isEditable={isEditable}
-                onEdit={handleEditLoi}
-                onDelete={handleDeleteLoi}
-                onStartVote={handleStartVote}
+                projets={projets} 
+                isEditable={isEditable} 
+                onEdit={handleEditLoi} 
+                onDelete={handleDeleteRequest} 
+                onStartVote={handleStartVoteRequest} 
               />
             </TabsContent>
             
             <TabsContent value="votes" className="mt-4">
               <VotesEnCoursTab 
-                votes={votes}
-                isEditable={isEditable}
+                votes={votes} 
+                isEditable={isEditable} 
                 onVote={handleVote}
                 onCompleteVote={handleCompleteVote}
               />
             </TabsContent>
             
             <TabsContent value="historique" className="mt-4">
-              <HistoriqueLoiTab 
-                historique={historique}
-                formatSeason={formatSeason}
-                isEditable={isEditable}
-              />
+              <HistoriqueLoiTab historique={historique} />
             </TabsContent>
           </Tabs>
         </CardContent>
       </Card>
       
-      <LoiModal
-        isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
+      {/* Modal pour ajouter/éditer une loi */}
+      <LoiModal 
+        isOpen={isModalOpen} 
+        onClose={() => setIsModalOpen(false)} 
         onSave={handleSaveLoi}
         loi={selectedLoi}
       />
+      
+      {/* Dialogue de confirmation pour la suppression */}
+      <AlertDialog open={deleteConfirmOpen} onOpenChange={setDeleteConfirmOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Confirmer la suppression</AlertDialogTitle>
+            <AlertDialogDescription>
+              Êtes-vous sûr de vouloir supprimer ce projet de loi ? Cette action ne peut pas être annulée.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Annuler</AlertDialogCancel>
+            <AlertDialogAction onClick={confirmDelete} className="bg-destructive text-destructive-foreground">Supprimer</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+      
+      {/* Dialogue de confirmation pour le démarrage du vote */}
+      <AlertDialog open={startVoteConfirmOpen} onOpenChange={setStartVoteConfirmOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Démarrer un vote</AlertDialogTitle>
+            <AlertDialogDescription>
+              Voulez-vous soumettre cette loi au vote du Sénat ? Une fois le vote commencé, le projet ne pourra plus être modifié.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Annuler</AlertDialogCancel>
+            <AlertDialogAction onClick={confirmStartVote}>Démarrer le vote</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };

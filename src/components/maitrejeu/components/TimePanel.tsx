@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { AlertCircle, Calendar, FastForward, Clock } from 'lucide-react';
 import { useMaitreJeu } from '../context';
+import { toast } from 'sonner';
 
 export const TimePanel: React.FC = () => {
   const { currentDate, currentPhase, advanceTime, changePhase } = useMaitreJeu();
@@ -16,6 +17,7 @@ export const TimePanel: React.FC = () => {
   const confirmAdvance = () => {
     advanceTime();
     setConfirmDialogOpen(false);
+    toast.success("Le temps a avancé à la saison suivante");
   };
   
   const translatePhase = (phase: string) => {
