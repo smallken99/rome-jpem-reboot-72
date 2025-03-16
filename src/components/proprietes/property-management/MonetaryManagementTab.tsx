@@ -4,18 +4,17 @@ import { useMonetaryManagement } from './hooks/useMonetaryManagement';
 import { TransactionList } from './monetary/TransactionList';
 import { PaymentForm } from './monetary/PaymentForm';
 import { FinancialSummary } from './monetary/FinancialSummary';
-import { Wallet, Receipt, ArrowRightLeft, PieChart, TrendingUp, CoinsIcon } from 'lucide-react';
+import { Wallet, Receipt, ArrowRightLeft, PieChart, TrendingUp, Coins } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Separator } from '@/components/ui/separator';
 import { RomanCard } from '@/components/ui-custom/RomanCard';
+import { formatCurrency } from '@/utils/currencyUtils';
 
 export const MonetaryManagementTab: React.FC = () => {
   const { 
     balance, 
     transactions, 
     recipients, 
-    addTransaction, 
     makePayment,
     incomeStats,
     expenseStats
@@ -26,7 +25,7 @@ export const MonetaryManagementTab: React.FC = () => {
       <div className="flex flex-col md:flex-row justify-between gap-4 items-start md:items-center">
         <div>
           <h3 className="font-cinzel text-xl text-rome-navy flex items-center gap-2">
-            <CoinsIcon className="h-5 w-5 text-rome-gold" />
+            <Coins className="h-5 w-5 text-rome-gold" />
             Gestion Monétaire
           </h3>
           <p className="text-sm text-muted-foreground">
@@ -43,7 +42,7 @@ export const MonetaryManagementTab: React.FC = () => {
             </div>
             <div>
               <p className="text-sm text-muted-foreground">Solde actuel</p>
-              <p className="text-xl font-bold text-rome-navy">{balance.toLocaleString()} As</p>
+              <p className="text-xl font-bold text-rome-navy">{formatCurrency(balance)}</p>
             </div>
           </CardContent>
         </Card>
@@ -55,7 +54,7 @@ export const MonetaryManagementTab: React.FC = () => {
             </div>
             <div>
               <p className="text-sm text-muted-foreground">Revenus mensuels</p>
-              <p className="text-xl font-bold text-green-600">+{incomeStats.monthly.toLocaleString()} As</p>
+              <p className="text-xl font-bold text-green-600">+{formatCurrency(incomeStats.monthly)}</p>
             </div>
           </CardContent>
         </Card>
@@ -67,7 +66,7 @@ export const MonetaryManagementTab: React.FC = () => {
             </div>
             <div>
               <p className="text-sm text-muted-foreground">Dépenses mensuelles</p>
-              <p className="text-xl font-bold text-rome-terracotta">-{expenseStats.monthly.toLocaleString()} As</p>
+              <p className="text-xl font-bold text-rome-terracotta">-{formatCurrency(expenseStats.monthly)}</p>
             </div>
           </CardContent>
         </Card>

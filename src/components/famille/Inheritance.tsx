@@ -6,7 +6,7 @@ import { Scroll, Users, Crown, LayoutList } from 'lucide-react';
 import { ActionButton } from '@/components/ui-custom/ActionButton';
 import { HeirCard } from './inheritance/HeirCard';
 import { useInheritance } from './inheritance/useInheritance';
-import { formatCurrency } from '@/lib/utils';
+import { formatCurrency } from '@/utils/currencyUtils';
 
 // Utilisation d'un ID de famille fictif pour le moment - à remplacer par le contexte utilisateur
 const CURRENT_FAMILLE_ID = "famille-1"; // À remplacer par l'ID réel de la famille du joueur

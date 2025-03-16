@@ -6,10 +6,11 @@ import { useBuildingInventory } from '../hooks/building/useBuildingInventory';
 import { Calculator, Calendar, Coins, AlertTriangle } from 'lucide-react';
 import { Progress } from '@/components/ui/progress';
 import { Button } from '@/components/ui/button';
-import { formatMoney } from '@/utils/formatUtils';
+import { formatCurrency } from '@/utils/currencyUtils';
+import { toast } from 'sonner';
 
 export const TaxationOverview: React.FC = () => {
-  const { balance } = usePatrimoine();
+  const { balance, addTransaction, properties } = usePatrimoine();
   const { ownedBuildings } = useBuildingInventory();
   
   // Simplified tax calculation
@@ -17,9 +18,10 @@ export const TaxationOverview: React.FC = () => {
   const incomeTaxRate = 0.1; // 10%
   
   // Calculated taxes - this would come from a proper API in a real app
-  const propertyValue = ownedBuildings.reduce((sum, b) => sum + b.maintenanceCost * 10, 0);
-  const propertyTax = propertyValue * propertyTaxRate;
-  const incomeTax = balance * 0.2 * incomeTaxRate; // Assuming 20% of balance is annual income
+  const propertyValue = properties.reduce((sum, p) => sum + p.value, 0) + 
+                        ownedBuildings.reduce((sum, b) => sum + (b.maintenanceCost * 10), 0);
+  const propertyTax = Math.round(propertyValue * propertyTaxRate);
+  const incomeTax = Math.round(balance * 0.2 * incomeTaxRate); // Assuming 20% of balance is annual income
   const totalTaxDue = propertyTax + incomeTax;
   
   // Tax payment status - would be tracked properly in a real app
@@ -32,8 +34,23 @@ export const TaxationOverview: React.FC = () => {
   nextPaymentDate.setMonth(nextPaymentDate.getMonth() + 1);
   
   const handlePayTaxes = () => {
-    // This would be implemented in a real app to pay taxes
-    alert("Fonctionnalité de paiement des impôts en cours de développement");
+    // Vérifier si le joueur a les fonds suffisants
+    if (taxesRemaining > balance) {
+      toast.error(`Fonds insuffisants pour payer les impôts (manque ${formatCurrency(taxesRemaining - balance)})`);
+      return;
+    }
+    
+    // Enregistrer le paiement des impôts
+    addTransaction({
+      amount: -taxesRemaining,
+      description: "Paiement des impôts",
+      category: "Impôts et taxes",
+      type: "expense"
+    });
+    
+    toast.success(`Paiement d'impôts de ${formatCurrency(taxesRemaining)} effectué avec succès`);
+    
+    // Dans une vraie application, il faudrait mettre à jour l'état de paiement des impôts
   };
   
   return (
@@ -45,9 +62,9 @@ export const TaxationOverview: React.FC = () => {
             <Calculator className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{formatMoney(propertyTax)}</div>
+            <div className="text-2xl font-bold">{formatCurrency(propertyTax)}</div>
             <p className="text-xs text-muted-foreground">
-              Basé sur une valeur estimée de {formatMoney(propertyValue)}
+              Basé sur une valeur estimée de {formatCurrency(propertyValue)}
             </p>
           </CardContent>
         </Card>
@@ -58,7 +75,7 @@ export const TaxationOverview: React.FC = () => {
             <Coins className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{formatMoney(incomeTax)}</div>
+            <div className="text-2xl font-bold">{formatCurrency(incomeTax)}</div>
             <p className="text-xs text-muted-foreground">
               Basé sur vos revenus annuels estimés
             </p>
@@ -75,7 +92,7 @@ export const TaxationOverview: React.FC = () => {
               {nextPaymentDate.toLocaleDateString('fr-FR', { day: 'numeric', month: 'long' })}
             </div>
             <p className="text-xs text-muted-foreground">
-              Montant estimé: {formatMoney(totalTaxDue / 4)}
+              Montant estimé: {formatCurrency(Math.round(totalTaxDue / 4))}
             </p>
           </CardContent>
         </Card>
@@ -99,21 +116,21 @@ export const TaxationOverview: React.FC = () => {
               <div className="flex items-center justify-between p-4 bg-muted/20 rounded-md">
                 <div>
                   <h3 className="font-medium">Impôts payés</h3>
-                  <p className="text-xl font-semibold mt-1">{formatMoney(taxesPaid)}</p>
+                  <p className="text-xl font-semibold mt-1">{formatCurrency(taxesPaid)}</p>
                 </div>
               </div>
               
               <div className="flex items-center justify-between p-4 bg-red-50/50 rounded-md">
                 <div>
                   <h3 className="font-medium text-red-800">Montant restant dû</h3>
-                  <p className="text-xl font-semibold mt-1 text-red-700">{formatMoney(taxesRemaining)}</p>
+                  <p className="text-xl font-semibold mt-1 text-red-700">{formatCurrency(taxesRemaining)}</p>
                 </div>
                 <AlertTriangle className="h-8 w-8 text-red-500" />
               </div>
             </div>
             
             <div className="flex justify-end pt-4">
-              <Button className="roman-btn" onClick={handlePayTaxes}>
+              <Button className="roman-btn" onClick={handlePayTaxes} disabled={taxesRemaining <= 0}>
                 Payer les impôts dus
               </Button>
             </div>

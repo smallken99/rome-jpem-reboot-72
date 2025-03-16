@@ -3,6 +3,7 @@ import React from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { FinancialStats } from '../hooks/useMonetaryManagement';
 import { ArrowUpRight, ArrowDownRight, TrendingUp, TrendingDown, DollarSign } from 'lucide-react';
+import { formatCurrency } from '@/utils/currencyUtils';
 
 type FinancialSummaryProps = {
   incomeStats: FinancialStats;
@@ -25,7 +26,7 @@ export const FinancialSummary: React.FC<FinancialSummaryProps> = ({ incomeStats,
               <div>
                 <p className="text-sm text-muted-foreground">Balance mensuelle</p>
                 <p className={`text-xl font-bold ${isPositiveBalance ? 'text-green-600' : 'text-red-600'}`}>
-                  {isPositiveBalance ? '+' : ''}{monthlyBalance.toLocaleString()} As
+                  {isPositiveBalance ? '+' : ''}{formatCurrency(monthlyBalance)}
                 </p>
               </div>
               <div className={`rounded-full p-2 ${isPositiveBalance ? 'bg-green-100' : 'bg-red-100'}`}>
@@ -50,7 +51,7 @@ export const FinancialSummary: React.FC<FinancialSummaryProps> = ({ incomeStats,
         <div>
           <h4 className="font-cinzel text-base text-rome-navy mb-3 flex items-center">
             <ArrowDownRight className="h-4 w-4 mr-2 text-green-600" />
-            Revenus ({incomeStats.monthly.toLocaleString()} As/mois)
+            Revenus ({formatCurrency(incomeStats.monthly)}/mois)
           </h4>
           
           <div className="space-y-3">
@@ -58,7 +59,7 @@ export const FinancialSummary: React.FC<FinancialSummaryProps> = ({ incomeStats,
               <div key={index} className="border border-rome-gold/20 rounded p-3 bg-green-50">
                 <div className="flex justify-between items-center mb-1">
                   <span className="font-medium">{category.name}</span>
-                  <span className="text-green-600">{category.amount.toLocaleString()} As</span>
+                  <span className="text-green-600">{formatCurrency(category.amount)}</span>
                 </div>
                 <div className="w-full bg-gray-200 rounded-full h-2">
                   <div 
@@ -78,7 +79,7 @@ export const FinancialSummary: React.FC<FinancialSummaryProps> = ({ incomeStats,
         <div>
           <h4 className="font-cinzel text-base text-rome-navy mb-3 flex items-center">
             <ArrowUpRight className="h-4 w-4 mr-2 text-rome-terracotta" /> 
-            Dépenses ({expenseStats.monthly.toLocaleString()} As/mois)
+            Dépenses ({formatCurrency(expenseStats.monthly)}/mois)
           </h4>
           
           <div className="space-y-3">
@@ -86,7 +87,7 @@ export const FinancialSummary: React.FC<FinancialSummaryProps> = ({ incomeStats,
               <div key={index} className="border border-rome-gold/20 rounded p-3 bg-red-50">
                 <div className="flex justify-between items-center mb-1">
                   <span className="font-medium">{category.name}</span>
-                  <span className="text-rome-terracotta">{category.amount.toLocaleString()} As</span>
+                  <span className="text-rome-terracotta">{formatCurrency(category.amount)}</span>
                 </div>
                 <div className="w-full bg-gray-200 rounded-full h-2">
                   <div 

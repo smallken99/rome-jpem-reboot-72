@@ -20,6 +20,15 @@ export interface Property {
   description?: string;
 }
 
+export interface Transaction {
+  id: string;
+  amount: number;
+  description: string;
+  category: string;
+  type: 'income' | 'expense';
+  date: string;
+}
+
 export const usePatrimoine = () => {
   const [properties, setProperties] = useState<Property[]>([
     {
@@ -49,6 +58,32 @@ export const usePatrimoine = () => {
   ]);
   
   const [balance, setBalance] = useState<number>(500000); // 500,000 as
+  const [transactions, setTransactions] = useState<Transaction[]>([
+    {
+      id: "trans-1",
+      amount: 25000,
+      description: "Revenus du domaine de Campanie",
+      category: "Revenus fonciers",
+      type: "income",
+      date: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString() // 7 jours avant
+    },
+    {
+      id: "trans-2",
+      amount: -5000,
+      description: "Entretien de la Villa du Palatin",
+      category: "Entretien",
+      type: "expense",
+      date: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString() // 3 jours avant
+    },
+    {
+      id: "trans-3",
+      amount: -8000,
+      description: "Personnel domestique",
+      category: "Personnel",
+      type: "expense",
+      date: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString() // hier
+    }
+  ]);
   
   const { addEconomieRecord } = useMaitreJeu();
   
@@ -64,11 +99,19 @@ export const usePatrimoine = () => {
     addEconomieRecord({
       amount: -property.value,
       description: `Achat propriété: ${property.name}`,
-      category: 'Immobilier',
+      category: "Immobilier",
       type: 'expense',
       date: new Date().toISOString(),
       source: 'Patrimoine personnel',
       approved: true
+    });
+    
+    // Ajouter à la liste des transactions locales
+    addTransaction({
+      amount: -property.value,
+      description: `Achat propriété: ${property.name}`,
+      category: "Immobilier",
+      type: 'expense'
     });
     
     // Mettre à jour le solde
@@ -91,11 +134,19 @@ export const usePatrimoine = () => {
     addEconomieRecord({
       amount: property.value,
       description: `Vente propriété: ${property.name}`,
-      category: 'Immobilier',
+      category: "Immobilier",
       type: 'income',
       date: new Date().toISOString(),
       source: 'Patrimoine personnel',
       approved: true
+    });
+    
+    // Ajouter à la liste des transactions locales
+    addTransaction({
+      amount: property.value,
+      description: `Vente propriété: ${property.name}`,
+      category: "Immobilier",
+      type: 'income'
     });
     
     // Mettre à jour le solde
@@ -107,19 +158,56 @@ export const usePatrimoine = () => {
   
   const buildingPurchased = useCallback((name: string, cost: number) => {
     setBalance(prev => prev - cost);
+    
+    // Ajouter à la liste des transactions
+    addTransaction({
+      amount: -cost,
+      description: `Achat: ${name}`,
+      category: "Immobilier",
+      type: 'expense'
+    });
   }, []);
   
   const buildingSold = useCallback((name: string, amount: number) => {
     setBalance(prev => prev + amount);
+    
+    // Ajouter à la liste des transactions
+    addTransaction({
+      amount: amount,
+      description: `Vente: ${name}`,
+      category: "Immobilier",
+      type: 'income'
+    });
+  }, []);
+  
+  const addTransaction = useCallback((transactionData: Omit<Transaction, 'id' | 'date'>) => {
+    const newTransaction = {
+      ...transactionData,
+      id: uuidv4(),
+      date: new Date().toISOString()
+    };
+    
+    setTransactions(prev => [newTransaction, ...prev]);
+    
+    // Mettre à jour le solde
+    if (transactionData.type === 'income') {
+      setBalance(prev => prev + transactionData.amount);
+    } else {
+      setBalance(prev => prev - Math.abs(transactionData.amount));
+    }
+    
+    return newTransaction.id;
   }, []);
   
   return {
     properties,
     balance,
+    transactions,
     addProperty,
     updateProperty,
     removeProperty,
     buildingPurchased,
-    buildingSold
+    buildingSold,
+    addTransaction
   };
 };

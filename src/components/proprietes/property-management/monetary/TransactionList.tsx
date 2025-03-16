@@ -8,6 +8,7 @@ import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Button } from '@/components/ui/button';
+import { formatCurrency } from '@/utils/currencyUtils';
 
 type TransactionListProps = {
   transactions: Transaction[];
@@ -114,7 +115,7 @@ export const TransactionList: React.FC<TransactionListProps> = ({ transactions }
                     )}
                   </td>
                   <td className={`py-3 px-4 font-medium ${transaction.type === 'income' ? 'text-green-600' : 'text-rome-terracotta'}`}>
-                    {transaction.type === 'income' ? '+' : '-'}{transaction.amount.toLocaleString()} As
+                    {transaction.type === 'income' ? '+' : '-'}{formatCurrency(Math.abs(transaction.amount))}
                   </td>
                   <td className="py-3 px-4">{transaction.recipient}</td>
                   <td className="py-3 px-4">

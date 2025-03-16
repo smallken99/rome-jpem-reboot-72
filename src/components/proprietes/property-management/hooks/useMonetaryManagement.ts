@@ -1,6 +1,8 @@
 
 import { useState, useEffect } from 'react';
 import { useEconomy } from '@/hooks/useEconomy';
+import { usePatrimoine } from '@/hooks/usePatrimoine';
+import { v4 as uuidv4 } from 'uuid';
 
 export type Transaction = {
   id: string;
@@ -29,13 +31,14 @@ export type FinancialStats = {
 };
 
 export const useMonetaryManagement = () => {
+  const patrimoine = usePatrimoine();
   const economy = useEconomy();
   
-  // État pour les transactions
+  // Transactions issues du patrimoine
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   
-  // Utiliser la balance du système économique central
-  const balance = economy.balance;
+  // Utiliser la balance du patrimoine
+  const balance = patrimoine.balance;
   
   // Simuler des données de destinataires pour les paiements
   const [recipients] = useState<Recipient[]>([
@@ -48,23 +51,23 @@ export const useMonetaryManagement = () => {
     { id: '7', name: 'Temple de Jupiter', type: 'autre' },
   ]);
   
-  // Synchroniser les transactions avec le système économique
+  // Synchroniser les transactions avec le patrimoine
   useEffect(() => {
-    const economicTransactions = economy.transactions;
-    
-    // Convertir les transactions économiques au format attendu par ce hook
-    const formattedTransactions: Transaction[] = economicTransactions.map(et => ({
-      id: et.id,
-      date: new Date(et.date instanceof Date ? et.date : new Date()),
-      amount: et.amount,
-      recipient: et.description.split(':')[0] || 'Inconnu',
-      description: et.description.split(':')[1]?.trim() || et.description,
-      type: et.type,
-      category: et.category
-    }));
-    
-    setTransactions(formattedTransactions);
-  }, [economy.transactions]);
+    if (patrimoine.transactions) {
+      // Convertir les transactions du patrimoine au format attendu
+      const formattedTransactions: Transaction[] = patrimoine.transactions.map(pt => ({
+        id: pt.id,
+        date: new Date(pt.date),
+        amount: pt.amount,
+        recipient: pt.description.split(':')[0] || 'Inconnu',
+        description: pt.description.split(':')[1]?.trim() || pt.description,
+        type: pt.type,
+        category: pt.category
+      }));
+      
+      setTransactions(formattedTransactions);
+    }
+  }, [patrimoine.transactions]);
   
   // Statistiques des revenus
   const incomeStats: FinancialStats = {
@@ -79,7 +82,7 @@ export const useMonetaryManagement = () => {
   
   // Statistiques des dépenses
   const expenseStats: FinancialStats = {
-    total: transactions.filter(t => t.type === 'expense').reduce((sum, t) => sum + t.amount, 0),
+    total: transactions.filter(t => t.type === 'expense').reduce((sum, t) => sum + Math.abs(t.amount), 0),
     monthly: 30000, // Estimation mensuelle
     categories: [
       { name: 'Entretien des propriétés', amount: 12000, percentage: 40 },
@@ -90,31 +93,14 @@ export const useMonetaryManagement = () => {
     ]
   };
   
-  // Ajouter une transaction via le système économique centralisé
-  const addTransaction = (transaction: Omit<Transaction, 'id'>) => {
-    if (transaction.type === 'income') {
-      return economy.receivePayment(
-        transaction.amount,
-        transaction.recipient,
-        transaction.category
-      );
-    } else {
-      return economy.makePayment(
-        transaction.amount,
-        transaction.recipient,
-        transaction.category
-      );
-    }
-  };
-  
   // Effectuer un paiement
   const makePayment = (
     recipientId: string, 
     amount: number, 
     description: string, 
     category: string
-  ) => {
-    if (amount <= 0 || !economy.canAfford(amount)) {
+  ): boolean => {
+    if (amount <= 0 || amount > balance) {
       throw new Error(amount <= 0 
         ? 'Le montant doit être positif' 
         : 'Fonds insuffisants pour ce paiement');
@@ -125,20 +111,28 @@ export const useMonetaryManagement = () => {
       throw new Error('Destinataire non trouvé');
     }
     
-    const success = economy.makePayment(
+    // Enregistrer la transaction dans le patrimoine
+    patrimoine.addTransaction({
+      amount: -amount, // Montant négatif pour une dépense
+      description: `${recipient.name}: ${description}`,
+      category: category,
+      type: 'expense'
+    });
+    
+    // Enregistrer également dans le système d'économie global
+    economy.makePayment(
       amount,
       recipient.name,
       category
     );
     
-    return success;
+    return true;
   };
   
   return {
     balance,
     transactions,
     recipients,
-    addTransaction,
     makePayment,
     incomeStats,
     expenseStats

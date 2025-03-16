@@ -1,8 +1,8 @@
 
 // Format a number as Roman currency (deniers, as, sesterces)
 export const formatCurrency = (amount: number): string => {
-  // For now, a simple implementation returning deniers
-  return `${amount.toLocaleString()} deniers`;
+  // Simple implementation returning As
+  return `${amount.toLocaleString()} As`;
 };
 
 // Convert between different Roman currency units
@@ -23,20 +23,8 @@ export const convertCurrency = (amount: number, from: 'as' | 'sestertius' | 'den
 
 // Format un montant en deniers ou sesterces selon la valeur
 export const formatOptimalCurrency = (amount: number): string => {
-  // Si le montant est très élevé, afficher en aureus
-  if (amount >= 1000) {
-    const aureus = convertCurrency(amount, 'denarius', 'aureus');
-    return `${aureus.toLocaleString(undefined, { maximumFractionDigits: 1 })} aureus`;
-  }
-  
-  // Si le montant est assez élevé, afficher en deniers
-  if (amount >= 4) {
-    return `${amount.toLocaleString()} deniers`;
-  }
-  
-  // Pour les petits montants, afficher en sesterces
-  const sesterces = convertCurrency(amount, 'denarius', 'sestertius');
-  return `${sesterces.toLocaleString()} sesterces`;
+  // Pour maintenant, tout afficher en As comme demandé
+  return `${amount.toLocaleString()} As`;
 };
 
 // Retourne la couleur CSS appropriée en fonction du montant (pour les variations)

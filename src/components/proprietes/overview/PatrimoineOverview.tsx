@@ -6,18 +6,18 @@ import { useBuildingInventory } from '../hooks/building/useBuildingInventory';
 import { BarChart, Building, Coins, Map, Users, FileBarChart } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Link } from 'react-router-dom';
-import { formatMoney } from '@/utils/formatUtils';
+import { formatCurrency } from '@/utils/currencyUtils';
 import { PatrimoineValueChart } from './PatrimoineValueChart';
 import { PropertyDistributionPie } from './PropertyDistributionPie';
 import { RecentTransactions } from './RecentTransactions';
 
 export const PatrimoineOverview: React.FC = () => {
-  const { balance, transactions } = usePatrimoine();
+  const { balance, transactions, properties } = usePatrimoine();
   const { ownedBuildings } = useBuildingInventory();
   
-  // Calculate total property value (simplified)
-  const totalPropertyValue = ownedBuildings.reduce((sum, building) => 
-    sum + (building.maintenanceCost * 10), 0); // Approximate value based on maintenance cost
+  // Calculate total property value from patrimoine
+  const totalPropertyValue = properties.reduce((sum, property) => 
+    sum + property.value, 0);
   
   // Total net worth
   const netWorth = balance + totalPropertyValue;
@@ -36,7 +36,7 @@ export const PatrimoineOverview: React.FC = () => {
             <Coins className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{formatMoney(netWorth)}</div>
+            <div className="text-2xl font-bold">{formatCurrency(netWorth)}</div>
             <p className="text-xs text-muted-foreground">Total des avoirs</p>
           </CardContent>
         </Card>
@@ -47,7 +47,7 @@ export const PatrimoineOverview: React.FC = () => {
             <Building className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{ownedBuildings.length}</div>
+            <div className="text-2xl font-bold">{properties.length + ownedBuildings.length}</div>
             <p className="text-xs text-muted-foreground">Biens immobiliers</p>
           </CardContent>
         </Card>
@@ -58,7 +58,7 @@ export const PatrimoineOverview: React.FC = () => {
             <Coins className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{formatMoney(balance)}</div>
+            <div className="text-2xl font-bold">{formatCurrency(balance)}</div>
             <p className="text-xs text-muted-foreground">Disponible immédiatement</p>
           </CardContent>
         </Card>
