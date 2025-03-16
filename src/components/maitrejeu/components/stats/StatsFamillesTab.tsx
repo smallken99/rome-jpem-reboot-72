@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useMaitreJeu } from '../../context';
@@ -5,6 +6,10 @@ import { PieChart, BarChart, LineChart } from 'lucide-react';
 
 export const StatsFamillesTab: React.FC = () => {
   const { familles, membres } = useMaitreJeu();
+  
+  // Calcul des statistiques
+  const totalFamilles = familles.length;
+  const totalMembres = membres.length;
   
   // Corriger les filtres pour correspondre aux types réels
   const hommes = membres.filter(m => m.genre === "male").length;

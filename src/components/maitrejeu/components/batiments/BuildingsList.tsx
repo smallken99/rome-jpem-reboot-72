@@ -9,7 +9,7 @@ import { useBatimentsManagement } from '../../hooks/useBatimentsManagement';
 import { BuildingsListProps } from '../../types/batiments';
 import { UnderDevelopmentSection } from '../UnderDevelopmentSection';
 
-export const BuildingsList: React.FC<BuildingsListProps> = ({ 
+const BuildingsList: React.FC<BuildingsListProps> = ({ 
   buildings = [], 
   onEdit,
   onDelete,
@@ -48,18 +48,21 @@ export const BuildingsList: React.FC<BuildingsListProps> = ({
   const getBadgeVariant = (status: BuildingStatus) => {
     switch (status) {
       case 'excellent':
-      case 'good':
         return 'success';
-      case 'damaged':
+      case 'good':
+        return 'secondary';
       case 'average':
         return 'secondary';
+      case 'damaged':
+        return 'secondary';
       case 'poor':
+        return 'destructive';
       case 'ruined':
         return 'destructive';
       case 'under_construction':
         return 'outline';
       default:
-        return 'default';
+        return 'secondary';
     }
   };
   
@@ -154,3 +157,5 @@ export const BuildingsList: React.FC<BuildingsListProps> = ({
     </div>
   );
 };
+
+export default BuildingsList;

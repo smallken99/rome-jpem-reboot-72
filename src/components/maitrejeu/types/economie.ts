@@ -4,8 +4,7 @@ import { GameDate } from './common';
 export type EconomieType = 'income' | 'expense' | 'tax' | 'trade' | 'military' | 'construction' | 'slaves' | 'other';
 export type EconomieCategory = 
   'Impôts' | 'Armée' | 'Construction' | 'Administration' | 'Religion' | 'Commerce' | 'Agriculture' | 'Autre' |
-  'military' | 'administration' | 'construction' | 'religion' | 'slaves' | 'entertainment' | 'tax' | 'trade' | 
-  'diplomacy' | 'other' | 'maintenance' | 'sale';
+  'Esclaves' | 'Divertissement' | 'Diplomatie' | 'Maintenance' | 'Vente';
 export type RecurringInterval = 'daily' | 'weekly' | 'monthly' | 'seasonal' | 'yearly';
 export type EconomieSource = 'tax' | 'trade' | 'war' | 'donation' | 'fine' | 'sale' | 'purchase' | 'salary' | 'rent' | 'manual_entry' | 'other'; 
 

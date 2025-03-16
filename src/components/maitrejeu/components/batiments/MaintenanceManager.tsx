@@ -1,130 +1,190 @@
-import React from 'react';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Badge } from '@/components/ui/badge';
+import React, { useState, useEffect } from 'react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Table, TableBody, TableCell, TableCaption, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
-import { CalendarClock, CheckCircle, AlertTriangle } from 'lucide-react';
-import { Building, BuildingStatus } from '../../types/batiments';
+import { Badge } from '@/components/ui/badge';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Calendar } from '@/components/ui/calendar';
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
+import { CalendarIcon } from "lucide-react"
+import { cn } from "@/lib/utils"
+import { format } from "date-fns"
+import { useMaitreJeu } from '../../context';
+import { Building, MaintenanceTask } from '../../types/batiments';
 
-interface MaintenanceTask {
-  id: string;
-  buildingId: string;
-  buildingName: string;
-  deadline: string;
-  estimatedCost: number;
-  priority: 'low' | 'medium' | 'high' | 'critical';
-  status: 'scheduled' | 'in_progress' | 'completed' | 'overdue';
-}
+const MaintenanceManager: React.FC = () => {
+  const { buildings } = useMaitreJeu();
+  const [tasks, setTasks] = useState<MaintenanceTask[]>([]);
+  const [selectedDate, setSelectedDate] = useState<Date | undefined>(new Date());
+  const [buildingFilter, setBuildingFilter] = useState<string>('');
+  const [priorityFilter, setPriorityFilter] = useState<string>('');
 
-interface MaintenanceManagerProps {
-  buildings: Building[];
-  onScheduleMaintenance: (buildingId: string, task: MaintenanceTask) => void;
-}
+  useEffect(() => {
+    // Simuler des tâches de maintenance
+    const mockTasks: MaintenanceTask[] = [
+      {
+        id: 'task-1',
+        buildingId: 'forum-romanum',
+        buildingName: 'Forum Romanum',
+        deadline: new Date(new Date().setDate(new Date().getDate() + 7)).toISOString(),
+        estimatedCost: 15000,
+        priority: 'high',
+        status: 'scheduled',
+        description: 'Réparer les dommages causés par les récentes émeutes',
+        startDate: new Date().toISOString()
+      },
+      {
+        id: 'task-2',
+        buildingId: 'basilica-aemilia',
+        buildingName: 'Basilica Aemilia',
+        deadline: new Date(new Date().setDate(new Date().getDate() + 14)).toISOString(),
+        estimatedCost: 8000,
+        priority: 'medium',
+        status: 'in_progress',
+        description: 'Remplacer les tuiles endommagées sur le toit',
+        startDate: new Date().toISOString()
+      },
+      {
+        id: 'task-3',
+        buildingId: 'temple-jupiter',
+        buildingName: 'Temple de Jupiter',
+        deadline: new Date(new Date().setDate(new Date().getDate() + 21)).toISOString(),
+        estimatedCost: 12000,
+        priority: 'low',
+        status: 'completed',
+        description: 'Nettoyer et restaurer les statues',
+        startDate: new Date().toISOString()
+      }
+    ];
+    setTasks(mockTasks);
+  }, []);
 
-export const MaintenanceManager: React.FC<MaintenanceManagerProps> = ({ buildings, onScheduleMaintenance }) => {
-  const maintenanceTasks: MaintenanceTask[] = [
-    {
-      id: 'mt1',
-      buildingId: 'b1',
-      buildingName: 'Temple de Jupiter',
-      deadline: '2024-06-01',
-      estimatedCost: 5000,
-      priority: 'medium',
-      status: 'scheduled'
-    },
-    {
-      id: 'mt2',
-      buildingId: 'b2',
-      buildingName: 'Aqueduc de Rome',
-      deadline: '2024-07-15',
-      estimatedCost: 8000,
-      priority: 'high',
-      status: 'in_progress'
-    },
-    {
-      id: 'mt3',
-      buildingId: 'b3',
-      buildingName: 'Théâtre de Marcellus',
-      deadline: '2024-08-01',
-      estimatedCost: 3000,
-      priority: 'low',
-      status: 'completed'
-    }
-  ];
-  
-  const getPriorityVariant = (priority: 'low' | 'medium' | 'high' | 'critical') => {
+  const filteredTasks = tasks.filter(task => {
+    const building = buildings.find(b => b.id === task.buildingId);
+    const buildingName = building ? building.name : '';
+    const dateMatch = selectedDate ? format(new Date(task.deadline), "yyyy-MM-dd") === format(selectedDate, "yyyy-MM-dd") : true;
+    const buildingMatch = buildingFilter ? buildingName.toLowerCase().includes(buildingFilter.toLowerCase()) : true;
+    const priorityMatch = priorityFilter ? task.priority === priorityFilter : true;
+    return dateMatch && buildingMatch && priorityMatch;
+  });
+
+  const getPriorityBadge = (priority: MaintenanceTask['priority']) => {
     switch (priority) {
       case 'low':
-        return 'success';
+        return 'secondary'; // Changed from "default"
       case 'medium':
-        return 'secondary';
+        return 'secondary'; // Changed from "warning"
       case 'high':
         return 'destructive';
       case 'critical':
         return 'destructive';
       default:
-        return 'default';
+        return 'secondary';
     }
   };
-  
-  const getStatusIcon = (status: string) => {
-    switch (status) {
-      case 'scheduled':
-        return <CalendarClock className="h-4 w-4 mr-2" />;
-      case 'in_progress':
-        return <AlertTriangle className="h-4 w-4 mr-2 text-yellow-500" />;
-      case 'completed':
-        return <CheckCircle className="h-4 w-4 mr-2 text-green-500" />;
-      case 'overdue':
-        return <AlertTriangle className="h-4 w-4 mr-2 text-red-500" />;
-      default:
-        return null;
-    }
-  };
-  
+
   return (
-    <Card className="w-full">
+    <Card>
       <CardHeader>
-        <CardTitle>Gestion de la Maintenance</CardTitle>
-        <CardDescription>Planifiez et suivez la maintenance des bâtiments publics</CardDescription>
+        <CardTitle>Gestion des Tâches de Maintenance</CardTitle>
       </CardHeader>
       <CardContent>
-        <Table>
+        <div className="grid gap-4 grid-cols-1 md:grid-cols-3">
+          <div>
+            <Label htmlFor="building-filter">Filtrer par Bâtiment</Label>
+            <Input
+              type="text"
+              id="building-filter"
+              placeholder="Nom du bâtiment"
+              value={buildingFilter}
+              onChange={e => setBuildingFilter(e.target.value)}
+            />
+          </div>
+          <div>
+            <Label htmlFor="priority-filter">Filtrer par Priorité</Label>
+            <select
+              id="priority-filter"
+              className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-foreground file:text-background file:h-9 file:px-3 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+              value={priorityFilter}
+              onChange={e => setPriorityFilter(e.target.value)}
+            >
+              <option value="">Toutes les Priorités</option>
+              <option value="low">Basse</option>
+              <option value="medium">Moyenne</option>
+              <option value="high">Haute</option>
+              <option value="critical">Critique</option>
+            </select>
+          </div>
+          <div>
+            <Label>Filtrer par Date</Label>
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button
+                  variant={"outline"}
+                  className={cn(
+                    "w-full justify-start text-left font-normal",
+                    !selectedDate && "text-muted-foreground"
+                  )}
+                >
+                  {selectedDate ? (
+                    format(selectedDate, "yyyy-MM-dd")
+                  ) : (
+                    <span>Choisir une date</span>
+                  )}
+                  <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-auto p-0" align="start">
+                <Calendar
+                  mode="single"
+                  selected={selectedDate}
+                  onSelect={setSelectedDate}
+                  disabled={false}
+                  initialFocus
+                />
+              </PopoverContent>
+            </Popover>
+          </div>
+        </div>
+        <Table className="mt-4">
+          <TableCaption>Liste des tâches de maintenance planifiées.</TableCaption>
           <TableHeader>
             <TableRow>
               <TableHead>Bâtiment</TableHead>
               <TableHead>Date Limite</TableHead>
-              <TableHead>Coût Estimé</TableHead>
               <TableHead>Priorité</TableHead>
               <TableHead>Statut</TableHead>
+              <TableHead>Description</TableHead>
               <TableHead className="text-right">Actions</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
-            {maintenanceTasks.map((task) => (
-              <TableRow key={task.id}>
-                <TableCell>{task.buildingName}</TableCell>
-                <TableCell>{task.deadline}</TableCell>
-                <TableCell>{task.estimatedCost}</TableCell>
-                <TableCell>
-                  <Badge variant={getPriorityVariant(task.priority)}>
-                    {task.priority}
-                  </Badge>
-                </TableCell>
-                <TableCell>
-                  <div className="flex items-center">
-                    {getStatusIcon(task.status)}
-                    <span>{task.status}</span>
-                  </div>
-                </TableCell>
-                <TableCell className="text-right">
-                  <Button size="sm">Gérer</Button>
-                </TableCell>
-              </TableRow>
-            ))}
+            {filteredTasks.map(task => {
+              const building = buildings.find(b => b.id === task.buildingId);
+              const buildingName = building ? building.name : 'Inconnu';
+              return (
+                <TableRow key={task.id}>
+                  <TableCell>{buildingName}</TableCell>
+                  <TableCell>{format(new Date(task.deadline), "yyyy-MM-dd")}</TableCell>
+                  <TableCell>
+                    <Badge variant={getPriorityBadge(task.priority)}>
+                      {task.priority}
+                    </Badge>
+                  </TableCell>
+                  <TableCell>{task.status}</TableCell>
+                  <TableCell>{task.description}</TableCell>
+                  <TableCell className="text-right">
+                    <Button size="sm">Marquer comme Terminé</Button>
+                  </TableCell>
+                </TableRow>
+              );
+            })}
           </TableBody>
         </Table>
       </CardContent>
     </Card>
   );
 };
+
+export default MaintenanceManager;

@@ -457,7 +457,7 @@ export const initialElections: Election[] = [];
 export const initialHistoireEntries: HistoireEntry[] = [];
 export const initialLois: Loi[] = [];
 
-// Ajustement de l'initialEquilibre pour inclure à la fois populaires et populares
+// Ajustement de l'initialEquilibre pour inclure à la fois populaires et populaires
 export const initialEquilibre: Equilibre = {
   facteurSenat: 60,
   facteurPlebs: 40,

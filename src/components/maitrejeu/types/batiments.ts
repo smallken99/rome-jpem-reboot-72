@@ -1,3 +1,4 @@
+
 import { GameDate } from './common';
 
 export type BuildingType = 
@@ -127,7 +128,7 @@ export interface PublicBuildingModalProps {
   isOpen: boolean;
   onClose: () => void;
   onSave: (building: BuildingCreationData) => void;
-  building?: Building | PublicBuildingData;
+  building?: Building;
 }
 
 export interface BuildingsListProps {

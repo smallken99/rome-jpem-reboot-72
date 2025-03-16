@@ -6,10 +6,11 @@ import { Map, BarChart3, PieChart } from 'lucide-react';
 export const StatsProvincesTab: React.FC = () => {
   const { provinces } = useMaitreJeu();
   
-  // Remplacer toutes les occurrences de 'stabilité' par 'stabilite'
-  const provincesStables = provinces.filter(p => p.stabilite >= 70).length;
-  const provincesInstables = provinces.filter(p => p.stabilite < 70).length;
-  
+  // Calcul des statistiques
+  const provincesCount = provinces.length;
+  const stableProvinces = provinces.filter(p => p.stabilite >= 70).length;
+  const unstableProvinces = provinces.filter(p => p.stabilite < 70).length;
+
   // Calcul des revenus totaux des provinces
   const revenuTotal = provinces.reduce((sum, province) => sum + (province.revenuAnnuel || 0), 0);
   
@@ -19,6 +20,35 @@ export const StatsProvincesTab: React.FC = () => {
         (province.revenuAnnuel || 0) > (max.revenuAnnuel || 0) ? province : max, provinces[0])
     : null;
   
+  const renderProvinceCard = (province: Province) => (
+    <Card key={province.id} className="overflow-hidden">
+      <CardHeader className="p-4">
+        <CardTitle className="text-base font-medium">{province.nom}</CardTitle>
+      </CardHeader>
+      <CardContent className="p-4 pt-0">
+        <div className="space-y-2">
+          <div className="flex justify-between text-sm">
+            <span className="text-muted-foreground">Stabilité:</span>
+            <span 
+              className={cn(
+                province.stabilite > 80 ? "text-green-500" : 
+                province.stabilite > 50 ? "text-amber-500" : 
+                "text-red-500"
+              )}
+            >
+              {province.stabilite}%
+            </span>
+          </div>
+          
+          <div className="flex justify-between text-sm">
+            <span className="text-muted-foreground">Revenu Annuel:</span>
+            <span>{province.revenuAnnuel || 0} As</span>
+          </div>
+        </div>
+      </CardContent>
+    </Card>
+  );
+
   return (
     <div className="space-y-4">
       <h3 className="text-xl font-semibold">Statistiques des Provinces</h3>
@@ -29,7 +59,7 @@ export const StatsProvincesTab: React.FC = () => {
             <CardTitle className="text-sm font-medium">Nombre de Provinces</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{totalProvinces}</div>
+            <div className="text-2xl font-bold">{provincesCount}</div>
           </CardContent>
         </Card>
         
@@ -44,7 +74,7 @@ export const StatsProvincesTab: React.FC = () => {
                 : 0}%
             </div>
             <p className="text-xs text-muted-foreground">
-              {provinces.filter(p => p.stabilite >= 70).length} provinces stables
+              {stableProvinces} provinces stables
             </p>
           </CardContent>
         </Card>
@@ -54,9 +84,9 @@ export const StatsProvincesTab: React.FC = () => {
             <CardTitle className="text-sm font-medium">Provinces Instables</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{provincesInstables}</div>
+            <div className="text-2xl font-bold">{unstableProvinces}</div>
             <p className="text-xs text-muted-foreground mt-1">
-              {((provincesInstables / totalProvinces) * 100).toFixed(1)}% du total
+              {((unstableProvinces / provincesCount) * 100).toFixed(1)}% du total
             </p>
           </CardContent>
         </Card>
@@ -112,26 +142,7 @@ export const StatsProvincesTab: React.FC = () => {
         </CardHeader>
         <CardContent>
           <div className="space-y-4">
-            {provinces.map(province => (
-              <div key={province.id} className="flex items-center space-x-4">
-                <div className="flex-1">
-                  <div className="flex justify-between">
-                    <span className="font-medium">{province.nom}</span>
-                    <span>{province.stabilite || 0}%</span>
-                  </div>
-                  <div className="w-full bg-muted rounded-full h-2 mt-1">
-                    <div 
-                      className={`h-2 rounded-full ${(province.stabilite || 0) > 70 
-                        ? 'bg-green-500' 
-                        : (province.stabilite || 0) > 30 
-                          ? 'bg-amber-500' 
-                          : 'bg-red-500'}`}
-                      style={{ width: `${province.stabilite || 0}%` }}
-                    />
-                  </div>
-                </div>
-              </div>
-            ))}
+            {provinces.map(renderProvinceCard)}
           </div>
         </CardContent>
       </Card>
