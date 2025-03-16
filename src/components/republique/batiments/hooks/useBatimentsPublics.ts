@@ -11,7 +11,8 @@ export const useBatimentsPublics = () => {
     publicBuildings,
     maintainBuilding,
     degradeBuildings,
-    addPublicBuilding
+    addPublicBuilding,
+    updateBuildingCondition
   } = usePublicBuildings();
   
   const {
@@ -53,13 +54,46 @@ export const useBatimentsPublics = () => {
     }
   };
 
+  // Gérer la maintenance des bâtiments
+  const handleMaintainBuilding = (buildingId: string, level: 'minimal' | 'standard' | 'excellent') => {
+    // Coûts de maintenance par niveau
+    const maintenanceCosts = {
+      minimal: 0.01, // 1% du coût de construction
+      standard: 0.03, // 3% du coût de construction
+      excellent: 0.05 // 5% du coût de construction
+    };
+    
+    // Trouver le bâtiment
+    const building = publicBuildings.find(b => b.id === buildingId);
+    if (!building) {
+      toast.error("Bâtiment introuvable");
+      return false;
+    }
+    
+    // Calculer le coût de maintenance
+    const maintenanceCost = Math.round(building.investmentAmount * maintenanceCosts[level]);
+    
+    // Simuler une dépense du trésor public
+    // (Dans une application réelle, vérifier les fonds disponibles)
+    
+    // Mettre à jour le niveau de maintenance
+    maintainBuilding(buildingId, level);
+    
+    // Améliorer la condition du bâtiment
+    const conditionImprovement = level === 'minimal' ? 5 : level === 'standard' ? 15 : 30;
+    updateBuildingCondition(buildingId, conditionImprovement);
+    
+    toast.success(`Maintenance effectuée: ${building.name} (${level})`);
+    return true;
+  };
+
   return {
     publicBuildings,
     constructionProjects,
     startConstructionProject,
     approveConstructionProject,
     advanceConstruction: handleAdvanceConstruction,
-    maintainBuilding,
+    maintainBuilding: handleMaintainBuilding,
     degradeBuildings
   };
 };

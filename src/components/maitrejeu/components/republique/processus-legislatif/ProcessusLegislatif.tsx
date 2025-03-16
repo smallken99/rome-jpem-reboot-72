@@ -10,6 +10,7 @@ import { VotesEnCoursTab } from './tabs/VotesEnCoursTab';
 import { HistoriqueLoiTab } from './tabs/HistoriqueLoiTab';
 import { LoiModal } from './modals/LoiModal';
 import { ProjetLoi, VoteLoi, HistoriqueLoi } from './types';
+import { toast } from 'sonner';
 
 export interface ProcessusLegislatifProps {
   isEditable?: boolean;
@@ -40,6 +41,7 @@ export const ProcessusLegislatif: React.FC<ProcessusLegislatifProps> = ({
     if (selectedLoi) {
       // Update existing loi
       setProjets(projets.map(p => p.id === selectedLoi.id ? { ...p, ...loiData } : p));
+      toast.success(`Loi "${loiData.titre}" mise à jour`);
     } else {
       // Add new loi
       const newLoi: ProjetLoi = {
@@ -47,12 +49,14 @@ export const ProcessusLegislatif: React.FC<ProcessusLegislatifProps> = ({
         ...loiData
       };
       setProjets([...projets, newLoi]);
+      toast.success(`Nouvelle loi "${loiData.titre}" créée`);
     }
     setIsModalOpen(false);
   };
   
   const handleDeleteLoi = (loiId: string) => {
     setProjets(projets.filter(p => p.id !== loiId));
+    toast.info("Projet de loi supprimé");
   };
   
   const handleStartVote = (loi: ProjetLoi) => {
@@ -73,6 +77,55 @@ export const ProcessusLegislatif: React.FC<ProcessusLegislatifProps> = ({
     };
     
     setVotes([...votes, newVote]);
+    toast.success(`Vote démarré pour la loi "${loi.titre}"`);
+  };
+
+  const handleVote = (voteId: string, voteType: 'pour' | 'contre' | 'abstention', count: number = 1) => {
+    setVotes(votes.map(vote => {
+      if (vote.id === voteId) {
+        return {
+          ...vote,
+          [voteType]: vote[voteType] + count
+        };
+      }
+      return vote;
+    }));
+    
+    const vote = votes.find(v => v.id === voteId);
+    if (vote) {
+      toast.success(`Vote "${voteType}" pour "${vote.titre}"`);
+    }
+  };
+
+  const handleCompleteVote = (voteId: string) => {
+    const vote = votes.find(v => v.id === voteId);
+    if (!vote) return;
+    
+    // Déterminer si la loi a été adoptée ou rejetée
+    const isAdopted = vote.pour > vote.contre;
+    
+    // Déplacer vers l'historique
+    const historyEntry: HistoriqueLoi = {
+      id: vote.id,
+      titre: vote.titre,
+      auteur: vote.auteur,
+      dateProposition: vote.dateDebut,
+      dateAdoption: new Date().toLocaleDateString('fr-FR'),
+      description: vote.description,
+      contenu: vote.contenu,
+      votes: {
+        pour: vote.pour,
+        contre: vote.contre,
+        abstention: vote.abstention
+      },
+      statut: isAdopted ? 'adoptée' : 'rejetée',
+      saison: "Été 705"
+    };
+    
+    setHistorique([historyEntry, ...historique]);
+    setVotes(votes.filter(v => v.id !== voteId));
+    
+    toast.success(`Vote terminé pour "${vote.titre}". La loi a été ${isAdopted ? 'adoptée' : 'rejetée'}.`);
   };
   
   const formatSeason = (season: string): string => {
@@ -112,6 +165,8 @@ export const ProcessusLegislatif: React.FC<ProcessusLegislatifProps> = ({
               <VotesEnCoursTab 
                 votes={votes}
                 isEditable={isEditable}
+                onVote={handleVote}
+                onCompleteVote={handleCompleteVote}
               />
             </TabsContent>
             

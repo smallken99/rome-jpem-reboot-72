@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { LandParcel } from '../types';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -17,11 +16,39 @@ interface AgerPublicusDetailsProps {
 }
 
 export const AgerPublicusDetails: React.FC<AgerPublicusDetailsProps> = ({ parcel, onClose }) => {
-  const { addOfficialToParcel, addSlavesToParcel, publicSlavePool } = useAgerPublicus();
+  const { addOfficialToParcel, addSlavesToParcel, publicSlavePool, allocateParcelToFamily, revokeParcelAllocation } = useAgerPublicus();
   const [slaveCount, setSlaveCount] = useState(5);
+  const [allocatingToFamily, setAllocatingToFamily] = useState(false);
+  const [selectedFamilyId, setSelectedFamilyId] = useState('');
+  const [selectedFamilyName, setSelectedFamilyName] = useState('');
+  const [allocationDuration, setAllocationDuration] = useState(10);
   
-  // Récupérer les détails du bâtiment rural
+  const senatorFamilies = [
+    { id: 'fam-1', name: 'Claudii' },
+    { id: 'fam-2', name: 'Cornelii' },
+    { id: 'fam-3', name: 'Julii' },
+    { id: 'fam-4', name: 'Sempronii' },
+    { id: 'fam-5', name: 'Valerii' },
+  ];
+  
   const buildingDetails = ruralProperties[parcel.buildingType];
+
+  const handleAllocateToFamily = () => {
+    if (selectedFamilyId && selectedFamilyName) {
+      if (allocateParcelToFamily) {
+        allocateParcelToFamily(parcel.id, selectedFamilyId, selectedFamilyName, allocationDuration);
+        setAllocatingToFamily(false);
+      }
+    } else {
+      toast.error("Veuillez sélectionner une famille");
+    }
+  };
+
+  const handleRevokeAllocation = () => {
+    if (revokeParcelAllocation) {
+      revokeParcelAllocation(parcel.id);
+    }
+  };
   
   return (
     <Card className="border border-rome-gold/30">
@@ -48,7 +75,6 @@ export const AgerPublicusDetails: React.FC<AgerPublicusDetailsProps> = ({ parcel
         </div>
       </CardHeader>
       <CardContent className="space-y-6">
-        {/* Informations sur le bâtiment rural */}
         <div className="space-y-3">
           <h3 className="font-semibold flex items-center gap-2">
             <Building className="h-4 w-4 text-rome-gold" />
@@ -84,7 +110,6 @@ export const AgerPublicusDetails: React.FC<AgerPublicusDetailsProps> = ({ parcel
           </div>
         </div>
         
-        {/* Statut de l'allocation */}
         <div className="space-y-3">
           <h3 className="font-semibold flex items-center gap-2">
             <Users className="h-4 w-4 text-rome-gold" />
@@ -138,7 +163,6 @@ export const AgerPublicusDetails: React.FC<AgerPublicusDetailsProps> = ({ parcel
           </div>
         </div>
         
-        {/* Production */}
         {parcel.production && (
           <div className="space-y-3">
             <h3 className="font-semibold flex items-center gap-2">
@@ -176,7 +200,6 @@ export const AgerPublicusDetails: React.FC<AgerPublicusDetailsProps> = ({ parcel
           </div>
         )}
         
-        {/* Main d'œuvre */}
         <div className="space-y-3">
           <h3 className="font-semibold flex items-center gap-2">
             <UserCog className="h-4 w-4 text-rome-gold" />
@@ -270,7 +293,6 @@ export const AgerPublicusDetails: React.FC<AgerPublicusDetailsProps> = ({ parcel
           </div>
         </div>
         
-        {/* Dépenses */}
         {parcel.expenses && (
           <div className="space-y-3">
             <h3 className="font-semibold flex items-center gap-2">
@@ -297,20 +319,78 @@ export const AgerPublicusDetails: React.FC<AgerPublicusDetailsProps> = ({ parcel
           </div>
         )}
         
-        {/* Actions */}
         <div className="pt-3 flex justify-end gap-3">
           <Button variant="outline" onClick={onClose}>
             Fermer
           </Button>
           
-          {parcel.status === 'available' && (
-            <Button variant="default">
+          {parcel.status === 'available' && !allocatingToFamily && (
+            <Button 
+              variant="default"
+              onClick={() => setAllocatingToFamily(true)}
+            >
               Attribuer ce domaine
             </Button>
           )}
           
-          {parcel.status === 'allocated' && (
-            <Button variant="destructive">
+          {allocatingToFamily && (
+            <div className="flex-1 border p-4 rounded-md space-y-4">
+              <h4 className="font-medium">Attribution du domaine</h4>
+              
+              <div className="space-y-2">
+                <label className="text-sm">Famille sénatoriale</label>
+                <select 
+                  className="w-full border p-2 rounded"
+                  value={selectedFamilyId}
+                  onChange={(e) => {
+                    setSelectedFamilyId(e.target.value);
+                    const family = senatorFamilies.find(f => f.id === e.target.value);
+                    if (family) setSelectedFamilyName(family.name);
+                  }}
+                >
+                  <option value="">Sélectionner une famille</option>
+                  {senatorFamilies.map(family => (
+                    <option key={family.id} value={family.id}>{family.name}</option>
+                  ))}
+                </select>
+              </div>
+              
+              <div className="space-y-2">
+                <label className="text-sm">Durée d'attribution (années)</label>
+                <input 
+                  type="number" 
+                  min="1"
+                  max="30"
+                  className="w-full border p-2 rounded"
+                  value={allocationDuration}
+                  onChange={(e) => setAllocationDuration(parseInt(e.target.value) || 10)}
+                />
+              </div>
+              
+              <div className="flex justify-end gap-2">
+                <Button 
+                  variant="outline" 
+                  size="sm"
+                  onClick={() => setAllocatingToFamily(false)}
+                >
+                  Annuler
+                </Button>
+                <Button 
+                  variant="default"
+                  size="sm"
+                  onClick={handleAllocateToFamily}
+                >
+                  Confirmer
+                </Button>
+              </div>
+            </div>
+          )}
+          
+          {parcel.status === 'allocated' && !allocatingToFamily && (
+            <Button 
+              variant="destructive"
+              onClick={handleRevokeAllocation}
+            >
               Révoquer l'attribution
             </Button>
           )}

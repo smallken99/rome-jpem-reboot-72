@@ -4,6 +4,7 @@ import { ActionButton } from '@/components/ui-custom/ActionButton';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
 import { useEducation } from '../context/EducationContext';
+import { Loader2 } from 'lucide-react';
 
 interface CardActionsProps {
   educationType: string;
@@ -20,10 +21,11 @@ export const CardActions: React.FC<CardActionsProps> = ({
 }) => {
   const hasEducation = educationType !== 'none';
   const navigate = useNavigate();
-  const { completeEducation } = useEducation();
+  const { completeEducation, isEducating } = useEducation();
   
   const handleChangePreceptor = () => {
     navigate(`/famille/education/preceptors?childId=${childId}&type=${educationType}`);
+    toast.info("Sélection d'un nouveau précepteur");
   };
   
   const handleRemoveEducation = () => {
@@ -31,7 +33,16 @@ export const CardActions: React.FC<CardActionsProps> = ({
     completeEducation(childId);
     
     // Show feedback
-    toast.success(`Éducation supprimée`);
+    toast.success(`Éducation supprimée pour l'enfant`);
+  };
+
+  const handleAssign = () => {
+    navigate(`/famille/education/child/${childId}`);
+    if (!hasEducation) {
+      toast.info("Assignation d'une nouvelle éducation");
+    } else {
+      toast.info("Modification de l'éducation actuelle");
+    }
   };
   
   return (
@@ -43,12 +54,14 @@ export const CardActions: React.FC<CardActionsProps> = ({
             label="Changer de précepteur"
             className="text-xs bg-rome-navy/5 hover:bg-rome-navy/10"
             onClick={handleChangePreceptor}
+            disabled={isEducating}
           />
           <ActionButton 
             variant="destructive"
             label="Supprimer"
             className="text-xs"
             onClick={handleRemoveEducation}
+            disabled={isEducating}
           />
         </>
       )}
@@ -56,7 +69,9 @@ export const CardActions: React.FC<CardActionsProps> = ({
         variant="outline"
         label={hasEducation ? 'Modifier' : 'Assigner'}
         className="text-xs"
-        to={`/famille/education/child/${childId}`}
+        onClick={handleAssign}
+        disabled={isEducating}
+        icon={isEducating ? <Loader2 className="h-3 w-3 animate-spin" /> : undefined}
       />
     </div>
   );

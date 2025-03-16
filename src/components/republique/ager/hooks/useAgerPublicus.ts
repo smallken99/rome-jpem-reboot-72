@@ -443,6 +443,73 @@ export const useAgerPublicus = () => {
     return true;
   };
   
+  // Attribuer une parcelle à une famille
+  const allocateParcelToFamily = (parcelId: string, familyId: string, familyName: string, duration: number = 10) => {
+    // Vérifier que la parcelle est disponible
+    const parcel = landParcels.find(p => p.id === parcelId);
+    if (!parcel) {
+      toast.error("Parcelle introuvable");
+      return false;
+    }
+    
+    if (parcel.status !== 'available') {
+      toast.error("Cette parcelle n'est pas disponible pour attribution");
+      return false;
+    }
+    
+    // Année actuelle simulée
+    const currentYear = 705; // AUC - Ab Urbe Condita
+    
+    setLandParcels(prev => prev.map(p => {
+      if (p.id !== parcelId) return p;
+      
+      return {
+        ...p,
+        status: 'allocated',
+        allocation: {
+          familyId,
+          familyName,
+          since: `${currentYear} AUC`,
+          until: duration > 0 ? `${currentYear + duration} AUC` : undefined
+        }
+      };
+    }));
+    
+    toast.success(`Parcelle "${parcel.name}" attribuée à la famille ${familyName}`);
+    return true;
+  };
+  
+  // Révoquer l'attribution d'une parcelle
+  const revokeParcelAllocation = (parcelId: string) => {
+    // Vérifier que la parcelle est attribuée
+    const parcel = landParcels.find(p => p.id === parcelId);
+    if (!parcel) {
+      toast.error("Parcelle introuvable");
+      return false;
+    }
+    
+    if (parcel.status !== 'allocated') {
+      toast.error("Cette parcelle n'est pas attribuée");
+      return false;
+    }
+    
+    setLandParcels(prev => prev.map(p => {
+      if (p.id !== parcelId) return p;
+      
+      // Conserver le nom de la famille pour le message
+      const familyName = p.allocation?.familyName;
+      
+      return {
+        ...p,
+        status: 'available',
+        allocation: undefined
+      };
+    }));
+    
+    toast.success(`Attribution révoquée pour la parcelle "${parcel.name}"`);
+    return true;
+  };
+  
   // Assigner un contremaître à une parcelle
   const assignOverseerToParcel = (overseerId: string, parcelId: string) => {
     // Vérifier si le contremaître est déjà assigné ailleurs
@@ -521,6 +588,8 @@ export const useAgerPublicus = () => {
     assignOverseerToParcel,
     purchasePublicSlaves,
     getParcelDetails,
-    getAvailableOverseersForParcel
+    getAvailableOverseersForParcel,
+    allocateParcelToFamily,
+    revokeParcelAllocation
   };
 };

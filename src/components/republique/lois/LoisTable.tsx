@@ -3,10 +3,11 @@ import React, { useState } from 'react';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Eye, FileText, CheckCircle, XCircle, Clock, Vote } from 'lucide-react';
+import { Eye, FileText, CheckCircle, Vote } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Loi, useLois } from './hooks/useLois';
+import { toast } from 'sonner';
 
 interface LoisTableProps {
   onViewDetails: (loi: Loi) => void;
@@ -19,7 +20,7 @@ export const LoisTable: React.FC<LoisTableProps> = ({
   onVote, 
   onPromulguer 
 }) => {
-  const { lois, categories, isLoading } = useLois();
+  const { lois, categories, isLoading, voterLoi, promulguerLoi } = useLois();
   const [searchTerm, setSearchTerm] = useState('');
   const [categoryFilter, setCategoryFilter] = useState('all');
   const [statusFilter, setStatusFilter] = useState('all');
@@ -65,6 +66,26 @@ export const LoisTable: React.FC<LoisTableProps> = ({
   const getCategoryName = (categorieId: string) => {
     const category = categories.find(cat => cat.id === categorieId);
     return category ? category.nom : 'Inconnu';
+  };
+
+  // Gérer le vote direct depuis la table
+  const handleVoteDirect = (loi: Loi, vote: 'pour' | 'contre' | 'abstention') => {
+    if (voterLoi) {
+      voterLoi(loi.id, {
+        pour: vote === 'pour' ? 120 : 10,
+        contre: vote === 'contre' ? 120 : 10,
+        abstention: vote === 'abstention' ? 80 : 10
+      });
+      toast.success(`Vote "${vote}" enregistré pour "${loi.titre}"`);
+    }
+  };
+
+  // Gérer la promulgation directe depuis la table
+  const handlePromulguerDirect = (loi: Loi) => {
+    if (promulguerLoi) {
+      promulguerLoi(loi.id);
+      toast.success(`La loi "${loi.titre}" a été promulguée`);
+    }
   };
   
   return (
@@ -147,23 +168,36 @@ export const LoisTable: React.FC<LoisTableProps> = ({
                         <Eye className="h-4 w-4" />
                       </Button>
                       
-                      {onVote && (loi.statut === 'proposée' || loi.statut === 'en_débat') && (
-                        <Button 
-                          variant="ghost" 
-                          size="icon"
-                          onClick={() => onVote(loi)}
-                          title="Voter"
-                        >
-                          <Vote className="h-4 w-4" />
-                        </Button>
+                      {(loi.statut === 'proposée' || loi.statut === 'en_débat') && (
+                        <div className="flex">
+                          <Button 
+                            variant="ghost" 
+                            size="icon"
+                            onClick={() => handleVoteDirect(loi, 'pour')}
+                            title="Voter pour"
+                            className="text-green-600"
+                          >
+                            <CheckCircle className="h-4 w-4" />
+                          </Button>
+                          
+                          <Button 
+                            variant="ghost" 
+                            size="icon"
+                            onClick={() => onVote && onVote(loi)}
+                            title="Options de vote"
+                          >
+                            <Vote className="h-4 w-4" />
+                          </Button>
+                        </div>
                       )}
                       
-                      {onPromulguer && loi.statut === 'votée' && (
+                      {loi.statut === 'votée' && (
                         <Button 
                           variant="ghost" 
                           size="icon"
-                          onClick={() => onPromulguer(loi)}
+                          onClick={() => handlePromulguerDirect(loi)}
                           title="Promulguer"
+                          className="text-purple-600"
                         >
                           <CheckCircle className="h-4 w-4" />
                         </Button>
