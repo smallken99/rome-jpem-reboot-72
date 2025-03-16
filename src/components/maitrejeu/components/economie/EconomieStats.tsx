@@ -11,9 +11,9 @@ export const EconomieStats: React.FC<EconomieStatsProps> = ({
 }) => {
   // Calculer un indicateur de santé économique
   const healthStatus = () => {
-    if (treasury.balance > treasury.expenses * 5) return 'Excellente';
-    if (treasury.balance > treasury.expenses * 2) return 'Bonne';
-    if (treasury.balance > treasury.expenses) return 'Stable';
+    if (treasury.balance > treasury.totalExpenses * 5) return 'Excellente';
+    if (treasury.balance > treasury.totalExpenses * 2) return 'Bonne';
+    if (treasury.balance > treasury.totalExpenses) return 'Stable';
     if (treasury.balance > 0) return 'Préoccupante';
     return 'Critique';
   };
@@ -54,11 +54,11 @@ export const EconomieStats: React.FC<EconomieStatsProps> = ({
         </CardHeader>
         <CardContent>
           <div className="text-2xl font-bold text-green-500">
-            {formatCurrency(treasury.income)}
+            {formatCurrency(treasury.totalIncome)}
           </div>
           <div className="flex items-center mt-1 text-sm">
             <ArrowUpIcon className="h-4 w-4 text-green-500 mr-1" />
-            <span>Projection: {formatCurrency(treasury.income * economicFactors.taxCollection)}</span>
+            <span>Projection: {formatCurrency(treasury.totalIncome * economicFactors.taxCollection)}</span>
           </div>
         </CardContent>
       </Card>
@@ -70,11 +70,11 @@ export const EconomieStats: React.FC<EconomieStatsProps> = ({
         </CardHeader>
         <CardContent>
           <div className="text-2xl font-bold text-red-500">
-            {formatCurrency(treasury.expenses)}
+            {formatCurrency(treasury.totalExpenses)}
           </div>
           <div className="flex items-center mt-1 text-sm">
             <ArrowDownIcon className="h-4 w-4 text-red-500 mr-1" />
-            <span>Projection: {formatCurrency(treasury.expenses * economicFactors.militaryExpense)}</span>
+            <span>Projection: {formatCurrency(treasury.totalExpenses * economicFactors.militaryExpense)}</span>
           </div>
         </CardContent>
       </Card>
@@ -89,7 +89,7 @@ export const EconomieStats: React.FC<EconomieStatsProps> = ({
             {healthStatus()}
           </div>
           <p className="mt-1 text-sm">
-            Dette: {formatCurrency(treasury.debt)}
+            Dette: {formatCurrency(treasury.debt || 0)}
           </p>
         </CardContent>
       </Card>

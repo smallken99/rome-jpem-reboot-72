@@ -7,11 +7,11 @@ import { Plus, FileText, Wrench, ChartBar } from 'lucide-react';
 import { useMaitreJeu } from './context';
 import { useBatimentsManagement } from './hooks/useBatimentsManagement';
 import { BuildingManagement } from './components/batiments/BuildingManagement';
-import { BuildingsList } from './components/batiments/BuildingsList';
-import { ConstructionProjects } from './components/batiments/ConstructionProjects';
-import { MaintenanceManager } from './components/batiments/MaintenanceManager';
-import { BuildingRevenue } from './components/batiments/BuildingRevenue';
-import { PublicBuildingModal } from './components/batiments/PublicBuildingModal';
+import BuildingsList from './components/batiments/BuildingsList';
+import ConstructionProjects from './components/batiments/ConstructionProjects';
+import MaintenanceManager from './components/batiments/MaintenanceManager';
+import BuildingRevenue from './components/batiments/BuildingRevenue';
+import PublicBuildingModal from './components/batiments/PublicBuildingModal';
 
 export const GestionBatiments = () => {
   const [activeTab, setActiveTab] = useState<string>('liste');
@@ -115,8 +115,7 @@ export const GestionBatiments = () => {
 
             <TabsContent value="revenus" className="pt-2">
               <BuildingRevenue 
-                currentYear={currentYear}
-                currentSeason={currentSeason}
+                buildingId="example-building-id" 
               />
             </TabsContent>
           </Tabs>

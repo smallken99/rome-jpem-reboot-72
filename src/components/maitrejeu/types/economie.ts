@@ -4,7 +4,7 @@ import { GameDate } from './common';
 export type EconomieType = 'income' | 'expense' | 'tax' | 'trade' | 'military' | 'construction' | 'slaves' | 'other';
 export type EconomieCategory = 
   'Impôts' | 'Armée' | 'Construction' | 'Administration' | 'Religion' | 'Commerce' | 'Agriculture' | 'Autre' |
-  'Esclaves' | 'Divertissement' | 'Diplomatie' | 'Maintenance' | 'Vente';
+  'Esclaves' | 'Divertissement' | 'Diplomatie' | 'Maintenance' | 'Vente' | 'Tax';
 export type RecurringInterval = 'daily' | 'weekly' | 'monthly' | 'seasonal' | 'yearly';
 export type EconomieSource = 'tax' | 'trade' | 'war' | 'donation' | 'fine' | 'sale' | 'purchase' | 'salary' | 'rent' | 'manual_entry' | 'other'; 
 
@@ -73,6 +73,9 @@ export interface TreasuryStatus {
   taxRate: number;
   comments?: string;
   previousBalance?: number;
+  income: number;
+  expenses: number;
+  debt: number;
 }
 
 export interface EconomicFactors {
@@ -86,10 +89,10 @@ export interface EconomicFactors {
   tradeRevenue: number;
   warSpoilsRevenue: number;
   loanInterestRate: number;
-  inflationRate?: number;
-  growthRate?: number;
-  taxRates?: Record<string, number>;
-  currentYear?: number;
+  inflationRate: number;
+  growthRate: number;
+  taxRates: Record<string, number>;
+  currentYear: number;
 }
 
 // Interface props pour les composants
@@ -107,8 +110,8 @@ export interface EconomieStatsProps {
 
 export interface EconomieTableProps {
   records: EconomieRecord[];
-  onEdit: (id: string) => void;
+  onEdit: (record: EconomieRecord) => void;
   onDelete: (id: string) => void;
-  sortConfig: EconomieSort;
-  onSort: (field: keyof EconomieRecord) => void;
+  sort: EconomieSort;
+  onSortChange: (field: keyof EconomieRecord) => void;
 }

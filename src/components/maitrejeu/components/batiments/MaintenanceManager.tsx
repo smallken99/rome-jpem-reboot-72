@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableCaption, TableHead, TableHeader, TableRow } from '@/components/ui/table';
@@ -12,9 +13,11 @@ import { cn } from "@/lib/utils"
 import { format } from "date-fns"
 import { useMaitreJeu } from '../../context';
 import { Building, MaintenanceTask } from '../../types/batiments';
+import { GameDate } from '../../types/common';
+import { useBatimentsManagement } from '../../hooks/useBatimentsManagement';
 
 const MaintenanceManager: React.FC = () => {
-  const { buildings } = useMaitreJeu();
+  const { buildings } = useBatimentsManagement();
   const [tasks, setTasks] = useState<MaintenanceTask[]>([]);
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(new Date());
   const [buildingFilter, setBuildingFilter] = useState<string>('');
@@ -27,45 +30,61 @@ const MaintenanceManager: React.FC = () => {
         id: 'task-1',
         buildingId: 'forum-romanum',
         buildingName: 'Forum Romanum',
-        deadline: new Date(new Date().setDate(new Date().getDate() + 7)).toISOString(),
+        deadline: { year: 2023, season: 'Spring' },
         estimatedCost: 15000,
         priority: 'high',
         status: 'scheduled',
         description: 'Réparer les dommages causés par les récentes émeutes',
-        startDate: new Date().toISOString()
+        startDate: { year: 2023, season: 'Winter' }
       },
       {
         id: 'task-2',
         buildingId: 'basilica-aemilia',
         buildingName: 'Basilica Aemilia',
-        deadline: new Date(new Date().setDate(new Date().getDate() + 14)).toISOString(),
+        deadline: { year: 2023, season: 'Summer' },
         estimatedCost: 8000,
         priority: 'medium',
         status: 'in_progress',
         description: 'Remplacer les tuiles endommagées sur le toit',
-        startDate: new Date().toISOString()
+        startDate: { year: 2023, season: 'Spring' }
       },
       {
         id: 'task-3',
         buildingId: 'temple-jupiter',
         buildingName: 'Temple de Jupiter',
-        deadline: new Date(new Date().setDate(new Date().getDate() + 21)).toISOString(),
+        deadline: { year: 2023, season: 'Autumn' },
         estimatedCost: 12000,
         priority: 'low',
         status: 'completed',
         description: 'Nettoyer et restaurer les statues',
-        startDate: new Date().toISOString()
+        startDate: { year: 2023, season: 'Spring' }
       }
     ];
     setTasks(mockTasks);
   }, []);
 
+  // Helper function to format GameDate for display
+  const formatGameDate = (gameDate: GameDate): string => {
+    return `${gameDate.year}-${gameDate.season}`;
+  };
+
   const filteredTasks = tasks.filter(task => {
-    const building = buildings.find(b => b.id === task.buildingId);
-    const buildingName = building ? building.name : '';
-    const dateMatch = selectedDate ? format(new Date(task.deadline), "yyyy-MM-dd") === format(selectedDate, "yyyy-MM-dd") : true;
-    const buildingMatch = buildingFilter ? buildingName.toLowerCase().includes(buildingFilter.toLowerCase()) : true;
-    const priorityMatch = priorityFilter ? task.priority === priorityFilter : true;
+    const building = buildings?.find(b => b.id === task.buildingId);
+    const buildingName = building ? building.name : task.buildingName || '';
+    
+    // For date matching, we're comparing formatted dates
+    const dateMatch = selectedDate 
+      ? formatGameDate(task.deadline) === format(selectedDate, "yyyy-MM") 
+      : true;
+      
+    const buildingMatch = buildingFilter 
+      ? buildingName.toLowerCase().includes(buildingFilter.toLowerCase()) 
+      : true;
+      
+    const priorityMatch = priorityFilter 
+      ? task.priority === priorityFilter 
+      : true;
+      
     return dateMatch && buildingMatch && priorityMatch;
   });
 
@@ -161,12 +180,12 @@ const MaintenanceManager: React.FC = () => {
           </TableHeader>
           <TableBody>
             {filteredTasks.map(task => {
-              const building = buildings.find(b => b.id === task.buildingId);
-              const buildingName = building ? building.name : 'Inconnu';
+              const building = buildings?.find(b => b.id === task.buildingId);
+              const buildingName = building ? building.name : task.buildingName || 'Inconnu';
               return (
                 <TableRow key={task.id}>
                   <TableCell>{buildingName}</TableCell>
-                  <TableCell>{format(new Date(task.deadline), "yyyy-MM-dd")}</TableCell>
+                  <TableCell>{formatGameDate(task.deadline)}</TableCell>
                   <TableCell>
                     <Badge variant={getPriorityBadge(task.priority)}>
                       {task.priority}

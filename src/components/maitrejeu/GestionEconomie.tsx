@@ -73,62 +73,67 @@ export const GestionEconomie = () => {
             <div>
               <CardTitle>Registre Économique</CardTitle>
               <CardDescription>
-                Transactions, impôts et finances de la République
+                Transactions économiques récentes de la République
               </CardDescription>
             </div>
-            <Button variant="outline" size="sm" className="flex items-center gap-2">
+            <Button variant="outline" size="sm" className="flex items-center gap-1">
               <FileDown className="h-4 w-4" />
               Exporter
             </Button>
           </div>
         </CardHeader>
-        <CardContent>
-          <Tabs value={activeTab} onValueChange={setActiveTab}>
-            <TabsList className="grid w-full grid-cols-3">
-              <TabsTrigger value="transactions">Transactions</TabsTrigger>
-              <TabsTrigger value="impots">Impôts</TabsTrigger>
-              <TabsTrigger value="commerce">Commerce</TabsTrigger>
-            </TabsList>
-            
-            <div className="my-4">
-              <EconomieFilters 
+        <CardContent className="p-0">
+          <Tabs defaultValue="transactions" value={activeTab} onValueChange={setActiveTab} className="w-full">
+            <div className="px-6 pt-4 pb-2 border-b">
+              <TabsList className="w-full">
+                <TabsTrigger value="transactions" className="flex-1">Transactions</TabsTrigger>
+                <TabsTrigger value="stats" className="flex-1">Statistiques</TabsTrigger>
+                <TabsTrigger value="projections" className="flex-1">Projections</TabsTrigger>
+              </TabsList>
+            </div>
+            <div className="px-6 py-4 border-b">
+              <EconomieFilters
                 filter={filter}
                 onFilterChange={handleFilterChange}
                 onResetFilters={handleResetFilters}
               />
             </div>
             
-            <TabsContent value="transactions">
-              <EconomieTable 
-                records={economieRecords}
-                sort={sort}
-                onSortChange={handleSortChange}
-                onEdit={handleEditTransaction}
-                onDelete={handleDeleteTransaction}
-              />
-            </TabsContent>
-            
-            <TabsContent value="impots">
-              <div className="p-8 text-center text-muted-foreground">
-                <p>Module de gestion des impôts en développement</p>
+            <TabsContent value="transactions" className="mt-0">
+              <div className="rounded-md border">
+                <EconomieTable 
+                  records={economieRecords}
+                  sort={sort}
+                  onSortChange={handleSortChange}
+                  onEdit={handleEditTransaction}
+                  onDelete={handleDeleteTransaction}
+                />
               </div>
             </TabsContent>
             
-            <TabsContent value="commerce">
-              <div className="p-8 text-center text-muted-foreground">
-                <p>Module de gestion du commerce en développement</p>
+            <TabsContent value="stats" className="mt-0 p-6">
+              <div className="text-center text-muted-foreground">
+                Statistiques économiques en cours de développement
+              </div>
+            </TabsContent>
+            
+            <TabsContent value="projections" className="mt-0 p-6">
+              <div className="text-center text-muted-foreground">
+                Projections économiques en cours de développement
               </div>
             </TabsContent>
           </Tabs>
         </CardContent>
       </Card>
 
-      <EconomieModal 
-        isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
-        onSave={handleSaveTransaction}
-        record={selectedRecord}
-      />
+      {isModalOpen && (
+        <EconomieModal
+          isOpen={isModalOpen}
+          onClose={() => setIsModalOpen(false)}
+          onSave={handleSaveTransaction}
+          record={selectedRecord}
+        />
+      )}
     </div>
   );
 };

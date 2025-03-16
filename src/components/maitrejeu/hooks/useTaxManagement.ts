@@ -26,6 +26,16 @@ interface TaxCollectionEvent {
   province?: string;
 }
 
+interface TaxCollection {
+  totalCollected: number;
+  byType: Record<string, number>;
+}
+
+interface TreasuryDataWithTax {
+  balance: number;
+  taxCollection: TaxCollection;
+}
+
 export const useTaxManagement = () => {
   const [taxRates, setTaxRates] = useState<TaxRate[]>([
     {
@@ -76,14 +86,19 @@ export const useTaxManagement = () => {
   ]);
   
   const [taxCollections, setTaxCollections] = useState<TaxCollectionEvent[]>([]);
-  const [treasuryData, setTreasuryData] = useState(getTreasuryData());
+  const [treasuryData, setTreasuryData] = useState<TreasuryDataWithTax>({
+    balance: 0,
+    taxCollection: { totalCollected: 0, byType: {} }
+  });
   
   const { addEconomieRecord, currentYear, currentSeason } = useMaitreJeu();
   
   // Load treasury data
   useEffect(() => {
     const data = getTreasuryData();
-    setTreasuryData(data);
+    if (data) {
+      setTreasuryData(data as TreasuryDataWithTax);
+    }
   }, []);
   
   // Update tax rate
@@ -127,17 +142,18 @@ export const useTaxManagement = () => {
     setTaxCollections(prev => [collectionEvent, ...prev]);
     
     // Add to the treasury
+    const updatedTaxCollection = { 
+      totalCollected: treasuryData.taxCollection.totalCollected + collectedAmount,
+      byType: {
+        ...treasuryData.taxCollection.byType,
+        [tax.id]: (treasuryData.taxCollection.byType[tax.id] || 0) + collectedAmount
+      }
+    };
+    
     const updatedTreasury = {
       ...treasuryData,
       balance: treasuryData.balance + collectedAmount,
-      taxCollection: {
-        ...treasuryData.taxCollection,
-        totalCollected: treasuryData.taxCollection.totalCollected + collectedAmount,
-        byType: {
-          ...treasuryData.taxCollection.byType,
-          [tax.id]: (treasuryData.taxCollection.byType[tax.id] || 0) + collectedAmount
-        }
-      }
+      taxCollection: updatedTaxCollection
     };
     
     setTreasuryData(updatedTreasury);
@@ -147,9 +163,12 @@ export const useTaxManagement = () => {
     addEconomieRecord({
       amount: collectedAmount,
       description: `Perception de ${tax.name}`,
-      category: 'tax',
+      category: 'Impôts',
       type: 'income',
-      date: new Date(),
+      date: {
+        year: currentYear,
+        season: currentSeason
+      },
       source: 'Perception fiscale',
       tags: ['tax', 'revenue']
     });
@@ -158,7 +177,7 @@ export const useTaxManagement = () => {
     updateTaxRate(taxId, { lastCollected: new Date() });
     
     return collectedAmount;
-  }, [taxRates, treasuryData, addEconomieRecord, updateTaxRate]);
+  }, [taxRates, treasuryData, addEconomieRecord, updateTaxRate, currentYear, currentSeason]);
   
   // Collect all enabled taxes
   const collectAllTaxes = useCallback(() => {

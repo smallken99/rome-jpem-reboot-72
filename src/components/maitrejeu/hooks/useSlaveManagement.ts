@@ -84,9 +84,12 @@ export const useSlaveManagement = () => {
       addEconomieRecord({
         amount: -totalCost,
         description: `Achat de ${quantity} esclave${quantity > 1 ? 's' : ''} (${type})`,
-        category: 'slaves',
+        category: 'Esclaves',
         type: 'expense',
-        date: new Date(),
+        date: {
+          year: new Date().getFullYear(),
+          season: 'Spring'
+        },
         source: `Marché aux esclaves de ${location}`
       });
       
@@ -135,9 +138,12 @@ export const useSlaveManagement = () => {
       addEconomieRecord({
         amount: totalAmount,
         description: `Vente de ${quantity} esclave${quantity > 1 ? 's' : ''} (${type})`,
-        category: 'slaves',
+        category: 'Esclaves',
         type: 'income',
-        date: new Date(),
+        date: {
+          year: new Date().getFullYear(),
+          season: 'Spring'
+        },
         source: `Marché aux esclaves de ${location}`
       });
       

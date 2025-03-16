@@ -5,17 +5,21 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Button } from '@/components/ui/button';
 import { ChevronDownIcon, ChevronUpIcon, PlusCircleIcon } from 'lucide-react';
 import { useMaitreJeu } from '../../context';
-import { Building, BuildingRevenueRecord } from '../../types/batiments';
+import { BuildingRevenueRecord } from '../../types/batiments';
+import { useBatimentsManagement } from '../../hooks/useBatimentsManagement';
 
-// Renommé pour éviter le conflit avec l'interface Building
-const BuildingRevenuePanel: React.FC<{ buildingId: string }> = ({ buildingId }) => {
-  const { buildings } = useMaitreJeu();
-  const [building, setBuilding] = useState<Building | null>(null);
+interface BuildingRevenueProps {
+  buildingId: string;
+}
+
+const BuildingRevenue: React.FC<BuildingRevenueProps> = ({ buildingId }) => {
+  const { buildings } = useBatimentsManagement();
+  const [building, setBuilding] = useState<any | null>(null);
   const [revenues, setRevenues] = useState<BuildingRevenueRecord[]>([]);
   const [expanded, setExpanded] = useState(false);
 
   useEffect(() => {
-    const foundBuilding = buildings.find(b => b.id === buildingId);
+    const foundBuilding = buildings?.find(b => b.id === buildingId);
     if (foundBuilding) {
       setBuilding(foundBuilding);
       // Simulation de données de revenus
@@ -98,4 +102,4 @@ const BuildingRevenuePanel: React.FC<{ buildingId: string }> = ({ buildingId }) 
   );
 };
 
-export default BuildingRevenuePanel;
+export default BuildingRevenue;

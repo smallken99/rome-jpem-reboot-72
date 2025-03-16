@@ -25,7 +25,7 @@ export const EconomieModal: React.FC<EconomieModalProps> = ({
   const { senateurs, provinces } = useMaitreJeu();
   const [formData, setFormData] = useState<EconomieCreationData>({
     amount: 0,
-    category: 'other',
+    category: 'Autre',
     description: '',
     type: 'income',
     source: 'manual_entry',
@@ -53,7 +53,7 @@ export const EconomieModal: React.FC<EconomieModalProps> = ({
     } else {
       setFormData({
         amount: 0,
-        category: 'other',
+        category: 'Autre',
         description: '',
         type: 'income',
         source: 'manual_entry',
@@ -151,16 +151,16 @@ export const EconomieModal: React.FC<EconomieModalProps> = ({
                   <SelectValue placeholder="Sélectionner une catégorie" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="military">Militaire</SelectItem>
-                  <SelectItem value="administration">Administration</SelectItem>
-                  <SelectItem value="construction">Construction</SelectItem>
-                  <SelectItem value="religion">Religion</SelectItem>
-                  <SelectItem value="slaves">Esclaves</SelectItem>
-                  <SelectItem value="entertainment">Divertissement</SelectItem>
-                  <SelectItem value="tax">Impôts</SelectItem>
-                  <SelectItem value="trade">Commerce</SelectItem>
-                  <SelectItem value="diplomacy">Diplomatie</SelectItem>
-                  <SelectItem value="other">Autre</SelectItem>
+                  <SelectItem value="Armée">Militaire</SelectItem>
+                  <SelectItem value="Administration">Administration</SelectItem>
+                  <SelectItem value="Construction">Construction</SelectItem>
+                  <SelectItem value="Religion">Religion</SelectItem>
+                  <SelectItem value="Esclaves">Esclaves</SelectItem>
+                  <SelectItem value="Divertissement">Divertissement</SelectItem>
+                  <SelectItem value="Impôts">Impôts</SelectItem>
+                  <SelectItem value="Commerce">Commerce</SelectItem>
+                  <SelectItem value="Diplomatie">Diplomatie</SelectItem>
+                  <SelectItem value="Autre">Autre</SelectItem>
                 </SelectContent>
               </Select>
             </div>
