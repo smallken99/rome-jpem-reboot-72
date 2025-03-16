@@ -1,33 +1,34 @@
 
 import React from 'react';
-import { Routes, Route } from 'react-router-dom';
+import { Route, Routes, Navigate } from 'react-router-dom';
+import Layout from '@/components/layout/Layout';
+import { PageHeader } from '@/components/ui-custom/PageHeader';
+import { FamilleWelcome } from '../welcome/FamilleWelcome';
+import { Inheritance } from '../Inheritance';
 import { FamilleMain } from '../pages/FamilleMain';
-import { ArbreGenealogique } from '../pages/ArbreGenealogique';
-import { Alliances } from '../pages/Alliances';
-import { AllianceManagementPage } from '../pages/AllianceManagementPage';
-import { EducationPage } from '../pages/EducationPage';
-import { ChildEducationDetailPage } from '../pages/ChildEducationDetailPage';
-import { PreceptorDetailPage } from '../pages/PreceptorDetailPage';
-import { Heritage } from '../pages/Heritage';
-import { InheritanceDetailsPage } from '../pages/InheritanceDetailsPage';
-import { DowryManagementPage } from '../pages/DowryManagementPage';
-import { FamilleWelcomePage } from '../pages/FamilleWelcomePage';
+import { Education } from '../Education';
+import { EducationProvider } from '../education/context/EducationContext';
 
 export const FamilleRoutes: React.FC = () => {
   return (
-    <Routes>
-      <Route path="/" element={<FamilleWelcomePage />} />
-      <Route path="/dashboard" element={<FamilleMain />} />
-      <Route path="/arbre-genealogique" element={<ArbreGenealogique />} />
-      <Route path="/alliances" element={<Alliances />} />
-      <Route path="/alliances/create" element={<AllianceManagementPage />} />
-      <Route path="/alliances/edit/:allianceId" element={<AllianceManagementPage />} />
-      <Route path="/alliances/dowry/:femaleId" element={<DowryManagementPage />} />
-      <Route path="/education" element={<EducationPage />} />
-      <Route path="/education/child/:childId" element={<ChildEducationDetailPage />} />
-      <Route path="/education/preceptor/:preceptorId" element={<PreceptorDetailPage />} />
-      <Route path="/heritage" element={<Heritage />} />
-      <Route path="/heritage/heir/:heirId" element={<InheritanceDetailsPage />} />
-    </Routes>
+    <Layout>
+      <PageHeader 
+        title="Famille"
+        subtitle="Gérez les membres de votre famille, les alliances et l'héritage"
+      />
+      
+      <Routes>
+        <Route path="/" element={<FamilleWelcome />} />
+        <Route path="/arbre-genealogique" element={<FamilleMain />} />
+        <Route path="/heritage" element={<Inheritance />} />
+        <Route path="/education/*" element={
+          <EducationProvider>
+            <Education />
+          </EducationProvider>
+        } />
+        <Route path="/alliances" element={<FamilleMain />} />
+        <Route path="*" element={<Navigate to="/famille" replace />} />
+      </Routes>
+    </Layout>
   );
 };

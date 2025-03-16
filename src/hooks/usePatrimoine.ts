@@ -1,122 +1,124 @@
-import { useState, useEffect, useCallback } from 'react';
+
+import { useState, useCallback } from 'react';
+import { useMaitreJeu } from '@/components/maitrejeu/context';
 import { v4 as uuidv4 } from 'uuid';
-import { useToast } from '@/components/ui/use-toast';
-import { Transaction } from '@/types/EconomyTypes';
 
-// Hook pour gérer le patrimoine (biens, propriétés, argent)
+export type PropertyType = 'villa' | 'domus' | 'insula' | 'domaine' | 'terrain' | 'commerce';
+
+export interface Property {
+  id: string;
+  name: string;
+  type: PropertyType;
+  location: string;
+  value: number;
+  income: number;
+  maintenance: number;
+  condition: number;
+  familyId?: string;
+  ownerId?: string;
+  acquired: string; // Date ISO string
+  description?: string;
+}
+
 export const usePatrimoine = () => {
-  const [patrimoine, setPatrimoine] = useState<any[]>([]);
-  const [loading, setLoading] = useState<boolean>(true);
-  const [error, setError] = useState<string | null>(null);
-  const [balance, setBalance] = useState<number>(0); // Solde initial
-  const [transactions, setTransactions] = useState<Transaction[]>([]); // Liste des transactions
-  const { toast } = useToast();
-
-  // Charger les données du patrimoine
-  useEffect(() => {
-    const loadPatrimoine = async () => {
-      setLoading(true);
-      try {
-        // Simuler un appel API
-        setTimeout(() => {
-          const mockPatrimoine = [
-            { id: 'p1', type: 'villa', name: 'Villa Urbana', value: 50000, location: 'Rome' },
-            { id: 'p2', type: 'domus', name: 'Domus Aurea', value: 30000, location: 'Rome' },
-            { id: 'p3', type: 'fundus', name: 'Fundus Sabinus', value: 20000, location: 'Sabine' }
-          ];
-          setPatrimoine(mockPatrimoine);
-          setLoading(false);
-        }, 500);
-      } catch (err) {
-        setError('Erreur lors du chargement du patrimoine');
-        console.error(err);
-        setLoading(false);
-      }
+  const [properties, setProperties] = useState<Property[]>([
+    {
+      id: "prop-1",
+      name: "Villa du Palatin",
+      type: "villa",
+      location: "Rome, Palatin",
+      value: 350000,
+      income: 0,
+      maintenance: 5000,
+      condition: 90,
+      acquired: "718-03-15", // AUC (Ab Urbe Condita)
+      description: "Élégante villa surplombant le Forum"
+    },
+    {
+      id: "prop-2",
+      name: "Domaine de Campanie",
+      type: "domaine",
+      location: "Campanie",
+      value: 420000,
+      income: 25000,
+      maintenance: 8000,
+      condition: 85,
+      acquired: "720-06-10",
+      description: "Vaste domaine agricole produisant du vin et de l'huile"
+    }
+  ]);
+  
+  const [balance, setBalance] = useState<number>(500000); // 500,000 as
+  
+  const { addEconomieRecord } = useMaitreJeu();
+  
+  const addProperty = useCallback((property: Omit<Property, 'id'>) => {
+    const newProperty = {
+      ...property,
+      id: uuidv4()
     };
-
-    loadPatrimoine();
+    
+    setProperties(prev => [...prev, newProperty]);
+    
+    // Enregistrer l'achat dans l'économie
+    addEconomieRecord({
+      amount: -property.value,
+      description: `Achat propriété: ${property.name}`,
+      category: 'Immobilier',
+      type: 'expense',
+      date: new Date().toISOString(),
+      source: 'Patrimoine personnel',
+      approved: true
+    });
+    
+    // Mettre à jour le solde
+    setBalance(prev => prev - property.value);
+    
+    return newProperty.id;
+  }, [addEconomieRecord]);
+  
+  const updateProperty = useCallback((id: string, updates: Partial<Property>) => {
+    setProperties(prev => prev.map(prop => 
+      prop.id === id ? { ...prop, ...updates } : prop
+    ));
   }, []);
-
-  // Ajouter un bien au patrimoine
-  const addBien = (bien: any) => {
-    setPatrimoine([...patrimoine, { ...bien, id: uuidv4() }]);
-    toast({
-      title: "Nouveau bien acquis!",
-      description: `Un(e) ${bien.type} a été ajouté(e) au patrimoine.`,
+  
+  const removeProperty = useCallback((id: string) => {
+    const property = properties.find(p => p.id === id);
+    if (!property) return;
+    
+    // Enregistrer la vente dans l'économie
+    addEconomieRecord({
+      amount: property.value,
+      description: `Vente propriété: ${property.name}`,
+      category: 'Immobilier',
+      type: 'income',
+      date: new Date().toISOString(),
+      source: 'Patrimoine personnel',
+      approved: true
     });
-  };
-
-  // Vendre un bien du patrimoine
-  const vendreBien = (id: string, amount: number) => {
-    setPatrimoine(patrimoine.filter(bien => bien.id !== id));
-    setBalance(prevBalance => prevBalance + amount);
-    toast({
-      title: "Bien vendu!",
-      description: "Un bien a été vendu et le solde a été mis à jour.",
-    });
-  };
-
-  // Mettre à jour un bien du patrimoine
-  const updateBien = (id: string, updates: any) => {
-    setPatrimoine(
-      patrimoine.map(bien => (bien.id === id ? { ...bien, ...updates } : bien))
-    );
-    toast({
-      title: "Bien mis à jour!",
-      description: "Les informations du bien ont été mises à jour.",
-    });
-  };
-
-  // Supprimer un bien du patrimoine
-  const supprimerBien = (id: string) => {
-    setPatrimoine(patrimoine.filter(bien => bien.id !== id));
-    toast({
-      title: "Bien supprimé!",
-      description: "Le bien a été supprimé du patrimoine.",
-    });
-  };
-
-  // Ajouter une transaction
-  const addTransaction = useCallback((transaction: any) => {
-    const newTransaction = { ...transaction, id: uuidv4(), date: new Date() };
-    setTransactions(prev => [newTransaction, ...prev]);
-    setBalance(prevBalance => prevBalance + transaction.amount);
-    toast({
-      title: "Nouvelle transaction!",
-      description: "Une nouvelle transaction a été enregistrée.",
-    });
-  }, [setTransactions, setBalance, toast]);
-
-  // Simuler l'achat d'un bâtiment
-  const buildingPurchased = (buildingType: string, cost: number) => {
-    addTransaction({
-      amount: -cost,
-      description: `Achat ${buildingType}`,
-      category: 'Immobilier'
-    });
-  };
-
-  // Simuler la vente d'un bâtiment
-  const buildingSold = (buildingType: string, value: number) => {
-    addTransaction({
-      amount: value,
-      description: `Vente ${buildingType}`,
-      category: 'Immobilier'
-    });
-  };
-
+    
+    // Mettre à jour le solde
+    setBalance(prev => prev + property.value);
+    
+    // Supprimer la propriété
+    setProperties(prev => prev.filter(p => p.id !== id));
+  }, [properties, addEconomieRecord]);
+  
+  const buildingPurchased = useCallback((name: string, cost: number) => {
+    setBalance(prev => prev - cost);
+  }, []);
+  
+  const buildingSold = useCallback((name: string, amount: number) => {
+    setBalance(prev => prev + amount);
+  }, []);
+  
   return {
-    patrimoine,
-    loading,
-    error,
-    addBien,
-    vendreBien,
-    updateBien,
-    supprimerBien,
+    properties,
     balance,
-    setBalance,
-    addTransaction,
-    transactions,
+    addProperty,
+    updateProperty,
+    removeProperty,
     buildingPurchased,
     buildingSold
   };
