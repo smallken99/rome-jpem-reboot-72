@@ -1,81 +1,29 @@
 
-import React, { useState } from 'react';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Edit2, Save, X } from 'lucide-react';
+import React from 'react';
+import { Shield, AlertTriangle } from 'lucide-react';
 import { ChildHeaderProps } from '../types/educationTypes';
 
 export const ChildHeader: React.FC<ChildHeaderProps> = ({ 
-  child,
+  child, 
   onNameChange,
-  hasInvalidEducation
+  hasInvalidEducation = false 
 }) => {
-  const [isEditing, setIsEditing] = useState(false);
-  const [newName, setNewName] = useState(child.name);
-  
-  // Gérer la modification du nom
-  const handleEditName = () => {
-    setIsEditing(true);
-  };
-  
-  // Annuler l'édition
-  const handleCancel = () => {
-    setIsEditing(false);
-    setNewName(child.name);
-  };
-  
-  // Enregistrer le nouveau nom
-  const handleSave = () => {
-    // Check if the child object has an id property and if onNameChange is provided
-    if (newName.trim() && onNameChange && 'id' in child && child.id) {
-      onNameChange(child.id, newName.trim());
-    }
-    setIsEditing(false);
-  };
-  
   return (
-    <div className="space-y-2">
-      <div className="flex items-center justify-between">
-        {isEditing ? (
-          <div className="flex items-center gap-2">
-            <Input
-              type="text"
-              value={newName}
-              onChange={e => setNewName(e.target.value)}
-              className="max-w-xs"
-              autoFocus
-            />
-            <Button variant="ghost" size="icon" onClick={handleSave}>
-              <Save className="h-4 w-4" />
-            </Button>
-            <Button variant="ghost" size="icon" onClick={handleCancel}>
-              <X className="h-4 w-4" />
-            </Button>
+    <div className={`p-4 ${hasInvalidEducation ? 'bg-amber-50' : child.gender === 'male' ? 'bg-blue-50' : 'bg-rose-50'}`}>
+      <div className="flex justify-between">
+        <div className="flex items-center gap-2">
+          {hasInvalidEducation ? (
+            <AlertTriangle className="h-5 w-5 text-amber-500" />
+          ) : (
+            <Shield className={`h-5 w-5 ${child.gender === 'male' ? 'text-blue-500' : 'text-rose-500'}`} />
+          )}
+          <div>
+            <h3 className="font-medium text-lg">{child.name}</h3>
+            <div className="text-sm text-muted-foreground">
+              {child.age} ans - {child.gender === 'male' ? 'Garçon' : 'Fille'}
+            </div>
           </div>
-        ) : (
-          <h2 className="text-2xl font-bold flex items-center gap-2">
-            {child.name}
-            {onNameChange && (
-              <Button variant="ghost" size="icon" onClick={handleEditName}>
-                <Edit2 className="h-4 w-4" />
-              </Button>
-            )}
-          </h2>
-        )}
-      </div>
-      
-      <div className="flex items-center gap-4">
-        <div className="px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-sm">
-          Âge: {child.age} ans
         </div>
-        <div className="px-3 py-1 bg-purple-100 text-purple-800 rounded-full text-sm">
-          {child.gender === 'male' ? 'Garçon' : 'Fille'}
-        </div>
-        {hasInvalidEducation && (
-          <div className="px-3 py-1 bg-red-100 text-red-800 rounded-full text-sm">
-            Éducation incompatible
-          </div>
-        )}
       </div>
     </div>
   );

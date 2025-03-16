@@ -31,7 +31,7 @@ export const CardActions: React.FC<CardActionsProps> = ({
     completeEducation(childId);
     
     // Show feedback
-    toast(`Éducation supprimée`);
+    toast.success(`Éducation supprimée`);
   };
   
   return (

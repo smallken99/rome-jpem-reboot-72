@@ -1,37 +1,59 @@
 
 import React, { useState, useEffect } from 'react';
-import { Tabs } from '@/components/ui/tabs';
-import { TabsNavigation } from './tabs/TabsNavigation';
-import { CurrentEducationTab } from './tabs/CurrentEducationTab';
-import { EducationPathsTab } from './tabs/EducationPathsTab';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { ChildrenTab } from './tabs/ChildrenTab';
 import { PreceptorsTab } from './tabs/PreceptorsTab';
-import { useLocation } from 'react-router-dom';
+import { HistoryTab } from './tabs/HistoryTab';
 import { useEducation } from './context/EducationContext';
+import { useNavigate, useLocation } from 'react-router-dom';
 
 export const EducationTabs: React.FC = () => {
-  const [activeTab, setActiveTab] = useState("current");
+  const [activeTab, setActiveTab] = useState('children');
+  const { children, preceptors } = useEducation();
+  const navigate = useNavigate();
   const location = useLocation();
-  const { refreshPreceptors } = useEducation();
   
-  // Handle tab changes from route state
+  // Effet pour gérer l'URL
   useEffect(() => {
-    if (location.state && location.state.tab) {
-      setActiveTab(location.state.tab);
+    const params = new URLSearchParams(location.search);
+    const tab = params.get('tab');
+    if (tab && ['children', 'preceptors', 'history'].includes(tab)) {
+      setActiveTab(tab);
     }
-  }, [location.state]);
+  }, [location.search]);
   
-  // Call refreshPreceptors once on mount
-  useEffect(() => {
-    refreshPreceptors();
-  }, [refreshPreceptors]);
+  // Changer l'onglet
+  const handleTabChange = (value: string) => {
+    setActiveTab(value);
+    navigate(`/famille/education?tab=${value}`);
+  };
   
   return (
-    <Tabs value={activeTab} onValueChange={setActiveTab} className="mt-6">
-      <TabsNavigation />
+    <Tabs value={activeTab} onValueChange={handleTabChange} className="mt-6">
+      <TabsList className="grid w-full grid-cols-3 mb-8">
+        <TabsTrigger value="children" className="data-[state=active]:bg-rome-navy/10">
+          Enfants {children.length > 0 && `(${children.length})`}
+        </TabsTrigger>
+        <TabsTrigger value="preceptors" className="data-[state=active]:bg-rome-navy/10">
+          Précepteurs {preceptors.filter(p => !p.available).length > 0 && 
+            `(${preceptors.filter(p => !p.available).length})`}
+        </TabsTrigger>
+        <TabsTrigger value="history" className="data-[state=active]:bg-rome-navy/10">
+          Historique
+        </TabsTrigger>
+      </TabsList>
       
-      <CurrentEducationTab />
-      <EducationPathsTab />
-      <PreceptorsTab />
+      <TabsContent value="children">
+        <ChildrenTab />
+      </TabsContent>
+      
+      <TabsContent value="preceptors">
+        <PreceptorsTab />
+      </TabsContent>
+      
+      <TabsContent value="history">
+        <HistoryTab />
+      </TabsContent>
     </Tabs>
   );
 };

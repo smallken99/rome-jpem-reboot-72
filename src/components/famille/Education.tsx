@@ -46,16 +46,13 @@ export const Education: React.FC<EducationProps> = ({
   };
 
   return (
-    <EducationProvider 
-      characters={characters}
-      onCharacterUpdate={handleCharacterUpdate}
-    >
-      <div className="education">
+    <div className="education">
+      <EducationProvider>
         <EducationHeader />
         <EducationInfoBox />
         
         <EducationTabs />
-      </div>
-    </EducationProvider>
+      </EducationProvider>
+    </div>
   );
 };

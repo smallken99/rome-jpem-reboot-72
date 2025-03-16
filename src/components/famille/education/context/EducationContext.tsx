@@ -2,39 +2,15 @@
 import React, { createContext, useState, useContext, ReactNode } from 'react';
 import { useMaitreJeu } from '@/components/maitrejeu/context';
 import { toast } from 'sonner';
+import { Child, Preceptor, EducationType } from '../types/educationTypes';
 
-export type EducationType = 'militaire' | 'politique' | 'rhétorique' | 'arts' | 'philosophie' | 'religieuse' | 'none';
-
-export interface EducationChild {
-  id: string;
-  name: string;
-  age: number;
-  gender: 'male' | 'female';
-  educationType: EducationType;
-  progress: number;
-  mentor: string | null;
-  specialties: string[];
-  completed: boolean;
-}
-
-export interface Preceptor {
-  id: string;
-  name: string;
-  specialties: EducationType[];
-  expertise: number;
-  cost: number;
-  reputation: number;
-  available: boolean;
-  description: string;
-}
-
-interface EducationContextValue {
-  children: EducationChild[];
+export interface EducationContextValue {
+  children: Child[];
   preceptors: Preceptor[];
   selectedChildId: string | null;
   isEducating: boolean;
   setSelectedChildId: (id: string | null) => void;
-  getChild: (id: string) => EducationChild | undefined;
+  getChild: (id: string) => Child | undefined;
   startEducation: (childId: string, type: EducationType, mentorId: string, specialties: string[]) => void;
   advanceEducation: (childId: string) => void;
   completeEducation: (childId: string) => void;
@@ -48,7 +24,7 @@ export const EducationProvider: React.FC<{ children: ReactNode }> = ({ children 
   const { membres, updateMembreFamille } = useMaitreJeu();
   
   // État pour les enfants en éducation
-  const [educationChildren, setEducationChildren] = useState<EducationChild[]>([
+  const [educationChildren, setEducationChildren] = useState<Child[]>([
     {
       id: "child-1",
       name: "Marcus Tullius Junior",
@@ -57,8 +33,7 @@ export const EducationProvider: React.FC<{ children: ReactNode }> = ({ children 
       educationType: "politique",
       progress: 40,
       mentor: "preceptor-1",
-      specialties: ["éloquence", "droit"],
-      completed: false
+      specialties: ["éloquence", "droit"]
     },
     {
       id: "child-2",
@@ -68,8 +43,7 @@ export const EducationProvider: React.FC<{ children: ReactNode }> = ({ children 
       educationType: "arts",
       progress: 25,
       mentor: "preceptor-2",
-      specialties: ["musique", "poésie"],
-      completed: false
+      specialties: ["musique", "poésie"]
     },
     {
       id: "child-3",
@@ -79,8 +53,7 @@ export const EducationProvider: React.FC<{ children: ReactNode }> = ({ children 
       educationType: "none",
       progress: 0,
       mentor: null,
-      specialties: [],
-      completed: false
+      specialties: []
     }
   ]);
   
@@ -94,7 +67,9 @@ export const EducationProvider: React.FC<{ children: ReactNode }> = ({ children 
       cost: 5000,
       reputation: 90,
       available: false,
-      description: "Ancien sénateur respecté, spécialiste du droit romain et de l'éloquence."
+      description: "Ancien sénateur respecté, spécialiste du droit romain et de l'éloquence.",
+      skill: 85,
+      specialty: "politique"
     },
     {
       id: "preceptor-2",
@@ -104,7 +79,9 @@ export const EducationProvider: React.FC<{ children: ReactNode }> = ({ children 
       cost: 4000,
       reputation: 80,
       available: false,
-      description: "Issue d'une famille patricienne, experte en littérature et arts libéraux."
+      description: "Issue d'une famille patricienne, experte en littérature et arts libéraux.",
+      skill: 75,
+      specialty: "arts"
     },
     {
       id: "preceptor-3",
@@ -114,7 +91,9 @@ export const EducationProvider: React.FC<{ children: ReactNode }> = ({ children 
       cost: 6000,
       reputation: 85,
       available: true,
-      description: "Ancien général et consul, expert en stratégie militaire et tactique politique."
+      description: "Ancien général et consul, expert en stratégie militaire et tactique politique.",
+      skill: 90,
+      specialty: "militaire"
     },
     {
       id: "preceptor-4",
@@ -124,7 +103,9 @@ export const EducationProvider: React.FC<{ children: ReactNode }> = ({ children 
       cost: 4500,
       reputation: 75,
       available: true,
-      description: "Femme cultivée et influente, maîtresse des enseignements stoïciens."
+      description: "Femme cultivée et influente, maîtresse des enseignements stoïciens.",
+      skill: 80,
+      specialty: "philosophie"
     },
     {
       id: "preceptor-5",
@@ -134,7 +115,9 @@ export const EducationProvider: React.FC<{ children: ReactNode }> = ({ children 
       cost: 3800,
       reputation: 65,
       available: true,
-      description: "Prêtre et homme politique, spécialiste des rites religieux et de la divination."
+      description: "Prêtre et homme politique, spécialiste des rites religieux et de la divination.",
+      skill: 70,
+      specialty: "religieuse"
     }
   ]);
   
@@ -155,8 +138,7 @@ export const EducationProvider: React.FC<{ children: ReactNode }> = ({ children 
           educationType: type,
           mentor: mentorId,
           specialties,
-          progress: 0,
-          completed: false
+          progress: 0
         };
       }
       return child;
@@ -181,13 +163,11 @@ export const EducationProvider: React.FC<{ children: ReactNode }> = ({ children 
       setEducationChildren(prev => prev.map(child => {
         if (child.id === childId) {
           const newProgress = Math.min(child.progress + 25, 100);
-          const completed = newProgress >= 100;
           
           return {
             ...child,
             progress: newProgress,
-            age: child.age + 1,
-            completed
+            age: child.age + 1
           };
         }
         return child;
@@ -204,7 +184,7 @@ export const EducationProvider: React.FC<{ children: ReactNode }> = ({ children 
         if (membre) {
           updateMembreFamille(childId, { 
             age: membre.age + 1,
-            education: child.specialties.join(', ')
+            education: child.specialties?.join(', ') || ''
           });
         }
         
@@ -236,8 +216,7 @@ export const EducationProvider: React.FC<{ children: ReactNode }> = ({ children 
           ...c,
           educationType: "none",
           mentor: null,
-          progress: 0,
-          completed: true
+          progress: 0
         };
       }
       return c;
@@ -277,7 +256,7 @@ export const EducationProvider: React.FC<{ children: ReactNode }> = ({ children 
         return {
           ...c,
           mentor: preceptorId,
-          educationType: preceptor.specialties[0] // Par défaut, prendre la première spécialité
+          educationType: preceptor.specialties[0] as EducationType // Par défaut, prendre la première spécialité
         };
       }
       return c;
