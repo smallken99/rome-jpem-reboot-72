@@ -13,7 +13,7 @@ interface BuildingRevenueProps {
 }
 
 const BuildingRevenue: React.FC<BuildingRevenueProps> = ({ buildingId }) => {
-  const { buildings } = useBatimentsManagement();
+  const { maintenanceTasks, buildings } = useBatimentsManagement();
   const [building, setBuilding] = useState<any | null>(null);
   const [revenues, setRevenues] = useState<BuildingRevenueRecord[]>([]);
   const [expanded, setExpanded] = useState(false);

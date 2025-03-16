@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -11,6 +10,7 @@ import { EconomieModal } from './components/economie/EconomieModal';
 import { Button } from '@/components/ui/button';
 import { FileDown } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { EconomieRecord } from './types/economie';
 
 export const GestionEconomie = () => {
   const navigate = useNavigate();
@@ -39,6 +39,10 @@ export const GestionEconomie = () => {
 
   const handleNavigateToBatiments = () => {
     navigate('/maitre-jeu/batiments');
+  };
+
+  const handleEdit = (record: EconomieRecord) => {
+    handleEditTransaction(record.id);
   };
 
   return (
@@ -105,7 +109,7 @@ export const GestionEconomie = () => {
                   records={economieRecords}
                   sort={sort}
                   onSortChange={handleSortChange}
-                  onEdit={handleEditTransaction}
+                  onEdit={handleEdit}
                   onDelete={handleDeleteTransaction}
                 />
               </div>

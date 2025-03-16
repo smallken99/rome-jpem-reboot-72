@@ -4,7 +4,7 @@ import { GameDate } from './common';
 export type EconomieType = 'income' | 'expense' | 'tax' | 'trade' | 'military' | 'construction' | 'slaves' | 'other';
 export type EconomieCategory = 
   'Impôts' | 'Armée' | 'Construction' | 'Administration' | 'Religion' | 'Commerce' | 'Agriculture' | 'Autre' |
-  'Esclaves' | 'Divertissement' | 'Diplomatie' | 'Maintenance' | 'Vente' | 'Tax';
+  'Esclaves' | 'Divertissement' | 'Diplomatie' | 'Maintenance' | 'Vente' | 'Tax' | 'Maintenance';
 export type RecurringInterval = 'daily' | 'weekly' | 'monthly' | 'seasonal' | 'yearly';
 export type EconomieSource = 'tax' | 'trade' | 'war' | 'donation' | 'fine' | 'sale' | 'purchase' | 'salary' | 'rent' | 'manual_entry' | 'other'; 
 
@@ -93,6 +93,17 @@ export interface EconomicFactors {
   growthRate: number;
   taxRates: Record<string, number>;
   currentYear: number;
+}
+
+// For tax management
+export interface TaxCollection {
+  totalCollected: number;
+  byType: Record<string, number>;
+}
+
+export interface TreasuryDataWithTax {
+  balance: number;
+  taxCollection: TaxCollection;
 }
 
 // Interface props pour les composants

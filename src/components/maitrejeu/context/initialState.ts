@@ -434,7 +434,10 @@ export const initialTreasury: TreasuryStatus = {
   lastUpdated: { year: 700, season: "SUMMER" },
   inflationRate: 2.5,
   taxRate: 8.0,
-  comments: "Finances saines, mais vigilance requise sur les dépenses militaires croissantes."
+  comments: "Finances saines, mais vigilance requise sur les dépenses militaires croissantes.",
+  income: 500000,
+  expenses: 300000,
+  debt: 0
 };
 
 export const initialEconomicFactors: EconomicFactors = {
@@ -447,7 +450,11 @@ export const initialEconomicFactors: EconomicFactors = {
   provinceRevenue: 350000,
   tradeRevenue: 280000,
   warSpoilsRevenue: 100000,
-  loanInterestRate: 5.0
+  loanInterestRate: 5.0,
+  inflationRate: 2.5,
+  growthRate: 1.5,
+  taxRates: { land: 5, commerce: 8, income: 10 },
+  currentYear: 700
 };
 
 // Données initiales
@@ -465,7 +472,7 @@ export const initialEquilibre: Equilibre = {
   facteurMilitaire: 60,
   facteurReligieux: 65,
   populaires: 45,
-  populares: 45,
+  populaires: 45,
   optimates: 55,
   moderates: 30,
   population: 800000,

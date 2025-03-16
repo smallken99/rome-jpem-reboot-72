@@ -12,6 +12,7 @@ import {
 } from '../types/batiments';
 import { useToast } from '@/components/ui/use-toast';
 import { generateId } from '../types/common';
+import { EconomieCategory } from '../types/economie';
 
 export const useBatimentsManagement = () => {
   // État du MaitreJeu
@@ -150,8 +151,8 @@ export const useBatimentsManagement = () => {
       status: 'good',
       constructionYear: currentYear,
       description: project.description,
-      cost: project.totalCost || project.cost,
-      maintenanceCost: Math.round(project.cost * 0.05), // 5% du coût initial
+      cost: project.estimatedCost, // Simplified for now to avoid type errors
+      maintenanceCost: Math.round(project.estimatedCost * 0.05), // 5% du coût initial
       revenue: 0, // À définir selon le type de bâtiment
       capacity: 0, // À définir selon le type de bâtiment
       owner: 'république'
@@ -280,52 +281,52 @@ export const useBatimentsManagement = () => {
   
   // Méthodes auxiliaires
   const addConstructionExpense = (buildingOrProject: Building | ConstructionProject) => {
-    const economieRecord = {
-      amount: 'cost' in buildingOrProject ? buildingOrProject.cost : buildingOrProject.totalCost || buildingOrProject.cost,
-      category: 'Construction',
+    // Create the record with the correct EconomieCategory type
+    const record = {
+      id: generateId(),
+      amount: 'cost' in buildingOrProject ? buildingOrProject.cost : buildingOrProject.estimatedCost,
+      category: 'Construction' as EconomieCategory,
       description: `Construction de ${buildingOrProject.name}`,
       date: { year: currentYear, season: currentSeason },
       type: 'expense' as const,
       source: 'Construction',
       approved: true,
       tags: ['construction', 'bâtiment'],
-      isRecurring: false
-    };
-    
-    setEconomieRecords(prev => [...prev, {
-      id: generateId(),
-      ...economieRecord,
+      isRecurring: false,
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString()
-    }]);
+    };
+    
+    // Add the record
+    setEconomieRecords(prev => [...prev, record]);
     
     // Mettre à jour le trésor
     setTreasury(prev => ({
       ...prev,
-      balance: prev.balance - economieRecord.amount,
-      totalExpenses: prev.totalExpenses + economieRecord.amount
+      balance: prev.balance - record.amount,
+      totalExpenses: prev.totalExpenses + record.amount
     }));
   };
   
   const addMaintenanceExpense = (building: Building, cost: number) => {
-    const economieRecord = {
+    // Create the record with the correct EconomieCategory type
+    const record = {
+      id: generateId(),
       amount: cost,
-      category: 'maintenance',
+      category: 'Maintenance' as EconomieCategory,
       description: `Maintenance de ${building.name}`,
       date: { year: currentYear, season: currentSeason },
       type: 'expense' as const,
       source: 'Services d\'entretien',
       approved: true,
       tags: ['maintenance', 'bâtiment'],
-      isRecurring: false
-    };
-    
-    setEconomieRecords(prev => [...prev, {
-      id: generateId(),
-      ...economieRecord,
+      isRecurring: false,
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString()
-    }]);
+    };
+    
+    // Add the record
+    setEconomieRecords(prev => [...prev, record]);
     
     // Mettre à jour le trésor
     setTreasury(prev => ({
@@ -336,9 +337,11 @@ export const useBatimentsManagement = () => {
   };
   
   const addBuildingRevenueIncome = (building: Building, amount: number) => {
-    const economieRecord = {
+    // Create the record with the correct EconomieCategory type
+    const record = {
+      id: generateId(),
       amount,
-      category: 'Commerce',
+      category: 'Commerce' as EconomieCategory,
       description: `Revenus de ${building.name}`,
       date: { year: currentYear, season: currentSeason },
       type: 'income' as const,
@@ -346,15 +349,13 @@ export const useBatimentsManagement = () => {
       approved: true,
       tags: ['revenus', 'bâtiment'],
       isRecurring: true,
-      recurringInterval: 'seasonal'
-    };
-    
-    setEconomieRecords(prev => [...prev, {
-      id: generateId(),
-      ...economieRecord,
+      recurringInterval: 'seasonal' as const,
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString()
-    }]);
+    };
+    
+    // Add the record
+    setEconomieRecords(prev => [...prev, record]);
     
     // Mettre à jour le trésor
     setTreasury(prev => ({

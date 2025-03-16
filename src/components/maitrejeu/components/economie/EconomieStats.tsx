@@ -58,7 +58,7 @@ export const EconomieStats: React.FC<EconomieStatsProps> = ({
           </div>
           <div className="flex items-center mt-1 text-sm">
             <ArrowUpIcon className="h-4 w-4 text-green-500 mr-1" />
-            <span>Projection: {formatCurrency(treasury.totalIncome * economicFactors.taxCollection)}</span>
+            <span>Projection: {formatCurrency(treasury.income * economicFactors.taxCollection)}</span>
           </div>
         </CardContent>
       </Card>
@@ -74,7 +74,7 @@ export const EconomieStats: React.FC<EconomieStatsProps> = ({
           </div>
           <div className="flex items-center mt-1 text-sm">
             <ArrowDownIcon className="h-4 w-4 text-red-500 mr-1" />
-            <span>Projection: {formatCurrency(treasury.totalExpenses * economicFactors.militaryExpense)}</span>
+            <span>Projection: {formatCurrency(treasury.expenses * economicFactors.militaryExpense)}</span>
           </div>
         </CardContent>
       </Card>

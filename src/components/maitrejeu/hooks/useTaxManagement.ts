@@ -1,29 +1,22 @@
 
-import { useState, useCallback, useEffect } from 'react';
-import { useMaitreJeu } from '../context';
-import { getTreasuryData, updateTreasuryData } from '@/data/db/republic';
+import { useState, useEffect, useCallback } from 'react';
+import { useMaitreJeu } from '../context/MaitreJeuContext';
+import { EconomieRecord, TreasuryStatus, EconomieCategory } from '../types/economie';
+import { GameDate } from '../types/common';
+import { formatCurrency } from '@/utils/currencyUtils';
+import { useToast } from '@/components/ui/use-toast';
 
-interface TaxRate {
+// Define necessary interfaces for tax management
+interface TaxType {
   id: string;
   name: string;
-  description: string;
   rate: number;
-  appliesTo: string[];
-  minIncome?: number;
-  maxIncome?: number;
-  enabled: boolean;
+  description: string;
+  targetGroup: string;
+  collectingInterval: 'yearly' | 'monthly' | 'seasonal';
   expectedRevenue: number;
-  lastCollected?: Date;
-}
-
-interface TaxCollectionEvent {
-  id: string;
-  date: Date;
-  taxId: string;
-  taxName: string;
-  amountCollected: number;
-  collectionRate: number; // % of expected that was collected
-  province?: string;
+  lastCollected?: GameDate;
+  isActive: boolean;
 }
 
 interface TaxCollection {
@@ -31,193 +24,221 @@ interface TaxCollection {
   byType: Record<string, number>;
 }
 
-interface TreasuryDataWithTax {
+interface TreasuryData {
   balance: number;
+  taxCollection: number; // The basic property expected by the application
+}
+
+// Extended treasury data with structured tax collection
+interface TreasuryDataWithTax extends Omit<TreasuryData, 'taxCollection'> {
   taxCollection: TaxCollection;
 }
 
 export const useTaxManagement = () => {
-  const [taxRates, setTaxRates] = useState<TaxRate[]>([
-    {
-      id: 'tributum',
-      name: 'Tributum',
-      description: 'Impôt direct sur les citoyens romains',
-      rate: 5,
-      appliesTo: ['citizens', 'patricians', 'plebeians'],
-      enabled: true,
-      expectedRevenue: 1200000
-    },
-    {
-      id: 'portoria',
-      name: 'Portoria',
-      description: 'Droits de douane sur les marchandises',
-      rate: 8,
-      appliesTo: ['trade', 'imports', 'exports'],
-      enabled: true,
-      expectedRevenue: 800000
-    },
-    {
-      id: 'vectigalia',
-      name: 'Vectigalia',
-      description: 'Taxes sur les terres publiques',
-      rate: 10,
-      appliesTo: ['public_land', 'agriculture'],
-      enabled: true,
-      expectedRevenue: 600000
-    },
-    {
-      id: 'scriptura',
-      name: 'Scriptura',
-      description: 'Taxe sur les pâturages',
-      rate: 12,
-      appliesTo: ['livestock', 'pasture'],
-      enabled: true,
-      expectedRevenue: 350000
-    },
-    {
-      id: 'decumae',
-      name: 'Decumae',
-      description: 'Dîme sur les récoltes',
-      rate: 10,
-      appliesTo: ['agriculture', 'provinces'],
-      enabled: true,
-      expectedRevenue: 450000
-    }
-  ]);
+  const { 
+    treasury, 
+    setTreasury, 
+    economieRecords, 
+    setEconomieRecords,
+    currentYear, 
+    currentSeason 
+  } = useMaitreJeu();
   
-  const [taxCollections, setTaxCollections] = useState<TaxCollectionEvent[]>([]);
-  const [treasuryData, setTreasuryData] = useState<TreasuryDataWithTax>({
-    balance: 0,
-    taxCollection: { totalCollected: 0, byType: {} }
-  });
+  const [taxTypes, setTaxTypes] = useState<TaxType[]>([]);
+  const [taxRates, setTaxRates] = useState<Record<string, number>>({});
+  const [taxHistory, setTaxHistory] = useState<EconomieRecord[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
   
-  const { addEconomieRecord, currentYear, currentSeason } = useMaitreJeu();
+  const { toast } = useToast();
   
-  // Load treasury data
+  // Filter tax records from economie records
   useEffect(() => {
-    const data = getTreasuryData();
-    if (data) {
-      setTreasuryData(data as TreasuryDataWithTax);
-    }
-  }, []);
+    const taxRecords = economieRecords.filter(record => 
+      record.type === 'tax' || record.type === 'income' && record.source.toLowerCase().includes('taxe')
+    );
+    setTaxHistory(taxRecords);
+  }, [economieRecords]);
   
-  // Update tax rate
-  const updateTaxRate = useCallback((taxId: string, updates: Partial<TaxRate>) => {
-    setTaxRates(prev => prev.map(tax => 
-      tax.id === taxId ? { ...tax, ...updates } : tax
-    ));
-  }, []);
-  
-  // Enable/disable a tax
-  const toggleTaxEnabled = useCallback((taxId: string, enabled: boolean) => {
-    updateTaxRate(taxId, { enabled });
-  }, [updateTaxRate]);
-  
-  // Calculate expected tax revenue for all enabled taxes
-  const calculateExpectedRevenue = useCallback(() => {
-    return taxRates
-      .filter(tax => tax.enabled)
-      .reduce((sum, tax) => sum + tax.expectedRevenue, 0);
-  }, [taxRates]);
-  
-  // Collect a specific tax
-  const collectTax = useCallback((taxId: string) => {
-    const tax = taxRates.find(t => t.id === taxId);
-    if (!tax || !tax.enabled) return false;
-    
-    // Calculate collection efficiency (80-95% random)
-    const collectionEfficiency = 0.8 + (Math.random() * 0.15);
-    const collectedAmount = Math.round(tax.expectedRevenue * collectionEfficiency);
-    
-    // Record the collection event
-    const collectionEvent: TaxCollectionEvent = {
-      id: `tax-collection-${Date.now()}`,
-      date: new Date(),
-      taxId: tax.id,
-      taxName: tax.name,
-      amountCollected: collectedAmount,
-      collectionRate: Math.round(collectionEfficiency * 100)
-    };
-    
-    setTaxCollections(prev => [collectionEvent, ...prev]);
-    
-    // Add to the treasury
-    const updatedTaxCollection = { 
-      totalCollected: treasuryData.taxCollection.totalCollected + collectedAmount,
-      byType: {
-        ...treasuryData.taxCollection.byType,
-        [tax.id]: (treasuryData.taxCollection.byType[tax.id] || 0) + collectedAmount
-      }
-    };
-    
-    const updatedTreasury = {
-      ...treasuryData,
-      balance: treasuryData.balance + collectedAmount,
-      taxCollection: updatedTaxCollection
-    };
-    
-    setTreasuryData(updatedTreasury);
-    updateTreasuryData(updatedTreasury);
-    
-    // Record in economy
-    addEconomieRecord({
-      amount: collectedAmount,
-      description: `Perception de ${tax.name}`,
-      category: 'Impôts',
-      type: 'income',
-      date: {
-        year: currentYear,
-        season: currentSeason
+  // Initialize tax types (normally would come from API)
+  useEffect(() => {
+    // Example tax types
+    const initialTaxTypes: TaxType[] = [
+      {
+        id: "1",
+        name: "Taxe foncière",
+        rate: 5,
+        description: "Taxe sur les propriétés",
+        targetGroup: "Propriétaires",
+        collectingInterval: "yearly",
+        expectedRevenue: 100000,
+        isActive: true
       },
-      source: 'Perception fiscale',
-      tags: ['tax', 'revenue']
+      {
+        id: "2",
+        name: "Taxe commerciale",
+        rate: 8,
+        description: "Taxe sur les activités commerciales",
+        targetGroup: "Commerçants",
+        collectingInterval: "seasonal",
+        expectedRevenue: 75000,
+        isActive: true
+      },
+      {
+        id: "3",
+        name: "Capitation",
+        rate: 2,
+        description: "Taxe par citoyen",
+        targetGroup: "Citoyens",
+        collectingInterval: "yearly",
+        expectedRevenue: 120000,
+        isActive: true
+      }
+    ];
+    
+    setTaxTypes(initialTaxTypes);
+    
+    // Initialize tax rates map
+    const rates: Record<string, number> = {};
+    initialTaxTypes.forEach(tax => {
+      rates[tax.id] = tax.rate;
+    });
+    setTaxRates(rates);
+  }, []);
+  
+  // Calculate tax statistics
+  const getTaxStatistics = useCallback(() => {
+    if (!taxHistory.length) return null;
+    
+    const currentYearTaxes = taxHistory.filter(record => {
+      if (typeof record.date === 'object' && 'year' in record.date) {
+        return record.date.year === currentYear;
+      }
+      return false;
     });
     
-    // Update the tax with last collected date
-    updateTaxRate(taxId, { lastCollected: new Date() });
+    const totalCollected = currentYearTaxes.reduce((sum, record) => sum + record.amount, 0);
     
-    return collectedAmount;
-  }, [taxRates, treasuryData, addEconomieRecord, updateTaxRate, currentYear, currentSeason]);
-  
-  // Collect all enabled taxes
-  const collectAllTaxes = useCallback(() => {
-    let totalCollected = 0;
-    
-    taxRates
-      .filter(tax => tax.enabled)
-      .forEach(tax => {
-        const amount = collectTax(tax.id);
-        if (amount) totalCollected += amount;
-      });
-    
-    return totalCollected;
-  }, [taxRates, collectTax]);
-  
-  // Calculate tax burden on population
-  const calculateTaxBurden = useCallback(() => {
-    const enabledTaxes = taxRates.filter(tax => tax.enabled);
-    const totalRate = enabledTaxes.reduce((sum, tax) => sum + tax.rate, 0);
-    const averageBurden = totalRate / enabledTaxes.length;
+    // Group by type/category
+    const byType: Record<string, number> = {};
+    currentYearTaxes.forEach(record => {
+      const category = record.category;
+      byType[category] = (byType[category] || 0) + record.amount;
+    });
     
     return {
-      averageBurden,
-      patricianBurden: averageBurden * 0.8, // Patricians pay less due to exemptions
-      plebeianBurden: averageBurden * 1.1, // Plebeians bear more of the burden
-      provinceBurden: averageBurden * 1.3 // Provinces pay the most
+      totalCollected,
+      byType
+    } as TaxCollection;
+  }, [taxHistory, currentYear]);
+  
+  // Convert to TreasuryDataWithTax for internal use
+  const getTreasuryWithTaxData = useCallback((): TreasuryDataWithTax => {
+    const taxStats = getTaxStatistics() || { totalCollected: 0, byType: {} };
+    
+    // Cast the treasury to the required type
+    const treasuryData = treasury as unknown as TreasuryData;
+    
+    return {
+      balance: treasuryData.balance,
+      taxCollection: taxStats
     };
-  }, [taxRates]);
+  }, [treasury, getTaxStatistics]);
+  
+  // Update tax rate
+  const updateTaxRate = useCallback((taxId: string, newRate: number) => {
+    setTaxTypes(prev => prev.map(tax => 
+      tax.id === taxId ? { ...tax, rate: newRate } : tax
+    ));
+    
+    setTaxRates(prev => ({ ...prev, [taxId]: newRate }));
+    
+    toast({
+      title: "Taux de taxe mis à jour",
+      description: `Le nouveau taux est de ${newRate}%`,
+    });
+  }, [toast]);
+  
+  // Collect taxes
+  const collectTaxes = useCallback((taxId?: string) => {
+    setIsLoading(true);
+    
+    // Determine which taxes to collect
+    const taxesToCollect = taxId 
+      ? taxTypes.filter(tax => tax.id === taxId && tax.isActive)
+      : taxTypes.filter(tax => tax.isActive);
+    
+    if (taxesToCollect.length === 0) {
+      toast({
+        title: "Aucune taxe à collecter",
+        description: "Vérifiez les taxes actives ou sélectionnez une taxe spécifique",
+        variant: "destructive"
+      });
+      setIsLoading(false);
+      return;
+    }
+    
+    // Calculate total tax to collect
+    let totalTaxes = 0;
+    const collectionByType: Record<string, number> = {};
+    
+    taxesToCollect.forEach(tax => {
+      // Calculate actual collected amount (with some randomization for simulation)
+      const collectionEfficiency = 0.8 + Math.random() * 0.4; // Between 80% and 120%
+      const collectedAmount = Math.floor(tax.expectedRevenue * (tax.rate / 100) * collectionEfficiency);
+      
+      totalTaxes += collectedAmount;
+      collectionByType[tax.id] = collectedAmount;
+      
+      // Create tax record in economy
+      const economieRecord: EconomieRecord = {
+        id: `tax-${Date.now()}-${tax.id}`,
+        date: { year: currentYear, season: currentSeason },
+        source: "Collecte fiscale",
+        category: "Impôts" as EconomieCategory,
+        amount: collectedAmount,
+        description: `Collecte de ${tax.name} (${tax.rate}%)`,
+        type: "income",
+        isRecurring: true,
+        recurringInterval: "seasonal",
+        tags: ["taxes", tax.targetGroup.toLowerCase()],
+        approved: true,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString()
+      };
+      
+      setEconomieRecords(prev => [economieRecord, ...prev]);
+    });
+    
+    // Update treasury
+    const taxCollection = {
+      totalCollected: totalTaxes,
+      byType: collectionByType
+    };
+    
+    // Convert to the basic property expected by the base structure
+    setTreasury(prev => ({
+      ...prev,
+      balance: prev.balance + totalTaxes,
+      income: prev.income + totalTaxes,
+      totalIncome: prev.totalIncome + totalTaxes
+    }));
+    
+    toast({
+      title: "Taxes collectées avec succès",
+      description: `${formatCurrency(totalTaxes)} ont été ajoutés au trésor public.`,
+    });
+    
+    setIsLoading(false);
+  }, [taxTypes, currentYear, currentSeason, setEconomieRecords, setTreasury, toast]);
   
   return {
+    taxTypes,
     taxRates,
-    taxCollections,
-    treasuryData,
+    taxHistory,
+    isLoading,
+    treasuryWithTaxData: getTreasuryWithTaxData(),
     updateTaxRate,
-    toggleTaxEnabled,
-    calculateExpectedRevenue,
-    collectTax,
-    collectAllTaxes,
-    calculateTaxBurden,
-    currentYear,
-    currentSeason
+    collectTaxes,
+    getTaxStatistics
   };
 };

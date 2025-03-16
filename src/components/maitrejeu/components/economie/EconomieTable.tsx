@@ -1,124 +1,153 @@
 
 import React from 'react';
-import { 
-  Table, 
-  TableBody, 
-  TableCaption, 
-  TableCell, 
-  TableHead, 
-  TableHeader, 
-  TableRow 
-} from '@/components/ui/table';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
-import { 
-  ChevronDown, 
-  ChevronUp, 
-  Edit, 
-  Trash2,
-  ArrowDownUp
-} from 'lucide-react';
-import { formatDate } from '@/utils/formatUtils';
+import { Pencil, Trash2, Filter, ArrowUpDown, ArrowUp, ArrowDown } from 'lucide-react';
 import { formatCurrency } from '@/utils/currencyUtils';
-import { EconomieRecord, EconomieSort, EconomieTableProps } from '../../types/economie';
+import { formatDate } from '@/utils/dateUtils';
 import { Badge } from '@/components/ui/badge';
+import { EconomieRecord, EconomieSort } from '../../types/economie';
 
-export const EconomieTable: React.FC<EconomieTableProps> = ({
-  records,
+export interface EconomieTableProps {
+  records: EconomieRecord[];
+  onEdit: (record: EconomieRecord) => void;
+  onDelete: (id: string) => void;
+  sort: EconomieSort;
+  onSortChange: (field: keyof EconomieRecord) => void;
+}
+
+export const EconomieTable: React.FC<EconomieTableProps> = ({ 
+  records, 
+  onEdit, 
+  onDelete,
   sort,
-  onSortChange,
-  onEdit,
-  onDelete
+  onSortChange
 }) => {
   const getSortIcon = (field: keyof EconomieRecord) => {
-    if (sort.field !== field) return <ArrowDownUp className="h-4 w-4 text-muted-foreground" />;
-    return sort.direction === 'asc' ? 
-      <ChevronUp className="h-4 w-4" /> : 
-      <ChevronDown className="h-4 w-4" />;
+    if (sort.field !== field) return <ArrowUpDown className="h-4 w-4" />;
+    return sort.direction === 'asc' ? <ArrowUp className="h-4 w-4" /> : <ArrowDown className="h-4 w-4" />;
   };
 
-  const handleSort = (field: keyof EconomieRecord) => {
-    onSortChange(field);
+  const getTypeColor = (type: string): string => {
+    switch (type) {
+      case 'income': return 'text-green-600';
+      case 'expense': return 'text-red-600';
+      case 'tax': return 'text-blue-600';
+      default: return '';
+    }
+  };
+
+  const getCategoryBadge = (category: string): JSX.Element => {
+    let variant: 'default' | 'secondary' | 'destructive' | 'outline' = 'default';
+    
+    switch (category) {
+      case 'Impôts':
+        variant = 'default';
+        break;
+      case 'Armée':
+        variant = 'destructive';
+        break;
+      case 'Construction':
+        variant = 'outline';
+        break;
+      case 'Commerce':
+        variant = 'secondary';
+        break;
+      default:
+        variant = 'default';
+    }
+    
+    return <Badge variant={variant}>{category}</Badge>;
   };
 
   return (
     <Table>
-      <TableCaption>Historique des transactions économiques</TableCaption>
       <TableHeader>
         <TableRow>
-          <TableHead className="cursor-pointer" onClick={() => handleSort('date')}>
-            <div className="flex items-center gap-1">
+          <TableHead className="w-[100px]">
+            <Button 
+              variant="ghost" 
+              onClick={() => onSortChange('date')}
+              className="h-8 px-2 text-xs"
+            >
               Date {getSortIcon('date')}
-            </div>
+            </Button>
           </TableHead>
-          <TableHead className="cursor-pointer" onClick={() => handleSort('type')}>
-            <div className="flex items-center gap-1">
-              Type {getSortIcon('type')}
-            </div>
-          </TableHead>
-          <TableHead className="cursor-pointer" onClick={() => handleSort('amount')}>
-            <div className="flex items-center gap-1">
-              Montant {getSortIcon('amount')}
-            </div>
-          </TableHead>
-          <TableHead className="cursor-pointer" onClick={() => handleSort('category')}>
-            <div className="flex items-center gap-1">
-              Catégorie {getSortIcon('category')}
-            </div>
-          </TableHead>
-          <TableHead className="cursor-pointer" onClick={() => handleSort('description')}>
-            <div className="flex items-center gap-1">
+          <TableHead className="w-[180px]">
+            <Button 
+              variant="ghost" 
+              onClick={() => onSortChange('description')}
+              className="h-8 px-2 text-xs"
+            >
               Description {getSortIcon('description')}
-            </div>
+            </Button>
           </TableHead>
-          <TableHead className="text-right">Actions</TableHead>
+          <TableHead>
+            <Button 
+              variant="ghost" 
+              onClick={() => onSortChange('category')}
+              className="h-8 px-2 text-xs"
+            >
+              Catégorie {getSortIcon('category')}
+            </Button>
+          </TableHead>
+          <TableHead>
+            <Button 
+              variant="ghost" 
+              onClick={() => onSortChange('source')}
+              className="h-8 px-2 text-xs"
+            >
+              Source {getSortIcon('source')}
+            </Button>
+          </TableHead>
+          <TableHead className="text-right">
+            <Button 
+              variant="ghost" 
+              onClick={() => onSortChange('amount')}
+              className="h-8 px-2 text-xs"
+            >
+              Montant {getSortIcon('amount')}
+            </Button>
+          </TableHead>
+          <TableHead className="w-[100px]">Actions</TableHead>
         </TableRow>
       </TableHeader>
       <TableBody>
         {records.length === 0 ? (
           <TableRow>
-            <TableCell colSpan={6} className="text-center py-8 text-muted-foreground">
+            <TableCell colSpan={6} className="text-center py-4 text-muted-foreground">
               Aucune transaction trouvée
             </TableCell>
           </TableRow>
         ) : (
           records.map((record) => (
             <TableRow key={record.id}>
-              <TableCell>
+              <TableCell className="font-medium">
                 {typeof record.date === 'string' 
-                  ? record.date 
-                  : formatDate(record.date)}
+                  ? formatDate(new Date(record.date)) 
+                  : `${record.date.year} ${record.date.season}`}
+              </TableCell>
+              <TableCell>{record.description}</TableCell>
+              <TableCell>{getCategoryBadge(record.category)}</TableCell>
+              <TableCell>{record.source}</TableCell>
+              <TableCell className={`text-right font-medium ${getTypeColor(record.type)}`}>
+                {record.type === 'expense' ? '-' : ''}{formatCurrency(Math.abs(record.amount))}
               </TableCell>
               <TableCell>
-                <Badge 
-                  variant={record.type === 'income' ? 'success' : record.type === 'expense' ? 'destructive' : 'outline'}
-                >
-                  {record.type === 'income' ? 'Revenu' : 
-                   record.type === 'expense' ? 'Dépense' : 
-                   record.type.charAt(0).toUpperCase() + record.type.slice(1)}
-                </Badge>
-              </TableCell>
-              <TableCell className={record.amount >= 0 ? 'text-green-600' : 'text-red-600'}>
-                {formatCurrency(record.amount)}
-              </TableCell>
-              <TableCell>
-                {record.category.charAt(0).toUpperCase() + record.category.slice(1)}
-              </TableCell>
-              <TableCell className="max-w-sm truncate">
-                {record.description}
-              </TableCell>
-              <TableCell className="text-right">
-                <div className="flex justify-end gap-1">
-                  <Button
-                    variant="ghost"
-                    size="icon"
+                <div className="flex space-x-2">
+                  <Button 
+                    variant="ghost" 
+                    size="icon" 
                     onClick={() => onEdit(record)}
+                    className="h-8 w-8"
                   >
-                    <Edit className="h-4 w-4" />
+                    <Pencil className="h-4 w-4" />
                   </Button>
-                  <Button
-                    variant="ghost"
-                    size="icon"
+                  <Button 
+                    variant="ghost" 
+                    size="icon" 
                     onClick={() => onDelete(record.id)}
+                    className="h-8 w-8 text-destructive"
                   >
                     <Trash2 className="h-4 w-4" />
                   </Button>

@@ -4,6 +4,7 @@ import { useMaitreJeu } from '../components/maitrejeu/context';
 import { useBatimentsPublics, PublicBuilding, ConstructionProject } from '@/components/republique/batiments/hooks/useBatimentsPublics';
 import { usePatrimoine } from '@/hooks/usePatrimoine';
 import { GameDate } from '@/utils/timeSystem';
+import { EconomieCategory } from '@/components/maitrejeu/types/economie';
 
 export const useBuildingManagement = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -27,7 +28,7 @@ export const useBuildingManagement = () => {
       location: buildingData.location,
       estimatedCost: buildingData.cost,
       duration: buildingData.constructionTime || 4,
-      estimatedCompletionYear: economicFactors.currentYear + Math.ceil(buildingData.constructionTime / 4),
+      expectedCompletionYear: economicFactors.currentYear + Math.ceil(buildingData.constructionTime / 4),
       benefits: buildingData.benefits || [],
       type: buildingData.buildingType
     });
@@ -39,7 +40,7 @@ export const useBuildingManagement = () => {
       addEconomieRecord({
         amount: -initialCost,
         description: `Démarrage construction: ${buildingData.name}`,
-        category: 'construction',
+        category: 'Construction' as EconomieCategory,
         type: 'expense',
         date: new Date().toISOString(),
         source: 'Trésor Public',
@@ -66,7 +67,7 @@ export const useBuildingManagement = () => {
       addEconomieRecord({
         amount: -constructionCost,
         description: `Progression construction: ${project.name}`,
-        category: 'construction',
+        category: 'Construction' as EconomieCategory,
         type: 'expense',
         date: new Date().toISOString(),
         source: 'Trésor Public',
@@ -89,7 +90,7 @@ export const useBuildingManagement = () => {
     addEconomieRecord({
       amount: -building.maintenanceCost,
       description: `Maintenance: ${building.name}`,
-      category: 'maintenance',
+      category: 'Maintenance' as EconomieCategory,
       type: 'expense',
       date: new Date().toISOString(),
       source: 'Services d\'entretien',
@@ -97,7 +98,7 @@ export const useBuildingManagement = () => {
     });
     
     // Perform the maintenance
-    maintainBuilding(buildingId);
+    maintainBuilding(buildingId, true);
     return true;
   }, [publicBuildings, maintainBuilding, addEconomieRecord]);
   
@@ -114,7 +115,7 @@ export const useBuildingManagement = () => {
     addEconomieRecord({
       amount: sellValue,
       description: `Vente bâtiment: ${building.name}`,
-      category: 'sale',
+      category: 'Vente' as EconomieCategory,
       type: 'income',
       date: new Date().toISOString(),
       source: 'Vente immobilière',

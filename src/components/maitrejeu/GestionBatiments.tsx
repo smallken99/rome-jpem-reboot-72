@@ -8,7 +8,7 @@ import { useMaitreJeu } from './context';
 import { useBatimentsManagement } from './hooks/useBatimentsManagement';
 import { BuildingManagement } from './components/batiments/BuildingManagement';
 import BuildingsList from './components/batiments/BuildingsList';
-import ConstructionProjects from './components/batiments/ConstructionProjects';
+import { ConstructionProjects } from './components/batiments/ConstructionProjects';
 import MaintenanceManager from './components/batiments/MaintenanceManager';
 import BuildingRevenue from './components/batiments/BuildingRevenue';
 import PublicBuildingModal from './components/batiments/PublicBuildingModal';
