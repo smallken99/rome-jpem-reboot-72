@@ -1,13 +1,13 @@
 
 import { GameDate } from './common';
 
-export type BuildingType = 'temple' | 'forum' | 'market' | 'villa' | 'domus' | 'insula' | 'warehouse' | 'baths' | 'theater' | 'port' | 'aqueduct' | 'road' | 'wall' | 'barracks' | 'palace' | 'senate' | 'other';
+export type BuildingType = 'temple' | 'forum' | 'market' | 'villa' | 'domus' | 'insula' | 'warehouse' | 'baths' | 'theater' | 'port' | 'aqueduct' | 'road' | 'wall' | 'barracks' | 'palace' | 'senate' | 'other' | 'basilica' | 'amphitheater' | 'circus' | 'bath' | 'bridge';
 
-export type BuildingStatus = 'excellent' | 'good' | 'damaged' | 'poor' | 'ruined';
+export type BuildingStatus = 'excellent' | 'good' | 'damaged' | 'poor' | 'ruined' | 'under_construction' | 'average';
 
 export type BuildingOwner = 'république' | 'private' | 'temple' | 'military';
 
-export type MaintenanceLevel = 'minor' | 'moderate' | 'major';
+export type MaintenanceLevel = 'minor' | 'moderate' | 'major' | 'excellent' | 'minimal' | 'standard';
 
 export type BuildingPriority = 'low' | 'medium' | 'high' | 'critical';
 
@@ -59,6 +59,7 @@ export interface ConstructionProject {
   duration?: number;
   cost?: number;
   totalCost?: number;
+  workers?: number; // Ajout de cette propriété
 }
 
 export interface MaintenanceTask {
@@ -70,7 +71,7 @@ export interface MaintenanceTask {
   priority: BuildingPriority;
   deadline?: GameDate;
   assignedTeam?: string;
-  status: 'pending' | 'in_progress' | 'completed' | 'delayed';
+  status: 'pending' | 'in_progress' | 'completed' | 'delayed' | 'scheduled';
   notes?: string;
   startDate?: GameDate;
 }
@@ -110,4 +111,19 @@ export interface PublicBuildingData {
   effects: Record<string, number>;
   unlockRequirements?: Record<string, any>;
   isUnlocked: boolean;
+}
+
+// Interfaces pour les props de composants
+export interface BuildingsListProps {
+  buildings?: Building[];
+  onEdit: (id: string) => void;
+  onDelete?: (id: string) => void;
+  onSelect?: (id: string) => void;
+}
+
+export interface PublicBuildingModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+  onSave: (data: BuildingCreationData) => void;
+  building?: Building;
 }

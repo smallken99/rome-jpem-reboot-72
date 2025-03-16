@@ -45,7 +45,6 @@ export interface Equilibre {
   
   // Political alignment
   populaires: number;
-  populares: number; // Alternative naming
   optimates: number;
   moderates: number;
   
@@ -53,16 +52,10 @@ export interface Equilibre {
   population: number;
   criminalityIndex: number; // Main name
   indiceCrime: number; // Alternative name
-  indiceCorruption?: number; // For compatibility
-  indiceMecontentement?: number; // For compatibility
-  stressPolitique?: number; // For compatibility
-  stabiliteGlobale?: number; // For compatibility
-  anneeEnCours?: number; // For compatibility
   economicStability: number;
   foodSupply: number;
   publicOrder: number;
-  notes?: string; // Added for GestionEquilibre.tsx
-
+  
   // EquilibreBarChart properties
   armée?: number;
   économie?: number;
@@ -78,4 +71,7 @@ export interface Equilibre {
   
   // History of events
   historique: PoliticalEvent[];
+  
+  // Optional notes
+  notes?: string;
 }

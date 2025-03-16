@@ -464,7 +464,7 @@ export const initialElections: Election[] = [];
 export const initialHistoireEntries: HistoireEntry[] = [];
 export const initialLois: Loi[] = [];
 
-// Ajustement de l'initialEquilibre pour inclure à la fois populaires et populaires
+// Ajustement de l'initialEquilibre pour inclure à la fois populaires et populares
 export const initialEquilibre: Equilibre = {
   facteurSenat: 40,
   facteurPlebs: 60,
@@ -472,27 +472,28 @@ export const initialEquilibre: Equilibre = {
   facteurMilitaire: 60,
   facteurReligieux: 65,
   populaires: 45,
-  populaires: 45,
   optimates: 55,
   moderates: 30,
   population: 800000,
-  stabilite: 60,
-  militaire: 70,
-  religieux: 65,
-  senatorien: 55,
+  criminalityIndex: 35,
+  indiceCrime: 35,
+  economicStability: 60,
+  foodSupply: 65,
+  publicOrder: 55,
+  unrestThreshold: 75,
+  rebellionThreshold: 90,
+  historique: [],
+  
+  // Propriétés supplémentaires compatibles avec l'interface
+  armée: 70,
+  économie: 60,
+  morale: 65,
+  loyauté: 60,
   patriciens: 80,
-  plebeiens: 40,
-  annona: 65,
-  jeux: 75,
-  commerce: 60,
-  provinces: 50,
-  guerres: 65,
-  justice: 55,
-  corruption: 40,
-  revoltes: 20,
-  criminalite: 35,
-  richesse: 70,
-  impots: 45,
+  plébéiens: 40,
+  neutrales: 30,
+  
+  // Notes
   notes: "Etat actuel de l'équilibre de la République"
 };
 

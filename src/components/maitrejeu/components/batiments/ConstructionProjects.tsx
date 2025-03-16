@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
@@ -100,13 +99,16 @@ export const ConstructionProjects: React.FC<ConstructionProjectsProps> = ({
                 </div>
                 <div className="flex items-center">
                   <HardHat className="h-4 w-4 mr-2 text-muted-foreground" />
-                  <span>{project.workers} ouvriers</span>
+                  <span>{project.workers || 0} ouvriers</span>
                 </div>
               </div>
               
               <div className="text-sm">
                 <span className="text-muted-foreground">Temps restant: </span>
-                <span className="font-medium">{getRemainingTime(project)}</span>
+                <span className="font-medium">{getRemainingTime({
+                  estimatedCompletionDate: project.estimatedCompletionDate || { year: currentYear + 1, season: currentSeason },
+                  progress: project.progress
+                })}</span>
               </div>
               
               <div className="flex justify-between">

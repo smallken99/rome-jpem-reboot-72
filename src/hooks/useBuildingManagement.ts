@@ -1,4 +1,3 @@
-
 import { useState, useCallback } from 'react';
 import { useMaitreJeu } from '../components/maitrejeu/context';
 import { useBatimentsPublics, PublicBuilding, ConstructionProject } from '@/components/republique/batiments/hooks/useBatimentsPublics';
@@ -30,7 +29,7 @@ export const useBuildingManagement = () => {
       duration: buildingData.constructionTime || 4,
       expectedCompletionYear: economicFactors.currentYear + Math.ceil(buildingData.constructionTime / 4),
       benefits: buildingData.benefits || [],
-      type: buildingData.buildingType
+      buildingType: buildingData.buildingType
     });
     
     // Record the initial payment in the economy system
@@ -98,7 +97,7 @@ export const useBuildingManagement = () => {
     });
     
     // Perform the maintenance
-    maintainBuilding(buildingId, true);
+    maintainBuilding(buildingId);
     return true;
   }, [publicBuildings, maintainBuilding, addEconomieRecord]);
   
