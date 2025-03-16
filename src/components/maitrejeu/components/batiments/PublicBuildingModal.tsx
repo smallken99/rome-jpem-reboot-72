@@ -31,14 +31,13 @@ const PublicBuildingModal: React.FC<PublicBuildingModalProps> = ({
   const [capacity, setCapacity] = useState(building?.capacity?.toString() || '');
   const [owner, setOwner] = useState(building?.owner || '');
 
-  // Mettre à jour handleSubmit pour s'assurer que tous les champs requis sont fournis
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     const buildingData: BuildingCreationData = {
       name: buildingName,
       type: buildingType,
       location,
-      status: buildingStatus, // S'assurer que le statut est valide
+      status: buildingStatus,
       constructionYear: parseInt(constructionYear),
       description,
       cost: parseInt(cost),

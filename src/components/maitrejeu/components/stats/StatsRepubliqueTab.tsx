@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
@@ -19,7 +18,7 @@ export const StatsRepubliqueTab: React.FC = () => {
   ).length;
   
   // Équilibre des factions (valeurs par défaut si undefined)
-  const populares = equilibre?.populares || 33;
+  const populaires = equilibre?.populaires || 33;
   const optimates = equilibre?.optimates || 33;
   const moderates = equilibre?.moderates || 34;
   
@@ -41,10 +40,10 @@ export const StatsRepubliqueTab: React.FC = () => {
             <div className="space-y-4">
               <div className="space-y-2">
                 <div className="flex items-center justify-between">
-                  <span className="text-sm font-medium">Populares</span>
-                  <span className="text-sm text-muted-foreground">{populares}%</span>
+                  <span className="text-sm font-medium">Populaires</span>
+                  <span className="text-sm text-muted-foreground">{populaires}%</span>
                 </div>
-                <Progress value={populares} className="h-2 bg-muted" 
+                <Progress value={populaires} className="h-2 bg-muted" 
                   indicatorClassName="bg-blue-500" />
               </div>
               

@@ -26,7 +26,7 @@ export const EquilibreBarChart: React.FC<EquilibreBarChartProps> = ({
     { name: 'Patriciens', value: equilibre.patriciens ?? equilibre.facteurPatriciens ?? 50 },
     { name: 'Plébéiens', value: equilibre.plébéiens ?? equilibre.facteurPlebs ?? 50 },
     { name: 'Optimates', value: equilibre.optimates },
-    { name: 'Populares', value: equilibre.populares },
+    { name: 'Populares', value: equilibre.populaires }, // Changed from 'populares' to 'populaires'
     { name: 'Modérés', value: equilibre.neutrales ?? equilibre.moderates ?? 50 }
   ];
   

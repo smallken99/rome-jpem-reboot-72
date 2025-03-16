@@ -29,7 +29,7 @@ export const useBuildingManagement = () => {
       duration: buildingData.constructionTime || 4,
       expectedCompletionYear: economicFactors.currentYear + Math.ceil(buildingData.constructionTime / 4),
       benefits: buildingData.benefits || [],
-      buildingType: buildingData.buildingType
+      buildingTypeId: buildingData.typeId
     });
     
     // Record the initial payment in the economy system
@@ -97,7 +97,7 @@ export const useBuildingManagement = () => {
     });
     
     // Perform the maintenance
-    maintainBuilding(buildingId);
+    maintainBuilding(buildingId, "standard");
     return true;
   }, [publicBuildings, maintainBuilding, addEconomieRecord]);
   
