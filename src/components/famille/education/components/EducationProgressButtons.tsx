@@ -7,7 +7,7 @@ import { toast } from 'sonner';
 
 export const EducationProgressButtons: React.FC<EducationProgressButtonsProps> = ({
   isEducating,
-  hasEducation,
+  hasEducation = false,
   educationProgress = 0,
   onAdvanceYear,
   onCompleteEducation,
@@ -82,7 +82,7 @@ export const EducationProgressButtons: React.FC<EducationProgressButtonsProps> =
             ) : (
               <>
                 <BookOpen className="h-4 w-4" />
-                Avancer d'un an
+                Avancer d'une année
               </>
             )}
           </Button>

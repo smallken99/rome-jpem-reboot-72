@@ -36,10 +36,24 @@ interface HistoriqueLoiItemProps {
 }
 
 const HistoriqueLoiItem: React.FC<HistoriqueLoiItemProps> = ({ loi }) => {
+  // Compatibility: Use either existing resultat or infer from statut
+  const resultat = loi.resultat || (loi.statut === 'adopté' ? 'Adoptée' : 'Rejetée');
+  
   const getBadgeClass = () => {
-    return loi.resultat === 'Adoptée' 
+    return resultat === 'Adoptée' 
       ? 'bg-green-100 text-green-800' 
       : 'bg-red-100 text-red-800';
+  };
+
+  // Format the votes to display as a string
+  const formatVotes = (votes: any) => {
+    if (typeof votes === 'string') return votes;
+    
+    if (votes && typeof votes === 'object') {
+      return `${votes.pour}-${votes.contre}-${votes.abstention}`;
+    }
+    
+    return 'Votes non comptabilisés';
   };
 
   return (
@@ -50,10 +64,12 @@ const HistoriqueLoiItem: React.FC<HistoriqueLoiItemProps> = ({ loi }) => {
         </div>
         <div>
           <h3 className="font-medium">{loi.titre}</h3>
-          <p className="text-sm text-muted-foreground">Proposé par {loi.auteur} le {loi.date}</p>
+          <p className="text-sm text-muted-foreground">
+            Proposé par {loi.auteur} le {loi.date || loi.dateProposition}
+          </p>
           <div className="mt-1">
             <span className={`text-xs px-2 py-0.5 rounded-full ${getBadgeClass()}`}>
-              {loi.resultat} ({loi.votes})
+              {resultat} ({formatVotes(loi.votes)})
             </span>
           </div>
         </div>

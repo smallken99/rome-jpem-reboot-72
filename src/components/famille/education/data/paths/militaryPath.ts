@@ -41,5 +41,8 @@ export const militaryPath: EducationPath = {
     'Archerie',
     'Cavalerie'
   ],
-  relatedStat: 'martialEducation'
+  relatedStat: 'martialEducation',
+  minAge: 12,
+  maxAge: 20,
+  cost: 3500
 };

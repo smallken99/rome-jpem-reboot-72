@@ -41,5 +41,8 @@ export const rhetoricPath: EducationPath = {
     'Diplomatie',
     'Grec ancien'
   ],
-  relatedStat: 'oratory'
+  relatedStat: 'oratory',
+  minAge: 10,
+  maxAge: 18,
+  cost: 4000
 };

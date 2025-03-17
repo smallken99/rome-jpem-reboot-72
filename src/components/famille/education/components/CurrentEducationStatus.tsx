@@ -22,13 +22,20 @@ export const CurrentEducationStatus: React.FC<CurrentEducationStatusProps> = ({
     );
   }
   
+  // Get type from either pathType or type
   const educationType = 'pathType' in edu ? edu.pathType : edu.type;
+  
+  // Get progress - handle both EducationRecord and ChildEducation formats
   const progress = 'currentYear' in edu && edu.totalYears
     ? (edu.currentYear / edu.totalYears) * 100
-    : edu.progress || 0;
-  const years = 'currentYear' in edu ? edu.currentYear : edu.yearsCompleted || 0;
+    : ('progress' in edu ? edu.progress : 0);
+  
+  // Handle years completed
+  const years = 'currentYear' in edu ? edu.currentYear : ('yearsCompleted' in edu ? edu.yearsCompleted : 0);
   const totalYears = edu.totalYears || 3;
-  const status = 'status' in edu ? edu.status : (edu.type && edu.type !== 'none' ? 'in_progress' : 'not_started');
+  
+  // Handle status
+  const status = 'status' in edu ? edu.status : (educationType && educationType !== 'none' ? 'in_progress' : 'not_started');
   
   // Helper to get education type display name
   const getEducationTypeName = (type: string) => {

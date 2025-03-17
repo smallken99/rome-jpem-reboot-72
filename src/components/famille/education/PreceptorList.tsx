@@ -1,102 +1,152 @@
 
-import React, { useState } from 'react';
-import { PreceptorCard } from './PreceptorCard';
+import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { UserPlus, Users, Search } from 'lucide-react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Preceptor } from './types/educationTypes';
 import { useEducation } from './context/EducationContext';
-import { getEducationTypes } from './data';
+import { PreceptorCard } from './components/PreceptorCard';
+import { toast } from 'sonner';
+import { useNavigate, useSearchParams } from 'react-router-dom';
+import { Loader2 } from 'lucide-react';
 
-interface EducationType {
-  value: string;
-  label: string;
+interface PreceptorListProps {
+  type?: string;
 }
 
-export const PreceptorList: React.FC = () => {
-  const { 
-    preceptors, 
-    hiredPreceptors, 
-    loadPreceptorsByType, 
-    hirePreceptor, 
-    firePreceptor 
-  } = useEducation();
+export const PreceptorList: React.FC<PreceptorListProps> = ({ type = 'all' }) => {
+  const { preceptors, hiredPreceptors, loadPreceptorsByType, hirePreceptor, isLoading } = useEducation();
+  const [searchParams] = useSearchParams();
+  const childId = searchParams.get('childId');
+  const navigate = useNavigate();
   
-  const [selectedType, setSelectedType] = useState<string>('all');
-  const [showAvailable, setShowAvailable] = useState(true);
+  const [filteredPreceptors, setFilteredPreceptors] = useState<Preceptor[]>([]);
+  const [selectedEducationType, setSelectedEducationType] = useState(type !== 'all' ? type : '');
   
-  const educationTypes: EducationType[] = getEducationTypes();
+  useEffect(() => {
+    if (type !== 'all' && type) {
+      setSelectedEducationType(type);
+      setFilteredPreceptors(loadPreceptorsByType(type));
+    } else {
+      setFilteredPreceptors(preceptors.filter(p => p.available));
+    }
+  }, [type, preceptors, loadPreceptorsByType]);
   
-  // Filter preceptors based on selected type
-  const filteredPreceptors = showAvailable 
-    ? loadPreceptorsByType(selectedType)
-    : hiredPreceptors.filter(p => selectedType === 'all' || p.specialty === selectedType);
+  // Handle filter change
+  const handleFilterChange = (newType: string) => {
+    setSelectedEducationType(newType);
+    if (newType === '') {
+      setFilteredPreceptors(preceptors.filter(p => p.available));
+    } else {
+      setFilteredPreceptors(loadPreceptorsByType(newType).filter(p => p.available));
+    }
+  };
+  
+  // Handle hiring a preceptor
+  const handleHirePreceptor = (preceptorId: string) => {
+    if (childId) {
+      hirePreceptor(preceptorId, childId);
+      
+      // Redirect back to child detail if applicable
+      toast.success("Précepteur embauché avec succès!");
+      navigate(`/famille/education/child/${childId}`);
+    } else {
+      hirePreceptor(preceptorId);
+      toast.success("Précepteur embauché avec succès!");
+    }
+  };
+  
+  // Calculate cost based on quality
+  const getHireCost = (preceptor: Preceptor) => {
+    const baseCost = preceptor.cost || preceptor.price || 1000;
+    const quality = preceptor.quality || 3;
+    
+    return baseCost * (quality / 3);
+  };
   
   return (
     <div className="space-y-6">
-      <div className="flex flex-col sm:flex-row justify-between gap-4">
-        <div className="flex items-center gap-2">
-          <Select value={selectedType} onValueChange={setSelectedType}>
-            <SelectTrigger className="w-[180px]">
-              <SelectValue placeholder="Tous les types" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">Tous les types</SelectItem>
-              {educationTypes.map(type => (
-                <SelectItem key={type.value} value={type.value}>{type.label}</SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-          
-          <Button 
-            variant="outline" 
-            className={showAvailable ? 'bg-blue-50 text-blue-800' : ''}
-            onClick={() => setShowAvailable(true)}
-          >
-            <Search className="h-4 w-4 mr-2" />
-            Disponibles
-          </Button>
-          
-          <Button 
-            variant="outline"
-            className={!showAvailable ? 'bg-green-50 text-green-800' : ''}
-            onClick={() => setShowAvailable(false)}
-          >
-            <Users className="h-4 w-4 mr-2" />
-            Employés
-          </Button>
-        </div>
+      <div className="flex flex-wrap gap-2 mb-6">
+        <Button
+          variant={selectedEducationType === '' ? 'default' : 'outline'}
+          onClick={() => handleFilterChange('')}
+          className="text-sm"
+        >
+          Tous
+        </Button>
+        <Button 
+          variant={selectedEducationType === 'military' ? 'default' : 'outline'}
+          onClick={() => handleFilterChange('military')}
+          className="text-sm"
+        >
+          Militaire
+        </Button>
+        <Button 
+          variant={selectedEducationType === 'rhetoric' ? 'default' : 'outline'}
+          onClick={() => handleFilterChange('rhetoric')}
+          className="text-sm"
+        >
+          Rhétorique
+        </Button>
+        <Button 
+          variant={selectedEducationType === 'religious' ? 'default' : 'outline'}
+          onClick={() => handleFilterChange('religious')}
+          className="text-sm"
+        >
+          Religieuse
+        </Button>
       </div>
       
-      {filteredPreceptors.length === 0 ? (
-        <div className="text-center p-8 border rounded-md">
-          <p className="text-muted-foreground">
-            {showAvailable 
-              ? "Aucun précepteur disponible pour ce type d'éducation." 
-              : "Vous n'avez pas encore embauché de précepteur de ce type."}
-          </p>
-          {!showAvailable && (
+      {isLoading ? (
+        <div className="flex justify-center items-center py-12">
+          <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+        </div>
+      ) : filteredPreceptors.length === 0 ? (
+        <Card>
+          <CardContent className="p-6 text-center">
+            <p className="text-muted-foreground">
+              Aucun précepteur disponible pour cette spécialité.
+            </p>
             <Button 
               variant="outline" 
               className="mt-4"
-              onClick={() => setShowAvailable(true)}
+              onClick={() => handleFilterChange('')}
             >
-              <UserPlus className="h-4 w-4 mr-2" />
-              Rechercher des précepteurs
+              Voir tous les précepteurs
             </Button>
-          )}
-        </div>
+          </CardContent>
+        </Card>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {filteredPreceptors.map(preceptor => (
             <PreceptorCard
               key={preceptor.id}
               preceptor={preceptor}
-              isHired={!showAvailable}
-              onHire={() => hirePreceptor(preceptor.id)}
-              onFire={() => firePreceptor(preceptor.id)}
+              onHire={() => handleHirePreceptor(preceptor.id)}
+              hireCost={getHireCost(preceptor)}
             />
           ))}
         </div>
+      )}
+      
+      {hiredPreceptors && hiredPreceptors.length > 0 && (
+        <Card className="mt-8">
+          <CardHeader>
+            <CardTitle>Précepteurs déjà embauchés</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {hiredPreceptors.map(preceptor => (
+                <PreceptorCard
+                  key={preceptor.id}
+                  preceptor={preceptor}
+                  hired={true}
+                  onView={() => navigate(`/famille/education/preceptor/${preceptor.id}`)}
+                  hireCost={0}
+                />
+              ))}
+            </div>
+          </CardContent>
+        </Card>
       )}
     </div>
   );

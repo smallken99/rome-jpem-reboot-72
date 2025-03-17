@@ -41,5 +41,8 @@ export const religiousPath: EducationPath = {
     'Mystères d\'Eleusis',
     'Lecture des entrailles'
   ],
-  relatedStat: 'piety'
+  relatedStat: 'piety',
+  minAge: 8,
+  maxAge: 16,
+  cost: 4500
 };

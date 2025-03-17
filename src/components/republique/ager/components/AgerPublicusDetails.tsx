@@ -9,6 +9,7 @@ import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { useAgerPublicus } from '../hooks/useAgerPublicus';
 import { ruralProperties } from '@/components/proprietes/data/buildings';
+import { toast } from 'sonner';
 
 interface AgerPublicusDetailsProps {
   parcel: LandParcel;

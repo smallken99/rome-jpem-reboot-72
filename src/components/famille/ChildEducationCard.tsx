@@ -21,10 +21,10 @@ const ChildEducationCard: React.FC<ChildEducationCardProps> = ({ child }) => {
   } = useEducation();
   
   // Determine if the child has an ongoing education
-  const hasEducation = child.currentEducation?.type && child.currentEducation.type !== 'none';
+  const hasEducation = child.educationType !== 'none';
   
   // Check if female with military education (invalid in Roman times)
-  const hasInvalidEducation = child.gender === 'female' && child.currentEducation?.type === 'military';
+  const hasInvalidEducation = child.gender === 'female' && child.educationType === 'military';
   
   // Check if education is in progress - handle both object and array types
   const isEducating = typeof educatingChildren === 'object' && !Array.isArray(educatingChildren) 
@@ -59,14 +59,14 @@ const ChildEducationCard: React.FC<ChildEducationCardProps> = ({ child }) => {
         <EducationProgressButtons 
           isEducating={isEducating}
           hasEducation={hasEducation}
-          educationProgress={child.currentEducation?.progress}
+          educationProgress={child.progress}
           onAdvanceYear={handleAdvanceYear}
           onCompleteEducation={() => completeEducation(child.id)}
-          canComplete={child.currentEducation?.yearsCompleted >= (child.currentEducation?.totalYears || 0) * 0.75}
+          canComplete={child.progress >= 75}
         />
         
         <CardActions 
-          educationType={child.currentEducation?.type || 'none'}
+          educationType={child.educationType || 'none'}
           childId={child.id}
           childGender={child.gender}
           childAge={child.age}

@@ -6,56 +6,71 @@ export const preceptorsList: Preceptor[] = [
     id: 'prec-1',
     name: 'Lucius Cornelius',
     specialty: 'rhetoric',
-    years: 12,
-    rating: 4.7,
+    specialties: ['rhetoric', 'politics'],
+    expertise: 12,
     cost: 1200,
     available: true,
     description: 'Ancien orateur du Sénat, spécialiste en rhétorique et argumentation.',
-    status: 'available'
+    status: 'available',
+    skill: 4,
+    quality: 4,
+    reputation: 85
   },
   {
     id: 'prec-2',
     name: 'Marcus Porcius',
     specialty: 'military',
-    years: 15,
-    rating: 4.5,
+    specialties: ['military', 'leadership'],
+    expertise: 15,
     cost: 1500,
     available: true,
     description: 'Vétéran des légions, enseigne les tactiques militaires et l\'art de la guerre.',
-    status: 'available'
+    status: 'available',
+    skill: 5,
+    quality: 5,
+    reputation: 90
   },
   {
     id: 'prec-3',
     name: 'Publius Vergilius',
-    specialty: 'literature',
-    years: 8,
-    rating: 4.8,
+    specialty: 'rhetoric',
+    specialties: ['rhetoric', 'literature'],
+    expertise: 8,
     cost: 1000,
     available: true,
     description: 'Poète et écrivain reconnu, spécialiste en littérature et poésie.',
-    status: 'available'
+    status: 'available',
+    skill: 4,
+    quality: 4,
+    reputation: 82
   },
   {
     id: 'prec-4',
     name: 'Titus Lucretius',
-    specialty: 'philosophy',
-    years: 20,
-    rating: 4.9,
+    specialty: 'religious',
+    specialties: ['religious', 'philosophy'],
+    expertise: 20,
     cost: 1800,
     available: true,
     description: 'Philosophe stoïcien expérimenté, formé à Athènes.',
-    status: 'available'
+    status: 'available',
+    skill: 5,
+    quality: 5,
+    reputation: 88
   },
   {
     id: 'prec-5',
     name: 'Gaius Sempronius',
-    specialty: 'law',
-    years: 14,
-    rating: 4.6,
+    specialty: 'rhetoric',
+    specialties: ['rhetoric', 'law'],
+    expertise: 14,
     cost: 1400,
     available: true,
     description: 'Juriste réputé, spécialisé dans le droit romain et les procédures légales.',
-    status: 'available'
+    status: 'available',
+    skill: 4,
+    quality: 4,
+    reputation: 85
   }
 ];
 

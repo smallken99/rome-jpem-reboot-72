@@ -1,70 +1,41 @@
 
 import React from 'react';
-import { AlertCircle, BookOpen, Users } from 'lucide-react';
+import { Card, CardContent } from '@/components/ui/card';
 import { useEducation } from '../context/EducationContext';
+import { Lightbulb, Loader2 } from 'lucide-react';
 
 export const EducationInfoBox: React.FC = () => {
-  const { children, preceptors, isLoading } = useEducation();
-  
-  // Count children in education
-  const childrenInEducation = children.filter(child => 
-    child.currentEducation && 
-    child.currentEducation.type && 
-    child.currentEducation.type !== 'none'
-  ).length;
-  
-  // Count available preceptors
-  const availablePreceptors = preceptors.filter(p => p.available).length;
+  const { isLoading } = useEducation();
   
   if (isLoading) {
     return (
-      <div className="border rounded-md p-4 bg-muted/20 animate-pulse">
-        <div className="h-4 w-1/2 bg-muted rounded mb-2"></div>
-        <div className="h-3 w-full bg-muted rounded"></div>
-      </div>
-    );
-  }
-  
-  if (!children.length) {
-    return (
-      <div className="border rounded-md p-4 bg-amber-50 text-amber-800 flex items-center gap-2">
-        <AlertCircle className="h-5 w-5 text-amber-500" />
-        <p>Aucun enfant n'est disponible pour l'éducation dans votre famille.</p>
-      </div>
+      <Card className="mb-6">
+        <CardContent className="p-4 flex items-center justify-center">
+          <Loader2 className="h-5 w-5 animate-spin mr-2 text-muted-foreground" />
+          <span className="text-muted-foreground">Chargement des informations...</span>
+        </CardContent>
+      </Card>
     );
   }
   
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-      <div className="border rounded-md p-4 flex items-start gap-3">
-        <BookOpen className="h-6 w-6 text-blue-500" />
-        <div>
-          <h3 className="font-medium">Éducation en cours</h3>
-          <p className="text-sm text-muted-foreground">
-            {childrenInEducation 
-              ? `${childrenInEducation} enfant${childrenInEducation > 1 ? 's' : ''} en éducation` 
-              : "Aucun enfant en éducation actuellement"}
-          </p>
-          <p className="text-xs text-muted-foreground mt-1">
-            {children.length} enfant{children.length > 1 ? 's' : ''} au total dans la famille
-          </p>
+    <Card className="mb-6">
+      <CardContent className="p-4">
+        <div className="flex gap-3 items-start">
+          <Lightbulb className="h-5 w-5 text-amber-500 mt-0.5" />
+          <div>
+            <p className="text-sm">
+              L'éducation des enfants est essentielle pour l'avenir de votre famille. Choisissez judicieusement
+              le type d'éducation selon le rôle que vous envisagez pour votre enfant.
+            </p>
+            <ul className="text-sm mt-2 space-y-1">
+              <li><span className="font-medium">Éducation Militaire</span> - Pour les fils destinés à la carrière militaire</li>
+              <li><span className="font-medium">Éducation Rhétorique</span> - Pour ceux qui se destinent à la politique</li>
+              <li><span className="font-medium">Éducation Religieuse</span> - Pour garantir la faveur des dieux</li>
+            </ul>
+          </div>
         </div>
-      </div>
-      
-      <div className="border rounded-md p-4 flex items-start gap-3">
-        <Users className="h-6 w-6 text-purple-500" />
-        <div>
-          <h3 className="font-medium">Précepteurs</h3>
-          <p className="text-sm text-muted-foreground">
-            {availablePreceptors 
-              ? `${availablePreceptors} précepteur${availablePreceptors > 1 ? 's' : ''} disponible${availablePreceptors > 1 ? 's' : ''}` 
-              : "Aucun précepteur disponible actuellement"}
-          </p>
-          <p className="text-xs text-muted-foreground mt-1">
-            {preceptors.length - availablePreceptors} précepteur{preceptors.length - availablePreceptors !== 1 ? 's' : ''} déjà embauché{preceptors.length - availablePreceptors !== 1 ? 's' : ''}
-          </p>
-        </div>
-      </div>
-    </div>
+      </CardContent>
+    </Card>
   );
 };

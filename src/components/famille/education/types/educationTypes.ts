@@ -32,6 +32,7 @@ export interface Preceptor {
   years?: number;
   speciality?: string;
   background?: string;
+  rating?: number; // Added for compatibility
 }
 
 export interface EducationPath {
@@ -45,6 +46,8 @@ export interface EducationPath {
   requirements?: {
     age?: number;
     gender?: 'male' | 'female' | 'both';
+    cost?: number;
+    duration?: string;
   } | string[];
   outcomes: string[] | {
     skills: string[];
@@ -82,6 +85,7 @@ export interface EducationRecord {
   startYear: number;
   currentYear: number;
   totalYears: number;
+  progress?: number; // Added for compatibility
   status: 'not_started' | 'in_progress' | 'completed' | 'canceled';
   skills: Record<string, number>;
   specialties: string[];

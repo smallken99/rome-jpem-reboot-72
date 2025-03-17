@@ -45,3 +45,31 @@ export interface HistoriqueLoi {
   date?: string;
   resultat?: 'Adoptée' | 'Rejetée';
 }
+
+export interface HistoriqueLoiTabProps {
+  historique: HistoriqueLoi[];
+  formatSeason?: (season: string) => string;
+  isEditable?: boolean;
+}
+
+export interface LoisActivesTabProps {
+  lois: any[];
+  onViewLoi: (loi?: any) => void;
+  onPromulguer: (loiId: string) => void;
+  formatSeason?: (season: string) => string;
+}
+
+export interface LoisProposeesTabProps {
+  lois: any[];
+  onViewLoi: (loi?: any) => void;
+  onVoterPour: (loiId: string) => void;
+  onVoterContre: (loiId: string) => void;
+  onVoterAbstention: (loiId: string) => void;
+  formatSeason?: (season: string) => string;
+}
+
+export interface LoisRejeteesTabProps {
+  lois: any[];
+  onViewLoi: (loi?: any) => void;
+  formatSeason?: (season: string) => string;
+}
