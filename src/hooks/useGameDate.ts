@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from 'react';
 import { GameDate, Season } from '@/components/maitrejeu/types/common';
 import { formatDate, formatSeason } from '@/utils/formatUtils';
@@ -103,6 +102,11 @@ export const useGameDate = (initialDate?: GameDate) => {
     return formatDate(date);
   };
 
+  // Convert GameDate to a compatible string format
+  const gameDateToCompatibleString = (gameDate: GameDate): string => {
+    return `${gameDate.year}-${gameDate.season}`;
+  };
+
   return {
     currentDate,
     setCurrentDate,
@@ -116,6 +120,8 @@ export const useGameDate = (initialDate?: GameDate) => {
     formatSeason,
     // Add the helper to convert GameDate to Date for compatibility
     gameDateToJs: gameToJsDate,
-    gameDateToString: gameToStringOrDate
+    gameDateToString: gameToStringOrDate,
+    // Add the new compatibility function
+    gameDateToCompatibleString
   };
 };

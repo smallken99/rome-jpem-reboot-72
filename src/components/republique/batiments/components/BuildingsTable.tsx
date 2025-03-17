@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
@@ -81,7 +80,7 @@ export const BuildingsTable: React.FC<BuildingsTableProps> = ({
                   </div>
                   <div className="text-xs text-muted-foreground mt-1">
                     Niveau: {building.maintenanceLevel === 'minimal' ? 'Minimal' : 
-                            building.maintenanceLevel === 'standard' ? 'Standard' : 'Excellent'}
+                            building.maintenanceLevel === 'normal' ? 'Normal' : 'Excellent'}
                   </div>
                 </TableCell>
                 <TableCell className="text-right">

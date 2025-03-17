@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { useMonetaryManagement } from './hooks/useMonetaryManagement';
 import { TransactionList } from './monetary/TransactionList';
@@ -20,6 +19,16 @@ export const MonetaryManagementTab: React.FC = () => {
     expenseStats
   } = useMonetaryManagement();
   
+  // Create a temporary adapter function to match expected signature
+  const adaptMakePayment = (originalMakePayment: (amount: number, recipient: string, category: string) => boolean) => {
+    return (recipientId: string, amount: number, description: string, category: string): boolean => {
+      return originalMakePayment(amount, recipientId, category);
+    };
+  };
+
+  // Use adaptedMakePayment instead of makePayment in the component
+  const adaptedMakePayment = adaptMakePayment(makePayment);
+
   return (
     <div className="space-y-6 animate-fade-in">
       <div className="flex flex-col md:flex-row justify-between gap-4 items-start md:items-center">
@@ -115,7 +124,7 @@ export const MonetaryManagementTab: React.FC = () => {
             </RomanCard.Header>
             <RomanCard.Content>
               <PaymentForm 
-                makePayment={makePayment}
+                makePayment={adaptedMakePayment}
                 recipients={recipients}
                 balance={balance}
               />

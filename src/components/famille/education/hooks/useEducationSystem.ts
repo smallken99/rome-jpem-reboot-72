@@ -1,7 +1,6 @@
-
 import { useState, useEffect } from 'react';
 import { Child, EducationPath, Preceptor, EducationPathType } from '../types/educationTypes';
-import { educationPathsData } from '../data/educationPaths';
+import { educationPaths as educationPathsData } from '../data/educationPaths';
 
 export const useEducationSystem = () => {
   const [educationPaths, setEducationPaths] = useState<EducationPath[]>(educationPathsData);

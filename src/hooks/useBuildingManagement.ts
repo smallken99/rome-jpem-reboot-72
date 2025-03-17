@@ -1,4 +1,3 @@
-
 import { useState, useCallback } from 'react';
 import { useMaitreJeu } from '../components/maitrejeu/context';
 import { useBatimentsPublics, PublicBuilding, ConstructionProject } from '@/components/republique/batiments/hooks/useBatimentsPublics';
@@ -98,7 +97,7 @@ export const useBuildingManagement = () => {
     });
     
     // Perform the maintenance
-    maintainBuilding(buildingId, "standard");
+    maintainBuilding(buildingId, "normal");
     return true;
   }, [publicBuildings, maintainBuilding, addEconomieRecord]);
   

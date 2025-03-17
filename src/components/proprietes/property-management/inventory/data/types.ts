@@ -1,4 +1,3 @@
-
 export interface MarketPrice {
   resourceName: string;
   basePrice: number;
@@ -40,6 +39,7 @@ export interface ResourceTransaction {
   total: number;
   date: string;
   unitPrice?: number;
+  recipient?: string;
 }
 
 export interface ResourceInventoryProps {
@@ -60,7 +60,13 @@ export interface ResourceTransactionsProps {
   transactions: ResourceTransaction[];
 }
 
-// Compatibility aliases
+export interface Recipient {
+  id: string;
+  name: string;
+  category: string;
+  type?: string;
+}
+
 export type Resource = PropertyResource;
 export type ResourceType = {
   id: string;

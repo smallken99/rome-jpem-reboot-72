@@ -1,4 +1,3 @@
-
 export interface Child {
   id: string;
   name: string;
@@ -33,6 +32,7 @@ export interface Preceptor {
   speciality?: string;
   background?: string;
   rating?: number;
+  portrait?: string;
 }
 
 export interface EducationPath {
@@ -85,7 +85,7 @@ export interface EducationRecord {
   startYear: number;
   currentYear: number;
   totalYears: number;
-  progress?: number; // Added for compatibility
+  progress?: number;
   status: 'not_started' | 'in_progress' | 'completed' | 'canceled';
   skills: Record<string, number>;
   specialties: string[];

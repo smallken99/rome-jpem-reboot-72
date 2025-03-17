@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { PageHeader } from '@/components/ui-custom/PageHeader';
 import { RomanCard } from '@/components/ui-custom/RomanCard';
@@ -57,7 +56,7 @@ export const BatimentsMilitairesPage: React.FC = () => {
   
   const handlePerformMaintenance = () => {
     if (selectedItem && 'id' in selectedItem) {
-      maintainBuilding(selectedItem.id, maintenanceLevel);
+      maintainBuilding(selectedItem.id, maintenanceLevel as 'minimal' | 'normal' | 'excellent');
       setIsMaintenanceDialogOpen(false);
     }
   };
@@ -248,8 +247,13 @@ export const BatimentsMilitairesPage: React.FC = () => {
                     </div>
                     <div className="grid grid-cols-2 items-center gap-4">
                       <Label className="text-right">Niveau d'entretien</Label>
-                      <div>{selectedItem.maintenanceLevel === 'minimal' ? 'Minimal' : 
-                           selectedItem.maintenanceLevel === 'standard' ? 'Standard' : 'Excellent'}</div>
+                      <div>
+                        <span className={selectedItem.maintenanceLevel === 'minimal' ? 'font-medium' : ''}>Minimal</span>
+                        {' • '}
+                        <span className={selectedItem.maintenanceLevel === 'normal' ? 'font-medium' : ''}>Normal</span>
+                        {' • '}
+                        <span className={selectedItem.maintenanceLevel === 'excellent' ? 'font-medium' : ''}>Excellent</span>
+                      </div>
                     </div>
                     {selectedItem.lastMaintenance && (
                       <div className="grid grid-cols-2 items-center gap-4">

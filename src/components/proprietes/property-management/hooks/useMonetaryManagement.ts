@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 
 export interface Transaction {
@@ -33,8 +32,13 @@ export interface FinancialStats {
   weeklyExpenses: number;
   monthlyIncome: number;
   monthlyExpenses: number;
-  yearlyIncome: number;
-  yearlyExpenses: number;
+  yearly: number;
+  monthly: number;
+  categories: Array<{ 
+    name: string; 
+    amount: number; 
+    percentage: number;
+  }>;
 }
 
 export const useMonetaryManagement = () => {
@@ -69,9 +73,7 @@ export const useMonetaryManagement = () => {
     'Impôts': 1200
   });
 
-  // Calculate financial statistics
   useEffect(() => {
-    // Calculate economy stats
     let income = 0;
     let expenses = 0;
     const incomeByCategory: Record<string, number> = {};
@@ -96,16 +98,13 @@ export const useMonetaryManagement = () => {
     });
   }, [transactions]);
 
-  // Check if user can afford a transaction
   const canAfford = (amount: number): boolean => {
     return balance >= amount;
   };
 
-  // Make a payment
   const makePayment = (amount: number, recipient: string, category: string): boolean => {
     if (!canAfford(amount)) return false;
     
-    // Record the transaction
     const transaction: Transaction = {
       id: `tx-${Date.now()}`,
       date: new Date().toISOString(),
@@ -123,9 +122,7 @@ export const useMonetaryManagement = () => {
     return true;
   };
 
-  // Receive a payment
   const receivePayment = (amount: number, source: string, category: string): boolean => {
-    // Record the transaction
     const transaction: Transaction = {
       id: `tx-${Date.now()}`,
       date: new Date().toISOString(),
@@ -142,7 +139,6 @@ export const useMonetaryManagement = () => {
     return true;
   };
 
-  // Record income (alias for receivePayment to match expected interface)
   const recordIncome = (income: number, source: string, category: string): void => {
     receivePayment(income, source, category);
   };

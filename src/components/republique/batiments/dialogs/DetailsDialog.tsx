@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
@@ -37,7 +36,7 @@ export const DetailsDialog: React.FC<DetailsDialogProps> = ({
               <span className="text-sm">Localisation: <span className="font-medium">{selectedItem.location}</span></span>
             </div>
             
-            {isBuilding ? (
+            {isBuilding && (
               <>
                 <div className="flex items-center gap-2">
                   <Building className="h-4 w-4 text-muted-foreground" />
@@ -54,7 +53,7 @@ export const DetailsDialog: React.FC<DetailsDialogProps> = ({
                   <span className="text-sm">Coût d'entretien: <span className="font-medium">{selectedItem.maintenanceCost.toLocaleString()} As/an</span></span>
                 </div>
                 
-                {selectedItem.population && (
+                {selectedItem.population !== undefined && (
                   <div className="flex items-center gap-2">
                     <Users className="h-4 w-4 text-muted-foreground" />
                     <span className="text-sm">Population servie: <span className="font-medium">{selectedItem.population.toLocaleString()}</span></span>
@@ -102,7 +101,7 @@ export const DetailsDialog: React.FC<DetailsDialogProps> = ({
                 <div className="text-sm">
                   <span className={selectedItem.maintenanceLevel === 'minimal' ? 'font-medium' : ''}>Minimal</span>
                   {' • '}
-                  <span className={selectedItem.maintenanceLevel === 'standard' ? 'font-medium' : ''}>Standard</span>
+                  <span className={selectedItem.maintenanceLevel === 'normal' ? 'font-medium' : ''}>Normal</span>
                   {' • '}
                   <span className={selectedItem.maintenanceLevel === 'excellent' ? 'font-medium' : ''}>Excellent</span>
                 </div>

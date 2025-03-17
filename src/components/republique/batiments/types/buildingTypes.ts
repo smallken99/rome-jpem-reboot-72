@@ -1,4 +1,3 @@
-
 export interface PublicBuilding {
   id: string;
   buildingTypeId: string;
@@ -7,18 +6,18 @@ export interface PublicBuilding {
   constructionYear: number;
   condition: number; // 0-100
   maintenanceCost: number;
-  maintenanceLevel: 'minimal' | 'standard' | 'excellent';
+  maintenanceLevel: 'minimal' | 'normal' | 'excellent';
   lastMaintenance?: number; // année de dernière maintenance
-  benefits: string[];
+  benefits: string[]; // Added this property
   capacity?: number;
   investmentAmount: number;
   constructionStatus: 'planned' | 'in_progress' | 'completed' | 'damaged' | 'abandoned';
   constructionProgress?: number; // 0-100
   image?: string;
-  population?: number; // Population qui utilise le bâtiment
-  revenueGeneration?: number; // Revenus générés par le bâtiment
-  employmentCapacity?: number; // Nombre d'emplois créés
-  publicApproval?: number; // Approbation publique (0-100)
+  population?: number; // Added this property
+  revenueGeneration?: number;
+  employmentCapacity?: number;
+  publicApproval?: number;
 }
 
 export interface ConstructionProject {
