@@ -1,159 +1,151 @@
-import { useState, useCallback } from 'react';
-import { toast } from 'sonner';
 
-export type TransactionType = 'income' | 'expense';
+import { useState, useEffect } from 'react';
 
 export interface Transaction {
   id: string;
+  date: string;
   amount: number;
   description: string;
   category: string;
-  type: TransactionType;
-  date: string;
-  source?: string;
-  recipient?: string;
+  source: string;
+  target?: string;
+  type: 'income' | 'expense';
 }
 
 export interface EconomyStats {
   totalIncome: number;
   totalExpenses: number;
-  netProfit: number;
+  netBalance: number;
   incomeByCategory: Record<string, number>;
   expensesByCategory: Record<string, number>;
 }
 
-export const useMonetaryManagement = (initialBalance: number = 0) => {
-  const [balance, setBalance] = useState<number>(initialBalance);
+export interface Recipient {
+  id: string;
+  name: string;
+  relationship: string;
+  lastTransaction?: string;
+}
+
+export interface FinancialStats {
+  balance: number;
+  weeklyIncome: number;
+  weeklyExpenses: number;
+  monthlyIncome: number;
+  monthlyExpenses: number;
+  yearlyIncome: number;
+  yearlyExpenses: number;
+}
+
+export const useMonetaryManagement = () => {
+  const [balance, setBalance] = useState(10000);
   const [transactions, setTransactions] = useState<Transaction[]>([]);
+  const [recipients, setRecipients] = useState<Recipient[]>([
+    { id: 'r1', name: 'Temple de Jupiter', relationship: 'Religieux' },
+    { id: 'r2', name: 'Marchand Tiberius', relationship: 'Commerce' },
+    { id: 'r3', name: 'Sénat', relationship: 'Politique' }
+  ]);
+  
+  const [economyStats, setEconomyStats] = useState<EconomyStats>({
+    totalIncome: 0,
+    totalExpenses: 0,
+    netBalance: 0,
+    incomeByCategory: {},
+    expensesByCategory: {}
+  });
+  
+  const [incomeStats, setIncomeStats] = useState<Record<string, number>>({
+    'Propriétés': 5000,
+    'Investissements': 2000,
+    'Cadeaux': 1000,
+    'Autre': 500
+  });
+  
+  const [expenseStats, setExpenseStats] = useState<Record<string, number>>({
+    'Entretien': 1500,
+    'Personnel': 2000,
+    'Nourriture': 1000,
+    'Cadeaux': 800,
+    'Impôts': 1200
+  });
 
-  // Check if user can afford a payment
-  const canAfford = useCallback((amount: number): boolean => {
-    return balance >= amount;
-  }, [balance]);
-
-  // Make a payment (expense)
-  const makePayment = useCallback((amount: number, recipient: string, category: string): boolean => {
-    if (!canAfford(amount)) {
-      toast.error(`Fonds insuffisants pour effectuer ce paiement de ${amount} as.`);
-      return false;
-    }
-
-    const newTransaction: Transaction = {
-      id: `trans-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
-      amount: -Math.abs(amount), // Ensure negative
-      description: `Paiement à ${recipient}`,
-      category,
-      type: 'expense',
-      date: new Date().toISOString(),
-      recipient
-    };
-
-    setTransactions(prev => [newTransaction, ...prev]);
-    setBalance(prev => prev - Math.abs(amount));
+  // Calculate financial statistics
+  useEffect(() => {
+    // Calculate economy stats
+    let income = 0;
+    let expenses = 0;
+    const incomeByCategory: Record<string, number> = {};
+    const expensesByCategory: Record<string, number> = {};
     
-    toast.success(`Paiement de ${amount} as effectué à ${recipient}.`);
-    return true;
-  }, [canAfford]);
-
-  // Receive a payment (income)
-  const receivePayment = useCallback((amount: number, source: string, category: string): boolean => {
-    if (amount <= 0) {
-      toast.error(`Le montant reçu doit être positif.`);
-      return false;
-    }
-
-    const newTransaction: Transaction = {
-      id: `trans-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
-      amount: Math.abs(amount), // Ensure positive
-      description: `Paiement reçu de ${source}`,
-      category,
-      type: 'income',
-      date: new Date().toISOString(),
-      source
-    };
-
-    setTransactions(prev => [newTransaction, ...prev]);
-    setBalance(prev => prev + Math.abs(amount));
-    
-    toast.success(`Paiement de ${amount} as reçu de ${source}.`);
-    return true;
-  }, []);
-
-  // Calculate economy statistics
-  const calculateEconomyStats = useCallback((): EconomyStats => {
-    const stats: EconomyStats = {
-      totalIncome: 0,
-      totalExpenses: 0,
-      netProfit: 0,
-      incomeByCategory: {},
-      expensesByCategory: {}
-    };
-
     transactions.forEach(transaction => {
       if (transaction.type === 'income') {
-        stats.totalIncome += transaction.amount;
-        
-        // Add to category
-        const category = transaction.category || 'Autre';
-        stats.incomeByCategory[category] = (stats.incomeByCategory[category] || 0) + transaction.amount;
+        income += transaction.amount;
+        incomeByCategory[transaction.category] = (incomeByCategory[transaction.category] || 0) + transaction.amount;
       } else {
-        stats.totalExpenses += Math.abs(transaction.amount);
-        
-        // Add to category
-        const category = transaction.category || 'Autre';
-        stats.expensesByCategory[category] = (stats.expensesByCategory[category] || 0) + Math.abs(transaction.amount);
+        expenses += transaction.amount;
+        expensesByCategory[transaction.category] = (expensesByCategory[transaction.category] || 0) + transaction.amount;
       }
     });
-
-    stats.netProfit = stats.totalIncome - stats.totalExpenses;
-    return stats;
-  }, [transactions]);
-
-  // Get transactions for a specific period
-  const getTransactionsForPeriod = useCallback((startDate: Date, endDate: Date): Transaction[] => {
-    return transactions.filter(transaction => {
-      const transactionDate = new Date(transaction.date);
-      return transactionDate >= startDate && transactionDate <= endDate;
+    
+    setEconomyStats({
+      totalIncome: income,
+      totalExpenses: expenses,
+      netBalance: income - expenses,
+      incomeByCategory,
+      expensesByCategory
     });
   }, [transactions]);
 
-  // Get transactions by category
-  const getTransactionsByCategory = useCallback((category: string): Transaction[] => {
-    return transactions.filter(transaction => transaction.category === category);
-  }, [transactions]);
+  // Check if user can afford a transaction
+  const canAfford = (amount: number): boolean => {
+    return balance >= amount;
+  };
 
-  // Add a transaction directly
-  const addTransaction = useCallback((transactionData: Omit<Transaction, 'id' | 'date'>): string => {
-    const newTransaction: Transaction = {
-      ...transactionData,
-      id: `trans-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
-      date: new Date().toISOString()
+  // Make a payment
+  const makePayment = (amount: number, recipient: string, category: string): boolean => {
+    if (!canAfford(amount)) return false;
+    
+    // Record the transaction
+    const transaction: Transaction = {
+      id: `tx-${Date.now()}`,
+      date: new Date().toISOString(),
+      amount,
+      description: `Paiement à ${recipient}`,
+      category,
+      source: 'Compte personnel',
+      target: recipient,
+      type: 'expense'
     };
-
-    setTransactions(prev => [newTransaction, ...prev]);
     
-    // Update balance
-    if (transactionData.type === 'income') {
-      setBalance(prev => prev + transactionData.amount);
-    } else {
-      setBalance(prev => prev - Math.abs(transactionData.amount));
-    }
+    setTransactions(prev => [...prev, transaction]);
+    setBalance(prev => prev - amount);
     
-    return newTransaction.id;
-  }, []);
+    return true;
+  };
 
-  // Record income (for compatibility with existing code)
-  const recordIncome = useCallback((income: number, source: string, category: string) => {
-    addTransaction({
-      amount: income,
-      description: `Revenu: ${source}`,
-      category: category,
+  // Receive a payment
+  const receivePayment = (amount: number, source: string, category: string): boolean => {
+    // Record the transaction
+    const transaction: Transaction = {
+      id: `tx-${Date.now()}`,
+      date: new Date().toISOString(),
+      amount,
+      description: `Paiement reçu de ${source}`,
+      category,
+      source,
       type: 'income'
-    });
-  }, [addTransaction]);
+    };
+    
+    setTransactions(prev => [...prev, transaction]);
+    setBalance(prev => prev + amount);
+    
+    return true;
+  };
 
-  // Calculate economy stats once
-  const economyStats = calculateEconomyStats();
+  // Record income (alias for receivePayment to match expected interface)
+  const recordIncome = (income: number, source: string, category: string): void => {
+    receivePayment(income, source, category);
+  };
 
   return {
     balance,
@@ -162,9 +154,9 @@ export const useMonetaryManagement = (initialBalance: number = 0) => {
     canAfford,
     makePayment,
     receivePayment,
-    getTransactionsForPeriod,
-    getTransactionsByCategory,
-    addTransaction,
+    recipients,
+    incomeStats,
+    expenseStats,
     recordIncome
   };
 };

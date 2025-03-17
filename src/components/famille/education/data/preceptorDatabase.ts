@@ -13,7 +13,7 @@ const militaryPreceptors: Preceptor[] = [
     portrait: '/assets/preceptors/military-1.jpg',
     background: 'Vétéran des guerres puniques et ancien tribun militaire',
     quality: 80,
-    reputation: 'excellent',
+    reputation: 80, // Changed from string to number
     cost: 4500,
     available: true,
     speciality: 'military',
@@ -29,7 +29,7 @@ const militaryPreceptors: Preceptor[] = [
     portrait: '/assets/preceptors/military-2.jpg',
     background: 'Ancien centurion des légions de César',
     quality: 70,
-    reputation: 'bon',
+    reputation: 70, // Changed from string to number
     cost: 3500,
     available: true,
     speciality: 'military',
@@ -45,7 +45,7 @@ const militaryPreceptors: Preceptor[] = [
     portrait: '/assets/preceptors/military-3.jpg',
     background: 'Jeune instructeur militaire issu d\'une famille équestre',
     quality: 60,
-    reputation: 'moyen',
+    reputation: 60, // Changed from string to number
     cost: 2500,
     available: true,
     speciality: 'military',
@@ -64,7 +64,7 @@ const religiousPreceptors: Preceptor[] = [
     portrait: '/assets/preceptors/religious-1.jpg',
     background: 'Ancien Grand Pontife et gardien des traditions religieuses',
     quality: 85,
-    reputation: 'excellent',
+    reputation: 85, // Changed from string to number
     cost: 5000,
     available: true,
     speciality: 'religious',
@@ -80,7 +80,7 @@ const religiousPreceptors: Preceptor[] = [
     portrait: '/assets/preceptors/religious-2.jpg',
     background: 'Augure respecté connaissant les présages et les rituels',
     quality: 75,
-    reputation: 'bon',
+    reputation: 75, // Changed from string to number
     cost: 3800,
     available: true,
     speciality: 'religious',
@@ -96,7 +96,7 @@ const religiousPreceptors: Preceptor[] = [
     portrait: '/assets/preceptors/religious-3.jpg',
     background: 'Prêtre des cultes étrusques et expert en purifications',
     quality: 60,
-    reputation: 'moyen',
+    reputation: 60, // Changed from string to number
     cost: 2700,
     available: true,
     speciality: 'religious',
@@ -115,7 +115,7 @@ const rhetoricPreceptors: Preceptor[] = [
     portrait: '/assets/preceptors/rhetoric-1.jpg',
     background: 'Ancien consul et orateur de renom, maître en éloquence',
     quality: 90,
-    reputation: 'excellent',
+    reputation: 90, // Changed from string to number
     cost: 6000,
     available: true,
     speciality: 'rhetoric',
@@ -131,7 +131,7 @@ const rhetoricPreceptors: Preceptor[] = [
     portrait: '/assets/preceptors/rhetoric-2.jpg',
     background: 'Philosophe grec ayant enseigné l\'art oratoire à Athènes',
     quality: 80,
-    reputation: 'bon',
+    reputation: 80, // Changed from string to number
     cost: 4200,
     available: true,
     speciality: 'rhetoric',
@@ -147,7 +147,7 @@ const rhetoricPreceptors: Preceptor[] = [
     portrait: '/assets/preceptors/rhetoric-3.jpg',
     background: 'Juriste et tuteur spécialisé dans la plaidoirie',
     quality: 65,
-    reputation: 'moyen',
+    reputation: 65, // Changed from string to number
     cost: 3000,
     available: true,
     speciality: 'rhetoric',

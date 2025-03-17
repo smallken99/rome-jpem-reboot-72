@@ -38,14 +38,29 @@ export const ProcessusLegislatif: React.FC<ProcessusLegislatifProps> = ({
   });
   
   const [historique, setHistorique] = useState<HistoriqueLoi[]>(() => {
-    return historiqueData.map(histoire => ({
-      ...histoire,
-      dateProposition: histoire.date || '',
-      dateAdoption: histoire.date || '',
-      contenu: [],
-      statut: histoire.resultat === 'Adoptée' ? 'adopté' : 'rejeté',
-      description: histoire.description || 'Aucune description'
-    }));
+    return historiqueData.map(histoire => {
+      let votesObj;
+      if (typeof histoire.votes === 'string') {
+        const parts = histoire.votes.split('-');
+        votesObj = {
+          pour: parseInt(parts[0]) || 0,
+          contre: parseInt(parts[1]) || 0,
+          abstention: parseInt(parts[2]) || 0
+        };
+      } else {
+        votesObj = histoire.votes || { pour: 0, contre: 0, abstention: 0 };
+      }
+      
+      return {
+        ...histoire,
+        dateProposition: histoire.date || '',
+        dateAdoption: histoire.date || '',
+        contenu: Array.isArray(histoire.contenu) ? histoire.contenu : [],
+        statut: histoire.resultat === 'Adoptée' ? 'adopté' : 'rejeté',
+        description: histoire.description || 'Aucune description',
+        votes: votesObj
+      };
+    });
   });
   
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -159,7 +174,9 @@ export const ProcessusLegislatif: React.FC<ProcessusLegislatifProps> = ({
         contre: vote.contre,
         abstention: vote.abstention
       },
-      statut: isAdopted ? 'adopté' : 'rejeté'
+      statut: isAdopted ? 'adopté' : 'rejeté',
+      resultat: isAdopted ? 'Adoptée' : 'Rejetée',
+      date: vote.dateDebut
     };
     
     setHistorique([historyEntry, ...historique]);

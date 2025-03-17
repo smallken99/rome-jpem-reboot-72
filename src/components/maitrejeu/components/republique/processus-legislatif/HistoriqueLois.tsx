@@ -31,7 +31,13 @@ export const HistoriqueLois: React.FC<HistoriqueLoiProps> = ({ searchTerm }) => 
             dateAdoption: loi.date || "Date inconnue",
             contenu: [],
             statut: loi.resultat === 'Adoptée' ? 'adopté' : 'rejeté',
-            description: loi.description || "Aucune description disponible"
+            description: loi.description || "Aucune description disponible",
+            // Convert votes from string to object
+            votes: typeof loi.votes === 'string' ? {
+              pour: parseInt(loi.votes.split('-')[0]) || 0,
+              contre: parseInt(loi.votes.split('-')[1]) || 0,
+              abstention: parseInt(loi.votes.split('-')[2]) || 0
+            } : { pour: 0, contre: 0, abstention: 0 }
           }} />
         ))
       )}

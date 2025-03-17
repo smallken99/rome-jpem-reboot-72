@@ -1,105 +1,105 @@
 
 import { useState, useEffect } from 'react';
-import { Child, EducationPath, Preceptor } from '../types/educationTypes';
-import { educationPaths } from '../data';
-import { 
-  generateRomanName, 
-  generateSpeciality, 
-  generateReputation, 
-  generateFee,
-  generateTitle,
-  generateStatBonus,
-  generateGender
-} from '../preceptorUtils';
+import { Child, EducationPath, Preceptor, EducationPathType } from '../types/educationTypes';
+import { educationPathsData } from '../data/educationPaths';
 
 export const useEducationSystem = () => {
-  const [availablePaths, setAvailablePaths] = useState<EducationPath[]>([]);
+  const [educationPaths, setEducationPaths] = useState<EducationPath[]>(educationPathsData);
   const [availablePreceptors, setAvailablePreceptors] = useState<Preceptor[]>([]);
-  const [loading, setLoading] = useState(true);
-  
-  useEffect(() => {
-    // Set available paths
-    setAvailablePaths(educationPaths);
-    
-    // Generate preceptors (simplified)
-    const preceptors: Preceptor[] = [];
-    for (let i = 0; i < 10; i++) {
-      const reputation = generateReputation();
-      const educationType = educationPaths[Math.floor(Math.random() * educationPaths.length)].id || '';
-      
-      preceptors.push({
-        id: `preceptor-${i}`,
-        name: generateRomanName(),
-        specialty: generateSpeciality(),
-        skill: reputation === "Excellent" ? 5 : reputation === "Bon" ? 4 : 3,
-        price: 1000 + Math.floor(Math.random() * 5000), 
-        status: 'available',
-        background: `Un éducateur expérimenté, spécialisé en ${generateSpeciality()}.`,
-        childId: null,
-        // For backward compatibility
-        reputation,
-        quality: reputation === "Excellent" ? 5 : reputation === "Bon" ? 4 : 3,
-        cost: 1000 + Math.floor(Math.random() * 5000),
+
+  // Fonction de recherche de précepteurs
+  const searchPreceptors = (type: string, minQuality?: number): Preceptor[] => {
+    // Simulation de la recherche de précepteurs
+    return [
+      {
+        id: `preceptor-${Date.now()}`,
+        name: `Précepteur de ${type}`,
+        specialties: [type],
+        expertise: minQuality ? minQuality + 10 : 60,
+        cost: 2000 + (minQuality || 0) * 50,
+        reputation: 75, // Changed from string to number
         available: true,
-        speciality: generateSpeciality(),
-        specialties: [generateSpeciality(), generateSpeciality()],
-      });
+        speciality: type
+      }
+    ];
+  };
+
+  // Fonction qui vérifie si un enfant peut suivre un certain chemin d'éducation
+  const canFollowPath = (child: Child, pathId: string): { eligible: boolean; reason?: string } => {
+    const path = educationPaths.find(p => p.id === pathId);
+    if (!path) return { eligible: false, reason: 'Chemin d\'éducation non trouvé' };
+
+    // Vérifier l'âge
+    if (child.age < path.minAge) {
+      return { eligible: false, reason: `L'enfant est trop jeune. Âge minimum: ${path.minAge}` };
+    }
+    if (child.age > path.maxAge) {
+      return { eligible: false, reason: `L'enfant est trop âgé. Âge maximum: ${path.maxAge}` };
+    }
+
+    // Vérifier les prérequis spécifiques si nécessaire
+    if (path.requirements) {
+      if (Array.isArray(path.requirements)) {
+        // Pour les prérequis sous forme de liste (à implémenter au besoin)
+      } else {
+        // Vérifier l'âge minimum spécifique si défini
+        if (path.requirements.age && child.age < path.requirements.age) {
+          return { eligible: false, reason: `L'enfant doit avoir au moins ${path.requirements.age} ans` };
+        }
+        
+        // Vérifier le genre si défini
+        if (path.requirements.gender && path.requirements.gender !== 'both') {
+          if (path.requirements.gender !== child.gender) {
+            return { eligible: false, reason: `Cette éducation est réservée aux ${path.requirements.gender === 'male' ? 'garçons' : 'filles'}` };
+          }
+        }
+      }
+    }
+
+    return { eligible: true };
+  };
+
+  // Fonction pour calculer le coût d'éducation
+  const calculateEducationCost = (pathId: string, preceptorId?: string): number => {
+    const path = educationPaths.find(p => p.id === pathId);
+    const baseCost = path ? path.cost : 0;
+    
+    // Ajouter le coût du précepteur si applicable
+    let preceptorCost = 0;
+    if (preceptorId) {
+      const preceptor = availablePreceptors.find(p => p.id === preceptorId);
+      preceptorCost = preceptor ? preceptor.cost : 0;
     }
     
-    setAvailablePreceptors(preceptors);
-    setLoading(false);
+    return baseCost + preceptorCost;
+  };
+
+  // Fonction pour trouver un chemin d'éducation par type
+  const findPathByType = (type: EducationPathType): EducationPath | undefined => {
+    return educationPaths.find(path => path.type === type);
+  };
+
+  // Fonctions pour l'initialisation et la mise à jour des données
+  const refreshPreceptors = () => {
+    setAvailablePreceptors(prev => [
+      ...prev,
+      ...searchPreceptors('military'),
+      ...searchPreceptors('religious'),
+      ...searchPreceptors('rhetoric')
+    ]);
+  };
+
+  useEffect(() => {
+    refreshPreceptors();
   }, []);
-  
-  // Function to filter education paths based on child's age and gender
-  const getPathsForChild = (child: Child): EducationPath[] => {
-    return availablePaths.filter(path => {
-      if (!path.requirements) return true;
-      
-      if (Array.isArray(path.requirements)) {
-        return true; // No specific requirements in array format
-      }
-      
-      // Check if requirements is an object with age and gender properties
-      if (typeof path.requirements === 'object') {
-        const meetsAgeRequirement = child.age >= (path.requirements.age || 0);
-        const meetsGenderRequirement = 
-          path.requirements.gender === 'both' || 
-          path.requirements.gender === child.gender;
-        
-        return meetsAgeRequirement && meetsGenderRequirement;
-      }
-      
-      return true;
-    });
-  };
-  
-  // Function to generate a random preceptor for a specific education type
-  const generatePreceptorForType = (educationType: string): Preceptor => {
-    const reputation = generateReputation();
-    return {
-      id: `preceptor-${Date.now()}`,
-      name: generateRomanName(),
-      specialty: generateSpeciality(),
-      skill: reputation === "Excellent" ? 5 : reputation === "Bon" ? 4 : 3,
-      price: 1000 + Math.floor(Math.random() * 5000),
-      status: 'available',
-      background: `Un éducateur expérimenté, spécialisé en ${generateSpeciality()}.`,
-      childId: null,
-      // For backward compatibility
-      reputation,
-      quality: reputation === "Excellent" ? 5 : reputation === "Bon" ? 4 : 3,
-      cost: 1000 + Math.floor(Math.random() * 5000),
-      available: true,
-      speciality: generateSpeciality(),
-      specialties: [educationType, generateSpeciality()],
-    };
-  };
-  
+
   return {
-    availablePaths,
+    educationPaths,
     availablePreceptors,
-    loading,
-    getPathsForChild,
-    generatePreceptorForType
+    canFollowPath,
+    calculateEducationCost,
+    findPathByType,
+    refreshPreceptors,
+    searchPreceptors
   };
 };

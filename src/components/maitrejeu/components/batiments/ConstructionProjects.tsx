@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -21,7 +22,7 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { cn } from '@/lib/utils';
 import { format } from 'date-fns';
 import { DateRange } from 'react-day-picker';
-import { gameToStringOrDate } from '@/utils/gameDate-helpers';
+import { gameToCompatibleDate } from '@/utils/gameDate-helpers';
 
 interface ConstructionProject {
   id: string;
@@ -34,7 +35,15 @@ interface ConstructionProject {
   status: 'planned' | 'inProgress' | 'completed' | 'delayed';
 }
 
-export const ConstructionProjects: React.FC = () => {
+interface ConstructionProjectsProps {
+  currentYear: number;
+  currentSeason: string;
+}
+
+export const ConstructionProjects: React.FC<ConstructionProjectsProps> = ({
+  currentYear,
+  currentSeason
+}) => {
   const [projects, setProjects] = useState<ConstructionProject[]>([
     {
       id: "cp-1",
@@ -100,7 +109,7 @@ export const ConstructionProjects: React.FC = () => {
     addEconomieRecord({
       amount: -newProject.cost,
       description: `Construction: ${newProject.name}`,
-      category: "Travaux Publics",
+      category: "Construction", // Changed to match expected enum values
       type: 'expense',
       date: new Date().toISOString(),
       source: 'Gouvernement',
@@ -137,15 +146,15 @@ export const ConstructionProjects: React.FC = () => {
           
           <TableBody>
             {projects.map(project => {
-              const startDate = gameToStringOrDate(project.startDate);
-              const endDate = gameToStringOrDate(project.endDate);
+              const startDate = gameToCompatibleDate(project.startDate);
+              const endDate = gameToCompatibleDate(project.endDate);
               
               return (
                 <TableRow key={project.id}>
                   <TableCell className="font-medium">{project.name}</TableCell>
                   <TableCell>{project.type}</TableCell>
-                  <TableCell>{startDate.toLocaleString()}</TableCell>
-                  <TableCell>{endDate.toLocaleString()}</TableCell>
+                  <TableCell>{new Date(startDate).toLocaleDateString()}</TableCell>
+                  <TableCell>{new Date(endDate).toLocaleDateString()}</TableCell>
                   <TableCell>{project.cost}</TableCell>
                   <TableCell>{project.status}</TableCell>
                 </TableRow>
@@ -201,6 +210,46 @@ export const ConstructionProjects: React.FC = () => {
             </div>
             
             <div className="grid grid-cols-4 items-center gap-4">
+              <Label className="text-right">
+                Dates
+              </Label>
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button
+                    id="date"
+                    variant={"outline"}
+                    className="col-span-3 justify-start text-left font-normal"
+                  >
+                    <span>
+                      {date?.from ? (
+                        date.to ? (
+                          <>
+                            {format(date.from, "LLL dd, y")} -{" "}
+                            {format(date.to, "LLL dd, y")}
+                          </>
+                        ) : (
+                          format(date.from, "LLL dd, y")
+                        )
+                      ) : (
+                        <span>Pick a date</span>
+                      )}
+                    </span>
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent align="start" className="w-auto p-0">
+                  <Calendar
+                    initialFocus
+                    mode="range"
+                    defaultMonth={date?.from}
+                    selected={date}
+                    onSelect={setDate}
+                    numberOfMonths={2}
+                  />
+                </PopoverContent>
+              </Popover>
+            </div>
+            
+            <div className="grid grid-cols-4 items-center gap-4">
               <Label htmlFor="cost" className="text-right">
                 Coût
               </Label>
@@ -209,17 +258,13 @@ export const ConstructionProjects: React.FC = () => {
                 id="cost" 
                 name="cost"
                 value={newProject.cost}
-                onChange={(e) => {
-                  if (!isNaN(Number(e.target.value))) {
-                    handleInputChange(e);
-                  }
-                }}
+                onChange={handleInputChange}
                 className="col-span-3" 
               />
             </div>
             
-            <div className="grid grid-cols-4 items-start gap-4">
-              <Label htmlFor="description" className="text-right mt-2">
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="description" className="text-right">
                 Description
               </Label>
               <Textarea 
@@ -230,66 +275,10 @@ export const ConstructionProjects: React.FC = () => {
                 className="col-span-3" 
               />
             </div>
-
-            <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="dates" className="text-right">
-                Dates
-              </Label>
-              <Popover className="col-span-3">
-                <PopoverTrigger asChild>
-                  <Button
-                    variant={"outline"}
-                    className={cn(
-                      "w-[300px] justify-start text-left font-normal",
-                      !date && "text-muted-foreground"
-                    )}
-                  >
-                    {date?.from ? (
-                      date.to ? (
-                        `${format(date.from, "LLL dd, y")} - ${format(
-                          date.to,
-                          "LLL dd, y"
-                        )}`
-                      ) : (
-                        format(date.from, "LLL dd, y")
-                      )
-                    ) : (
-                      <span>Choisir une date</span>
-                    )}
-                  </Button>
-                </PopoverTrigger>
-                <PopoverContent className="w-auto p-0" align="center">
-                  <Calendar
-                    mode="range"
-                    defaultMonth={date?.from}
-                    selected={date}
-                    onSelect={(dateRange) => {
-                      setDate(dateRange)
-                      if (dateRange?.from) {
-                        handleDateChange('startDate', {
-                          year: dateRange.from.getFullYear(),
-                          season: 'Ver'
-                        })
-                      }
-                      if (dateRange?.to) {
-                        handleDateChange('endDate', {
-                          year: dateRange.to.getFullYear(),
-                          season: 'Ver'
-                        })
-                      }
-                    }}
-                    numberOfMonths={2}
-                    pagedNavigation
-                  />
-                </PopoverContent>
-              </Popover>
-            </div>
           </div>
           
           <DialogFooter>
-            <Button type="button" onClick={addProject}>
-              Ajouter
-            </Button>
+            <Button type="submit" onClick={addProject}>Ajouter</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>

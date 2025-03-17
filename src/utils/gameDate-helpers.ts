@@ -52,3 +52,13 @@ export const gameToStringOrDate = (gameDate: GameDate): string | Date => {
   // Default to using the Date representation for compatibility
   return gameToJsDate(gameDate);
 };
+
+/**
+ * Convert GameDate to a format usable by date-related functions
+ * This is a special adapter function that helps pass GameDate to functions
+ * that expect Date or string
+ */
+export const gameToCompatibleDate = (gameDate: GameDate): string | Date => {
+  // Convert to ISO string which is broadly compatible
+  return gameToJsDate(gameDate).toISOString();
+};
