@@ -35,7 +35,7 @@ export interface HistoriqueLoi {
   dateProposition: string;
   dateAdoption: string;
   description: string;
-  contenu: string[];  // This property is required in ProcessusLegislatif.tsx
+  contenu: string[];  // Added the missing property
   votes: {
     pour: number;
     contre: number;
