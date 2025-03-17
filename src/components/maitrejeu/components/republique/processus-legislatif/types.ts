@@ -8,6 +8,11 @@ export interface ProjetLoi {
   description: string;
   contenu: string[];
   tags?: string[];
+  votes?: {
+    pour: number;
+    contre: number;
+    abstention: number;
+  };
 }
 
 export interface VoteLoi {
@@ -37,4 +42,6 @@ export interface HistoriqueLoi {
     abstention: number;
   };
   statut: 'adopté' | 'rejeté' | string;
+  date?: string;
+  resultat?: 'Adoptée' | 'Rejetée';
 }

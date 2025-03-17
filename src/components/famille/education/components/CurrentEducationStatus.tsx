@@ -7,16 +7,28 @@ import { CurrentEducationStatusProps } from '../types/educationTypes';
 
 export const CurrentEducationStatus: React.FC<CurrentEducationStatusProps> = ({ 
   education,
-  currentEducation
+  currentEducation,
+  mentor
 }) => {
   // Use either education or currentEducation depending on which is provided
-  const educationType = education?.pathType || currentEducation?.type || 'none';
-  const progress = education?.currentYear 
-    ? (education.currentYear / education.totalYears) * 100
-    : currentEducation?.progress || 0;
-  const years = education?.currentYear || currentEducation?.yearsCompleted || 0;
-  const totalYears = education?.totalYears || currentEducation?.totalYears || 3;
-  const status = education?.status || (currentEducation?.type && currentEducation.type !== 'none' ? 'in_progress' : 'not_started');
+  const edu = education || currentEducation;
+  
+  if (!edu) {
+    return (
+      <div className="text-center py-6 border rounded-md bg-gray-50">
+        <BookOpen className="h-8 w-8 mx-auto text-gray-400 mb-2" />
+        <p className="text-muted-foreground">Aucune éducation en cours</p>
+      </div>
+    );
+  }
+  
+  const educationType = 'pathType' in edu ? edu.pathType : edu.type;
+  const progress = 'currentYear' in edu && edu.totalYears
+    ? (edu.currentYear / edu.totalYears) * 100
+    : edu.progress || 0;
+  const years = 'currentYear' in edu ? edu.currentYear : edu.yearsCompleted || 0;
+  const totalYears = edu.totalYears || 3;
+  const status = 'status' in edu ? edu.status : (edu.type && edu.type !== 'none' ? 'in_progress' : 'not_started');
   
   // Helper to get education type display name
   const getEducationTypeName = (type: string) => {
@@ -42,9 +54,9 @@ export const CurrentEducationStatus: React.FC<CurrentEducationStatusProps> = ({
     }
   };
   
-  const statusStyle = getStatusStyle(status);
+  const statusStyle = getStatusStyle(status as string);
   
-  if (educationType === 'none' || (!education && !currentEducation)) {
+  if (educationType === 'none') {
     return (
       <div className="text-center py-6 border rounded-md bg-gray-50">
         <BookOpen className="h-8 w-8 mx-auto text-gray-400 mb-2" />
@@ -58,7 +70,7 @@ export const CurrentEducationStatus: React.FC<CurrentEducationStatusProps> = ({
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
         <div>
           <h3 className="text-lg font-medium">
-            Éducation {getEducationTypeName(educationType)}
+            Éducation {getEducationTypeName(educationType as string)}
           </h3>
           <p className="text-sm text-muted-foreground flex items-center gap-1">
             <Clock className="h-3.5 w-3.5" />
@@ -79,10 +91,10 @@ export const CurrentEducationStatus: React.FC<CurrentEducationStatusProps> = ({
         <Progress value={progress} className="h-2" />
       </div>
       
-      {currentEducation?.statBonus && (
+      {'statBonus' in edu && edu.statBonus && (
         <div className="flex items-center gap-2 text-sm border-t pt-2 mt-2">
           <Award className="h-4 w-4 text-amber-500" />
-          <span>Bonus d'attribut: +{currentEducation.statBonus}</span>
+          <span>Bonus d'attribut: +{edu.statBonus}</span>
         </div>
       )}
     </div>

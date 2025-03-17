@@ -4,28 +4,34 @@ export interface Child {
   name: string;
   age: number;
   gender: 'male' | 'female';
-  educationType: string;
-  progress: number;
-  mentor: string | null;
+  educationType?: string;
+  progress?: number;
+  mentor?: string | null;
   specialties?: string[];
   currentEducation?: ChildEducation;
+  skills?: Record<string, number>;
+  traits?: string[];
+  status?: string;
 }
 
 export interface Preceptor {
   id: string;
   name: string;
   specialties: string[];
-  expertise: number;
+  expertise?: number;
   cost: number;
-  reputation: number;
+  reputation?: number;
   available: boolean;
-  description: string;
-  skill?: number; // For compatibility
-  specialty?: string; // For compatibility
-  price?: number; // For compatibility
-  quality?: number; // For compatibility
+  description?: string;
+  skill?: number;
+  specialty?: string;
+  price?: number;
+  quality?: number;
   status?: 'available' | 'hired' | 'assigned';
   childId?: string | null;
+  years?: number;
+  speciality?: string;
+  background?: string;
 }
 
 export interface EducationPath {
@@ -36,14 +42,20 @@ export interface EducationPath {
   maxAge: number;
   duration: number;
   cost: number;
-  requirements?: string[];
+  requirements?: {
+    age?: number;
+    gender?: 'male' | 'female' | 'both';
+  } | string[];
   outcomes: string[] | {
     skills: string[];
     bonuses: Record<string, number>;
   };
   relatedStat?: string;
-  icon: string;
-  color: string;
+  icon?: string;
+  color?: string;
+  type?: string;
+  benefits?: string[];
+  specialties?: string[];
 }
 
 export interface ChildEducation {
@@ -55,6 +67,11 @@ export interface ChildEducation {
   totalYears: number;
   statBonus: number;
   mentorId?: string | null;
+  pathType?: string;
+  currentYear?: number;
+  status?: 'not_started' | 'in_progress' | 'completed' | 'canceled';
+  speciality?: string;
+  specialties?: string[];
 }
 
 export interface EducationRecord {
@@ -75,11 +92,18 @@ export interface EducationFormData {
   specialties: string[];
   mentor: string;
   childId?: string;
+  pathType?: string;
+  preceptorId?: string;
+  startYear?: number;
+  currentYear?: number;
+  totalYears?: number;
+  status?: string;
+  skills?: Record<string, number>;
 }
 
 export interface EducationProgressButtonsProps {
   isEducating: boolean;
-  hasEducation: boolean;
+  hasEducation?: boolean;
   educationProgress?: number;
   onAdvanceYear?: () => void;
   onCompleteEducation?: () => void;
@@ -89,17 +113,24 @@ export interface EducationProgressButtonsProps {
   canComplete?: boolean;
 }
 
-export type EducationType = 'militaire' | 'politique' | 'rhétorique' | 'arts' | 'philosophie' | 'religieuse' | 'none';
+export type EducationType = 'militaire' | 'politique' | 'rhétorique' | 'arts' | 'philosophie' | 'religieuse' | 'military' | 'political' | 'rhetoric' | 'religious' | 'none';
 export type EducationPathType = EducationType;
 
 export interface EducationHistory {
-  pathId: string;
-  startDate: string;
+  pathId?: string;
+  startDate?: string;
   endDate?: string;
-  completed: boolean;
+  completed?: boolean;
   mentorId?: string;
-  skills: string[];
-  specialties: string[];
+  skills?: string[];
+  specialties?: string[];
+  type?: string;
+  mentor?: string;
+  speciality?: string;
+  completedAt?: number;
+  statBonus?: number;
+  startYear?: number;
+  endYear?: number;
 }
 
 export type PreceptorsByType = Record<string, Preceptor[]>;
@@ -111,18 +142,20 @@ export interface ChildHeaderProps {
 }
 
 export interface ChildNotFoundProps {
-  childId: string;
+  childId?: string;
   onBack: () => void;
 }
 
 export interface CurrentEducationStatusProps {
-  education: ChildEducation;
+  education?: ChildEducation | EducationRecord;
   mentor?: Preceptor | null;
+  currentEducation?: ChildEducation;
 }
 
 export interface EducationObjectivesProps {
-  educationType: string;
-  specialties: string[];
+  educationType?: string;
+  specialties?: string[];
+  pathType?: string;
 }
 
 export interface EducationSpecialtySelectorProps {
@@ -130,6 +163,7 @@ export interface EducationSpecialtySelectorProps {
   selectedSpecialties: string[];
   onChange: (specialties: string[]) => void;
   disabled?: boolean;
+  maxSelections?: number;
 }
 
 export interface EducationStatusProps {
@@ -140,20 +174,25 @@ export interface EducationStatusProps {
 
 export interface EducationTypeSelectorProps {
   selectedType: string;
-  onChange: (type: string) => void;
+  onChange?: (type: string) => void;
   disabled?: boolean;
   gender?: 'male' | 'female';
+  childGender?: 'male' | 'female';
+  value?: string;
+  onSelectType?: (type: string) => void;
 }
 
 export interface MentorInfoProps {
-  mentor: Preceptor | null;
-  educationType: string;
-  onChangeMentor: () => void;
+  mentor?: Preceptor | null;
+  educationType?: string;
+  onChangeMentor?: () => void;
+  preceptor?: Preceptor | null;
 }
 
 export interface SkillProgressProps {
-  label: string;
+  label?: string;
   value: number;
   max?: number;
   icon?: React.ReactNode;
+  skill?: string;
 }

@@ -1,111 +1,125 @@
 
 import React from 'react';
-import { educationPaths } from '../data/educationPaths';
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
+import { Label } from '@/components/ui/label';
 import { EducationTypeSelectorProps } from '../types/educationTypes';
-import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
-import { BookOpen, Sword, Heart } from 'lucide-react';
+import { educationPaths } from '../data';
 
 export const EducationTypeSelector: React.FC<EducationTypeSelectorProps> = ({
-  value,
+  selectedType,
   onChange,
+  onSelectType,
+  disabled = false,
+  gender,
   childGender,
+  value
 }) => {
-  // Filtrer les chemins d'éducation par genre
+  // Use the most appropriate prop based on what's provided
+  const currentValue = value || selectedType;
+  
+  // Handle changes
+  const handleChange = (value: string) => {
+    if (onChange) onChange(value);
+    if (onSelectType) onSelectType(value);
+  };
+  
+  // Filter education paths based on gender if provided
   const filteredPaths = educationPaths.filter(path => {
-    if (path.requirements?.gender === 'both') return true;
-    return path.requirements?.gender === childGender;
+    // If no gender restriction, show all
+    if (!gender && !childGender) return true;
+    
+    // Check if path has gender requirements
+    if (path.requirements && typeof path.requirements === 'object' && 'gender' in path.requirements) {
+      const genderReq = path.requirements.gender;
+      const checkGender = gender || childGender;
+      
+      // If requirement is 'both' or matches the gender
+      return genderReq === 'both' || genderReq === checkGender;
+    }
+    
+    return true;
   });
-
-  // Helper function to get icon for education type
-  const getIcon = (pathId: string) => {
-    switch(pathId) {
-      case 'military': return <Sword className="h-5 w-5" />;
-      case 'religious': return <Heart className="h-5 w-5" />;
-      case 'rhetoric': return <BookOpen className="h-5 w-5" />;
-      default: return <BookOpen className="h-5 w-5" />;
-    }
-  };
-
-  // Helper function to get the display name for education type
-  const getDisplayName = (pathId: string) => {
-    switch(pathId) {
-      case 'military': return 'Militaire';
-      case 'religious': return 'Piété';
-      case 'rhetoric': return 'Éloquence';
-      default: return pathId;
-    }
-  };
-
+  
   return (
-    <div className="space-y-4">
-      <div>
-        <h3 className="text-lg font-medium">Type d'Éducation</h3>
-        <p className="text-sm text-muted-foreground">
-          Choisissez le type d'éducation qui définira la carrière future de votre enfant.
-        </p>
-      </div>
-
-      <Tabs value={value} onValueChange={onChange} className="w-full">
-        <TabsList className="grid grid-cols-2 md:grid-cols-4">
-          <TabsTrigger value="none">Aucune</TabsTrigger>
-          
-          {filteredPaths.map(path => (
-            <TabsTrigger 
-              key={path.id} 
-              value={path.id}
-              disabled={path.requirements?.age && path.requirements.age > 15} 
-              className="flex items-center gap-2"
-            >
-              {getIcon(path.id)}
-              {getDisplayName(path.id)}
-            </TabsTrigger>
-          ))}
-        </TabsList>
-
-        {filteredPaths.map(path => (
-          <TabsContent key={path.id} value={path.id} className="mt-4 space-y-4">
-            <div className="flex items-center gap-2">
-              {getIcon(path.id)}
-              <h3 className="text-xl font-semibold">{path.name}</h3>
-            </div>
-            
-            <p>{path.description}</p>
-            
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <h4 className="font-medium mb-2">Bénéfices</h4>
-                <ul className="list-disc list-inside space-y-1 text-sm">
-                  {path.benefits.map((benefit, index) => (
-                    <li key={index}>{benefit}</li>
-                  ))}
-                </ul>
-              </div>
-              
-              <div>
-                <h4 className="font-medium mb-2">Prérequis</h4>
-                <ul className="list-disc list-inside space-y-1 text-sm">
-                  <li>Âge minimum: {path.requirements?.age || 'N/A'} ans</li>
-                  <li>Genre: {
-                    path.requirements?.gender === 'male' ? 'Garçon uniquement' : 
-                    path.requirements?.gender === 'female' ? 'Fille uniquement' : 
-                    'Tous'
-                  }</li>
-                  {path.requirements?.cost && (
-                    <li>Coût: {path.requirements.cost} As</li>
-                  )}
-                  <li>Durée typique: {path.requirements?.duration || `${path.duration} ans`}</li>
-                </ul>
-              </div>
-            </div>
-          </TabsContent>
-        ))}
+    <RadioGroup
+      value={currentValue}
+      onValueChange={handleChange}
+      className="grid grid-cols-1 md:grid-cols-2 gap-4"
+      disabled={disabled}
+    >
+      {filteredPaths.map(path => {
+        // Check if path has age requirements
+        const hasAgeRequirement = path.requirements && 
+          typeof path.requirements === 'object' && 
+          'age' in path.requirements && 
+          path.requirements.age !== undefined;
         
-        <TabsContent value="none" className="mt-4">
-          <p className="text-muted-foreground italic">
-            Aucune éducation sélectionnée. Votre enfant ne recevra pas d'instruction spécialisée.
-          </p>
-        </TabsContent>
-      </Tabs>
-    </div>
+        // Format path name
+        const pathName = path.name;
+        
+        return (
+          <div key={path.id} className="relative">
+            <RadioGroupItem
+              value={path.id}
+              id={path.id}
+              className="peer sr-only"
+            />
+            <Label
+              htmlFor={path.id}
+              className="flex flex-col border rounded-md p-3 hover:bg-muted/20 hover:border-primary peer-data-[state=checked]:border-primary peer-data-[state=checked]:bg-primary/5 [&:has([data-state=checked])]:border-primary transition-colors cursor-pointer"
+            >
+              <span className="font-medium">{pathName}</span>
+              <span className="text-xs text-muted-foreground mt-1">
+                {path.description}
+              </span>
+              
+              {/* Path details */}
+              {path.requirements && (
+                <div className="mt-2 text-xs space-y-1 border-t pt-2">
+                  {hasAgeRequirement && (
+                    <p>
+                      Âge requis: {path.requirements.age}+ ans
+                    </p>
+                  )}
+                  
+                  {path.requirements && 
+                   typeof path.requirements === 'object' && 
+                   'gender' in path.requirements && 
+                   path.requirements.gender !== 'both' && (
+                    <p>
+                      Genre: {path.requirements.gender === 'male' ? 'Garçon' : 'Fille'}
+                    </p>
+                  )}
+                  
+                  {typeof path.cost === 'number' && (
+                    <p>
+                      Coût: {path.cost} <span className="text-muted-foreground">as/an</span>
+                    </p>
+                  )}
+                  
+                  {typeof path.duration === 'number' && (
+                    <p>
+                      Durée: {path.duration} {path.duration > 1 ? 'années' : 'année'}
+                    </p>
+                  )}
+                </div>
+              )}
+              
+              {path.benefits && (
+                <div className="mt-2 text-xs border-t pt-2">
+                  <p className="font-medium">Bénéfices:</p>
+                  <ul className="list-disc list-inside text-muted-foreground mt-1">
+                    {path.benefits.slice(0, 2).map((benefit, idx) => (
+                      <li key={idx}>{benefit}</li>
+                    ))}
+                    {path.benefits.length > 2 && <li>...</li>}
+                  </ul>
+                </div>
+              )}
+            </Label>
+          </div>
+        );
+      })}
+    </RadioGroup>
   );
 };

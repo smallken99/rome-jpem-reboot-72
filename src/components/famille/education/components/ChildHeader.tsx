@@ -1,90 +1,95 @@
 
 import React, { useState } from 'react';
-import { Shield, AlertTriangle, Edit, Check } from 'lucide-react';
-import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { ChildHeaderProps } from '../types/educationTypes';
-import { toast } from 'sonner';
+import { Edit, Check, X } from 'lucide-react';
+import { Input } from '@/components/ui/input';
+import { Badge } from '@/components/ui/badge';
+import { Child } from '../types/educationTypes';
+
+interface ChildHeaderProps {
+  child: Child;
+  onNameChange?: (id: string, newName: string) => void;
+  hasInvalidEducation?: boolean;
+}
 
 export const ChildHeader: React.FC<ChildHeaderProps> = ({ 
   child, 
   onNameChange,
-  hasInvalidEducation = false 
+  hasInvalidEducation
 }) => {
   const [isEditing, setIsEditing] = useState(false);
-  const [nameValue, setNameValue] = useState(child.name);
-
-  const handleSubmitNameChange = () => {
-    if (nameValue.trim() === '') {
-      toast.error("Le nom ne peut pas être vide");
-      return;
-    }
-    
-    if (onNameChange) {
-      onNameChange(child.id, nameValue);
-      toast.success(`Nom changé en ${nameValue}`);
+  const [newName, setNewName] = useState(child.name);
+  
+  const handleSave = () => {
+    if (newName.trim() && onNameChange) {
+      onNameChange(child.id, newName);
     }
     setIsEditing(false);
   };
-
-  const handleKeyPress = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter') {
-      handleSubmitNameChange();
-    }
-    if (e.key === 'Escape') {
-      setNameValue(child.name);
-      setIsEditing(false);
-    }
+  
+  const handleCancel = () => {
+    setNewName(child.name);
+    setIsEditing(false);
   };
-
+  
   return (
-    <div className={`p-4 ${hasInvalidEducation ? 'bg-amber-50' : child.gender === 'male' ? 'bg-blue-50' : 'bg-rose-50'}`}>
-      <div className="flex justify-between">
-        <div className="flex items-center gap-2">
-          {hasInvalidEducation ? (
-            <AlertTriangle className="h-5 w-5 text-amber-500" />
-          ) : (
-            <Shield className={`h-5 w-5 ${child.gender === 'male' ? 'text-blue-500' : 'text-rose-500'}`} />
-          )}
-          <div>
-            {isEditing ? (
-              <div className="flex items-center gap-2">
-                <Input
-                  value={nameValue}
-                  onChange={(e) => setNameValue(e.target.value)}
-                  onKeyDown={handleKeyPress}
-                  autoFocus
-                  className="py-1 h-8 text-lg"
-                />
-                <Button 
-                  variant="ghost" 
-                  size="icon" 
-                  onClick={handleSubmitNameChange}
-                  className="h-8 w-8"
-                >
-                  <Check className="h-4 w-4" />
-                </Button>
-              </div>
-            ) : (
-              <div className="flex items-center gap-2">
-                <h3 className="font-medium text-lg">{child.name}</h3>
-                {onNameChange && (
-                  <Button 
-                    variant="ghost" 
-                    size="icon" 
-                    onClick={() => setIsEditing(true)}
-                    className="h-6 w-6 opacity-50 hover:opacity-100"
-                  >
-                    <Edit className="h-3 w-3" />
-                  </Button>
-                )}
-              </div>
-            )}
-            <div className="text-sm text-muted-foreground">
-              {child.age} ans - {child.gender === 'male' ? 'Garçon' : 'Fille'}
-            </div>
+    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+      <div className="flex items-center gap-2">
+        {isEditing ? (
+          <div className="flex items-center gap-2">
+            <Input
+              value={newName}
+              onChange={(e) => setNewName(e.target.value)}
+              className="max-w-[200px]"
+              autoFocus
+            />
+            <Button 
+              size="icon" 
+              variant="ghost" 
+              onClick={handleSave} 
+              className="h-8 w-8 text-green-600"
+            >
+              <Check className="h-4 w-4" />
+            </Button>
+            <Button 
+              size="icon" 
+              variant="ghost" 
+              onClick={handleCancel} 
+              className="h-8 w-8 text-red-600"
+            >
+              <X className="h-4 w-4" />
+            </Button>
           </div>
-        </div>
+        ) : (
+          <>
+            <h3 className="text-lg font-semibold">{child.name}</h3>
+            {onNameChange && (
+              <Button 
+                size="icon" 
+                variant="ghost" 
+                onClick={() => setIsEditing(true)} 
+                className="h-8 w-8"
+              >
+                <Edit className="h-3.5 w-3.5" />
+              </Button>
+            )}
+          </>
+        )}
+      </div>
+      
+      <div className="flex items-center gap-2">
+        <Badge variant="outline" className={`${child.gender === 'male' ? 'bg-blue-50 text-blue-700' : 'bg-pink-50 text-pink-700'}`}>
+          {child.gender === 'male' ? 'Garçon' : 'Fille'}
+        </Badge>
+        <Badge variant="outline" className="bg-amber-50 text-amber-700">
+          {child.age} ans
+        </Badge>
+        
+        {hasInvalidEducation && (
+          <Badge variant="outline" className="bg-red-50 text-red-700 border-red-200">
+            Éducation incompatible
+          </Badge>
+        )}
       </div>
     </div>
   );

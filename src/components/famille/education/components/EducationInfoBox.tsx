@@ -1,79 +1,70 @@
 
 import React from 'react';
-import { BookOpen, GraduationCap, Info, Clock } from 'lucide-react';
-import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { AlertCircle, BookOpen, Users } from 'lucide-react';
 import { useEducation } from '../context/EducationContext';
-import { Button } from '@/components/ui/button';
-import { useNavigate } from 'react-router-dom';
 
 export const EducationInfoBox: React.FC = () => {
   const { children, preceptors, isLoading } = useEducation();
-  const navigate = useNavigate();
   
-  // Statistiques éducatives
-  const childrenWithEducation = children.filter(child => child.educationType !== 'none');
-  const hiredPreceptorsCount = preceptors.filter(p => !p.available).length;
+  // Count children in education
+  const childrenInEducation = children.filter(child => 
+    child.currentEducation && 
+    child.currentEducation.type && 
+    child.currentEducation.type !== 'none'
+  ).length;
   
-  // Fonctions pour gérer les actions
-  const handleAddPreceptor = () => {
-    navigate('/famille/education?tab=preceptors');
-  };
+  // Count available preceptors
+  const availablePreceptors = preceptors.filter(p => p.available).length;
   
-  const handleManageEducation = () => {
-    if (children.length > 0) {
-      if (childrenWithEducation.length > 0) {
-        navigate(`/famille/education/child/${childrenWithEducation[0].id}`);
-      } else {
-        navigate(`/famille/education/child/${children[0].id}`);
-      }
-    }
-  };
+  if (isLoading) {
+    return (
+      <div className="border rounded-md p-4 bg-muted/20 animate-pulse">
+        <div className="h-4 w-1/2 bg-muted rounded mb-2"></div>
+        <div className="h-3 w-full bg-muted rounded"></div>
+      </div>
+    );
+  }
+  
+  if (!children.length) {
+    return (
+      <div className="border rounded-md p-4 bg-amber-50 text-amber-800 flex items-center gap-2">
+        <AlertCircle className="h-5 w-5 text-amber-500" />
+        <p>Aucun enfant n'est disponible pour l'éducation dans votre famille.</p>
+      </div>
+    );
+  }
   
   return (
-    <Alert className="bg-blue-50 border-blue-200 mt-4">
-      <Info className="h-4 w-4 text-blue-500" />
-      <AlertTitle className="text-blue-700 flex justify-between items-center">
-        <span>Système d'éducation romaine</span>
-        {isLoading && <Clock className="h-4 w-4 animate-spin text-blue-500" />}
-      </AlertTitle>
-      <AlertDescription className="text-blue-600">
-        <p className="mb-2">
-          L'éducation de vos enfants est cruciale pour assurer l'avenir et le prestige de votre famille.
-        </p>
-        
-        <div className="flex flex-wrap gap-x-8 gap-y-2 mt-3">
-          <div className="flex items-center gap-2">
-            <BookOpen className="h-4 w-4 text-blue-600" />
-            <span>{childrenWithEducation.length} enfant(s) en éducation</span>
-          </div>
-          
-          <div className="flex items-center gap-2">
-            <GraduationCap className="h-4 w-4 text-blue-600" />
-            <span>{hiredPreceptorsCount} précepteur(s) engagé(s)</span>
-          </div>
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div className="border rounded-md p-4 flex items-start gap-3">
+        <BookOpen className="h-6 w-6 text-blue-500" />
+        <div>
+          <h3 className="font-medium">Éducation en cours</h3>
+          <p className="text-sm text-muted-foreground">
+            {childrenInEducation 
+              ? `${childrenInEducation} enfant${childrenInEducation > 1 ? 's' : ''} en éducation` 
+              : "Aucun enfant en éducation actuellement"}
+          </p>
+          <p className="text-xs text-muted-foreground mt-1">
+            {children.length} enfant{children.length > 1 ? 's' : ''} au total dans la famille
+          </p>
         </div>
-        
-        <div className="flex gap-2 mt-4">
-          <Button 
-            variant="outline" 
-            size="sm"
-            className="bg-white border-blue-200 text-blue-600 hover:bg-blue-50"
-            onClick={handleAddPreceptor}
-          >
-            Engager un précepteur
-          </Button>
-          
-          <Button 
-            variant="outline" 
-            size="sm"
-            className="bg-white border-blue-200 text-blue-600 hover:bg-blue-50"
-            onClick={handleManageEducation}
-            disabled={children.length === 0}
-          >
-            Gérer l'éducation
-          </Button>
+      </div>
+      
+      <div className="border rounded-md p-4 flex items-start gap-3">
+        <Users className="h-6 w-6 text-purple-500" />
+        <div>
+          <h3 className="font-medium">Précepteurs</h3>
+          <p className="text-sm text-muted-foreground">
+            {availablePreceptors 
+              ? `${availablePreceptors} précepteur${availablePreceptors > 1 ? 's' : ''} disponible${availablePreceptors > 1 ? 's' : ''}` 
+              : "Aucun précepteur disponible actuellement"}
+          </p>
+          <p className="text-xs text-muted-foreground mt-1">
+            {preceptors.length - availablePreceptors} précepteur{preceptors.length - availablePreceptors !== 1 ? 's' : ''} déjà embauché{preceptors.length - availablePreceptors !== 1 ? 's' : ''}
+          </p>
         </div>
-      </AlertDescription>
-    </Alert>
+      </div>
+    </div>
   );
 };
