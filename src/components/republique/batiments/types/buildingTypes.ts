@@ -8,16 +8,19 @@ export interface PublicBuilding {
   maintenanceCost: number;
   maintenanceLevel: 'minimal' | 'normal' | 'excellent';
   lastMaintenance?: number; // année de dernière maintenance
-  benefits: string[]; // Added this property
+  benefits: string[]; // Ensure this property exists
   capacity?: number;
   investmentAmount: number;
   constructionStatus: 'planned' | 'in_progress' | 'completed' | 'damaged' | 'abandoned';
   constructionProgress?: number; // 0-100
   image?: string;
-  population?: number; // Added this property
+  population?: number; // Ensure this property exists
   revenueGeneration?: number;
   employmentCapacity?: number;
   publicApproval?: number;
+  type?: string;
+  level?: string;
+  effects?: Record<string, number>;
 }
 
 export interface ConstructionProject {

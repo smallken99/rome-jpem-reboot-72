@@ -8,7 +8,7 @@ export const usePublicBuildings = () => {
   const [publicBuildings, setPublicBuildings] = useState<PublicBuilding[]>(mockPublicBuildings);
 
   // Effectuer la maintenance d'un bâtiment
-  const maintainBuilding = (buildingId: string, level: 'minimal' | 'standard' | 'excellent') => {
+  const maintainBuilding = (buildingId: string, level: 'minimal' | 'normal' | 'excellent') => {
     setPublicBuildings(prev => prev.map(building => {
       if (building.id !== buildingId) return building;
       
@@ -21,7 +21,7 @@ export const usePublicBuildings = () => {
           conditionImprovement = 5;
           costMultiplier = 0.7;
           break;
-        case 'standard':
+        case 'normal':
           conditionImprovement = 15;
           costMultiplier = 1;
           break;
@@ -57,7 +57,7 @@ export const usePublicBuildings = () => {
         case 'minimal':
           degradationRate = 8 * yearsPassed;
           break;
-        case 'standard':
+        case 'normal':
           degradationRate = 5 * yearsPassed;
           break;
         case 'excellent':

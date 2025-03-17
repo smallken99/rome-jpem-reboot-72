@@ -9,6 +9,7 @@ export interface Transaction {
   source: string;
   target?: string;
   type: 'income' | 'expense';
+  recipient: string;
 }
 
 export interface EconomyStats {
@@ -24,6 +25,7 @@ export interface Recipient {
   name: string;
   relationship: string;
   lastTransaction?: string;
+  type: string;
 }
 
 export interface FinancialStats {
@@ -58,19 +60,37 @@ export const useMonetaryManagement = () => {
     expensesByCategory: {}
   });
   
-  const [incomeStats, setIncomeStats] = useState<Record<string, number>>({
-    'Propriétés': 5000,
-    'Investissements': 2000,
-    'Cadeaux': 1000,
-    'Autre': 500
+  const [incomeStats, setIncomeStats] = useState<FinancialStats>({
+    balance: 10000,
+    weeklyIncome: 500,
+    weeklyExpenses: 300,
+    monthlyIncome: 2000,
+    monthlyExpenses: 1200,
+    yearly: 24000,
+    monthly: 2000,
+    categories: [
+      { name: 'Propriétés', amount: 5000, percentage: 50 },
+      { name: 'Investissements', amount: 2000, percentage: 20 },
+      { name: 'Cadeaux', amount: 1000, percentage: 10 },
+      { name: 'Autre', amount: 500, percentage: 5 }
+    ]
   });
   
-  const [expenseStats, setExpenseStats] = useState<Record<string, number>>({
-    'Entretien': 1500,
-    'Personnel': 2000,
-    'Nourriture': 1000,
-    'Cadeaux': 800,
-    'Impôts': 1200
+  const [expenseStats, setExpenseStats] = useState<FinancialStats>({
+    balance: 10000,
+    weeklyIncome: 500,
+    weeklyExpenses: 300,
+    monthlyIncome: 2000,
+    monthlyExpenses: 1200,
+    yearly: 24000,
+    monthly: 2000,
+    categories: [
+      { name: 'Entretien', amount: 1500, percentage: 30 },
+      { name: 'Personnel', amount: 2000, percentage: 40 },
+      { name: 'Nourriture', amount: 1000, percentage: 20 },
+      { name: 'Cadeaux', amount: 800, percentage: 16 },
+      { name: 'Impôts', amount: 1200, percentage: 24 }
+    ]
   });
 
   useEffect(() => {
@@ -113,7 +133,8 @@ export const useMonetaryManagement = () => {
       category,
       source: 'Compte personnel',
       target: recipient,
-      type: 'expense'
+      type: 'expense',
+      recipient
     };
     
     setTransactions(prev => [...prev, transaction]);
@@ -130,7 +151,8 @@ export const useMonetaryManagement = () => {
       description: `Paiement reçu de ${source}`,
       category,
       source,
-      type: 'income'
+      type: 'income',
+      recipient: source
     };
     
     setTransactions(prev => [...prev, transaction]);

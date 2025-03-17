@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Transaction } from '../hooks/useMonetaryManagement';
 import { format } from 'date-fns';
@@ -20,7 +19,7 @@ export const TransactionList: React.FC<TransactionListProps> = ({ transactions }
   
   const filteredTransactions = transactions.filter(transaction => {
     const matchesSearch = 
-      transaction.recipient.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (transaction.recipient?.toLowerCase().includes(searchTerm.toLowerCase()) || '') ||
       transaction.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
       transaction.category.toLowerCase().includes(searchTerm.toLowerCase());
       
@@ -117,7 +116,7 @@ export const TransactionList: React.FC<TransactionListProps> = ({ transactions }
                   <td className={`py-3 px-4 font-medium ${transaction.type === 'income' ? 'text-green-600' : 'text-rome-terracotta'}`}>
                     {transaction.type === 'income' ? '+' : '-'}{formatCurrency(Math.abs(transaction.amount))}
                   </td>
-                  <td className="py-3 px-4">{transaction.recipient}</td>
+                  <td className="py-3 px-4">{transaction.recipient || transaction.target || 'Non spécifié'}</td>
                   <td className="py-3 px-4">
                     <Badge variant="secondary" className="font-normal">
                       {transaction.category}

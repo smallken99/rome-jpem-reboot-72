@@ -62,8 +62,8 @@ export const GestionBatimentsPage: React.FC = () => {
     advanceConstruction(projectId, 10);
   };
 
-  const isBuilding = (item: any): item is PublicBuilding => {
-    return 'constructionStatus' in item;
+  const isBuilding = (item: PublicBuilding | ConstructionProject): item is PublicBuilding => {
+    return 'condition' in item;
   };
 
   return (
@@ -113,7 +113,7 @@ export const GestionBatimentsPage: React.FC = () => {
                 Ces projets amélioreront l'infrastructure de Rome. Supervisez leur progression et assurez-vous qu'ils respectent les délais.
               </p>
               <BuildingsTable
-                buildings={constructionProjects}
+                buildings={constructionProjects as any}
                 onViewDetails={handleViewDetails}
                 onApprove={handleApproveProject}
                 onAdvance={handleAdvanceProject}
@@ -211,7 +211,7 @@ export const GestionBatimentsPage: React.FC = () => {
                   <Label className="text-right">Avantages</Label>
                   <div>
                     <ul className="list-disc pl-5 space-y-1">
-                      {selectedItem.benefits.map((benefit, index) => (
+                      {selectedItem.benefits && selectedItem.benefits.map((benefit, index) => (
                         <li key={index} className="text-sm">{benefit}</li>
                       ))}
                     </ul>

@@ -1,4 +1,3 @@
-
 import { PublicBuilding, ConstructionProject } from '../types/buildingTypes';
 
 // Liste des bâtiments publics existants
@@ -11,7 +10,7 @@ export const mockPublicBuildings: PublicBuilding[] = [
     constructionYear: 450,
     condition: 85,
     maintenanceCost: 50000,
-    maintenanceLevel: 'standard',
+    maintenanceLevel: 'normal',
     lastMaintenance: 703,
     benefits: [
       'Centre de la vie politique romaine',
@@ -20,7 +19,13 @@ export const mockPublicBuildings: PublicBuilding[] = [
     ],
     capacity: 10000,
     investmentAmount: 1500000,
-    constructionStatus: 'completed'
+    constructionStatus: 'completed',
+    type: 'forum',
+    level: 'metropolis',
+    effects: {
+      'commerce': 20,
+      'ordrePublic': 10
+    }
   },
   {
     id: 'basilica-aemilia',
@@ -38,7 +43,13 @@ export const mockPublicBuildings: PublicBuilding[] = [
       'Améliore la perception des impôts de 5%'
     ],
     investmentAmount: 800000,
-    constructionStatus: 'completed'
+    constructionStatus: 'completed',
+    type: 'basilica',
+    level: 'city',
+    effects: {
+      'justice': 15,
+      'administration': 10
+    }
   },
   {
     id: 'temple-jupiter',
@@ -48,7 +59,7 @@ export const mockPublicBuildings: PublicBuilding[] = [
     constructionYear: 509,
     condition: 78,
     maintenanceCost: 35000,
-    maintenanceLevel: 'standard',
+    maintenanceLevel: 'normal',
     lastMaintenance: 700,
     benefits: [
       'Centre religieux principal de Rome',
@@ -56,7 +67,13 @@ export const mockPublicBuildings: PublicBuilding[] = [
       'Améliore les relations avec les dieux'
     ],
     investmentAmount: 1200000,
-    constructionStatus: 'completed'
+    constructionStatus: 'completed',
+    type: 'temple',
+    level: 'metropolis',
+    effects: {
+      'piete': 20,
+      'prestige': 15
+    }
   }
 ];
 

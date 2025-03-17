@@ -22,7 +22,9 @@ export const MonetaryManagementTab: React.FC = () => {
   // Create a temporary adapter function to match expected signature
   const adaptMakePayment = (originalMakePayment: (amount: number, recipient: string, category: string) => boolean) => {
     return (recipientId: string, amount: number, description: string, category: string): boolean => {
-      return originalMakePayment(amount, recipientId, category);
+      // Convert recipientId to number if needed by the function signature
+      const parsedAmount = typeof amount === 'string' ? parseFloat(amount) : amount;
+      return originalMakePayment(parsedAmount, recipientId, category);
     };
   };
 

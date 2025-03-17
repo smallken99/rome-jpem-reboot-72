@@ -107,6 +107,21 @@ export const useGameDate = (initialDate?: GameDate) => {
     return `${gameDate.year}-${gameDate.season}`;
   };
 
+  // This function converts a GameDate to a JavaScript Date for compatibility
+  const gameDateToDate = (gameDate: GameDate): Date => {
+    // Simple mapping of seasons to months
+    let month = 0;
+    switch (gameDate.season) {
+      case 'Ver': month = 2; break; // March
+      case 'Aestas': month = 5; break; // June
+      case 'Autumnus': month = 8; break; // September
+      case 'Hiems': month = 11; break; // December
+    }
+    
+    // Use a base year (2000) and add the game year as offset
+    return new Date(2000 + gameDate.year - 753, month, 15);
+  };
+
   return {
     currentDate,
     setCurrentDate,
@@ -118,10 +133,9 @@ export const useGameDate = (initialDate?: GameDate) => {
     isAfter,
     formatGameDate,
     formatSeason,
-    // Add the helper to convert GameDate to Date for compatibility
     gameDateToJs: gameToJsDate,
     gameDateToString: gameToStringOrDate,
-    // Add the new compatibility function
-    gameDateToCompatibleString
+    gameDateToCompatibleString,
+    gameDateToDate
   };
 };

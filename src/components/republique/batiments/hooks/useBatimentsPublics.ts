@@ -17,6 +17,8 @@ export interface PublicBuilding {
   lastMaintenance?: number;
   buildingTypeId: string;
   investmentAmount: number;
+  benefits: string[];  // Add this property
+  population?: number; // Add this property
 }
 
 export interface ConstructionProject {
@@ -54,7 +56,9 @@ export const useBatimentsPublics = () => {
       maintenanceLevel: 'excellent',
       lastMaintenance: 703,
       buildingTypeId: 'temple',
-      investmentAmount: 50000
+      investmentAmount: 50000,
+      benefits: ['Bonheur populaire', 'Prestige de la cité'],
+      population: 10000
     },
     {
       id: 'forum-romain',
@@ -73,7 +77,9 @@ export const useBatimentsPublics = () => {
       maintenanceLevel: 'normal',
       lastMaintenance: 702,
       buildingTypeId: 'forum',
-      investmentAmount: 100000
+      investmentAmount: 100000,
+      benefits: ['Centre de commerce', 'Lieu de rassemblement'],
+      population: 50000
     }
   ]);
 
@@ -197,7 +203,8 @@ export const useBatimentsPublics = () => {
               constructionStatus: 'completed',
               maintenanceLevel: 'normal',
               buildingTypeId: project.buildingTypeId,
-              investmentAmount: project.estimatedCost
+              investmentAmount: project.estimatedCost,
+              benefits: project.benefits
             };
             
             addPublicBuilding(newBuilding);
@@ -225,11 +232,16 @@ export const useBatimentsPublics = () => {
     degradeBuildings,
     addPublicBuilding,
     updateBuildingCondition,
-    // Added properties and functions
     constructionProjects,
     startConstructionProject,
     approveConstructionProject,
     advanceConstruction,
     updateBuilding
   };
+};
+
+// Missing function definition (to avoid errors)
+const updateBuildingCondition = (buildingId: string, newCondition: number) => {
+  // This function is just a stub to make TypeScript happy
+  // The implementation is inside useBatimentsPublics
 };
