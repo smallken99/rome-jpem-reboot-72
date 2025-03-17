@@ -5,7 +5,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { formatCurrency } from '@/utils/currencyUtils';
 import { BuildingDescription } from '../../data/types/buildingTypes';
-import { CircleDollarSign, Clock, User, Star, Tool } from 'lucide-react';
+import { CircleDollarSign, Clock, User, Star, Wrench } from 'lucide-react';
 
 interface BuildingCatalogueItemProps {
   building: BuildingDescription;
@@ -98,7 +98,7 @@ export const BuildingCatalogueItem: React.FC<BuildingCatalogueItemProps> = ({
               onMaintenance(building.id);
             }}
           >
-            <Tool className="h-3.5 w-3.5 mr-1" />
+            <Wrench className="h-3.5 w-3.5 mr-1" />
             Entretien
           </Button>
         )}

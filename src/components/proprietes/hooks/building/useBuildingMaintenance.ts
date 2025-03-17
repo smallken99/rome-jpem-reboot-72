@@ -6,7 +6,7 @@ import { toast } from 'sonner';
 
 export function useBuildingMaintenance() {
   const [isLoading, setIsLoading] = useState(false);
-  const { updateBuildingProperty } = useBuildingInventory();
+  const { updateBuildingProperty, buildings } = useBuildingInventory();
   const { addTransaction } = usePatrimoine();
   
   // Toggle maintenance setting for a building
@@ -33,6 +33,75 @@ export function useBuildingMaintenance() {
     }
   };
   
+  // Check if a building needs maintenance
+  const needsMaintenance = (buildingId: number | string): boolean => {
+    const building = buildings.find(b => b.id === buildingId);
+    if (!building) return false;
+    
+    // If condition is below 70%, maintenance is needed
+    if (building.condition < 70) return true;
+    
+    // If the last maintenance was done more than 6 months ago
+    if (building.lastMaintenance) {
+      const sixMonthsAgo = new Date();
+      sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6);
+      return new Date(building.lastMaintenance) < sixMonthsAgo;
+    }
+    
+    // If no maintenance has ever been done
+    return true;
+  };
+  
+  // Calculate maintenance cost based on building condition and level
+  const calculateMaintenanceCost = (
+    buildingId: number | string,
+    level: 'basic' | 'standard' | 'premium' = 'standard'
+  ): number => {
+    const building = buildings.find(b => b.id === buildingId);
+    if (!building) return 0;
+    
+    let baseCost = building.maintenanceCost;
+    
+    // Adjust cost based on current condition - worse condition means higher cost
+    const conditionFactor = (100 - building.condition) / 100 + 0.5;
+    
+    // Adjust based on maintenance level
+    let levelMultiplier = 1.0;
+    switch(level) {
+      case 'basic': 
+        levelMultiplier = 0.6;
+        break;
+      case 'premium':
+        levelMultiplier = 1.5;
+        break;
+      default:
+        levelMultiplier = 1.0;
+    }
+    
+    return Math.round(baseCost * conditionFactor * levelMultiplier);
+  };
+  
+  // Get estimates for different maintenance options
+  const getMaintenanceOptions = (buildingId: number | string) => {
+    return {
+      basic: {
+        cost: calculateMaintenanceCost(buildingId, 'basic'),
+        improvement: 10,
+        description: "Entretien minimal"
+      },
+      standard: {
+        cost: calculateMaintenanceCost(buildingId, 'standard'),
+        improvement: 20,
+        description: "Entretien standard"
+      },
+      premium: {
+        cost: calculateMaintenanceCost(buildingId, 'premium'),
+        improvement: 40,
+        description: "Entretien complet"
+      }
+    };
+  };
+  
   // Perform maintenance operation on a building
   const performMaintenance = async (
     buildingId: number | string, 
@@ -42,8 +111,7 @@ export function useBuildingMaintenance() {
     
     try {
       // Get the building from inventory
-      const { ownedBuildings } = useBuildingInventory();
-      const building = ownedBuildings.find(b => b.id === buildingId);
+      const building = buildings.find(b => b.id === buildingId);
       
       if (!building) {
         toast.error("Bâtiment introuvable");
@@ -51,37 +119,26 @@ export function useBuildingMaintenance() {
       }
       
       // Calculate the maintenance cost based on level
-      let maintenanceCost = building.maintenanceCost;
-      let conditionImprovement = 20;
-      
-      switch(level) {
-        case 'basic':
-          maintenanceCost = Math.round(building.maintenanceCost * 0.6);
-          conditionImprovement = 10;
-          break;
-        case 'premium':
-          maintenanceCost = Math.round(building.maintenanceCost * 1.5);
-          conditionImprovement = 40;
-          break;
-      }
+      const maintenanceOptions = getMaintenanceOptions(buildingId);
+      const selectedOption = maintenanceOptions[level];
       
       // Register the transaction
       addTransaction({
-        amount: -maintenanceCost,
+        amount: -selectedOption.cost,
         description: `Maintenance ${level} de ${building.name}`,
         category: "Entretien",
         type: 'expense'
       });
       
       // Update the building condition
-      const newCondition = Math.min(100, building.condition + conditionImprovement);
+      const newCondition = Math.min(100, building.condition + selectedOption.improvement);
       updateBuildingProperty(buildingId, 'condition', newCondition);
       updateBuildingProperty(buildingId, 'lastMaintenance', new Date());
       
       toast.success(
         "Maintenance effectuée",
         {
-          description: `La condition de ${building.name} est maintenant de ${newCondition}% (+${conditionImprovement}%).`
+          description: `La condition de ${building.name} est maintenant de ${newCondition}% (+${selectedOption.improvement}%).`
         }
       );
       
@@ -98,6 +155,9 @@ export function useBuildingMaintenance() {
   return {
     isLoading,
     toggleMaintenance,
-    performMaintenance
+    performMaintenance,
+    needsMaintenance,
+    calculateMaintenanceCost,
+    getMaintenanceOptions
   };
 }

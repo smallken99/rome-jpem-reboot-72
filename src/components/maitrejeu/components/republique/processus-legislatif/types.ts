@@ -10,6 +10,7 @@ export interface ProjetLoi {
   categorieId?: string;
   categorie?: string;
   importance?: 'faible' | 'normale' | 'haute' | 'critique';
+  statut?: 'en_cours' | 'en_vote' | 'adopté' | 'rejeté';
 }
 
 export interface VoteLoi {

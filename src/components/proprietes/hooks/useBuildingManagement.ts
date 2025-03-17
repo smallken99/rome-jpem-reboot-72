@@ -22,7 +22,7 @@ export function useBuildingManagement() {
   
   // Use the individual hooks
   const { 
-    ownedBuildings, addBuilding, removeBuilding
+    ownedBuildings, addBuilding, removeBuilding, updateBuildingProperty
   } = useBuildingInventory();
   
   const { 
@@ -32,14 +32,18 @@ export function useBuildingManagement() {
   
   const { 
     isLoading: isSaleLoading, 
-    estimateBuildingValue,
-    sellBuilding 
+    calculateBuildingValue,
+    sellBuilding,
+    calculateBuildingValueById
   } = useBuildingSale();
   
   const { 
     isLoading: isMaintenanceLoading, 
     toggleMaintenance, 
-    performMaintenance 
+    performMaintenance,
+    needsMaintenance,
+    calculateMaintenanceCost,
+    getMaintenanceOptions
   } = useBuildingMaintenance();
   
   const { 
@@ -67,13 +71,47 @@ export function useBuildingManagement() {
     }
   };
   
+  // Handle adding a new property
+  const handleAddProperty = (
+    buildingId: string,
+    buildingType: "urban" | "rural" | "religious" | "public",
+    location: string,
+    customName?: string
+  ): boolean => {
+    try {
+      // Générer un ID unique 
+      const newId = Date.now();
+      
+      // Ajouter le bâtiment à l'inventaire
+      addBuilding({
+        id: newId,
+        buildingId,
+        name: customName || `Bâtiment ${buildingType} à ${location}`,
+        buildingType,
+        location,
+        maintenanceEnabled: true,
+        maintenanceCost: 1000, // Default value
+        slaves: 0,
+        condition: 100,
+        purchaseDate: new Date()
+      });
+      
+      toast.success(`Propriété ${buildingType} ajoutée avec succès!`);
+      return true;
+    } catch (error) {
+      console.error("Erreur lors de l'ajout de la propriété:", error);
+      toast.error("Échec de l'ajout de la propriété");
+      return false;
+    }
+  };
+  
   // Handle building sale
   const handleSellBuilding = useCallback(async (buildingId: number | string): Promise<boolean> => {
     try {
       const building = ownedBuildings.find(b => b.id === buildingId);
       if (!building) return false;
       
-      const result = sellBuilding(buildingId as number);
+      const result = sellBuilding(buildingId);
       if (result) {
         setSelectedBuilding(null);
         return true;
@@ -101,6 +139,19 @@ export function useBuildingManagement() {
     return true;
   }, []);
   
+  // Rename a building
+  const renameBuilding = useCallback((buildingId: number | string, newName: string): boolean => {
+    try {
+      updateBuildingProperty(buildingId, 'name', newName);
+      toast.success("Propriété renommée avec succès");
+      return true;
+    } catch (error) {
+      console.error("Erreur lors du renommage:", error);
+      toast.error("Une erreur est survenue");
+      return false;
+    }
+  }, [updateBuildingProperty]);
+  
   return {
     // Building inventory
     ownedBuildings,
@@ -124,9 +175,16 @@ export function useBuildingManagement() {
     handleSellBuilding,
     handleMaintenanceBuilding,
     handleStartConstruction,
+    handleAddProperty,
     toggleMaintenance,
     assignSlaves,
-    estimateBuildingValue,
+    sellBuilding,
+    calculateBuildingValue,
+    calculateBuildingValueById,
+    needsMaintenance,
+    calculateMaintenanceCost,
+    getMaintenanceOptions,
+    renameBuilding,
     
     // Financial info
     balance,
