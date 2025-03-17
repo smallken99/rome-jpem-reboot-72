@@ -35,7 +35,7 @@ export interface HistoriqueLoi {
   dateProposition: string;
   dateAdoption: string;
   description: string;
-  contenu: string[];  // Ajout de la propriété contenu manquante
+  contenu: string[];  // Cette propriété est maintenant correctement définie
   votes: {
     pour: number;
     contre: number;

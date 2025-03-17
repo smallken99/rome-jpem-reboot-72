@@ -56,7 +56,7 @@ export const ProcessusLegislatif: React.FC<ProcessusLegislatifProps> = ({
         ...histoire,
         dateProposition: histoire.date || '',
         dateAdoption: histoire.date || '',
-        contenu: Array.isArray(histoire.contenu) ? histoire.contenu : (histoire.contenu ? [histoire.contenu] : []),
+        contenu: Array.isArray(histoire.contenu) ? histoire.contenu : (histoire.contenu ? [histoire.contenu as string] : []),
         statut: histoire.resultat === 'Adoptée' ? 'adopté' : 'rejeté',
         description: histoire.description || 'Aucune description',
         votes: votesObj
