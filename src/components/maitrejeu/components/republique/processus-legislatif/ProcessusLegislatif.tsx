@@ -55,7 +55,7 @@ export const ProcessusLegislatif: React.FC<ProcessusLegislatifProps> = ({
         ...histoire,
         dateProposition: histoire.date || '',
         dateAdoption: histoire.date || '',
-        contenu: Array.isArray(histoire.contenu) ? histoire.contenu : [],
+        contenu: Array.isArray(histoire.contenu) ? histoire.contenu : (histoire.contenu ? [histoire.contenu] : []),
         statut: histoire.resultat === 'Adoptée' ? 'adopté' : 'rejeté',
         description: histoire.description || 'Aucune description',
         votes: votesObj
@@ -274,11 +274,3 @@ export const ProcessusLegislatif: React.FC<ProcessusLegislatifProps> = ({
     </div>
   );
 };
-
-const handleAddLoi = () => {};
-const handleEditLoi = (loi: ProjetLoi) => {};
-const handleSaveLoi = (loiData: any) => {};
-const handleDeleteRequest = (loiId: string) => {};
-const handleStartVoteRequest = (loi: ProjetLoi) => {};
-const handleVote = (voteId: string, voteType: 'pour' | 'contre' | 'abstention', count: number = 1) => {};
-const handleCompleteVote = (voteId: string) => {};
