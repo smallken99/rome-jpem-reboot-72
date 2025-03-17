@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
@@ -60,7 +61,9 @@ export const DetailsDialog: React.FC<DetailsDialogProps> = ({
                   </div>
                 )}
               </>
-            ) : (
+            )}
+            
+            {!isBuilding && (
               <>
                 <div className="flex items-center gap-2">
                   <Coins className="h-4 w-4 text-muted-foreground" />
@@ -86,7 +89,7 @@ export const DetailsDialog: React.FC<DetailsDialogProps> = ({
             <div>
               <h4 className="text-sm font-medium mb-2">Bénéfices</h4>
               <ul className="text-sm space-y-1">
-                {selectedItem.benefits.map((benefit, index) => (
+                {selectedItem.benefits && selectedItem.benefits.map((benefit, index) => (
                   <li key={index} className="flex items-center gap-2">
                     <div className="h-1 w-1 rounded-full bg-rome-gold"></div>
                     {benefit}
