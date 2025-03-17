@@ -1,3 +1,4 @@
+
 import { useEffect, useState } from 'react';
 import { GameDate, Season } from '@/components/maitrejeu/types/common';
 import { formatDate, formatSeason } from '@/utils/formatUtils';
@@ -121,7 +122,7 @@ export const useGameDate = (initialDate?: GameDate) => {
     return new Date(2000 + gameDate.year - 753, month, 15);
   };
 
-  // Modified: Always return a Date object to fix type compatibility
+  // Modified: Always return a Date object to fix type compatibility issues
   const gameToStringOrDate = (gameDate: GameDate): Date => {
     return gameDateToDate(gameDate);
   };
