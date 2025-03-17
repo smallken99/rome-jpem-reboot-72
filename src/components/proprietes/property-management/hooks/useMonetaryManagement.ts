@@ -47,9 +47,9 @@ export const useMonetaryManagement = () => {
   const [balance, setBalance] = useState(10000);
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [recipients, setRecipients] = useState<Recipient[]>([
-    { id: 'r1', name: 'Temple de Jupiter', relationship: 'Religieux' },
-    { id: 'r2', name: 'Marchand Tiberius', relationship: 'Commerce' },
-    { id: 'r3', name: 'Sénat', relationship: 'Politique' }
+    { id: 'r1', name: 'Temple de Jupiter', relationship: 'Religieux', type: 'temple' },
+    { id: 'r2', name: 'Marchand Tiberius', relationship: 'Commerce', type: 'commerce' },
+    { id: 'r3', name: 'Sénat', relationship: 'Politique', type: 'politique' }
   ]);
   
   const [economyStats, setEconomyStats] = useState<EconomyStats>({

@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { PageHeader } from '@/components/ui-custom/PageHeader';
 import { RomanCard } from '@/components/ui-custom/RomanCard';
@@ -13,6 +14,7 @@ import { Separator } from '@/components/ui/separator';
 import { Badge } from '@/components/ui/badge';
 import { formatMoney } from '@/utils/formatUtils';
 import { toast } from 'sonner';
+import { BatimentsTable } from './BatimentsTable';
 
 export const GestionBatimentsPage: React.FC = () => {
   const {
@@ -112,8 +114,9 @@ export const GestionBatimentsPage: React.FC = () => {
               <p className="text-muted-foreground mb-4">
                 Ces projets amélioreront l'infrastructure de Rome. Supervisez leur progression et assurez-vous qu'ils respectent les délais.
               </p>
-              <BuildingsTable
-                buildings={constructionProjects as any}
+              <BatimentsTable
+                type="projects"
+                projects={constructionProjects}
                 onViewDetails={handleViewDetails}
                 onApprove={handleApproveProject}
                 onAdvance={handleAdvanceProject}

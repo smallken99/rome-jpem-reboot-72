@@ -1,7 +1,7 @@
+
 import { useEffect, useState } from 'react';
 import { GameDate, Season } from '@/components/maitrejeu/types/common';
 import { formatDate, formatSeason } from '@/utils/formatUtils';
-import { gameToStringOrDate, gameToJsDate } from '@/utils/gameDate-helpers';
 
 export const useGameDate = (initialDate?: GameDate) => {
   const [currentDate, setCurrentDate] = useState<GameDate>(
@@ -122,6 +122,11 @@ export const useGameDate = (initialDate?: GameDate) => {
     return new Date(2000 + gameDate.year - 753, month, 15);
   };
 
+  // Wrapper function that ensures a GameDate can be used where a string or Date is expected
+  const gameToStringOrDate = (gameDate: GameDate): string | Date => {
+    return gameDateToDate(gameDate);
+  };
+
   return {
     currentDate,
     setCurrentDate,
@@ -133,7 +138,7 @@ export const useGameDate = (initialDate?: GameDate) => {
     isAfter,
     formatGameDate,
     formatSeason,
-    gameDateToJs: gameToJsDate,
+    gameDateToJs: gameDateToDate,
     gameDateToString: gameToStringOrDate,
     gameDateToCompatibleString,
     gameDateToDate
