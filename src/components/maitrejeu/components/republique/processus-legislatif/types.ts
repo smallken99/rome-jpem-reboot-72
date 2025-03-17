@@ -35,7 +35,7 @@ export interface HistoriqueLoi {
   dateProposition: string;
   dateAdoption: string;
   description: string;
-  contenu: string[];  // Added the missing property
+  contenu: string[];
   votes: {
     pour: number;
     contre: number;
