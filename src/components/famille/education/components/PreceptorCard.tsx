@@ -6,24 +6,34 @@ import { Badge } from '@/components/ui/badge';
 import { Preceptor } from '../types/educationTypes';
 import { Info, Check, X, Medal } from 'lucide-react';
 
-interface PreceptorCardProps {
+export interface PreceptorCardProps {
   preceptor: Preceptor;
   isSelected?: boolean;
+  isHired?: boolean;
+  hired?: boolean;
+  hireCost?: number;
   onSelect?: (id: string) => void;
   onHire?: (id: string) => void;
   onFire?: (id: string) => void;
   onAssign?: (id: string) => void;
+  onView?: () => void;
   viewOnly?: boolean;
+  childId?: string;
 }
 
 export const PreceptorCard: React.FC<PreceptorCardProps> = ({
   preceptor,
   isSelected = false,
+  isHired = false,
+  hired = false,
+  hireCost,
   onSelect,
   onHire,
   onFire,
   onAssign,
-  viewOnly = false
+  onView,
+  viewOnly = false,
+  childId
 }) => {
   // Quality star display
   const qualityStars = () => {
@@ -44,6 +54,9 @@ export const PreceptorCard: React.FC<PreceptorCardProps> = ({
     if (onSelect && !viewOnly) {
       onSelect(preceptor.id);
     }
+    if (onView && (viewOnly || hired || isHired)) {
+      onView();
+    }
   };
 
   return (
@@ -54,8 +67,8 @@ export const PreceptorCard: React.FC<PreceptorCardProps> = ({
       <CardHeader className="pb-2">
         <div className="flex justify-between items-start">
           <CardTitle className="text-lg">{preceptor.name}</CardTitle>
-          <Badge variant={preceptor.available ? 'outline' : 'secondary'}>
-            {preceptor.available ? 'Disponible' : 'Engagé'}
+          <Badge variant={(hired || isHired) ? 'secondary' : 'outline'}>
+            {(hired || isHired) ? 'Engagé' : 'Disponible'}
           </Badge>
         </div>
       </CardHeader>
@@ -67,7 +80,7 @@ export const PreceptorCard: React.FC<PreceptorCardProps> = ({
           </div>
           <div>
             <span className="text-muted-foreground">Coût:</span>
-            <p>{preceptor.cost || preceptor.price} as/an</p>
+            <p>{hireCost || preceptor.cost || preceptor.price} as/an</p>
           </div>
           <div>
             <span className="text-muted-foreground">Qualité:</span>
@@ -81,7 +94,7 @@ export const PreceptorCard: React.FC<PreceptorCardProps> = ({
         
         {!viewOnly && (
           <div className="flex justify-end space-x-2 pt-2">
-            {preceptor.available && onHire && (
+            {!(hired || isHired) && onHire && (
               <Button size="sm" onClick={(e) => {
                 e.stopPropagation();
                 onHire(preceptor.id);
@@ -91,7 +104,7 @@ export const PreceptorCard: React.FC<PreceptorCardProps> = ({
               </Button>
             )}
             
-            {!preceptor.available && onFire && (
+            {(hired || isHired) && onFire && (
               <Button size="sm" variant="outline" onClick={(e) => {
                 e.stopPropagation();
                 onFire(preceptor.id);
@@ -101,7 +114,7 @@ export const PreceptorCard: React.FC<PreceptorCardProps> = ({
               </Button>
             )}
             
-            {!preceptor.available && onAssign && (
+            {(hired || isHired) && onAssign && (
               <Button size="sm" variant="secondary" onClick={(e) => {
                 e.stopPropagation();
                 onAssign(preceptor.id);

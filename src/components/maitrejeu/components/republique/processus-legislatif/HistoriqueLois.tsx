@@ -24,7 +24,14 @@ export const HistoriqueLois: React.FC<HistoriqueLoiProps> = ({ searchTerm }) => 
         </div>
       ) : (
         filteredLois.map(loi => (
-          <HistoriqueLoiItem key={loi.id} loi={loi} />
+          <HistoriqueLoiItem key={loi.id} loi={{
+            ...loi,
+            // Add required properties that might be missing
+            dateProposition: loi.date || "Date inconnue",
+            dateAdoption: loi.date || "Date inconnue",
+            contenu: [],
+            statut: loi.resultat === 'Adoptée' ? 'adopté' : 'rejeté'
+          }} />
         ))
       )}
     </div>
@@ -65,7 +72,7 @@ const HistoriqueLoiItem: React.FC<HistoriqueLoiItemProps> = ({ loi }) => {
         <div>
           <h3 className="font-medium">{loi.titre}</h3>
           <p className="text-sm text-muted-foreground">
-            Proposé par {loi.auteur} le {loi.date || loi.dateProposition}
+            Proposé par {loi.auteur} le {loi.dateProposition || loi.date}
           </p>
           <div className="mt-1">
             <span className={`text-xs px-2 py-0.5 rounded-full ${getBadgeClass()}`}>

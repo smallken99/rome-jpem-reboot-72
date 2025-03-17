@@ -7,13 +7,15 @@ export interface SkillProgressProps {
   value: number;
   max?: number;
   icon?: React.ReactNode;
+  skill?: string;
 }
 
 export const SkillProgress: React.FC<SkillProgressProps> = ({
   label,
   value,
   max = 10,
-  icon
+  icon,
+  skill
 }) => {
   const percentage = (value / max) * 100;
   
@@ -22,7 +24,7 @@ export const SkillProgress: React.FC<SkillProgressProps> = ({
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
           {icon && <span>{icon}</span>}
-          <span className="text-sm font-medium capitalize">{label}</span>
+          <span className="text-sm font-medium capitalize">{label || skill}</span>
         </div>
         <span className="text-sm text-muted-foreground">{value}/{max}</span>
       </div>

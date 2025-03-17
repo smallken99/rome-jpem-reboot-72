@@ -16,7 +16,8 @@ const militaryPreceptors: Preceptor[] = [
     reputation: 'excellent',
     cost: 4500,
     available: true,
-    speciality: 'military'
+    speciality: 'military',
+    specialties: ['military', 'strategy']
   },
   {
     id: 'mil-2',
@@ -31,7 +32,8 @@ const militaryPreceptors: Preceptor[] = [
     reputation: 'bon',
     cost: 3500,
     available: true,
-    speciality: 'military'
+    speciality: 'military',
+    specialties: ['military', 'discipline']
   },
   {
     id: 'mil-3',
@@ -46,7 +48,8 @@ const militaryPreceptors: Preceptor[] = [
     reputation: 'moyen',
     cost: 2500,
     available: true,
-    speciality: 'military'
+    speciality: 'military',
+    specialties: ['military', 'endurance']
   }
 ];
 
@@ -64,7 +67,8 @@ const religiousPreceptors: Preceptor[] = [
     reputation: 'excellent',
     cost: 5000,
     available: true,
-    speciality: 'religious'
+    speciality: 'religious',
+    specialties: ['religious', 'traditions']
   },
   {
     id: 'rel-2',
@@ -79,7 +83,8 @@ const religiousPreceptors: Preceptor[] = [
     reputation: 'bon',
     cost: 3800,
     available: true,
-    speciality: 'religious'
+    speciality: 'religious',
+    specialties: ['religious', 'rituals']
   },
   {
     id: 'rel-3',
@@ -94,7 +99,8 @@ const religiousPreceptors: Preceptor[] = [
     reputation: 'moyen',
     cost: 2700,
     available: true,
-    speciality: 'religious'
+    speciality: 'religious',
+    specialties: ['religious', 'ceremonies']
   }
 ];
 
@@ -112,7 +118,8 @@ const rhetoricPreceptors: Preceptor[] = [
     reputation: 'excellent',
     cost: 6000,
     available: true,
-    speciality: 'rhetoric'
+    speciality: 'rhetoric',
+    specialties: ['rhetoric', 'eloquence']
   },
   {
     id: 'rhe-2',
@@ -127,7 +134,8 @@ const rhetoricPreceptors: Preceptor[] = [
     reputation: 'bon',
     cost: 4200,
     available: true,
-    speciality: 'rhetoric'
+    speciality: 'rhetoric',
+    specialties: ['rhetoric', 'persuasion']
   },
   {
     id: 'rhe-3',
@@ -142,7 +150,8 @@ const rhetoricPreceptors: Preceptor[] = [
     reputation: 'moyen',
     cost: 3000,
     available: true,
-    speciality: 'rhetoric'
+    speciality: 'rhetoric',
+    specialties: ['rhetoric', 'law']
   }
 ];
 

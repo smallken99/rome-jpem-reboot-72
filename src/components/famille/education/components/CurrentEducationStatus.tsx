@@ -27,14 +27,14 @@ export const CurrentEducationStatus: React.FC<CurrentEducationStatusProps> = ({
     if ('currentYear' in education) {
       return education.currentYear;
     }
-    return education.yearsCompleted || 0;
+    return 'yearsCompleted' in education ? education.yearsCompleted : 0;
   };
   
   const getTotalYears = () => {
-    if ('totalYears' in education) {
+    if ('totalYears' in education && education.totalYears !== undefined) {
       return education.totalYears;
     }
-    return education.totalYears || 10;
+    return 10; // Default value if not specified
   };
   
   const getStatus = () => {

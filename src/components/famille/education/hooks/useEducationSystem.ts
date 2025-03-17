@@ -32,17 +32,17 @@ export const useEducationSystem = () => {
         name: generateRomanName(),
         specialty: generateSpeciality(),
         skill: reputation === "Excellent" ? 5 : reputation === "Bon" ? 4 : 3,
-        price: generateFee(),
+        price: 1000 + Math.floor(Math.random() * 5000), // Generate numeric price
         status: 'available',
         background: `Un éducateur expérimenté, spécialisé en ${generateSpeciality()}.`,
         childId: null,
         // For backward compatibility
         reputation,
         quality: reputation === "Excellent" ? 5 : reputation === "Bon" ? 4 : 3,
-        cost: generateFee(),
+        cost: 1000 + Math.floor(Math.random() * 5000), // Generate numeric cost
         available: true,
         speciality: generateSpeciality(),
-        specialties: [],
+        specialties: [generateSpeciality(), generateSpeciality()],
       });
     }
     
@@ -59,12 +59,17 @@ export const useEducationSystem = () => {
         return true; // No specific requirements in array format
       }
       
-      const meetsAgeRequirement = child.age >= (path.requirements.age || 0);
-      const meetsGenderRequirement = 
-        path.requirements.gender === 'both' || 
-        path.requirements.gender === child.gender;
+      // Check if requirements is an object with age and gender properties
+      if (typeof path.requirements === 'object') {
+        const meetsAgeRequirement = child.age >= (path.requirements.age || 0);
+        const meetsGenderRequirement = 
+          path.requirements.gender === 'both' || 
+          path.requirements.gender === child.gender;
+        
+        return meetsAgeRequirement && meetsGenderRequirement;
+      }
       
-      return meetsAgeRequirement && meetsGenderRequirement;
+      return true;
     });
   };
   
@@ -76,17 +81,17 @@ export const useEducationSystem = () => {
       name: generateRomanName(),
       specialty: generateSpeciality(),
       skill: reputation === "Excellent" ? 5 : reputation === "Bon" ? 4 : 3,
-      price: generateFee(),
+      price: 1000 + Math.floor(Math.random() * 5000), // Generate numeric price
       status: 'available',
       background: `Un éducateur expérimenté, spécialisé en ${generateSpeciality()}.`,
       childId: null,
       // For backward compatibility
       reputation,
       quality: reputation === "Excellent" ? 5 : reputation === "Bon" ? 4 : 3,
-      cost: generateFee(),
+      cost: 1000 + Math.floor(Math.random() * 5000), // Generate numeric cost
       available: true,
       speciality: generateSpeciality(),
-      specialties: [],
+      specialties: [educationType, generateSpeciality()],
     };
   };
   

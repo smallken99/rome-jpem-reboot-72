@@ -1,17 +1,32 @@
 
 import React, { useState } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { useMaitreJeu } from '../context';
+import { 
+  Card, 
+  CardContent, 
+  CardDescription, 
+  CardFooter, 
+  CardHeader, 
+  CardTitle 
+} from '@/components/ui/card';
+import { 
+  Select, 
+  SelectContent, 
+  SelectItem, 
+  SelectTrigger, 
+  SelectValue 
+} from '@/components/ui/select';
+import { Season, GamePhase } from '@/components/maitrejeu/types/common';
+import { formatSeasonDisplay } from '@/components/maitrejeu/types/common';
+import { CalendarClock, ChevronRight, Clock, FastForward } from 'lucide-react';
+import { useMaitreJeu } from '@/components/maitrejeu/context';
 import { Separator } from '@/components/ui/separator';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Label } from '@/components/ui/label';
-import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
-import { Calendar, FastForward } from 'lucide-react';
-import { toast } from 'sonner';
-import { Season, GamePhase } from '@/components/maitrejeu/types';
 
-export const TimeManagement: React.FC = () => {
+interface TimeManagementProps {
+  onAdvance?: () => void;
+}
+
+export const TimeManagement: React.FC<TimeManagementProps> = ({ onAdvance }) => {
   const { 
     currentYear, 
     currentSeason, 
@@ -19,108 +34,102 @@ export const TimeManagement: React.FC = () => {
     advanceTime, 
     changePhase 
   } = useMaitreJeu();
-
-  const [confirmDialogOpen, setConfirmDialogOpen] = useState(false);
-  const [targetPhase, setTargetPhase] = useState<GamePhase | null>(null);
-
-  const seasonNames: Record<Season, string> = {
-    SPRING: 'Printemps',
-    SUMMER: 'Été',
-    FALL: 'Automne',
-    WINTER: 'Hiver'
-  };
-
-  const phaseNames: Record<GamePhase, string> = {
-    ECONOMY: 'Économie',
-    POLITICS: 'Politique',
-    SOCIAL: 'Sociale',
-    MILITARY: 'Militaire',
-    RELIGION: 'Religieuse',
-    ELECTION: 'Élections',
-    DIPLOMACY: 'Diplomatie'
-  };
-
-  const confirmChangePhase = (phase: GamePhase) => {
-    setTargetPhase(phase);
-    setConfirmDialogOpen(true);
-  };
-
-  const handleChangePhase = () => {
-    if (targetPhase) {
-      changePhase(targetPhase);
-      toast.success(`Phase changée : ${phaseNames[targetPhase]}`);
-      setConfirmDialogOpen(false);
-    }
-  };
-
+  
+  const [selectedPhase, setSelectedPhase] = useState<GamePhase>(currentPhase);
+  
   const handleAdvanceTime = () => {
     advanceTime();
-    toast.success("Saison avancée");
+    if (onAdvance) onAdvance();
   };
-
+  
+  const handleChangePhase = () => {
+    changePhase(selectedPhase);
+  };
+  
   return (
     <Card>
       <CardHeader className="pb-3">
-        <CardTitle className="text-lg">Gestion du Temps</CardTitle>
+        <div className="flex items-center">
+          <CalendarClock className="h-5 w-5 mr-2 text-primary" />
+          <CardTitle>Gestion du Temps</CardTitle>
+        </div>
+        <CardDescription>
+          Contrôlez l'écoulement du temps dans la République
+        </CardDescription>
       </CardHeader>
+      
       <CardContent className="space-y-4">
-        <div className="flex justify-between items-center">
-          <div className="flex items-center space-x-2">
-            <Calendar className="h-4 w-4 text-muted-foreground" />
-            <span className="font-medium">
-              An {currentYear} AUC - {seasonNames[currentSeason]}
-            </span>
+        <div className="flex justify-between items-center p-4 bg-muted/50 rounded-md">
+          <div>
+            <p className="text-muted-foreground text-sm">Année</p>
+            <p className="text-2xl font-bold">
+              {currentYear} <span className="text-sm font-normal ml-1">AUC</span>
+            </p>
           </div>
-          <Button 
-            variant="outline" 
-            size="sm" 
-            onClick={handleAdvanceTime} 
-            className="flex items-center gap-1"
-          >
-            <FastForward className="h-3.5 w-3.5" />
-            Avancer
-          </Button>
+          
+          <div>
+            <p className="text-muted-foreground text-sm">Saison</p>
+            <p className="text-2xl font-bold">
+              {formatSeasonDisplay(currentSeason)}
+            </p>
+          </div>
+          
+          <div>
+            <p className="text-muted-foreground text-sm">Phase</p>
+            <p className="text-xl font-bold">
+              {currentPhase === 'ELECTION' ? 'Élections' : 
+               currentPhase === 'VOTE' ? 'Vote' :
+               currentPhase === 'SENATE' ? 'Sénat' :
+               currentPhase === 'ACTIONS' ? 'Actions' :
+               currentPhase === 'ECONOMY' ? 'Économie' :
+               currentPhase === 'EVENTS' ? 'Événements' :
+               currentPhase === 'MILITARY' ? 'Militaire' : 'Autre'}
+            </p>
+          </div>
         </div>
         
-        <Separator />
+        <Separator className="my-2" />
         
-        <div className="space-y-2">
-          <Label>Phase Actuelle: {phaseNames[currentPhase]}</Label>
-          <Select 
-            onValueChange={(value) => confirmChangePhase(value as GamePhase)} 
-            defaultValue={currentPhase}
-          >
-            <SelectTrigger>
-              <SelectValue placeholder="Changer de phase" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="ECONOMY">Économie</SelectItem>
-              <SelectItem value="POLITICS">Politique</SelectItem>
-              <SelectItem value="SOCIAL">Sociale</SelectItem>
-              <SelectItem value="MILITARY">Militaire</SelectItem>
-              <SelectItem value="RELIGION">Religieuse</SelectItem>
-              <SelectItem value="ELECTION">Élections</SelectItem>
-              <SelectItem value="DIPLOMACY">Diplomatie</SelectItem>
-            </SelectContent>
-          </Select>
+        <div className="space-y-3">
+          <h3 className="text-sm font-medium">Changer de phase</h3>
+          
+          <div className="flex space-x-2">
+            <Select value={selectedPhase} onValueChange={(value: GamePhase) => setSelectedPhase(value)}>
+              <SelectTrigger className="flex-1">
+                <SelectValue placeholder="Choisir une phase" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="SENATE">Sénat</SelectItem>
+                <SelectItem value="ELECTION">Élections</SelectItem>
+                <SelectItem value="VOTE">Vote</SelectItem>
+                <SelectItem value="ACTIONS">Actions</SelectItem>
+                <SelectItem value="ECONOMY">Économie</SelectItem>
+                <SelectItem value="EVENTS">Événements</SelectItem>
+                <SelectItem value="MILITARY">Militaire</SelectItem>
+              </SelectContent>
+            </Select>
+            
+            <Button variant="outline" onClick={handleChangePhase}>
+              <Clock className="h-4 w-4 mr-2" />
+              Changer
+            </Button>
+          </div>
         </div>
       </CardContent>
-
-      <AlertDialog open={confirmDialogOpen} onOpenChange={setConfirmDialogOpen}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Changer de phase</AlertDialogTitle>
-            <AlertDialogDescription>
-              Êtes-vous sûr de vouloir passer à la phase {targetPhase ? phaseNames[targetPhase] : ''}?
-              Cela pourrait avoir des effets sur l'état du jeu.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Annuler</AlertDialogCancel>
-            <AlertDialogAction onClick={handleChangePhase}>Confirmer</AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+      
+      <CardFooter className="border-t pt-4">
+        <div className="flex w-full justify-between">
+          <Button variant="outline" onClick={handleAdvanceTime}>
+            <ChevronRight className="h-4 w-4 mr-2" />
+            Saison suivante
+          </Button>
+          
+          <Button variant="default" onClick={handleAdvanceTime}>
+            <FastForward className="h-4 w-4 mr-2" />
+            Année suivante
+          </Button>
+        </div>
+      </CardFooter>
     </Card>
   );
 };
