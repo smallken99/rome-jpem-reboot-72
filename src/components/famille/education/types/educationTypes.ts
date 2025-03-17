@@ -32,7 +32,7 @@ export interface Preceptor {
   years?: number;
   speciality?: string;
   background?: string;
-  rating?: number; // Added for compatibility
+  rating?: number;
 }
 
 export interface EducationPath {
@@ -93,8 +93,8 @@ export interface EducationRecord {
 
 export interface EducationFormData {
   educationType: string;
-  specialties: string[];
   mentor: string;
+  specialties: string[];
   childId?: string;
   pathType?: string;
   preceptorId?: string;

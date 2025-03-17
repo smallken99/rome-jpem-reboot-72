@@ -71,7 +71,8 @@ const mockPreceptors: Preceptor[] = [
     quality: 4,
     cost: 2000,
     available: true,
-    skills: ["Combat", "Tactique", "Histoire militaire"],
+    skill: 80,
+    specialties: ["Combat", "Tactique", "Histoire militaire"],
     background: "Ancien centurion des légions"
   },
   {
@@ -81,7 +82,8 @@ const mockPreceptors: Preceptor[] = [
     quality: 5,
     cost: 2500,
     available: true,
-    skills: ["Éloquence", "Philosophie", "Grec ancien"],
+    skill: 90,
+    specialties: ["Éloquence", "Philosophie", "Grec ancien"],
     background: "Orateur renommé du forum"
   },
   {
@@ -91,7 +93,8 @@ const mockPreceptors: Preceptor[] = [
     quality: 3,
     cost: 1800,
     available: true,
-    skills: ["Rituels", "Auspices", "Traditions"],
+    skill: 75,
+    specialties: ["Rituels", "Auspices", "Traditions"],
     background: "Ancien assistant d'un pontife"
   }
 ];
@@ -230,7 +233,15 @@ export const useChildEducation = (childId: string) => {
   const startNewEducation = (formData: EducationFormData) => {
     const newEducation: EducationRecord = {
       id: `edu${Date.now()}`,
-      ...formData
+      childId: formData.childId || childId,
+      pathType: formData.pathType || formData.educationType,
+      preceptorId: formData.preceptorId || formData.mentor,
+      startYear: formData.startYear || new Date().getFullYear(),
+      currentYear: formData.currentYear || 1,
+      totalYears: formData.totalYears || 10,
+      status: (formData.status as 'not_started' | 'in_progress' | 'completed' | 'canceled') || 'in_progress',
+      skills: formData.skills || {},
+      specialties: formData.specialties || []
     };
     
     setEducation(newEducation);

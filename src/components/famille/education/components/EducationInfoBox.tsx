@@ -1,18 +1,19 @@
 
 import React from 'react';
 import { Card, CardContent } from '@/components/ui/card';
+import { Info, Loader2 } from 'lucide-react';
 import { useEducation } from '../context/EducationContext';
-import { Lightbulb, Loader2 } from 'lucide-react';
 
-export const EducationInfoBox: React.FC = () => {
-  const { isLoading } = useEducation();
+export const EducationInfoBox = () => {
+  const { children, preceptors } = useEducation();
+  const loading = false; // Fixed for now
   
-  if (isLoading) {
+  if (loading) {
     return (
       <Card className="mb-6">
         <CardContent className="p-4 flex items-center justify-center">
-          <Loader2 className="h-5 w-5 animate-spin mr-2 text-muted-foreground" />
-          <span className="text-muted-foreground">Chargement des informations...</span>
+          <Loader2 className="h-5 w-5 animate-spin mr-2" />
+          <span>Chargement des données éducatives...</span>
         </CardContent>
       </Card>
     );
@@ -20,20 +21,17 @@ export const EducationInfoBox: React.FC = () => {
   
   return (
     <Card className="mb-6">
-      <CardContent className="p-4">
-        <div className="flex gap-3 items-start">
-          <Lightbulb className="h-5 w-5 text-amber-500 mt-0.5" />
-          <div>
-            <p className="text-sm">
-              L'éducation des enfants est essentielle pour l'avenir de votre famille. Choisissez judicieusement
-              le type d'éducation selon le rôle que vous envisagez pour votre enfant.
-            </p>
-            <ul className="text-sm mt-2 space-y-1">
-              <li><span className="font-medium">Éducation Militaire</span> - Pour les fils destinés à la carrière militaire</li>
-              <li><span className="font-medium">Éducation Rhétorique</span> - Pour ceux qui se destinent à la politique</li>
-              <li><span className="font-medium">Éducation Religieuse</span> - Pour garantir la faveur des dieux</li>
-            </ul>
-          </div>
+      <CardContent className="p-4 flex items-start gap-3">
+        <Info className="h-5 w-5 text-blue-600 mt-0.5 flex-shrink-0" />
+        <div>
+          <p className="text-sm">
+            <span className="font-medium">Information sur l'éducation romaine:</span> L'éducation est un aspect crucial de la société romaine.
+            Vos enfants peuvent être formés dans divers domaines pour assurer leur succès futur.
+          </p>
+          <ul className="text-sm mt-2 space-y-1 text-muted-foreground">
+            <li>• {children.filter(c => c.educationType !== 'none').length} enfant(s) en cours d'éducation</li>
+            <li>• {preceptors.filter(p => p.available).length} précepteur(s) disponible(s)</li>
+          </ul>
         </div>
       </CardContent>
     </Card>

@@ -19,7 +19,7 @@ import { MentorInfo } from './components/MentorInfo';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { ChildNotFound } from './components/ChildNotFound';
-import { EducationFormData, EducationPathType } from './types/educationTypes';
+import { EducationFormData, EducationPathType, EducationType } from './types/educationTypes';
 import { educationPaths } from './data';
 
 export const ChildEducationDetail = () => {
@@ -39,7 +39,7 @@ export const ChildEducationDetail = () => {
   } = useChildEducation(childId || '');
   
   const [currentTab, setCurrentTab] = useState('current');
-  const [selectedPathType, setSelectedPathType] = useState<EducationPathType | null>(null);
+  const [selectedPathType, setSelectedPathType] = useState<EducationPathType>('none');
   const [selectedPreceptorId, setSelectedPreceptorId] = useState<string | null>(null);
   const [showStartNewForm, setShowStartNewForm] = useState(false);
   
@@ -61,14 +61,16 @@ export const ChildEducationDetail = () => {
   const handleCancelNewEducation = () => {
     setShowStartNewForm(false);
     setCurrentTab('current');
-    setSelectedPathType(null);
+    setSelectedPathType('none');
     setSelectedPreceptorId(null);
   };
   
   const handleSaveNewEducation = () => {
-    if (!selectedPathType || !selectedPreceptorId || !childId) return;
+    if (selectedPathType === 'none' || !selectedPreceptorId || !childId) return;
     
     const formData: EducationFormData = {
+      educationType: selectedPathType,
+      mentor: selectedPreceptorId,
       childId,
       pathType: selectedPathType,
       preceptorId: selectedPreceptorId,
@@ -116,7 +118,7 @@ export const ChildEducationDetail = () => {
   }
   
   if (!child) {
-    return <ChildNotFound onBack={handleBackToList} />;
+    return <ChildNotFound onBack={handleBackToList} childId={childId} />;
   }
   
   return (
@@ -178,8 +180,8 @@ export const ChildEducationDetail = () => {
                     <div>
                       <h3 className="text-lg font-medium mb-3">Progression</h3>
                       <div className="space-y-4">
-                        {Object.entries(education.skills || {}).map(([skill, value]) => (
-                          <SkillProgress key={skill} skill={skill} value={value} />
+                        {Object.entries(education.skills || {}).map(([skillName, value]) => (
+                          <SkillProgress key={skillName} label={skillName} value={value} />
                         ))}
                       </div>
                     </div>
@@ -188,7 +190,8 @@ export const ChildEducationDetail = () => {
                       <h3 className="text-lg font-medium mb-3">Précepteur</h3>
                       {education.preceptorId && (
                         <MentorInfo 
-                          preceptor={preceptors.find(p => p.id === education.preceptorId) || null}
+                          mentor={preceptors.find(p => p.id === education.preceptorId) || null}
+                          educationType={education.pathType}
                         />
                       )}
                       
@@ -215,6 +218,8 @@ export const ChildEducationDetail = () => {
                         onCancel={handleCancelEducation}
                         onComplete={handleCompleteEducation}
                         canComplete={education.currentYear >= education.totalYears * 0.75}
+                        isEducating={loading}
+                        hasEducation={true}
                       />
                     </div>
                   )}
@@ -242,7 +247,7 @@ export const ChildEducationDetail = () => {
                     <div className="flex items-center justify-between">
                       <div>
                         <h4 className="font-medium">
-                          {educationPaths.find(p => p.type === education.pathType)?.name}
+                          {educationPaths.find(p => p.id === education.pathType)?.name}
                         </h4>
                         <p className="text-sm text-muted-foreground">
                           {education.startYear} - {education.startYear + education.currentYear}
@@ -298,20 +303,20 @@ export const ChildEducationDetail = () => {
                   <div>
                     <h4 className="text-md font-medium mb-4">Compétences intellectuelles</h4>
                     <div className="space-y-3">
-                      <SkillProgress skill="rhétorique" value={child.skills?.rhetoric || 0} />
-                      <SkillProgress skill="politique" value={child.skills?.politics || 0} />
-                      <SkillProgress skill="stratégie" value={child.skills?.strategy || 0} />
-                      <SkillProgress skill="diplomatie" value={child.skills?.diplomacy || 0} />
+                      <SkillProgress label="rhétorique" value={child.skills?.rhetoric || 0} />
+                      <SkillProgress label="politique" value={child.skills?.politics || 0} />
+                      <SkillProgress label="stratégie" value={child.skills?.strategy || 0} />
+                      <SkillProgress label="diplomatie" value={child.skills?.diplomacy || 0} />
                     </div>
                   </div>
                   
                   <div>
                     <h4 className="text-md font-medium mb-4">Compétences martiales</h4>
                     <div className="space-y-3">
-                      <SkillProgress skill="combat" value={child.skills?.combat || 0} />
-                      <SkillProgress skill="commandement" value={child.skills?.leadership || 0} />
-                      <SkillProgress skill="équitation" value={child.skills?.riding || 0} />
-                      <SkillProgress skill="tactique" value={child.skills?.tactics || 0} />
+                      <SkillProgress label="combat" value={child.skills?.combat || 0} />
+                      <SkillProgress label="commandement" value={child.skills?.leadership || 0} />
+                      <SkillProgress label="équitation" value={child.skills?.riding || 0} />
+                      <SkillProgress label="tactique" value={child.skills?.tactics || 0} />
                     </div>
                   </div>
                 </div>
@@ -343,12 +348,13 @@ export const ChildEducationDetail = () => {
                       <h4 className="text-md font-medium mb-4">Choisir un parcours éducatif</h4>
                       <EducationTypeSelector 
                         selectedType={selectedPathType}
-                        onSelectType={setSelectedPathType}
+                        onChange={(type: string) => setSelectedPathType(type as EducationType)}
+                        childGender={child.gender}
                       />
                       
-                      {selectedPathType && (
+                      {selectedPathType && selectedPathType !== 'none' && (
                         <div className="mt-4">
-                          <EducationObjectives pathType={selectedPathType} />
+                          <EducationObjectives educationType={selectedPathType} />
                         </div>
                       )}
                     </div>
@@ -371,7 +377,7 @@ export const ChildEducationDetail = () => {
                                 <div>
                                   <h5 className="font-medium">{preceptor.name}</h5>
                                   <p className="text-sm text-muted-foreground">
-                                    Spécialité: {preceptor.specialty}
+                                    Spécialité: {preceptor.specialty || preceptor.speciality}
                                   </p>
                                 </div>
                                 <div className="text-right">
@@ -397,7 +403,7 @@ export const ChildEducationDetail = () => {
                   <EducationFormActions
                     onCancel={handleCancelNewEducation}
                     onSave={handleSaveNewEducation}
-                    disabled={!selectedPathType || !selectedPreceptorId}
+                    disabled={!selectedPathType || selectedPathType === 'none' || !selectedPreceptorId}
                   />
                 </div>
               )}

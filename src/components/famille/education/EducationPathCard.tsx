@@ -30,6 +30,13 @@ export const EducationPathCard: React.FC<EducationPathCardProps> = ({ path }) =>
     return path.outcomes.skills || [];
   };
   
+  // Helper to safely access requirements properties
+  const getRequirementValue = (property: string) => {
+    if (!path.requirements) return null;
+    if (Array.isArray(path.requirements)) return null;
+    return (path.requirements as any)[property];
+  };
+  
   return (
     <Card className="h-full">
       <CardHeader className="pb-2">
@@ -50,16 +57,16 @@ export const EducationPathCard: React.FC<EducationPathCardProps> = ({ path }) =>
           <div className="text-sm">
             <p className="font-medium mb-1">Conditions:</p>
             <ul className="space-y-1 text-muted-foreground">
-              {path.requirements.age && (
+              {getRequirementValue('age') && (
                 <li className="flex items-center gap-1">
-                  <span>• Âge minimum: {path.requirements.age} ans</span>
+                  <span>• Âge minimum: {getRequirementValue('age')} ans</span>
                 </li>
               )}
-              {path.requirements.gender && (
+              {getRequirementValue('gender') && (
                 <li className="flex items-center gap-1">
-                  <span>• Genre: {path.requirements.gender === 'both' 
+                  <span>• Genre: {getRequirementValue('gender') === 'both' 
                     ? 'Tous' 
-                    : path.requirements.gender === 'male' 
+                    : getRequirementValue('gender') === 'male' 
                       ? 'Garçons uniquement' 
                       : 'Filles uniquement'}</span>
                 </li>
@@ -71,7 +78,7 @@ export const EducationPathCard: React.FC<EducationPathCardProps> = ({ path }) =>
         <div className="text-sm pt-2 border-t">
           <p className="font-medium mb-1">Bénéfices:</p>
           <ul className="space-y-1">
-            {path.benefits.map((benefit, idx) => (
+            {path.benefits && path.benefits.map((benefit, idx) => (
               <li key={idx} className="flex items-center gap-1 text-muted-foreground">
                 <Check className="h-3 w-3 text-green-600 flex-shrink-0" />
                 <span>{benefit}</span>

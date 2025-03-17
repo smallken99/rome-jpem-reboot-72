@@ -41,7 +41,8 @@ export const useEducationSystem = () => {
         quality: reputation === "Excellent" ? 5 : reputation === "Bon" ? 4 : 3,
         cost: generateFee(),
         available: true,
-        speciality: generateSpeciality()
+        speciality: generateSpeciality(),
+        specialties: [],
       });
     }
     
@@ -52,10 +53,16 @@ export const useEducationSystem = () => {
   // Function to filter education paths based on child's age and gender
   const getPathsForChild = (child: Child): EducationPath[] => {
     return availablePaths.filter(path => {
-      const meetsAgeRequirement = child.age >= (path.requirements?.age || 0);
+      if (!path.requirements) return true;
+      
+      if (Array.isArray(path.requirements)) {
+        return true; // No specific requirements in array format
+      }
+      
+      const meetsAgeRequirement = child.age >= (path.requirements.age || 0);
       const meetsGenderRequirement = 
-        path.requirements?.gender === 'both' || 
-        path.requirements?.gender === child.gender;
+        path.requirements.gender === 'both' || 
+        path.requirements.gender === child.gender;
       
       return meetsAgeRequirement && meetsGenderRequirement;
     });
@@ -78,7 +85,8 @@ export const useEducationSystem = () => {
       quality: reputation === "Excellent" ? 5 : reputation === "Bon" ? 4 : 3,
       cost: generateFee(),
       available: true,
-      speciality: generateSpeciality()
+      speciality: generateSpeciality(),
+      specialties: [],
     };
   };
   
