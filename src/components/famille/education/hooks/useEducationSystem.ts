@@ -32,14 +32,14 @@ export const useEducationSystem = () => {
         name: generateRomanName(),
         specialty: generateSpeciality(),
         skill: reputation === "Excellent" ? 5 : reputation === "Bon" ? 4 : 3,
-        price: 1000 + Math.floor(Math.random() * 5000), // Generate numeric price
+        price: 1000 + Math.floor(Math.random() * 5000), 
         status: 'available',
         background: `Un éducateur expérimenté, spécialisé en ${generateSpeciality()}.`,
         childId: null,
         // For backward compatibility
         reputation,
         quality: reputation === "Excellent" ? 5 : reputation === "Bon" ? 4 : 3,
-        cost: 1000 + Math.floor(Math.random() * 5000), // Generate numeric cost
+        cost: 1000 + Math.floor(Math.random() * 5000),
         available: true,
         speciality: generateSpeciality(),
         specialties: [generateSpeciality(), generateSpeciality()],
@@ -81,14 +81,14 @@ export const useEducationSystem = () => {
       name: generateRomanName(),
       specialty: generateSpeciality(),
       skill: reputation === "Excellent" ? 5 : reputation === "Bon" ? 4 : 3,
-      price: 1000 + Math.floor(Math.random() * 5000), // Generate numeric price
+      price: 1000 + Math.floor(Math.random() * 5000),
       status: 'available',
       background: `Un éducateur expérimenté, spécialisé en ${generateSpeciality()}.`,
       childId: null,
       // For backward compatibility
       reputation,
       quality: reputation === "Excellent" ? 5 : reputation === "Bon" ? 4 : 3,
-      cost: 1000 + Math.floor(Math.random() * 5000), // Generate numeric cost
+      cost: 1000 + Math.floor(Math.random() * 5000),
       available: true,
       speciality: generateSpeciality(),
       specialties: [educationType, generateSpeciality()],

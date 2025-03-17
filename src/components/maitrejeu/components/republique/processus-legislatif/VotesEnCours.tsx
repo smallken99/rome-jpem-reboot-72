@@ -24,7 +24,11 @@ export const VotesEnCours: React.FC<VotesEnCoursProps> = ({ searchTerm }) => {
         </div>
       ) : (
         filteredVotes.map(vote => (
-          <VoteItem key={vote.id} vote={vote} />
+          <VoteItem key={vote.id} vote={{
+            ...vote,
+            description: vote.description || '',
+            contenu: Array.isArray(vote.contenu) ? vote.contenu : []
+          }} />
         ))
       )}
     </div>

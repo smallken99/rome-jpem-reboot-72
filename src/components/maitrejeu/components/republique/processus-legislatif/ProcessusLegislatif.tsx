@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -21,12 +20,12 @@ export const ProcessusLegislatif: React.FC<ProcessusLegislatifProps> = ({
   isEditable = true
 }) => {
   const [activeTab, setActiveTab] = useState('projets');
-  // Use state initializer functions instead of direct arrays to fix type mismatch
+  
   const [projets, setProjets] = useState<ProjetLoi[]>(() => {
     return projetsData.map(projet => ({
       ...projet,
       description: projet.description || '',
-      contenu: projet.contenu || []
+      contenu: Array.isArray(projet.contenu) ? projet.contenu : (projet.contenu ? [projet.contenu] : [])
     }));
   });
   
@@ -34,7 +33,7 @@ export const ProcessusLegislatif: React.FC<ProcessusLegislatifProps> = ({
     return votesData.map(vote => ({
       ...vote,
       description: vote.description || '',
-      contenu: vote.contenu || []
+      contenu: Array.isArray(vote.contenu) ? vote.contenu : (vote.contenu ? [vote.contenu] : [])
     }));
   });
   
@@ -44,7 +43,8 @@ export const ProcessusLegislatif: React.FC<ProcessusLegislatifProps> = ({
       dateProposition: histoire.date || '',
       dateAdoption: histoire.date || '',
       contenu: [],
-      statut: histoire.resultat === 'Adoptée' ? 'adopté' : 'rejeté'
+      statut: histoire.resultat === 'Adoptée' ? 'adopté' : 'rejeté',
+      description: histoire.description || 'Aucune description'
     }));
   });
   
@@ -67,11 +67,9 @@ export const ProcessusLegislatif: React.FC<ProcessusLegislatifProps> = ({
   
   const handleSaveLoi = (loiData: any) => {
     if (selectedLoi) {
-      // Update existing loi
       setProjets(projets.map(p => p.id === selectedLoi.id ? { ...p, ...loiData } : p));
       toast.success(`Loi "${loiData.titre}" mise à jour`);
     } else {
-      // Add new loi
       const newLoi: ProjetLoi = {
         id: `proj-${Date.now()}`,
         ...loiData
@@ -103,7 +101,6 @@ export const ProcessusLegislatif: React.FC<ProcessusLegislatifProps> = ({
   
   const confirmStartVote = () => {
     if (loiToStartVote) {
-      // Move from projets to votes
       setProjets(projets.filter(p => p.id !== loiToStartVote.id));
       
       const newVote: VoteLoi = {
@@ -147,10 +144,8 @@ export const ProcessusLegislatif: React.FC<ProcessusLegislatifProps> = ({
     const vote = votes.find(v => v.id === voteId);
     if (!vote) return;
     
-    // Déterminer si la loi a été adoptée ou rejetée
     const isAdopted = vote.pour > vote.contre;
     
-    // Déplacer vers l'historique
     const historyEntry: HistoriqueLoi = {
       id: vote.id,
       titre: vote.titre,
@@ -223,7 +218,6 @@ export const ProcessusLegislatif: React.FC<ProcessusLegislatifProps> = ({
         </CardContent>
       </Card>
       
-      {/* Modal pour ajouter/éditer une loi */}
       <LoiModal 
         isOpen={isModalOpen} 
         onClose={() => setIsModalOpen(false)} 
@@ -231,7 +225,6 @@ export const ProcessusLegislatif: React.FC<ProcessusLegislatifProps> = ({
         loi={selectedLoi}
       />
       
-      {/* Dialogue de confirmation pour la suppression */}
       <AlertDialog open={deleteConfirmOpen} onOpenChange={setDeleteConfirmOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
@@ -247,7 +240,6 @@ export const ProcessusLegislatif: React.FC<ProcessusLegislatifProps> = ({
         </AlertDialogContent>
       </AlertDialog>
       
-      {/* Dialogue de confirmation pour le démarrage du vote */}
       <AlertDialog open={startVoteConfirmOpen} onOpenChange={setStartVoteConfirmOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
@@ -266,7 +258,6 @@ export const ProcessusLegislatif: React.FC<ProcessusLegislatifProps> = ({
   );
 };
 
-// Implement missing functions to make TypeScript happy
 const handleAddLoi = () => {};
 const handleEditLoi = (loi: ProjetLoi) => {};
 const handleSaveLoi = (loiData: any) => {};

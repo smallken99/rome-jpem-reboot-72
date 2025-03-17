@@ -1,102 +1,73 @@
 
 import React from 'react';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import { Eye, ThumbsUp, ThumbsDown } from 'lucide-react';
-import { formatDate } from '@/utils/formatUtils';
-import { LoisRejeteesTabProps } from '../types';
+import { Card, CardContent } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { Loi } from '@/components/maitrejeu/types/lois';
-import { ensureLoiCompliance } from '../utils/loiAdapter';
+import { gameDateToStringOrDate } from '../utils/dateConverter';
+import { formatAnyGameDate } from '../utils/dateHelpers';
 
-export const LoisRejeteesTab: React.FC<LoisRejeteesTabProps> = ({ lois, onViewLoi }) => {
-  // Helper functions to handle different Loi formats
-  const getLoiTitle = (loi: Loi): string => {
-    return loi.titre || loi.title || '';
-  };
-  
-  const getLoiDate = (loi: Loi): string => {
-    if (loi.dateProposition) {
-      return typeof loi.dateProposition === 'string' 
-        ? loi.dateProposition 
-        : formatDate(loi.dateProposition);
-    }
-    if (loi.date) {
-      return typeof loi.date === 'string'
-        ? loi.date
-        : formatDate(loi.date);
-    }
-    return '';
-  };
-  
-  const getLoiProposer = (loi: Loi): string => {
-    return loi.proposedBy || loi.proposeur || loi.auteur || '';
-  };
-  
-  const getLoiCategory = (loi: Loi): string => {
-    return loi.category || loi.catégorie || loi.categorieId || '';
-  };
-  
-  const getLoiVotesFor = (loi: Loi): number => {
-    return loi.votesFor || loi.votesPositifs || (loi.votes?.pour || 0);
-  };
-  
-  const getLoiVotesAgainst = (loi: Loi): number => {
-    return loi.votesAgainst || loi.votesNégatifs || (loi.votes?.contre || 0);
-  };
-  
-  // Assurer la compatibilité des lois
-  const compliantLois = lois.map(loi => ensureLoiCompliance(loi));
-  
+interface LoisRejeteesTabProps {
+  lois: Loi[];
+  onViewLoi: (loi?: Loi) => void;
+  formatSeason?: (season: string) => string;
+}
+
+export const LoisRejeteesTab: React.FC<LoisRejeteesTabProps> = ({
+  lois,
+  onViewLoi,
+  formatSeason = (s) => s
+}) => {
   return (
     <div className="space-y-4">
-      <Table>
-        <TableHeader>
-          <TableRow>
-            <TableHead>Titre</TableHead>
-            <TableHead>Date de décision</TableHead>
-            <TableHead>Proposée par</TableHead>
-            <TableHead>Catégorie</TableHead>
-            <TableHead>Résultat du vote</TableHead>
-            <TableHead className="text-right">Actions</TableHead>
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {compliantLois.length > 0 ? (
-            compliantLois.map((loi) => (
-              <TableRow key={loi.id}>
-                <TableCell className="font-medium">{getLoiTitle(loi)}</TableCell>
-                <TableCell>{getLoiDate(loi)}</TableCell>
-                <TableCell>{getLoiProposer(loi)}</TableCell>
-                <TableCell>{getLoiCategory(loi)}</TableCell>
-                <TableCell>
-                  <div className="flex items-center space-x-2">
-                    <Badge className="bg-green-100 text-green-800 border-green-200 flex items-center">
-                      <ThumbsUp className="h-3 w-3 mr-1" />
-                      {getLoiVotesFor(loi)}
-                    </Badge>
-                    <Badge className="bg-red-100 text-red-800 border-red-200 flex items-center">
-                      <ThumbsDown className="h-3 w-3 mr-1" />
-                      {getLoiVotesAgainst(loi)}
+      {lois.length === 0 ? (
+        <div className="text-center py-12 text-muted-foreground">
+          Aucune loi rejetée à afficher
+        </div>
+      ) : (
+        lois.map((loi) => (
+          <Card key={loi.id} className="overflow-hidden">
+            <CardContent className="p-0">
+              <div className="flex flex-col md:flex-row">
+                <div className="p-4 md:p-6 flex-1">
+                  <div className="flex flex-col md:flex-row md:items-center justify-between gap-2 mb-4">
+                    <h3 className="text-lg font-semibold">{loi.titre}</h3>
+                    <Badge variant="outline" className="bg-red-100 text-red-800 md:self-start">
+                      {loi.état}
                     </Badge>
                   </div>
-                </TableCell>
-                <TableCell className="text-right">
-                  <Button variant="ghost" size="sm" onClick={() => onViewLoi(loi)}>
-                    <Eye className="h-4 w-4 mr-2" /> Voir
+
+                  <p className="text-sm text-muted-foreground mb-4">
+                    {loi.description?.substring(0, 150)}
+                    {loi.description?.length > 150 ? '...' : ''}
+                  </p>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                    <div>
+                      <span className="text-muted-foreground">Proposé par:</span> {loi.proposeur}
+                    </div>
+                    <div>
+                      <span className="text-muted-foreground">Date:</span> {formatAnyGameDate(loi.date)}
+                    </div>
+                    <div>
+                      <span className="text-muted-foreground">Catégorie:</span> {loi.catégorie || loi.type}
+                    </div>
+                    <div>
+                      <span className="text-muted-foreground">Votes:</span> {loi.votesPositifs}-{loi.votesNégatifs}-{loi.votesAbstention}
+                    </div>
+                  </div>
+                </div>
+
+                <div className="p-4 md:w-48 bg-muted flex flex-row md:flex-col justify-between items-center md:items-stretch gap-2">
+                  <Button onClick={() => onViewLoi(loi)} variant="outline" size="sm" className="w-full">
+                    Voir détails
                   </Button>
-                </TableCell>
-              </TableRow>
-            ))
-          ) : (
-            <TableRow>
-              <TableCell colSpan={6} className="text-center py-6 text-muted-foreground">
-                Aucune loi rejetée
-              </TableCell>
-            </TableRow>
-          )}
-        </TableBody>
-      </Table>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        ))
+      )}
     </div>
   );
 };

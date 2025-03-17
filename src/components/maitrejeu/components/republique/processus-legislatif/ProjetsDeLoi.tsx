@@ -24,7 +24,11 @@ export const ProjetsDeLoi: React.FC<ProjetsDeLoiProps> = ({ searchTerm }) => {
         </div>
       ) : (
         filteredProjets.map(projet => (
-          <ProjetItem key={projet.id} projet={projet} />
+          <ProjetItem key={projet.id} projet={{
+            ...projet,
+            description: projet.description || '',
+            contenu: Array.isArray(projet.contenu) ? projet.contenu : []
+          }} />
         ))
       )}
     </div>

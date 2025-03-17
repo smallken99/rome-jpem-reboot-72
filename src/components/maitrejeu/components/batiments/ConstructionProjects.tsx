@@ -1,148 +1,298 @@
-import React from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Progress } from '@/components/ui/progress';
-import { Badge } from '@/components/ui/badge';
+import React, { useState } from 'react';
+import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { CheckIcon, Calendar, User, Coins, HardHat } from 'lucide-react';
-import { useBatimentsManagement } from '../../hooks/useBatimentsManagement';
-import { formatDate } from '@/utils/formatUtils';
-import { formatCurrency } from '@/utils/formatUtils';
-import { GameDate, Season } from '../../types/common';
-import { UnderDevelopmentSection } from '../UnderDevelopmentSection';
+import { Plus } from 'lucide-react';
+import {
+  Table,
+  TableHeader,
+  TableRow,
+  TableHead,
+  TableBody,
+  TableCell,
+} from "@/components/ui/table"
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
+import { Dialog, DialogTrigger, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog';
+import { useMaitreJeu } from '@/components/maitrejeu/context';
+import { GameDate } from '@/components/maitrejeu/types/common';
+import { Calendar } from '@/components/ui/calendar';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { cn } from '@/lib/utils';
+import { format } from 'date-fns';
+import { DateRange } from 'react-day-picker';
+import { gameToStringOrDate } from '@/utils/gameDate-helpers';
 
-interface ConstructionProjectsProps {
-  currentYear: number;
-  currentSeason: Season;
+interface ConstructionProject {
+  id: string;
+  name: string;
+  type: string;
+  startDate: GameDate;
+  endDate: GameDate;
+  cost: number;
+  description: string;
+  status: 'planned' | 'inProgress' | 'completed' | 'delayed';
 }
 
-export const ConstructionProjects: React.FC<ConstructionProjectsProps> = ({
-  currentYear,
-  currentSeason
-}) => {
-  const { constructionProjects, approveProject, updateProjectProgress } = useBatimentsManagement();
-  
-  if (constructionProjects.length === 0) {
-    return (
-      <UnderDevelopmentSection
-        title="Projets de construction"
-        description="Aucun projet de construction en cours. Utilisez le bouton 'Nouveau projet' pour en créer un."
-      />
-    );
-  }
-  
-  const getRemainingTime = (project: { estimatedCompletionDate: GameDate, progress: number }) => {
-    if (project.progress >= 100) return "Terminé";
-    
-    const currentDate = { year: currentYear, season: currentSeason };
-    const estimatedDate = project.estimatedCompletionDate;
-    
-    if (estimatedDate.year < currentDate.year) return "En retard";
-    if (estimatedDate.year > currentDate.year) {
-      const yearsRemaining = estimatedDate.year - currentDate.year;
-      return yearsRemaining > 1 ? `${yearsRemaining} ans` : "1 an";
+export const ConstructionProjects: React.FC = () => {
+  const [projects, setProjects] = useState<ConstructionProject[]>([
+    {
+      id: "cp-1",
+      name: "Construction du Colisée",
+      type: "Amphithéâtre",
+      startDate: { year: 72, season: "Aestas" },
+      endDate: { year: 80, season: "Aestas" },
+      cost: 100000,
+      description: "Construction du plus grand amphithéâtre de Rome.",
+      status: "inProgress"
+    },
+    {
+      id: "cp-2",
+      name: "Agrandissement du Forum Romain",
+      type: "Infrastructure",
+      startDate: { year: 75, season: "Ver" },
+      endDate: { year: 78, season: "Autumnus" },
+      cost: 50000,
+      description: "Agrandissement et rénovation du Forum Romain.",
+      status: "completed"
     }
-    
-    // Même année, comparer les saisons
-    const seasons = ["SPRING", "SUMMER", "AUTUMN", "WINTER"];
-    const currentSeasonIndex = seasons.indexOf(currentSeason.toString());
-    const estimatedSeasonIndex = seasons.indexOf(estimatedDate.season.toString());
-    
-    if (estimatedSeasonIndex < currentSeasonIndex) return "En retard";
-    if (estimatedSeasonIndex === currentSeasonIndex) return "Cette saison";
-    
-    const seasonsRemaining = estimatedSeasonIndex - currentSeasonIndex;
-    return seasonsRemaining === 1 ? "Saison prochaine" : `${seasonsRemaining} saisons`;
+  ]);
+  
+  const [open, setOpen] = useState(false);
+  const [newProject, setNewProject] = useState<Omit<ConstructionProject, 'id' | 'status'>>({
+    name: '',
+    type: '',
+    startDate: { year: new Date().getFullYear(), season: 'Ver' },
+    endDate: { year: new Date().getFullYear(), season: 'Ver' },
+    cost: 0,
+    description: ''
+  });
+  
+  const { addEconomieRecord } = useMaitreJeu();
+  
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    const { name, value } = e.target;
+    setNewProject(prev => ({
+      ...prev,
+      [name]: value
+    }));
   };
   
+  const handleDateChange = (name: 'startDate' | 'endDate', date: GameDate) => {
+    setNewProject(prev => ({
+      ...prev,
+      [name]: date
+    }));
+  };
+  
+  const addProject = () => {
+    const newId = `cp-${Date.now()}`;
+    const newProjectWithId: ConstructionProject = {
+      ...newProject,
+      id: newId,
+      status: 'planned'
+    };
+    
+    setProjects(prev => [...prev, newProjectWithId]);
+    setOpen(false);
+    
+    // Enregistrer la dépense dans l'économie
+    addEconomieRecord({
+      amount: -newProject.cost,
+      description: `Construction: ${newProject.name}`,
+      category: "Travaux Publics",
+      type: 'expense',
+      date: new Date().toISOString(),
+      source: 'Gouvernement',
+      approved: true
+    });
+  };
+
+  const [date, setDate] = useState<DateRange | undefined>({
+    from: new Date(newProject.startDate.year, 2, 1),
+    to: new Date(newProject.endDate.year, 2, 1),
+  })
+
   return (
-    <div className="space-y-4">
-      <div className="flex justify-between items-center">
-        <h3 className="text-lg font-semibold">Projets de construction actifs</h3>
-        <Button size="sm">Nouveau projet</Button>
-      </div>
+    <Card className="space-y-4">
+      <CardHeader>
+        <CardTitle>Projets de Construction</CardTitle>
+        <CardDescription>
+          Gérez les projets de construction en cours et à venir dans la ville.
+        </CardDescription>
+      </CardHeader>
       
-      <div className="grid gap-4 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
-        {constructionProjects.map((project) => (
-          <Card key={project.id} className="overflow-hidden">
-            <CardHeader className="pb-3">
-              <div className="flex justify-between items-start">
-                <div>
-                  <CardTitle className="text-base font-semibold">{project.name}</CardTitle>
-                  <CardDescription>{project.location}</CardDescription>
-                </div>
-                <Badge variant={project.approved ? "default" : "outline"}>
-                  {project.approved ? "Approuvé" : "En attente"}
-                </Badge>
-              </div>
-            </CardHeader>
-            <CardContent className="pt-0 space-y-4">
-              <div className="space-y-2">
-                <div className="flex justify-between text-sm">
-                  <span className="text-muted-foreground">Progression</span>
-                  <span className="font-medium">{project.progress}%</span>
-                </div>
-                <Progress value={project.progress} className="h-2" />
-              </div>
+      <CardContent>
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead>Projet</TableHead>
+              <TableHead>Type</TableHead>
+              <TableHead>Début</TableHead>
+              <TableHead>Fin</TableHead>
+              <TableHead>Coût</TableHead>
+              <TableHead>État</TableHead>
+            </TableRow>
+          </TableHeader>
+          
+          <TableBody>
+            {projects.map(project => {
+              const startDate = gameToStringOrDate(project.startDate);
+              const endDate = gameToStringOrDate(project.endDate);
               
-              <div className="grid grid-cols-2 gap-2 text-sm">
-                <div className="flex items-center">
-                  <Coins className="h-4 w-4 mr-2 text-muted-foreground" />
-                  <span>{formatCurrency(project.cost)}</span>
-                </div>
-                <div className="flex items-center">
-                  <Calendar className="h-4 w-4 mr-2 text-muted-foreground" />
-                  <span>{formatDate(project.estimatedCompletionDate)}</span>
-                </div>
-                <div className="flex items-center">
-                  <User className="h-4 w-4 mr-2 text-muted-foreground" />
-                  <span>{project.sponsor}</span>
-                </div>
-                <div className="flex items-center">
-                  <HardHat className="h-4 w-4 mr-2 text-muted-foreground" />
-                  <span>{project.workers || 0} ouvriers</span>
-                </div>
-              </div>
-              
-              <div className="text-sm">
-                <span className="text-muted-foreground">Temps restant: </span>
-                <span className="font-medium">{getRemainingTime({
-                  estimatedCompletionDate: project.estimatedCompletionDate || { year: currentYear + 1, season: currentSeason },
-                  progress: project.progress
-                })}</span>
-              </div>
-              
-              <div className="flex justify-between">
-                {!project.approved ? (
-                  <Button 
-                    className="w-full flex items-center gap-2"
-                    onClick={() => approveProject(project.id)}
+              return (
+                <TableRow key={project.id}>
+                  <TableCell className="font-medium">{project.name}</TableCell>
+                  <TableCell>{project.type}</TableCell>
+                  <TableCell>{startDate.toLocaleString()}</TableCell>
+                  <TableCell>{endDate.toLocaleString()}</TableCell>
+                  <TableCell>{project.cost}</TableCell>
+                  <TableCell>{project.status}</TableCell>
+                </TableRow>
+              );
+            })}
+          </TableBody>
+        </Table>
+      </CardContent>
+      
+      <Dialog open={open} onOpenChange={setOpen}>
+        <DialogTrigger asChild>
+          <Button className="ml-4">
+            <Plus className="h-4 w-4 mr-2" />
+            Nouveau Projet
+          </Button>
+        </DialogTrigger>
+        
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle>Ajouter un Projet</DialogTitle>
+            <DialogDescription>
+              Ajoutez un nouveau projet de construction à la ville.
+            </DialogDescription>
+          </DialogHeader>
+          
+          <div className="grid gap-4 py-4">
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="name" className="text-right">
+                Nom
+              </Label>
+              <Input 
+                type="text" 
+                id="name" 
+                name="name"
+                value={newProject.name}
+                onChange={handleInputChange}
+                className="col-span-3" 
+              />
+            </div>
+            
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="type" className="text-right">
+                Type
+              </Label>
+              <Input 
+                type="text" 
+                id="type" 
+                name="type"
+                value={newProject.type}
+                onChange={handleInputChange}
+                className="col-span-3" 
+              />
+            </div>
+            
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="cost" className="text-right">
+                Coût
+              </Label>
+              <Input 
+                type="number" 
+                id="cost" 
+                name="cost"
+                value={newProject.cost}
+                onChange={(e) => {
+                  if (!isNaN(Number(e.target.value))) {
+                    handleInputChange(e);
+                  }
+                }}
+                className="col-span-3" 
+              />
+            </div>
+            
+            <div className="grid grid-cols-4 items-start gap-4">
+              <Label htmlFor="description" className="text-right mt-2">
+                Description
+              </Label>
+              <Textarea 
+                id="description" 
+                name="description"
+                value={newProject.description}
+                onChange={handleInputChange}
+                className="col-span-3" 
+              />
+            </div>
+
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="dates" className="text-right">
+                Dates
+              </Label>
+              <Popover className="col-span-3">
+                <PopoverTrigger asChild>
+                  <Button
+                    variant={"outline"}
+                    className={cn(
+                      "w-[300px] justify-start text-left font-normal",
+                      !date && "text-muted-foreground"
+                    )}
                   >
-                    <CheckIcon className="h-4 w-4" />
-                    Approuver
+                    {date?.from ? (
+                      date.to ? (
+                        `${format(date.from, "LLL dd, y")} - ${format(
+                          date.to,
+                          "LLL dd, y"
+                        )}`
+                      ) : (
+                        format(date.from, "LLL dd, y")
+                      )
+                    ) : (
+                      <span>Choisir une date</span>
+                    )}
                   </Button>
-                ) : (
-                  <>
-                    <Button 
-                      variant="outline" 
-                      className="flex-1"
-                      onClick={() => updateProjectProgress(project.id, Math.min(100, project.progress + 10))}
-                    >
-                      Mettre à jour
-                    </Button>
-                    <Button 
-                      variant="outline" 
-                      className="flex-1 ml-2"
-                      onClick={() => updateProjectProgress(project.id, 100)}
-                    >
-                      Terminer
-                    </Button>
-                  </>
-                )}
-              </div>
-            </CardContent>
-          </Card>
-        ))}
-      </div>
-    </div>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0" align="center">
+                  <Calendar
+                    mode="range"
+                    defaultMonth={date?.from}
+                    selected={date}
+                    onSelect={(dateRange) => {
+                      setDate(dateRange)
+                      if (dateRange?.from) {
+                        handleDateChange('startDate', {
+                          year: dateRange.from.getFullYear(),
+                          season: 'Ver'
+                        })
+                      }
+                      if (dateRange?.to) {
+                        handleDateChange('endDate', {
+                          year: dateRange.to.getFullYear(),
+                          season: 'Ver'
+                        })
+                      }
+                    }}
+                    numberOfMonths={2}
+                    pagedNavigation
+                  />
+                </PopoverContent>
+              </Popover>
+            </div>
+          </div>
+          
+          <DialogFooter>
+            <Button type="button" onClick={addProject}>
+              Ajouter
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    </Card>
   );
 };

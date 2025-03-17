@@ -30,7 +30,8 @@ export const HistoriqueLois: React.FC<HistoriqueLoiProps> = ({ searchTerm }) => 
             dateProposition: loi.date || "Date inconnue",
             dateAdoption: loi.date || "Date inconnue",
             contenu: [],
-            statut: loi.resultat === 'Adoptée' ? 'adopté' : 'rejeté'
+            statut: loi.resultat === 'Adoptée' ? 'adopté' : 'rejeté',
+            description: loi.description || "Aucune description disponible"
           }} />
         ))
       )}

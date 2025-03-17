@@ -2,6 +2,7 @@
 import { useEffect, useState } from 'react';
 import { GameDate, Season } from '@/components/maitrejeu/types/common';
 import { formatDate, formatSeason } from '@/utils/formatUtils';
+import { gameToStringOrDate, gameToJsDate } from '@/utils/gameDate-helpers';
 
 export const useGameDate = (initialDate?: GameDate) => {
   const [currentDate, setCurrentDate] = useState<GameDate>(
@@ -112,6 +113,9 @@ export const useGameDate = (initialDate?: GameDate) => {
     isBefore,
     isAfter,
     formatGameDate,
-    formatSeason
+    formatSeason,
+    // Add the helper to convert GameDate to Date for compatibility
+    gameDateToJs: gameToJsDate,
+    gameDateToString: gameToStringOrDate
   };
 };

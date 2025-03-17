@@ -1,100 +1,159 @@
 
-import React from 'react';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
+import React, { useState } from 'react';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { 
+  DropdownMenu, 
+  DropdownMenuContent, 
+  DropdownMenuItem, 
+  DropdownMenuTrigger 
+} from "@/components/ui/dropdown-menu";
+import { ChevronDown, Filter, Search } from "lucide-react";
 import { Loi } from '@/components/maitrejeu/types/lois';
-import { formatDistanceToNow } from 'date-fns';
-import { fr } from 'date-fns/locale';
-import { Scroll, CheckCircle, AlertCircle, Clock } from 'lucide-react';
+import { formatAnyGameDate } from '../utils/dateHelpers';
+import { extractLoiDateInfo, gameDateToDate } from '../utils/dateConverter';
 
 interface LoisAllTabProps {
   lois: Loi[];
   onViewLoi: (loi?: Loi) => void;
-  formatSeason?: (season: string) => string;
+  formatSeason: (season: string) => string;
 }
 
-export const LoisAllTab: React.FC<LoisAllTabProps> = ({ 
-  lois, 
+export const LoisAllTab: React.FC<LoisAllTabProps> = ({
+  lois,
   onViewLoi,
-  formatSeason = (s) => s
+  formatSeason
 }) => {
-  // Fonction pour obtenir le statut visuel de la loi
-  const getStatusDisplay = (loi: Loi) => {
-    switch(loi.statut) {
-      case 'active':
-        return { 
-          label: 'Active', 
-          icon: <CheckCircle className="h-3.5 w-3.5 mr-1" />, 
-          className: 'bg-green-100 text-green-800 border-green-200' 
-        };
-      case 'rejetée':
-        return { 
-          label: 'Rejetée', 
-          icon: <AlertCircle className="h-3.5 w-3.5 mr-1" />, 
-          className: 'bg-red-100 text-red-800 border-red-200' 
-        };
-      case 'en_vote':
-        return { 
-          label: 'En vote', 
-          icon: <Clock className="h-3.5 w-3.5 mr-1" />, 
-          className: 'bg-blue-100 text-blue-800 border-blue-200' 
-        };
-      default:
-        return { 
-          label: 'Proposée', 
-          icon: <Scroll className="h-3.5 w-3.5 mr-1" />, 
-          className: 'bg-amber-100 text-amber-800 border-amber-200' 
-        };
+  const [searchTerm, setSearchTerm] = useState('');
+  const [selectedStatus, setSelectedStatus] = useState<string | null>(null);
+
+  // Filter lois based on search term and selected status
+  const filteredLois = lois.filter(loi => {
+    const matchesSearch = searchTerm === '' || 
+      loi.titre?.toLowerCase().includes(searchTerm.toLowerCase()) || 
+      loi.proposeur?.toLowerCase().includes(searchTerm.toLowerCase());
+
+    const matchesStatus = selectedStatus === null || 
+      loi.état?.toLowerCase() === selectedStatus.toLowerCase();
+
+    return matchesSearch && matchesStatus;
+  });
+
+  // Sort lois by date, most recent first
+  const sortedLois = [...filteredLois].sort((a, b) => {
+    if (a.date && b.date) {
+      try {
+        const dateA = typeof a.date === 'string' ? new Date(a.date) : gameDateToDate(a.date);
+        const dateB = typeof b.date === 'string' ? new Date(b.date) : gameDateToDate(b.date);
+        return dateB.getTime() - dateA.getTime();
+      } catch (error) {
+        return 0;
+      }
     }
-  };
+    return 0;
+  });
 
   return (
     <div className="space-y-4">
-      {lois.length === 0 ? (
-        <div className="text-center py-12 text-muted-foreground">
-          Aucune loi
+      <div className="flex flex-col sm:flex-row gap-4">
+        <div className="relative flex-1">
+          <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
+          <Input
+            placeholder="Rechercher une loi..."
+            className="pl-8"
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+          />
         </div>
-      ) : (
-        lois.map(loi => {
-          const statusDisplay = getStatusDisplay(loi);
-          
-          return (
-            <Card key={loi.id} className="overflow-hidden hover:shadow-md transition-shadow">
-              <CardContent className="p-0">
-                <div className="p-4">
-                  <div className="flex justify-between items-start">
-                    <div>
-                      <h3 className="font-medium">{loi.nom}</h3>
-                      <p className="text-sm text-muted-foreground">
-                        Proposée par {loi.auteur || 'Inconnu'}, 
-                        {loi.dateProposition && (
-                          <> il y a {formatDistanceToNow(new Date(loi.dateProposition), { locale: fr })}</>
-                        )}
-                      </p>
-                    </div>
-                    <Badge className={`flex items-center ${statusDisplay.className}`}>
-                      {statusDisplay.icon}
-                      {statusDisplay.label}
-                    </Badge>
-                  </div>
-                  <p className="mt-2 text-sm line-clamp-2">{loi.description}</p>
-                  {loi.saison && (
-                    <p className="mt-1 text-xs text-muted-foreground">
-                      Saison d'application: {formatSeason(loi.saison)} {loi.année}
-                    </p>
-                  )}
-                </div>
-                <div className="px-4 py-2 bg-muted/10 border-t flex justify-end">
-                  <Button variant="outline" size="sm" onClick={() => onViewLoi(loi)}>
-                    Détails
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
-          );
-        })
-      )}
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="outline" className="flex items-center gap-2">
+              <Filter className="h-4 w-4" />
+              <span>Statut</span>
+              <ChevronDown className="h-4 w-4" />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end">
+            <DropdownMenuItem onClick={() => setSelectedStatus(null)}>
+              Tous
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={() => setSelectedStatus('proposée')}>
+              Proposée
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={() => setSelectedStatus('active')}>
+              Active
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={() => setSelectedStatus('rejected')}>
+              Rejetée
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
+      </div>
+
+      <div className="rounded-md border">
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead className="w-[300px]">Loi</TableHead>
+              <TableHead>Auteur</TableHead>
+              <TableHead>Catégorie</TableHead>
+              <TableHead>Date</TableHead>
+              <TableHead>Statut</TableHead>
+              <TableHead className="text-right">Actions</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {sortedLois.length === 0 ? (
+              <TableRow>
+                <TableCell colSpan={6} className="h-24 text-center">
+                  Aucune loi trouvée.
+                </TableCell>
+              </TableRow>
+            ) : (
+              sortedLois.map((loi) => {
+                const dateInfo = extractLoiDateInfo(loi);
+                
+                return (
+                  <TableRow key={loi.id}>
+                    <TableCell className="font-medium">{loi.titre}</TableCell>
+                    <TableCell>{loi.proposeur}</TableCell>
+                    <TableCell>
+                      <Badge variant="outline">{loi.catégorie || loi.type}</Badge>
+                    </TableCell>
+                    <TableCell>
+                      {formatAnyGameDate(loi.date)}
+                    </TableCell>
+                    <TableCell>
+                      <Badge
+                        className={
+                          loi.état === 'active' || loi.état === 'promulguée'
+                            ? 'bg-green-100 text-green-800'
+                            : loi.état === 'rejected' || loi.état === 'rejetée'
+                            ? 'bg-red-100 text-red-800'
+                            : 'bg-blue-100 text-blue-800'
+                        }
+                      >
+                        {loi.état}
+                      </Badge>
+                    </TableCell>
+                    <TableCell className="text-right">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => onViewLoi(loi)}
+                      >
+                        Voir détails
+                      </Button>
+                    </TableCell>
+                  </TableRow>
+                );
+              })
+            )}
+          </TableBody>
+        </Table>
+      </div>
     </div>
   );
 };
