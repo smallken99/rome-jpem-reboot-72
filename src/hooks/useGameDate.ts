@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from 'react';
 import { GameDate, Season } from '@/components/maitrejeu/types/common';
 import { formatDate, formatSeason } from '@/utils/formatUtils';
