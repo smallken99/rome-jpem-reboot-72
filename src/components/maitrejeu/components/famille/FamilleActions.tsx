@@ -1,17 +1,15 @@
 
-import React, { useState } from 'react';
+import React from 'react';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { AlertCircle, ArrowUpDown, BookOpen, ChevronDown, FileText, Plus, Power, UserPlus, Users } from 'lucide-react';
-import { toast } from 'sonner';
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import { UserPlus, Users, Handshake, Network } from 'lucide-react';
 
-export interface FamilleActionsProps {
-  onCreateFamille?: () => void;
-  onCreateMembre?: () => void;
-  onCreateAlliance?: () => void;
-  onManageRelations?: () => void;
+interface FamilleActionsProps {
+  onCreateFamille: () => void;
+  onCreateMembre: () => void;
+  onCreateAlliance: () => void;
+  onManageRelations: () => void;
 }
 
 export const FamilleActions: React.FC<FamilleActionsProps> = ({
@@ -20,183 +18,98 @@ export const FamilleActions: React.FC<FamilleActionsProps> = ({
   onCreateAlliance,
   onManageRelations
 }) => {
-  const [eventDialogOpen, setEventDialogOpen] = useState(false);
-  const [selectedEvent, setSelectedEvent] = useState('');
-  
-  const handleEventAction = (event: string) => {
-    setSelectedEvent(event);
-    setEventDialogOpen(true);
-  };
-  
-  const confirmEvent = () => {
-    setEventDialogOpen(false);
-    
-    switch (selectedEvent) {
-      case 'naissance':
-        toast.success('Un nouvel enfant est né dans la famille!');
-        if (onCreateMembre) onCreateMembre();
-        break;
-      case 'deces':
-        toast.error('Un membre de la famille est décédé');
-        break;
-      case 'mariage':
-        toast.success('Un mariage a été arrangé');
-        if (onCreateAlliance) onCreateAlliance();
-        break;
-      case 'divorce':
-        toast.info('Un divorce a été prononcé');
-        break;
-      case 'adoption':
-        toast.success('Un enfant a été adopté dans la famille');
-        if (onCreateMembre) onCreateMembre();
-        break;
-      case 'succession':
-        toast.info('Une succession a été établie');
-        break;
-    }
-  };
-  
-  const getEventTitle = () => {
-    switch (selectedEvent) {
-      case 'naissance': return 'Déclarer une naissance';
-      case 'deces': return 'Déclarer un décès';
-      case 'mariage': return 'Arranger un mariage';
-      case 'divorce': return 'Prononcer un divorce';
-      case 'adoption': return 'Adopter un enfant';
-      case 'succession': return 'Gérer une succession';
-      default: return 'Événement familial';
-    }
-  };
-  
-  const getEventDescription = () => {
-    switch (selectedEvent) {
-      case 'naissance': 
-        return 'Enregistrer la naissance d\'un nouvel enfant dans la famille.';
-      case 'deces': 
-        return 'Déclarer le décès d\'un membre de la famille. Cela affectera la succession et les relations familiales.';
-      case 'mariage': 
-        return 'Arranger un mariage entre deux familles, créant une alliance et renforçant les relations politiques.';
-      case 'divorce': 
-        return 'Prononcer un divorce, mettant fin à une alliance matrimoniale entre familles.';
-      case 'adoption': 
-        return 'Adopter un enfant extérieur à la famille, lui donnant tous les droits d\'un membre de sang.';
-      case 'succession': 
-        return 'Gérer la succession d\'un défunt et transférer ses biens et titres à ses héritiers.';
-      default: 
-        return 'Gérer un événement important dans la vie de la famille.';
-    }
-  };
-  
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>Actions Familiales</CardTitle>
-        <CardDescription>
-          Gérez votre famille, créez des alliances et enregistrez des événements importants
-        </CardDescription>
-      </CardHeader>
-      <CardContent>
-        <div className="grid grid-cols-2 gap-4">
+    <div className="space-y-4">
+      <Card>
+        <CardHeader className="pb-3">
+          <CardTitle>Actions</CardTitle>
+          <CardDescription>
+            Gérer les familles et leurs relations
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
           <Button 
-            variant="outline" 
-            className="flex items-center gap-2 justify-start" 
+            className="w-full flex items-center justify-start" 
             onClick={onCreateFamille}
           >
-            <Users className="h-4 w-4" />
-            <span>Créer une famille</span>
+            <Users className="mr-2 h-4 w-4" />
+            Créer une famille
           </Button>
           
           <Button 
-            variant="outline" 
-            className="flex items-center gap-2 justify-start" 
+            className="w-full flex items-center justify-start" 
             onClick={onCreateMembre}
+            variant="outline"
           >
-            <UserPlus className="h-4 w-4" />
-            <span>Ajouter un membre</span>
+            <UserPlus className="mr-2 h-4 w-4" />
+            Ajouter un membre
           </Button>
           
           <Button 
-            variant="outline" 
-            className="flex items-center gap-2 justify-start" 
+            className="w-full flex items-center justify-start" 
             onClick={onCreateAlliance}
+            variant="outline"
           >
-            <ArrowUpDown className="h-4 w-4" />
-            <span>Créer une alliance</span>
+            <Handshake className="mr-2 h-4 w-4" />
+            Créer une alliance
           </Button>
           
           <Button 
-            variant="outline" 
-            className="flex items-center gap-2 justify-start" 
+            className="w-full flex items-center justify-start" 
             onClick={onManageRelations}
+            variant="outline"
           >
-            <BookOpen className="h-4 w-4" />
-            <span>Gérer les relations</span>
+            <Network className="mr-2 h-4 w-4" />
+            Voir les relations
           </Button>
-          
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="outline" className="flex items-center gap-2 justify-start w-full col-span-2">
-                <FileText className="h-4 w-4" />
-                <span>Événements familiaux</span>
-                <ChevronDown className="h-4 w-4 ml-auto" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-56">
-              <DropdownMenuItem onClick={() => handleEventAction('naissance')}>
-                <Plus className="h-4 w-4 mr-2" />
-                <span>Naissance</span>
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => handleEventAction('deces')}>
-                <Power className="h-4 w-4 mr-2" />
-                <span>Décès</span>
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => handleEventAction('mariage')}>
-                <Users className="h-4 w-4 mr-2" />
-                <span>Mariage</span>
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => handleEventAction('divorce')}>
-                <ArrowUpDown className="h-4 w-4 mr-2" />
-                <span>Divorce</span>
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => handleEventAction('adoption')}>
-                <UserPlus className="h-4 w-4 mr-2" />
-                <span>Adoption</span>
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => handleEventAction('succession')}>
-                <FileText className="h-4 w-4 mr-2" />
-                <span>Succession</span>
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
-        </div>
-      </CardContent>
+        </CardContent>
+      </Card>
       
-      <Dialog open={eventDialogOpen} onOpenChange={setEventDialogOpen}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>{getEventTitle()}</DialogTitle>
-            <DialogDescription>
-              {getEventDescription()}
-            </DialogDescription>
-          </DialogHeader>
-          
-          <div className="bg-amber-50 border border-amber-200 rounded-md p-3 flex gap-2 items-start">
-            <AlertCircle className="h-5 w-5 text-amber-500 mt-0.5" />
-            <div className="text-sm text-amber-800">
-              <p>Cette action aura des conséquences importantes sur l'équilibre des familles et la progression du jeu.</p>
+      <Card>
+        <CardHeader className="pb-3">
+          <CardTitle>Rappels</CardTitle>
+          <CardDescription>
+            Points importants sur les familles
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <ScrollArea className="h-[180px]">
+            <div className="space-y-4">
+              <div>
+                <h4 className="font-medium">Familles Patriciennes</h4>
+                <p className="text-sm text-muted-foreground">
+                  Les familles patriciennes sont les plus anciennes et les plus prestigieuses de Rome. 
+                  Elles ont accès exclusif à certaines magistratures.
+                </p>
+              </div>
+              
+              <div>
+                <h4 className="font-medium">Familles Plébéiennes</h4>
+                <p className="text-sm text-muted-foreground">
+                  Issues de la plèbe, ces familles ont gagné en influence au fil des siècles. 
+                  Elles peuvent accéder à la plupart des magistratures, mais avec certaines limitations.
+                </p>
+              </div>
+              
+              <div>
+                <h4 className="font-medium">Alliances</h4>
+                <p className="text-sm text-muted-foreground">
+                  Les alliances entre familles sont essentielles pour renforcer votre position 
+                  politique et votre influence dans la République.
+                </p>
+              </div>
+              
+              <div>
+                <h4 className="font-medium">Mariages</h4>
+                <p className="text-sm text-muted-foreground">
+                  Les mariages sont un moyen privilégié de créer des alliances durables 
+                  entre familles et d'assurer la continuité des lignées.
+                </p>
+              </div>
             </div>
-          </div>
-          
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setEventDialogOpen(false)}>
-              Annuler
-            </Button>
-            <Button onClick={confirmEvent}>
-              Confirmer
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-    </Card>
+          </ScrollArea>
+        </CardContent>
+      </Card>
+    </div>
   );
 };

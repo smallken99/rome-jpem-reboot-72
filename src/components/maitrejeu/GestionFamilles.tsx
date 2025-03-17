@@ -2,7 +2,7 @@
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { useFamilleGestion } from './components/famille/gestion/useFamilleGestion';
-import { FamilleListe } from './components/famille/gestion/FamilleListe';
+import { FamilleList } from './components/famille/gestion/FamilleList';
 import { FamilleDetail } from './components/famille/gestion/FamilleDetail';
 import { FamilleRelationsOverview } from './components/famille/gestion/FamilleRelationsOverview';
 import { FamilleCreationDialog } from './components/famille/gestion/dialogs/FamilleCreationDialog';
@@ -104,7 +104,7 @@ export const GestionFamilles = () => {
                   </div>
                 </CardHeader>
                 <CardContent>
-                  <FamilleListe
+                  <FamilleList
                     familles={familles.filter(f => 
                       f.nom.toLowerCase().includes(searchTerm.toLowerCase()) ||
                       f.gens.toLowerCase().includes(searchTerm.toLowerCase())

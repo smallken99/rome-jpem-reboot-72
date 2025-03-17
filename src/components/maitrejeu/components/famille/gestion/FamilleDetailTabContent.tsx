@@ -1,10 +1,9 @@
 
 import React from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { FamilleInfo } from '../../../types/familles';
 import { ArrowLeft, Edit, Trash } from 'lucide-react';
-import { FamilleInfo } from '../../../types';
-import { Badge } from '@/components/ui/badge';
 
 export interface FamilleDetailTabContentProps {
   famille: FamilleInfo;
@@ -20,101 +19,83 @@ export const FamilleDetailTabContent: React.FC<FamilleDetailTabContentProps> = (
   onBack
 }) => {
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <Button 
-          onClick={onBack} 
-          variant="outline" 
-          className="flex items-center gap-1"
-        >
-          <ArrowLeft className="h-4 w-4" />
+    <div className="space-y-4">
+      <div className="flex justify-between items-center">
+        <Button variant="outline" size="sm" onClick={onBack}>
+          <ArrowLeft className="w-4 h-4 mr-2" />
           Retour
         </Button>
-        
-        <div className="flex items-center gap-2">
-          <Button 
-            onClick={onEditFamille} 
-            variant="outline" 
-            className="flex items-center gap-1"
-          >
-            <Edit className="h-4 w-4" />
+        <div>
+          <Button variant="outline" size="sm" className="mr-2" onClick={onEditFamille}>
+            <Edit className="w-4 h-4 mr-2" />
             Modifier
           </Button>
-          <Button 
-            onClick={onDeleteFamille} 
-            variant="destructive" 
-            className="flex items-center gap-1"
-          >
-            <Trash className="h-4 w-4" />
+          <Button variant="destructive" size="sm" onClick={onDeleteFamille}>
+            <Trash className="w-4 h-4 mr-2" />
             Supprimer
           </Button>
         </div>
       </div>
-      
+
       <Card>
-        <CardHeader 
-          className="pb-2" 
-          style={{
-            backgroundColor: famille.couleurPrimaire || '#f1f5f9',
-            color: '#fff',
-            borderBottom: `4px solid ${famille.couleurSecondaire || '#64748b'}`
-          }}
-        >
-          <CardTitle className="text-2xl font-bold flex justify-between items-center">
-            <span>Famille {famille.nom}</span>
-            <Badge className="ml-2" variant={famille.statut === "Patricien" ? "default" : "outline"}>
-              {famille.statut}
-            </Badge>
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="pt-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div className="space-y-4">
-              <div>
-                <h3 className="text-sm font-medium text-muted-foreground">Gens</h3>
-                <p className="text-lg">{famille.gens}</p>
-              </div>
-              
-              <div>
-                <h3 className="text-sm font-medium text-muted-foreground">Devise</h3>
-                <p className="text-lg italic">{famille.devise || "Aucune devise"}</p>
-              </div>
-              
-              <div>
-                <h3 className="text-sm font-medium text-muted-foreground">Prestige</h3>
-                <div className="flex items-center gap-2">
-                  <div className="w-full bg-gray-200 rounded-full h-2.5">
-                    <div 
-                      className="bg-blue-600 h-2.5 rounded-full" 
-                      style={{ width: `${famille.prestige}%` }}
-                    ></div>
-                  </div>
-                  <span className="text-sm">{famille.prestige}</span>
-                </div>
-              </div>
-              
-              <div>
-                <h3 className="text-sm font-medium text-muted-foreground">Influence</h3>
-                <div className="flex items-center gap-2">
-                  <div className="w-full bg-gray-200 rounded-full h-2.5">
-                    <div 
-                      className="bg-purple-600 h-2.5 rounded-full" 
-                      style={{ width: `${famille.influence}%` }}
-                    ></div>
-                  </div>
-                  <span className="text-sm">{famille.influence}</span>
-                </div>
-              </div>
-              
-              <div>
-                <h3 className="text-sm font-medium text-muted-foreground">Richesse</h3>
-                <p className="text-lg">{famille.richesse.toLocaleString()} As</p>
-              </div>
-            </div>
-            
+        <CardContent className="p-6">
+          <div className="flex justify-between">
             <div>
-              <h3 className="text-sm font-medium text-muted-foreground mb-2">Description</h3>
-              <p className="text-gray-700">{famille.description || "Aucune description disponible."}</p>
+              <h2 className="text-2xl font-bold">{famille.nom}</h2>
+              <p className="text-muted-foreground">Gens {famille.gens}</p>
+            </div>
+            <div className="flex space-x-2">
+              <div
+                className="w-10 h-10 rounded-full"
+                style={{ backgroundColor: famille.couleurPrimaire }}
+              ></div>
+              <div
+                className="w-10 h-10 rounded-full"
+                style={{ backgroundColor: famille.couleurSecondaire }}
+              ></div>
+            </div>
+          </div>
+
+          <div className="mt-6 grid grid-cols-3 gap-4">
+            <div>
+              <div className="text-sm text-muted-foreground">Statut</div>
+              <div className="font-medium">{famille.statut}</div>
+            </div>
+            <div>
+              <div className="text-sm text-muted-foreground">Prestige</div>
+              <div className="font-medium">{famille.prestige}</div>
+            </div>
+            <div>
+              <div className="text-sm text-muted-foreground">Influence</div>
+              <div className="font-medium">{famille.influence}</div>
+            </div>
+          </div>
+
+          <div className="mt-4">
+            <div className="text-sm text-muted-foreground">Richesse</div>
+            <div className="font-medium">{famille.richesse.toLocaleString()} as</div>
+          </div>
+
+          {famille.devise && (
+            <div className="mt-4">
+              <div className="text-sm text-muted-foreground">Devise</div>
+              <div className="font-medium italic">"{famille.devise}"</div>
+            </div>
+          )}
+
+          <div className="mt-4">
+            <div className="text-sm text-muted-foreground">Description</div>
+            <div className="mt-1">{famille.description}</div>
+          </div>
+
+          <div className="mt-6 grid grid-cols-2 gap-4">
+            <div>
+              <div className="text-sm font-medium">Membres</div>
+              <div className="text-xl">{famille.membres.length}</div>
+            </div>
+            <div>
+              <div className="text-sm font-medium">Alliances</div>
+              <div className="text-xl">{famille.alliances.length}</div>
             </div>
           </div>
         </CardContent>
