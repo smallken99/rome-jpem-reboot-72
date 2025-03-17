@@ -1,31 +1,48 @@
 
 import { useState } from 'react';
-import { usePatrimoine } from '@/hooks/usePatrimoine';
 import { useBuildingInventory } from './useBuildingInventory';
+import { usePatrimoine } from '@/hooks/usePatrimoine';
 import { toast } from 'sonner';
 
 export function useBuildingMaintenance() {
   const [isLoading, setIsLoading] = useState(false);
-  const patrimoine = usePatrimoine();
-  const { updateBuildingProperty, ownedBuildings } = useBuildingInventory();
+  const { updateBuildingProperty, performBuildingMaintenance } = useBuildingInventory();
+  const { addTransaction } = usePatrimoine();
   
-  // Activer ou désactiver l'entretien automatique
-  const toggleMaintenance = (buildingId: number | string, enabled: boolean): void => {
-    updateBuildingProperty(buildingId, 'maintenanceEnabled', enabled);
-    
-    toast.success(
-      enabled 
-        ? "Entretien automatique activé" 
-        : "Entretien automatique désactivé"
-    );
+  // Toggle maintenance setting for a building
+  const toggleMaintenance = (buildingId: number | string, enabled: boolean = true): boolean => {
+    try {
+      updateBuildingProperty(buildingId, 'maintenanceEnabled', enabled);
+      
+      toast.success(
+        enabled 
+          ? "Maintenance activée" 
+          : "Maintenance désactivée",
+        {
+          description: enabled 
+            ? "L'entretien régulier préviendra la détérioration." 
+            : "Le bâtiment se dégradera plus rapidement sans entretien."
+        }
+      );
+      
+      return true;
+    } catch (error) {
+      console.error("Erreur lors de la modification des paramètres de maintenance:", error);
+      toast.error("Une erreur est survenue");
+      return false;
+    }
   };
   
-  // Effectuer l'entretien d'un bâtiment
-  const performMaintenance = async (buildingId: number | string): Promise<boolean> => {
+  // Perform maintenance operation on a building
+  const performMaintenance = async (
+    buildingId: number | string, 
+    level: 'basic' | 'standard' | 'premium' = 'standard'
+  ): Promise<boolean> => {
     setIsLoading(true);
     
     try {
-      // Trouver le bâtiment dans l'inventaire
+      // Get the building from inventory
+      const { ownedBuildings } = useBuildingInventory();
       const building = ownedBuildings.find(b => b.id === buildingId);
       
       if (!building) {
@@ -33,107 +50,54 @@ export function useBuildingMaintenance() {
         return false;
       }
       
-      // Calculer le coût de l'entretien
-      // Plus le bâtiment est en mauvais état, plus cher sera l'entretien
-      const maintenanceFactor = Math.max(1, (100 - building.condition) / 20);
-      const maintenanceCost = Math.round(building.maintenanceCost * maintenanceFactor);
+      // Calculate the maintenance cost based on level
+      let maintenanceCost = building.maintenanceCost;
+      let conditionImprovement = 20;
       
-      // Vérifier si le joueur a les fonds suffisants
-      if (maintenanceCost > patrimoine.balance) {
-        toast.error(`Fonds insuffisants pour l'entretien (coût: ${maintenanceCost.toLocaleString()} As)`);
-        return false;
+      switch(level) {
+        case 'basic':
+          maintenanceCost = Math.round(building.maintenanceCost * 0.6);
+          conditionImprovement = 10;
+          break;
+        case 'premium':
+          maintenanceCost = Math.round(building.maintenanceCost * 1.5);
+          conditionImprovement = 40;
+          break;
       }
       
-      // Effectuer le paiement via le patrimoine
-      patrimoine.addTransaction({
+      // Register the transaction
+      addTransaction({
         amount: -maintenanceCost,
-        description: `Entretien: ${building.name}`,
+        description: `Maintenance ${level} de ${building.name}`,
         category: "Entretien",
         type: 'expense'
       });
       
-      // Améliorer l'état du bâtiment
-      const newCondition = Math.min(100, building.condition + 20);
+      // Update the building condition
+      const newCondition = Math.min(100, building.condition + conditionImprovement);
       updateBuildingProperty(buildingId, 'condition', newCondition);
       updateBuildingProperty(buildingId, 'lastMaintenance', new Date());
       
-      toast.success(`Entretien effectué avec succès pour ${building.name}`);
+      toast.success(
+        "Maintenance effectuée",
+        {
+          description: `La condition de ${building.name} est maintenant de ${newCondition}% (+${conditionImprovement}%).`
+        }
+      );
+      
       return true;
     } catch (error) {
-      console.error("Erreur lors de l'entretien du bâtiment:", error);
-      toast.error("Une erreur est survenue lors de l'entretien");
+      console.error("Erreur lors de la maintenance:", error);
+      toast.error("Une erreur est survenue lors de la maintenance");
       return false;
     } finally {
       setIsLoading(false);
     }
   };
   
-  // Simuler la dégradation automatique des bâtiments au fil du temps
-  const degradeBuildings = () => {
-    ownedBuildings.forEach(building => {
-      // Les bâtiments sans entretien se dégradent plus vite
-      const degradationRate = building.maintenanceEnabled ? 1 : 2;
-      
-      // Calculer la nouvelle condition (ne pas descendre en dessous de 10%)
-      const newCondition = Math.max(10, building.condition - degradationRate);
-      
-      // Mettre à jour la condition du bâtiment
-      if (newCondition !== building.condition) {
-        updateBuildingProperty(building.id, 'condition', newCondition);
-      }
-    });
-  };
-  
-  // Appliquer l'entretien automatique aux bâtiments qui l'ont activé
-  const applyAutomaticMaintenance = () => {
-    // Filtrer les bâtiments avec entretien automatique activé
-    const buildingsToMaintain = ownedBuildings.filter(b => b.maintenanceEnabled && b.condition < 95);
-    
-    let totalCost = 0;
-    const maintainedBuildings: string[] = [];
-    
-    // Calculer le coût total de maintenance
-    buildingsToMaintain.forEach(building => {
-      const maintenanceCost = Math.round(building.maintenanceCost);
-      totalCost += maintenanceCost;
-      maintainedBuildings.push(building.name);
-    });
-    
-    // Vérifier si les fonds sont suffisants
-    if (totalCost > 0 && totalCost <= patrimoine.balance) {
-      // Effectuer le paiement
-      patrimoine.addTransaction({
-        amount: -totalCost,
-        description: `Entretien automatique: ${maintainedBuildings.join(', ')}`,
-        category: "Entretien",
-        type: 'expense'
-      });
-      
-      // Appliquer l'entretien à chaque bâtiment
-      buildingsToMaintain.forEach(building => {
-        const newCondition = Math.min(100, building.condition + 15);
-        updateBuildingProperty(building.id, 'condition', newCondition);
-        updateBuildingProperty(building.id, 'lastMaintenance', new Date());
-      });
-      
-      if (maintainedBuildings.length > 0) {
-        toast.success(`Entretien automatique effectué pour ${maintainedBuildings.length} bâtiments`);
-      }
-      
-      return true;
-    } else if (totalCost > 0) {
-      toast.error("Fonds insuffisants pour l'entretien automatique");
-      return false;
-    }
-    
-    return true;
-  };
-  
   return {
     isLoading,
     toggleMaintenance,
-    performMaintenance,
-    degradeBuildings,
-    applyAutomaticMaintenance
+    performMaintenance
   };
 }
