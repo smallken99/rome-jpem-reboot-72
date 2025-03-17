@@ -37,11 +37,16 @@ export const useProcessusLegislatif = (isEditable = true) => {
         votesObj = histoire.votes || { pour: 0, contre: 0, abstention: 0 };
       }
       
+      // Make sure contenu is always a string array
+      const contenuArray: string[] = Array.isArray(histoire.contenu) 
+        ? histoire.contenu 
+        : (histoire.contenu ? [histoire.contenu as string] : []);
+      
       return {
         ...histoire,
         dateProposition: histoire.date || '',
         dateAdoption: histoire.date || '',
-        contenu: Array.isArray(histoire.contenu) ? histoire.contenu : (histoire.contenu ? [histoire.contenu as string] : []),
+        contenu: contenuArray,
         statut: histoire.resultat === 'Adoptée' ? 'adopté' : 'rejeté',
         description: histoire.description || 'Aucune description',
         votes: votesObj
