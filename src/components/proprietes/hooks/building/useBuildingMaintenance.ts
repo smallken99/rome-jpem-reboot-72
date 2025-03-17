@@ -6,7 +6,7 @@ import { toast } from 'sonner';
 
 export function useBuildingMaintenance() {
   const [isLoading, setIsLoading] = useState(false);
-  const { updateBuildingProperty, performBuildingMaintenance } = useBuildingInventory();
+  const { updateBuildingProperty } = useBuildingInventory();
   const { addTransaction } = usePatrimoine();
   
   // Toggle maintenance setting for a building

@@ -1,18 +1,15 @@
 
+// Types pour le processus législatif
 export interface ProjetLoi {
   id: string;
   titre: string;
   auteur: string;
-  date: string;
-  statut: 'brouillon' | 'en révision' | 'prêt pour vote' | string;
+  date?: string;
   description: string;
   contenu: string[];
-  tags?: string[];
-  votes?: {
-    pour: number;
-    contre: number;
-    abstention: number;
-  };
+  categorieId?: string;
+  categorie?: string;
+  importance?: 'faible' | 'normale' | 'haute' | 'critique';
 }
 
 export interface VoteLoi {
@@ -26,6 +23,8 @@ export interface VoteLoi {
   pour: number;
   contre: number;
   abstention: number;
+  categorieId?: string;
+  categorie?: string;
 }
 
 export interface HistoriqueLoi {
@@ -41,35 +40,9 @@ export interface HistoriqueLoi {
     contre: number;
     abstention: number;
   };
-  statut: 'adopté' | 'rejeté' | string;
-  date?: string;
-  resultat?: 'Adoptée' | 'Rejetée';
-}
-
-export interface HistoriqueLoiTabProps {
-  historique: HistoriqueLoi[];
-  formatSeason?: (season: string) => string;
-  isEditable?: boolean;
-}
-
-export interface LoisActivesTabProps {
-  lois: any[];
-  onViewLoi: (loi?: any) => void;
-  onPromulguer: (loiId: string) => void;
-  formatSeason?: (season: string) => string;
-}
-
-export interface LoisProposeesTabProps {
-  lois: any[];
-  onViewLoi: (loi?: any) => void;
-  onVoterPour: (loiId: string) => void;
-  onVoterContre: (loiId: string) => void;
-  onVoterAbstention: (loiId: string) => void;
-  formatSeason?: (season: string) => string;
-}
-
-export interface LoisRejeteesTabProps {
-  lois: any[];
-  onViewLoi: (loi?: any) => void;
-  formatSeason?: (season: string) => string;
+  statut: 'adopté' | 'rejeté' | 'abrogé';
+  resultat: string;
+  date: string;
+  categorieId?: string;
+  categorie?: string;
 }

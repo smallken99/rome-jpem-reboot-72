@@ -5,12 +5,13 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { formatCurrency } from '@/utils/currencyUtils';
 import { BuildingDescription } from '../../data/types/buildingTypes';
-import { CircleDollarSign, Clock, User, Star } from 'lucide-react';
+import { CircleDollarSign, Clock, User, Star, Tool } from 'lucide-react';
 
 interface BuildingCatalogueItemProps {
   building: BuildingDescription;
   onSelect: (buildingId: string) => void;
   onPurchase: (buildingId: string) => void;
+  onMaintenance?: (buildingId: string) => void;
   selected: boolean;
 }
 
@@ -18,6 +19,7 @@ export const BuildingCatalogueItem: React.FC<BuildingCatalogueItemProps> = ({
   building,
   onSelect,
   onPurchase,
+  onMaintenance,
   selected
 }) => {
   return (
@@ -76,7 +78,7 @@ export const BuildingCatalogueItem: React.FC<BuildingCatalogueItemProps> = ({
           </div>
         )}
       </CardContent>
-      <CardFooter>
+      <CardFooter className="flex flex-col gap-2">
         <Button 
           className="w-full text-sm h-8" 
           onClick={(e) => {
@@ -86,6 +88,20 @@ export const BuildingCatalogueItem: React.FC<BuildingCatalogueItemProps> = ({
         >
           Acquérir
         </Button>
+        
+        {onMaintenance && (
+          <Button 
+            variant="outline"
+            className="w-full text-sm h-8"
+            onClick={(e) => {
+              e.stopPropagation();
+              onMaintenance(building.id);
+            }}
+          >
+            <Tool className="h-3.5 w-3.5 mr-1" />
+            Entretien
+          </Button>
+        )}
       </CardFooter>
     </Card>
   );
