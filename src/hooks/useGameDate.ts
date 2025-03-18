@@ -1,3 +1,4 @@
+
 import { useEffect, useState } from 'react';
 import { GameDate, Season } from '@/components/maitrejeu/types/common';
 import { formatDate, formatSeason } from '@/utils/formatUtils';
@@ -88,8 +89,10 @@ export const useGameDate = (initialDate?: GameDate) => {
     return seasonOrder[date1.season] > seasonOrder[date2.season];
   };
 
+  // This function now returns a string representation of the GameDate
+  // instead of using formatDate which expects a string or Date
   const formatGameDate = (date: GameDate): string => {
-    return formatDate(date);
+    return `An ${date.year}, ${formatSeason(date.season)}`;
   };
 
   const gameDateToCompatibleString = (gameDate: GameDate): string => {
