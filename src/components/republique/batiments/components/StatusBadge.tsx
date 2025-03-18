@@ -2,9 +2,9 @@
 import React from 'react';
 import { Badge } from '@/components/ui/badge';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
-import { AlertTriangle, CheckCircle, Clock, HardHat, Construction } from 'lucide-react';
+import { AlertTriangle, CheckCircle, Clock, HardHat, Construction, CircleSlashed } from 'lucide-react';
 
-type StatusType = 'completed' | 'in_progress' | 'planned' | 'damaged' | 'abandoned';
+export type StatusType = 'completed' | 'in_progress' | 'planned' | 'damaged' | 'abandoned' | 'ruined' | 'renovating';
 
 interface StatusBadgeProps {
   status: StatusType | string;
@@ -49,6 +49,20 @@ const getStatusConfig = (status: StatusType | string) => {
         color: 'bg-red-50 border-red-200 text-red-700',
         icon: <AlertTriangle className="h-3 w-3 mr-1" />,
         tooltip: 'Ce bâtiment a été abandonné'
+      };
+    case 'ruined':
+      return {
+        label: 'En ruine',
+        color: 'bg-red-100 border-red-300 text-red-800',
+        icon: <CircleSlashed className="h-3 w-3 mr-1" />,
+        tooltip: 'Ce bâtiment est en ruine et nécessite une reconstruction complète'
+      };
+    case 'renovating':
+      return {
+        label: 'En rénovation',
+        color: 'bg-teal-50 border-teal-200 text-teal-700',
+        icon: <Construction className="h-3 w-3 mr-1" />,
+        tooltip: 'Ce bâtiment est en cours de rénovation'
       };
     default:
       return {

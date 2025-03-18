@@ -1,147 +1,153 @@
 
 import React from 'react';
-import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { 
-  GraduationCap, User, Coins, Star, Award, Check, X
-} from 'lucide-react';
+import { Badge } from '@/components/ui/badge';
 import { Preceptor } from './types/educationTypes';
-import { formatCurrency } from '@/utils/currencyUtils';
-import { useNavigate } from 'react-router-dom';
-import { useEducation } from './context/EducationContext';
+import { Info, Check, X, Medal, Eye, UserCheck, Bookmark } from 'lucide-react';
 
-interface PreceptorCardProps {
+export interface PreceptorCardProps {
   preceptor: Preceptor;
+  isSelected?: boolean;
   isHired?: boolean;
+  hired?: boolean;
+  hireCost?: number;
+  onSelect?: (id: string) => void;
+  onHire?: (id: string) => void;
+  onFire?: (id: string) => void;
+  onAssign?: (id: string) => void;
+  onView?: () => void;
+  viewOnly?: boolean;
   childId?: string;
-  onHire?: (preceptorId: string) => void;
-  onFire?: (preceptorId: string) => void;
-  onAssign?: (preceptorId: string, childId: string) => void;
 }
 
 export const PreceptorCard: React.FC<PreceptorCardProps> = ({
   preceptor,
+  isSelected = false,
   isHired = false,
-  childId,
+  hired = false,
+  hireCost,
+  onSelect,
   onHire,
   onFire,
-  onAssign
+  onAssign,
+  onView,
+  viewOnly = false,
+  childId
 }) => {
-  const navigate = useNavigate();
-  const { hirePreceptor, firePreceptor } = useEducation();
-  
-  // Obtenir les valeurs appropriées 
-  const specialties = preceptor.specialties;
-  const primarySpecialty = preceptor.specialty || preceptor.specialties[0];
-  const expertise = preceptor.expertise || 70;
-  const cost = preceptor.cost || 5000;
-  
-  // Gérer l'engagement d'un précepteur
-  const handleHire = () => {
-    if (onHire) {
-      onHire(preceptor.id);
-    } else {
-      hirePreceptor(preceptor.id, childId || '');
-      navigate('/famille/education');
+  // Quality star display
+  const qualityStars = () => {
+    const quality = preceptor.quality || Math.floor((preceptor.expertise || preceptor.skill || 50) / 20) || 3;
+    return (
+      <div className="flex items-center">
+        {[...Array(5)].map((_, index) => (
+          <Medal 
+            key={index}
+            className={`h-4 w-4 ${index < quality ? 'text-yellow-500' : 'text-gray-300'}`}
+          />
+        ))}
+      </div>
+    );
+  };
+
+  const handleClick = () => {
+    if (onSelect && !viewOnly) {
+      onSelect(preceptor.id);
+    }
+    if (onView && (viewOnly || hired || isHired)) {
+      onView();
     }
   };
-  
-  // Gérer le licenciement d'un précepteur
-  const handleFire = () => {
-    if (onFire) {
-      onFire(preceptor.id);
-    } else {
-      firePreceptor(preceptor.id);
+
+  const getStatusBadge = () => {
+    if (hired || isHired) {
+      if (preceptor.childId) {
+        return <Badge variant="secondary" className="bg-green-100 text-green-800">Assigné</Badge>;
+      }
+      return <Badge variant="secondary">Engagé</Badge>;
     }
+    return <Badge variant="outline">Disponible</Badge>;
   };
-  
-  // Gérer l'assignation d'un précepteur à un enfant
-  const handleAssign = () => {
-    if (childId && onAssign) {
-      onAssign(preceptor.id, childId);
-    }
-  };
-  
+
   return (
-    <Card className="h-full flex flex-col">
+    <Card 
+      className={`transition-all hover:shadow-md cursor-pointer ${isSelected ? 'border-primary ring-1 ring-primary' : ''}`}
+      onClick={handleClick}
+    >
       <CardHeader className="pb-2">
         <div className="flex justify-between items-start">
-          <CardTitle className="text-lg font-semibold">{preceptor.name}</CardTitle>
-          <Badge variant="outline" className="capitalize bg-green-50 text-green-700 border-green-200">
-            {primarySpecialty}
-          </Badge>
+          <CardTitle className="text-lg">{preceptor.name}</CardTitle>
+          {getStatusBadge()}
         </div>
       </CardHeader>
-      
-      <CardContent className="flex-grow">
-        <div className="space-y-3 text-sm">
-          <div className="flex gap-2 items-center">
-            <GraduationCap className="h-4 w-4 text-muted-foreground" />
-            <span>Expertise: {expertise}/100</span>
+      <CardContent className="pt-0 space-y-3">
+        <div className="grid grid-cols-2 gap-2 text-sm">
+          <div>
+            <span className="text-muted-foreground">Spécialité:</span>
+            <p className="capitalize">{preceptor.specialty || preceptor.speciality}</p>
           </div>
-          
-          <div className="flex gap-2 items-center">
-            <Coins className="h-4 w-4 text-muted-foreground" />
-            <span>Coût: {formatCurrency(cost)} par an</span>
+          <div>
+            <span className="text-muted-foreground">Coût:</span>
+            <p>{hireCost || preceptor.cost || preceptor.price} as/an</p>
           </div>
-          
-          <div className="flex gap-2 items-center">
-            <Star className="h-4 w-4 text-muted-foreground" />
-            <span>Spécialités: {specialties.join(', ')}</span>
+          <div>
+            <span className="text-muted-foreground">Qualité:</span>
+            <div>{qualityStars()}</div>
           </div>
-          
-          <div className="mt-2 text-muted-foreground text-xs">
-            {preceptor.description}
+          <div>
+            <span className="text-muted-foreground">Expertise:</span>
+            <p>{preceptor.expertise || preceptor.skill || 50}/100</p>
           </div>
         </div>
-      </CardContent>
-      
-      <CardFooter className="pt-2">
-        {!isHired ? (
-          childId ? (
-            <Button 
-              onClick={handleAssign} 
-              className="w-full"
-              variant="default"
-            >
-              <User className="h-4 w-4 mr-2" />
-              Assigner à cet enfant
-            </Button>
-          ) : (
-            <Button 
-              onClick={handleHire} 
-              className="w-full"
-              variant="default"
-            >
-              <Award className="h-4 w-4 mr-2" />
-              Recruter
-            </Button>
-          )
-        ) : (
-          <div className="flex w-full justify-between gap-2">
-            <Button 
-              onClick={handleFire} 
-              variant="destructive"
-              className="flex-1"
-            >
-              <X className="h-4 w-4 mr-2" />
-              Renvoyer
-            </Button>
+        
+        {preceptor.description && (
+          <p className="text-sm text-muted-foreground italic">{preceptor.description}</p>
+        )}
+        
+        {!viewOnly && (
+          <div className="flex justify-end space-x-2 pt-2">
+            {!(hired || isHired) && onHire && (
+              <Button size="sm" onClick={(e) => {
+                e.stopPropagation();
+                onHire(preceptor.id);
+              }}>
+                <Check className="mr-1 h-4 w-4" />
+                Embaucher
+              </Button>
+            )}
             
-            {childId && (
-              <Button 
-                onClick={handleAssign} 
-                variant="default"
-                className="flex-1"
-              >
-                <Check className="h-4 w-4 mr-2" />
+            {(hired || isHired) && onFire && (
+              <Button size="sm" variant="outline" className="text-red-600 hover:bg-red-50" onClick={(e) => {
+                e.stopPropagation();
+                onFire(preceptor.id);
+              }}>
+                <X className="mr-1 h-4 w-4" />
+                Licencier
+              </Button>
+            )}
+            
+            {(hired || isHired) && !preceptor.childId && onAssign && (
+              <Button size="sm" variant="secondary" onClick={(e) => {
+                e.stopPropagation();
+                onAssign(preceptor.id);
+              }}>
+                <UserCheck className="mr-1 h-4 w-4" />
                 Assigner
+              </Button>
+            )}
+            
+            {onView && (
+              <Button size="sm" variant="outline" onClick={(e) => {
+                e.stopPropagation();
+                onView();
+              }}>
+                <Eye className="mr-1 h-4 w-4" />
+                Détails
               </Button>
             )}
           </div>
         )}
-      </CardFooter>
+      </CardContent>
     </Card>
   );
 };

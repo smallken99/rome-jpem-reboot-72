@@ -11,6 +11,7 @@ export interface Child {
   skills?: Record<string, number>;
   traits?: string[];
   status?: string;
+  preceptorId?: string | null;
 }
 
 export interface Preceptor {

@@ -69,6 +69,7 @@ export interface EducationContextType {
   hiredPreceptors: Preceptor[];
   educatingChildren: Record<string, boolean> | string[];
   isLoading: boolean;
+  isEducating: boolean | Record<string, boolean>; // Ajout de cette propriété
   
   // Child management
   addChild: (newChild: Omit<Child, 'id'>) => string;
@@ -78,9 +79,11 @@ export interface EducationContextType {
   
   // Education management
   startEducation: (childId: string, educationType: string, preceptorId: string | null) => void;
-  updateEducation: (childId: string, updates: Partial<Pick<Child, 'educationType' | 'preceptorId' | 'specialties'>>) => void;
+  updateEducation: (childId: string, updates: Partial<Child>) => void;
   advanceEducationYear: (childId: string) => void;
+  advanceEducation: (childId: string) => void; // Alias pour advanceEducationYear
   completeEducation: (childId: string) => void;
+  setSelectedChildId?: (id: string | null) => void; // Ajout de cette propriété optionnelle
   
   // Preceptor management
   hirePreceptor: (preceptorId: string) => void;
@@ -95,6 +98,7 @@ const EducationContext = createContext<EducationContextType>({
   hiredPreceptors: [],
   educatingChildren: {},
   isLoading: false,
+  isEducating: false,
   
   addChild: () => '',
   updateChild: () => {},
@@ -104,6 +108,7 @@ const EducationContext = createContext<EducationContextType>({
   startEducation: () => {},
   updateEducation: () => {},
   advanceEducationYear: () => {},
+  advanceEducation: () => {},
   completeEducation: () => {},
   
   hirePreceptor: () => {},
@@ -116,6 +121,7 @@ export const EducationProvider: React.FC<{ children: React.ReactNode }> = ({ chi
   const [childrenData, setChildrenData] = useState<Child[]>(MOCK_CHILDREN);
   const [educatingChildrenState, setEducatingChildrenState] = useState<Record<string, boolean>>({});
   const [isLoading, setIsLoading] = useState(false);
+  const [selectedChildId, setSelectedChildId] = useState<string | null>(null);
   
   const { 
     preceptors,
@@ -169,7 +175,7 @@ export const EducationProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     }
   };
   
-  const updateEducation = (childId: string, updates: Partial<Pick<Child, 'educationType' | 'preceptorId' | 'specialties'>>) => {
+  const updateEducation = (childId: string, updates: Partial<Child>) => {
     const child = childrenData.find(c => c.id === childId);
     if (!child) return;
     
@@ -181,7 +187,9 @@ export const EducationProvider: React.FC<{ children: React.ReactNode }> = ({ chi
       }
       
       // Make the new preceptor unavailable
-      updatePreceptor(updates.preceptorId, { available: false });
+      if (typeof updates.preceptorId === 'string') {
+        updatePreceptor(updates.preceptorId, { available: false });
+      }
     }
     
     updateChild(childId, updates);
@@ -208,6 +216,9 @@ export const EducationProvider: React.FC<{ children: React.ReactNode }> = ({ chi
       });
     }
   };
+  
+  // Alias pour advanceEducationYear
+  const advanceEducation = advanceEducationYear;
   
   const completeEducation = (childId: string) => {
     updateChild(childId, { 
@@ -242,38 +253,52 @@ export const EducationProvider: React.FC<{ children: React.ReactNode }> = ({ chi
   };
   
   const loadPreceptorsByType = (type: string): Preceptor[] => {
+    // Simulation d'une requête backend
     setIsLoading(true);
-    const result = getPreceptorsBySpecialty(type);
-    setIsLoading(false);
-    return result;
+    
+    // Filtre les précepteurs par type
+    const filteredPreceptors = preceptors.filter(
+      p => (p.specialty || p.speciality || '').toLowerCase().includes(type.toLowerCase())
+    );
+    
+    setTimeout(() => {
+      setIsLoading(false);
+    }, 500);
+    
+    return filteredPreceptors;
   };
   
-  // Prepare the context value
-  const value = {
-    children: childrenData,
-    preceptors,
-    hiredPreceptors: getAssignedPreceptors(),
-    educatingChildren: educatingChildrenState,
-    isLoading,
-    
-    addChild,
-    updateChild,
-    removeChild,
-    updateChildName,
-    
-    startEducation,
-    updateEducation,
-    advanceEducationYear,
-    completeEducation,
-    
-    hirePreceptor,
-    firePreceptor,
-    getAvailablePreceptors,
-    loadPreceptorsByType
-  };
+  // Calculate which children are currently being educated
+  const hiredPreceptors = preceptors.filter(p => !p.available);
   
   return (
-    <EducationContext.Provider value={value}>
+    <EducationContext.Provider
+      value={{
+        children: childrenData,
+        preceptors,
+        hiredPreceptors,
+        educatingChildren: educatingChildrenState,
+        isLoading,
+        isEducating: educatingChildrenState,
+        
+        addChild,
+        updateChild,
+        removeChild,
+        updateChildName,
+        
+        startEducation,
+        updateEducation,
+        advanceEducationYear,
+        advanceEducation,
+        completeEducation,
+        setSelectedChildId,
+        
+        hirePreceptor,
+        firePreceptor,
+        getAvailablePreceptors,
+        loadPreceptorsByType
+      }}
+    >
       {children}
     </EducationContext.Provider>
   );

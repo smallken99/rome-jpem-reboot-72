@@ -23,6 +23,11 @@ export const CardActions: React.FC<CardActionsProps> = ({
   const navigate = useNavigate();
   const { completeEducation, isEducating } = useEducation();
   
+  // Vérifiez si l'enfant spécifique est en cours d'éducation
+  const isChildEducating = typeof isEducating === 'object' 
+    ? isEducating[childId] 
+    : false;
+  
   const handleChangePreceptor = () => {
     navigate(`/famille/education/preceptors?childId=${childId}&type=${educationType}`);
     toast.info("Sélection d'un nouveau précepteur");
@@ -54,14 +59,14 @@ export const CardActions: React.FC<CardActionsProps> = ({
             label="Changer de précepteur"
             className="text-xs bg-rome-navy/5 hover:bg-rome-navy/10"
             onClick={handleChangePreceptor}
-            disabled={isEducating}
+            disabled={isChildEducating}
           />
           <ActionButton 
             variant="destructive"
             label="Supprimer"
             className="text-xs"
             onClick={handleRemoveEducation}
-            disabled={isEducating}
+            disabled={isChildEducating}
           />
         </>
       )}
@@ -70,8 +75,8 @@ export const CardActions: React.FC<CardActionsProps> = ({
         label={hasEducation ? 'Modifier' : 'Assigner'}
         className="text-xs"
         onClick={handleAssign}
-        disabled={isEducating}
-        icon={isEducating ? <Loader2 className="h-3 w-3 animate-spin" /> : undefined}
+        disabled={isChildEducating}
+        icon={isChildEducating ? <Loader2 className="h-3 w-3 animate-spin" /> : undefined}
       />
     </div>
   );

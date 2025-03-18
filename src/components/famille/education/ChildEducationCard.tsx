@@ -1,11 +1,11 @@
 
 import React from 'react';
-import { ChildHeader } from './components/ChildHeader';
-import { EducationStatus } from './components/EducationStatus';
-import { EducationProgressButtons } from './components/EducationProgressButtons';
-import { CardActions } from './components/CardActions';
-import { Child } from './types/educationTypes';
-import { useEducation } from './context/EducationContext';
+import { ChildHeader } from './education/components/ChildHeader';
+import { EducationStatus } from './education/components/EducationStatus';
+import { EducationProgressButtons } from './education/components/EducationProgressButtons';
+import { CardActions } from './education/components/CardActions';
+import { Child } from './education/types/educationTypes';
+import { useEducation } from './education/context/EducationContext';
 
 interface ChildEducationCardProps {
   child: Child;
@@ -14,10 +14,11 @@ interface ChildEducationCardProps {
 const ChildEducationCard: React.FC<ChildEducationCardProps> = ({ child }) => {
   // Use our education context for functionality
   const { 
-    isEducating,
-    advanceEducation,
+    educatingChildren, 
+    advanceEducationYear, 
     completeEducation,
-    setSelectedChildId
+    updateChildName,
+    isEducating 
   } = useEducation();
   
   // Determine if the child has an ongoing education
@@ -26,18 +27,19 @@ const ChildEducationCard: React.FC<ChildEducationCardProps> = ({ child }) => {
   // Check if female with military education (invalid in Roman times)
   const hasInvalidEducation = child.gender === 'female' && child.educationType === 'military';
   
-  // Check if education is in progress
-  const isEducatingThisChild = isEducating;
+  // Check if education is in progress - handle both object and array types
+  const isChildEducating = typeof isEducating === 'object' && !Array.isArray(isEducating) 
+    ? isEducating[child.id] 
+    : (Array.isArray(educatingChildren) ? educatingChildren.includes(child.id) : false);
   
   // Handle advancing education by a year
   const handleAdvanceYear = () => {
-    advanceEducation(child.id);
+    advanceEducationYear(child.id);
   };
   
   // Handle name change
   const handleNameChange = (id: string, newName: string) => {
-    // This will now be handled by the context
-    setSelectedChildId(id);
+    updateChildName(id, newName);
   };
   
   return (
@@ -56,7 +58,7 @@ const ChildEducationCard: React.FC<ChildEducationCardProps> = ({ child }) => {
         />
         
         <EducationProgressButtons 
-          isEducating={isEducatingThisChild}
+          isEducating={isChildEducating}
           hasEducation={hasEducation}
           educationProgress={child.progress}
           onAdvanceYear={handleAdvanceYear}
@@ -65,7 +67,7 @@ const ChildEducationCard: React.FC<ChildEducationCardProps> = ({ child }) => {
         />
         
         <CardActions 
-          educationType={child.educationType}
+          educationType={child.educationType || 'none'}
           childId={child.id}
           childGender={child.gender}
           childAge={child.age}
