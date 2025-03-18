@@ -24,4 +24,8 @@ export interface BuildingDescription {
   };
   basePrice?: number;
   type?: "urban" | "rural" | "religious" | "public";
+  subType?: string;
+  requirements?: string;
+  maintenance?: string;
+  security?: string;
 }
