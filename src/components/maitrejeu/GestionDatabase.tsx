@@ -1,87 +1,67 @@
 
 import React, { useState } from 'react';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { PageHeader } from '@/components/ui-custom/PageHeader';
-import { Database, Server, ListTree, Clock, Users, Map, Scroll, Sword } from 'lucide-react';
-import { DatabaseTable } from './components/database/DatabaseTable';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { DatabaseOverview } from './components/database/DatabaseOverview';
 import { DatabaseStats } from './components/database/DatabaseStats';
+import { DatabaseViewer } from './components/database/DatabaseViewer';
+import { DatabaseExporter } from './components/database/DatabaseExporter';
+import { DatabaseImporter } from './components/database/DatabaseImporter';
 import { DatabaseBackupManager } from './components/database/DatabaseBackupManager';
-import { useDatabaseManager } from './components/database/hooks/useDatabaseManager';
+import { useMaitreJeu } from './context';
+import { Database } from 'lucide-react';
 
-export const GestionDatabase: React.FC = () => {
-  const [activeTab, setActiveTab] = useState('senateurs');
-  const { tables, stats, getTableData, exportTable, importData } = useDatabaseManager();
+export const GestionDatabase = () => {
+  const [activeTab, setActiveTab] = useState('overview');
+  const { familles, senateurs, provinces, lois } = useMaitreJeu();
 
+  // Statistiques de la base de données
+  const dbStats = {
+    totalTables: 14, // Nombre de tables dans la base de données
+    totalRecords: familles.length + senateurs.length + provinces.length + lois.length + 42, // Estimation du nombre total d'enregistrements
+    lastUpdated: new Date().toISOString(),
+    databaseSize: '4.8 MB', // Taille estimée
+    backups: [] // Liste des sauvegardes
+  };
+  
   return (
-    <div className="space-y-6 p-6">
-      <PageHeader
-        title="Gestionnaire de Base de Données"
-        subtitle="Administrez les tables de données du jeu"
-        icon={<Database className="h-6 w-6" />}
+    <div className="p-6 space-y-6">
+      <PageHeader 
+        title="Base de Données du Jeu"
+        subtitle="Gérez, exportez et importez les données du jeu"
       />
-
-      <DatabaseStats stats={stats} />
-
-      <Card>
-        <CardHeader className="pb-3">
-          <CardTitle>Tables de Données</CardTitle>
-          <CardDescription>
-            Visualisez et modifiez les données du jeu
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-            <TabsList className="grid grid-cols-7 mb-4">
-              <TabsTrigger value="senateurs" className="flex items-center gap-1">
-                <Users className="h-4 w-4" />
-                <span>Sénateurs</span>
-              </TabsTrigger>
-              <TabsTrigger value="familles" className="flex items-center gap-1">
-                <ListTree className="h-4 w-4" />
-                <span>Familles</span>
-              </TabsTrigger>
-              <TabsTrigger value="provinces" className="flex items-center gap-1">
-                <Map className="h-4 w-4" />
-                <span>Provinces</span>
-              </TabsTrigger>
-              <TabsTrigger value="lois" className="flex items-center gap-1">
-                <Scroll className="h-4 w-4" />
-                <span>Lois</span>
-              </TabsTrigger>
-              <TabsTrigger value="batiments" className="flex items-center gap-1">
-                <Server className="h-4 w-4" />
-                <span>Bâtiments</span>
-              </TabsTrigger>
-              <TabsTrigger value="evenements" className="flex items-center gap-1">
-                <Sword className="h-4 w-4" />
-                <span>Évènements</span>
-              </TabsTrigger>
-              <TabsTrigger value="histoire" className="flex items-center gap-1">
-                <Clock className="h-4 w-4" />
-                <span>Histoire</span>
-              </TabsTrigger>
-            </TabsList>
-
-            {Object.keys(tables).map(tableKey => (
-              <TabsContent key={tableKey} value={tableKey} className="mt-0">
-                <DatabaseTable 
-                  tableName={tableKey}
-                  data={getTableData(tableKey)}
-                  onExport={() => exportTable(tableKey)}
-                />
-              </TabsContent>
-            ))}
-          </Tabs>
-        </CardContent>
-      </Card>
-
-      <DatabaseBackupManager 
-        onExportAll={() => tables}
-        onImport={importData}
-      />
+      
+      <DatabaseStats stats={dbStats} />
+      
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="mt-6">
+        <TabsList className="grid grid-cols-5 max-w-3xl mx-auto">
+          <TabsTrigger value="overview">Vue d'ensemble</TabsTrigger>
+          <TabsTrigger value="viewer">Explorateur</TabsTrigger>
+          <TabsTrigger value="export">Exporter</TabsTrigger>
+          <TabsTrigger value="import">Importer</TabsTrigger>
+          <TabsTrigger value="backups">Sauvegardes</TabsTrigger>
+        </TabsList>
+        
+        <TabsContent value="overview" className="mt-6">
+          <DatabaseOverview />
+        </TabsContent>
+        
+        <TabsContent value="viewer" className="mt-6">
+          <DatabaseViewer />
+        </TabsContent>
+        
+        <TabsContent value="export" className="mt-6">
+          <DatabaseExporter />
+        </TabsContent>
+        
+        <TabsContent value="import" className="mt-6">
+          <DatabaseImporter />
+        </TabsContent>
+        
+        <TabsContent value="backups" className="mt-6">
+          <DatabaseBackupManager />
+        </TabsContent>
+      </Tabs>
     </div>
   );
 };
-
-export default GestionDatabase;

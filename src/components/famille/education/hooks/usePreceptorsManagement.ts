@@ -1,123 +1,140 @@
 
-import { useState, useCallback } from 'react';
+import { useState, useEffect } from 'react';
 import { Preceptor } from '../types/educationTypes';
-import { toast } from 'sonner';
+import { v4 as uuidv4 } from 'uuid';
 
-// Import the correct export
-import { preceptorsList as mockPreceptors } from '../data/preceptors';
+const DEFAULT_PRECEPTORS: Preceptor[] = [
+  {
+    id: '1',
+    name: 'Marcus Tullius',
+    specialties: ['Éloquence', 'Débat', 'Littérature'],
+    expertise: 80,
+    cost: 1500,
+    reputation: 85,
+    available: true,
+    skill: 85,
+    specialty: 'Rhétorique',
+    quality: 4,
+    status: 'available',
+    background: 'Ancien consul et orateur renommé',
+    rating: 4.5,
+    description: 'Un ancien consul réputé pour son éloquence et ses écrits philosophiques.'
+  },
+  {
+    id: '2',
+    name: 'Lucius Cornelius',
+    specialties: ['Tactique', 'Leadership', 'Stratégie'],
+    expertise: 90,
+    cost: 2000,
+    reputation: 90,
+    available: true,
+    skill: 90,
+    specialty: 'Militaire',
+    quality: 5,
+    status: 'available',
+    background: 'Ancien général victorieux',
+    rating: 5,
+    description: 'Général décoré ayant servi sous plusieurs consuls. Expert en tactique militaire.'
+  },
+  {
+    id: '3',
+    name: 'Quintus Servilius',
+    specialties: ['Rituels', 'Divination', 'Traditions'],
+    expertise: 75,
+    cost: 1200,
+    reputation: 80,
+    available: true,
+    skill: 80,
+    specialty: 'Religieux',
+    quality: 4,
+    status: 'available',
+    background: 'Ancien augure respecté',
+    rating: 4,
+    description: 'Un augure respecté qui a servi dans les principaux temples de Rome.'
+  },
+  {
+    id: '4',
+    name: 'Publius Sempronius',
+    specialties: ['Négociation', 'Diplomatie', 'Lois'],
+    expertise: 85,
+    cost: 1800,
+    reputation: 80,
+    available: true,
+    skill: 85,
+    specialty: 'Politique',
+    quality: 4,
+    status: 'available',
+    background: 'Ancien tribun de la plèbe',
+    rating: 4.2,
+    description: 'Tribun de la plèbe qui s\'est distingué par sa connaissance des lois et sa capacité à négocier.'
+  },
+  {
+    id: '5',
+    name: 'Aulus Postumius',
+    specialties: ['Combat', 'Discipline', 'Stratégie'],
+    expertise: 70,
+    cost: 1200,
+    reputation: 75,
+    available: true,
+    skill: 75,
+    specialty: 'Militaire',
+    quality: 3,
+    status: 'available',
+    background: 'Centurion retraité',
+    rating: 3.8,
+    description: 'Ancien centurion ayant servi pendant 20 ans dans les légions romaines.'
+  }
+];
 
 export const usePreceptorsManagement = () => {
-  const [preceptors, setPreceptors] = useState<Preceptor[]>(mockPreceptors);
-  const [hiredPreceptors, setHiredPreceptors] = useState<Preceptor[]>([]);
-  const [isHiringPreceptor, setIsHiringPreceptor] = useState(false);
-
-  // Load preceptors by type
-  const loadPreceptorsByType = useCallback((type: string): Preceptor[] => {
-    return preceptors.filter(p => p.specialty === type && p.available);
-  }, [preceptors]);
-
-  // Refresh preceptors list
-  const refreshPreceptors = useCallback(() => {
-    // In a real app, this would fetch from an API
-    setPreceptors(mockPreceptors);
-  }, []);
-
-  // Hire a preceptor
-  const hirePreceptor = useCallback((id: string) => {
-    setIsHiringPreceptor(true);
-
-    try {
-      // Find the preceptor
-      const preceptor = preceptors.find(p => p.id === id);
-      
-      if (!preceptor) {
-        toast.error("Précepteur introuvable");
-        return;
-      }
-      
-      // Update available status
-      setPreceptors(prev => 
-        prev.map(p => 
-          p.id === id ? { ...p, available: false } : p
-        )
-      );
-      
-      // Add to hired preceptors
-      const hiredPreceptor = { ...preceptor, available: false, status: 'hired' as const };
-      setHiredPreceptors(prev => [...prev, hiredPreceptor]);
-      
-      toast.success(`${preceptor.name} a été engagé`);
-    } catch (error) {
-      console.error("Error hiring preceptor:", error);
-      toast.error("Une erreur est survenue");
-    } finally {
-      setIsHiringPreceptor(false);
-    }
-  }, [preceptors]);
-
-  // Fire a preceptor
-  const firePreceptor = useCallback((id: string) => {
-    try {
-      // Find the preceptor
-      const preceptor = hiredPreceptors.find(p => p.id === id);
-      
-      if (!preceptor) {
-        toast.error("Précepteur introuvable");
-        return;
-      }
-      
-      // Update available status in main list
-      setPreceptors(prev => 
-        prev.map(p => 
-          p.id === id ? { ...p, available: true } : p
-        )
-      );
-      
-      // Remove from hired preceptors
-      setHiredPreceptors(prev => prev.filter(p => p.id !== id));
-      
-      toast.success(`${preceptor.name} a été renvoyé`);
-    } catch (error) {
-      console.error("Error firing preceptor:", error);
-      toast.error("Une erreur est survenue");
-    }
-  }, [hiredPreceptors]);
-
-  // Assign preceptor to child
-  const assignPreceptorToChild = useCallback((preceptorId: string, childId: string) => {
-    try {
-      // First, unassign any preceptor currently assigned to this child
-      setHiredPreceptors(prev => 
-        prev.map(p => 
-          p.childId === childId ? { ...p, status: 'hired', childId: null } : p
-        )
-      );
-      
-      // Then assign the new preceptor
-      setHiredPreceptors(prev => 
-        prev.map(p => 
-          p.id === preceptorId ? { ...p, status: 'assigned', childId } : p
-        )
-      );
-      
-      const preceptor = hiredPreceptors.find(p => p.id === preceptorId);
-      if (preceptor) {
-        toast.success(`${preceptor.name} a été assigné à l'éducation`);
-      }
-    } catch (error) {
-      console.error("Error assigning preceptor:", error);
-      toast.error("Une erreur est survenue");
-    }
-  }, [hiredPreceptors]);
-
+  const [preceptors, setPreceptors] = useState<Preceptor[]>(DEFAULT_PRECEPTORS);
+  
+  const addPreceptor = (preceptorData: Omit<Preceptor, 'id'>) => {
+    const newPreceptor: Preceptor = {
+      id: uuidv4(),
+      ...preceptorData
+    };
+    
+    setPreceptors(prev => [...prev, newPreceptor]);
+    return newPreceptor.id;
+  };
+  
+  const updatePreceptor = (id: string, updates: Partial<Preceptor>) => {
+    setPreceptors(prev => 
+      prev.map(preceptor => 
+        preceptor.id === id ? { ...preceptor, ...updates } : preceptor
+      )
+    );
+  };
+  
+  const removePreceptor = (id: string) => {
+    setPreceptors(prev => 
+      prev.filter(preceptor => preceptor.id !== id)
+    );
+  };
+  
+  const getPreceptorsBySpecialty = (specialty: string) => {
+    return preceptors.filter(p => 
+      p.specialties.includes(specialty) || p.specialty === specialty
+    );
+  };
+  
+  const getAvailablePreceptors = () => {
+    return preceptors.filter(p => p.available);
+  };
+  
+  const getAssignedPreceptors = () => {
+    return preceptors.filter(p => !p.available);
+  };
+  
   return {
     preceptors,
-    hiredPreceptors,
-    isHiringPreceptor,
-    refreshPreceptors,
-    loadPreceptorsByType,
-    hirePreceptor,
-    firePreceptor,
-    assignPreceptorToChild
+    setPreceptors,
+    addPreceptor,
+    updatePreceptor,
+    removePreceptor,
+    getPreceptorsBySpecialty,
+    getAvailablePreceptors,
+    getAssignedPreceptors
   };
 };
