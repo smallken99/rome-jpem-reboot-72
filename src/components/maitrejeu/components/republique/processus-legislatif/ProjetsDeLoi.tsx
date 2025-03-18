@@ -27,7 +27,8 @@ export const ProjetsDeLoi: React.FC<ProjetsDeLoiProps> = ({ searchTerm }) => {
           <ProjetItem key={projet.id} projet={{
             ...projet,
             description: projet.description || '',
-            contenu: Array.isArray(projet.contenu) ? projet.contenu : []
+            contenu: Array.isArray(projet.contenu) ? projet.contenu : [],
+            statut: (projet.statut as any) || 'en_cours'
           }} />
         ))
       )}

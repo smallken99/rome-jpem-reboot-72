@@ -6,12 +6,15 @@ export interface ProjetLoi {
   date: string;
   statut: string;
   description?: string;
-  contenu?: string;
+  contenu?: string | string[];
   votes?: {
     pour: number;
     contre: number;
     abstention: number;
   };
+  categorieId?: string;
+  categorie?: string;
+  importance?: 'faible' | 'normale' | 'haute' | 'critique';
 }
 
 export interface VoteLoi {
@@ -21,10 +24,12 @@ export interface VoteLoi {
   dateDebut: string;
   dateFin: string;
   description?: string;
-  contenu?: string;
+  contenu?: string | string[];
   pour: number;
   contre: number;
   abstention: number;
+  categorieId?: string;
+  categorie?: string;
 }
 
 export interface HistoriqueLoi {
@@ -33,8 +38,15 @@ export interface HistoriqueLoi {
   auteur: string;
   date: string;
   resultat: 'Adoptée' | 'Rejetée';
-  votes: string;
+  votes: string | {
+    pour: number;
+    contre: number;
+    abstention: number;
+  };
   description?: string;
+  contenu?: string | string[];
+  categorieId?: string;
+  categorie?: string;
 }
 
 // Projets de loi en cours

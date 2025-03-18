@@ -123,8 +123,9 @@ export const useGameDate = (initialDate?: GameDate) => {
   };
 
   // Modified: Always return a Date object to fix type compatibility issues
-  const gameToStringOrDate = (gameDate: GameDate): Date => {
-    return gameDateToDate(gameDate);
+  const gameToStringOrDate = (gameDate: GameDate): string => {
+    // Convertir en chaîne de caractères au lieu d'objet Date
+    return `${gameDate.year}-${gameDate.season}`;
   };
 
   return {

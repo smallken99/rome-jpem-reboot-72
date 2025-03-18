@@ -11,7 +11,10 @@ export const useProcessusLegislatif = (isEditable = true) => {
     return projetsData.map(projet => ({
       ...projet,
       description: projet.description || '',
-      contenu: Array.isArray(projet.contenu) ? projet.contenu : (projet.contenu ? [projet.contenu as string] : [])
+      contenu: Array.isArray(projet.contenu) 
+        ? projet.contenu 
+        : (projet.contenu ? [projet.contenu as string] : []),
+      statut: (projet.statut as any) || 'en_cours'
     }));
   });
   
@@ -19,7 +22,9 @@ export const useProcessusLegislatif = (isEditable = true) => {
     return votesData.map(vote => ({
       ...vote,
       description: vote.description || '',
-      contenu: Array.isArray(vote.contenu) ? vote.contenu : (vote.contenu ? [vote.contenu as string] : [])
+      contenu: Array.isArray(vote.contenu) 
+        ? vote.contenu 
+        : (vote.contenu ? [vote.contenu as string] : [])
     }));
   });
   
@@ -37,16 +42,11 @@ export const useProcessusLegislatif = (isEditable = true) => {
         votesObj = histoire.votes || { pour: 0, contre: 0, abstention: 0 };
       }
       
-      // Make sure contenu is always a string array
-      const contenuArray: string[] = Array.isArray(histoire.contenu) 
-        ? histoire.contenu 
-        : (histoire.contenu ? [histoire.contenu as string] : []);
-      
       return {
         ...histoire,
         dateProposition: histoire.date || '',
         dateAdoption: histoire.date || '',
-        contenu: contenuArray,
+        contenu: histoire.description ? [histoire.description] : [],
         statut: histoire.resultat === 'Adoptée' ? 'adopté' : 'rejeté',
         description: histoire.description || 'Aucune description',
         votes: votesObj
@@ -78,7 +78,8 @@ export const useProcessusLegislatif = (isEditable = true) => {
     } else {
       const newLoi: ProjetLoi = {
         id: `proj-${Date.now()}`,
-        ...loiData
+        ...loiData,
+        contenu: loiData.contenu ? [loiData.contenu] : []
       };
       setProjets([...projets, newLoi]);
       toast.success(`Nouvelle loi "${loiData.titre}" créée`);
