@@ -11,6 +11,7 @@ import { GestionFamilles } from '../GestionFamilles';
 import { GestionRepublique } from '../GestionRepublique';
 import { GestionBatiments } from '../GestionBatiments';
 import { GestionLois } from '../GestionLois';
+import { GestionDatabase } from '../GestionDatabase';
 import { MaitreJeuStats } from '../MaitreJeuStats';
 import { TimePanel } from '../components/TimePanel';
 import { MaitreJeuWelcome } from '../MaitreJeuWelcome';
@@ -42,6 +43,7 @@ export const MaitreJeuContent: React.FC<MaitreJeuContentProps> = ({ activeTab })
       {activeTab === 'republique' && <GestionRepublique />}
       {activeTab === 'batiments' && <GestionBatiments />}
       {activeTab === 'lois' && <GestionLois />}
+      {activeTab === 'database' && <GestionDatabase />}
       {activeTab === 'statistiques' && <MaitreJeuStats />}
     </div>
   );

@@ -89,8 +89,7 @@ export const useGameDate = (initialDate?: GameDate) => {
     return seasonOrder[date1.season] > seasonOrder[date2.season];
   };
 
-  // This function now returns a string representation of the GameDate
-  // instead of using formatDate which expects a string or Date
+  // Cette fonction renvoie maintenant une chaîne formatée directement
   const formatGameDate = (date: GameDate): string => {
     return `An ${date.year}, ${formatSeason(date.season)}`;
   };
@@ -111,6 +110,7 @@ export const useGameDate = (initialDate?: GameDate) => {
     return new Date(2000 + gameDate.year - 753, month, 15);
   };
 
+  // Cette fonction renvoie maintenant une chaîne
   const gameToStringOrDate = (gameDate: GameDate): string => {
     return `${gameDate.year}-${gameDate.season}`;
   };
