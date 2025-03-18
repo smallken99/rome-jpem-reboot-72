@@ -1,16 +1,9 @@
 
 import React from 'react';
 import { CardHeader, CardTitle } from '@/components/ui/card';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { Button } from '@/components/ui/button';
-import { MoreHorizontal } from 'lucide-react';
-import { 
-  DropdownMenu, 
-  DropdownMenuContent, 
-  DropdownMenuItem, 
-  DropdownMenuTrigger, 
-  DropdownMenuSeparator 
-} from '@/components/ui/dropdown-menu';
-import { Wrench, Users, Trash2 } from 'lucide-react';
+import { MoreHorizontal, Wrench, Users, TrendingDown } from 'lucide-react';
 
 interface PropertyCardHeaderProps {
   name: string;
@@ -29,28 +22,30 @@ export const PropertyCardHeader: React.FC<PropertyCardHeaderProps> = ({
 }) => {
   return (
     <CardHeader className="pb-2 flex flex-row items-center justify-between">
-      <CardTitle className="font-cinzel text-base">{name}</CardTitle>
+      <CardTitle className="text-base font-cinzel">{name}</CardTitle>
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
-          <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+          <Button variant="ghost" className="h-8 w-8 p-0">
+            <span className="sr-only">Ouvrir le menu</span>
             <MoreHorizontal className="h-4 w-4" />
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end">
-          <DropdownMenuItem onClick={onOpenMaintenanceDialog}>
+          <DropdownMenuItem onClick={onOpenMaintenanceDialog} className="cursor-pointer">
             <Wrench className="mr-2 h-4 w-4" />
-            <span>Gérer l'entretien</span>
+            <span>Maintenance</span>
           </DropdownMenuItem>
+          
           {showSlaveManagement && (
-            <DropdownMenuItem onClick={onOpenSlaveDialog}>
+            <DropdownMenuItem onClick={onOpenSlaveDialog} className="cursor-pointer">
               <Users className="mr-2 h-4 w-4" />
               <span>Gérer les esclaves</span>
             </DropdownMenuItem>
           )}
-          <DropdownMenuSeparator />
-          <DropdownMenuItem onClick={onOpenSaleDialog} className="text-red-600">
-            <Trash2 className="mr-2 h-4 w-4" />
-            <span>Vendre la propriété</span>
+          
+          <DropdownMenuItem onClick={onOpenSaleDialog} className="cursor-pointer text-red-600">
+            <TrendingDown className="mr-2 h-4 w-4" />
+            <span>Vendre</span>
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>

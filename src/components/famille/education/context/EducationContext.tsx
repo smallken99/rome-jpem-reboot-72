@@ -1,307 +1,366 @@
 
-import React, { createContext, useContext, useState, useEffect } from 'react';
-import { Child, Preceptor } from '../types/educationTypes';
-import { usePreceptorsManagement } from '../hooks/usePreceptorsManagement';
-import { Character } from '@/types/character';
+import React, { createContext, useContext, useState, useCallback, ReactNode } from 'react';
+import { Child, Preceptor, EducationType } from '../types/educationTypes';
+import { v4 as uuidv4 } from 'uuid';
+import { toast } from 'sonner';
 
-// Sample data for development
-const MOCK_CHILDREN: Child[] = [
-  {
-    id: '1',
-    name: 'Marcus Aurelius',
-    age: 12,
-    gender: 'male',
-    educationType: 'political',
-    progress: 50,
-    specialties: ['Diplomatie', 'Éloquence'],
-    preceptorId: '1',
-    status: 'in_progress'
-  },
-  {
-    id: '2',
-    name: 'Livia Augusta',
-    age: 10,
-    gender: 'female',
-    educationType: 'religious',
-    progress: 25,
-    specialties: ['Rituels'],
-    preceptorId: '3',
-    status: 'in_progress'
-  },
-  {
-    id: '3',
-    name: 'Titus Valerius',
-    age: 14,
-    gender: 'male',
-    educationType: 'military',
-    progress: 75,
-    specialties: ['Tactique', 'Combat'],
-    preceptorId: '2',
-    status: 'in_progress'
-  },
-  {
-    id: '4',
-    name: 'Julia Domna',
-    age: 9,
-    gender: 'female',
-    educationType: 'none',
-    progress: 0,
-    specialties: [],
-    preceptorId: null,
-    status: 'not_started'
-  },
-  {
-    id: '5',
-    name: 'Gaius Octavius',
-    age: 16,
-    gender: 'male',
-    educationType: 'political',
-    progress: 100,
-    specialties: ['Législation', 'Administration'],
-    preceptorId: '4',
-    status: 'completed'
-  }
-];
-
-export interface EducationContextType {
+interface EducationContextType {
   children: Child[];
   preceptors: Preceptor[];
-  hiredPreceptors: Preceptor[];
-  educatingChildren: Record<string, boolean> | string[];
-  isLoading: boolean;
-  isEducating: boolean | Record<string, boolean>; // Ajout de cette propriété
+  educatingChildren: string[];
+  isEducating: Record<string, boolean>;
   
-  // Child management
-  addChild: (newChild: Omit<Child, 'id'>) => string;
-  updateChild: (id: string, updates: Partial<Child>) => void;
+  // Child functions
+  addChild: (child: Omit<Child, 'id' | 'progress'>) => string;
   removeChild: (id: string) => void;
-  updateChildName: (id: string, newName: string) => void;
+  updateChildName: (id: string, name: string) => void;
+  updateChildEducation: (id: string, educationType: EducationType) => void;
+  assignPreceptorToChild: (childId: string, preceptorId: string) => void;
   
-  // Education management
-  startEducation: (childId: string, educationType: string, preceptorId: string | null) => void;
-  updateEducation: (childId: string, updates: Partial<Child>) => void;
+  // Education functions
+  startEducation: (childId: string) => void;
   advanceEducationYear: (childId: string) => void;
-  advanceEducation: (childId: string) => void; // Alias pour advanceEducationYear
   completeEducation: (childId: string) => void;
-  setSelectedChildId?: (id: string | null) => void; // Ajout de cette propriété optionnelle
   
-  // Preceptor management
-  hirePreceptor: (preceptorId: string) => void;
-  firePreceptor: (preceptorId: string) => void;
-  getAvailablePreceptors: () => Preceptor[];
-  loadPreceptorsByType: (type: string) => Preceptor[];
+  // Preceptor functions
+  addPreceptor: (preceptor: Omit<Preceptor, 'id'>) => string;
+  removePreceptor: (id: string) => void;
+  hirePreceptor: (id: string) => boolean;
+  firePreceptor: (id: string) => void;
 }
 
-const EducationContext = createContext<EducationContextType>({
-  children: [],
-  preceptors: [],
-  hiredPreceptors: [],
-  educatingChildren: {},
-  isLoading: false,
-  isEducating: false,
-  
-  addChild: () => '',
-  updateChild: () => {},
-  removeChild: () => {},
-  updateChildName: () => {},
-  
-  startEducation: () => {},
-  updateEducation: () => {},
-  advanceEducationYear: () => {},
-  advanceEducation: () => {},
-  completeEducation: () => {},
-  
-  hirePreceptor: () => {},
-  firePreceptor: () => {},
-  getAvailablePreceptors: () => [],
-  loadPreceptorsByType: () => []
-});
+const EducationContext = createContext<EducationContextType | undefined>(undefined);
 
-export const EducationProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [childrenData, setChildrenData] = useState<Child[]>(MOCK_CHILDREN);
-  const [educatingChildrenState, setEducatingChildrenState] = useState<Record<string, boolean>>({});
-  const [isLoading, setIsLoading] = useState(false);
-  const [selectedChildId, setSelectedChildId] = useState<string | null>(null);
+export const EducationProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
+  const [childrenData, setChildrenData] = useState<Child[]>([
+    {
+      id: '1',
+      name: 'Lucius Cornelius',
+      age: 10,
+      gender: 'male',
+      educationType: 'military',
+      progress: 35,
+      preceptorId: '2'
+    },
+    {
+      id: '2',
+      name: 'Julia Cornelia',
+      age: 12,
+      gender: 'female',
+      educationType: 'rhetoric',
+      progress: 60
+    },
+    {
+      id: '3',
+      name: 'Marcus Cornelius',
+      age: 8,
+      gender: 'male',
+      educationType: 'none',
+      progress: 0
+    }
+  ]);
   
-  const { 
-    preceptors,
-    addPreceptor,
-    updatePreceptor,
-    removePreceptor,
-    getPreceptorsBySpecialty,
-    getAvailablePreceptors,
-    getAssignedPreceptors
-  } = usePreceptorsManagement();
+  const [preceptorsData, setPreceptorsData] = useState<Preceptor[]>([
+    {
+      id: '1',
+      name: 'Quintus Servilius',
+      specialty: 'rhetoric',
+      price: 5000,
+      quality: 85,
+      experience: 15,
+      assigned: false
+    },
+    {
+      id: '2',
+      name: 'Gaius Flavius',
+      specialty: 'military',
+      price: 8000,
+      quality: 90,
+      experience: 20,
+      assigned: true
+    },
+    {
+      id: '3',
+      name: 'Titus Livius',
+      specialty: 'academic',
+      price: 6000,
+      quality: 95,
+      experience: 25,
+      assigned: false
+    }
+  ]);
+  
+  // Track which children are currently being educated (in progress)
+  const [educatingChildrenIds, setEducatingChildrenIds] = useState<string[]>([]);
+  const [isEducatingMap, setIsEducatingMap] = useState<Record<string, boolean>>({});
   
   // Child management functions
-  const addChild = (newChild: Omit<Child, 'id'>): string => {
-    const id = Math.random().toString(36).substr(2, 9);
-    const child: Child = { id, ...newChild };
-    setChildrenData(prev => [...prev, child]);
+  const addChild = useCallback((child: Omit<Child, 'id' | 'progress'>): string => {
+    const id = uuidv4();
+    const newChild: Child = {
+      ...child,
+      id,
+      progress: 0
+    };
+    
+    setChildrenData(prev => [...prev, newChild]);
+    toast.success(`${child.name} a été ajouté(e) à la famille`);
     return id;
-  };
+  }, []);
   
-  const updateChild = (id: string, updates: Partial<Child>) => {
-    setChildrenData(prev => 
-      prev.map(child => 
-        child.id === id ? { ...child, ...updates } : child
-      )
-    );
-  };
-  
-  const removeChild = (id: string) => {
+  const removeChild = useCallback((id: string) => {
     setChildrenData(prev => prev.filter(child => child.id !== id));
-  };
+    toast.success(`L'enfant a été retiré de la famille`);
+  }, []);
   
-  const updateChildName = (id: string, newName: string) => {
-    updateChild(id, { name: newName });
-  };
-  
-  // Education management functions
-  const startEducation = (childId: string, educationType: string, preceptorId: string | null) => {
-    updateChild(childId, { 
-      educationType,
-      preceptorId,
-      progress: 0,
-      status: 'in_progress'
-    });
-    
-    // Mark child as currently educating
-    setEducatingChildrenState(prev => ({ ...prev, [childId]: true }));
-    
-    // If a preceptor is assigned, update their availability
-    if (preceptorId) {
-      updatePreceptor(preceptorId, { available: false });
-    }
-  };
-  
-  const updateEducation = (childId: string, updates: Partial<Child>) => {
-    const child = childrenData.find(c => c.id === childId);
-    if (!child) return;
-    
-    // If changing preceptors, update availability
-    if (updates.preceptorId && updates.preceptorId !== child.preceptorId) {
-      // Make the old preceptor available
-      if (child.preceptorId) {
-        updatePreceptor(child.preceptorId, { available: true });
-      }
-      
-      // Make the new preceptor unavailable
-      if (typeof updates.preceptorId === 'string') {
-        updatePreceptor(updates.preceptorId, { available: false });
-      }
-    }
-    
-    updateChild(childId, updates);
-  };
-  
-  const advanceEducationYear = (childId: string) => {
-    const child = childrenData.find(c => c.id === childId);
-    if (!child) return;
-    
-    // Calculate progress increase (25% per year, limited to 100%)
-    const newProgress = Math.min(100, (child.progress || 0) + 25);
-    
-    updateChild(childId, { 
-      progress: newProgress,
-      status: newProgress >= 100 ? 'completed' : 'in_progress'
-    });
-    
-    if (newProgress >= 100) {
-      // If education is complete, stop educating
-      setEducatingChildrenState(prev => {
-        const newState = { ...prev };
-        delete newState[childId];
-        return newState;
-      });
-    }
-  };
-  
-  // Alias pour advanceEducationYear
-  const advanceEducation = advanceEducationYear;
-  
-  const completeEducation = (childId: string) => {
-    updateChild(childId, { 
-      progress: 100,
-      status: 'completed'
-    });
-    
-    // Stop educating
-    setEducatingChildrenState(prev => {
-      const newState = { ...prev };
-      delete newState[childId];
-      return newState;
-    });
-  };
-  
-  // Preceptor management
-  const hirePreceptor = (preceptorId: string) => {
-    updatePreceptor(preceptorId, { available: false });
-  };
-  
-  const firePreceptor = (preceptorId: string) => {
-    updatePreceptor(preceptorId, { available: true });
-    
-    // Update any children using this preceptor
+  const updateChildName = useCallback((id: string, name: string) => {
     setChildrenData(prev => 
       prev.map(child => 
-        child.preceptorId === preceptorId 
-          ? { ...child, preceptorId: null } 
-          : child
+        child.id === id ? { ...child, name } : child
       )
     );
-  };
+  }, []);
   
-  const loadPreceptorsByType = (type: string): Preceptor[] => {
-    // Simulation d'une requête backend
-    setIsLoading(true);
-    
-    // Filtre les précepteurs par type
-    const filteredPreceptors = preceptors.filter(
-      p => (p.specialty || p.speciality || '').toLowerCase().includes(type.toLowerCase())
+  const updateChildEducation = useCallback((id: string, educationType: EducationType) => {
+    setChildrenData(prev => 
+      prev.map(child => 
+        child.id === id ? { ...child, educationType, progress: 0 } : child
+      )
     );
     
-    setTimeout(() => {
-      setIsLoading(false);
-    }, 500);
-    
-    return filteredPreceptors;
-  };
+    toast.success("Type d'éducation mis à jour");
+  }, []);
   
-  // Calculate which children are currently being educated
-  const hiredPreceptors = preceptors.filter(p => !p.available);
+  const assignPreceptorToChild = useCallback((childId: string, preceptorId: string) => {
+    // Update child with preceptor
+    setChildrenData(prev => 
+      prev.map(child => 
+        child.id === childId ? { ...child, preceptorId } : child
+      )
+    );
+    
+    // Mark preceptor as assigned
+    setPreceptorsData(prev => 
+      prev.map(preceptor => 
+        preceptor.id === preceptorId ? { ...preceptor, assigned: true } : preceptor
+      )
+    );
+    
+    const preceptor = preceptorsData.find(p => p.id === preceptorId);
+    const child = childrenData.find(c => c.id === childId);
+    
+    if (preceptor && child) {
+      toast.success(`${preceptor.name} a été assigné à l'éducation de ${child.name}`);
+    }
+  }, [childrenData, preceptorsData]);
+  
+  // Education functions
+  const startEducation = useCallback((childId: string) => {
+    const child = childrenData.find(c => c.id === childId);
+    
+    if (!child) {
+      toast.error("Enfant introuvable");
+      return;
+    }
+    
+    if (child.educationType === 'none') {
+      toast.error("Aucun type d'éducation n'a été assigné");
+      return;
+    }
+    
+    setEducatingChildrenIds(prev => [...prev, childId]);
+    setIsEducatingMap(prev => ({ ...prev, [childId]: true }));
+    
+    toast.success(`L'éducation de ${child.name} a commencé`);
+  }, [childrenData]);
+  
+  const advanceEducationYear = useCallback((childId: string) => {
+    const child = childrenData.find(c => c.id === childId);
+    
+    if (!child) {
+      toast.error("Enfant introuvable");
+      return;
+    }
+    
+    if (child.educationType === 'none') {
+      toast.error("Aucun type d'éducation n'a été assigné");
+      return;
+    }
+    
+    // Set this child as currently educating
+    setIsEducatingMap(prev => ({ ...prev, [childId]: true }));
+    
+    // Simulate education progress
+    setTimeout(() => {
+      setChildrenData(prev => 
+        prev.map(c => {
+          if (c.id === childId) {
+            // Calculate progress increase based on preceptor quality if assigned
+            let progressIncrease = 15; // Base increase
+            
+            if (c.preceptorId) {
+              const preceptor = preceptorsData.find(p => p.id === c.preceptorId);
+              if (preceptor) {
+                // Better preceptors provide faster progress
+                progressIncrease = 10 + Math.floor(preceptor.quality / 10);
+              }
+            }
+            
+            const newProgress = Math.min(100, c.progress + progressIncrease);
+            return { ...c, progress: newProgress };
+          }
+          return c;
+        })
+      );
+      
+      // Mark as no longer educating
+      setIsEducatingMap(prev => ({ ...prev, [childId]: false }));
+      
+      toast.success(`L'éducation de ${child.name} a progressé !`);
+    }, 2000); // Simulate progress over 2 seconds
+  }, [childrenData, preceptorsData]);
+  
+  const completeEducation = useCallback((childId: string) => {
+    const child = childrenData.find(c => c.id === childId);
+    
+    if (!child) {
+      toast.error("Enfant introuvable");
+      return;
+    }
+    
+    if (child.educationType === 'none') {
+      toast.error("Aucun type d'éducation n'a été assigné");
+      return;
+    }
+    
+    if (child.progress < 75) {
+      toast.error("L'éducation n'est pas suffisamment avancée pour être complétée");
+      return;
+    }
+    
+    // Complete the education by setting progress to 100%
+    setChildrenData(prev => 
+      prev.map(c => 
+        c.id === childId ? { ...c, progress: 100 } : c
+      )
+    );
+    
+    // Remove from educating children
+    setEducatingChildrenIds(prev => prev.filter(id => id !== childId));
+    setIsEducatingMap(prev => ({ ...prev, [childId]: false }));
+    
+    toast.success(`L'éducation de ${child.name} est maintenant complète !`);
+  }, [childrenData]);
+  
+  // Preceptor management functions
+  const addPreceptor = useCallback((preceptor: Omit<Preceptor, 'id'>): string => {
+    const id = uuidv4();
+    const newPreceptor: Preceptor = {
+      ...preceptor,
+      id
+    };
+    
+    setPreceptorsData(prev => [...prev, newPreceptor]);
+    toast.success(`${preceptor.name} a été ajouté à la liste des précepteurs`);
+    return id;
+  }, []);
+  
+  const removePreceptor = useCallback((id: string) => {
+    const preceptor = preceptorsData.find(p => p.id === id);
+    
+    if (!preceptor) {
+      toast.error("Précepteur introuvable");
+      return;
+    }
+    
+    // Check if the preceptor is assigned to any child
+    const assignedToChild = childrenData.some(child => child.preceptorId === id);
+    
+    if (assignedToChild) {
+      toast.error("Ce précepteur est actuellement assigné à un enfant et ne peut pas être retiré");
+      return;
+    }
+    
+    setPreceptorsData(prev => prev.filter(p => p.id !== id));
+    toast.success(`${preceptor.name} a été retiré de la liste des précepteurs`);
+  }, [preceptorsData, childrenData]);
+  
+  const hirePreceptor = useCallback((id: string): boolean => {
+    const preceptor = preceptorsData.find(p => p.id === id);
+    
+    if (!preceptor) {
+      toast.error("Précepteur introuvable");
+      return false;
+    }
+    
+    // In a real app, check if enough funds are available
+    // For now, we'll assume the hiring is successful
+    
+    toast.success(`${preceptor.name} a été embauché comme précepteur`);
+    return true;
+  }, [preceptorsData]);
+  
+  const firePreceptor = useCallback((id: string) => {
+    const preceptor = preceptorsData.find(p => p.id === id);
+    
+    if (!preceptor) {
+      toast.error("Précepteur introuvable");
+      return;
+    }
+    
+    // Remove preceptor assignment from any children
+    setChildrenData(prev => 
+      prev.map(child => 
+        child.preceptorId === id ? { ...child, preceptorId: undefined } : child
+      )
+    );
+    
+    // Mark as unassigned (or remove completely in a real implementation)
+    setPreceptorsData(prev => 
+      prev.map(p => 
+        p.id === id ? { ...p, assigned: false } : p
+      )
+    );
+    
+    toast.success(`${preceptor.name} a été renvoyé`);
+  }, [preceptorsData]);
+  
+  const value = {
+    children: childrenData,
+    preceptors: preceptorsData,
+    educatingChildren: educatingChildrenIds,
+    isEducating: isEducatingMap,
+    
+    // Child functions
+    addChild,
+    removeChild,
+    updateChildName,
+    updateChildEducation,
+    assignPreceptorToChild,
+    
+    // Education functions
+    startEducation,
+    advanceEducationYear,
+    completeEducation,
+    
+    // Preceptor functions
+    addPreceptor,
+    removePreceptor,
+    hirePreceptor,
+    firePreceptor
+  };
   
   return (
-    <EducationContext.Provider
-      value={{
-        children: childrenData,
-        preceptors,
-        hiredPreceptors,
-        educatingChildren: educatingChildrenState,
-        isLoading,
-        isEducating: educatingChildrenState,
-        
-        addChild,
-        updateChild,
-        removeChild,
-        updateChildName,
-        
-        startEducation,
-        updateEducation,
-        advanceEducationYear,
-        advanceEducation,
-        completeEducation,
-        setSelectedChildId,
-        
-        hirePreceptor,
-        firePreceptor,
-        getAvailablePreceptors,
-        loadPreceptorsByType
-      }}
-    >
+    <EducationContext.Provider value={value}>
       {children}
     </EducationContext.Provider>
   );
 };
 
-export const useEducation = () => useContext(EducationContext);
+export const useEducation = () => {
+  const context = useContext(EducationContext);
+  if (context === undefined) {
+    throw new Error('useEducation must be used within an EducationProvider');
+  }
+  return context;
+};

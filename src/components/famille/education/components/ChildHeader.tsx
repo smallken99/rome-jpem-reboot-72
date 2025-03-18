@@ -1,95 +1,69 @@
 
 import React, { useState } from 'react';
-import { Button } from '@/components/ui/button';
-import { Edit, Check, X } from 'lucide-react';
-import { Input } from '@/components/ui/input';
-import { Badge } from '@/components/ui/badge';
+import { Edit, User, UserCheck } from 'lucide-react';
 import { Child } from '../types/educationTypes';
+import { Badge } from '@/components/ui/badge';
 
 interface ChildHeaderProps {
   child: Child;
-  onNameChange?: (id: string, newName: string) => void;
+  onNameChange: (id: string, newName: string) => void;
   hasInvalidEducation?: boolean;
 }
 
 export const ChildHeader: React.FC<ChildHeaderProps> = ({ 
   child, 
   onNameChange,
-  hasInvalidEducation
+  hasInvalidEducation = false
 }) => {
   const [isEditing, setIsEditing] = useState(false);
   const [newName, setNewName] = useState(child.name);
   
-  const handleSave = () => {
-    if (newName.trim() && onNameChange) {
+  const handleNameSubmit = () => {
+    if (newName.trim() && newName !== child.name) {
       onNameChange(child.id, newName);
     }
     setIsEditing(false);
   };
   
-  const handleCancel = () => {
-    setNewName(child.name);
-    setIsEditing(false);
-  };
-  
   return (
-    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-      <div className="flex items-center gap-2">
-        {isEditing ? (
-          <div className="flex items-center gap-2">
-            <Input
-              value={newName}
-              onChange={(e) => setNewName(e.target.value)}
-              className="max-w-[200px]"
-              autoFocus
-            />
-            <Button 
-              size="icon" 
-              variant="ghost" 
-              onClick={handleSave} 
-              className="h-8 w-8 text-green-600"
-            >
-              <Check className="h-4 w-4" />
-            </Button>
-            <Button 
-              size="icon" 
-              variant="ghost" 
-              onClick={handleCancel} 
-              className="h-8 w-8 text-red-600"
-            >
-              <X className="h-4 w-4" />
-            </Button>
-          </div>
-        ) : (
-          <>
-            <h3 className="text-lg font-semibold">{child.name}</h3>
-            {onNameChange && (
-              <Button 
-                size="icon" 
-                variant="ghost" 
-                onClick={() => setIsEditing(true)} 
-                className="h-8 w-8"
+    <div className="flex items-center justify-between p-4 border-b bg-gradient-to-r from-rome-marble to-white">
+      <div className="flex items-center gap-3">
+        <div className={`rounded-full p-2 ${child.gender === 'male' ? 'bg-blue-50 text-blue-600' : 'bg-pink-50 text-pink-600'}`}>
+          {child.gender === 'male' ? <UserCheck size={20} /> : <User size={20} />}
+        </div>
+        <div>
+          {isEditing ? (
+            <div className="flex items-center gap-2">
+              <input
+                type="text"
+                value={newName}
+                onChange={(e) => setNewName(e.target.value)}
+                onBlur={handleNameSubmit}
+                onKeyDown={(e) => e.key === 'Enter' && handleNameSubmit()}
+                className="border border-rome-gold/30 px-2 py-1 rounded text-sm focus:outline-none focus:ring-1 focus:ring-rome-gold"
+                autoFocus
+              />
+            </div>
+          ) : (
+            <div className="flex items-center gap-2">
+              <h3 className="font-cinzel font-semibold text-rome-navy">{child.name}</h3>
+              <button 
+                onClick={() => setIsEditing(true)}
+                className="text-muted-foreground hover:text-rome-gold transition-colors"
               >
-                <Edit className="h-3.5 w-3.5" />
-              </Button>
+                <Edit size={14} />
+              </button>
+            </div>
+          )}
+          <div className="flex items-center gap-2 mt-1">
+            <span className="text-sm text-muted-foreground">{child.age} ans</span>
+            {hasInvalidEducation && (
+              <Badge variant="destructive" className="text-xs">
+                Éducation incompatible
+              </Badge>
             )}
-          </>
-        )}
-      </div>
-      
-      <div className="flex items-center gap-2">
-        <Badge variant="outline" className={`${child.gender === 'male' ? 'bg-blue-50 text-blue-700' : 'bg-pink-50 text-pink-700'}`}>
-          {child.gender === 'male' ? 'Garçon' : 'Fille'}
-        </Badge>
-        <Badge variant="outline" className="bg-amber-50 text-amber-700">
-          {child.age} ans
-        </Badge>
-        
-        {hasInvalidEducation && (
-          <Badge variant="outline" className="bg-red-50 text-red-700 border-red-200">
-            Éducation incompatible
-          </Badge>
-        )}
+          </div>
+        </div>
       </div>
     </div>
   );

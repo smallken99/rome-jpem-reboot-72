@@ -2,8 +2,8 @@
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { usePatrimoine } from '@/hooks/usePatrimoine';
-import { useBuildingInventory } from '../hooks/building/useBuildingInventory';
-import { BarChart, Building, Coins, Map, Users, FileBarChart } from 'lucide-react';
+import { useBuildingManagement } from '../hooks/useBuildingManagement';
+import { BarChart, Building, Coins, Map, Users, FileBarChart, Landmark, Farm, CircleDollarSign } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Link } from 'react-router-dom';
 import { formatCurrency } from '@/utils/currencyUtils';
@@ -13,19 +13,21 @@ import { RecentTransactions } from './RecentTransactions';
 
 export const PatrimoineOverview: React.FC = () => {
   const { balance, transactions, properties } = usePatrimoine();
-  const { ownedBuildings } = useBuildingInventory();
+  const { 
+    buildings, 
+    urbanBuildings, 
+    ruralBuildings, 
+    religiousBuildings, 
+    calculateTotalPropertyValue, 
+    calculateAnnualIncome,
+    getPropertyStats 
+  } = useBuildingManagement();
   
-  // Calculate total property value from patrimoine
-  const totalPropertyValue = properties.reduce((sum, property) => 
-    sum + property.value, 0);
+  // Get property statistics
+  const propertyStats = getPropertyStats();
   
-  // Total net worth
-  const netWorth = balance + totalPropertyValue;
-  
-  // Count property types
-  const urbanProperties = ownedBuildings.filter(b => b.buildingType === 'urban').length;
-  const ruralProperties = ownedBuildings.filter(b => b.buildingType === 'rural').length;
-  const otherProperties = ownedBuildings.length - urbanProperties - ruralProperties;
+  // Calculate total net worth
+  const netWorth = balance + propertyStats.totalValue;
   
   return (
     <div className="space-y-6">
@@ -33,7 +35,7 @@ export const PatrimoineOverview: React.FC = () => {
         <Card>
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="text-sm font-medium">Valeur Nette</CardTitle>
-            <Coins className="h-4 w-4 text-muted-foreground" />
+            <CircleDollarSign className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{formatCurrency(netWorth)}</div>
@@ -47,8 +49,10 @@ export const PatrimoineOverview: React.FC = () => {
             <Building className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{properties.length + ownedBuildings.length}</div>
-            <p className="text-xs text-muted-foreground">Biens immobiliers</p>
+            <div className="text-2xl font-bold">{properties.length + buildings.length}</div>
+            <p className="text-xs text-muted-foreground">
+              {propertyStats.urbanCount} urbaines, {propertyStats.ruralCount} rurales
+            </p>
           </CardContent>
         </Card>
         
@@ -65,12 +69,12 @@ export const PatrimoineOverview: React.FC = () => {
         
         <Card>
           <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium">Transactions</CardTitle>
+            <CardTitle className="text-sm font-medium">Revenu Annuel</CardTitle>
             <FileBarChart className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{transactions.length}</div>
-            <p className="text-xs text-muted-foreground">Enregistrées</p>
+            <div className="text-2xl font-bold text-emerald-600">{formatCurrency(propertyStats.annualIncome)}</div>
+            <p className="text-xs text-muted-foreground">Estimation</p>
           </CardContent>
         </Card>
       </div>
@@ -91,28 +95,57 @@ export const PatrimoineOverview: React.FC = () => {
           </CardHeader>
           <CardContent>
             <PropertyDistributionPie 
-              urbanProperties={urbanProperties} 
-              ruralProperties={ruralProperties} 
-              otherProperties={otherProperties} 
+              urbanProperties={propertyStats.urbanCount} 
+              ruralProperties={propertyStats.ruralCount} 
+              otherProperties={propertyStats.religiousCount + propertyStats.publicCount} 
             />
           </CardContent>
         </Card>
       </div>
       
-      <Card>
-        <CardHeader className="flex justify-between items-center">
-          <CardTitle>Transactions récentes</CardTitle>
-          <Button asChild variant="outline" size="sm" className="gap-1">
-            <Link to="/patrimoine/economie">
-              <FileBarChart className="h-4 w-4" />
-              <span>Toutes les transactions</span>
-            </Link>
-          </Button>
-        </CardHeader>
-        <CardContent>
-          <RecentTransactions transactions={transactions.slice(0, 5)} />
-        </CardContent>
-      </Card>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <Card>
+          <CardHeader className="flex justify-between items-center">
+            <CardTitle>Propriétés en alerte</CardTitle>
+            <Button asChild variant="outline" size="sm" className="gap-1">
+              <Link to="/patrimoine/proprietes">
+                <Building className="h-4 w-4" />
+                <span>Gérer</span>
+              </Link>
+            </Button>
+          </CardHeader>
+          <CardContent>
+            {propertyStats.propertyNeedingMaintenance > 0 ? (
+              <div className="space-y-4">
+                <div className="p-4 bg-amber-50 text-amber-800 rounded-md border border-amber-200">
+                  <h3 className="font-medium mb-1">Maintenance requise</h3>
+                  <p className="text-sm">{propertyStats.propertyNeedingMaintenance} propriété(s) nécessite(nt) de l'entretien.</p>
+                </div>
+              </div>
+            ) : (
+              <div className="p-4 bg-green-50 text-green-800 rounded-md border border-green-200">
+                <h3 className="font-medium mb-1">Aucune alerte</h3>
+                <p className="text-sm">Toutes vos propriétés sont en bon état.</p>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+        
+        <Card>
+          <CardHeader className="flex justify-between items-center">
+            <CardTitle>Transactions récentes</CardTitle>
+            <Button asChild variant="outline" size="sm" className="gap-1">
+              <Link to="/patrimoine/economie">
+                <FileBarChart className="h-4 w-4" />
+                <span>Voir tout</span>
+              </Link>
+            </Button>
+          </CardHeader>
+          <CardContent>
+            <RecentTransactions transactions={transactions.slice(0, 3)} />
+          </CardContent>
+        </Card>
+      </div>
       
       <div className="flex flex-col md:flex-row gap-4">
         <Button asChild className="flex-1 gap-2">
@@ -126,6 +159,13 @@ export const PatrimoineOverview: React.FC = () => {
           <Link to="/patrimoine/carte">
             <Map className="h-4 w-4" />
             <span>Voir la carte</span>
+          </Link>
+        </Button>
+        
+        <Button asChild variant="outline" className="flex-1 gap-2">
+          <Link to="/patrimoine/economie">
+            <Coins className="h-4 w-4" />
+            <span>Gestion financière</span>
           </Link>
         </Button>
       </div>

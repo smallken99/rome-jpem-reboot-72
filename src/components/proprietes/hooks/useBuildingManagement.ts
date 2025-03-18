@@ -1,89 +1,41 @@
 
 import { useState, useCallback } from 'react';
 import { useBuildingInventory } from './building/useBuildingInventory';
-import { useBuildingPurchase } from './building/useBuildingPurchase';
 import { useBuildingSale } from './building/useBuildingSale';
+import { useBuildingPurchase } from './building/useBuildingPurchase';
 import { useBuildingMaintenance } from './building/useBuildingMaintenance';
 import { useSlaveAssignment } from './building/useSlaveAssignment';
-import { OwnedBuilding, BuildingPurchaseOptions } from './building/types';
+import { OwnedBuilding } from './building/types';
 import { usePatrimoine } from '@/hooks/usePatrimoine';
 import { toast } from 'sonner';
 
-// Re-export the OwnedBuilding type
-export type { OwnedBuilding } from './building/types';
-
-// Unified hook that combines all building management hooks
 export function useBuildingManagement() {
-  const [selectedBuilding, setSelectedBuilding] = useState<OwnedBuilding | null>(null);
-  const [isPurchaseDialogOpen, setIsPurchaseDialogOpen] = useState(false);
-  const [isSaleDialogOpen, setIsSaleDialogOpen] = useState(false);
-  const [isMaintenanceDialogOpen, setIsMaintenanceDialogOpen] = useState(false);
-  const [isConstructionDialogOpen, setIsConstructionDialogOpen] = useState(false);
+  const { buildings, ownedBuildings, addBuilding, updateBuildingProperty } = useBuildingInventory();
+  const { sellBuilding, calculateBuildingValue } = useBuildingSale();
+  const { purchaseBuilding } = useBuildingPurchase();
+  const { toggleMaintenance, performMaintenance } = useBuildingMaintenance();
+  const { assignSlaves } = useSlaveAssignment();
+  const { balance, buildingPurchased, buildingSold } = usePatrimoine();
   
-  // Use the individual hooks
-  const { 
-    ownedBuildings, addBuilding, removeBuilding, updateBuildingProperty
-  } = useBuildingInventory();
+  // Filter buildings by type
+  const urbanBuildings = buildings.filter(b => b.buildingType === 'urban');
+  const ruralBuildings = buildings.filter(b => b.buildingType === 'rural');
+  const religiousBuildings = buildings.filter(b => b.buildingType === 'religious');
+  const publicBuildings = buildings.filter(b => b.buildingType === 'public');
   
-  const { 
-    isLoading: isPurchaseLoading, 
-    purchaseBuilding 
-  } = useBuildingPurchase();
-  
-  const { 
-    isLoading: isSaleLoading, 
-    calculateBuildingValue,
-    sellBuilding,
-    calculateBuildingValueById
-  } = useBuildingSale();
-  
-  const { 
-    isLoading: isMaintenanceLoading, 
-    toggleMaintenance, 
-    performMaintenance,
-    needsMaintenance,
-    calculateMaintenanceCost,
-    getMaintenanceOptions
-  } = useBuildingMaintenance();
-  
-  const { 
-    assignSlaves 
-  } = useSlaveAssignment();
-  
-  const { balance } = usePatrimoine();
-  
-  // Combine loading states
-  const isLoading = isPurchaseLoading || isSaleLoading || isMaintenanceLoading;
-
-  // Handle building purchase
-  const handlePurchaseBuilding = async (options: BuildingPurchaseOptions): Promise<boolean> => {
-    try {
-      const result = await purchaseBuilding(options);
-      if (result) {
-        toast.success(`${options.name} acquis avec succès!`);
-        return true;
-      }
-      return false;
-    } catch (error) {
-      console.error("Erreur lors de l'achat:", error);
-      toast.error("Une erreur est survenue lors de l'achat");
-      return false;
-    }
-  };
-  
-  // Handle adding a new property
-  const handleAddProperty = (
+  // Add property with a custom name
+  const handleAddProperty = useCallback((
     buildingId: string,
     buildingType: "urban" | "rural" | "religious" | "public",
     location: string,
     customName?: string
   ): boolean => {
     try {
-      // Générer un ID unique 
+      // Generate a unique ID
       const newId = Date.now();
       
-      // Ajouter le bâtiment à l'inventaire
-      addBuilding({
+      // Default values for a new building
+      const newBuilding: OwnedBuilding = {
         id: newId,
         buildingId,
         name: customName || `Bâtiment ${buildingType} à ${location}`,
@@ -94,7 +46,13 @@ export function useBuildingManagement() {
         slaves: 0,
         condition: 100,
         purchaseDate: new Date()
-      });
+      };
+      
+      // Add building to inventory
+      addBuilding(newBuilding);
+      
+      // Record financial transaction
+      buildingPurchased(newBuilding.name, 5000); // Example cost
       
       toast.success(`Propriété ${buildingType} ajoutée avec succès!`);
       return true;
@@ -103,96 +61,104 @@ export function useBuildingManagement() {
       toast.error("Échec de l'ajout de la propriété");
       return false;
     }
-  };
+  }, [addBuilding, buildingPurchased]);
   
-  // Handle building sale
-  const handleSellBuilding = useCallback(async (buildingId: number | string): Promise<boolean> => {
+  // Handle selling a building
+  const handleSellBuilding = useCallback((buildingId: string | number): boolean => {
     try {
-      const building = ownedBuildings.find(b => b.id === buildingId);
-      if (!building) return false;
+      // Find the building to get its value
+      const building = buildings.find(b => b.id === buildingId);
       
-      const result = sellBuilding(buildingId);
-      if (result) {
-        setSelectedBuilding(null);
-        return true;
+      if (!building) {
+        toast.error("Bâtiment introuvable");
+        return false;
       }
-      return false;
+      
+      // Calculate sale value
+      const value = calculateBuildingValue(building);
+      
+      // Sell the building (remove from inventory)
+      const success = sellBuilding(buildingId);
+      
+      if (success) {
+        // Record financial transaction
+        buildingSold(building.name, value);
+        
+        toast.success(`${building.name} vendu pour ${value} As!`);
+        return true;
+      } else {
+        toast.error("La vente n'a pas pu être complétée");
+        return false;
+      }
     } catch (error) {
-      console.error("Erreur lors de la vente:", error);
+      console.error("Erreur lors de la vente du bâtiment:", error);
       toast.error("Une erreur est survenue lors de la vente");
       return false;
     }
-  }, [ownedBuildings, sellBuilding]);
+  }, [buildings, calculateBuildingValue, sellBuilding, buildingSold]);
   
-  // Handle building maintenance
-  const handleMaintenanceBuilding = useCallback(async (
-    buildingId: number | string, 
-    level: 'basic' | 'standard' | 'premium'
-  ): Promise<boolean> => {
-    return await performMaintenance(buildingId, level);
-  }, [performMaintenance]);
+  // Calculate total property value
+  const calculateTotalPropertyValue = useCallback((): number => {
+    return buildings.reduce((total, building) => {
+      return total + calculateBuildingValue(building);
+    }, 0);
+  }, [buildings, calculateBuildingValue]);
   
-  // Handle construction
-  const handleStartConstruction = useCallback(async (constructionData: any): Promise<boolean> => {
-    // Placeholder for construction logic
-    toast.success(`Construction de ${constructionData.name} démarrée`);
-    return true;
-  }, []);
+  // Calculate estimated annual income from properties
+  const calculateAnnualIncome = useCallback((): number => {
+    // In a real app, this would calculate based on property type, location, etc.
+    return buildings.reduce((total, building) => {
+      // Example calculation
+      const baseIncome = building.buildingType === 'rural' ? 5000 : 3000;
+      const conditionFactor = building.condition / 100;
+      return total + (baseIncome * conditionFactor);
+    }, 0);
+  }, [buildings]);
   
-  // Rename a building
-  const renameBuilding = useCallback((buildingId: number | string, newName: string): boolean => {
-    try {
-      updateBuildingProperty(buildingId, 'name', newName);
-      toast.success("Propriété renommée avec succès");
-      return true;
-    } catch (error) {
-      console.error("Erreur lors du renommage:", error);
-      toast.error("Une erreur est survenue");
-      return false;
-    }
-  }, [updateBuildingProperty]);
+  // Get counts and statistics
+  const getPropertyStats = useCallback(() => {
+    return {
+      totalCount: buildings.length,
+      urbanCount: urbanBuildings.length,
+      ruralCount: ruralBuildings.length,
+      religiousCount: religiousBuildings.length,
+      publicCount: publicBuildings.length,
+      totalValue: calculateTotalPropertyValue(),
+      annualIncome: calculateAnnualIncome(),
+      propertyNeedingMaintenance: buildings.filter(b => b.condition < 70).length
+    };
+  }, [
+    buildings, 
+    urbanBuildings, 
+    ruralBuildings, 
+    religiousBuildings, 
+    publicBuildings, 
+    calculateTotalPropertyValue, 
+    calculateAnnualIncome
+  ]);
   
   return {
-    // Building inventory
-    ownedBuildings,
-    buildings: ownedBuildings,
-    
-    // Dialog states
-    selectedBuilding,
-    setSelectedBuilding,
-    isPurchaseDialogOpen,
-    setIsPurchaseDialogOpen,
-    isSaleDialogOpen,
-    setIsSaleDialogOpen,
-    isMaintenanceDialogOpen,
-    setIsMaintenanceDialogOpen,
-    isConstructionDialogOpen,
-    setIsConstructionDialogOpen,
-    
-    // Action handlers
-    isLoading,
-    handlePurchaseBuilding,
-    handleSellBuilding,
-    handleMaintenanceBuilding,
-    handleStartConstruction,
-    handleAddProperty,
-    toggleMaintenance,
-    assignSlaves,
-    sellBuilding,
-    calculateBuildingValue,
-    calculateBuildingValueById,
-    needsMaintenance,
-    calculateMaintenanceCost,
-    getMaintenanceOptions,
-    renameBuilding,
+    // Building collections
+    buildings,
+    urbanBuildings,
+    ruralBuildings,
+    religiousBuildings,
+    publicBuildings,
     
     // Financial info
     balance,
     
-    // Building categories
-    ruralBuildings: ownedBuildings.filter(b => b.buildingType === "rural"),
-    urbanBuildings: ownedBuildings.filter(b => b.buildingType === "urban"),
-    religiousBuildings: ownedBuildings.filter(b => b.buildingType === "religious"),
-    publicBuildings: ownedBuildings.filter(b => b.buildingType === "public")
+    // Building operations
+    handleAddProperty,
+    sellBuilding: handleSellBuilding,
+    toggleMaintenance,
+    performMaintenance,
+    assignSlaves,
+    calculateBuildingValue,
+    
+    // Statistics
+    getPropertyStats,
+    calculateTotalPropertyValue,
+    calculateAnnualIncome
   };
 }

@@ -1,89 +1,84 @@
 
 import React from 'react';
+import { Child } from '../types/educationTypes';
 import { Progress } from '@/components/ui/progress';
-import { Child, EducationStatusProps } from '../types/educationTypes';
-import { Badge } from '@/components/ui/badge';
-import { AlertTriangle, BookOpen, GraduationCap } from 'lucide-react';
+import { AlertTriangle, BookOpen, GraduationCap, Swords, ScrollText } from 'lucide-react';
+
+interface EducationStatusProps {
+  child: Child;
+  hasEducation: boolean;
+  hasInvalidEducation: boolean;
+}
 
 export const EducationStatus: React.FC<EducationStatusProps> = ({ 
   child, 
   hasEducation,
-  hasInvalidEducation = false 
+  hasInvalidEducation 
 }) => {
-  // Warning for invalid education (e.g., female with military education)
+  // Map education type to icon and color
+  const getEducationIcon = () => {
+    switch (child.educationType) {
+      case 'military':
+        return <Swords className="h-5 w-5 mr-2 text-rome-red" />;
+      case 'rhetoric':
+        return <ScrollText className="h-5 w-5 mr-2 text-purple-600" />;
+      case 'academic':
+        return <BookOpen className="h-5 w-5 mr-2 text-blue-600" />;
+      default:
+        return <GraduationCap className="h-5 w-5 mr-2 text-gray-500" />;
+    }
+  };
+  
+  const getEducationName = () => {
+    switch (child.educationType) {
+      case 'military':
+        return 'Militaire';
+      case 'rhetoric':
+        return 'Rhétorique';
+      case 'academic':
+        return 'Académique';
+      default:
+        return 'Aucune';
+    }
+  };
+  
   if (hasInvalidEducation) {
     return (
-      <div className="space-y-2 mb-4">
-        <div className="flex items-center gap-2 text-amber-500">
-          <AlertTriangle className="h-5 w-5" />
-          <span className="font-medium">Éducation inappropriée</span>
+      <div className="rounded-md border border-red-200 bg-red-50 p-3 mb-4">
+        <div className="flex items-center text-red-700">
+          <AlertTriangle className="h-5 w-5 mr-2" />
+          <p className="text-sm">
+            L'éducation militaire n'est pas adaptée pour une fille romaine. 
+            Veuillez choisir une éducation plus appropriée.
+          </p>
         </div>
-        <p className="text-sm text-muted-foreground">
-          Ce type d'éducation n'est généralement pas adapté pour une jeune fille romaine. 
-          Envisagez de choisir une éducation plus appropriée.
-        </p>
       </div>
     );
   }
-  
-  // No education yet
-  if (!hasEducation) {
-    return (
-      <div className="space-y-2 mb-4">
-        <div className="flex items-center gap-2 text-muted-foreground">
-          <BookOpen className="h-5 w-5" />
-          <span className="font-medium">Pas encore d'éducation</span>
-        </div>
-        <p className="text-sm text-muted-foreground">
-          Cet enfant n'a pas encore commencé son éducation. Assignez un précepteur 
-          et choisissez un parcours éducatif.
-        </p>
-      </div>
-    );
-  }
-  
-  // In progress education
-  const displayProgress = child.progress;
   
   return (
-    <div className="space-y-4 mb-4">
-      <div className="flex justify-between">
-        <div className="flex items-center gap-2">
-          <GraduationCap className="h-5 w-5 text-primary" />
-          <span className="font-medium">
-            <span className="capitalize">{child.educationType}</span>
-          </span>
-        </div>
-        
-        <Badge variant="outline" className="text-xs bg-primary/10">
-          {displayProgress}% Complété
-        </Badge>
+    <div className="mb-4">
+      <div className="flex items-center mb-2">
+        {hasEducation ? (
+          <>
+            {getEducationIcon()}
+            <h3 className="font-medium">Éducation: {getEducationName()}</h3>
+          </>
+        ) : (
+          <>
+            <GraduationCap className="h-5 w-5 mr-2 text-gray-500" />
+            <h3 className="font-medium text-muted-foreground">Aucune éducation assignée</h3>
+          </>
+        )}
       </div>
       
-      <div className="space-y-1">
-        <div className="flex justify-between text-xs text-muted-foreground">
-          <span>Progression</span>
-          <span>{displayProgress}%</span>
-        </div>
-        <Progress value={displayProgress} className="h-2" />
-      </div>
-      
-      {child.specialties && child.specialties.length > 0 && (
-        <div className="space-y-1">
-          <span className="text-xs text-muted-foreground">Spécialités:</span>
-          <div className="flex flex-wrap gap-1">
-            {child.specialties.map((specialty, index) => (
-              <Badge key={index} variant="outline" className="text-xs capitalize">
-                {specialty}
-              </Badge>
-            ))}
+      {hasEducation && (
+        <div>
+          <div className="flex justify-between text-sm mb-1">
+            <span>Progrès</span>
+            <span>{child.progress}%</span>
           </div>
-        </div>
-      )}
-      
-      {child.mentor && (
-        <div className="text-xs text-muted-foreground">
-          Précepteur: <span className="font-medium">{child.mentor}</span>
+          <Progress value={child.progress} className="h-2" />
         </div>
       )}
     </div>
