@@ -1,341 +1,282 @@
 
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { Child, Preceptor, EducationHistory } from '../types/educationTypes';
-import { useChildrenManagement } from '../hooks/useChildrenManagement';
+import { Child, Preceptor } from '../types/educationTypes';
 import { usePreceptorsManagement } from '../hooks/usePreceptorsManagement';
-import { toast } from 'sonner';
 import { Character } from '@/types/character';
 
-// Définition du contexte
-interface EducationContextType {
+// Sample data for development
+const MOCK_CHILDREN: Child[] = [
+  {
+    id: '1',
+    name: 'Marcus Aurelius',
+    age: 12,
+    gender: 'male',
+    educationType: 'political',
+    progress: 50,
+    specialties: ['Diplomatie', 'Éloquence'],
+    preceptorId: '1',
+    status: 'in_progress'
+  },
+  {
+    id: '2',
+    name: 'Livia Augusta',
+    age: 10,
+    gender: 'female',
+    educationType: 'religious',
+    progress: 25,
+    specialties: ['Rituels'],
+    preceptorId: '3',
+    status: 'in_progress'
+  },
+  {
+    id: '3',
+    name: 'Titus Valerius',
+    age: 14,
+    gender: 'male',
+    educationType: 'military',
+    progress: 75,
+    specialties: ['Tactique', 'Combat'],
+    preceptorId: '2',
+    status: 'in_progress'
+  },
+  {
+    id: '4',
+    name: 'Julia Domna',
+    age: 9,
+    gender: 'female',
+    educationType: 'none',
+    progress: 0,
+    specialties: [],
+    preceptorId: null,
+    status: 'not_started'
+  },
+  {
+    id: '5',
+    name: 'Gaius Octavius',
+    age: 16,
+    gender: 'male',
+    educationType: 'political',
+    progress: 100,
+    specialties: ['Législation', 'Administration'],
+    preceptorId: '4',
+    status: 'completed'
+  }
+];
+
+export interface EducationContextType {
   children: Child[];
   preceptors: Preceptor[];
-  educationHistory: EducationHistory[];
-  selectedChildId: string | null;
-  isEducating: boolean;
-  educatingChildren: Record<string, boolean>;
-
-  // Actions pour les enfants
-  setSelectedChildId: (id: string | null) => void;
-  updateChildName: (childId: string, newName: string) => void;
-  updateChildEducation: (childId: string, educationType: string, specialties: string[], mentor: string | null) => void;
-  advanceEducation: (childId: string) => void;
+  hiredPreceptors: Preceptor[];
+  educatingChildren: Record<string, boolean> | string[];
+  isLoading: boolean;
+  
+  // Child management
+  addChild: (newChild: Omit<Child, 'id'>) => string;
+  updateChild: (id: string, updates: Partial<Child>) => void;
+  removeChild: (id: string) => void;
+  updateChildName: (id: string, newName: string) => void;
+  
+  // Education management
+  startEducation: (childId: string, educationType: string, preceptorId: string | null) => void;
+  updateEducation: (childId: string, updates: Partial<Pick<Child, 'educationType' | 'preceptorId' | 'specialties'>>) => void;
+  advanceEducationYear: (childId: string) => void;
   completeEducation: (childId: string) => void;
   
-  // Actions pour les précepteurs
-  hirePreceptor: (preceptorId: string, childId?: string) => void;
+  // Preceptor management
+  hirePreceptor: (preceptorId: string) => void;
   firePreceptor: (preceptorId: string) => void;
-  assignPreceptor: (preceptorId: string, childId: string) => void;
-  
-  // Utilities
-  getMentorForChild: (childId: string) => Preceptor | null;
-  getSpecialtiesForEducationType: (type: string) => string[];
-  getChildById: (id: string) => Child | undefined;
-  getPreceptorById: (id: string) => Preceptor | undefined;
-  
-  // Advanced
-  calculateEducationCost: () => number;
-  getChildrenByEducationType: (type: string) => Child[];
   getAvailablePreceptors: () => Preceptor[];
-  getHiredPreceptors: () => Preceptor[];
+  loadPreceptorsByType: (type: string) => Preceptor[];
 }
 
-// Création du contexte avec une valeur par défaut
-const EducationContext = createContext<EducationContextType>({} as EducationContextType);
+const EducationContext = createContext<EducationContextType>({
+  children: [],
+  preceptors: [],
+  hiredPreceptors: [],
+  educatingChildren: {},
+  isLoading: false,
+  
+  addChild: () => '',
+  updateChild: () => {},
+  removeChild: () => {},
+  updateChildName: () => {},
+  
+  startEducation: () => {},
+  updateEducation: () => {},
+  advanceEducationYear: () => {},
+  completeEducation: () => {},
+  
+  hirePreceptor: () => {},
+  firePreceptor: () => {},
+  getAvailablePreceptors: () => [],
+  loadPreceptorsByType: () => []
+});
 
-// Hook personnalisé pour utiliser le contexte
-export const useEducation = () => useContext(EducationContext);
-
-// Provider du contexte
-export const EducationProvider: React.FC<{
-  children: React.ReactNode;
-  initialCharacters?: Character[];
-}> = ({ children, initialCharacters = [] }) => {
-  // Utilisation des hooks de gestion
-  const { educationChildren, setEducationChildren, updateChildName } = useChildrenManagement(initialCharacters);
-  const { preceptors, setPreceptors } = usePreceptorsManagement();
+export const EducationProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const [childrenData, setChildrenData] = useState<Child[]>(MOCK_CHILDREN);
+  const [educatingChildrenState, setEducatingChildrenState] = useState<Record<string, boolean>>({});
+  const [isLoading, setIsLoading] = useState(false);
   
-  // États supplémentaires
-  const [selectedChildId, setSelectedChildId] = useState<string | null>(null);
-  const [educationHistory, setEducationHistory] = useState<EducationHistory[]>([]);
-  const [educatingChildren, setEducatingChildren] = useState<Record<string, boolean>>({});
+  const { 
+    preceptors,
+    addPreceptor,
+    updatePreceptor,
+    removePreceptor,
+    getPreceptorsBySpecialty,
+    getAvailablePreceptors,
+    getAssignedPreceptors
+  } = usePreceptorsManagement();
   
-  // Déterminer si une éducation est en cours
-  const isEducating = Object.values(educatingChildren).some(value => value);
+  // Child management functions
+  const addChild = (newChild: Omit<Child, 'id'>): string => {
+    const id = Math.random().toString(36).substr(2, 9);
+    const child: Child = { id, ...newChild };
+    setChildrenData(prev => [...prev, child]);
+    return id;
+  };
   
-  // Mettre à jour l'éducation d'un enfant
-  const updateChildEducation = (childId: string, educationType: string, specialties: string[], mentor: string | null) => {
-    setEducationChildren(prev => {
-      return prev.map(child => {
-        if (child.id === childId) {
-          return {
-            ...child,
-            educationType,
-            specialties,
-            mentor,
-            progress: 0
-          };
-        }
-        return child;
-      });
+  const updateChild = (id: string, updates: Partial<Child>) => {
+    setChildrenData(prev => 
+      prev.map(child => 
+        child.id === id ? { ...child, ...updates } : child
+      )
+    );
+  };
+  
+  const removeChild = (id: string) => {
+    setChildrenData(prev => prev.filter(child => child.id !== id));
+  };
+  
+  const updateChildName = (id: string, newName: string) => {
+    updateChild(id, { name: newName });
+  };
+  
+  // Education management functions
+  const startEducation = (childId: string, educationType: string, preceptorId: string | null) => {
+    updateChild(childId, { 
+      educationType,
+      preceptorId,
+      progress: 0,
+      status: 'in_progress'
     });
     
-    toast.success(`Éducation mise à jour pour ${educationChildren.find(c => c.id === childId)?.name}`);
+    // Mark child as currently educating
+    setEducatingChildrenState(prev => ({ ...prev, [childId]: true }));
+    
+    // If a preceptor is assigned, update their availability
+    if (preceptorId) {
+      updatePreceptor(preceptorId, { available: false });
+    }
   };
   
-  // Faire avancer l'éducation d'un enfant
-  const advanceEducation = (childId: string) => {
-    setEducatingChildren(prev => ({ ...prev, [childId]: true }));
-    
-    // Simuler le temps d'avancement
-    setTimeout(() => {
-      setEducationChildren(prev => {
-        return prev.map(child => {
-          if (child.id === childId) {
-            const newProgress = Math.min(100, (child.progress || 0) + 25);
-            return {
-              ...child,
-              progress: newProgress
-            };
-          }
-          return child;
-        });
-      });
-      
-      setEducatingChildren(prev => ({ ...prev, [childId]: false }));
-      toast.success(`Éducation avancée pour ${educationChildren.find(c => c.id === childId)?.name}`);
-    }, 1500);
-  };
-  
-  // Terminer l'éducation d'un enfant
-  const completeEducation = (childId: string) => {
-    const child = educationChildren.find(c => c.id === childId);
-    
+  const updateEducation = (childId: string, updates: Partial<Pick<Child, 'educationType' | 'preceptorId' | 'specialties'>>) => {
+    const child = childrenData.find(c => c.id === childId);
     if (!child) return;
     
-    // Ajouter à l'historique
-    setEducationHistory(prev => [
-      ...prev,
-      {
-        type: child.educationType,
-        mentor: child.mentor,
-        specialties: child.specialties,
-        completedAt: child.age
+    // If changing preceptors, update availability
+    if (updates.preceptorId && updates.preceptorId !== child.preceptorId) {
+      // Make the old preceptor available
+      if (child.preceptorId) {
+        updatePreceptor(child.preceptorId, { available: true });
       }
-    ]);
-    
-    // Réinitialiser l'éducation de l'enfant
-    setEducationChildren(prev => {
-      return prev.map(c => {
-        if (c.id === childId) {
-          return {
-            ...c,
-            educationType: 'none',
-            mentor: null,
-            progress: 0,
-            specialties: []
-          };
-        }
-        return c;
-      });
-    });
-    
-    toast.success(`Éducation terminée pour ${child.name}`);
-  };
-  
-  // Embaucher un précepteur
-  const hirePreceptor = (preceptorId: string, childId?: string) => {
-    setPreceptors(prev => {
-      return prev.map(p => {
-        if (p.id === preceptorId) {
-          return {
-            ...p,
-            available: false,
-            childId
-          };
-        }
-        return p;
-      });
-    });
-    
-    if (childId) {
-      const preceptor = preceptors.find(p => p.id === preceptorId);
       
-      setEducationChildren(prev => {
-        return prev.map(child => {
-          if (child.id === childId) {
-            return {
-              ...child,
-              mentor: preceptor?.name || null
-            };
-          }
-          return child;
-        });
-      });
+      // Make the new preceptor unavailable
+      updatePreceptor(updates.preceptorId, { available: false });
     }
     
-    toast.success(`Précepteur embauché avec succès`);
+    updateChild(childId, updates);
   };
   
-  // Licencier un précepteur
+  const advanceEducationYear = (childId: string) => {
+    const child = childrenData.find(c => c.id === childId);
+    if (!child) return;
+    
+    // Calculate progress increase (25% per year, limited to 100%)
+    const newProgress = Math.min(100, (child.progress || 0) + 25);
+    
+    updateChild(childId, { 
+      progress: newProgress,
+      status: newProgress >= 100 ? 'completed' : 'in_progress'
+    });
+    
+    if (newProgress >= 100) {
+      // If education is complete, stop educating
+      setEducatingChildrenState(prev => {
+        const newState = { ...prev };
+        delete newState[childId];
+        return newState;
+      });
+    }
+  };
+  
+  const completeEducation = (childId: string) => {
+    updateChild(childId, { 
+      progress: 100,
+      status: 'completed'
+    });
+    
+    // Stop educating
+    setEducatingChildrenState(prev => {
+      const newState = { ...prev };
+      delete newState[childId];
+      return newState;
+    });
+  };
+  
+  // Preceptor management
+  const hirePreceptor = (preceptorId: string) => {
+    updatePreceptor(preceptorId, { available: false });
+  };
+  
   const firePreceptor = (preceptorId: string) => {
-    const preceptor = preceptors.find(p => p.id === preceptorId);
+    updatePreceptor(preceptorId, { available: true });
     
-    if (preceptor?.childId) {
-      setEducationChildren(prev => {
-        return prev.map(child => {
-          if (child.id === preceptor.childId) {
-            return {
-              ...child,
-              mentor: null
-            };
-          }
-          return child;
-        });
-      });
-    }
-    
-    setPreceptors(prev => {
-      return prev.map(p => {
-        if (p.id === preceptorId) {
-          return {
-            ...p,
-            available: true,
-            childId: null
-          };
-        }
-        return p;
-      });
-    });
-    
-    toast.success(`Précepteur renvoyé`);
+    // Update any children using this preceptor
+    setChildrenData(prev => 
+      prev.map(child => 
+        child.preceptorId === preceptorId 
+          ? { ...child, preceptorId: null } 
+          : child
+      )
+    );
   };
   
-  // Assigner un précepteur à un enfant
-  const assignPreceptor = (preceptorId: string, childId: string) => {
-    const preceptor = preceptors.find(p => p.id === preceptorId);
-    
-    if (!preceptor) return;
-    
-    // Mettre à jour l'enfant
-    setEducationChildren(prev => {
-      return prev.map(child => {
-        if (child.id === childId) {
-          return {
-            ...child,
-            mentor: preceptor.name
-          };
-        }
-        return child;
-      });
-    });
-    
-    // Mettre à jour le précepteur
-    setPreceptors(prev => {
-      return prev.map(p => {
-        if (p.id === preceptorId) {
-          return {
-            ...p,
-            childId
-          };
-        }
-        return p;
-      });
-    });
-    
-    toast.success(`Précepteur assigné à ${educationChildren.find(c => c.id === childId)?.name}`);
+  const loadPreceptorsByType = (type: string): Preceptor[] => {
+    setIsLoading(true);
+    const result = getPreceptorsBySpecialty(type);
+    setIsLoading(false);
+    return result;
   };
   
-  // Obtenir le mentor pour un enfant
-  const getMentorForChild = (childId: string): Preceptor | null => {
-    const preceptor = preceptors.find(p => p.childId === childId);
-    return preceptor || null;
-  };
-  
-  // Obtenir les spécialités pour un type d'éducation
-  const getSpecialtiesForEducationType = (type: string): string[] => {
-    switch (type) {
-      case 'military':
-        return ['Tactique', 'Leadership', 'Stratégie', 'Combat'];
-      case 'rhetorique':
-      case 'rhetoric':
-        return ['Éloquence', 'Persuasion', 'Débat', 'Littérature'];
-      case 'religious':
-      case 'religieuse':
-        return ['Rituels', 'Prière', 'Divination', 'Traditions'];
-      case 'politique':
-      case 'political':
-        return ['Négociation', 'Diplomatie', 'Administration', 'Lois'];
-      default:
-        return [];
-    }
-  };
-  
-  // Obtenir un enfant par son ID
-  const getChildById = (id: string): Child | undefined => {
-    return educationChildren.find(child => child.id === id);
-  };
-  
-  // Obtenir un précepteur par son ID
-  const getPreceptorById = (id: string): Preceptor | undefined => {
-    return preceptors.find(p => p.id === id);
-  };
-  
-  // Calculer le coût total de l'éducation
-  const calculateEducationCost = (): number => {
-    return preceptors
-      .filter(p => !p.available)
-      .reduce((total, p) => total + p.cost, 0);
-  };
-  
-  // Obtenir les enfants par type d'éducation
-  const getChildrenByEducationType = (type: string): Child[] => {
-    return educationChildren.filter(child => child.educationType === type);
-  };
-  
-  // Obtenir les précepteurs disponibles
-  const getAvailablePreceptors = (): Preceptor[] => {
-    return preceptors.filter(p => p.available);
-  };
-  
-  // Obtenir les précepteurs embauchés
-  const getHiredPreceptors = (): Preceptor[] => {
-    return preceptors.filter(p => !p.available);
-  };
-  
-  // Valeur du contexte
-  const contextValue: EducationContextType = {
-    children: educationChildren,
+  // Prepare the context value
+  const value = {
+    children: childrenData,
     preceptors,
-    educationHistory,
-    selectedChildId,
-    isEducating,
-    educatingChildren,
+    hiredPreceptors: getAssignedPreceptors(),
+    educatingChildren: educatingChildrenState,
+    isLoading,
     
-    setSelectedChildId,
+    addChild,
+    updateChild,
+    removeChild,
     updateChildName,
-    updateChildEducation,
-    advanceEducation,
+    
+    startEducation,
+    updateEducation,
+    advanceEducationYear,
     completeEducation,
     
     hirePreceptor,
     firePreceptor,
-    assignPreceptor,
-    
-    getMentorForChild,
-    getSpecialtiesForEducationType,
-    getChildById,
-    getPreceptorById,
-    
-    calculateEducationCost,
-    getChildrenByEducationType,
     getAvailablePreceptors,
-    getHiredPreceptors
+    loadPreceptorsByType
   };
   
   return (
-    <EducationContext.Provider value={contextValue}>
+    <EducationContext.Provider value={value}>
       {children}
     </EducationContext.Provider>
   );
 };
+
+export const useEducation = () => useContext(EducationContext);

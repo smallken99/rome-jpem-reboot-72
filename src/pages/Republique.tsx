@@ -18,6 +18,7 @@ import { QuesteurBureau } from '@/components/republique/bureaux/questeur/Questeu
 import { CenseurBureau } from '@/components/republique/bureaux/censeur/CenseurBureau';
 import { RepubliqueMain } from '@/components/republique/pages/RepubliqueMain';
 import { BatimentsPage } from '@/components/republique/pages/BatimentsPage';
+import { TresorPublicPage } from '@/components/republique/pages/TresorPublicPage';
 
 import { 
   Building, 
@@ -202,15 +203,7 @@ const Republique = () => {
                 </TabsContent>
 
                 <TabsContent value="tresor">
-                  <div className="grid grid-cols-1 gap-6">
-                    <div className="p-8 text-center border rounded-lg bg-muted/20">
-                      <h3 className="text-xl font-semibold mb-2">Trésor Public en construction</h3>
-                      <p className="text-muted-foreground">
-                        Cette section sera bientôt disponible. Vous pourrez consulter les finances publiques,
-                        les revenus et dépenses de la République.
-                      </p>
-                    </div>
-                  </div>
+                  <TresorPublicPage />
                 </TabsContent>
 
                 <TabsContent value="domaines">
