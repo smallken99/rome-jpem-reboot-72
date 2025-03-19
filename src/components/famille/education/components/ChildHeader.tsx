@@ -1,69 +1,35 @@
 
-import React, { useState } from 'react';
-import { Edit, User, UserCheck } from 'lucide-react';
+import React from 'react';
 import { Child } from '../types/educationTypes';
-import { Badge } from '@/components/ui/badge';
+import { GenderIcon } from './GenderIcon';
 
 export interface ChildHeaderProps {
   child: Child;
-  onNameChange: (id: string, newName: string) => void;
   hasInvalidEducation?: boolean;
+  onNameChange?: (id: string, name: string) => void;
 }
 
 export const ChildHeader: React.FC<ChildHeaderProps> = ({ 
   child, 
-  onNameChange,
-  hasInvalidEducation = false
+  hasInvalidEducation = false,
+  onNameChange = () => {} // Default empty function
 }) => {
-  const [isEditing, setIsEditing] = useState(false);
-  const [newName, setNewName] = useState(child.name);
-  
-  const handleNameSubmit = () => {
-    if (newName.trim() && newName !== child.name) {
-      onNameChange(child.id, newName);
-    }
-    setIsEditing(false);
-  };
-  
   return (
-    <div className="flex items-center justify-between p-4 border-b bg-gradient-to-r from-rome-marble to-white">
-      <div className="flex items-center gap-3">
-        <div className={`rounded-full p-2 ${child.gender === 'male' ? 'bg-blue-50 text-blue-600' : 'bg-pink-50 text-pink-600'}`}>
-          {child.gender === 'male' ? <UserCheck size={20} /> : <User size={20} />}
-        </div>
-        <div>
-          {isEditing ? (
-            <div className="flex items-center gap-2">
-              <input
-                type="text"
-                value={newName}
-                onChange={(e) => setNewName(e.target.value)}
-                onBlur={handleNameSubmit}
-                onKeyDown={(e) => e.key === 'Enter' && handleNameSubmit()}
-                className="border border-rome-gold/30 px-2 py-1 rounded text-sm focus:outline-none focus:ring-1 focus:ring-rome-gold"
-                autoFocus
-              />
-            </div>
-          ) : (
-            <div className="flex items-center gap-2">
-              <h3 className="font-cinzel font-semibold text-rome-navy">{child.name}</h3>
-              <button 
-                onClick={() => setIsEditing(true)}
-                className="text-muted-foreground hover:text-rome-gold transition-colors"
-              >
-                <Edit size={14} />
-              </button>
-            </div>
-          )}
-          <div className="flex items-center gap-2 mt-1">
-            <span className="text-sm text-muted-foreground">{child.age} ans</span>
-            {hasInvalidEducation && (
-              <Badge variant="destructive" className="text-xs">
-                Éducation incompatible
-              </Badge>
-            )}
-          </div>
-        </div>
+    <div className="p-4 border-b bg-slate-50 flex items-center justify-between">
+      <div className="flex items-center space-x-2">
+        <GenderIcon gender={child.gender} size={20} />
+        <h3 className="font-semibold">{child.name}</h3>
+        <span className="text-sm text-slate-500">{child.age} ans</span>
+        
+        {hasInvalidEducation && (
+          <span className="px-2 py-0.5 bg-red-100 text-red-700 text-xs rounded-full">
+            Éducation inappropriée
+          </span>
+        )}
+      </div>
+      
+      <div className="text-sm">
+        Status: <span className="font-medium">{child.status || 'En formation'}</span>
       </div>
     </div>
   );

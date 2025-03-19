@@ -49,11 +49,13 @@ export const academicPath: EducationPath = {
     intelligence: 8,
     sagesse: 6
   },
-  outcomes: [
-    'Accès aux carrières académiques',
-    'Bonus aux tests d\'intelligence',
-    'Compétences en sciences et philosophie'
-  ],
+  outcomes: {
+    skills: ['connaissance', 'analyse', 'observation', 'enseignement'],
+    bonuses: {
+      'intelligence': 3,
+      'sagesse': 2
+    }
+  },
   suitableFor: {
     gender: 'both',
     status: ['patricien', 'plébéien']

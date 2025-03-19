@@ -1,72 +1,67 @@
 
 import React from 'react';
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
-import { Preceptor } from '../types/educationTypes';
+import { usePreceptorDetail } from '../hooks/usePreceptorDetail';
 
-interface HirePreceptorDialogProps {
-  preceptor: Preceptor | null;
+export interface HirePreceptorDialogProps {
   isOpen: boolean;
-  onClose: () => void;
-  onConfirm: () => void;
+  onOpenChange: (open: boolean) => void;
+  preceptorId: string;
+  onHire: () => void;
 }
 
 export const HirePreceptorDialog: React.FC<HirePreceptorDialogProps> = ({
-  preceptor,
   isOpen,
-  onClose,
-  onConfirm,
+  onOpenChange,
+  preceptorId,
+  onHire
 }) => {
-  if (!preceptor) return null;
+  const { preceptor, loading } = usePreceptorDetail(preceptorId);
+
+  if (loading || !preceptor) {
+    return null;
+  }
+
+  const handleConfirm = () => {
+    onHire();
+    onOpenChange(false);
+  };
 
   return (
-    <Dialog open={isOpen} onOpenChange={onClose}>
+    <Dialog open={isOpen} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
-          <DialogTitle>Embaucher {preceptor.name}</DialogTitle>
+          <DialogTitle>Engager {preceptor.name}</DialogTitle>
           <DialogDescription>
-            Voulez-vous embaucher ce précepteur pour votre famille ?
+            Êtes-vous sûr de vouloir engager ce précepteur ?
           </DialogDescription>
         </DialogHeader>
 
-        <div className="space-y-4 my-6">
-          <div className="grid grid-cols-2 gap-3 text-sm">
-            <div>
-              <span className="text-muted-foreground">Spécialité:</span>
-              <p className="font-medium">{preceptor.specialty}</p>
-            </div>
-            <div>
-              <span className="text-muted-foreground">Coût annuel:</span>
-              <p className="font-medium">{preceptor.cost || preceptor.price} as</p>
-            </div>
-            <div>
-              <span className="text-muted-foreground">Expertise:</span>
-              <p className="font-medium">{preceptor.expertise || preceptor.skill}/100</p>
-            </div>
-            <div>
-              <span className="text-muted-foreground">Réputation:</span>
-              <p className="font-medium">{preceptor.reputation}/100</p>
-            </div>
+        <div className="mt-4 space-y-4">
+          <div>
+            <h4 className="font-medium text-sm">Coût annuel</h4>
+            <p className="text-sm">{preceptor.price || 0} as par an</p>
+          </div>
+          
+          <div>
+            <h4 className="font-medium text-sm">Spécialité</h4>
+            <p className="text-sm">{preceptor.specialty}</p>
           </div>
 
-          {preceptor.description && (
-            <div className="border-t pt-2">
-              <span className="text-muted-foreground">Biographie:</span>
-              <p className="text-sm mt-1">{preceptor.description}</p>
-            </div>
-          )}
+          <div>
+            <h4 className="font-medium text-sm">Qualité</h4>
+            <p className="text-sm">{preceptor.quality} / 5</p>
+          </div>
         </div>
 
-        <DialogFooter>
-          <Button variant="outline" onClick={onClose}>Annuler</Button>
-          <Button onClick={onConfirm}>Embaucher pour {preceptor.cost || preceptor.price} as</Button>
+        <DialogFooter className="mt-6">
+          <Button variant="outline" onClick={() => onOpenChange(false)}>
+            Annuler
+          </Button>
+          <Button onClick={handleConfirm}>
+            Engager ({preceptor.price || 0} as/an)
+          </Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>
