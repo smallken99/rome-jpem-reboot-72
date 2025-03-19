@@ -2,7 +2,18 @@
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { ChevronRight, CheckCircle, XCircle } from 'lucide-react';
-import { EducationProgressButtonsProps } from '../types/educationTypes';
+
+export interface EducationProgressButtonsProps {
+  isEducating: boolean;
+  hasEducation: boolean;
+  educationProgress: number;
+  onAdvanceYear: () => void;
+  onCompleteEducation: () => void;
+  canComplete?: boolean;
+  onAdvance?: () => void;
+  onCancel?: () => void;
+  onComplete?: () => void;
+}
 
 export const EducationProgressButtons: React.FC<EducationProgressButtonsProps> = ({
   isEducating,

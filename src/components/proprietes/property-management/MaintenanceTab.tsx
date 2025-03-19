@@ -1,6 +1,6 @@
 
 import React, { useState } from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
 import { Slider } from '@/components/ui/slider';
@@ -10,6 +10,7 @@ import { AlertCircle, ArrowUp, Banknote, Hammer, Shield } from 'lucide-react';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { OwnedBuilding } from '../types/buildingTypes';
 import { calculateMaintenanceCost, calculateIncomeByMaintenance } from './card/buildingAdapter';
+import { useBuildings } from '../hooks/useBuildings';
 
 interface MaintenanceTabProps {
   building: OwnedBuilding;
@@ -75,9 +76,6 @@ export const MaintenanceTab: React.FC<MaintenanceTabProps> = ({
                 <Hammer className="h-5 w-5" />
                 Niveau d'entretien
               </CardTitle>
-              <CardDescription>
-                Définissez le niveau d'entretien pour maintenir votre propriété en bon état
-              </CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
               <div className="flex justify-between items-center">
@@ -139,9 +137,6 @@ export const MaintenanceTab: React.FC<MaintenanceTabProps> = ({
                 <Shield className="h-5 w-5" />
                 Niveau de sécurité
               </CardTitle>
-              <CardDescription>
-                Protégez votre propriété contre les vols et les dégradations
-              </CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
               <div className="flex justify-between items-center">
@@ -201,9 +196,6 @@ export const MaintenanceTab: React.FC<MaintenanceTabProps> = ({
                 <Hammer className="h-5 w-5" />
                 État et réparations
               </CardTitle>
-              <CardDescription>
-                Surveillez l'état de votre propriété et effectuez des réparations si nécessaire
-              </CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
               <div className="space-y-2">
@@ -228,7 +220,7 @@ export const MaintenanceTab: React.FC<MaintenanceTabProps> = ({
               </div>
               
               {needsRenovation && (
-                <Alert variant="default">
+                <Alert variant="destructive">
                   <AlertCircle className="h-4 w-4" />
                   <AlertTitle>Réparations nécessaires</AlertTitle>
                   <AlertDescription>

@@ -1,8 +1,8 @@
 
 import React from 'react';
+import { BookOpen, GraduationCap, AlertTriangle } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
-import { Progress } from '@/components/ui/progress';
-import { InfoCircle } from '@/components/ui/InfoIcon';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Child } from '../types/educationTypes';
 
 interface EducationStatusProps {
@@ -11,83 +11,81 @@ interface EducationStatusProps {
   hasInvalidEducation?: boolean;
 }
 
-export const EducationStatus: React.FC<EducationStatusProps> = ({
-  child,
+export const EducationStatus: React.FC<EducationStatusProps> = ({ 
+  child, 
   hasEducation,
-  hasInvalidEducation = false
+  hasInvalidEducation = false 
 }) => {
-  // Fonction pour obtenir la description du type d'éducation
-  const getEducationTypeDescription = (type: string) => {
-    switch (type) {
-      case 'military':
-        return 'Formation militaire';
-      case 'rhetoric':
-        return 'Formation à la rhétorique';
-      case 'religious':
-        return 'Formation religieuse';
-      case 'academic':
-        return 'Formation académique';
-      default:
-        return 'Aucune éducation en cours';
-    }
+  // Get display name for education type
+  const getEducationTypeName = (type: string): string => {
+    const types: Record<string, string> = {
+      'none': 'Aucune',
+      'military': 'Militaire',
+      'rhetoric': 'Rhétorique',
+      'religious': 'Religieuse',
+      'academic': 'Académique'
+    };
+    return types[type] || type;
   };
 
-  // Function to format progress text
-  const formatProgressText = (progress: number) => {
-    if (progress < 25) return 'Débutant';
-    if (progress < 50) return 'Apprenti';
-    if (progress < 75) return 'Intermédiaire';
-    if (progress < 100) return 'Avancé';
-    return 'Maître';
-  };
-
-  return (
-    <div className="space-y-3 mt-2">
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <span className="font-medium">Éducation:</span>
-          {hasEducation ? (
-            <Badge 
-              className={`
-                ${child.educationType === 'military' ? 'bg-red-100 text-red-800 hover:bg-red-200' : 
-                 child.educationType === 'rhetoric' ? 'bg-blue-100 text-blue-800 hover:bg-blue-200' :
-                 child.educationType === 'religious' ? 'bg-amber-100 text-amber-800 hover:bg-amber-200' :
-                 child.educationType === 'academic' ? 'bg-green-100 text-green-800 hover:bg-green-200' :
-                 'bg-gray-100 text-gray-800 hover:bg-gray-200'}
-              `}
-            >
-              {getEducationTypeDescription(child.educationType)}
-            </Badge>
-          ) : (
-            <Badge variant="outline" className="text-muted-foreground">
-              Non éduqué
-            </Badge>
-          )}
-          
-          {hasInvalidEducation && (
-            <div className="flex items-center text-red-500 text-xs">
-              <InfoCircle className="h-3.5 w-3.5 mr-1" />
-              <span>Incompatible avec le genre</span>
-            </div>
-          )}
+  // Warning for children with no education
+  if (!hasEducation) {
+    return (
+      <div className="mb-4 rounded-md border border-amber-200 bg-amber-50 p-3">
+        <div className="flex items-start gap-2">
+          <AlertTriangle className="h-5 w-5 text-amber-600 mt-0.5" />
+          <div>
+            <h4 className="font-medium text-amber-800 mb-1">Aucune éducation en cours</h4>
+            <p className="text-sm text-amber-700">
+              Cet enfant n'a pas d'éducation. Définissez un type d'éducation pour commencer son instruction.
+            </p>
+          </div>
         </div>
-        
-        {hasEducation && (
-          <span className="text-sm text-muted-foreground">
-            {formatProgressText(child.progress)}
-          </span>
-        )}
+      </div>
+    );
+  }
+
+  // Warning for female children with military education
+  if (hasInvalidEducation) {
+    return (
+      <Alert variant="destructive" className="mb-4">
+        <AlertTriangle className="h-4 w-4" />
+        <AlertDescription>
+          L'éducation militaire n'est pas adaptée aux filles dans la société romaine. Veuillez choisir un autre type d'éducation.
+        </AlertDescription>
+      </Alert>
+    );
+  }
+
+  // Education progress display
+  return (
+    <div className="mb-4">
+      <div className="flex items-center justify-between mb-2">
+        <div className="flex items-center gap-2">
+          <BookOpen className="h-4 w-4 text-primary" />
+          <span className="font-medium">{getEducationTypeName(child.educationType)} ({child.progress}%)</span>
+        </div>
+        <Badge variant="outline">
+          {child.progress < 25 ? 'Débutant' : 
+           child.progress < 50 ? 'Apprenti' : 
+           child.progress < 75 ? 'Confirmé' : 
+           'Maître'}
+        </Badge>
       </div>
       
-      {hasEducation && (
-        <div className="space-y-1">
-          <div className="flex justify-between text-xs">
-            <span>Progression</span>
-            <span>{child.progress}%</span>
-          </div>
-          <Progress value={child.progress} className="h-2" />
-        </div>
-      )}
+      <div className="bg-muted h-2 rounded-full mb-2 overflow-hidden">
+        <div 
+          className="bg-primary h-full rounded-full"
+          style={{ width: `${child.progress}%` }}
+        ></div>
+      </div>
+      
+      <div className="flex items-center justify-between text-xs text-muted-foreground">
+        <span>Débutant</span>
+        <span>Apprenti</span>
+        <span>Confirmé</span>
+        <span>Maître</span>
+      </div>
     </div>
   );
 };

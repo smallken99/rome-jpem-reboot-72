@@ -3,9 +3,17 @@ import { useState, useCallback } from 'react';
 import { OwnedBuilding } from '../types/buildingTypes';
 import { calculateIncomeByMaintenance, calculateMaintenanceCost } from '../property-management/card/buildingAdapter';
 
+// Define a building with maintenance fields
+interface BuildingWithMaintenance extends OwnedBuilding {
+  maintenance?: {
+    current: number;
+    baseCost: number;
+  };
+}
+
 // Hook personnalisé pour gérer les bâtiments
-export const useBuildings = (initialBuildings: OwnedBuilding[] = []) => {
-  const [buildings, setBuildings] = useState<OwnedBuilding[]>(initialBuildings);
+export const useBuildings = (initialBuildings: BuildingWithMaintenance[] = []) => {
+  const [buildings, setBuildings] = useState<BuildingWithMaintenance[]>(initialBuildings);
 
   // Filtrer les bâtiments par type
   const urbanBuildings = buildings.filter(b => b.type === 'urban');
@@ -14,12 +22,29 @@ export const useBuildings = (initialBuildings: OwnedBuilding[] = []) => {
   const commercialBuildings = buildings.filter(b => b.type === 'commercial');
   const industrialBuildings = buildings.filter(b => b.type === 'industrial');
 
+  // Mettre à jour un bâtiment
+  const updateBuilding = useCallback((buildingId: string, updates: Partial<BuildingWithMaintenance>) => {
+    setBuildings(prev => 
+      prev.map(building => 
+        building.id === buildingId 
+          ? { ...building, ...updates } 
+          : building
+      )
+    );
+  }, []);
+
   // Mettre à jour le niveau d'entretien d'un bâtiment
   const updateMaintenanceLevel = useCallback((buildingId: string, level: number) => {
     setBuildings(prev => 
       prev.map(building => 
         building.id === buildingId 
-          ? { ...building, maintenanceLevel: level } 
+          ? { 
+              ...building, 
+              maintenance: {
+                ...(building.maintenance || { baseCost: 100 }),
+                current: level
+              }
+            } 
           : building
       )
     );
@@ -98,6 +123,7 @@ export const useBuildings = (initialBuildings: OwnedBuilding[] = []) => {
     religiousBuildings,
     commercialBuildings,
     industrialBuildings,
+    updateBuilding,
     updateMaintenanceLevel,
     updateSecurityLevel,
     updateWorkers,
