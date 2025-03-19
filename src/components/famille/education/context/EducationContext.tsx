@@ -1,14 +1,16 @@
-
 import React, { createContext, useContext, useState, useCallback, ReactNode } from 'react';
 import { Child, Preceptor, EducationType } from '../types/educationTypes';
 import { v4 as uuidv4 } from 'uuid';
 import { toast } from 'sonner';
+import { militaryPath, religiousPath, rhetoricPath, academicPath } from '../data/paths';
 
 interface EducationContextType {
   children: Child[];
   preceptors: Preceptor[];
   educatingChildren: string[];
   isEducating: Record<string, boolean>;
+  hiredPreceptors: Preceptor[];
+  selectedChildId: string | null;
   
   // Child functions
   addChild: (child: Omit<Child, 'id' | 'progress'>) => string;
@@ -16,22 +18,27 @@ interface EducationContextType {
   updateChildName: (id: string, name: string) => void;
   updateChildEducation: (id: string, educationType: EducationType) => void;
   assignPreceptorToChild: (childId: string, preceptorId: string) => void;
+  getChild: (id: string) => Child | undefined;
+  getChildById: (id: string) => Child | undefined;
+  setSelectedChildId: (id: string | null) => void;
   
   // Education functions
-  startEducation: (childId: string, educationType?: EducationType, specialty?: string) => void;
+  startEducation: (childId: string, educationType?: EducationType, mentorId?: string, specialties?: string[]) => void;
   advanceEducationYear: (childId: string) => void;
+  advanceEducation: (childId: string) => void;
   completeEducation: (childId: string) => void;
+  cancelEducation: (childId: string) => void;
   
   // Preceptor functions
   addPreceptor: (preceptor: Omit<Preceptor, 'id'>) => string;
   removePreceptor: (id: string) => void;
-  hirePreceptor: (id: string) => boolean;
+  hirePreceptor: (id: string, childId?: string) => boolean;
   firePreceptor: (id: string) => void;
+  loadPreceptorsByType: (type: string) => Preceptor[];
+  refreshPreceptors: () => void;
   
-  // New functions to fix errors
-  getChildById: (id: string) => Child | undefined;
-  advanceEducation: (childId: string) => void;
-  cancelEducation: (childId: string) => void;
+  // Path functions
+  findEducationPathById: (pathType: string) => any;
   getEducationPathById: (pathType: string) => any;
   getAllEducationPaths: () => any[];
 }
@@ -97,11 +104,12 @@ export const EducationProvider: React.FC<{ children: ReactNode }> = ({ children 
     }
   ]);
   
-  // Track which children are currently being educated (in progress)
   const [educatingChildrenIds, setEducatingChildrenIds] = useState<string[]>([]);
   const [isEducatingMap, setIsEducatingMap] = useState<Record<string, boolean>>({});
   
-  // Child management functions
+  const [hiredPreceptors, setHiredPreceptors] = useState<Preceptor[]>([]);
+  const [selectedChildId, setSelectedChildId] = useState<string | null>(null);
+  
   const addChild = useCallback((child: Omit<Child, 'id' | 'progress'>): string => {
     const id = uuidv4();
     const newChild: Child = {
@@ -139,14 +147,12 @@ export const EducationProvider: React.FC<{ children: ReactNode }> = ({ children 
   }, []);
   
   const assignPreceptorToChild = useCallback((childId: string, preceptorId: string) => {
-    // Update child with preceptor
     setChildrenData(prev => 
       prev.map(child => 
         child.id === childId ? { ...child, preceptorId } : child
       )
     );
     
-    // Mark preceptor as assigned
     setPreceptorsData(prev => 
       prev.map(preceptor => 
         preceptor.id === preceptorId ? { ...preceptor, assigned: true } : preceptor
@@ -161,8 +167,19 @@ export const EducationProvider: React.FC<{ children: ReactNode }> = ({ children 
     }
   }, [childrenData, preceptorsData]);
   
-  // Education functions
-  const startEducation = useCallback((childId: string, educationType?: EducationType, specialty?: string) => {
+  const getChild = useCallback((id: string) => {
+    return childrenData.find(child => child.id === id);
+  }, [childrenData]);
+  
+  const getChildById = useCallback((id: string) => {
+    return getChild(id);
+  }, [getChild]);
+  
+  const setSelectedChildId = useCallback((id: string | null) => {
+    setSelectedChildId(id);
+  }, []);
+  
+  const startEducation = useCallback((childId: string, educationType?: EducationType, mentorId?: string, specialties?: string[]) => {
     const child = childrenData.find(c => c.id === childId);
     
     if (!child) {
@@ -196,21 +213,17 @@ export const EducationProvider: React.FC<{ children: ReactNode }> = ({ children 
       return;
     }
     
-    // Set this child as currently educating
     setIsEducatingMap(prev => ({ ...prev, [childId]: true }));
     
-    // Simulate education progress
     setTimeout(() => {
       setChildrenData(prev => 
         prev.map(c => {
           if (c.id === childId) {
-            // Calculate progress increase based on preceptor quality if assigned
-            let progressIncrease = 15; // Base increase
+            let progressIncrease = 15;
             
             if (c.preceptorId) {
               const preceptor = preceptorsData.find(p => p.id === c.preceptorId);
               if (preceptor) {
-                // Better preceptors provide faster progress
                 progressIncrease = 10 + Math.floor(preceptor.quality / 10);
               }
             }
@@ -222,12 +235,15 @@ export const EducationProvider: React.FC<{ children: ReactNode }> = ({ children 
         })
       );
       
-      // Mark as no longer educating
       setIsEducatingMap(prev => ({ ...prev, [childId]: false }));
       
       toast.success(`L'éducation de ${child.name} a progressé !`);
-    }, 2000); // Simulate progress over 2 seconds
+    }, 2000);
   }, [childrenData, preceptorsData]);
+  
+  const advanceEducation = useCallback((childId: string) => {
+    advanceEducationYear(childId);
+  }, [advanceEducationYear]);
   
   const completeEducation = useCallback((childId: string) => {
     const child = childrenData.find(c => c.id === childId);
@@ -247,21 +263,38 @@ export const EducationProvider: React.FC<{ children: ReactNode }> = ({ children 
       return;
     }
     
-    // Complete the education by setting progress to 100%
     setChildrenData(prev => 
       prev.map(c => 
         c.id === childId ? { ...c, progress: 100 } : c
       )
     );
     
-    // Remove from educating children
     setEducatingChildrenIds(prev => prev.filter(id => id !== childId));
     setIsEducatingMap(prev => ({ ...prev, [childId]: false }));
     
     toast.success(`L'éducation de ${child.name} est maintenant complète !`);
   }, [childrenData]);
   
-  // Preceptor management functions
+  const cancelEducation = useCallback((childId: string) => {
+    const child = childrenData.find(c => c.id === childId);
+    
+    if (!child) {
+      toast.error("Enfant introuvable");
+      return;
+    }
+    
+    setChildrenData(prev => 
+      prev.map(c => 
+        c.id === childId ? { ...c, progress: 0 } : c
+      )
+    );
+    
+    setEducatingChildrenIds(prev => prev.filter(id => id !== childId));
+    setIsEducatingMap(prev => ({ ...prev, [childId]: false }));
+    
+    toast.success(`L'éducation de ${child.name} a été annulée.`);
+  }, [childrenData]);
+  
   const addPreceptor = useCallback((preceptor: Omit<Preceptor, 'id'>): string => {
     const id = uuidv4();
     const newPreceptor: Preceptor = {
@@ -282,7 +315,6 @@ export const EducationProvider: React.FC<{ children: ReactNode }> = ({ children 
       return;
     }
     
-    // Check if the preceptor is assigned to any child
     const assignedToChild = childrenData.some(child => child.preceptorId === id);
     
     if (assignedToChild) {
@@ -294,16 +326,13 @@ export const EducationProvider: React.FC<{ children: ReactNode }> = ({ children 
     toast.success(`${preceptor.name} a été retiré de la liste des précepteurs`);
   }, [preceptorsData, childrenData]);
   
-  const hirePreceptor = useCallback((id: string): boolean => {
+  const hirePreceptor = useCallback((id: string, childId?: string): boolean => {
     const preceptor = preceptorsData.find(p => p.id === id);
     
     if (!preceptor) {
       toast.error("Précepteur introuvable");
       return false;
     }
-    
-    // In a real app, check if enough funds are available
-    // For now, we'll assume the hiring is successful
     
     toast.success(`${preceptor.name} a été embauché comme précepteur`);
     return true;
@@ -317,14 +346,12 @@ export const EducationProvider: React.FC<{ children: ReactNode }> = ({ children 
       return;
     }
     
-    // Remove preceptor assignment from any children
     setChildrenData(prev => 
       prev.map(child => 
         child.preceptorId === id ? { ...child, preceptorId: undefined } : child
       )
     );
     
-    // Mark as unassigned (or remove completely in a real implementation)
     setPreceptorsData(prev => 
       prev.map(p => 
         p.id === id ? { ...p, assigned: false } : p
@@ -334,50 +361,27 @@ export const EducationProvider: React.FC<{ children: ReactNode }> = ({ children 
     toast.success(`${preceptor.name} a été renvoyé`);
   }, [preceptorsData]);
   
-  // New functions to fix errors
-  const getChildById = useCallback((id: string) => {
-    return childrenData.find(child => child.id === id);
-  }, [childrenData]);
-  
-  const advanceEducation = useCallback((childId: string) => {
-    advanceEducationYear(childId); // Alias for existing function
-  }, [advanceEducationYear]);
-  
-  const cancelEducation = useCallback((childId: string) => {
-    const child = childrenData.find(c => c.id === childId);
-    
-    if (!child) {
-      toast.error("Enfant introuvable");
-      return;
+  const findEducationPathById = useCallback((pathType: string) => {
+    switch(pathType) {
+      case 'military': return militaryPath;
+      case 'religious': return religiousPath;
+      case 'rhetoric': return rhetoricPath;
+      case 'academic': return academicPath;
+      default: return {
+        name: pathType.charAt(0).toUpperCase() + pathType.slice(1),
+        duration: 3,
+        minAge: 8,
+        suitableFor: { gender: 'both' },
+        specialties: []
+      };
     }
-    
-    // Reset education progress
-    setChildrenData(prev => 
-      prev.map(c => 
-        c.id === childId ? { ...c, progress: 0 } : c
-      )
-    );
-    
-    // Remove from educating children
-    setEducatingChildrenIds(prev => prev.filter(id => id !== childId));
-    setIsEducatingMap(prev => ({ ...prev, [childId]: false }));
-    
-    toast.success(`L'éducation de ${child.name} a été annulée.`);
-  }, [childrenData]);
-  
-  const getEducationPathById = useCallback((pathType: string) => {
-    // This would normally fetch from a data store
-    return {
-      name: pathType.charAt(0).toUpperCase() + pathType.slice(1),
-      duration: 3,
-      minimumAge: 8,
-      suitableFor: { gender: 'both' },
-      specialties: []
-    };
   }, []);
   
+  const getEducationPathById = useCallback((pathType: string) => {
+    return findEducationPathById(pathType);
+  }, [findEducationPathById]);
+  
   const getAllEducationPaths = useCallback(() => {
-    // This would normally fetch from a data store
     return [
       { id: 'military', name: 'Militaire' },
       { id: 'rhetoric', name: 'Rhétorique' },
@@ -386,34 +390,45 @@ export const EducationProvider: React.FC<{ children: ReactNode }> = ({ children 
     ];
   }, []);
   
+  const loadPreceptorsByType = useCallback((type: string) => {
+    return preceptorsData.filter(p => p.specialty === type);
+  }, [preceptorsData]);
+  
+  const refreshPreceptors = useCallback(() => {
+    console.log("Refreshing preceptors...");
+  }, []);
+  
   const value = {
     children: childrenData,
     preceptors: preceptorsData,
     educatingChildren: educatingChildrenIds,
     isEducating: isEducatingMap,
+    hiredPreceptors: hiredPreceptors,
+    selectedChildId: selectedChildId,
     
-    // Child functions
     addChild,
     removeChild,
     updateChildName,
     updateChildEducation,
     assignPreceptorToChild,
+    getChild,
+    getChildById,
+    setSelectedChildId,
     
-    // Education functions
     startEducation,
     advanceEducationYear,
+    advanceEducation,
     completeEducation,
+    cancelEducation,
     
-    // Preceptor functions
     addPreceptor,
     removePreceptor,
     hirePreceptor,
     firePreceptor,
+    loadPreceptorsByType,
+    refreshPreceptors,
     
-    // New functions
-    getChildById,
-    advanceEducation,
-    cancelEducation,
+    findEducationPathById,
     getEducationPathById,
     getAllEducationPaths
   };

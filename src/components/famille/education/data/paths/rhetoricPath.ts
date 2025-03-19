@@ -1,6 +1,5 @@
 
 import { EducationPath } from '../../types/educationTypes';
-import { BookOpen } from 'lucide-react';
 
 export const rhetoricPath: EducationPath = {
   id: 'rhetoric',
@@ -13,11 +12,9 @@ export const rhetoricPath: EducationPath = {
     'Arguments logiques'
   ],
   duration: 3,
-  requirements: {
-    age: 10,
-    gender: 'both',
-    cost: 4000,
-    duration: '3 ans'
+  requiredAttributes: {
+    intelligence: 6,
+    charisma: 7
   },
   outcomes: {
     skills: [
@@ -44,5 +41,9 @@ export const rhetoricPath: EducationPath = {
   relatedStat: 'oratory',
   minAge: 10,
   maxAge: 18,
-  cost: 4000
+  cost: 4000,
+  suitableFor: {
+    gender: 'both',
+    status: ['patricien', 'plébéien']
+  }
 };

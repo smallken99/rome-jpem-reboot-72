@@ -1,3 +1,4 @@
+
 export type EducationType = 'none' | 'military' | 'rhetoric' | 'academic' | 'religious' | 'political';
 export type Gender = 'male' | 'female';
 export type EducationPathType = EducationType;
@@ -64,6 +65,12 @@ export interface EducationPath {
   mainStatBonus?: string;
   statBonus?: number;
   specialties: string[];
+  requirements?: {
+    age?: number;
+    gender?: string;
+    cost?: number;
+    duration?: string;
+  };
   requiredAttributes?: Record<string, number>;
   recommendedAttributes?: Record<string, number>;
   outcomes: {

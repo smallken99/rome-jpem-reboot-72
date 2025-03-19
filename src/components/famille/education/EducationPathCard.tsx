@@ -30,13 +30,6 @@ export const EducationPathCard: React.FC<EducationPathCardProps> = ({ path }) =>
     return path.outcomes.skills || [];
   };
   
-  // Helper to safely access requirements properties
-  const getRequirementValue = (property: string) => {
-    if (!path.requirements) return null;
-    if (Array.isArray(path.requirements)) return null;
-    return (path.requirements as any)[property];
-  };
-  
   return (
     <Card className="h-full">
       <CardHeader className="pb-2">
@@ -53,27 +46,21 @@ export const EducationPathCard: React.FC<EducationPathCardProps> = ({ path }) =>
           <span>Durée: {path.duration} {path.duration > 1 ? 'années' : 'année'}</span>
         </div>
         
-        {path.requirements && (
-          <div className="text-sm">
-            <p className="font-medium mb-1">Conditions:</p>
-            <ul className="space-y-1 text-muted-foreground">
-              {getRequirementValue('age') && (
-                <li className="flex items-center gap-1">
-                  <span>• Âge minimum: {getRequirementValue('age')} ans</span>
-                </li>
-              )}
-              {getRequirementValue('gender') && (
-                <li className="flex items-center gap-1">
-                  <span>• Genre: {getRequirementValue('gender') === 'both' 
-                    ? 'Tous' 
-                    : getRequirementValue('gender') === 'male' 
-                      ? 'Garçons uniquement' 
-                      : 'Filles uniquement'}</span>
-                </li>
-              )}
-            </ul>
-          </div>
-        )}
+        <div className="text-sm">
+          <p className="font-medium mb-1">Conditions:</p>
+          <ul className="space-y-1 text-muted-foreground">
+            <li className="flex items-center gap-1">
+              <span>• Âge minimum: {path.minAge} ans</span>
+            </li>
+            <li className="flex items-center gap-1">
+              <span>• Genre: {path.suitableFor.gender === 'both' 
+                ? 'Tous' 
+                : path.suitableFor.gender === 'male' 
+                  ? 'Garçons uniquement' 
+                  : 'Filles uniquement'}</span>
+            </li>
+          </ul>
+        </div>
         
         <div className="text-sm pt-2 border-t">
           <p className="font-medium mb-1">Bénéfices:</p>

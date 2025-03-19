@@ -1,6 +1,21 @@
+
 import { useEffect, useState } from 'react';
 import { GameDate, Season } from '@/components/maitrejeu/types/common';
-import { formatDate, formatSeason } from '@/utils/formatUtils';
+
+// Utility functions for formatting
+const formatDate = (date: Date): string => {
+  return date.toLocaleDateString();
+};
+
+const formatSeason = (season: Season): string => {
+  switch (season) {
+    case 'Ver': return 'Printemps';
+    case 'Aestas': return 'Été';
+    case 'Autumnus': return 'Automne';
+    case 'Hiems': return 'Hiver';
+    default: return season;
+  }
+};
 
 export const useGameDate = (initialDate?: GameDate) => {
   const [currentDate, setCurrentDate] = useState<GameDate>(
@@ -111,7 +126,7 @@ export const useGameDate = (initialDate?: GameDate) => {
   const stringToDate = (dateString: string): Date => {
     if (!dateString) return new Date();
     
-    if (dateString instanceof Date) {
+    if (typeof dateString === 'object' && dateString instanceof Date) {
       return dateString;
     }
     

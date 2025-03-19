@@ -1,18 +1,16 @@
 
 import React from 'react';
-import { Button } from '@/components/ui/button';
-import { Card } from '@/components/ui/card';
-import { Scroll, Shield, Book } from 'lucide-react';
-import { academicPath } from '../data/paths/academicPath';
-import { militaryPath } from '../data/paths/militaryPath';
-import { rhetoricPath } from '../data/paths/rhetoricPath';
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
+import { Label } from '@/components/ui/label';
+import { EducationPathCard } from '../EducationPathCard';
+import { useEducation } from '../context/EducationContext';
 import { EducationType, Gender } from '../types/educationTypes';
 
 interface EducationPathSelectorProps {
   childAge: number;
   childGender: Gender;
   selectedPath: EducationType | null;
-  onSelectPath: (pathId: EducationType) => void;
+  onSelectPath: (path: EducationType) => void;
 }
 
 export const EducationPathSelector: React.FC<EducationPathSelectorProps> = ({
@@ -21,58 +19,66 @@ export const EducationPathSelector: React.FC<EducationPathSelectorProps> = ({
   selectedPath,
   onSelectPath
 }) => {
-  // Path definitions with appropriate icons
-  const paths = [
-    {
-      ...militaryPath,
-      icon: <Shield className="h-8 w-8 text-red-600" />,
-      disabled: childGender === 'female' || childAge < militaryPath.minAge || childAge > militaryPath.maxAge
-    },
-    {
-      ...rhetoricPath,
-      icon: <Book className="h-8 w-8 text-blue-600" />,
-      disabled: childAge < rhetoricPath.minAge || childAge > rhetoricPath.maxAge
-    },
-    {
-      ...academicPath,
-      icon: <Scroll className="h-8 w-8 text-purple-600" />,
-      disabled: childAge < academicPath.minAge || childAge > academicPath.maxAge
-    }
-  ];
-
+  const { getAllEducationPaths, findEducationPathById } = useEducation();
+  const paths = getAllEducationPaths();
+  
+  // Filter paths based on age and gender
+  const eligiblePaths = paths.filter(path => {
+    const pathData = findEducationPathById(path.id);
+    if (!pathData) return false;
+    
+    // Check age range
+    const ageOk = childAge >= pathData.minAge && childAge <= pathData.maxAge;
+    
+    // Check gender suitability
+    const genderOk = pathData.suitableFor.gender === 'both' || 
+                     pathData.suitableFor.gender === childGender;
+    
+    return ageOk && genderOk;
+  });
+  
+  if (eligiblePaths.length === 0) {
+    return (
+      <div className="p-6 bg-amber-50 border border-amber-200 rounded-md">
+        <h3 className="font-semibold text-amber-700">Aucun chemin d'éducation disponible</h3>
+        <p className="text-amber-600 mt-2">
+          Il n'y a pas de chemin d'éducation disponible pour cet enfant en raison de son âge ({childAge} ans) 
+          ou de son genre ({childGender === 'male' ? 'masculin' : 'féminin'}).
+        </p>
+      </div>
+    );
+  }
+  
   return (
     <div className="space-y-4">
-      <h3 className="text-lg font-medium">Choisir un parcours d'éducation</h3>
+      <h3 className="font-semibold text-lg">Sélectionnez un type d'éducation</h3>
       
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        {paths.map((path) => (
-          <Card key={path.id} className={`p-4 border-2 ${
-            selectedPath === path.type ? 'border-rome-gold' : 'border-gray-200'
-          } ${path.disabled ? 'opacity-50' : 'hover:border-rome-gold/60'} transition-all cursor-pointer`}
-               onClick={() => !path.disabled && onSelectPath(path.type as EducationType)}>
-            <div className="flex flex-col items-center text-center">
-              <div className="mb-3">{path.icon}</div>
-              <h4 className="font-cinzel text-lg mb-2">{path.name}</h4>
-              <p className="text-sm text-muted-foreground mb-4">{path.description}</p>
-              
-              <div className="mt-2 text-xs">
-                <div>Âge : {path.minAge} - {path.maxAge} ans</div>
-                <div>Durée : {path.duration} ans</div>
-              </div>
-              
-              {path.disabled && (
-                <div className="mt-2 text-xs text-red-500">
-                  {childGender === 'female' && path.type === 'military' 
-                    ? 'Non disponible pour les filles' 
-                    : childAge < path.minAge 
-                      ? 'Enfant trop jeune' 
-                      : 'Enfant trop âgé'}
-                </div>
-              )}
+      <RadioGroup 
+        value={selectedPath || ''} 
+        onValueChange={(value) => onSelectPath(value as EducationType)}
+        className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"
+      >
+        {eligiblePaths.map((path) => {
+          const pathData = findEducationPathById(path.id);
+          if (!pathData) return null;
+          
+          return (
+            <div key={path.id} className="relative">
+              <RadioGroupItem 
+                value={path.id} 
+                id={`path-${path.id}`} 
+                className="sr-only peer"
+              />
+              <Label 
+                htmlFor={`path-${path.id}`} 
+                className="cursor-pointer block h-full peer-checked:ring-2 peer-checked:ring-blue-500 rounded-lg overflow-hidden"
+              >
+                <EducationPathCard path={pathData} />
+              </Label>
             </div>
-          </Card>
-        ))}
-      </div>
+          );
+        })}
+      </RadioGroup>
     </div>
   );
 };

@@ -1,126 +1,88 @@
 
-import { useState, useEffect } from 'react';
+import { useState, useCallback } from 'react';
+import { useEducation } from '../context/EducationContext';
 import { Preceptor } from '../types/educationTypes';
 import { v4 as uuidv4 } from 'uuid';
 import { toast } from 'sonner';
 
 export const usePreceptorsManagement = () => {
-  const [preceptors, setPreceptors] = useState<Preceptor[]>([
-    {
-      id: '1',
-      name: 'Quintus Servilius',
-      specialty: 'rhetoric',
-      price: 5000,
-      quality: 85,
-      experience: 15,
-      assigned: false,
-      available: true
-    },
-    {
-      id: '2',
-      name: 'Gaius Flavius',
-      specialty: 'military',
-      price: 8000,
-      quality: 90,
-      experience: 20,
-      assigned: false,
-      available: true
-    },
-    {
-      id: '3',
-      name: 'Titus Livius',
-      specialty: 'academic',
-      price: 6000,
-      quality: 95,
-      experience: 25,
-      assigned: false,
-      available: true
-    }
-  ]);
+  const { preceptors: contextPreceptors, firePreceptor: contextFirePreceptor, hirePreceptor: contextHirePreceptor } = useEducation();
+  const [preceptors, setPreceptors] = useState<Preceptor[]>(contextPreceptors);
 
-  const getPreceptorById = (id: string): Preceptor | undefined => {
-    return preceptors.find(p => p.id === id);
-  };
+  // Get all preceptors
+  const getAllPreceptors = useCallback(() => {
+    return preceptors;
+  }, [preceptors]);
 
-  const addPreceptor = (preceptorData: Omit<Preceptor, 'id'>): string => {
-    const id = uuidv4();
-    const newPreceptor: Preceptor = {
-      ...preceptorData,
-      id
-    };
-    
-    setPreceptors(prev => [...prev, newPreceptor]);
-    return id;
-  };
+  // Get available preceptors
+  const getAvailablePreceptors = useCallback(() => {
+    return preceptors.filter(p => p.available !== false);
+  }, [preceptors]);
 
-  const removePreceptor = (id: string) => {
-    setPreceptors(prev => prev.filter(p => p.id !== id));
-  };
+  // Get preceptors by type
+  const getPreceptorsByType = useCallback((type: string) => {
+    return preceptors.filter(p => p.specialty === type);
+  }, [preceptors]);
 
-  const updatePreceptor = (id: string, data: Partial<Preceptor>) => {
-    setPreceptors(prev => 
-      prev.map(p => p.id === id ? { ...p, ...data } : p)
-    );
-  };
-
-  const hirePreceptor = (preceptorId: string, childId?: string) => {
-    const preceptor = getPreceptorById(preceptorId);
-    
+  // Get preceptors by ID
+  const getPreceptorById = useCallback((id: string) => {
+    const preceptor = preceptors.find(p => p.id === id);
     if (!preceptor) {
-      toast.error('Précepteur non trouvé');
-      return false;
+      console.error(`Preceptor with ID ${id} not found`);
+      return null;
     }
-    
-    const updates: Partial<Preceptor> = {
-      assigned: true,
-      available: false
-    };
-    
-    if (childId) {
-      updates.childId = childId;
+    return preceptor;
+  }, [preceptors]);
+
+  // Get assigned preceptors
+  const getAssignedPreceptors = useCallback(() => {
+    return preceptors.filter(p => p.assigned);
+  }, [preceptors]);
+
+  // Hire a preceptor
+  const hirePreceptor = useCallback((preceptorId: string, childId?: string) => {
+    if (contextHirePreceptor) {
+      contextHirePreceptor(preceptorId, childId);
+    } else {
+      // Fallback implementation
+      setPreceptors(prev => 
+        prev.map(p => 
+          p.id === preceptorId 
+            ? { ...p, available: false, assigned: true, childId } 
+            : p
+        )
+      );
+      toast.success("Précepteur engagé avec succès");
     }
-    
-    updatePreceptor(preceptorId, updates);
-    
-    toast.success(`${preceptor.name} a été embauché comme précepteur`);
     return true;
-  };
+  }, [contextHirePreceptor, setPreceptors]);
 
-  const firePreceptor = (preceptorId: string) => {
-    const preceptor = getPreceptorById(preceptorId);
-    
-    if (!preceptor) {
-      toast.error('Précepteur non trouvé');
-      return;
+  // Fire a preceptor
+  const firePreceptor = useCallback((preceptorId: string) => {
+    if (contextFirePreceptor) {
+      contextFirePreceptor(preceptorId);
+    } else {
+      // Fallback implementation
+      setPreceptors(prev => 
+        prev.map(p => 
+          p.id === preceptorId 
+            ? { ...p, available: true, assigned: false, childId: undefined } 
+            : p
+        )
+      );
+      toast.success("Précepteur renvoyé avec succès");
     }
-    
-    updatePreceptor(preceptorId, {
-      assigned: false,
-      available: true,
-      childId: undefined
-    });
-    
-    toast.success(`${preceptor.name} a été renvoyé`);
-  };
-
-  const getAvailablePreceptors = () => {
-    return preceptors.filter(p => p.assigned !== true && p.available !== false);
-  };
-
-  const getAssignedPreceptors = () => {
-    return preceptors.filter(p => p.assigned === true || p.available === false);
-  };
+  }, [contextFirePreceptor, setPreceptors]);
 
   return {
     preceptors,
     setPreceptors,
-    addPreceptor,
-    removePreceptor,
-    updatePreceptor,
-    hirePreceptor,
-    firePreceptor,
+    getAllPreceptors,
+    availablePreceptors: getAvailablePreceptors(),
+    getPreceptorsByType,
     getPreceptorById,
-    getAvailablePreceptors,
-    getAssignedPreceptors
+    getAssignedPreceptors,
+    hirePreceptor,
+    firePreceptor
   };
 };

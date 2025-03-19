@@ -5,7 +5,6 @@ import { Button } from '@/components/ui/button';
 import { Info } from 'lucide-react';
 import { HirePreceptorDialog } from '../dialogs/HirePreceptorDialog';
 import { FirePreceptorDialog } from '../dialogs/FirePreceptorDialog';
-import { usePreceptorsManagement } from '../hooks/usePreceptorsManagement';
 
 const PreceptorsTab = () => {
   const [selectedPreceptorId, setSelectedPreceptorId] = useState('');
@@ -14,12 +13,8 @@ const PreceptorsTab = () => {
   const [fireDialogOpen, setFireDialogOpen] = useState(false);
   const [activeTab, setActiveTab] = useState('rhetoric');
 
-  const { preceptors } = useEducation();
-  const {
-    availablePreceptors,
-    hirePreceptor,
-    firePreceptor,
-  } = usePreceptorsManagement();
+  // Use the preceptors directly from context
+  const { preceptors, hirePreceptor, firePreceptor } = useEducation();
 
   const getFilteredPreceptors = () => {
     const preceptorsToUse = showAvailableOnly ? 

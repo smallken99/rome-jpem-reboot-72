@@ -1,6 +1,5 @@
 
 import { EducationPath } from '../../types/educationTypes';
-import { Sword } from 'lucide-react';
 
 export const militaryPath: EducationPath = {
   id: 'military',
@@ -13,11 +12,9 @@ export const militaryPath: EducationPath = {
     'Commandement de troupes'
   ],
   duration: 3,
-  requirements: {
-    age: 12,
-    gender: 'male',
-    cost: 3500,
-    duration: '3 ans'
+  requiredAttributes: {
+    strength: 8,
+    endurance: 6
   },
   outcomes: {
     skills: [
@@ -44,5 +41,9 @@ export const militaryPath: EducationPath = {
   relatedStat: 'martialEducation',
   minAge: 12,
   maxAge: 20,
-  cost: 3500
+  cost: 3500,
+  suitableFor: {
+    gender: 'male',
+    status: ['patricien', 'plébéien']
+  }
 };

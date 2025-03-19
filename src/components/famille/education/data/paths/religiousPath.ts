@@ -1,6 +1,5 @@
 
 import { EducationPath } from '../../types/educationTypes';
-import { Heart } from 'lucide-react';
 
 export const religiousPath: EducationPath = {
   id: 'religious',
@@ -13,11 +12,9 @@ export const religiousPath: EducationPath = {
     'Influence spirituelle'
   ],
   duration: 3,
-  requirements: {
-    age: 8,
-    gender: 'both',
-    cost: 4500,
-    duration: '3 ans'
+  requiredAttributes: {
+    wisdom: 7,
+    charisma: 5
   },
   outcomes: {
     skills: [
@@ -44,5 +41,9 @@ export const religiousPath: EducationPath = {
   relatedStat: 'piety',
   minAge: 8,
   maxAge: 16,
-  cost: 4500
+  cost: 4500,
+  suitableFor: {
+    gender: 'both',
+    status: ['patricien', 'plébéien']
+  }
 };

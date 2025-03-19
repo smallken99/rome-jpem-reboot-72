@@ -1,57 +1,34 @@
 
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { ChildrenTab } from './tabs/ChildrenTab';
-import { HistoryTab } from './tabs/HistoryTab';
-import { useEducation } from './context/EducationContext';
-import { useNavigate, useLocation } from 'react-router-dom';
+import ChildrenTab from './tabs/ChildrenTab';
+import EducationPathsTab from './tabs/EducationPathsTab';
+import HistoryTab from './tabs/HistoryTab';
 import PreceptorsTab from './tabs/PreceptorsTab';
 
 export const EducationTabs: React.FC = () => {
-  const [activeTab, setActiveTab] = useState('children');
-  const { children, preceptors } = useEducation();
-  const navigate = useNavigate();
-  const location = useLocation();
-  
-  // Effet pour gérer l'URL
-  useEffect(() => {
-    const params = new URLSearchParams(location.search);
-    const tab = params.get('tab');
-    if (tab && ['children', 'preceptors', 'history'].includes(tab)) {
-      setActiveTab(tab);
-    }
-  }, [location.search]);
-  
-  // Changer l'onglet
-  const handleTabChange = (value: string) => {
-    setActiveTab(value);
-    navigate(`/famille/education?tab=${value}`);
-  };
-  
   return (
-    <Tabs value={activeTab} onValueChange={handleTabChange} className="mt-6">
-      <TabsList className="grid w-full grid-cols-3 mb-8">
-        <TabsTrigger value="children" className="data-[state=active]:bg-rome-navy/10">
-          Enfants {children.length > 0 && `(${children.length})`}
-        </TabsTrigger>
-        <TabsTrigger value="preceptors" className="data-[state=active]:bg-rome-navy/10">
-          Précepteurs {preceptors.filter(p => !p.available).length > 0 && 
-            `(${preceptors.filter(p => !p.available).length})`}
-        </TabsTrigger>
-        <TabsTrigger value="history" className="data-[state=active]:bg-rome-navy/10">
-          Historique
-        </TabsTrigger>
+    <Tabs defaultValue="children">
+      <TabsList className="w-full border-b border-muted bg-white rounded-b-none rounded-t-md">
+        <TabsTrigger value="children">Enfants</TabsTrigger>
+        <TabsTrigger value="paths">Parcours d'éducation</TabsTrigger>
+        <TabsTrigger value="preceptors">Précepteurs</TabsTrigger>
+        <TabsTrigger value="history">Historique</TabsTrigger>
       </TabsList>
       
-      <TabsContent value="children">
+      <TabsContent value="children" className="bg-white border border-t-0 rounded-b-md p-4">
         <ChildrenTab />
       </TabsContent>
       
-      <TabsContent value="preceptors">
+      <TabsContent value="paths" className="bg-white border border-t-0 rounded-b-md p-4">
+        <EducationPathsTab />
+      </TabsContent>
+      
+      <TabsContent value="preceptors" className="bg-white border border-t-0 rounded-b-md p-4">
         <PreceptorsTab />
       </TabsContent>
       
-      <TabsContent value="history">
+      <TabsContent value="history" className="bg-white border border-t-0 rounded-b-md p-4">
         <HistoryTab />
       </TabsContent>
     </Tabs>
