@@ -2,8 +2,7 @@
 import React from 'react';
 import Layout from '@/components/layout/Layout';
 import { PageHeader } from '@/components/ui-custom/PageHeader';
-import { EconomieStats } from '@/components/economie/EconomieStats';
-import { EconomieTabs } from '@/components/economie/EconomieTabs';
+import { EconomyManager } from '@/components/economie/EconomyManager';
 
 const Economie = () => {
   return (
@@ -12,9 +11,10 @@ const Economie = () => {
         title="Économie" 
         subtitle="Gérez les finances et les revenus de votre Gens" 
       />
-
-      <EconomieStats />
-      <EconomieTabs />
+      
+      <div className="container mx-auto py-6">
+        <EconomyManager />
+      </div>
       
     </Layout>
   );

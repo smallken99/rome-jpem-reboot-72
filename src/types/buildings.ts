@@ -42,6 +42,7 @@ export interface OwnedBuilding {
   buildingType: string;
   name: string;
   location: string;
+  type?: BuildingType; // Ajout de la propriété manquante
   maintenanceEnabled?: boolean;
   maintenanceCost: number;
   condition: number;

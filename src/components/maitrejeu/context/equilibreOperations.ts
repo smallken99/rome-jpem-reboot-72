@@ -1,5 +1,5 @@
 
-import { RepublicEquilibre, Equilibre } from '@/types/republic';
+import { RepublicEquilibre } from '@/types/republic';
 
 export const createEquilibreOperations = (
   setEquilibre: React.Dispatch<React.SetStateAction<RepublicEquilibre | null>>

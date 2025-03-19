@@ -1,6 +1,5 @@
 
 import { BuildingType } from '@/components/maitrejeu/types/batiments';
-import { OwnedBuilding, BuildingPurchaseOptions, BuildingStatistics } from './buildings';
 
 export type PropertyType = 'villa' | 'domus' | 'insula' | 'domaine' | 'terrain' | 'commerce';
 
@@ -28,5 +27,13 @@ export interface Transaction {
   date: string;
 }
 
-// Exporter les types depuis le fichier unifié
-export { OwnedBuilding, BuildingPurchaseOptions, BuildingStatistics };
+export interface PropertyStats {
+  totalValue: number;
+  totalIncome: number;
+  totalMaintenance: number;
+  propertyCount: number;
+  averageCondition: number;
+}
+
+// Export des types depuis le module buildings
+export type { OwnedBuilding, BuildingPurchaseOptions, BuildingStatistics } from './buildings';

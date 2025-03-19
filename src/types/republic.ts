@@ -18,7 +18,7 @@ export interface RepublicEquilibre {
   facteurPlebs?: number;
 }
 
-// Alias pour la compatibilité avec le code existant
+// Alias pour la compatibilité avec le code existant - important de définir les propriétés requises!
 export type Equilibre = RepublicEquilibre;
 
 // Types pour les factions politiques
