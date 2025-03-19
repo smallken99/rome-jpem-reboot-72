@@ -1,10 +1,12 @@
 
 import React from 'react';
-import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { Card } from '@/components/ui/card';
+import { Scroll, Shield, Book } from 'lucide-react';
+import { academicPath } from '../data/paths/academicPath';
+import { militaryPath } from '../data/paths/militaryPath';
+import { rhetoricPath } from '../data/paths/rhetoricPath';
 import { EducationType, Gender } from '../types/educationTypes';
-import { Book, Shield, ScrollText, Church } from 'lucide-react';
-import { cn } from '@/lib/utils';
 
 interface EducationPathSelectorProps {
   childAge: number;
@@ -19,89 +21,57 @@ export const EducationPathSelector: React.FC<EducationPathSelectorProps> = ({
   selectedPath,
   onSelectPath
 }) => {
-  // Education paths available in Roman society
+  // Path definitions with appropriate icons
   const paths = [
     {
-      id: 'military' as EducationType,
-      name: 'Militaire',
-      description: 'Formation aux arts de la guerre, tactiques et leadership militaire',
-      icon: Shield,
-      minAge: 10,
-      genderRestriction: 'male' as Gender,
-      color: 'bg-red-100 text-red-700'
+      ...militaryPath,
+      icon: <Shield className="h-8 w-8 text-red-600" />,
+      disabled: childGender === 'female' || childAge < militaryPath.minAge || childAge > militaryPath.maxAge
     },
     {
-      id: 'rhetoric' as EducationType,
-      name: 'Rhétorique',
-      description: 'Apprentissage de l\'éloquence, du droit et de la politique',
-      icon: ScrollText,
-      minAge: 8,
-      genderRestriction: null,
-      color: 'bg-blue-100 text-blue-700'
+      ...rhetoricPath,
+      icon: <Book className="h-8 w-8 text-blue-600" />,
+      disabled: childAge < rhetoricPath.minAge || childAge > rhetoricPath.maxAge
     },
     {
-      id: 'academic' as EducationType,
-      name: 'Académique',
-      description: 'Étude des sciences, de la philosophie et des mathématiques',
-      icon: Book,
-      minAge: 8,
-      genderRestriction: null,
-      color: 'bg-purple-100 text-purple-700'
-    },
-    {
-      id: 'religious' as EducationType,
-      name: 'Religieuse',
-      description: 'Formation aux rites religieux, traditions et divination',
-      icon: Church,
-      minAge: 9,
-      genderRestriction: null,
-      color: 'bg-amber-100 text-amber-700'
-    },
+      ...academicPath,
+      icon: <Scroll className="h-8 w-8 text-purple-600" />,
+      disabled: childAge < academicPath.minAge || childAge > academicPath.maxAge
+    }
   ];
 
   return (
     <div className="space-y-4">
       <h3 className="text-lg font-medium">Choisir un parcours d'éducation</h3>
       
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        {paths.map((path) => {
-          const isDisabled = 
-            (path.minAge > childAge) || 
-            (path.genderRestriction && path.genderRestriction !== childGender);
-          
-          return (
-            <Card 
-              key={path.id}
-              className={cn(
-                "cursor-pointer hover:border-blue-400 transition-colors",
-                selectedPath === path.id ? "border-blue-500" : "",
-                isDisabled ? "opacity-50 cursor-not-allowed" : ""
-              )}
-              onClick={() => !isDisabled && onSelectPath(path.id)}
-            >
-              <CardContent className="p-4">
-                <div className="flex items-start gap-3">
-                  <div className={cn("p-2 rounded-full", path.color)}>
-                    <path.icon className="h-5 w-5" />
-                  </div>
-                  <div>
-                    <h4 className="font-medium">{path.name}</h4>
-                    <p className="text-sm text-muted-foreground">{path.description}</p>
-                    
-                    {isDisabled && (
-                      <div className="mt-2 text-xs text-red-600">
-                        {path.minAge > childAge && 
-                          `L'enfant doit avoir au moins ${path.minAge} ans`}
-                        {path.genderRestriction && path.genderRestriction !== childGender && 
-                          `Réservé aux ${path.genderRestriction === 'male' ? 'garçons' : 'filles'}`}
-                      </div>
-                    )}
-                  </div>
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        {paths.map((path) => (
+          <Card key={path.id} className={`p-4 border-2 ${
+            selectedPath === path.type ? 'border-rome-gold' : 'border-gray-200'
+          } ${path.disabled ? 'opacity-50' : 'hover:border-rome-gold/60'} transition-all cursor-pointer`}
+               onClick={() => !path.disabled && onSelectPath(path.type as EducationType)}>
+            <div className="flex flex-col items-center text-center">
+              <div className="mb-3">{path.icon}</div>
+              <h4 className="font-cinzel text-lg mb-2">{path.name}</h4>
+              <p className="text-sm text-muted-foreground mb-4">{path.description}</p>
+              
+              <div className="mt-2 text-xs">
+                <div>Âge : {path.minAge} - {path.maxAge} ans</div>
+                <div>Durée : {path.duration} ans</div>
+              </div>
+              
+              {path.disabled && (
+                <div className="mt-2 text-xs text-red-500">
+                  {childGender === 'female' && path.type === 'military' 
+                    ? 'Non disponible pour les filles' 
+                    : childAge < path.minAge 
+                      ? 'Enfant trop jeune' 
+                      : 'Enfant trop âgé'}
                 </div>
-              </CardContent>
-            </Card>
-          );
-        })}
+              )}
+            </div>
+          </Card>
+        ))}
       </div>
     </div>
   );

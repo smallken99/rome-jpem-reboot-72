@@ -32,30 +32,16 @@ export const useEducationSystem = () => {
     if (!path) return { eligible: false, reason: 'Chemin d\'éducation non trouvé' };
 
     // Vérifier l'âge
-    if (child.age < path.minimumAge) {
-      return { eligible: false, reason: `L'enfant est trop jeune. Âge minimum: ${path.minimumAge}` };
+    if (child.age < path.minAge) {
+      return { eligible: false, reason: `L'enfant est trop jeune. Âge minimum: ${path.minAge}` };
     }
-    if (child.age > path.maximumAge) {
-      return { eligible: false, reason: `L'enfant est trop âgé. Âge maximum: ${path.maximumAge}` };
+    if (child.age > path.maxAge) {
+      return { eligible: false, reason: `L'enfant est trop âgé. Âge maximum: ${path.maxAge}` };
     }
 
     // Vérifier les prérequis spécifiques si nécessaire
-    if (path.requirements) {
-      if (Array.isArray(path.requirements)) {
-        // Pour les prérequis sous forme de liste (à implémenter au besoin)
-      } else {
-        // Vérifier l'âge minimum spécifique si défini
-        if (path.requirements.age && child.age < path.requirements.age) {
-          return { eligible: false, reason: `L'enfant doit avoir au moins ${path.requirements.age} ans` };
-        }
-        
-        // Vérifier le genre si défini
-        if (path.requirements.gender && path.requirements.gender !== 'both') {
-          if (path.requirements.gender !== child.gender) {
-            return { eligible: false, reason: `Cette éducation est réservée aux ${path.requirements.gender === 'male' ? 'garçons' : 'filles'}` };
-          }
-        }
-      }
+    if (path.requiredAttributes) {
+      // Handle required attributes check
     }
 
     return { eligible: true };

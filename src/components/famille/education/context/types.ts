@@ -10,8 +10,11 @@ export interface EducationContextType {
   isLoading?: boolean;
   isEducating: {[childId: string]: boolean} | string[];
   educatingChildren: {[childId: string]: boolean} | string[];
-  setSelectedChildId: (id: string | null) => void;
+  
+  // Required methods for ChildEducationDetail.tsx
   getChild: (id: string) => Child | undefined;
+  findEducationPathById: (pathType: string) => any;
+  setSelectedChildId: (id: string | null) => void;
   startEducation: (childId: string, type: string, mentorId?: string, specialties?: string[]) => void;
   advanceEducation: (childId: string) => void;
   advanceEducationYear: (childId: string) => void;
@@ -23,7 +26,6 @@ export interface EducationContextType {
   updateChildName: (childId: string, newName: string) => void;
   loadPreceptorsByType: (type: string) => Preceptor[];
   refreshPreceptors: () => void;
-  findEducationPathById: (pathType: string) => any;
   getAllEducationPaths: () => any[];
 }
 

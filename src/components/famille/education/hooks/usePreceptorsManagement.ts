@@ -1,69 +1,126 @@
 
 import { useState, useEffect } from 'react';
-import { useEducation } from '../context/EducationContext';
 import { Preceptor } from '../types/educationTypes';
+import { v4 as uuidv4 } from 'uuid';
 import { toast } from 'sonner';
 
 export const usePreceptorsManagement = () => {
-  const { preceptors } = useEducation();
-  const [availablePreceptors, setAvailablePreceptors] = useState<Preceptor[]>([]);
+  const [preceptors, setPreceptors] = useState<Preceptor[]>([
+    {
+      id: '1',
+      name: 'Quintus Servilius',
+      specialty: 'rhetoric',
+      price: 5000,
+      quality: 85,
+      experience: 15,
+      assigned: false,
+      available: true
+    },
+    {
+      id: '2',
+      name: 'Gaius Flavius',
+      specialty: 'military',
+      price: 8000,
+      quality: 90,
+      experience: 20,
+      assigned: false,
+      available: true
+    },
+    {
+      id: '3',
+      name: 'Titus Livius',
+      specialty: 'academic',
+      price: 6000,
+      quality: 95,
+      experience: 25,
+      assigned: false,
+      available: true
+    }
+  ]);
 
-  // Update available preceptors when global preceptors change
-  useEffect(() => {
-    setAvailablePreceptors(preceptors.filter(p => p.available !== false));
-  }, [preceptors]);
-
-  // Get preceptor by ID
   const getPreceptorById = (id: string): Preceptor | undefined => {
     return preceptors.find(p => p.id === id);
   };
 
-  // Hire a preceptor
-  const hirePreceptor = (preceptorId: string, childId?: string) => {
-    const preceptor = getPreceptorById(preceptorId);
-    if (!preceptor) {
-      toast.error("Précepteur introuvable");
-      return;
-    }
-
-    // In a real app, update the preceptor in the database
-    toast.success(`${preceptor.name} a été engagé comme précepteur`);
+  const addPreceptor = (preceptorData: Omit<Preceptor, 'id'>): string => {
+    const id = uuidv4();
+    const newPreceptor: Preceptor = {
+      ...preceptorData,
+      id
+    };
     
-    // If a child ID was provided, assign the preceptor to that child
-    if (childId) {
-      assignPreceptorToChild(preceptorId, childId);
-    }
+    setPreceptors(prev => [...prev, newPreceptor]);
+    return id;
   };
 
-  // Fire a preceptor
+  const removePreceptor = (id: string) => {
+    setPreceptors(prev => prev.filter(p => p.id !== id));
+  };
+
+  const updatePreceptor = (id: string, data: Partial<Preceptor>) => {
+    setPreceptors(prev => 
+      prev.map(p => p.id === id ? { ...p, ...data } : p)
+    );
+  };
+
+  const hirePreceptor = (preceptorId: string, childId?: string) => {
+    const preceptor = getPreceptorById(preceptorId);
+    
+    if (!preceptor) {
+      toast.error('Précepteur non trouvé');
+      return false;
+    }
+    
+    const updates: Partial<Preceptor> = {
+      assigned: true,
+      available: false
+    };
+    
+    if (childId) {
+      updates.childId = childId;
+    }
+    
+    updatePreceptor(preceptorId, updates);
+    
+    toast.success(`${preceptor.name} a été embauché comme précepteur`);
+    return true;
+  };
+
   const firePreceptor = (preceptorId: string) => {
     const preceptor = getPreceptorById(preceptorId);
+    
     if (!preceptor) {
-      toast.error("Précepteur introuvable");
+      toast.error('Précepteur non trouvé');
       return;
     }
-
-    // In a real app, update the preceptor in the database
+    
+    updatePreceptor(preceptorId, {
+      assigned: false,
+      available: true,
+      childId: undefined
+    });
+    
     toast.success(`${preceptor.name} a été renvoyé`);
   };
 
-  // Assign a preceptor to a child
-  const assignPreceptorToChild = (preceptorId: string, childId: string) => {
-    const preceptor = getPreceptorById(preceptorId);
-    if (!preceptor) {
-      toast.error("Précepteur introuvable");
-      return;
-    }
+  const getAvailablePreceptors = () => {
+    return preceptors.filter(p => p.assigned !== true && p.available !== false);
+  };
 
-    // In a real app, update the relation in the database
-    toast.success(`${preceptor.name} a été assigné à l'enfant`);
+  const getAssignedPreceptors = () => {
+    return preceptors.filter(p => p.assigned === true || p.available === false);
   };
 
   return {
-    availablePreceptors,
-    getPreceptorById,
+    preceptors,
+    setPreceptors,
+    addPreceptor,
+    removePreceptor,
+    updatePreceptor,
     hirePreceptor,
     firePreceptor,
-    assignPreceptorToChild
+    getPreceptorById,
+    getAvailablePreceptors,
+    getAssignedPreceptors
   };
 };

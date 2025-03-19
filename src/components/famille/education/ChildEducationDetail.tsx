@@ -24,7 +24,7 @@ export const ChildEducationDetail: React.FC = () => {
   // Access context functions
   const { 
     children, 
-    getChild, 
+    getChild,
     startEducation, 
     advanceEducationYear,
     completeEducation,
@@ -36,7 +36,7 @@ export const ChildEducationDetail: React.FC = () => {
   
   // Access preceptor management functions
   const {
-    availablePreceptors,
+    preceptors,
     hirePreceptor,
     firePreceptor,
     getPreceptorById
@@ -72,7 +72,7 @@ export const ChildEducationDetail: React.FC = () => {
   // Check if education is complete
   const isCompleteEnabled = hasEducation && 
     child.progress >= 100 && 
-    child.age >= (educationPath?.minimumAge || 0) + (educationPath?.duration || 0);
+    child.age >= (educationPath?.minAge || 0) + (educationPath?.duration || 0);
   
   const handleSelectPath = (pathId: EducationType) => {
     setSelectedPath(pathId);
@@ -137,6 +137,16 @@ export const ChildEducationDetail: React.FC = () => {
     setHireDialogOpen(true);
   };
   
+  // Modification here to handle specialty display with specialties array
+  const getChildSpecialty = () => {
+    if (!child.specialties || child.specialties.length === 0) {
+      return child.specialty || 'Inconnue';
+    }
+    const specialtyId = child.specialties[0];
+    const specialty = educationPath?.specialtyDetails?.find(s => s.id === specialtyId);
+    return specialty?.name || 'Inconnue';
+  };
+  
   const renderEducationSetup = () => {
     return (
       <div className="space-y-6">
@@ -196,9 +206,7 @@ export const ChildEducationDetail: React.FC = () => {
                 
                 <div>
                   <p className="text-sm text-slate-500">Spécialité</p>
-                  <p className="font-medium">
-                    {educationPath.specialtyDetails?.find(s => s.id === child.specialties?.[0])?.name || 'Inconnue'}
-                  </p>
+                  <p className="font-medium">{getChildSpecialty()}</p>
                 </div>
                 
                 <div>
@@ -220,6 +228,7 @@ export const ChildEducationDetail: React.FC = () => {
               isEducating={!!isEducating[child.id]}
               hasEducation={true}
               educationProgress={child.progress || 0}
+              onCancel={handleCancelEducation}
             />
           </div>
         </Card>
@@ -238,12 +247,12 @@ export const ChildEducationDetail: React.FC = () => {
                   
                   <div>
                     <p className="text-sm text-slate-500">Spécialité</p>
-                    <p className="font-medium">{preceptor.specialty}</p>
+                    <p className="font-medium">{preceptor.specialty || preceptor.speciality}</p>
                   </div>
                   
                   <div>
                     <p className="text-sm text-slate-500">Qualité</p>
-                    <p className="font-medium">{preceptor.quality}/5</p>
+                    <p className="font-medium">{preceptor.quality}/100</p>
                   </div>
                   
                   <div>
@@ -267,7 +276,10 @@ export const ChildEducationDetail: React.FC = () => {
                 <p className="text-slate-500">Aucun précepteur n'est assigné à cet enfant.</p>
                 
                 <PreceptorSelector
-                  preceptors={availablePreceptors.filter(p => p.specialty === child.educationType)}
+                  preceptors={preceptors.filter(p => 
+                    (p.specialty === child.educationType || p.speciality === child.educationType) && 
+                    p.available !== false
+                  )}
                   selectedPreceptorId={selectedPreceptorId}
                   onSelectPreceptor={handleSelectPreceptor}
                   onHirePreceptor={openHireDialog}

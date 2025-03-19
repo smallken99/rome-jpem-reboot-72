@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from 'react';
 import { GameDate, Season } from '@/components/maitrejeu/types/common';
 import { formatDate, formatSeason } from '@/utils/formatUtils';
@@ -89,7 +88,6 @@ export const useGameDate = (initialDate?: GameDate) => {
     return seasonOrder[date1.season] > seasonOrder[date2.season];
   };
 
-  // Cette fonction renvoie maintenant une chaîne formatée directement
   const formatGameDate = (date: GameDate): string => {
     return `An ${date.year}, ${formatSeason(date.season)}`;
   };
@@ -110,13 +108,16 @@ export const useGameDate = (initialDate?: GameDate) => {
     return new Date(2000 + gameDate.year - 753, month, 15);
   };
 
-  // Convertir une chaîne en Date
   const stringToDate = (dateString: string): Date => {
     if (!dateString) return new Date();
+    
+    if (dateString instanceof Date) {
+      return dateString;
+    }
+    
     return new Date(dateString);
   };
 
-  // Cette fonction renvoie maintenant une chaîne
   const gameToStringOrDate = (gameDate: GameDate): string => {
     return `${gameDate.year}-${gameDate.season}`;
   };

@@ -1,4 +1,3 @@
-
 export type EducationType = 'none' | 'military' | 'rhetoric' | 'academic' | 'religious' | 'political';
 export type Gender = 'male' | 'female';
 export type EducationPathType = EducationType;
@@ -18,6 +17,7 @@ export interface Child {
   currentEducation?: ChildEducation;
   specialties?: string[];
   mentor?: string;
+  specialty?: string;
 }
 
 export interface Preceptor {
@@ -57,21 +57,30 @@ export interface EducationPath {
   description: string;
   benefits: string[];
   duration: number;
-  requirements: {
-    age: number;
-    gender: string;
-    cost: number;
-    duration: string;
-  };
+  minAge: number;
+  maxAge: number;
+  cost: number;
+  relatedStat: string;
+  mainStatBonus?: string;
+  statBonus?: number;
+  specialties: string[];
+  requiredAttributes?: Record<string, number>;
+  recommendedAttributes?: Record<string, number>;
   outcomes: {
     skills: string[];
     bonuses: Record<string, number>;
   };
-  specialties: string[];
-  relatedStat: string;
-  minAge: number;
-  maxAge: number;
-  cost: number;
+  suitableFor: {
+    gender: string;
+    status: string[];
+  };
+  specialtyDetails?: Array<{
+    id: string;
+    name: string;
+    description: string;
+    skills: string[];
+    careers: string[];
+  }>;
 }
 
 export interface EducationRecord {

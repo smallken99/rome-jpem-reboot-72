@@ -4,11 +4,10 @@ import { EducationPath } from '../../types/educationTypes';
 export const academicPath: EducationPath = {
   id: 'academic',
   name: 'Académique',
-  icon: 'Scroll',
-  color: 'bg-indigo-100 text-indigo-700',
+  type: 'academic',
   description: 'L\'éducation académique forme aux sciences, à la philosophie et aux mathématiques.',
-  minimumAge: 8,
-  maximumAge: 17,
+  minAge: 8,
+  maxAge: 17,
   duration: 6,
   mainStatBonus: 'intelligence',
   statBonus: 40,
@@ -60,5 +59,8 @@ export const academicPath: EducationPath = {
       skills: ['mémoire', 'analyse'],
       careers: ['Historien', 'Conseiller']
     }
-  ]
+  ],
+  cost: 5000,
+  relatedStat: 'intelligence',
+  benefits: ['Compétences analytiques', 'Connaissances scientifiques']
 };
