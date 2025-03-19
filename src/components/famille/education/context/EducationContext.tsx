@@ -1,3 +1,4 @@
+
 import React, { createContext, useContext, useState, useCallback, ReactNode } from 'react';
 import { Child, Preceptor, EducationType } from '../types/educationTypes';
 import { v4 as uuidv4 } from 'uuid';
@@ -175,7 +176,8 @@ export const EducationProvider: React.FC<{ children: ReactNode }> = ({ children 
     return getChild(id);
   }, [getChild]);
   
-  const handleSetSelectedChildId = useCallback((id: string | null) => {
+  // Rename this function to avoid the naming conflict with the state setter
+  const handleSelectedChildChange = useCallback((id: string | null) => {
     setSelectedChildId(id);
   }, []);
   
@@ -413,7 +415,7 @@ export const EducationProvider: React.FC<{ children: ReactNode }> = ({ children 
     assignPreceptorToChild,
     getChild,
     getChildById,
-    setSelectedChildId: handleSetSelectedChildId,
+    setSelectedChildId: handleSelectedChildChange, // Use the renamed function here
     
     startEducation,
     advanceEducationYear,
