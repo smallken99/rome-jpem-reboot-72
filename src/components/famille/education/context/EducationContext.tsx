@@ -175,7 +175,7 @@ export const EducationProvider: React.FC<{ children: ReactNode }> = ({ children 
     return getChild(id);
   }, [getChild]);
   
-  const setSelectedChildId = useCallback((id: string | null) => {
+  const handleSetSelectedChildId = useCallback((id: string | null) => {
     setSelectedChildId(id);
   }, []);
   
@@ -413,7 +413,7 @@ export const EducationProvider: React.FC<{ children: ReactNode }> = ({ children 
     assignPreceptorToChild,
     getChild,
     getChildById,
-    setSelectedChildId,
+    setSelectedChildId: handleSetSelectedChildId,
     
     startEducation,
     advanceEducationYear,
