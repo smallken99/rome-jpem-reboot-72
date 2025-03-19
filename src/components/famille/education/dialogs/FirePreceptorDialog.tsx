@@ -2,7 +2,7 @@
 import React from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
-import { usePreceptorDetail } from '../hooks/usePreceptorDetail';
+import { useEducation } from '../context/EducationContext';
 
 export interface FirePreceptorDialogProps {
   isOpen: boolean;
@@ -17,9 +17,10 @@ export const FirePreceptorDialog: React.FC<FirePreceptorDialogProps> = ({
   preceptorId,
   onFire
 }) => {
-  const { preceptor, loading } = usePreceptorDetail(preceptorId);
+  const { preceptors } = useEducation();
+  const preceptor = preceptors.find(p => p.id === preceptorId);
 
-  if (loading || !preceptor) {
+  if (!preceptor) {
     return null;
   }
 

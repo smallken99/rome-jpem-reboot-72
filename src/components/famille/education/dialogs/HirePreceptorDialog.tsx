@@ -2,7 +2,8 @@
 import React from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
-import { usePreceptorDetail } from '../hooks/usePreceptorDetail';
+import { useEducation } from '../context/EducationContext';
+import { formatMoney } from '@/utils/formatUtils';
 
 export interface HirePreceptorDialogProps {
   isOpen: boolean;
@@ -17,9 +18,10 @@ export const HirePreceptorDialog: React.FC<HirePreceptorDialogProps> = ({
   preceptorId,
   onHire
 }) => {
-  const { preceptor, loading } = usePreceptorDetail(preceptorId);
+  const { preceptors } = useEducation();
+  const preceptor = preceptors.find(p => p.id === preceptorId);
 
-  if (loading || !preceptor) {
+  if (!preceptor) {
     return null;
   }
 
@@ -41,7 +43,7 @@ export const HirePreceptorDialog: React.FC<HirePreceptorDialogProps> = ({
         <div className="mt-4 space-y-4">
           <div>
             <h4 className="font-medium text-sm">Coût annuel</h4>
-            <p className="text-sm">{preceptor.price || 0} as par an</p>
+            <p className="text-sm">{formatMoney(preceptor.price || 0)}</p>
           </div>
           
           <div>
@@ -60,7 +62,7 @@ export const HirePreceptorDialog: React.FC<HirePreceptorDialogProps> = ({
             Annuler
           </Button>
           <Button onClick={handleConfirm}>
-            Engager ({preceptor.price || 0} as/an)
+            Engager ({formatMoney(preceptor.price || 0)}/an)
           </Button>
         </DialogFooter>
       </DialogContent>

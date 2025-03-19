@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -14,18 +15,18 @@ import { Child, EducationPath, EducationType } from './types/educationTypes';
 import { HirePreceptorDialog } from './dialogs/HirePreceptorDialog';
 import { FirePreceptorDialog } from './dialogs/FirePreceptorDialog';
 import { usePreceptorsManagement } from './hooks/usePreceptorsManagement';
-import { useToast } from '@/components/ui/use-toast';
+import { toast } from 'sonner';
 
 export const ChildEducationDetail: React.FC = () => {
   const { childId } = useParams<{ childId: string }>();
   const navigate = useNavigate();
-  const { toast } = useToast();
   
+  // Access context functions
   const { 
     children, 
     getChildById, 
     startEducation, 
-    advanceEducation,
+    advanceEducationYear,
     completeEducation,
     cancelEducation,
     isEducating,
@@ -33,6 +34,7 @@ export const ChildEducationDetail: React.FC = () => {
     getAllEducationPaths
   } = useEducation();
   
+  // Access preceptor management functions
   const {
     availablePreceptors,
     hirePreceptor,
@@ -46,7 +48,7 @@ export const ChildEducationDetail: React.FC = () => {
   const [hireDialogOpen, setHireDialogOpen] = useState(false);
   const [fireDialogOpen, setFireDialogOpen] = useState(false);
   
-  const child = getChildById(childId || '');
+  const child = childId ? getChildById(childId) : undefined;
   
   useEffect(() => {
     if (!child) {
@@ -86,29 +88,22 @@ export const ChildEducationDetail: React.FC = () => {
   };
   
   const handleStartEducation = () => {
-    if (selectedPath && selectedSpecialty) {
-      startEducation(child.id, selectedPath, selectedSpecialty);
-      toast({
-        title: "Éducation commencée",
-        description: `${child.name} a commencé son éducation ${selectedPath}.`,
-      });
+    if (selectedPath) {
+      startEducation(child.id, selectedPath);
+      toast.success(`${child.name} a commencé son éducation ${selectedPath}.`);
     }
   };
   
   const handleAdvanceEducation = () => {
     if (hasEducation) {
-      advanceEducation(child.id);
+      advanceEducationYear(child.id);
     }
   };
   
   const handleCompleteEducation = () => {
     if (hasEducation && isCompleteEnabled) {
       completeEducation(child.id);
-      toast({
-        title: "Éducation terminée",
-        description: `${child.name} a terminé son éducation avec succès.`,
-        variant: "success",
-      });
+      toast.success(`${child.name} a terminé son éducation avec succès.`);
     }
   };
   
@@ -116,11 +111,7 @@ export const ChildEducationDetail: React.FC = () => {
     if (hasEducation) {
       if (window.confirm(`Êtes-vous sûr de vouloir annuler l'éducation de ${child.name} ?`)) {
         cancelEducation(child.id);
-        toast({
-          title: "Éducation annulée",
-          description: `L'éducation de ${child.name} a été annulée.`,
-          variant: "destructive",
-        });
+        toast.error(`L'éducation de ${child.name} a été annulée.`);
       }
     }
   };
@@ -129,10 +120,7 @@ export const ChildEducationDetail: React.FC = () => {
     if (selectedPreceptorId) {
       hirePreceptor(selectedPreceptorId, child.id);
       setHireDialogOpen(false);
-      toast({
-        title: "Précepteur engagé",
-        description: `Un nouveau précepteur a été engagé pour ${child.name}.`,
-      });
+      toast.success(`Un nouveau précepteur a été engagé pour ${child.name}.`);
     }
   };
   
@@ -140,11 +128,7 @@ export const ChildEducationDetail: React.FC = () => {
     if (child.preceptorId) {
       firePreceptor(child.preceptorId);
       setFireDialogOpen(false);
-      toast({
-        title: "Précepteur renvoyé",
-        description: `Le précepteur de ${child.name} a été renvoyé.`,
-        variant: "destructive",
-      });
+      toast.error(`Le précepteur de ${child.name} a été renvoyé.`);
     }
   };
   
@@ -191,6 +175,7 @@ export const ChildEducationDetail: React.FC = () => {
           <ChildHeader 
             child={child} 
             hasInvalidEducation={!isEducationValid}
+            onNameChange={() => {}}
           />
           
           <div className="p-4">
@@ -212,7 +197,7 @@ export const ChildEducationDetail: React.FC = () => {
                 <div>
                   <p className="text-sm text-slate-500">Spécialité</p>
                   <p className="font-medium">
-                    {educationPath.specialties.find(s => s.id === child.specialty)?.name || 'Inconnue'}
+                    {educationPath.specialties?.find?.(s => s.id === child.specialty)?.name || 'Inconnue'}
                   </p>
                 </div>
                 
@@ -229,15 +214,12 @@ export const ChildEducationDetail: React.FC = () => {
             </div>
             
             <EducationProgressButtons
-              onAdvance={handleAdvanceEducation}
-              onCancel={handleCancelEducation}
-              onComplete={handleCompleteEducation}
-              canComplete={isCompleteEnabled}
-              isEducating={isEducating}
-              hasEducation={true}
-              educationProgress={child.progress || 0}
               onAdvanceYear={handleAdvanceEducation}
               onCompleteEducation={handleCompleteEducation}
+              canComplete={isCompleteEnabled}
+              isEducating={!!isEducating[child.id]}
+              hasEducation={true}
+              educationProgress={child.progress || 0}
             />
           </div>
         </Card>

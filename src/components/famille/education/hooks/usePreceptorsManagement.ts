@@ -1,140 +1,167 @@
 
-import { useState, useEffect } from 'react';
-import { Preceptor } from '../types/educationTypes';
-import { v4 as uuidv4 } from 'uuid';
-
-const DEFAULT_PRECEPTORS: Preceptor[] = [
-  {
-    id: '1',
-    name: 'Marcus Tullius',
-    specialties: ['Éloquence', 'Débat', 'Littérature'],
-    expertise: 80,
-    cost: 1500,
-    reputation: 85,
-    available: true,
-    skill: 85,
-    specialty: 'rhetoric',
-    quality: 4,
-    status: 'available',
-    background: 'Ancien consul et orateur renommé',
-    price: 1500,
-    experience: 15
-  },
-  {
-    id: '2',
-    name: 'Lucius Cornelius',
-    specialties: ['Tactique', 'Leadership', 'Stratégie'],
-    expertise: 90,
-    cost: 2000,
-    reputation: 90,
-    available: true,
-    skill: 90,
-    specialty: 'military',
-    quality: 5,
-    status: 'available',
-    background: 'Ancien général victorieux',
-    price: 2000,
-    experience: 20
-  },
-  {
-    id: '3',
-    name: 'Quintus Servilius',
-    specialties: ['Rituels', 'Divination', 'Traditions'],
-    expertise: 75,
-    cost: 1200,
-    reputation: 80,
-    available: true,
-    skill: 80,
-    specialty: 'religious',
-    quality: 4,
-    status: 'available',
-    background: 'Ancien augure respecté',
-    price: 1200,
-    experience: 10
-  },
-  {
-    id: '4',
-    name: 'Publius Sempronius',
-    specialties: ['Négociation', 'Diplomatie', 'Lois'],
-    expertise: 85,
-    cost: 1800,
-    reputation: 80,
-    available: true,
-    skill: 85,
-    specialty: 'rhetoric',
-    quality: 4,
-    status: 'available',
-    background: 'Ancien tribun de la plèbe',
-    price: 1800,
-    experience: 12
-  },
-  {
-    id: '5',
-    name: 'Aulus Postumius',
-    specialties: ['Combat', 'Discipline', 'Stratégie'],
-    expertise: 70,
-    cost: 1200,
-    reputation: 75,
-    available: true,
-    skill: 75,
-    specialty: 'military',
-    quality: 3,
-    status: 'available',
-    background: 'Centurion retraité',
-    price: 1200,
-    experience: 8
-  }
-];
+import { useState, useCallback } from 'react';
+import { Preceptor, EducationType } from '../types/educationTypes';
+import { toast } from 'sonner';
 
 export const usePreceptorsManagement = () => {
-  const [preceptors, setPreceptors] = useState<Preceptor[]>(DEFAULT_PRECEPTORS);
+  const [preceptors, setPreceptors] = useState<Preceptor[]>([
+    {
+      id: 'preceptor-1',
+      name: 'Quintus Fabius',
+      specialty: 'rhetoric',
+      price: 5000,
+      quality: 90,
+      experience: 15,
+      assigned: false,
+      available: true
+    },
+    {
+      id: 'preceptor-2',
+      name: 'Marcus Livius',
+      specialty: 'military',
+      price: 6000,
+      quality: 85,
+      experience: 12,
+      assigned: false,
+      available: true
+    },
+    {
+      id: 'preceptor-3',
+      name: 'Publius Cornelius',
+      specialty: 'academic',
+      price: 4500,
+      quality: 80,
+      experience: 10,
+      assigned: false,
+      available: true
+    }
+  ]);
   
-  const addPreceptor = (preceptorData: Omit<Preceptor, 'id'>) => {
+  // Function to add a new preceptor
+  const addPreceptor = useCallback((preceptorData: Omit<Preceptor, 'id'>) => {
+    const id = `preceptor-${preceptors.length + 1}`;
     const newPreceptor: Preceptor = {
-      id: uuidv4(),
-      ...preceptorData
+      ...preceptorData,
+      id,
+      assigned: false,
+      available: true
     };
     
     setPreceptors(prev => [...prev, newPreceptor]);
-    return newPreceptor.id;
-  };
+    toast.success(`${newPreceptor.name} a été ajouté comme précepteur disponible.`);
+    
+    return id;
+  }, [preceptors]);
   
-  const updatePreceptor = (id: string, updates: Partial<Preceptor>) => {
+  // Function to remove a preceptor
+  const removePreceptor = useCallback((preceptorId: string) => {
+    const preceptor = preceptors.find(p => p.id === preceptorId);
+    
+    if (!preceptor) {
+      toast.error('Précepteur non trouvé.');
+      return false;
+    }
+    
+    if (preceptor.assigned) {
+      toast.error('Ce précepteur est actuellement assigné et ne peut pas être retiré.');
+      return false;
+    }
+    
+    setPreceptors(prev => prev.filter(p => p.id !== preceptorId));
+    toast.success(`${preceptor.name} a été retiré de la liste.`);
+    
+    return true;
+  }, [preceptors]);
+  
+  // Function to assign a preceptor to a child
+  const assignPreceptor = useCallback((preceptorId: string, childId: string) => {
     setPreceptors(prev => 
-      prev.map(preceptor => 
-        preceptor.id === id ? { ...preceptor, ...updates } : preceptor
+      prev.map(p => p.id === preceptorId ? { ...p, assigned: true, childId } : p)
+    );
+    
+    const preceptor = preceptors.find(p => p.id === preceptorId);
+    if (preceptor) {
+      toast.success(`${preceptor.name} a été assigné à l'éducation.`);
+    }
+    
+    return true;
+  }, [preceptors]);
+  
+  // Function to unassign a preceptor
+  const unassignPreceptor = useCallback((preceptorId: string) => {
+    setPreceptors(prev => 
+      prev.map(p => p.id === preceptorId ? { ...p, assigned: false, childId: undefined } : p)
+    );
+    
+    const preceptor = preceptors.find(p => p.id === preceptorId);
+    if (preceptor) {
+      toast.success(`${preceptor.name} a été libéré de ses fonctions d'éducation.`);
+    }
+    
+    return true;
+  }, [preceptors]);
+  
+  // Get assigned preceptors
+  const getAssignedPreceptors = useCallback(() => {
+    return preceptors.filter(p => p.assigned);
+  }, [preceptors]);
+  
+  // New functions to fix errors
+  const availablePreceptors = preceptors.filter(p => p.available && !p.assigned);
+  
+  const hirePreceptor = useCallback((preceptorId: string, childId?: string) => {
+    const preceptor = preceptors.find(p => p.id === preceptorId);
+    
+    if (!preceptor) {
+      toast.error('Précepteur non trouvé.');
+      return false;
+    }
+    
+    setPreceptors(prev => 
+      prev.map(p => p.id === preceptorId ? 
+        { ...p, available: false, assigned: !!childId, childId } : p
       )
     );
-  };
+    
+    toast.success(`${preceptor.name} a été embauché comme précepteur.`);
+    return true;
+  }, [preceptors]);
   
-  const removePreceptor = (id: string) => {
+  const firePreceptor = useCallback((preceptorId: string) => {
+    const preceptor = preceptors.find(p => p.id === preceptorId);
+    
+    if (!preceptor) {
+      toast.error('Précepteur non trouvé.');
+      return false;
+    }
+    
     setPreceptors(prev => 
-      prev.filter(preceptor => preceptor.id !== id)
+      prev.map(p => p.id === preceptorId ? 
+        { ...p, available: true, assigned: false, childId: undefined } : p
+      )
     );
-  };
+    
+    toast.success(`${preceptor.name} a été renvoyé.`);
+    return true;
+  }, [preceptors]);
   
-  const getPreceptorsBySpecialty = (specialty: string) => {
-    return preceptors.filter(p => 
-      p.specialties.includes(specialty) || p.specialty === specialty
-    );
-  };
-  
-  const getAvailablePreceptors = () => {
-    return preceptors.filter(p => p.available);
-  };
-  
-  const getAssignedPreceptors = () => {
-    return preceptors.filter(p => !p.available);
-  };
+  const getPreceptorById = useCallback((id: string) => {
+    return preceptors.find(p => p.id === id);
+  }, [preceptors]);
   
   return {
     preceptors,
     setPreceptors,
     addPreceptor,
-    updatePreceptor,
     removePreceptor,
-    getPreceptorsBySpecialty,
-    getAvailablePreceptors,
-    getAssignedPreceptors
+    assignPreceptor,
+    unassignPreceptor,
+    getAssignedPreceptors,
+    
+    // Additional functions
+    availablePreceptors,
+    hirePreceptor,
+    firePreceptor,
+    getPreceptorById
   };
 };

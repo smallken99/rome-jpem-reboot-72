@@ -18,7 +18,7 @@ interface EducationContextType {
   assignPreceptorToChild: (childId: string, preceptorId: string) => void;
   
   // Education functions
-  startEducation: (childId: string) => void;
+  startEducation: (childId: string, educationType?: EducationType, specialty?: string) => void;
   advanceEducationYear: (childId: string) => void;
   completeEducation: (childId: string) => void;
   
@@ -27,6 +27,13 @@ interface EducationContextType {
   removePreceptor: (id: string) => void;
   hirePreceptor: (id: string) => boolean;
   firePreceptor: (id: string) => void;
+  
+  // New functions to fix errors
+  getChildById: (id: string) => Child | undefined;
+  advanceEducation: (childId: string) => void;
+  cancelEducation: (childId: string) => void;
+  getEducationPathById: (pathType: string) => any;
+  getAllEducationPaths: () => any[];
 }
 
 const EducationContext = createContext<EducationContextType | undefined>(undefined);
@@ -155,7 +162,7 @@ export const EducationProvider: React.FC<{ children: ReactNode }> = ({ children 
   }, [childrenData, preceptorsData]);
   
   // Education functions
-  const startEducation = useCallback((childId: string) => {
+  const startEducation = useCallback((childId: string, educationType?: EducationType, specialty?: string) => {
     const child = childrenData.find(c => c.id === childId);
     
     if (!child) {
@@ -163,7 +170,9 @@ export const EducationProvider: React.FC<{ children: ReactNode }> = ({ children 
       return;
     }
     
-    if (child.educationType === 'none') {
+    const type = educationType || child.educationType;
+    
+    if (type === 'none') {
       toast.error("Aucun type d'éducation n'a été assigné");
       return;
     }
@@ -325,6 +334,58 @@ export const EducationProvider: React.FC<{ children: ReactNode }> = ({ children 
     toast.success(`${preceptor.name} a été renvoyé`);
   }, [preceptorsData]);
   
+  // New functions to fix errors
+  const getChildById = useCallback((id: string) => {
+    return childrenData.find(child => child.id === id);
+  }, [childrenData]);
+  
+  const advanceEducation = useCallback((childId: string) => {
+    advanceEducationYear(childId); // Alias for existing function
+  }, [advanceEducationYear]);
+  
+  const cancelEducation = useCallback((childId: string) => {
+    const child = childrenData.find(c => c.id === childId);
+    
+    if (!child) {
+      toast.error("Enfant introuvable");
+      return;
+    }
+    
+    // Reset education progress
+    setChildrenData(prev => 
+      prev.map(c => 
+        c.id === childId ? { ...c, progress: 0 } : c
+      )
+    );
+    
+    // Remove from educating children
+    setEducatingChildrenIds(prev => prev.filter(id => id !== childId));
+    setIsEducatingMap(prev => ({ ...prev, [childId]: false }));
+    
+    toast.success(`L'éducation de ${child.name} a été annulée.`);
+  }, [childrenData]);
+  
+  const getEducationPathById = useCallback((pathType: string) => {
+    // This would normally fetch from a data store
+    return {
+      name: pathType.charAt(0).toUpperCase() + pathType.slice(1),
+      duration: 3,
+      minimumAge: 8,
+      suitableFor: { gender: 'both' },
+      specialties: []
+    };
+  }, []);
+  
+  const getAllEducationPaths = useCallback(() => {
+    // This would normally fetch from a data store
+    return [
+      { id: 'military', name: 'Militaire' },
+      { id: 'rhetoric', name: 'Rhétorique' },
+      { id: 'academic', name: 'Académique' },
+      { id: 'religious', name: 'Religieuse' }
+    ];
+  }, []);
+  
   const value = {
     children: childrenData,
     preceptors: preceptorsData,
@@ -347,7 +408,14 @@ export const EducationProvider: React.FC<{ children: ReactNode }> = ({ children 
     addPreceptor,
     removePreceptor,
     hirePreceptor,
-    firePreceptor
+    firePreceptor,
+    
+    // New functions
+    getChildById,
+    advanceEducation,
+    cancelEducation,
+    getEducationPathById,
+    getAllEducationPaths
   };
   
   return (
