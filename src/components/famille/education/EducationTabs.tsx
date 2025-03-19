@@ -4,7 +4,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { ChildrenTab } from './tabs/ChildrenTab';
 import { EducationPathsTab } from './tabs/EducationPathsTab';
 import { HistoryTab } from './tabs/HistoryTab';
-import { PreceptorsTab } from './tabs/PreceptorsTab';
+import PreceptorsTab from './tabs/PreceptorsTab';
 
 export const EducationTabs: React.FC = () => {
   return (

@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from 'react';
 import { GameDate, Season } from '@/components/maitrejeu/types/common';
 
@@ -123,11 +122,11 @@ export const useGameDate = (initialDate?: GameDate) => {
     return new Date(2000 + gameDate.year - 753, month, 15);
   };
 
-  const stringToDate = (dateString: string): Date => {
+  const stringToDate = (dateString: string | Date): Date => {
     if (!dateString) return new Date();
     
     // Check if dateString is already a Date object
-    if (typeof dateString === 'object' && dateString instanceof Date) {
+    if (dateString instanceof Date) {
       return dateString;
     }
     
