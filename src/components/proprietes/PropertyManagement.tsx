@@ -8,7 +8,7 @@ import { WorkersTab } from './property-management/WorkersTab';
 import { UpgradesTab } from './property-management/UpgradesTab';
 import { PropertyHeader } from './property-management/PropertyHeader';
 import { useBuildings } from './hooks/useBuildings';
-import { OwnedBuilding } from './types/buildingTypes';
+import { OwnedBuilding } from '@/types/buildings';
 
 // Données fictives pour les tests
 const mockBuildings: OwnedBuilding[] = [
@@ -16,27 +16,31 @@ const mockBuildings: OwnedBuilding[] = [
     id: 'building-1',
     buildingId: 'domus-1',
     name: 'Domus Palatina',
-    type: 'urban',
+    buildingType: 'urban',
     location: 'Rome',
     condition: 85,
     maintenanceLevel: 2,
     income: 2000,
     workers: 5,
     securityLevel: 2,
-    description: 'Une magnifique maison patricienne située près du forum'
+    description: 'Une magnifique maison patricienne située près du forum',
+    maintenanceCost: 500,
+    purchaseDate: new Date()
   },
   {
     id: 'building-2',
     buildingId: 'villa-1',
     name: 'Villa Rustica',
-    type: 'rural',
+    buildingType: 'rural',
     location: 'Campanie',
     condition: 70,
     maintenanceLevel: 1,
     income: 5000,
     workers: 50,
     securityLevel: 1,
-    description: 'Une vaste propriété rurale produisant du vin et de l\'huile d\'olive'
+    description: 'Une vaste propriété rurale produisant du vin et de l\'huile d\'olive',
+    maintenanceCost: 1200,
+    purchaseDate: new Date()
   }
 ];
 
@@ -55,6 +59,19 @@ export const PropertyManagement: React.FC<PropertyManagementProps> = ({ building
     sellBuilding,
     findBuildingById
   } = useBuildings(mockBuildings);
+  
+  // Adapter les fonctions pour qu'elles correspondent aux signatures attendues
+  const handleUpdateMaintenanceLevel = (buildingId: string, level: number) => {
+    updateMaintenanceLevel(buildingId, level);
+  };
+  
+  const handleUpdateSecurityLevel = (buildingId: string, level: number) => {
+    updateSecurityLevel(buildingId, level);
+  };
+  
+  const handleUpdateWorkers = (buildingId: string, workers: number) => {
+    updateWorkers(buildingId, workers);
+  };
   
   const building = findBuildingById(buildingId);
 
@@ -81,14 +98,14 @@ export const PropertyManagement: React.FC<PropertyManagementProps> = ({ building
         <TabsContent value="maintenance">
           <MaintenanceTab 
             building={building} 
-            updateMaintenanceLevel={updateMaintenanceLevel}
-            updateSecurityLevel={updateSecurityLevel}
+            updateMaintenanceLevel={handleUpdateMaintenanceLevel}
+            updateSecurityLevel={handleUpdateSecurityLevel}
             renovateBuilding={renovateBuilding}
           />
         </TabsContent>
         
         <TabsContent value="workers">
-          <WorkersTab building={building} updateWorkers={updateWorkers} />
+          <WorkersTab building={building} updateWorkers={handleUpdateWorkers} />
         </TabsContent>
         
         <TabsContent value="upgrades">

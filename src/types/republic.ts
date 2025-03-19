@@ -1,6 +1,4 @@
 
-import { GameDate } from '@/components/maitrejeu/types/common';
-
 // Types pour l'équilibre de la République
 export interface RepublicEquilibre {
   populares: number;
@@ -19,6 +17,9 @@ export interface RepublicEquilibre {
   plébéiens?: number;
   facteurPlebs?: number;
 }
+
+// Alias pour la compatibilité avec le code existant
+export type Equilibre = RepublicEquilibre;
 
 // Types pour les factions politiques
 export interface PoliticalFaction {
