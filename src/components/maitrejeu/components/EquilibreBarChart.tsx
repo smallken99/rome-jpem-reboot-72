@@ -1,11 +1,11 @@
 
 import React from 'react';
 import { Bar, BarChart, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from 'recharts';
-import { Equilibre } from '../types/equilibre';
+import { RepublicEquilibre } from '@/types/republic';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 
 interface EquilibreBarChartProps {
-  equilibre: Equilibre;
+  equilibre: RepublicEquilibre;
   title: string;
   description?: string;
 }
@@ -15,6 +15,7 @@ export const EquilibreBarChart: React.FC<EquilibreBarChartProps> = ({
   title,
   description
 }) => {
+  // Utiliser des valeurs par défaut pour éviter les undefined
   const militaryData = [
     { name: 'Armée', value: equilibre.armée ?? equilibre.facteurMilitaire ?? 50 },
     { name: 'Économie', value: equilibre.économie ?? equilibre.economicStability ?? 50 },
@@ -25,8 +26,8 @@ export const EquilibreBarChart: React.FC<EquilibreBarChartProps> = ({
   const factionsData = [
     { name: 'Patriciens', value: equilibre.patriciens ?? equilibre.facteurPatriciens ?? 50 },
     { name: 'Plébéiens', value: equilibre.plébéiens ?? equilibre.facteurPlebs ?? 50 },
-    { name: 'Optimates', value: equilibre.optimates },
-    { name: 'Populares', value: equilibre.populaires }, // Changed from 'populares' to 'populaires'
+    { name: 'Optimates', value: equilibre.optimates ?? 50 },
+    { name: 'Populares', value: equilibre.populaires ?? equilibre.populares ?? 50 },
     { name: 'Modérés', value: equilibre.neutrales ?? equilibre.moderates ?? 50 }
   ];
   

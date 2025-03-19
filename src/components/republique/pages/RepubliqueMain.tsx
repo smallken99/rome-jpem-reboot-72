@@ -1,65 +1,111 @@
 
 import React from 'react';
-import { Routes, Route } from 'react-router-dom';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { RepublicStats } from '@/components/republique/statistiques/RepublicStats';
 import { FunctionCard } from '@/components/republique/ui/FunctionCard';
-import { ConsulBureau } from '../bureaux/consul/ConsulBureau';
-import { PreteurBureau } from '../bureaux/preteur/PreteurBureau';
-import { EdileBureau } from '../bureaux/edile/EdileBureau';
-import { QuesteurBureau } from '../bureaux/questeur/QuesteurBureau';
-import { CenseurBureau } from '../bureaux/censeur/CenseurBureau';
-import { SectionNavigation, NavigationItem } from '@/components/ui-custom/SectionNavigation';
-import { Landmark, Gavel, Building, Coins, Shield } from 'lucide-react';
-import { PageHeader } from '@/components/ui-custom/PageHeader';
-import { RepubliqueFunctions } from '../RepubliqueFunctions';
+import { useNavigate } from 'react-router-dom';
+import { 
+  Building, 
+  Landmark, 
+  Gavel, 
+  Scale, 
+  Globe, 
+  Scroll, 
+  Coins, 
+  Map
+} from 'lucide-react';
 
-const RepubliqueMain: React.FC = () => {
-  const navigationItems: NavigationItem[] = [
+export const RepubliqueMain: React.FC = () => {
+  const navigate = useNavigate();
+  const [activeTab, setActiveTab] = React.useState('statistiques');
+  
+  // Fonctions des bureaux
+  const bureaux = [
     {
-      label: "Consul",
-      path: "/republique/bureaux/consul",
-      icon: <Landmark className="h-4 w-4" />
+      title: "Bureau du Consul",
+      description: "Diriger la République et présider le Sénat",
+      icon: <Landmark className="h-6 w-6" />,
+      color: "bg-blue-100",
+      iconColor: "text-blue-700",
+      route: "/republique/bureaux/consul"
     },
     {
-      label: "Préteur",
-      path: "/republique/bureaux/preteur",
-      icon: <Gavel className="h-4 w-4" />
+      title: "Bureau du Préteur",
+      description: "Administrer la justice et représenter les consuls",
+      icon: <Scale className="h-6 w-6" />,
+      color: "bg-emerald-100",
+      iconColor: "text-emerald-700",
+      route: "/republique/bureaux/preteur"
     },
     {
-      label: "Édile",
-      path: "/republique/bureaux/edile",
-      icon: <Shield className="h-4 w-4" />
+      title: "Bureau de l'Édile",
+      description: "Superviser l'infrastructure et les services publics",
+      icon: <Building className="h-6 w-6" />,
+      color: "bg-amber-100",
+      iconColor: "text-amber-700",
+      route: "/republique/bureaux/edile"
     },
     {
-      label: "Questeur",
-      path: "/republique/bureaux/questeur",
-      icon: <Coins className="h-4 w-4" />
+      title: "Bureau du Questeur",
+      description: "Gérer les finances publiques et collecter les impôts",
+      icon: <Coins className="h-6 w-6" />,
+      color: "bg-yellow-100",
+      iconColor: "text-yellow-700",
+      route: "/republique/bureaux/questeur"
     },
     {
-      label: "Censeur",
-      path: "/republique/bureaux/censeur",
-      icon: <Building className="h-4 w-4" />
+      title: "Bureau du Censeur",
+      description: "Surveiller la moralité et recenser la population",
+      icon: <Scroll className="h-6 w-6" />,
+      color: "bg-purple-100",
+      iconColor: "text-purple-700",
+      route: "/republique/bureaux/censeur"
     }
   ];
-
+  
   return (
     <div className="space-y-6">
-      <PageHeader 
-        title="Bureaux des Magistrats" 
-        subtitle="Administration de la République romaine" 
-      />
-
-      <SectionNavigation items={navigationItems} />
-
-      <Routes>
-        <Route index element={<RepubliqueFunctions />} />
-        <Route path="consul" element={<ConsulBureau />} />
-        <Route path="preteur" element={<PreteurBureau />} />
-        <Route path="edile" element={<EdileBureau />} />
-        <Route path="questeur" element={<QuesteurBureau />} />
-        <Route path="censeur" element={<CenseurBureau />} />
-      </Routes>
+      <header>
+        <h1 className="text-3xl font-bold font-cinzel mb-2">Administration de la République</h1>
+        <p className="text-muted-foreground">
+          Gérez les affaires publiques selon votre fonction et consultez l'état de la République.
+        </p>
+      </header>
+      
+      <Tabs value={activeTab} onValueChange={setActiveTab}>
+        <TabsList>
+          <TabsTrigger value="statistiques">Statistiques</TabsTrigger>
+          <TabsTrigger value="bureaux">Bureaux des Magistrats</TabsTrigger>
+        </TabsList>
+        
+        <TabsContent value="statistiques" className="mt-6">
+          <RepublicStats />
+        </TabsContent>
+        
+        <TabsContent value="bureaux" className="mt-6">
+          <Card>
+            <CardHeader>
+              <CardTitle>Bureaux des Magistrats</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {bureaux.map((bureau, index) => (
+                  <FunctionCard
+                    key={index}
+                    title={bureau.title}
+                    description={bureau.description}
+                    icon={bureau.icon}
+                    color={bureau.color}
+                    iconColor={bureau.iconColor}
+                    onClick={() => navigate(bureau.route)}
+                  />
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+      </Tabs>
     </div>
   );
 };
-
-export { RepubliqueMain };

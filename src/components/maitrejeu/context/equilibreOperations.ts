@@ -1,11 +1,11 @@
 
-import { Equilibre } from '../types';
+import { RepublicEquilibre } from '@/types/republic';
 
 export const createEquilibreOperations = (
-  setEquilibre: React.Dispatch<React.SetStateAction<Equilibre | null>>
+  setEquilibre: React.Dispatch<React.SetStateAction<RepublicEquilibre | null>>
 ) => {
-  const updateEquilibre = (updates: Partial<Equilibre>) => {
-    setEquilibre(prev => prev ? { ...prev, ...updates } : updates as Equilibre);
+  const updateEquilibre = (updates: Partial<RepublicEquilibre>) => {
+    setEquilibre(prev => prev ? { ...prev, ...updates } : updates as RepublicEquilibre);
   };
 
   // Ajouter la fonction pour mettre à jour l'équilibre des factions
