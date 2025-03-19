@@ -126,6 +126,7 @@ export const useGameDate = (initialDate?: GameDate) => {
   const stringToDate = (dateString: string): Date => {
     if (!dateString) return new Date();
     
+    // Check if dateString is already a Date object
     if (typeof dateString === 'object' && dateString instanceof Date) {
       return dateString;
     }
