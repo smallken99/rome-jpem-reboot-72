@@ -104,6 +104,11 @@ export const ChildEducationDetail = () => {
       completeEducation(education.id);
     }
   };
+
+  const handleNameChange = (id: string, newName: string) => {
+    console.log(`Changing name of child ${id} to ${newName}`);
+    // Normally would update child name here
+  };
   
   if (loading) {
     return (
@@ -147,7 +152,10 @@ export const ChildEducationDetail = () => {
       
       <Card>
         <CardHeader>
-          <ChildHeader child={child} />
+          <ChildHeader 
+            child={child} 
+            onNameChange={handleNameChange}
+          />
         </CardHeader>
         
         <CardContent>
@@ -214,10 +222,10 @@ export const ChildEducationDetail = () => {
                     <div className="mt-6">
                       <Separator className="my-4" />
                       <EducationProgressButtons 
-                        onAdvance={handleAdvanceEducation}
+                        onAdvanceYear={handleAdvanceEducation}
                         onCancel={handleCancelEducation}
                         onComplete={handleCompleteEducation}
-                        canComplete={education.currentYear >= education.totalYears * 0.75}
+                        canComplete={(education.currentYear || 0) >= (education.totalYears || 0) * 0.75}
                         isEducating={loading}
                         hasEducation={true}
                       />
@@ -247,10 +255,10 @@ export const ChildEducationDetail = () => {
                     <div className="flex items-center justify-between">
                       <div>
                         <h4 className="font-medium">
-                          {educationPaths.find(p => p.id === education.pathType)?.name}
+                          {educationPaths.find(p => p.id === education.pathType)?.name || education.pathType}
                         </h4>
                         <p className="text-sm text-muted-foreground">
-                          {education.startYear} - {education.startYear + education.currentYear}
+                          {education.startYear} - {education.startYear + (education.currentYear || 0)}
                         </p>
                       </div>
                       <Badge className="bg-green-500">Complétée</Badge>
@@ -377,7 +385,7 @@ export const ChildEducationDetail = () => {
                                 <div>
                                   <h5 className="font-medium">{preceptor.name}</h5>
                                   <p className="text-sm text-muted-foreground">
-                                    Spécialité: {preceptor.specialty || preceptor.speciality}
+                                    Spécialité: {preceptor.specialty}
                                   </p>
                                 </div>
                                 <div className="text-right">
@@ -385,7 +393,7 @@ export const ChildEducationDetail = () => {
                                     Qualité: {preceptor.quality}/5
                                   </span>
                                   <p className="text-sm text-muted-foreground">
-                                    Coût: {preceptor.cost} as/an
+                                    Coût: {preceptor.cost || preceptor.price} as/an
                                   </p>
                                 </div>
                               </div>

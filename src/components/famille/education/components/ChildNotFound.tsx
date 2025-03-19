@@ -1,26 +1,32 @@
 
 import React from 'react';
-import { Card, CardContent } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { ChevronLeft, AlertTriangle } from 'lucide-react';
+import { AlertCircle, ChevronLeft } from 'lucide-react';
 
 interface ChildNotFoundProps {
-  onBack: () => void;
   childId?: string;
+  onBack: () => void;
 }
 
-export const ChildNotFound: React.FC<ChildNotFoundProps> = ({ onBack, childId }) => {
+export const ChildNotFound: React.FC<ChildNotFoundProps> = ({ childId, onBack }) => {
   return (
     <Card>
-      <CardContent className="pt-6 pb-8 flex flex-col items-center justify-center">
-        <AlertTriangle className="h-12 w-12 text-amber-500 mb-4" />
-        <h2 className="text-xl font-semibold mb-2">Enfant non trouvé</h2>
-        <p className="text-muted-foreground text-center mb-4">
-          L'enfant avec l'identifiant "{childId}" n'a pas été trouvé dans la liste des enfants disponibles.
+      <CardHeader className="pb-3">
+        <CardTitle className="flex items-center gap-2">
+          <AlertCircle className="h-5 w-5 text-red-500" />
+          Enfant introuvable
+        </CardTitle>
+      </CardHeader>
+      <CardContent className="pb-6">
+        <p className="text-muted-foreground mb-6">
+          L'enfant avec l'identifiant "{childId}" n'a pas été trouvé dans votre famille.
+          Il est possible qu'il ait été retiré ou que l'identifiant soit incorrect.
         </p>
+        
         <Button onClick={onBack} className="flex items-center gap-2">
           <ChevronLeft className="h-4 w-4" />
-          <span>Retour à la liste</span>
+          Retourner à la liste des enfants
         </Button>
       </CardContent>
     </Card>

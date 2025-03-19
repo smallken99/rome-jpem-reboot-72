@@ -18,6 +18,8 @@ export const useChildrenManagement = (characters: Character[] = []) => {
         age: char.age,
         gender: char.gender,
         status: 'child',
+        educationType: char.education?.type || 'none',
+        progress: char.education?.progress || 0,
         currentEducation: char.currentEducation ? {
           type: char.currentEducation.type || char.education?.type || 'none',
           mentor: char.currentEducation.mentor || char.education?.mentor || null,

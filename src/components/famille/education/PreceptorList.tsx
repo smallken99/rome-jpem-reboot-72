@@ -17,6 +17,7 @@ interface PreceptorListProps {
   educationType?: string;
   viewOnly?: boolean;
   childId?: string;
+  showHireButton?: boolean;
 }
 
 export const PreceptorList: React.FC<PreceptorListProps> = ({
@@ -30,7 +31,8 @@ export const PreceptorList: React.FC<PreceptorListProps> = ({
   showAvailableOnly = false,
   educationType,
   viewOnly = false,
-  childId
+  childId,
+  showHireButton = true
 }) => {
   // Filter preceptors based on parameters
   const filteredPreceptors = preceptors

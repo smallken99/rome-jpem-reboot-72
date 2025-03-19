@@ -1,7 +1,8 @@
 
-export type EducationType = 'none' | 'military' | 'rhetoric' | 'academic' | 'religious';
+export type EducationType = 'none' | 'military' | 'rhetoric' | 'academic' | 'religious' | 'political';
 export type Gender = 'male' | 'female';
 export type EducationPathType = EducationType;
+export type EducationStatus = 'not_started' | 'in_progress' | 'completed' | 'canceled';
 
 export interface Child {
   id: string;
@@ -24,8 +25,8 @@ export interface Preceptor {
   name: string;
   specialty: EducationType;
   price: number;
-  quality: number;
   experience: number;
+  quality: number;
   assigned?: boolean;
   skill?: number;
   expertise?: number;
@@ -81,7 +82,7 @@ export interface EducationRecord {
   startYear?: number;
   currentYear?: number;
   totalYears?: number;
-  status: 'not_started' | 'in_progress' | 'completed' | 'canceled';
+  status: EducationStatus;
   skills?: Record<string, number>;
   specialties?: string[];
 }
@@ -145,4 +146,17 @@ export interface PreceptorsByType {
   rhetoric: Preceptor[];
   religious: Preceptor[];
   academic: Preceptor[];
+  political?: Preceptor[];
+}
+
+export interface EducationProgressButtonsProps {
+  isEducating: boolean;
+  hasEducation: boolean;
+  educationProgress?: number;
+  onAdvanceYear?: () => void;
+  onCompleteEducation?: () => void;
+  canComplete?: boolean;
+  onAdvance?: () => void;
+  onCancel?: () => void;
+  onComplete?: () => void;
 }

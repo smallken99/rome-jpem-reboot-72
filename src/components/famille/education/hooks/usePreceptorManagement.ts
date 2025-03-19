@@ -57,17 +57,21 @@ export const usePreceptorManagement = () => {
   
   // Get preceptors by education type
   const getPreceptorsByType = (preceptors: Preceptor[]): PreceptorsByType => {
-    const result: PreceptorsByType = {};
+    const result: PreceptorsByType = {
+      military: [],
+      rhetoric: [],
+      religious: [],
+      academic: []
+    };
     
     preceptors.forEach(preceptor => {
       if (!preceptor.specialty) return;
       
       const type = determineEducationType(preceptor.specialty);
-      if (!result[type]) {
-        result[type] = [];
-      }
-      
-      result[type].push(preceptor);
+      if (type === 'military') result.military.push(preceptor);
+      else if (type === 'rhetoric') result.rhetoric.push(preceptor);
+      else if (type === 'religious') result.religious.push(preceptor);
+      else if (type === 'academic') result.academic.push(preceptor);
     });
     
     return result;

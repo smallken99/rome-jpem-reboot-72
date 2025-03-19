@@ -3,53 +3,49 @@ import React from 'react';
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
+  DialogFooter,
   DialogHeader,
   DialogTitle,
-  DialogFooter,
-  DialogDescription,
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
-import { useEducation } from '../context/EducationContext';
+import { Preceptor } from '../types/educationTypes';
 
 interface FirePreceptorDialogProps {
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
-  preceptorId: string;
-  onFire: () => void;
+  preceptor: Preceptor | null;
+  isOpen: boolean;
+  onClose: () => void;
+  onConfirm: () => void;
 }
 
 export const FirePreceptorDialog: React.FC<FirePreceptorDialogProps> = ({
-  open,
-  onOpenChange,
-  preceptorId,
-  onFire,
+  preceptor,
+  isOpen,
+  onClose,
+  onConfirm,
 }) => {
-  const { preceptors } = useEducation();
-  const preceptor = preceptors.find(p => p.id === preceptorId);
-
   if (!preceptor) return null;
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent>
+    <Dialog open={isOpen} onOpenChange={onClose}>
+      <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
-          <DialogTitle>Congédier un précepteur</DialogTitle>
+          <DialogTitle>Licencier {preceptor.name}</DialogTitle>
           <DialogDescription>
-            Êtes-vous sûr de vouloir congédier {preceptor.name} ?
+            Êtes-vous sûr de vouloir licencier ce précepteur ?
           </DialogDescription>
         </DialogHeader>
 
-        <div className="grid gap-4 py-4">
-          <div>
-            <p className="text-sm text-red-600">
-              Le précepteur sera renvoyé et ne sera plus disponible pour l'éducation des enfants.
-            </p>
-          </div>
+        <div className="my-4 text-sm">
+          <p className="text-muted-foreground">
+            Ce précepteur ne sera plus à votre service et vous ne paierez plus son salaire.
+            {preceptor.childId && " Cela interrompra également l'éducation de l'enfant auquel il est assigné."}
+          </p>
         </div>
 
         <DialogFooter>
-          <Button variant="outline" onClick={() => onOpenChange(false)}>Annuler</Button>
-          <Button variant="destructive" onClick={onFire}>Congédier</Button>
+          <Button variant="outline" onClick={onClose}>Annuler</Button>
+          <Button variant="destructive" onClick={onConfirm}>Licencier</Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>

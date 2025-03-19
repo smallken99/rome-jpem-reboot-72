@@ -13,12 +13,12 @@ const DEFAULT_PRECEPTORS: Preceptor[] = [
     reputation: 85,
     available: true,
     skill: 85,
-    specialty: 'Rhétorique',
+    specialty: 'rhetoric',
     quality: 4,
     status: 'available',
     background: 'Ancien consul et orateur renommé',
-    rating: 4.5,
-    description: 'Un ancien consul réputé pour son éloquence et ses écrits philosophiques.'
+    price: 1500,
+    experience: 15
   },
   {
     id: '2',
@@ -29,12 +29,12 @@ const DEFAULT_PRECEPTORS: Preceptor[] = [
     reputation: 90,
     available: true,
     skill: 90,
-    specialty: 'Militaire',
+    specialty: 'military',
     quality: 5,
     status: 'available',
     background: 'Ancien général victorieux',
-    rating: 5,
-    description: 'Général décoré ayant servi sous plusieurs consuls. Expert en tactique militaire.'
+    price: 2000,
+    experience: 20
   },
   {
     id: '3',
@@ -45,12 +45,12 @@ const DEFAULT_PRECEPTORS: Preceptor[] = [
     reputation: 80,
     available: true,
     skill: 80,
-    specialty: 'Religieux',
+    specialty: 'religious',
     quality: 4,
     status: 'available',
     background: 'Ancien augure respecté',
-    rating: 4,
-    description: 'Un augure respecté qui a servi dans les principaux temples de Rome.'
+    price: 1200,
+    experience: 10
   },
   {
     id: '4',
@@ -61,12 +61,12 @@ const DEFAULT_PRECEPTORS: Preceptor[] = [
     reputation: 80,
     available: true,
     skill: 85,
-    specialty: 'Politique',
+    specialty: 'rhetoric',
     quality: 4,
     status: 'available',
     background: 'Ancien tribun de la plèbe',
-    rating: 4.2,
-    description: 'Tribun de la plèbe qui s\'est distingué par sa connaissance des lois et sa capacité à négocier.'
+    price: 1800,
+    experience: 12
   },
   {
     id: '5',
@@ -77,12 +77,12 @@ const DEFAULT_PRECEPTORS: Preceptor[] = [
     reputation: 75,
     available: true,
     skill: 75,
-    specialty: 'Militaire',
+    specialty: 'military',
     quality: 3,
     status: 'available',
     background: 'Centurion retraité',
-    rating: 3.8,
-    description: 'Ancien centurion ayant servi pendant 20 ans dans les légions romaines.'
+    price: 1200,
+    experience: 8
   }
 ];
 

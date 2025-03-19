@@ -1,11 +1,11 @@
 
 import React from 'react';
-import { ChildHeader } from './education/components/ChildHeader';
-import { EducationStatus } from './education/components/EducationStatus';
-import { EducationProgressButtons } from './education/components/EducationProgressButtons';
-import { CardActions } from './education/components/CardActions';
-import { Child } from './education/types/educationTypes';
-import { useEducation } from './education/context/EducationContext';
+import { ChildHeader } from './components/ChildHeader';
+import { EducationStatus } from './components/EducationStatus';
+import { EducationProgressButtons } from './components/EducationProgressButtons';
+import { CardActions } from './components/CardActions';
+import { Child } from './types/educationTypes';
+import { useEducation } from './context/EducationContext';
 
 interface ChildEducationCardProps {
   child: Child;

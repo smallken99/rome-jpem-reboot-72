@@ -4,7 +4,7 @@ import { Edit, User, UserCheck } from 'lucide-react';
 import { Child } from '../types/educationTypes';
 import { Badge } from '@/components/ui/badge';
 
-interface ChildHeaderProps {
+export interface ChildHeaderProps {
   child: Child;
   onNameChange: (id: string, newName: string) => void;
   hasInvalidEducation?: boolean;

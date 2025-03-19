@@ -1,10 +1,9 @@
 
 import React from 'react';
+import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { InfoCircle } from '@/components/ui/InfoIcon';
 import { Child } from '../types/educationTypes';
-import { Badge } from '@/components/ui/badge';
-import { BookOpen, AlertTriangle } from 'lucide-react';
 
 interface EducationStatusProps {
   child: Child;
@@ -17,67 +16,78 @@ export const EducationStatus: React.FC<EducationStatusProps> = ({
   hasEducation,
   hasInvalidEducation = false
 }) => {
-  const formatEducationType = (type: string) => {
+  // Fonction pour obtenir la description du type d'éducation
+  const getEducationTypeDescription = (type: string) => {
     switch (type) {
-      case 'military': return 'Militaire';
-      case 'rhetoric': return 'Rhétorique';
-      case 'academic': return 'Académique';
-      case 'religious': return 'Religieuse';
-      default: return 'Non définie';
+      case 'military':
+        return 'Formation militaire';
+      case 'rhetoric':
+        return 'Formation à la rhétorique';
+      case 'religious':
+        return 'Formation religieuse';
+      case 'academic':
+        return 'Formation académique';
+      default:
+        return 'Aucune éducation en cours';
     }
   };
 
-  if (!hasEducation) {
-    return (
-      <div className="flex items-start gap-2 mb-4">
-        <InfoCircle className="h-5 w-5 text-amber-500 mt-0.5" />
-        <div>
-          <p className="text-sm text-muted-foreground">
-            Aucune éducation n'est assignée à cet enfant.
-          </p>
-        </div>
-      </div>
-    );
-  }
-
-  if (hasInvalidEducation) {
-    return (
-      <div className="flex items-start gap-2 mb-4">
-        <AlertTriangle className="h-5 w-5 text-red-500 mt-0.5" />
-        <div>
-          <p className="text-sm font-medium text-red-600">
-            L'éducation militaire n'est pas adaptée pour une fille romaine
-          </p>
-          <p className="text-xs text-muted-foreground mt-1">
-            Choisissez un autre type d'éducation plus approprié
-          </p>
-        </div>
-      </div>
-    );
-  }
+  // Function to format progress text
+  const formatProgressText = (progress: number) => {
+    if (progress < 25) return 'Débutant';
+    if (progress < 50) return 'Apprenti';
+    if (progress < 75) return 'Intermédiaire';
+    if (progress < 100) return 'Avancé';
+    return 'Maître';
+  };
 
   return (
-    <div className="mb-4">
-      <div className="flex items-center justify-between mb-2">
+    <div className="space-y-3 mt-2">
+      <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <BookOpen className="h-4 w-4 text-blue-600" />
-          <span className="text-sm font-medium">
-            Éducation {formatEducationType(child.educationType)}
-          </span>
+          <span className="font-medium">Éducation:</span>
+          {hasEducation ? (
+            <Badge 
+              className={`
+                ${child.educationType === 'military' ? 'bg-red-100 text-red-800 hover:bg-red-200' : 
+                 child.educationType === 'rhetoric' ? 'bg-blue-100 text-blue-800 hover:bg-blue-200' :
+                 child.educationType === 'religious' ? 'bg-amber-100 text-amber-800 hover:bg-amber-200' :
+                 child.educationType === 'academic' ? 'bg-green-100 text-green-800 hover:bg-green-200' :
+                 'bg-gray-100 text-gray-800 hover:bg-gray-200'}
+              `}
+            >
+              {getEducationTypeDescription(child.educationType)}
+            </Badge>
+          ) : (
+            <Badge variant="outline" className="text-muted-foreground">
+              Non éduqué
+            </Badge>
+          )}
+          
+          {hasInvalidEducation && (
+            <div className="flex items-center text-red-500 text-xs">
+              <InfoCircle className="h-3.5 w-3.5 mr-1" />
+              <span>Incompatible avec le genre</span>
+            </div>
+          )}
         </div>
         
-        <Badge variant="outline" className="text-xs">
-          {child.preceptorId ? "Avec précepteur" : "Auto-formation"}
-        </Badge>
+        {hasEducation && (
+          <span className="text-sm text-muted-foreground">
+            {formatProgressText(child.progress)}
+          </span>
+        )}
       </div>
       
-      <div className="space-y-1">
-        <div className="flex justify-between items-center text-xs">
-          <span>Progression</span>
-          <span>{child.progress}%</span>
+      {hasEducation && (
+        <div className="space-y-1">
+          <div className="flex justify-between text-xs">
+            <span>Progression</span>
+            <span>{child.progress}%</span>
+          </div>
+          <Progress value={child.progress} className="h-2" />
         </div>
-        <Progress value={child.progress} className="h-2" />
-      </div>
+      )}
     </div>
   );
 };

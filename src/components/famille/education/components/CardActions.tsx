@@ -2,14 +2,13 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { Settings2, BookOpen, Ban } from 'lucide-react';
+import { Eye, UserPlus, BookOpen } from 'lucide-react';
 import { useEducation } from '../context/EducationContext';
-import { EducationType, Gender } from '../types/educationTypes';
 
 interface CardActionsProps {
-  educationType: EducationType;
+  educationType: string;
   childId: string;
-  childGender: Gender;
+  childGender: string;
   childAge: number;
 }
 
@@ -20,37 +19,41 @@ export const CardActions: React.FC<CardActionsProps> = ({
   childAge
 }) => {
   const navigate = useNavigate();
-  const { updateChildEducation } = useEducation();
+  const { startEducation } = useEducation();
   
-  const handleChangeEducationType = () => {
+  const handleViewDetails = () => {
     navigate(`/famille/education/child/${childId}`);
   };
   
-  const handleCancelEducation = () => {
-    updateChildEducation(childId, 'none');
+  const handleStartEducation = () => {
+    if (educationType === 'none') {
+      navigate(`/famille/education/child/${childId}?tab=new`);
+    } else {
+      startEducation(childId);
+    }
   };
   
   return (
-    <div className="flex flex-wrap justify-end gap-2 mt-4">
-      <Button 
-        size="sm" 
-        variant="outline"
-        onClick={handleChangeEducationType}
-        className="flex items-center gap-1 text-xs"
-      >
-        <Settings2 className="h-3 w-3" />
-        <span>Configurer</span>
+    <div className="flex justify-end gap-2 mt-4 border-t pt-4">
+      <Button variant="outline" size="sm" onClick={handleViewDetails}>
+        <Eye className="h-4 w-4 mr-1" />
+        Détails
       </Button>
       
-      {educationType !== 'none' && (
-        <Button 
-          size="sm" 
-          variant="outline"
-          onClick={handleCancelEducation}
-          className="flex items-center gap-1 text-xs text-red-600 hover:text-red-700 border-red-200 hover:border-red-300"
+      {educationType === 'none' ? (
+        <Button size="sm" onClick={handleStartEducation}>
+          <UserPlus className="h-4 w-4 mr-1" />
+          Configurer
+        </Button>
+      ) : (
+        <Button
+          size="sm"
+          variant="secondary"
+          onClick={handleStartEducation}
+          disabled={educationType === 'none'}
         >
-          <Ban className="h-3 w-3" />
-          <span>Annuler</span>
+          <BookOpen className="h-4 w-4 mr-1" />
+          Étudier
         </Button>
       )}
     </div>
