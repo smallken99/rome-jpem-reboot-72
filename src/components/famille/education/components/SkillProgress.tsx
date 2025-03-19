@@ -1,34 +1,27 @@
 
 import React from 'react';
-import { Progress } from "@/components/ui/progress";
+import { Progress } from '@/components/ui/progress';
 
-export interface SkillProgressProps {
-  label?: string;
+interface SkillProgressProps {
+  label: string;
   value: number;
-  max?: number;
-  icon?: React.ReactNode;
-  skill?: string;
+  maxValue?: number;
 }
 
 export const SkillProgress: React.FC<SkillProgressProps> = ({
   label,
   value,
-  max = 10,
-  icon,
-  skill
+  maxValue = 10
 }) => {
-  const percentage = (value / max) * 100;
+  const progressPercentage = (value / maxValue) * 100;
   
   return (
     <div className="space-y-1">
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          {icon && <span>{icon}</span>}
-          <span className="text-sm font-medium capitalize">{label || skill}</span>
-        </div>
-        <span className="text-sm text-muted-foreground">{value}/{max}</span>
+      <div className="flex justify-between items-center text-sm">
+        <span className="capitalize">{label}</span>
+        <span>{value}/{maxValue}</span>
       </div>
-      <Progress value={percentage} className="h-2" />
+      <Progress value={progressPercentage} className="h-2" />
     </div>
   );
 };

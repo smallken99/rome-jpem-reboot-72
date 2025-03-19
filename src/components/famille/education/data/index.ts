@@ -1,23 +1,22 @@
 
-export * from './educationPaths';
-export * from './paths/militaryPath';
-export * from './paths/religiousPath';
-export * from './paths/rhetoricPath';
+import { militaryPath } from './paths/militaryPath';
+import { religiousPath } from './paths/religiousPath';
+import { rhetoricPath } from './paths/rhetoricPath';
+import { EducationPath } from '../types/educationTypes';
 
-// Function to get an education path by type for backwards compatibility
-export const getEducationPath = (type: string) => {
-  const { educationPaths } = require('./educationPaths');
-  return educationPaths.find(path => path.id === type);
+export const educationPaths = [militaryPath, religiousPath, rhetoricPath];
+
+export const getEducationPath = (type: string): EducationPath | undefined => {
+  switch (type) {
+    case 'military':
+      return militaryPath;
+    case 'religious':
+      return religiousPath;
+    case 'rhetoric':
+      return rhetoricPath;
+    default:
+      return undefined;
+  }
 };
 
-// Re-export educationPaths directly
-export { educationPaths } from './educationPaths';
-
-// Function to get education types for backwards compatibility
-export const getEducationTypes = () => {
-  return [
-    { value: 'military', label: 'Militaire' },
-    { value: 'religious', label: 'Piété' },
-    { value: 'rhetoric', label: 'Éloquence' }
-  ];
-};
+export { militaryPath, religiousPath, rhetoricPath };

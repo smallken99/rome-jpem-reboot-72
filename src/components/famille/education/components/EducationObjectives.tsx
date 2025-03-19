@@ -1,87 +1,60 @@
 
 import React from 'react';
-import { Card } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Award, Target, TrendingUp } from 'lucide-react';
+import { CheckCircle2 } from 'lucide-react';
+import { Card, CardContent } from '@/components/ui/card';
+import { militaryPath, religiousPath, rhetoricPath } from '../data/paths';
 import { EducationObjectivesProps } from '../types/educationTypes';
-import { educationPaths } from '../data';
 
-export const EducationObjectives: React.FC<EducationObjectivesProps> = ({ 
-  educationType,
-  specialties = [],
-  pathType
-}) => {
-  // Use either educationType or pathType based on which is provided
-  const type = pathType || educationType;
+export const EducationObjectives: React.FC<EducationObjectivesProps> = ({ educationType }) => {
+  const getEducationPath = () => {
+    switch (educationType) {
+      case 'military': return militaryPath;
+      case 'religious': return religiousPath;
+      case 'rhetoric': return rhetoricPath;
+      default: return null;
+    }
+  };
   
-  if (!type || type === 'none') {
-    return (
-      <div className="text-muted-foreground text-center py-4">
-        Aucun objectif d'éducation défini
-      </div>
-    );
-  }
-  
-  // Find matching education path
-  const path = educationPaths.find(p => 
-    p.id === type || 
-    p.id === type.toLowerCase() || 
-    (p.type && p.type === type)
-  );
+  const path = getEducationPath();
   
   if (!path) {
-    return (
-      <div className="text-muted-foreground text-center py-4">
-        Type d'éducation non reconnu: {type}
-      </div>
-    );
+    return null;
   }
   
-  const outcomes = typeof path.outcomes === 'object' && !Array.isArray(path.outcomes) 
-    ? path.outcomes.skills 
-    : Array.isArray(path.outcomes) 
-      ? path.outcomes 
-      : [];
-  
   return (
-    <Card className="p-4 space-y-4">
-      <div className="flex items-start gap-3">
-        <Award className="h-5 w-5 text-amber-500 mt-0.5" />
-        <div>
-          <h4 className="font-medium">Objectifs de l'éducation {path.name}</h4>
-          <p className="text-sm text-muted-foreground">{path.description}</p>
-        </div>
-      </div>
-      
-      <div className="space-y-3">
-        <div className="flex items-start gap-3">
-          <Target className="h-4 w-4 text-primary mt-0.5" />
-          <div>
-            <p className="text-sm font-medium">Compétences visées:</p>
-            <div className="flex flex-wrap gap-1 mt-1">
-              {outcomes.map((skill, index) => (
-                <Badge key={index} variant="outline" className="capitalize">
-                  {skill}
-                </Badge>
-              ))}
-            </div>
-          </div>
-        </div>
+    <Card>
+      <CardContent className="p-4">
+        <h4 className="text-sm font-medium mb-2">Objectifs de l'éducation</h4>
+        <ul className="space-y-2">
+          {path.benefits.map((benefit, index) => (
+            <li key={index} className="flex items-start gap-2 text-xs">
+              <CheckCircle2 className="h-3.5 w-3.5 text-green-600 mt-0.5 flex-shrink-0" />
+              <span>{benefit}</span>
+            </li>
+          ))}
+        </ul>
         
-        {path.benefits && (
-          <div className="flex items-start gap-3">
-            <TrendingUp className="h-4 w-4 text-emerald-500 mt-0.5" />
+        <div className="mt-3 pt-3 border-t text-xs">
+          <div className="grid grid-cols-2 gap-x-4 gap-y-2">
             <div>
-              <p className="text-sm font-medium">Bénéfices:</p>
-              <ul className="text-sm text-muted-foreground list-disc list-inside mt-1">
-                {path.benefits.map((benefit, index) => (
-                  <li key={index}>{benefit}</li>
-                ))}
-              </ul>
+              <span className="text-muted-foreground">Durée:</span>
+              <p>{path.duration} ans</p>
+            </div>
+            <div>
+              <span className="text-muted-foreground">Coût:</span>
+              <p>{path.cost} as</p>
+            </div>
+            <div>
+              <span className="text-muted-foreground">Âge minimum:</span>
+              <p>{path.minAge} ans</p>
+            </div>
+            <div>
+              <span className="text-muted-foreground">Statistique liée:</span>
+              <p className="capitalize">{path.relatedStat}</p>
             </div>
           </div>
-        )}
-      </div>
+        </div>
+      </CardContent>
     </Card>
   );
 };

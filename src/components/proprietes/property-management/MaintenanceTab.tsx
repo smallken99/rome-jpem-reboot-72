@@ -1,200 +1,130 @@
 
 import React, { useState } from 'react';
-import { useBuildingManagement } from '../hooks/useBuildingManagement';
-import { useBuildingMaintenance } from '../hooks/building/useBuildingMaintenance';
-import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from '@/components/ui/table';
+import { Slider } from '@/components/ui/slider';
+import { useBuildings } from '../hooks/useBuildings';
+import { OwnedBuilding } from '../types/buildingTypes';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@/components/ui/select';
-import { Progress } from '@/components/ui/progress';
 import { Badge } from '@/components/ui/badge';
-import { BuildingMaintenanceDialog } from './modals/BuildingMaintenanceDialog';
-import { formatCurrency } from '@/utils/currencyUtils';
-import { AlertTriangle, Wrench, Search, Filter, Building, Archive, House, Landmark } from 'lucide-react';
+import { AlertTriangle, Wrench, Info } from 'lucide-react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 
-export const MaintenanceTab: React.FC = () => {
-  const { ownedBuildings, balance } = useBuildingManagement();
-  const { needsMaintenance } = useBuildingMaintenance();
+export const MaintenanceTab = ({ buildingId }: { buildingId: string }) => {
+  const { buildings, urbanBuildings, ruralBuildings, religiousBuildings, updateBuilding } = useBuildings();
+  const building = buildings.find(b => b.id === buildingId);
   
-  const [searchTerm, setSearchTerm] = useState('');
-  const [typeFilter, setTypeFilter] = useState('all');
-  const [selectedBuilding, setSelectedBuilding] = useState<number | string | null>(null);
-  const [isMaintenanceDialogOpen, setIsMaintenanceDialogOpen] = useState(false);
+  const [maintenanceLevel, setMaintenanceLevel] = useState(building?.maintenance?.current || 50);
+  const [hasChanged, setHasChanged] = useState(false);
   
-  // Sort buildings by condition (worst first)
-  const sortedBuildings = [...ownedBuildings].sort((a, b) => a.condition - b.condition);
+  if (!building) {
+    return (
+      <Alert variant="destructive">
+        <AlertTriangle className="h-4 w-4" />
+        <AlertTitle>Erreur</AlertTitle>
+        <AlertDescription>
+          Bâtiment non trouvé
+        </AlertDescription>
+      </Alert>
+    );
+  }
   
-  // Filter buildings
-  const filteredBuildings = sortedBuildings.filter(building => {
-    const matchesSearch = building.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                          building.location.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesType = typeFilter === 'all' || building.buildingType === typeFilter;
-    
-    return matchesSearch && matchesType;
-  });
-  
-  const getBuildingIcon = (type: string) => {
-    switch (type) {
-      case 'urban': return <House className="h-4 w-4" />;
-      case 'rural': return <Building className="h-4 w-4" />;
-      case 'religious': return <Landmark className="h-4 w-4" />;
-      case 'public': return <Archive className="h-4 w-4" />;
-      default: return <Building className="h-4 w-4" />;
-    }
+  const handleMaintenanceChange = (value: number[]) => {
+    setMaintenanceLevel(value[0]);
+    setHasChanged(true);
   };
   
-  const getConditionColor = (condition: number) => {
-    if (condition >= 80) return "bg-green-600";
-    if (condition >= 60) return "bg-yellow-600";
-    if (condition >= 40) return "bg-orange-600";
-    return "bg-red-600";
+  const getMaintenanceCost = (level: number) => {
+    const baseCost = building.maintenance?.baseCost || 100;
+    return Math.round(baseCost * (level / 50));
   };
   
-  const getConditionText = (condition: number) => {
-    if (condition >= 90) return "Excellent";
-    if (condition >= 75) return "Très bon";
-    if (condition >= 60) return "Bon";
-    if (condition >= 40) return "Moyen";
-    if (condition >= 20) return "Mauvais";
-    return "Critique";
+  const getMaintenanceStatus = (level: number) => {
+    if (level < 20) return { label: 'Négligé', color: 'destructive' };
+    if (level < 40) return { label: 'Détérioré', color: 'warning' };
+    if (level < 60) return { label: 'Correct', color: 'secondary' };
+    if (level < 80) return { label: 'Bon', color: 'default' };
+    return { label: 'Excellent', color: 'success' };
   };
   
-  const handleMaintenanceClick = (buildingId: number | string) => {
-    setSelectedBuilding(buildingId);
-    setIsMaintenanceDialogOpen(true);
+  const handleSave = () => {
+    updateBuilding(buildingId, {
+      maintenance: {
+        ...building.maintenance,
+        current: maintenanceLevel
+      }
+    });
+    setHasChanged(false);
   };
   
-  const selectedBuildingData = ownedBuildings.find(b => b.id === selectedBuilding) || null;
+  const status = getMaintenanceStatus(maintenanceLevel);
+  const currentCost = getMaintenanceCost(maintenanceLevel);
+  const previousCost = getMaintenanceCost(building.maintenance?.current || 50);
+  const costDifference = currentCost - previousCost;
   
   return (
-    <div className="space-y-4">
-      <div className="flex flex-col md:flex-row justify-between gap-4 mb-6">
-        <div className="flex-1 flex flex-col sm:flex-row gap-2">
-          <div className="relative flex-1">
-            <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
-            <Input
-              placeholder="Rechercher..."
-              className="pl-8"
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-            />
+    <div className="space-y-6">
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Wrench className="h-5 w-5" />
+            <span>Maintenance du bâtiment</span>
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="flex items-center justify-between">
+            <span className="text-sm font-medium">Niveau de maintenance actuel</span>
+            <Badge variant={status.color as any}>{status.label}</Badge>
           </div>
           
-          <Select value={typeFilter} onValueChange={setTypeFilter}>
-            <SelectTrigger className="w-52 gap-1">
-              <Filter className="h-4 w-4" />
-              <SelectValue placeholder="Type de propriété" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">Toutes les propriétés</SelectItem>
-              <SelectItem value="urban">Urbaines</SelectItem>
-              <SelectItem value="rural">Rurales</SelectItem>
-              <SelectItem value="religious">Religieuses</SelectItem>
-              <SelectItem value="public">Publiques</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
-        
-        <Button className="gap-2" onClick={() => {
-          // Trouver le premier bâtiment qui a besoin de maintenance
-          const needsMaintenanceBuilding = ownedBuildings.find(b => needsMaintenance(b.id));
-          if (needsMaintenanceBuilding) {
-            handleMaintenanceClick(needsMaintenanceBuilding.id);
-          }
-        }}>
-          <Wrench className="h-4 w-4" />
-          <span>Maintenance prioritaire</span>
-        </Button>
-      </div>
-      
-      {filteredBuildings.length > 0 ? (
-        <div className="rounded-md border">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Propriété</TableHead>
-                <TableHead>Type</TableHead>
-                <TableHead>Emplacement</TableHead>
-                <TableHead>État</TableHead>
-                <TableHead>Maintenance</TableHead>
-                <TableHead>Coût</TableHead>
-                <TableHead>Dernière maintenance</TableHead>
-                <TableHead className="text-right">Actions</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {filteredBuildings.map(building => (
-                <TableRow key={building.id}>
-                  <TableCell className="font-medium">{building.name}</TableCell>
-                  <TableCell>
-                    <div className="flex items-center gap-1">
-                      {getBuildingIcon(building.buildingType)}
-                      <span>
-                        {building.buildingType === 'urban' ? 'Urbain' :
-                         building.buildingType === 'rural' ? 'Rural' :
-                         building.buildingType === 'religious' ? 'Religieux' : 'Public'}
-                      </span>
-                    </div>
-                  </TableCell>
-                  <TableCell>{building.location}</TableCell>
-                  <TableCell>
-                    <div className="space-y-1">
-                      <div className="flex items-center gap-2">
-                        <span className="text-sm">{getConditionText(building.condition)}</span>
-                        {needsMaintenance(building.id) && (
-                          <Badge variant="destructive" className="h-5 flex items-center gap-1">
-                            <AlertTriangle className="h-3 w-3" />
-                            <span>Maintenance requise</span>
-                          </Badge>
-                        )}
-                      </div>
-                      <Progress 
-                        value={building.condition} 
-                        className="h-2 w-24" 
-                        indicatorClassName={getConditionColor(building.condition)}
-                      />
-                    </div>
-                  </TableCell>
-                  <TableCell>
-                    <Badge variant={building.maintenanceEnabled ? "default" : "outline"}>
-                      {building.maintenanceEnabled ? "Activée" : "Désactivée"}
-                    </Badge>
-                  </TableCell>
-                  <TableCell>{formatCurrency(building.maintenanceCost)}/an</TableCell>
-                  <TableCell>
-                    {building.lastMaintenance 
-                      ? new Date(building.lastMaintenance).toLocaleDateString('fr-FR')
-                      : "Jamais"}
-                  </TableCell>
-                  <TableCell className="text-right">
-                    <Button 
-                      variant={needsMaintenance(building.id) ? "default" : "outline"}
-                      size="sm"
-                      className="gap-1"
-                      onClick={() => handleMaintenanceClick(building.id)}
-                    >
-                      <Wrench className="h-3.5 w-3.5" />
-                      <span>Entretenir</span>
-                    </Button>
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </div>
-      ) : (
-        <div className="flex items-center justify-center p-8 text-muted-foreground">
-          Aucune propriété ne correspond aux critères de recherche.
-        </div>
-      )}
-      
-      {/* Maintenance Dialog */}
-      <BuildingMaintenanceDialog 
-        building={selectedBuildingData}
-        isOpen={isMaintenanceDialogOpen}
-        onClose={() => setIsMaintenanceDialogOpen(false)}
-        balance={balance}
-      />
+          <Slider
+            defaultValue={[maintenanceLevel]}
+            max={100}
+            step={5}
+            onValueChange={handleMaintenanceChange}
+            className="my-6"
+          />
+          
+          <div className="flex justify-between text-xs text-muted-foreground">
+            <span>Négligé</span>
+            <span>Correct</span>
+            <span>Excellent</span>
+          </div>
+          
+          <div className="mt-8 p-4 bg-slate-50 rounded-md">
+            <div className="flex items-center justify-between">
+              <span className="text-sm font-medium">Coût de maintenance</span>
+              <span className="font-semibold">{currentCost} as/an</span>
+            </div>
+            
+            {hasChanged && (
+              <div className="flex items-center gap-2 mt-2 text-xs">
+                <span>
+                  {costDifference > 0 
+                    ? `Augmentation de ${costDifference} as/an` 
+                    : costDifference < 0 
+                      ? `Réduction de ${Math.abs(costDifference)} as/an`
+                      : 'Coût inchangé'}
+                </span>
+              </div>
+            )}
+          </div>
+          
+          <Alert variant="info" className="mt-4">
+            <Info className="h-4 w-4" />
+            <AlertDescription>
+              Une maintenance insuffisante peut entraîner une détérioration du bâtiment et une baisse de sa valeur et de ses revenus.
+            </AlertDescription>
+          </Alert>
+          
+          {hasChanged && (
+            <div className="flex justify-end mt-6">
+              <Button onClick={handleSave}>
+                Enregistrer les modifications
+              </Button>
+            </div>
+          )}
+        </CardContent>
+      </Card>
     </div>
   );
 };

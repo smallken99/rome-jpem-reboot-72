@@ -1,86 +1,83 @@
 
 import React from 'react';
-import { Child } from '../types/educationTypes';
 import { Progress } from '@/components/ui/progress';
-import { AlertTriangle, BookOpen, GraduationCap, Swords, ScrollText } from 'lucide-react';
+import { InfoCircle } from '@/components/ui/InfoIcon';
+import { Child } from '../types/educationTypes';
+import { Badge } from '@/components/ui/badge';
+import { BookOpen, AlertTriangle } from 'lucide-react';
 
 interface EducationStatusProps {
   child: Child;
   hasEducation: boolean;
-  hasInvalidEducation: boolean;
+  hasInvalidEducation?: boolean;
 }
 
-export const EducationStatus: React.FC<EducationStatusProps> = ({ 
-  child, 
+export const EducationStatus: React.FC<EducationStatusProps> = ({
+  child,
   hasEducation,
-  hasInvalidEducation 
+  hasInvalidEducation = false
 }) => {
-  // Map education type to icon and color
-  const getEducationIcon = () => {
-    switch (child.educationType) {
-      case 'military':
-        return <Swords className="h-5 w-5 mr-2 text-rome-red" />;
-      case 'rhetoric':
-        return <ScrollText className="h-5 w-5 mr-2 text-purple-600" />;
-      case 'academic':
-        return <BookOpen className="h-5 w-5 mr-2 text-blue-600" />;
-      default:
-        return <GraduationCap className="h-5 w-5 mr-2 text-gray-500" />;
+  const formatEducationType = (type: string) => {
+    switch (type) {
+      case 'military': return 'Militaire';
+      case 'rhetoric': return 'Rhétorique';
+      case 'academic': return 'Académique';
+      case 'religious': return 'Religieuse';
+      default: return 'Non définie';
     }
   };
-  
-  const getEducationName = () => {
-    switch (child.educationType) {
-      case 'military':
-        return 'Militaire';
-      case 'rhetoric':
-        return 'Rhétorique';
-      case 'academic':
-        return 'Académique';
-      default:
-        return 'Aucune';
-    }
-  };
-  
-  if (hasInvalidEducation) {
+
+  if (!hasEducation) {
     return (
-      <div className="rounded-md border border-red-200 bg-red-50 p-3 mb-4">
-        <div className="flex items-center text-red-700">
-          <AlertTriangle className="h-5 w-5 mr-2" />
-          <p className="text-sm">
-            L'éducation militaire n'est pas adaptée pour une fille romaine. 
-            Veuillez choisir une éducation plus appropriée.
+      <div className="flex items-start gap-2 mb-4">
+        <InfoCircle className="h-5 w-5 text-amber-500 mt-0.5" />
+        <div>
+          <p className="text-sm text-muted-foreground">
+            Aucune éducation n'est assignée à cet enfant.
           </p>
         </div>
       </div>
     );
   }
-  
+
+  if (hasInvalidEducation) {
+    return (
+      <div className="flex items-start gap-2 mb-4">
+        <AlertTriangle className="h-5 w-5 text-red-500 mt-0.5" />
+        <div>
+          <p className="text-sm font-medium text-red-600">
+            L'éducation militaire n'est pas adaptée pour une fille romaine
+          </p>
+          <p className="text-xs text-muted-foreground mt-1">
+            Choisissez un autre type d'éducation plus approprié
+          </p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="mb-4">
-      <div className="flex items-center mb-2">
-        {hasEducation ? (
-          <>
-            {getEducationIcon()}
-            <h3 className="font-medium">Éducation: {getEducationName()}</h3>
-          </>
-        ) : (
-          <>
-            <GraduationCap className="h-5 w-5 mr-2 text-gray-500" />
-            <h3 className="font-medium text-muted-foreground">Aucune éducation assignée</h3>
-          </>
-        )}
+      <div className="flex items-center justify-between mb-2">
+        <div className="flex items-center gap-2">
+          <BookOpen className="h-4 w-4 text-blue-600" />
+          <span className="text-sm font-medium">
+            Éducation {formatEducationType(child.educationType)}
+          </span>
+        </div>
+        
+        <Badge variant="outline" className="text-xs">
+          {child.preceptorId ? "Avec précepteur" : "Auto-formation"}
+        </Badge>
       </div>
       
-      {hasEducation && (
-        <div>
-          <div className="flex justify-between text-sm mb-1">
-            <span>Progrès</span>
-            <span>{child.progress}%</span>
-          </div>
-          <Progress value={child.progress} className="h-2" />
+      <div className="space-y-1">
+        <div className="flex justify-between items-center text-xs">
+          <span>Progression</span>
+          <span>{child.progress}%</span>
         </div>
-      )}
+        <Progress value={child.progress} className="h-2" />
+      </div>
     </div>
   );
 };
