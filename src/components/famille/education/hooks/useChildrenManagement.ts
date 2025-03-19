@@ -1,6 +1,6 @@
 
 import { useState, useEffect } from 'react';
-import { Child } from '../types/educationTypes';
+import { Child, EducationType } from '../types/educationTypes';
 import { Character } from '@/types/character';
 
 export const useChildrenManagement = (characters: Character[] = []) => {
@@ -18,10 +18,13 @@ export const useChildrenManagement = (characters: Character[] = []) => {
         age: char.age,
         gender: char.gender,
         status: 'child',
-        educationType: char.education?.type || 'none',
-        progress: char.education?.progress || 0,
+        educationType: (char.education?.type || 'none') as EducationType,
+        progress: char.education?.completed ? 100 : (char.currentEducation?.progress || 0),
+        preceptorId: char.currentEducation?.mentorId,
+        specialties: char.education?.specialties || [],
+        traits: [],
         currentEducation: char.currentEducation ? {
-          type: char.currentEducation.type || char.education?.type || 'none',
+          type: (char.currentEducation.type || char.education?.type || 'none') as EducationType,
           mentor: char.currentEducation.mentor || char.education?.mentor || null,
           progress: char.currentEducation.progress || 0,
           skills: char.currentEducation.skills || char.education?.specialties || [],
@@ -30,7 +33,7 @@ export const useChildrenManagement = (characters: Character[] = []) => {
           statBonus: char.currentEducation.statBonus || 0,
           mentorId: char.currentEducation.mentorId || null
         } : {
-          type: 'none',
+          type: 'none' as EducationType,
           mentor: null,
           progress: 0,
           skills: [],

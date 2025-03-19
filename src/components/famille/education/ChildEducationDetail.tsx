@@ -24,13 +24,13 @@ export const ChildEducationDetail: React.FC = () => {
   // Access context functions
   const { 
     children, 
-    getChildById, 
+    getChild, 
     startEducation, 
     advanceEducationYear,
     completeEducation,
     cancelEducation,
     isEducating,
-    getEducationPathById,
+    findEducationPathById,
     getAllEducationPaths
   } = useEducation();
   
@@ -48,7 +48,7 @@ export const ChildEducationDetail: React.FC = () => {
   const [hireDialogOpen, setHireDialogOpen] = useState(false);
   const [fireDialogOpen, setFireDialogOpen] = useState(false);
   
-  const child = childId ? getChildById(childId) : undefined;
+  const child = childId ? getChild(childId) : undefined;
   
   useEffect(() => {
     if (!child) {
@@ -61,7 +61,7 @@ export const ChildEducationDetail: React.FC = () => {
   }
   
   const hasEducation = !!child.educationType;
-  const educationPath = hasEducation ? getEducationPathById(child.educationType) : null;
+  const educationPath = hasEducation ? findEducationPathById(child.educationType) : null;
   const preceptor = child.preceptorId ? getPreceptorById(child.preceptorId) : null;
   
   // Check if education is valid for gender
@@ -197,7 +197,7 @@ export const ChildEducationDetail: React.FC = () => {
                 <div>
                   <p className="text-sm text-slate-500">Spécialité</p>
                   <p className="font-medium">
-                    {educationPath.specialties?.find?.(s => s.id === child.specialty)?.name || 'Inconnue'}
+                    {educationPath.specialtyDetails?.find(s => s.id === child.specialties?.[0])?.name || 'Inconnue'}
                   </p>
                 </div>
                 

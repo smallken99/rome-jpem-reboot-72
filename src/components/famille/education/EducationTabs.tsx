@@ -2,10 +2,10 @@
 import React, { useState, useEffect } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { ChildrenTab } from './tabs/ChildrenTab';
-import PreceptorsTab from './tabs/PreceptorsTab';
 import { HistoryTab } from './tabs/HistoryTab';
 import { useEducation } from './context/EducationContext';
 import { useNavigate, useLocation } from 'react-router-dom';
+import PreceptorsTab from './tabs/PreceptorsTab';
 
 export const EducationTabs: React.FC = () => {
   const [activeTab, setActiveTab] = useState('children');

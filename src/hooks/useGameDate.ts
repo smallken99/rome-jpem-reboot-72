@@ -110,6 +110,12 @@ export const useGameDate = (initialDate?: GameDate) => {
     return new Date(2000 + gameDate.year - 753, month, 15);
   };
 
+  // Convertir une chaîne en Date
+  const stringToDate = (dateString: string): Date => {
+    if (!dateString) return new Date();
+    return new Date(dateString);
+  };
+
   // Cette fonction renvoie maintenant une chaîne
   const gameToStringOrDate = (gameDate: GameDate): string => {
     return `${gameDate.year}-${gameDate.season}`;
@@ -129,6 +135,7 @@ export const useGameDate = (initialDate?: GameDate) => {
     gameDateToJs: gameDateToDate,
     gameDateToString: gameToStringOrDate,
     gameDateToCompatibleString,
-    gameDateToDate
+    gameDateToDate,
+    stringToDate
   };
 };

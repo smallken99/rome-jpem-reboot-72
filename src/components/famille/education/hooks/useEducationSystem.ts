@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { Child, EducationPath, Preceptor, EducationPathType } from '../types/educationTypes';
 import { educationPaths as educationPathsData } from '../data/educationPaths';
@@ -13,11 +14,13 @@ export const useEducationSystem = () => {
       {
         id: `preceptor-${Date.now()}`,
         name: `Précepteur de ${type}`,
-        specialties: [type],
-        expertise: minQuality ? minQuality + 10 : 60,
-        cost: 2000 + (minQuality || 0) * 50,
-        reputation: 75, // Changed from string to number
+        specialty: type as EducationPathType,
+        price: 2000 + (minQuality || 0) * 50,
+        quality: minQuality ? minQuality + 10 : 60,
+        experience: 5,
+        assigned: false,
         available: true,
+        specialties: [type],
         speciality: type
       }
     ];
@@ -29,11 +32,11 @@ export const useEducationSystem = () => {
     if (!path) return { eligible: false, reason: 'Chemin d\'éducation non trouvé' };
 
     // Vérifier l'âge
-    if (child.age < path.minAge) {
-      return { eligible: false, reason: `L'enfant est trop jeune. Âge minimum: ${path.minAge}` };
+    if (child.age < path.minimumAge) {
+      return { eligible: false, reason: `L'enfant est trop jeune. Âge minimum: ${path.minimumAge}` };
     }
-    if (child.age > path.maxAge) {
-      return { eligible: false, reason: `L'enfant est trop âgé. Âge maximum: ${path.maxAge}` };
+    if (child.age > path.maximumAge) {
+      return { eligible: false, reason: `L'enfant est trop âgé. Âge maximum: ${path.maximumAge}` };
     }
 
     // Vérifier les prérequis spécifiques si nécessaire
@@ -67,7 +70,7 @@ export const useEducationSystem = () => {
     let preceptorCost = 0;
     if (preceptorId) {
       const preceptor = availablePreceptors.find(p => p.id === preceptorId);
-      preceptorCost = preceptor ? preceptor.cost : 0;
+      preceptorCost = preceptor ? preceptor.price : 0;
     }
     
     return baseCost + preceptorCost;

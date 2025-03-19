@@ -1,10 +1,11 @@
 
 import React, { useState } from 'react';
-import { usePreceptorsManagement } from '../hooks/usePreceptorsManagement';
+import { useEducation } from '../context/EducationContext';
 import { Button } from '@/components/ui/button';
 import { Info } from 'lucide-react';
 import { HirePreceptorDialog } from '../dialogs/HirePreceptorDialog';
 import { FirePreceptorDialog } from '../dialogs/FirePreceptorDialog';
+import { usePreceptorsManagement } from '../hooks/usePreceptorsManagement';
 
 const PreceptorsTab = () => {
   const [selectedPreceptorId, setSelectedPreceptorId] = useState('');
@@ -13,15 +14,17 @@ const PreceptorsTab = () => {
   const [fireDialogOpen, setFireDialogOpen] = useState(false);
   const [activeTab, setActiveTab] = useState('rhetoric');
 
+  const { preceptors } = useEducation();
   const {
-    allPreceptors,
     availablePreceptors,
     hirePreceptor,
     firePreceptor,
   } = usePreceptorsManagement();
 
   const getFilteredPreceptors = () => {
-    const preceptorsToUse = showAvailableOnly ? availablePreceptors : allPreceptors;
+    const preceptorsToUse = showAvailableOnly ? 
+      preceptors.filter(p => p.available !== false) : 
+      preceptors;
     
     if (activeTab === 'all') {
       return preceptorsToUse;
@@ -117,7 +120,7 @@ const PreceptorsTab = () => {
             <p className="text-sm text-gray-600">Qualité: {preceptor.quality}/5</p>
             <p className="text-sm text-gray-600">Prix: {preceptor.price || 0} as/an</p>
             <div className="flex justify-end mt-4 space-x-2">
-              {preceptor.available ? (
+              {preceptor.available !== false ? (
                 <Button 
                   size="sm" 
                   onClick={() => openHireDialog(preceptor.id)}

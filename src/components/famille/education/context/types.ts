@@ -8,20 +8,23 @@ export interface EducationContextType {
   hiredPreceptors: Preceptor[];
   selectedChildId: string | null;
   isLoading?: boolean;
-  isEducating: boolean;
+  isEducating: {[childId: string]: boolean} | string[];
   educatingChildren: {[childId: string]: boolean} | string[];
   setSelectedChildId: (id: string | null) => void;
   getChild: (id: string) => Child | undefined;
-  startEducation: (childId: string, type: string, mentorId: string, specialties: string[]) => void;
+  startEducation: (childId: string, type: string, mentorId?: string, specialties?: string[]) => void;
   advanceEducation: (childId: string) => void;
   advanceEducationYear: (childId: string) => void;
   completeEducation: (childId: string) => void;
+  cancelEducation: (childId: string) => void;
   hirePreceptor: (preceptorId: string, childId?: string) => void;
   firePreceptor: (preceptorId: string) => void;
   assignPreceptorToChild: (preceptorId: string, childId: string) => void;
   updateChildName: (childId: string, newName: string) => void;
   loadPreceptorsByType: (type: string) => Preceptor[];
   refreshPreceptors: () => void;
+  findEducationPathById: (pathType: string) => any;
+  getAllEducationPaths: () => any[];
 }
 
 export interface EducationProviderProps {

@@ -12,7 +12,26 @@ export const academicPath: EducationPath = {
   duration: 6,
   mainStatBonus: 'intelligence',
   statBonus: 40,
-  specialties: [
+  specialties: ['philosophy', 'mathematics', 'science', 'history'],
+  requiredAttributes: {
+    intelligence: 6
+  },
+  recommendedAttributes: {
+    intelligence: 8,
+    sagesse: 6
+  },
+  outcomes: {
+    skills: ['connaissance', 'analyse', 'observation', 'enseignement'],
+    bonuses: {
+      'intelligence': 3,
+      'sagesse': 2
+    }
+  },
+  suitableFor: {
+    gender: 'both',
+    status: ['patricien', 'plébéien']
+  },
+  specialtyDetails: [
     {
       id: 'philosophy',
       name: 'Philosophie',
@@ -41,23 +60,5 @@ export const academicPath: EducationPath = {
       skills: ['mémoire', 'analyse'],
       careers: ['Historien', 'Conseiller']
     }
-  ],
-  requiredAttributes: {
-    intelligence: 6
-  },
-  recommendedAttributes: {
-    intelligence: 8,
-    sagesse: 6
-  },
-  outcomes: {
-    skills: ['connaissance', 'analyse', 'observation', 'enseignement'],
-    bonuses: {
-      'intelligence': 3,
-      'sagesse': 2
-    }
-  },
-  suitableFor: {
-    gender: 'both',
-    status: ['patricien', 'plébéien']
-  }
+  ]
 };

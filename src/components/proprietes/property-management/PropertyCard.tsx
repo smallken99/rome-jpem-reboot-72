@@ -10,7 +10,16 @@ import { BuildingDescription as HookBuildingDescription } from '../hooks/buildin
 import { PropertyCardHeader } from './card/PropertyCardHeader';
 import { PropertyCardContent } from './card/PropertyCardContent';
 import { PropertyCardActions } from './card/PropertyCardActions';
-import { adaptBuildingDescription } from './card/buildingAdapter';
+
+// Create a merged type to handle both types of BuildingDescription
+interface AdaptedBuildingDescription {
+  cost?: number;
+  workers?: number;
+  slaves?: {
+    optimal?: number;
+  };
+  [key: string]: any;
+}
 
 interface PropertyCardProps {
   building: OwnedBuilding;
@@ -23,6 +32,20 @@ interface PropertyCardProps {
   totalAvailableSlaves: number;
   buildingValue: number;
 }
+
+// Helper function to adapt building description to a common format
+const adaptBuildingDescription = (details: DataBuildingDescription | HookBuildingDescription | null): AdaptedBuildingDescription | null => {
+  if (!details) return null;
+  
+  const adapted: AdaptedBuildingDescription = { ...details };
+  
+  // Add missing properties with default values if needed
+  if (!adapted.cost) adapted.cost = 0;
+  if (!adapted.workers) adapted.workers = 0;
+  if (!adapted.slaves) adapted.slaves = { optimal: 0 };
+  
+  return adapted;
+};
 
 export const PropertyCard: React.FC<PropertyCardProps> = ({
   building,
