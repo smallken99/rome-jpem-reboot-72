@@ -1,140 +1,149 @@
+
 import { useState, useCallback } from 'react';
-import { useMaitreJeu } from '../components/maitrejeu/context';
-import { useBatimentsPublics, PublicBuilding, ConstructionProject } from '@/components/republique/batiments/hooks/useBatimentsPublics';
-import { usePatrimoine } from '@/hooks/usePatrimoine';
-import { GameDate } from '@/utils/timeSystem';
-import { EconomieCategory } from '@/components/maitrejeu/types/economie';
+import { OwnedBuilding, BuildingPurchaseOptions } from '@/types/patrimoine';
+import { usePatrimoine } from './usePatrimoine';
+import { toast } from 'sonner';
+import { v4 as uuidv4 } from 'uuid';
 
 export const useBuildingManagement = () => {
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  
-  const { 
-    publicBuildings, 
-    constructionProjects, 
-    startConstructionProject, 
-    advanceConstruction, 
-    maintainBuilding 
-  } = useBatimentsPublics();
+  const [buildings, setBuildings] = useState<OwnedBuilding[]>([
+    {
+      id: 1,
+      buildingId: 'insula',
+      buildingType: 'urban',
+      name: 'Insula de la Via Sacra',
+      location: 'Rome - Via Sacra',
+      maintenanceEnabled: true,
+      maintenanceCost: 1200,
+      slaves: 3,
+      condition: 85,
+      purchaseDate: new Date(2023, 1, 15)
+    },
+    {
+      id: 2,
+      buildingId: 'domaine_vignoble',
+      buildingType: 'rural',
+      name: 'Domaine viticole de Campanie',
+      location: 'Campanie',
+      maintenanceEnabled: true,
+      maintenanceCost: 6000,
+      slaves: 25,
+      condition: 92,
+      purchaseDate: new Date(2022, 5, 10)
+    }
+  ]);
   
   const { balance, buildingPurchased, buildingSold } = usePatrimoine();
-  const { addEconomieRecord, economicFactors } = useMaitreJeu();
-  
-  const handleStartConstruction = useCallback((buildingData: any) => {
-    // Create a new construction project
-    const projectId = startConstructionProject({
-      name: buildingData.name,
-      buildingTypeId: buildingData.typeId,
-      location: buildingData.location,
-      estimatedCost: buildingData.cost,
-      duration: buildingData.constructionTime || 4,
-      expectedCompletionYear: economicFactors.currentYear + Math.ceil(buildingData.constructionTime / 4),
-      benefits: buildingData.benefits || [],
-      sponsors: [] // Adding the required sponsors property with an empty array
-    });
-    
-    // Record the initial payment in the economy system
-    if (projectId) {
-      const initialCost = Math.round(buildingData.cost * 0.3); // 30% upfront cost
-      
-      addEconomieRecord({
-        amount: -initialCost,
-        description: `Démarrage construction: ${buildingData.name}`,
-        category: 'Construction' as EconomieCategory,
-        type: 'expense',
-        date: new Date().toISOString(),
-        source: 'Trésor Public',
-        approved: true
-      });
-      
-      buildingPurchased(buildingData.name, initialCost);
+
+  const addBuilding = useCallback((building: OwnedBuilding) => {
+    setBuildings(prev => [...prev, building]);
+    return building.id;
+  }, []);
+
+  const removeBuilding = useCallback((id: string | number) => {
+    setBuildings(prev => prev.filter(b => b.id !== id));
+  }, []);
+
+  const purchaseBuilding = useCallback((options: BuildingPurchaseOptions): boolean => {
+    // Vérifier si les fonds sont suffisants
+    if (options.initialCost > balance) {
+      toast.error("Fonds insuffisants pour acheter cette propriété");
+      return false;
     }
     
-    return projectId;
-  }, [startConstructionProject, economicFactors, addEconomieRecord, buildingPurchased]);
-  
-  const handleAdvanceConstruction = useCallback((projectId: string, progressAmount: number) => {
-    const project = constructionProjects.find(p => p.id === projectId);
-    if (!project) return false;
+    // Crée un nouveau bâtiment
+    const newBuilding: OwnedBuilding = {
+      id: uuidv4(),
+      buildingId: options.buildingId,
+      buildingType: options.type,
+      name: options.name,
+      location: options.location,
+      maintenanceEnabled: true,
+      maintenanceCost: options.maintenanceCost,
+      slaves: options.slaves || 0,
+      condition: 100, // Nouveau bâtiment en parfait état
+      purchaseDate: new Date()
+    };
     
-    // Calculate cost based on progress
-    const constructionCost = Math.round(
-      project.estimatedCost * (progressAmount / 100) * 0.7 // Remaining 70% spread across progress
-    );
+    // Ajouter le bâtiment à l'inventaire
+    addBuilding(newBuilding);
     
-    // Record the payment
-    if (constructionCost > 0) {
-      addEconomieRecord({
-        amount: -constructionCost,
-        description: `Progression construction: ${project.name}`,
-        category: 'Construction' as EconomieCategory,
-        type: 'expense',
-        date: new Date().toISOString(),
-        source: 'Trésor Public',
-        approved: true
-      });
-      
-      // Advance the construction progress
-      advanceConstruction(projectId, progressAmount);
-      return true;
+    // Enregistrer la transaction financière
+    buildingPurchased(options.name, options.initialCost);
+    
+    toast.success(`${options.name} acquis avec succès!`);
+    return true;
+  }, [balance, addBuilding, buildingPurchased]);
+
+  const sellBuilding = useCallback((id: string | number): boolean => {
+    const building = buildings.find(b => b.id === id);
+    
+    if (!building) {
+      toast.error("Bâtiment introuvable");
+      return false;
     }
     
-    return false;
-  }, [constructionProjects, advanceConstruction, addEconomieRecord]);
-  
-  const handleMaintenance = useCallback((buildingId: string) => {
-    const building = publicBuildings.find(b => b.id === buildingId);
-    if (!building) return false;
+    // Calculer le prix de vente (simplifié)
+    const sellingPrice = Math.round(building.maintenanceCost * 20 * (building.condition / 100));
     
-    // Record the maintenance payment
-    addEconomieRecord({
-      amount: -building.maintenanceCost,
-      description: `Maintenance: ${building.name}`,
-      category: 'Maintenance' as EconomieCategory,
-      type: 'expense',
-      date: new Date().toISOString(),
-      source: 'Services d\'entretien',
-      approved: true
-    });
+    // Vendre le bâtiment
+    removeBuilding(id);
     
-    // Perform the maintenance
-    maintainBuilding(buildingId, "normal");
+    // Enregistrer la transaction
+    buildingSold(building.name, sellingPrice);
+    
+    toast.success(`${building.name} vendu pour ${sellingPrice} As`);
     return true;
-  }, [publicBuildings, maintainBuilding, addEconomieRecord]);
-  
-  const handleSellBuilding = useCallback((buildingId: string) => {
-    const building = publicBuildings.find(b => b.id === buildingId);
-    if (!building) return false;
-    
-    // Calculate sell value (based on condition and initial investment)
-    const sellValue = Math.round(
-      building.investmentAmount * (building.condition / 100) * 0.7 // 70% of original value adjusted by condition
+  }, [buildings, removeBuilding, buildingSold]);
+
+  const updateBuildingCondition = useCallback((id: string | number, newCondition: number) => {
+    setBuildings(prev => 
+      prev.map(building => 
+        building.id === id 
+          ? { ...building, condition: Math.max(0, Math.min(100, newCondition)) } 
+          : building
+      )
+    );
+  }, []);
+
+  const updateMaintenanceEnabled = useCallback((id: string | number, enabled: boolean) => {
+    setBuildings(prev => 
+      prev.map(building => 
+        building.id === id 
+          ? { ...building, maintenanceEnabled: enabled } 
+          : building
+      )
     );
     
-    // Record the sale
-    addEconomieRecord({
-      amount: sellValue,
-      description: `Vente bâtiment: ${building.name}`,
-      category: 'Vente' as EconomieCategory,
-      type: 'income',
-      date: new Date().toISOString(),
-      source: 'Vente immobilière',
-      approved: true
-    });
+    const building = buildings.find(b => b.id === id);
+    if (building) {
+      toast.success(`Maintenance ${enabled ? 'activée' : 'désactivée'} pour ${building.name}`);
+    }
+  }, [buildings]);
+
+  const assignSlaves = useCallback((buildingId: string | number, slaveCount: number) => {
+    setBuildings(prev => 
+      prev.map(building => 
+        building.id === buildingId 
+          ? { ...building, slaves: slaveCount } 
+          : building
+      )
+    );
     
-    buildingSold(building.name, sellValue);
-    
-    return true;
-  }, [publicBuildings, addEconomieRecord, buildingSold]);
-  
+    const building = buildings.find(b => b.id === buildingId);
+    if (building) {
+      toast.success(`${slaveCount} esclaves assignés à ${building.name}`);
+    }
+  }, [buildings]);
+
   return {
-    isModalOpen,
-    setIsModalOpen,
-    publicBuildings,
-    constructionProjects,
-    balance,
-    startConstruction: handleStartConstruction,
-    advanceConstruction: handleAdvanceConstruction,
-    maintainBuilding: handleMaintenance,
-    sellBuilding: handleSellBuilding
+    buildings,
+    addBuilding,
+    removeBuilding,
+    purchaseBuilding,
+    sellBuilding,
+    updateBuildingCondition,
+    updateMaintenanceEnabled,
+    assignSlaves
   };
 };

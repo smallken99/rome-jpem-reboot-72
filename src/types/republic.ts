@@ -3,10 +3,10 @@ import { GameDate } from '@/components/maitrejeu/types/common';
 
 // Types pour l'équilibre de la République
 export interface RepublicEquilibre {
-  populaires: number; // Pour compatibilité avec populares
   populares: number;
   optimates: number;
   moderates: number;
+  populaires?: number; // Pour compatibilité avec l'ancien nom
   neutrales?: number; // Pour compatibilité
   armée?: number;
   facteurMilitaire?: number;

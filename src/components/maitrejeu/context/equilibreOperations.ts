@@ -9,13 +9,13 @@ export const createEquilibreOperations = (
   };
 
   // Ajouter la fonction pour mettre à jour l'équilibre des factions
-  const updateFactionBalance = (populaires: number, optimates: number, moderates: number) => {
+  const updateFactionBalance = (populares: number, optimates: number, moderates: number) => {
     setEquilibre(prev => {
       if (!prev) return null;
       return {
         ...prev,
-        populaires,
-        populares: populaires, // Mettre à jour les deux pour la compatibilité
+        populares,
+        populaires: populares, // Mettre à jour les deux pour la compatibilité
         optimates,
         moderates
       };
