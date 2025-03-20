@@ -471,7 +471,6 @@ export const initialEquilibre: Equilibre = {
   facteurPatriciens: 75,
   facteurMilitaire: 60,
   facteurReligieux: 65,
-  populaires: 45,
   optimates: 55,
   moderates: 30,
   population: 800000,
@@ -499,8 +498,9 @@ export const initialEquilibre: Equilibre = {
   corruption: 25,
   influence_extérieure: 15,
   
-  // Pour la compatibilité
+  // Pour la compatibilité - utiliser une seule fois populaires et ajouter populares
   populaires: 45,
+  populares: 45,
   
   // Notes
   notes: "Etat actuel de l'équilibre de la République"

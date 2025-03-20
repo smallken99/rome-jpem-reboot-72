@@ -81,9 +81,27 @@ export const PropertyManagement: React.FC<PropertyManagementProps> = ({ building
     return <div>Bâtiment non trouvé</div>;
   }
 
+  // Création d'un nouvel objet qui correspond exactement au type OwnedBuilding requis
+  const typedBuilding = {
+    id: building.id,
+    buildingId: building.buildingId,
+    name: building.name,
+    buildingType: building.buildingType,
+    type: building.type,
+    location: building.location,
+    condition: building.condition,
+    maintenanceLevel: building.maintenanceLevel || 2,
+    income: building.income || 0,
+    workers: building.workers || 0,
+    securityLevel: building.securityLevel || 1,
+    description: building.description || '',
+    maintenanceCost: building.maintenanceCost || 0,
+    purchaseDate: building.purchaseDate
+  };
+
   return (
     <div className="property-management space-y-6">
-      <PropertyHeader building={building} onSell={() => sellBuilding(building.id)} />
+      <PropertyHeader building={typedBuilding} onSell={() => sellBuilding(building.id)} />
       
       <Tabs value={activeTab} onValueChange={setActiveTab}>
         <TabsList className="grid w-full grid-cols-4">
@@ -94,12 +112,12 @@ export const PropertyManagement: React.FC<PropertyManagementProps> = ({ building
         </TabsList>
         
         <TabsContent value="overview">
-          <OverviewTab building={building} />
+          <OverviewTab building={typedBuilding} />
         </TabsContent>
         
         <TabsContent value="maintenance">
           <MaintenanceTab 
-            building={building} 
+            building={typedBuilding} 
             updateMaintenanceLevel={handleUpdateMaintenanceLevel}
             updateSecurityLevel={handleUpdateSecurityLevel}
             renovateBuilding={renovateBuilding}
@@ -107,11 +125,11 @@ export const PropertyManagement: React.FC<PropertyManagementProps> = ({ building
         </TabsContent>
         
         <TabsContent value="workers">
-          <WorkersTab building={building} updateWorkers={handleUpdateWorkers} />
+          <WorkersTab building={typedBuilding} updateWorkers={handleUpdateWorkers} />
         </TabsContent>
         
         <TabsContent value="upgrades">
-          <UpgradesTab building={building} />
+          <UpgradesTab building={typedBuilding} />
         </TabsContent>
       </Tabs>
     </div>
