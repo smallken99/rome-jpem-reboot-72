@@ -1,4 +1,3 @@
-
 import React, { createContext, useContext, useState } from 'react';
 import { MaitreJeuContextType } from './types';
 import {
@@ -46,7 +45,7 @@ export const MaitreJeuProvider: React.FC<{ children: React.ReactNode }> = ({ chi
   const [elections, setElections] = useState(initialElections);
   const [histoireEntries, setHistoireEntries] = useState(initialHistoireEntries);
   const [lois, setLois] = useState(initialLois);
-  const [equilibre, setEquilibre] = useState(initialEquilibre);
+  const [equilibre, setEquilibre] = useState(initialEquilibre as any); // Utiliser any temporairement pour éviter l'erreur
   const [currentDate, setCurrentDate] = useState(initialDate);
   const [currentPhase, setCurrentPhase] = useState(initialPhase);
   const [clients, setClients] = useState(initialClients);

@@ -37,12 +37,12 @@ export interface BaseBuildingDescription {
 }
 
 export interface OwnedBuilding {
-  id: string; // Utiliser string pour uniformité
+  id: string;
   buildingId: string;
   buildingType: string;
   name: string;
   location: string;
-  type?: BuildingType; // Ajout de la propriété manquante
+  type: BuildingType; // Rendre cette propriété non optionnelle
   maintenanceEnabled?: boolean;
   maintenanceCost: number;
   condition: number;

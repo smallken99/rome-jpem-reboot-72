@@ -8,6 +8,7 @@ import { WorkersTab } from './WorkersTab';
 import { UpgradesTab } from './UpgradesTab';
 import { PropertyHeader } from './PropertyHeader';
 import { useBuildingManagement } from '@/hooks/useBuildingManagement';
+import { OwnedBuilding, BuildingType } from '@/types/buildings';
 import { toast } from 'sonner';
 
 export const PropertyManagement: React.FC = () => {
@@ -23,7 +24,12 @@ export const PropertyManagement: React.FC = () => {
     sellBuilding
   } = useBuildingManagement();
   
-  const building = buildings.find(b => b.id === (buildingId || "building-1"));
+  // Assurer que l'OwnedBuilding inclut la propriété type requise
+  const buildingWithType = buildings.find(b => b.id === (buildingId || "building-1"));
+  const building = buildingWithType ? {
+    ...buildingWithType,
+    type: buildingWithType.type || 'other' as BuildingType
+  } : null;
 
   if (!building) {
     return (
@@ -48,8 +54,9 @@ export const PropertyManagement: React.FC = () => {
     }
   };
 
-  const handleUpdateMaintenanceLevel = (level: number) => {
-    // Implementation
+  const handleUpdateMaintenanceLevel = (buildingId: string, level: number) => {
+    // Implémentation correcte avec le bon ordre de paramètres
+    updateBuildingCondition(buildingId, level);
     toast.success(`Niveau d'entretien mis à jour pour ${building.name}`);
   };
 
@@ -58,8 +65,9 @@ export const PropertyManagement: React.FC = () => {
     toast.success(`${building.name} a été entièrement rénové`);
   };
 
-  const handleUpdateWorkers = (count: number) => {
-    assignSlaves(building.id, count);
+  const handleUpdateWorkers = (buildingId: string, count: number) => {
+    // Implémentation correcte avec le bon ordre de paramètres
+    assignSlaves(buildingId, count);
   };
 
   const handleToggleMaintenance = (enabled: boolean) => {

@@ -1,283 +1,234 @@
-
 import React from 'react';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { useMaitreJeu } from './context/MaitreJeuContext';
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { 
-  Users, 
-  Map, 
-  AlertTriangle, 
-  Calendar, 
-  Scroll, 
-  BarChart, 
-  ArrowUpRight,
-  ArrowRight,
-  Crown,
-  Building,
-  Shield
-} from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
+import { ScrollArea } from "@/components/ui/scroll-area"
+import { Badge } from "@/components/ui/badge"
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import {
+  Table,
+  TableBody,
+  TableCaption,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table"
+import { GAME_PHASES, EVENT_STATUS } from './constants/gamePhases';
 
 export const MaitreJeuWelcome: React.FC = () => {
   const { 
-    currentDate, 
-    currentPhase, 
     senateurs, 
     provinces, 
     evenements, 
-    elections,
-    lois,
-    clients,
-    familles,
-    economieRecords,
+    elections, 
+    histoireEntries,
+    currentYear,
+    currentSeason,
+    currentPhase,
     equilibre
   } = useMaitreJeu();
   
-  const navigate = useNavigate();
+  // Filtrer les sénateurs joueurs
+  const joueurs = senateurs.filter(sen => sen.joueur);
   
-  // Statistiques rapides
-  const pendingEvents = evenements.filter(e => !e.resolved).length;
-  const upcomingElections = elections.filter(e => e.status === 'scheduled').length;
-  const pendingLaws = lois.filter(l => l.état === 'En délibération').length;
+  // Trier les événements par date
+  const upcomingEvents = evenements
+    .filter(event => event.status === EVENT_STATUS.SCHEDULED)
+    .sort((a, b) => a.year - b.year);
   
-  // Format de la date
-  const formatSeason = (season: string) => {
-    const seasonMap: Record<string, string> = {
-      'SPRING': 'Printemps',
-      'SUMMER': 'Été',
-      'AUTUMN': 'Automne',
-      'WINTER': 'Hiver'
-    };
-    return seasonMap[season] || season;
-  };
+  // Sélectionner les 5 dernières entrées d'histoire
+  const recentHistory = histoireEntries.slice(0, 5);
   
-  // Navigation
-  const navigateTo = (path: string) => {
-    navigate(`/maitre-jeu/${path}`);
-  };
+  // Trouver la prochaine élection
+  const nextElection = elections.find(election => election.year === currentYear);
+  
+  // Trouver les provinces avec faible stabilité
+  const unstableProvinces = provinces.filter(province => province.stabilite < 50);
   
   return (
-    <div className="p-6 space-y-8">
-      <div className="flex justify-between items-start">
-        <div>
-          <h1 className="text-3xl font-bold">SPQR: Tabula Imperii Romani</h1>
-          <p className="text-muted-foreground mt-2">
-            Panneau d'administration du Maître du Jeu
-          </p>
-          <div className="flex mt-4 space-x-6">
-            <div>
-              <h3 className="text-lg font-semibold flex items-center">
-                <Calendar className="h-5 w-5 mr-2 text-primary" />
-                An {currentDate.year} AUC
-              </h3>
-              <p className="text-muted-foreground">{formatSeason(currentDate.season)}</p>
-            </div>
-            <div>
-              <h3 className="text-lg font-semibold flex items-center">
-                <Scroll className="h-5 w-5 mr-2 text-primary" />
-                Phase: {currentPhase}
-              </h3>
-              <p className="text-muted-foreground">État actuel du jeu</p>
-            </div>
-          </div>
-        </div>
-        
-        {pendingEvents > 0 && (
-          <Alert variant="destructive" className="max-w-md">
-            <AlertTriangle className="h-4 w-4" />
-            <AlertTitle>Événements en attente</AlertTitle>
-            <AlertDescription>
-              Vous avez {pendingEvents} événement{pendingEvents > 1 ? 's' : ''} non résolu{pendingEvents > 1 ? 's' : ''} qui require{pendingEvents > 1 ? 'nt' : 't'} votre attention.
-            </AlertDescription>
-          </Alert>
-        )}
-      </div>
+    <div className="p-6 space-y-6">
+      <h1 className="text-3xl font-bold">Bienvenue, Maître du Jeu</h1>
+      <p className="text-muted-foreground">
+        Aperçu rapide de la République romaine - Année {currentYear} {currentSeason}
+      </p>
       
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <Card>
           <CardHeader className="pb-2">
-            <CardTitle className="text-xl">Sénateurs</CardTitle>
-            <CardDescription>{senateurs.length} au total</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{senateurs.filter(s => s.joueur).length}</div>
-            <p className="text-muted-foreground">Sénateurs joueurs</p>
-          </CardContent>
-          <CardFooter>
-            <Button variant="ghost" className="w-full flex justify-between items-center" onClick={() => navigateTo('senateurs')}>
-              Gérer les sénateurs
-              <ArrowRight className="h-4 w-4 ml-2" />
-            </Button>
-          </CardFooter>
-        </Card>
-        
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-xl">Provinces</CardTitle>
-            <CardDescription>{provinces.length} territoires</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">
-              {provinces.filter(p => p.stability < 50).length}
-            </div>
-            <p className="text-muted-foreground">Provinces instables</p>
-          </CardContent>
-          <CardFooter>
-            <Button variant="ghost" className="w-full flex justify-between items-center" onClick={() => navigateTo('provinces')}>
-              Gérer les provinces
-              <ArrowRight className="h-4 w-4 ml-2" />
-            </Button>
-          </CardFooter>
-        </Card>
-        
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-xl">Familles</CardTitle>
-            <CardDescription>{familles.length} lignées</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">
-              {familles.filter(f => f.statut === 'Patricien').length}
-            </div>
-            <p className="text-muted-foreground">Familles patriciennes</p>
-          </CardContent>
-          <CardFooter>
-            <Button variant="ghost" className="w-full flex justify-between items-center" onClick={() => navigateTo('familles')}>
-              Gérer les familles
-              <ArrowRight className="h-4 w-4 ml-2" />
-            </Button>
-          </CardFooter>
-        </Card>
-        
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-xl">Clients</CardTitle>
-            <CardDescription>{clients.length} au total</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">
-              {clients.filter(c => !c.assignedToSenateurId).length}
-            </div>
-            <p className="text-muted-foreground">Clients non assignés</p>
-          </CardContent>
-          <CardFooter>
-            <Button variant="ghost" className="w-full flex justify-between items-center" onClick={() => navigateTo('clients')}>
-              Gérer les clients
-              <ArrowRight className="h-4 w-4 ml-2" />
-            </Button>
-          </CardFooter>
-        </Card>
-      </div>
-      
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <Card className="col-span-1 lg:col-span-2">
-          <CardHeader>
-            <CardTitle>Activités Récentes</CardTitle>
+            <CardTitle>Sénateurs Joueurs</CardTitle>
             <CardDescription>
-              Derniers événements importants dans la République
+              {joueurs.length} sénateurs actifs
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="space-y-8">
-              {/* Élections */}
-              <div>
-                <h3 className="text-lg font-medium flex items-center">
-                  <Crown className="h-5 w-5 mr-2 text-amber-500" />
-                  Élections
-                </h3>
-                <div className="mt-2 space-y-3">
-                  {elections.slice(0, 3).map(election => (
-                    <div key={election.id} className="flex justify-between border-b pb-2">
-                      <div>
-                        <p className="font-medium">{election.magistrature}</p>
-                        <p className="text-sm text-muted-foreground">
-                          An {election.year || election.annee}, {election.season || election.saison}
-                        </p>
-                      </div>
-                      <div>
-                        <span className={`inline-flex items-center rounded-full px-2 py-1 text-xs font-medium ${
-                          election.status === 'completed' ? 'bg-green-100 text-green-800' :
-                          election.status === 'in_progress' ? 'bg-blue-100 text-blue-800' :
-                          'bg-amber-100 text-amber-800'
-                        }`}>
-                          {election.status === 'completed' ? 'Terminée' :
-                           election.status === 'in_progress' ? 'En cours' :
-                           'Prévue'}
-                        </span>
-                      </div>
-                    </div>
-                  ))}
+            <ScrollArea className="h-[150px] w-full space-y-2">
+              {joueurs.map(joueur => (
+                <div key={joueur.id} className="flex items-center space-x-4">
+                  <Avatar>
+                    <AvatarImage src={`https://i.pravatar.cc/150?img=${joueur.id}`} />
+                    <AvatarFallback>{joueur.nom[0]}{joueur.prenom[0]}</AvatarFallback>
+                  </Avatar>
+                  <div>
+                    <p className="text-sm font-medium leading-none">{joueur.nom}, {joueur.prenom}</p>
+                    <p className="text-sm text-muted-foreground">
+                      {joueur.statut} - {joueur.appartenance}
+                    </p>
+                  </div>
                 </div>
-                <Button variant="link" className="mt-2 p-0" onClick={() => navigateTo('politique')}>
-                  Voir toutes les élections
-                  <ArrowUpRight className="h-3 w-3 ml-1" />
-                </Button>
+              ))}
+            </ScrollArea>
+          </CardContent>
+        </Card>
+        
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle>Prochaines Élections</CardTitle>
+            <CardDescription>
+              Élections consulaires de {nextElection?.year || currentYear + 1}
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            {nextElection ? (
+              <div className="space-y-2">
+                <div className="flex justify-between">
+                  <span>Poste:</span>
+                  <span>{nextElection.poste}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span>Candidats:</span>
+                  <span>{nextElection.candidats.length}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span>Favori:</span>
+                  <span>{nextElection.candidats[0]}</span>
+                </div>
               </div>
+            ) : (
+              <p className="text-muted-foreground">
+                Aucune élection planifiée pour le moment.
+              </p>
+            )}
+          </CardContent>
+        </Card>
+        
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle>Provinces Instables</CardTitle>
+            <CardDescription>
+              {unstableProvinces.length} provinces nécessitant une attention
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <ScrollArea className="h-[150px] w-full space-y-2">
+              {unstableProvinces.map(province => (
+                <div key={province.id} className="flex items-center justify-between">
+                  <span>{province.nom}</span>
+                  <Badge variant="destructive">
+                    {province.stabilite}%
+                  </Badge>
+                </div>
+              ))}
+            </ScrollArea>
+          </CardContent>
+        </Card>
+      </div>
+      
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <Card>
+          <CardHeader>
+            <CardTitle>Événements à Venir</CardTitle>
+            <CardDescription>
+              {upcomingEvents.length} événements nécessitant une résolution
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <ScrollArea className="h-[300px] w-full">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead className="w-[100px]">Année</TableHead>
+                    <TableHead>Titre</TableHead>
+                    <TableHead>Statut</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {upcomingEvents.map(event => (
+                    <TableRow key={event.id}>
+                      <TableCell className="font-medium">{event.year}</TableCell>
+                      <TableCell>{event.title}</TableCell>
+                      <TableCell>
+                        <Badge 
+                          variant={
+                            event.status === EVENT_STATUS.COMPLETED
+                              ? "success"
+                              : event.status === EVENT_STATUS.IN_PROGRESS
+                              ? "secondary"
+                              : "outline"
+                          }
+                        >
+                          {event.status}
+                        </Badge>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </ScrollArea>
+          </CardContent>
+        </Card>
+        
+        <Card>
+          <CardHeader>
+            <CardTitle>Chroniques Récentes</CardTitle>
+            <CardDescription>
+              Dernières entrées dans les annales de Rome
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <ScrollArea className="h-[300px] w-full">
+              <div className="divide-y divide-border">
+                {recentHistory.map(entry => (
+                  <div key={entry.id} className="py-4">
+                    <p className="text-sm font-medium leading-none">{entry.title}</p>
+                    <p className="text-sm text-muted-foreground">
+                      {entry.year} - {entry.description}
+                    </p>
+                  </div>
+                ))}
+              </div>
+            </ScrollArea>
+          </CardContent>
+        </Card>
+      </div>
+      
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <Card>
+          <CardHeader>
+            <CardTitle>Phase Actuelle</CardTitle>
+            <CardDescription>
+              Phase de jeu en cours
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">
+              {currentPhase}
+            </div>
+            <p className="text-muted-foreground">
+              La République est actuellement en phase de {currentPhase}.
+            </p>
+            
+            <div className="mt-4">
+              {currentPhase === GAME_PHASES.FORUM && (
+                <p className="text-green-500">
+                  Le Forum est ouvert pour les débats et les décisions.
+                </p>
+              )}
               
-              {/* Lois */}
-              <div>
-                <h3 className="text-lg font-medium flex items-center">
-                  <Scroll className="h-5 w-5 mr-2 text-emerald-600" />
-                  Lois
-                </h3>
-                <div className="mt-2 space-y-3">
-                  {lois.slice(0, 3).map(loi => (
-                    <div key={loi.id} className="flex justify-between border-b pb-2">
-                      <div>
-                        <p className="font-medium">{loi.titre || loi.title}</p>
-                        <p className="text-sm text-muted-foreground">
-                          Proposée par: {loi.proposeur || loi.proposedBy}
-                        </p>
-                      </div>
-                      <div>
-                        <span className={`inline-flex items-center rounded-full px-2 py-1 text-xs font-medium ${
-                          loi.état === 'Promulguée' || loi.statut === 'Promulguée' ? 'bg-green-100 text-green-800' :
-                          loi.état === 'Rejetée' || loi.statut === 'Rejetée' ? 'bg-red-100 text-red-800' :
-                          'bg-blue-100 text-blue-800'
-                        }`}>
-                          {loi.état || loi.statut || 'En délibération'}
-                        </span>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-                <Button variant="link" className="mt-2 p-0" onClick={() => navigateTo('lois')}>
-                  Voir toutes les lois
-                  <ArrowUpRight className="h-3 w-3 ml-1" />
-                </Button>
-              </div>
-              
-              {/* Économie */}
-              <div>
-                <h3 className="text-lg font-medium flex items-center">
-                  <Building className="h-5 w-5 mr-2 text-indigo-600" />
-                  Économie
-                </h3>
-                <div className="mt-2 space-y-3">
-                  {economieRecords.slice(0, 3).map(record => (
-                    <div key={record.id} className="flex justify-between border-b pb-2">
-                      <div>
-                        <p className="font-medium">{record.description}</p>
-                        <p className="text-sm text-muted-foreground">
-                          Source: {record.source}, Catégorie: {record.category}
-                        </p>
-                      </div>
-                      <div>
-                        <span className={`inline-flex items-center rounded-full px-2 py-1 text-xs font-medium ${
-                          record.type === 'income' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
-                        }`}>
-                          {record.amount.toLocaleString()} As
-                        </span>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-                <Button variant="link" className="mt-2 p-0" onClick={() => navigateTo('economie')}>
-                  Voir l'économie
-                  <ArrowUpRight className="h-3 w-3 ml-1" />
-                </Button>
-              </div>
+              {currentPhase === GAME_PHASES.COMBAT && (
+                <p className="text-red-500">
+                  Les armées sont en mouvement, la guerre fait rage.
+                </p>
+              )}
             </div>
           </CardContent>
         </Card>
@@ -286,212 +237,38 @@ export const MaitreJeuWelcome: React.FC = () => {
           <CardHeader>
             <CardTitle>Équilibre des Factions</CardTitle>
             <CardDescription>
-              État actuel de l'équilibre politique
+              Répartition des forces politiques dans la République
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="space-y-6">
-              <div className="space-y-2">
-                <div className="flex justify-between items-center">
-                  <h4 className="font-medium">Populares</h4>
-                  <span className="font-semibold">{equilibre?.populares || 0}%</span>
-                </div>
-                <div className="h-2.5 w-full bg-gray-200 rounded-full">
-                  <div 
-                    className="h-2.5 bg-red-500 rounded-full" 
-                    style={{ width: `${equilibre?.populares || 0}%` }}
-                  ></div>
-                </div>
+            <div className="space-y-2">
+              <div className="flex justify-between">
+                <span>Populares:</span>
+                <span>{equilibre?.populaires}%</span>
               </div>
-              
-              <div className="space-y-2">
-                <div className="flex justify-between items-center">
-                  <h4 className="font-medium">Optimates</h4>
-                  <span className="font-semibold">{equilibre?.optimates || 0}%</span>
-                </div>
-                <div className="h-2.5 w-full bg-gray-200 rounded-full">
-                  <div 
-                    className="h-2.5 bg-blue-500 rounded-full" 
-                    style={{ width: `${equilibre?.optimates || 0}%` }}
-                  ></div>
-                </div>
+              <div className="flex justify-between">
+                <span>Optimates:</span>
+                <span>{equilibre?.optimates}%</span>
               </div>
-              
-              <div className="space-y-2">
-                <div className="flex justify-between items-center">
-                  <h4 className="font-medium">Moderates</h4>
-                  <span className="font-semibold">{equilibre?.moderates || equilibre?.neutrales || 0}%</span>
-                </div>
-                <div className="h-2.5 w-full bg-gray-200 rounded-full">
-                  <div 
-                    className="h-2.5 bg-green-500 rounded-full" 
-                    style={{ width: `${equilibre?.moderates || equilibre?.neutrales || 0}%` }}
-                  ></div>
-                </div>
-              </div>
-              
-              <div className="space-y-2">
-                <div className="flex justify-between items-center">
-                  <h4 className="font-medium">Stabilité Économique</h4>
-                  <span className="font-semibold">{equilibre?.economicStability || equilibre?.économie || 0}%</span>
-                </div>
-                <div className="h-2.5 w-full bg-gray-200 rounded-full">
-                  <div 
-                    className="h-2.5 bg-amber-500 rounded-full" 
-                    style={{ width: `${equilibre?.economicStability || equilibre?.économie || 0}%` }}
-                  ></div>
-                </div>
-              </div>
-              
-              <div className="space-y-2">
-                <div className="flex justify-between items-center">
-                  <h4 className="font-medium">Puissance Militaire</h4>
-                  <span className="font-semibold">{equilibre?.facteurMilitaire || equilibre?.armée || 0}%</span>
-                </div>
-                <div className="h-2.5 w-full bg-gray-200 rounded-full">
-                  <div 
-                    className="h-2.5 bg-purple-500 rounded-full" 
-                    style={{ width: `${equilibre?.facteurMilitaire || equilibre?.armée || 0}%` }}
-                  ></div>
-                </div>
+              <div className="flex justify-between">
+                <span>Moderates:</span>
+                <span>{equilibre?.moderates}%</span>
               </div>
             </div>
             
-            <Button variant="outline" className="w-full mt-6" onClick={() => navigateTo('equilibre')}>
-              <Shield className="h-4 w-4 mr-2" />
-              Gérer l'équilibre
-            </Button>
-          </CardContent>
-        </Card>
-      </div>
-      
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <Card>
-          <CardHeader>
-            <CardTitle>Actions Rapides</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <Button 
-              variant="outline" 
-              className="w-full flex items-center justify-start" 
-              onClick={() => navigateTo('senateurs')}
-            >
-              <Users className="h-4 w-4 mr-2" />
-              Ajouter un Sénateur
-            </Button>
-            
-            <Button 
-              variant="outline" 
-              className="w-full flex items-center justify-start" 
-              onClick={() => navigateTo('provinces')}
-            >
-              <Map className="h-4 w-4 mr-2" />
-              Gérer les Provinces
-            </Button>
-            
-            <Button 
-              variant="outline" 
-              className="w-full flex items-center justify-start" 
-              onClick={() => navigateTo('evenements')}
-            >
-              <AlertTriangle className="h-4 w-4 mr-2" />
-              Créer un Événement
-            </Button>
-            
-            <Button 
-              variant="outline" 
-              className="w-full flex items-center justify-start" 
-              onClick={() => navigateTo('economie')}
-            >
-              <BarChart className="h-4 w-4 mr-2" />
-              Gérer l'Économie
-            </Button>
-          </CardContent>
-        </Card>
-        
-        <Card>
-          <CardHeader>
-            <CardTitle>Événements à Venir</CardTitle>
-          </CardHeader>
-          <CardContent>
-            {upcomingElections > 0 && (
-              <Alert className="mb-4">
-                <Crown className="h-4 w-4" />
-                <AlertTitle>Élections</AlertTitle>
-                <AlertDescription>
-                  {upcomingElections} élection{upcomingElections > 1 ? 's' : ''} à venir
-                </AlertDescription>
-              </Alert>
-            )}
-            
-            {pendingLaws > 0 && (
-              <Alert className="mb-4">
-                <Scroll className="h-4 w-4" />
-                <AlertTitle>Lois</AlertTitle>
-                <AlertDescription>
-                  {pendingLaws} loi{pendingLaws > 1 ? 's' : ''} en délibération
-                </AlertDescription>
-              </Alert>
-            )}
-            
-            {pendingEvents > 0 && (
-              <Alert className="mb-4" variant="destructive">
-                <AlertTriangle className="h-4 w-4" />
-                <AlertTitle>Événements</AlertTitle>
-                <AlertDescription>
-                  {pendingEvents} événement{pendingEvents > 1 ? 's' : ''} non résolu{pendingEvents > 1 ? 's' : ''}
-                </AlertDescription>
-              </Alert>
-            )}
-            
-            {!upcomingElections && !pendingLaws && !pendingEvents && (
-              <p className="text-muted-foreground text-center py-4">
-                Aucun événement à venir actuellement
-              </p>
-            )}
-          </CardContent>
-        </Card>
-        
-        <Card>
-          <CardHeader>
-            <CardTitle>Système</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <Button 
-              variant={currentPhase === "SENATE" ? "default" : "outline"}
-              className="w-full flex items-center justify-start" 
-              onClick={() => navigateTo('')}
-            >
-              <Shield className="h-4 w-4 mr-2" />
-              Phase du Sénat
-            </Button>
-            
-            <Button 
-              variant={currentPhase === "FORUM" ? "default" : "outline"}
-              className="w-full flex items-center justify-start" 
-              onClick={() => navigateTo('')}
-            >
-              <Users className="h-4 w-4 mr-2" />
-              Phase du Forum
-            </Button>
-            
-            <Button 
-              variant={currentPhase === "COMBAT" ? "default" : "outline"}
-              className="w-full flex items-center justify-start" 
-              onClick={() => navigateTo('')}
-            >
-              <Shield className="h-4 w-4 mr-2" />
-              Phase de Combat
-            </Button>
-            
-            <Button 
-              variant="outline" 
-              className="w-full flex items-center justify-start" 
-              onClick={() => navigateTo('statistiques')}
-            >
-              <BarChart className="h-4 w-4 mr-2" />
-              Statistiques
-            </Button>
+            <div className="mt-4">
+              {equilibre?.populaires > 60 && (
+                <p className="text-red-500">
+                  Les Populares dominent le Sénat, attention à la plèbe.
+                </p>
+              )}
+              
+              {equilibre?.populaires < 40 && (
+                <p className="text-green-500">
+                  Les Optimates ont le contrôle, mais la tension monte.
+                </p>
+              )}
+            </div>
           </CardContent>
         </Card>
       </div>

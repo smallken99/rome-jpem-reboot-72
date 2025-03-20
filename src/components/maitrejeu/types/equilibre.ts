@@ -1,77 +1,70 @@
 
-import { GameDate } from './common';
-
-export interface EquilibreFactors {
-  senat: number;
-  plebs: number;
-  patricians: number;
-  military: number;
-  religious: number;
+export interface Equilibre {
+  // Facteurs politiques
+  populaires: number;
+  populares: number; // Alias pour compatibilité
+  optimates: number;
+  moderates: number;
+  
+  // Facteurs économiques
+  économie: number; 
+  economicStability: number; // Alias pour compatibilité
+  
+  // Facteurs sociaux
+  armée: number;
+  facteurMilitaire: number; // Alias pour compatibilité
+  morale: number;
+  facteurPlebs: number;
+  plébéiens: number; // Alias pour compatibilité
+  facteurPatriciens: number;
+  patriciens: number; // Alias pour compatibilité
+  
+  // Facteurs de stabilité
+  stabilité: number;
+  mécontentement: number;
+  corruption: number;
+  influence_extérieure: number;
 }
 
 export interface PoliticalEvent {
   id: string;
   title: string;
   description: string;
-  date: GameDate;
-  year?: number; // Added for compatibility
-  season?: string; // Added for compatibility
-  faction?: string; // Added for compatibility
-  importance?: 'majeure' | 'normale' | 'mineure'; // Added for compatibility
-  impact: {
-    populares?: number;
+  year: number;
+  effects: {
+    populaires?: number;
     optimates?: number;
-    moderate?: number;
-    senat?: number;
-    plebs?: number;
-    patricians?: number;
-    military?: number;
-    religious?: number;
-    criminalityIndex?: number;
-    economicStability?: number;
-    population?: number;
+    moderates?: number;
+    économie?: number;
+    armée?: number;
+    morale?: number;
+    plébéiens?: number;
+    patriciens?: number;
+    stabilité?: number;
+    mécontentement?: number;
+    corruption?: number;
+    influence_extérieure?: number;
   };
-  type: 'political' | 'social' | 'military' | 'religious' | 'economic';
   resolved: boolean;
 }
 
-export interface Equilibre {
-  // Basic factors
-  facteurSenat: number;
-  facteurPlebs: number;
-  facteurPatriciens: number;
-  facteurMilitaire: number;
-  facteurReligieux: number;
-  
-  // Political alignment
+// Types d'alias pour assurer la compatibilité entre les interfaces
+export interface RepublicEquilibre {
+  populares: number;
   populaires: number;
   optimates: number;
   moderates: number;
-  
-  // Global city indicators
-  population: number;
-  criminalityIndex: number; // Main name
-  indiceCrime: number; // Alternative name
+  économie: number;
   economicStability: number;
-  foodSupply: number;
-  publicOrder: number;
-  
-  // EquilibreBarChart properties
-  armée?: number;
-  économie?: number;
-  morale?: number;
-  loyauté?: number;
-  patriciens?: number;
-  plébéiens?: number;
-  neutrales?: number;
-  
-  // Thresholds for unrest
-  unrestThreshold: number;
-  rebellionThreshold: number;
-  
-  // History of events
-  historique: PoliticalEvent[];
-  
-  // Optional notes
-  notes?: string;
+  armée: number;
+  facteurMilitaire: number;
+  morale: number;
+  facteurPlebs: number;
+  plébéiens: number;
+  facteurPatriciens: number;
+  patriciens: number;
+  stabilité: number;
+  mécontentement: number;
+  corruption: number;
+  influence_extérieure: number;
 }

@@ -9,15 +9,20 @@ import { Textarea } from '@/components/ui/textarea';
 import { toast } from 'sonner';
 
 interface PaymentFormProps {
-  onSubmit: (paymentData: any) => void;
-  categories: string[];
+  onSubmit?: (paymentData: any) => void;
+  categories?: string[];
   title?: string;
   defaultType?: 'income' | 'expense';
+  // Nouvelles propriétés pour la compatibilité
+  onPayment?: (amount: number, recipient: string, category: string, description?: string) => boolean;
+  onReceive?: (amount: number, source: string, category: string, description?: string) => void;
 }
 
 export const PaymentForm: React.FC<PaymentFormProps> = ({
   onSubmit,
-  categories,
+  onPayment,
+  onReceive,
+  categories = ['Personnel', 'Impôts', 'Entretien', 'Divers', 'Investissement', 'Commerce'],
   title = "Enregistrer une transaction",
   defaultType = 'expense'
 }) => {
@@ -36,21 +41,42 @@ export const PaymentForm: React.FC<PaymentFormProps> = ({
       return;
     }
 
-    const paymentData = {
-      category,
-      amount: Number(amount), // Conversion explicite en nombre
-      description,
-      type,
-      source,
-      isRecurring,
-      date: {
-        year: new Date().getFullYear(),
-        season: 'SPRING'
+    // Si nous avons la nouvelle interface onPayment/onReceive
+    if ((type === 'expense' && onPayment) || (type === 'income' && onReceive)) {
+      if (type === 'expense' && onPayment) {
+        const success = onPayment(amount, source, category, description);
+        if (success) {
+          resetForm();
+        }
+        return;
+      } else if (type === 'income' && onReceive) {
+        onReceive(amount, source, category, description);
+        resetForm();
+        return;
       }
-    };
+    }
 
-    onSubmit(paymentData);
-    
+    // Interface originale
+    if (onSubmit) {
+      const paymentData = {
+        category,
+        amount: Number(amount),
+        description,
+        type,
+        source,
+        isRecurring,
+        date: {
+          year: new Date().getFullYear(),
+          season: 'SPRING'
+        }
+      };
+  
+      onSubmit(paymentData);
+      resetForm();
+    }
+  };
+
+  const resetForm = () => {
     // Réinitialiser le formulaire
     setCategory(categories[0] || '');
     setAmount(0);

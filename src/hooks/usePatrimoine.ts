@@ -1,7 +1,8 @@
 
 import { useState, useCallback } from 'react';
-import { Property, PropertyStats } from '@/types/patrimoine';
+import { Property, PropertyStats, Transaction } from '@/types/patrimoine';
 import { v4 as uuidv4 } from 'uuid';
+import { useTransactions } from './useTransactions';
 
 export const useProperties = () => {
   const [properties, setProperties] = useState<Property[]>([]);
@@ -74,9 +75,58 @@ export const usePatrimoine = () => {
     calculateStats
   } = useProperties();
 
+  // Intégrer les transactions et le solde
+  const {
+    balance,
+    transactions,
+    addTransaction,
+    getRecentTransactions,
+    getTransactionsByCategory,
+    getTransactionsByType,
+    setBalance
+  } = useTransactions();
+
   // Fonction pour obtenir les statistiques des propriétés
   const getPropertyStats = (): PropertyStats => {
     return calculateStats();
+  };
+
+  // Fonction pour enregistrer l'achat d'un bâtiment
+  const buildingPurchased = (buildingName: string, cost: number): void => {
+    addTransaction({
+      amount: -cost,
+      description: `Achat de: ${buildingName}`,
+      category: "Acquisition immobilière",
+      type: "expense"
+    });
+  };
+
+  // Fonction pour enregistrer la vente d'un bâtiment
+  const buildingSold = (buildingName: string, value: number): void => {
+    addTransaction({
+      amount: value,
+      description: `Vente de: ${buildingName}`,
+      category: "Vente immobilière",
+      type: "income"
+    });
+  };
+
+  // Fonction pour enregistrer une vente de propriété standard
+  const sellProperty = (propertyId: string) => {
+    const property = properties.find(p => p.id === propertyId);
+    if (!property) return false;
+    
+    // Ajouter la transaction
+    addTransaction({
+      amount: property.value,
+      description: `Vente de: ${property.name}`,
+      category: "Vente immobilière",
+      type: "income"
+    });
+    
+    // Supprimer la propriété
+    removeProperty(propertyId);
+    return true;
   };
 
   return {
@@ -85,6 +135,17 @@ export const usePatrimoine = () => {
     removeProperty,
     updateProperty,
     calculateStats,
-    getPropertyStats
+    getPropertyStats,
+    // Nouvelles propriétés et méthodes
+    balance,
+    transactions,
+    addTransaction,
+    getRecentTransactions,
+    getTransactionsByCategory,
+    getTransactionsByType,
+    setBalance,
+    buildingPurchased,
+    buildingSold,
+    sellProperty
   };
 };

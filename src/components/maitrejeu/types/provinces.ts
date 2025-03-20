@@ -2,40 +2,25 @@
 export interface Province {
   id: string;
   nom: string;
-  région: string;
-  description: string;
-  gouverneur: string;
-  status: 'Pacifiée' | 'Instable' | 'En guerre' | 'Rebelle';
+  gouverneur?: string;
+  gouverneur_id?: string;
+  ressources: string[];
+  revenu: number;
+  coût: number;
   population: number;
-  ressource: string;
-  revenue: number;
+  légions: number;
   stabilite: number;
-  loyauté: number;
-  richesse: number;
-  armée: number;
-  impôts: number;
-  revenuAnnuel: number;
-  variationLoyauté: number;
-  légions?: number;
+  stability: number; // Alias pour compatibilité
+  rébellion: boolean;
+  description: string;
+  founding_year: number;
+  location: string;
+  type: 'sénatoriale' | 'impériale';
+  loyalty: number; // Ajout de loyalty pour compatibilité
 }
 
 export interface ProvinceCardProps {
   province: Province;
-  onEdit?: (province: Province) => void;
-  onDelete?: (id: string) => void;
-  onSelect?: () => void;
+  onSelect?: (provinceId: string) => void;
   selected?: boolean;
-}
-
-export interface ProvinceModalProps {
-  province: Province;
-  isOpen: boolean;
-  onClose: () => void;
-  onSave: (province: Province) => void;
-}
-
-export interface ProvincesMapProps {
-  provinces: Province[];
-  onProvinceSelect: (provinceId: string) => void;
-  selectedProvinceId?: string;
 }

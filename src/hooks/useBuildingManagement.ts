@@ -1,6 +1,6 @@
 
 import { useState, useCallback } from 'react';
-import { OwnedBuilding } from '@/types/buildings';
+import { OwnedBuilding, BuildingType } from '@/types/buildings';
 import { v4 as uuidv4 } from 'uuid';
 import { toast } from 'sonner';
 
@@ -12,6 +12,7 @@ export const useBuildingManagement = () => {
     const newBuilding: OwnedBuilding = {
       ...building,
       id: uuidv4(), // Générer un ID string
+      type: (building.type || 'other') as BuildingType, // Assurer que type est défini
       purchaseDate: new Date(),
       condition: 100,
       maintenanceLevel: 2, // Niveau standard par défaut
@@ -49,6 +50,26 @@ export const useBuildingManagement = () => {
     toast.success(`Niveau d'entretien mis à jour.`);
   }, []);
 
+  // Activer/désactiver la maintenance
+  const updateMaintenanceEnabled = useCallback((id: string, enabled: boolean) => {
+    setBuildings(prev => 
+      prev.map(building => 
+        building.id === id ? { ...building, maintenanceEnabled: enabled } : building
+      )
+    );
+    toast.success(`Maintenance ${enabled ? 'activée' : 'désactivée'}.`);
+  }, []);
+
+  // Mise à jour de l'état du bâtiment
+  const updateBuildingCondition = useCallback((id: string, condition: number) => {
+    setBuildings(prev => 
+      prev.map(building => 
+        building.id === id ? { ...building, condition: Math.min(100, condition) } : building
+      )
+    );
+    toast.success(`État du bâtiment mis à jour.`);
+  }, []);
+
   // Mise à jour du niveau de sécurité
   const updateSecurityLevel = useCallback((id: string, level: number) => {
     setBuildings(prev => 
@@ -69,6 +90,16 @@ export const useBuildingManagement = () => {
     toast.success(`Nombre de travailleurs mis à jour.`);
   }, []);
 
+  // Assignation d'esclaves
+  const assignSlaves = useCallback((id: string, count: number) => {
+    setBuildings(prev => 
+      prev.map(building => 
+        building.id === id ? { ...building, slaves: count } : building
+      )
+    );
+    toast.success(`Nombre d'esclaves assignés mis à jour.`);
+  }, []);
+
   // Rénovation d'un bâtiment
   const renovateBuilding = useCallback((id: string) => {
     setBuildings(prev => 
@@ -79,6 +110,13 @@ export const useBuildingManagement = () => {
     toast.success(`Bâtiment rénové avec succès.`);
   }, []);
 
+  // Vente d'un bâtiment
+  const sellBuilding = useCallback((id: string) => {
+    setBuildings(prev => prev.filter(building => building.id !== id));
+    toast.success(`Bâtiment vendu avec succès.`);
+    return true;
+  }, []);
+
   return {
     buildings,
     addBuilding,
@@ -87,6 +125,11 @@ export const useBuildingManagement = () => {
     updateMaintenanceLevel,
     updateSecurityLevel,
     updateWorkers,
-    renovateBuilding
+    renovateBuilding,
+    // Nouvelles méthodes
+    updateMaintenanceEnabled,
+    updateBuildingCondition,
+    assignSlaves,
+    sellBuilding
   };
 };

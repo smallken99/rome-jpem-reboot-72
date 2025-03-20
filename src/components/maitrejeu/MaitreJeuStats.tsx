@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { useMaitreJeu } from './context/MaitreJeuContext';
@@ -19,7 +18,7 @@ export const MaitreJeuStats: React.FC = () => {
   
   // Préparation des données pour les graphiques
   const factionData = [
-    { name: 'Populares', value: equilibre?.populares || 0 },
+    { name: 'Populaires', value: equilibre?.populaires || 0 },
     { name: 'Optimates', value: equilibre?.optimates || 0 },
     { name: 'Moderates', value: equilibre?.moderates || 0 }
   ];
@@ -79,17 +78,17 @@ export const MaitreJeuStats: React.FC = () => {
             <div className="space-y-2">
               <div className="flex justify-between">
                 <span>Pacifiées:</span>
-                <span>{provinces.filter(p => p.stability >= 70).length}</span>
+                <span>{provinces.filter(p => p.stabilite >= 70).length}</span>
               </div>
               <div className="flex justify-between">
                 <span>Instables:</span>
-                <span>{provinces.filter(p => p.stability < 50).length}</span>
+                <span>{provinces.filter(p => p.stabilite < 50).length}</span>
               </div>
               <div className="flex justify-between">
                 <span>Loyauté moyenne:</span>
                 <span>
                   {provinces.length > 0 
-                    ? Math.round(provinces.reduce((acc, p) => acc + p.loyalty, 0) / provinces.length) 
+                    ? Math.round(provinces.reduce((acc, p) => acc + p.stabilite, 0) / provinces.length) 
                     : 0}%
                 </span>
               </div>
