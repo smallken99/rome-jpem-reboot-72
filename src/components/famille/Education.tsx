@@ -47,7 +47,10 @@ export const Education: React.FC<EducationProps> = ({
 
   return (
     <div className="education">
-      <EducationProvider>
+      <EducationProvider 
+        characters={characters}
+        onCharacterUpdate={handleCharacterUpdate}
+      >
         <EducationHeader />
         <EducationInfoBox />
         

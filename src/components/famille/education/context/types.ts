@@ -13,6 +13,7 @@ export interface EducationContextType {
   
   // Child management methods
   getChild: (id: string) => Child | undefined;
+  getChildById: (id: string) => Child | undefined;
   getPreceptorById: (id: string) => Preceptor | null;
   findEducationPathById: (pathType: string) => any;
   setSelectedChildId: (id: string | null) => void;
@@ -25,13 +26,16 @@ export interface EducationContextType {
   cancelEducation: (childId: string) => void;
   
   // Preceptor management methods
-  hirePreceptor: (preceptorId: string, childId?: string) => void;
+  hirePreceptor: (preceptorId: string, childId?: string) => boolean;
   firePreceptor: (preceptorId: string) => void;
-  assignPreceptorToChild: (preceptorId: string, childId: string) => void;
+  assignPreceptorToChild: (childId: string, preceptorId: string) => void;
   updateChildName: (childId: string, newName: string) => void;
   loadPreceptorsByType: (type: string) => Preceptor[];
   refreshPreceptors: () => void;
   getAllEducationPaths: () => any[];
+  updateChildEducation: (id: string, educationType: string) => void;
+  addChild: (child: Omit<Child, 'id' | 'progress'>) => string;
+  removeChild: (id: string) => void;
 }
 
 export interface EducationProviderProps {

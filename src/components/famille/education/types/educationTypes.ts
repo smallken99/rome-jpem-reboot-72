@@ -1,3 +1,4 @@
+
 export type EducationType = 'none' | 'military' | 'rhetoric' | 'academic' | 'religious' | 'political';
 export type Gender = 'male' | 'female';
 export type EducationPathType = EducationType;
