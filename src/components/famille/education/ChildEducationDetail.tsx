@@ -11,7 +11,7 @@ import { EducationStatus } from './components/EducationStatus';
 import { SpecialtySelector } from './components/SpecialtySelector';
 import { PreceptorSelector } from './components/PreceptorSelector';
 import { useEducation } from './context/EducationContext';
-import { Child, EducationPath, EducationType } from './types/educationTypes';
+import { Child, EducationType } from './types/educationTypes';
 import { HirePreceptorDialog } from './dialogs/HirePreceptorDialog';
 import { FirePreceptorDialog } from './dialogs/FirePreceptorDialog';
 import { usePreceptorsManagement } from './hooks/usePreceptorsManagement';
@@ -47,20 +47,38 @@ export const ChildEducationDetail: React.FC = () => {
   const [selectedPreceptorId, setSelectedPreceptorId] = useState<string | null>(null);
   const [hireDialogOpen, setHireDialogOpen] = useState(false);
   const [fireDialogOpen, setFireDialogOpen] = useState(false);
+  const [activeTab, setActiveTab] = useState<string>('path');
   
   const child = childId ? getChild(childId) : undefined;
   
   useEffect(() => {
     if (!child) {
       navigate('/famille/education');
+    } else if (child.educationType && child.educationType !== 'none') {
+      setActiveTab('progress');
+      setSelectedPath(child.educationType as EducationType);
     }
   }, [child, navigate]);
+  
+  useEffect(() => {
+    // Si un parcours est sélectionné, filtrer les précepteurs correspondants
+    if (selectedPath) {
+      const matchingPreceptor = preceptors.find(p => 
+        (p.specialty === selectedPath || p.speciality === selectedPath) && 
+        p.available !== false &&
+        !p.assigned
+      );
+      if (matchingPreceptor) {
+        setSelectedPreceptorId(matchingPreceptor.id);
+      }
+    }
+  }, [selectedPath, preceptors]);
   
   if (!child) {
     return null;
   }
   
-  const hasEducation = !!child.educationType;
+  const hasEducation = !!child.educationType && child.educationType !== 'none';
   const educationPath = hasEducation ? findEducationPathById(child.educationType) : null;
   const preceptor = child.preceptorId ? getPreceptorById(child.preceptorId) : null;
   
@@ -91,6 +109,13 @@ export const ChildEducationDetail: React.FC = () => {
     if (selectedPath) {
       startEducation(child.id, selectedPath);
       toast.success(`${child.name} a commencé son éducation ${selectedPath}.`);
+      
+      if (selectedPreceptorId) {
+        hirePreceptor(selectedPreceptorId, child.id);
+        toast.success("Un précepteur a été assigné à cet enfant.");
+      }
+      
+      setActiveTab('progress');
     }
   };
   
@@ -111,6 +136,9 @@ export const ChildEducationDetail: React.FC = () => {
     if (hasEducation) {
       if (window.confirm(`Êtes-vous sûr de vouloir annuler l'éducation de ${child.name} ?`)) {
         cancelEducation(child.id);
+        if (child.preceptorId) {
+          firePreceptor(child.preceptorId);
+        }
         toast.error(`L'éducation de ${child.name} a été annulée.`);
       }
     }
@@ -137,7 +165,14 @@ export const ChildEducationDetail: React.FC = () => {
     setHireDialogOpen(true);
   };
   
-  // Modification here to handle specialty display with specialties array
+  // Filtrer les précepteurs par type d'éducation sélectionné
+  const filteredPreceptors = preceptors.filter(p => 
+    (p.specialty === selectedPath || p.speciality === selectedPath) && 
+    p.available !== false &&
+    !p.assigned
+  );
+  
+  // Obtenir les enfants pour notre sélecteur
   const getChildSpecialty = () => {
     if (!child.specialties || child.specialties.length === 0) {
       return child.specialty || 'Inconnue';
@@ -147,32 +182,79 @@ export const ChildEducationDetail: React.FC = () => {
     return specialty?.name || 'Inconnue';
   };
   
-  const renderEducationSetup = () => {
+  const renderSetupTabs = () => {
     return (
-      <div className="space-y-6">
-        <EducationPathSelector
-          childAge={child.age}
-          childGender={child.gender}
-          selectedPath={selectedPath}
-          onSelectPath={handleSelectPath}
-        />
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="mt-6">
+        <TabsList className="grid grid-cols-3 w-full">
+          <TabsTrigger value="path">Parcours</TabsTrigger>
+          <TabsTrigger value="specialty" disabled={!selectedPath}>Spécialité</TabsTrigger>
+          <TabsTrigger value="preceptor" disabled={!selectedSpecialty}>Précepteur</TabsTrigger>
+        </TabsList>
         
-        {selectedPath && (
-          <SpecialtySelector
-            pathId={selectedPath}
-            selectedSpecialty={selectedSpecialty}
-            onSelectSpecialty={handleSelectSpecialty}
+        <TabsContent value="path" className="mt-6">
+          <EducationPathSelector
+            childAge={child.age}
+            childGender={child.gender}
+            selectedPath={selectedPath}
+            onSelectPath={handleSelectPath}
           />
-        )}
-        
-        {selectedPath && selectedSpecialty && (
+          
           <div className="flex justify-end mt-6">
-            <Button onClick={handleStartEducation}>
-              Commencer l'éducation
+            <Button 
+              onClick={() => selectedPath && setActiveTab('specialty')}
+              disabled={!selectedPath}
+            >
+              Continuer
             </Button>
           </div>
-        )}
-      </div>
+        </TabsContent>
+        
+        <TabsContent value="specialty" className="mt-6">
+          {selectedPath && (
+            <SpecialtySelector
+              pathId={selectedPath}
+              selectedSpecialty={selectedSpecialty}
+              onSelectSpecialty={handleSelectSpecialty}
+            />
+          )}
+          
+          <div className="flex justify-between mt-6">
+            <Button variant="outline" onClick={() => setActiveTab('path')}>
+              Retour
+            </Button>
+            <Button 
+              onClick={() => selectedSpecialty && setActiveTab('preceptor')}
+              disabled={!selectedSpecialty}
+            >
+              Continuer
+            </Button>
+          </div>
+        </TabsContent>
+        
+        <TabsContent value="preceptor" className="mt-6">
+          <div className="space-y-6">
+            <h3 className="font-semibold text-lg">Choisissez un précepteur</h3>
+            
+            <PreceptorSelector
+              preceptors={filteredPreceptors}
+              selectedPreceptorId={selectedPreceptorId}
+              onSelectPreceptor={handleSelectPreceptor}
+              onHirePreceptor={openHireDialog}
+            />
+            
+            <div className="flex justify-between mt-6">
+              <Button variant="outline" onClick={() => setActiveTab('specialty')}>
+                Retour
+              </Button>
+              <Button onClick={handleStartEducation}>
+                {selectedPreceptorId 
+                  ? "Commencer l'éducation avec ce précepteur" 
+                  : "Commencer l'éducation sans précepteur"}
+              </Button>
+            </div>
+          </div>
+        </TabsContent>
+      </Tabs>
     );
   };
   
@@ -257,11 +339,17 @@ export const ChildEducationDetail: React.FC = () => {
                   
                   <div>
                     <p className="text-sm text-slate-500">Coût annuel</p>
-                    <p className="font-medium">{preceptor.price} as</p>
+                    <p className="font-medium">{preceptor.price || preceptor.cost} as</p>
                   </div>
                 </div>
                 
-                <div className="flex justify-end">
+                <div className="flex justify-between">
+                  <Button 
+                    variant="outline" 
+                    onClick={() => navigate(`/famille/education/preceptor/${preceptor.id}`)}
+                  >
+                    Voir détails
+                  </Button>
                   <Button 
                     variant="outline" 
                     className="text-red-600 hover:bg-red-50"
@@ -274,16 +362,9 @@ export const ChildEducationDetail: React.FC = () => {
             ) : (
               <div className="space-y-4">
                 <p className="text-slate-500">Aucun précepteur n'est assigné à cet enfant.</p>
-                
-                <PreceptorSelector
-                  preceptors={preceptors.filter(p => 
-                    (p.specialty === child.educationType || p.speciality === child.educationType) && 
-                    p.available !== false
-                  )}
-                  selectedPreceptorId={selectedPreceptorId}
-                  onSelectPreceptor={handleSelectPreceptor}
-                  onHirePreceptor={openHireDialog}
-                />
+                <Button onClick={() => navigate('/famille/education/preceptors')}>
+                  Trouver un précepteur
+                </Button>
               </div>
             )}
           </div>
@@ -301,7 +382,7 @@ export const ChildEducationDetail: React.FC = () => {
         </Button>
       </div>
       
-      {hasEducation ? renderEducationProgress() : renderEducationSetup()}
+      {hasEducation ? renderEducationProgress() : renderSetupTabs()}
       
       <HirePreceptorDialog
         isOpen={hireDialogOpen}
