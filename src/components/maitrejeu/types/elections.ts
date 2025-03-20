@@ -10,9 +10,11 @@ export interface Election {
   candidats?: string[];
   vainqueur?: string;
   
-  // Propriétés manquantes dans l'interface mais utilisées dans le code
+  // Propriétés manquantes et alias pour compatibilité
   year?: number; // Alias pour année
   season?: string; // Alias pour saison
   status?: 'scheduled' | 'in_progress' | 'completed' | 'cancelled'; // Alias pour statut en anglais
   poste?: string; // Alias pour magistrature
+  annee?: number; // Alternative à année (sans accent)
+  results?: any; // Résultats détaillés de l'élection
 }

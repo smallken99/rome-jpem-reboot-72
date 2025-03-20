@@ -11,10 +11,11 @@ export const GAME_PHASES = {
 export const EVENT_STATUS = {
   SCHEDULED: 'planifiée',
   IN_PROGRESS: 'en cours',
-  COMPLETED: 'terminée'
+  COMPLETED: 'terminée',
+  CANCELLED: 'annulée'
 };
 
-// Ajouter une table de correspondance pour les phases de jeu
+// Table de correspondance pour les phases de jeu
 export const GAME_PHASE_MAP = {
   FORUM: 'FORUM',
   COMBAT: 'COMBAT',
@@ -22,9 +23,18 @@ export const GAME_PHASE_MAP = {
   COMMERCE: 'COMMERCE'
 };
 
-// Ajouter une table de correspondance pour les statuts en anglais et français
+// Table de correspondance pour les statuts en anglais et français
 export const EVENT_STATUS_MAP = {
   scheduled: 'planifiée',
   in_progress: 'en cours',
-  completed: 'terminée'
+  completed: 'terminée',
+  cancelled: 'annulée'
+};
+
+// Mapping inverse
+export const EVENT_STATUS_REVERSE_MAP = {
+  'planifiée': 'scheduled',
+  'en cours': 'in_progress',
+  'terminée': 'completed',
+  'annulée': 'cancelled'
 };

@@ -14,8 +14,12 @@ export interface HistoireEntry {
   auteur?: string;
   tags?: string[];
   
-  // Propriétés manquantes dans l'interface mais utilisées dans le code
+  // Propriétés additionnelles nécessaires
   titre?: string;
   title?: string; // Alias pour titre
   year?: number; // Pour compatibilité
+  description?: string; // Alias pour contenu
+  catégorie?: string; // Alias pour type
+  personnagesImpliqués?: string[]; // Personnages impliqués dans l'événement
+  visible?: boolean; // Visibilité de l'entrée d'histoire
 }

@@ -1,96 +1,52 @@
 
+// Types pour l'équilibre de la République
+
 export interface Equilibre {
-  // Facteurs politiques
+  // Propriétés pour l'équilibre politique
   populaires: number;
-  populares: number; // Alias pour compatibilité
   optimates: number;
   moderates: number;
   
-  // Facteurs économiques
-  économie: number; 
-  economicStability: number; // Alias pour compatibilité
+  // Alias pour compatibilité
+  populares?: number;
   
-  // Facteurs sociaux
-  armée: number;
-  facteurMilitaire: number; // Alias pour compatibilité
-  morale: number;
-  facteurPlebs: number;
-  plébéiens: number; // Alias pour compatibilité
-  facteurPatriciens: number;
-  patriciens: number; // Alias pour compatibilité
+  // Facteurs d'équilibre
+  facteurSenat?: number;
+  facteurPlebs?: number;
+  facteurPatriciens?: number;
+  facteurMilitaire?: number;
+  facteurReligieux?: number;
   
-  // Facteurs de stabilité
-  stabilité: number;
-  mécontentement: number;
-  corruption: number;
-  influence_extérieure: number;
-  
-  // Ajout des propriétés manquantes
-  facteurSenat: number;
-  facteurReligieux: number;
-  notes?: string;
-  population?: number;
+  // Statut de la population
+  population: number;
   criminalityIndex?: number;
   indiceCrime?: number;
+  economicStability?: number;
   foodSupply?: number;
   publicOrder?: number;
+  
+  // Seuils de risque
   unrestThreshold?: number;
   rebellionThreshold?: number;
+  
+  // Historique des changements
   historique?: any[];
+  
+  // Propriétés supplémentaires
+  armée?: number;
+  économie?: number;
+  morale?: number;
   loyauté?: number;
+  patriciens?: number;
+  plébéiens?: number;
   neutrales?: number;
-}
-
-export interface PoliticalEvent {
-  id: string;
-  title: string;
-  description: string;
-  year: number;
-  date?: {
-    year: number;
-    season: string;
-  };
-  importance?: 'mineure' | 'normale' | 'majeure' | 'critique';
-  effects: {
-    populaires?: number;
-    optimates?: number;
-    moderates?: number;
-    économie?: number;
-    armée?: number;
-    morale?: number;
-    plébéiens?: number;
-    patriciens?: number;
-    stabilité?: number;
-    mécontentement?: number;
-    corruption?: number;
-    influence_extérieure?: number;
-  };
-  resolved: boolean;
-  type?: string;
-  faction?: string;
-}
-
-// Types d'alias pour assurer la compatibilité entre les interfaces
-export interface RepublicEquilibre {
-  populares: number;
-  populaires: number;
-  optimates: number;
-  moderates: number;
-  économie: number;
-  economicStability: number;
-  armée: number;
-  facteurMilitaire: number;
-  morale: number;
-  facteurPlebs: number;
-  plébéiens: number;
-  facteurPatriciens: number;
-  patriciens: number;
-  stabilité: number;
-  mécontentement: number;
-  corruption: number;
-  influence_extérieure: number;
-  // Ajout des propriétés manquantes
-  facteurSenat: number;
-  facteurReligieux: number;
+  
+  // Nouveaux paramètres requis
+  stabilité?: number;
+  mécontentement?: number;
+  corruption?: number;
+  influence_extérieure?: number;
+  
+  // Notes
   notes?: string;
 }

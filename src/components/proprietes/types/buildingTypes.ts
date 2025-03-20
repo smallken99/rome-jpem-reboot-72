@@ -1,4 +1,3 @@
-
 export interface BuildingDescription {
   id: string;
   name: string;
@@ -26,10 +25,10 @@ export interface OwnedBuilding {
   id: string;
   buildingId: string;
   name: string;
-  type: string; // Rendre ce champ obligatoire
+  type: string; // Propriété obligatoire
   location: string;
   condition: number;
-  maintenanceLevel: number; // Rendre ce champ obligatoire
+  maintenanceLevel: number; // Propriété obligatoire
   income: number;
   workers: number;
   securityLevel: number;

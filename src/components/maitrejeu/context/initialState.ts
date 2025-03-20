@@ -464,7 +464,7 @@ export const initialElections: Election[] = [];
 export const initialHistoireEntries: HistoireEntry[] = [];
 export const initialLois: Loi[] = [];
 
-// Ajustement de l'initialEquilibre pour inclure à la fois populaires et populares
+// Ajustement de l'initialEquilibre pour inclure toutes les propriétés requises
 export const initialEquilibre: Equilibre = {
   facteurSenat: 40,
   facteurPlebs: 60,
@@ -472,6 +472,7 @@ export const initialEquilibre: Equilibre = {
   facteurMilitaire: 60,
   facteurReligieux: 65,
   populaires: 45,
+  populaires: 45, // Ajout de l'alias
   optimates: 55,
   moderates: 30,
   population: 800000,
@@ -492,6 +493,12 @@ export const initialEquilibre: Equilibre = {
   patriciens: 80,
   plébéiens: 40,
   neutrales: 30,
+  
+  // Propriétés requises manquantes
+  stabilité: 65,
+  mécontentement: 35,
+  corruption: 25,
+  influence_extérieure: 15,
   
   // Notes
   notes: "Etat actuel de l'équilibre de la République"
