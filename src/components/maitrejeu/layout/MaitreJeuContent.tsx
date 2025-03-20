@@ -24,27 +24,28 @@ export const MaitreJeuContent: React.FC<MaitreJeuContentProps> = ({ activeTab })
   // Détecter si la section active nécessite le TimePanel
   const showTimePanel = activeTab !== 'accueil';
   
+  // Mappage des onglets vers les composants
+  const tabComponents: Record<string, React.ReactNode> = {
+    'accueil': <MaitreJeuWelcome />,
+    'senateurs': <GestionSenateurs />,
+    'provinces': <GestionProvinces />,
+    'politique': <GestionPolitique />,
+    'equilibre': <GestionEquilibre />,
+    'histoire': <GestionHistoire />,
+    'clients': <GestionClients />,
+    'economie': <GestionEconomie />,
+    'familles': <GestionFamilles />,
+    'republique': <GestionRepublique />,
+    'batiments': <GestionBatiments />,
+    'lois': <GestionLois />,
+    'database': <GestionDatabase />,
+    'statistiques': <MaitreJeuStats />
+  };
+  
   return (
     <div className="bg-background border rounded-lg shadow overflow-hidden">
       {showTimePanel && <TimePanel />}
-      
-      {/* Page d'accueil */}
-      {activeTab === 'accueil' && <MaitreJeuWelcome />}
-      
-      {/* Sections principales */}
-      {activeTab === 'senateurs' && <GestionSenateurs />}
-      {activeTab === 'provinces' && <GestionProvinces />}
-      {activeTab === 'politique' && <GestionPolitique />}
-      {activeTab === 'equilibre' && <GestionEquilibre />}
-      {activeTab === 'histoire' && <GestionHistoire />}
-      {activeTab === 'clients' && <GestionClients />}
-      {activeTab === 'economie' && <GestionEconomie />}
-      {activeTab === 'familles' && <GestionFamilles />}
-      {activeTab === 'republique' && <GestionRepublique />}
-      {activeTab === 'batiments' && <GestionBatiments />}
-      {activeTab === 'lois' && <GestionLois />}
-      {activeTab === 'database' && <GestionDatabase />}
-      {activeTab === 'statistiques' && <MaitreJeuStats />}
+      {tabComponents[activeTab] || <div className="p-6">Section non trouvée</div>}
     </div>
   );
 };

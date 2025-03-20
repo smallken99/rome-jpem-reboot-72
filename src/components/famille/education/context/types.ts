@@ -11,16 +11,20 @@ export interface EducationContextType {
   isEducating: {[childId: string]: boolean} | string[];
   educatingChildren: {[childId: string]: boolean} | string[];
   
-  // Required methods for ChildEducationDetail.tsx
+  // Child management methods
   getChild: (id: string) => Child | undefined;
-  getPreceptorById: (id: string) => Preceptor | null; // Added this method
+  getPreceptorById: (id: string) => Preceptor | null;
   findEducationPathById: (pathType: string) => any;
   setSelectedChildId: (id: string | null) => void;
+  
+  // Education process methods
   startEducation: (childId: string, type: string, mentorId?: string, specialties?: string[]) => void;
   advanceEducation: (childId: string) => void;
   advanceEducationYear: (childId: string) => void;
   completeEducation: (childId: string) => void;
   cancelEducation: (childId: string) => void;
+  
+  // Preceptor management methods
   hirePreceptor: (preceptorId: string, childId?: string) => void;
   firePreceptor: (preceptorId: string) => void;
   assignPreceptorToChild: (preceptorId: string, childId: string) => void;

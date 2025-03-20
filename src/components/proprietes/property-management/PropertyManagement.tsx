@@ -23,7 +23,6 @@ export const PropertyManagement: React.FC = () => {
     sellBuilding
   } = useBuildingManagement();
   
-  // Assurer que l'OwnedBuilding inclut toutes les propriétés requises
   const buildingWithType = buildings.find(b => b.id === (buildingId || "building-1"));
   const building = buildingWithType ? {
     ...buildingWithType,
@@ -58,7 +57,6 @@ export const PropertyManagement: React.FC = () => {
   };
 
   const handleUpdateMaintenanceLevel = (buildingId: string, level: number) => {
-    // Implémentation correcte avec le bon ordre de paramètres
     updateBuildingCondition(buildingId, level);
     toast.success(`Niveau d'entretien mis à jour pour ${building.name}`);
   };
@@ -69,7 +67,6 @@ export const PropertyManagement: React.FC = () => {
   };
 
   const handleUpdateWorkers = (buildingId: string, count: number) => {
-    // Implémentation correcte avec le bon ordre de paramètres
     assignSlaves(buildingId, count);
   };
 

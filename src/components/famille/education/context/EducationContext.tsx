@@ -12,7 +12,6 @@ interface EducationContextType {
   hiredPreceptors: Preceptor[];
   selectedChildId: string | null;
   
-  // Child functions
   addChild: (child: Omit<Child, 'id' | 'progress'>) => string;
   removeChild: (id: string) => void;
   updateChildName: (id: string, name: string) => void;
@@ -22,14 +21,12 @@ interface EducationContextType {
   getChildById: (id: string) => Child | undefined;
   setSelectedChildId: (id: string | null) => void;
   
-  // Education functions
   startEducation: (childId: string, educationType?: EducationType, mentorId?: string, specialties?: string[]) => void;
   advanceEducationYear: (childId: string) => void;
   advanceEducation: (childId: string) => void;
   completeEducation: (childId: string) => void;
   cancelEducation: (childId: string) => void;
   
-  // Preceptor functions
   addPreceptor: (preceptor: Omit<Preceptor, 'id'>) => string;
   removePreceptor: (id: string) => void;
   hirePreceptor: (id: string, childId?: string) => boolean;
@@ -37,12 +34,10 @@ interface EducationContextType {
   loadPreceptorsByType: (type: string) => Preceptor[];
   refreshPreceptors: () => void;
   
-  // Path functions
   findEducationPathById: (pathType: string) => any;
   getEducationPathById: (pathType: string) => any;
   getAllEducationPaths: () => any[];
   
-  // Additional functions
   getPreceptorById: (id: string) => Preceptor | null;
 }
 
@@ -442,5 +437,23 @@ export const EducationProvider: React.FC<{ children: ReactNode }> = ({ children 
     findEducationPathById,
     getEducationPathById,
     getAllEducationPaths,
+    
+    getPreceptorById
+  };
+  
+  return (
+    <EducationContext.Provider value={value}>
+      {children}
+    </EducationContext.Provider>
+  );
+};
 
+export const useEducation = () => {
+  const context = useContext(EducationContext);
+  if (context === undefined) {
+    throw new Error('useEducation must be used within an EducationProvider');
+  }
+  return context;
+};
 
+export default EducationContext;
