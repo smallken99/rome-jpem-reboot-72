@@ -1,16 +1,21 @@
 
-import { GameDate, ImportanceType } from './common';
+// Types pour l'histoire
 
 export interface HistoireEntry {
   id: string;
-  titre: string;
+  date: {
+    year: number;
+    season: string;
+  };
   contenu: string;
-  date: GameDate;
-  catégorie: string;
-  importance: ImportanceType;
-  auteur: string;
-  visible: boolean;
-  type?: string; // For backward compatibility
-  description?: string; // For backward compatibility
-  personnagesImpliqués?: string[]; // Add this field
+  type: string;
+  importance: 'mineure' | 'majeure' | 'critique' | 'normale';
+  sources?: string[];
+  auteur?: string;
+  tags?: string[];
+  
+  // Propriétés manquantes dans l'interface mais utilisées dans le code
+  titre?: string;
+  title?: string; // Alias pour titre
+  year?: number; // Pour compatibilité
 }

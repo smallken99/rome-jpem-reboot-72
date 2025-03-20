@@ -25,9 +25,9 @@ export const ProvinceCard: React.FC<ProvinceCardProps> = ({
 
   const getLoyaltyTrend = () => {
     const variation = province.variationLoyauté;
-    if (variation > 0) {
+    if (variation && variation > 0) {
       return <span className="text-green-600 flex items-center"><ArrowUpIcon className="w-4 h-4 mr-1" />{Math.abs(variation)}%</span>;
-    } else if (variation < 0) {
+    } else if (variation && variation < 0) {
       return <span className="text-red-600 flex items-center"><ArrowDownIcon className="w-4 h-4 mr-1" />{Math.abs(variation)}%</span>;
     } else {
       return <span className="text-gray-600">Stable</span>;
@@ -55,7 +55,7 @@ export const ProvinceCard: React.FC<ProvinceCardProps> = ({
             <div className="text-xs text-muted-foreground">Armée</div>
             <div className="font-semibold flex items-center">
               <ShieldIcon className="w-3 h-3 mr-1" />
-              {province.armée} {province.armée > 0 ? 'légions' : 'légion'}
+              {province.armée} {province.armée && province.armée > 0 ? 'légions' : 'légion'}
             </div>
           </div>
           <div className="bg-muted/50 p-2 rounded">
@@ -76,7 +76,7 @@ export const ProvinceCard: React.FC<ProvinceCardProps> = ({
         <div className="text-sm">
           <div className="flex justify-between">
             <span className="text-muted-foreground">Ressource:</span>
-            <span className="font-medium">{province.ressource}</span>
+            <span className="font-medium">{province.ressource || province.ressources?.[0] || 'N/A'}</span>
           </div>
           <div className="flex justify-between mt-1">
             <span className="text-muted-foreground">Gouverneur:</span>
@@ -85,7 +85,7 @@ export const ProvinceCard: React.FC<ProvinceCardProps> = ({
         </div>
       </CardContent>
       <CardFooter className="pt-2 flex justify-between">
-        <Button variant="outline" size="sm" onClick={onSelect}>
+        <Button variant="outline" size="sm" onClick={() => onSelect && onSelect(province.id)}>
           Détails
         </Button>
         <div className="space-x-2">

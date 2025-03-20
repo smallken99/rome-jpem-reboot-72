@@ -26,15 +26,23 @@ export interface OwnedBuilding {
   id: string;
   buildingId: string;
   name: string;
-  type: string;
+  type: string; // Rendre ce champ obligatoire
   location: string;
   condition: number;
-  maintenanceLevel: number;
+  maintenanceLevel: number; // Rendre ce champ obligatoire
   income: number;
   workers: number;
   securityLevel: number;
   description?: string;
   buildingDescription?: BuildingDescription;
+  buildingType?: string; // Pour la compatibilité
+  maintenanceEnabled?: boolean;
+  maintenanceCost?: number;
+  slaves?: number;
+  purchaseDate?: Date;
+  lastMaintenance?: Date;
+  size?: string;
+  status?: string;
 }
 
 export interface BuildingOperations {

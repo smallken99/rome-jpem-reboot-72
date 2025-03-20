@@ -27,6 +27,11 @@ export interface Evenement {
   options: EvenementAction[];
   resolved: boolean;
   selectedOption?: string;
+  
+  // Propriétés manquantes dans l'interface mais utilisées dans le code
+  status?: 'planifiée' | 'en cours' | 'terminée';
+  year?: number; // Pour compatibilité
+  title?: string; // Alias pour titre
 }
 
 // Interface pour les props du formulaire d'événements

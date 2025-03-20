@@ -17,10 +17,22 @@ export interface Province {
   location: string;
   type: 'sénatoriale' | 'impériale';
   loyalty: number; // Ajout de loyalty pour compatibilité
+  
+  // Propriétés manquantes dans l'interface mais utilisées dans le code
+  région?: string;
+  status?: string;
+  armée?: number;
+  loyauté?: number;
+  variationLoyauté?: number;
+  richesse?: number;
+  ressource?: string;
+  revenue?: number; // Alias pour revenu
 }
 
 export interface ProvinceCardProps {
   province: Province;
   onSelect?: (provinceId: string) => void;
   selected?: boolean;
+  onEdit?: (province: Province) => void;
+  onDelete?: (provinceId: string) => void;
 }

@@ -24,6 +24,21 @@ export interface Equilibre {
   mécontentement: number;
   corruption: number;
   influence_extérieure: number;
+  
+  // Ajout des propriétés manquantes
+  facteurSenat: number;
+  facteurReligieux: number;
+  notes?: string;
+  population?: number;
+  criminalityIndex?: number;
+  indiceCrime?: number;
+  foodSupply?: number;
+  publicOrder?: number;
+  unrestThreshold?: number;
+  rebellionThreshold?: number;
+  historique?: any[];
+  loyauté?: number;
+  neutrales?: number;
 }
 
 export interface PoliticalEvent {
@@ -31,6 +46,11 @@ export interface PoliticalEvent {
   title: string;
   description: string;
   year: number;
+  date?: {
+    year: number;
+    season: string;
+  };
+  importance?: 'mineure' | 'normale' | 'majeure' | 'critique';
   effects: {
     populaires?: number;
     optimates?: number;
@@ -46,6 +66,8 @@ export interface PoliticalEvent {
     influence_extérieure?: number;
   };
   resolved: boolean;
+  type?: string;
+  faction?: string;
 }
 
 // Types d'alias pour assurer la compatibilité entre les interfaces
@@ -67,4 +89,8 @@ export interface RepublicEquilibre {
   mécontentement: number;
   corruption: number;
   influence_extérieure: number;
+  // Ajout des propriétés manquantes
+  facteurSenat: number;
+  facteurReligieux: number;
+  notes?: string;
 }
