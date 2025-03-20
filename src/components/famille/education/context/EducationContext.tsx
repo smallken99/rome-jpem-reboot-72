@@ -1,4 +1,3 @@
-
 import React, { createContext, useContext, useState, useCallback, ReactNode } from 'react';
 import { Child, Preceptor, EducationType } from '../types/educationTypes';
 import { v4 as uuidv4 } from 'uuid';
@@ -42,6 +41,9 @@ interface EducationContextType {
   findEducationPathById: (pathType: string) => any;
   getEducationPathById: (pathType: string) => any;
   getAllEducationPaths: () => any[];
+  
+  // Additional functions
+  getPreceptorById: (id: string) => Preceptor | null;
 }
 
 const EducationContext = createContext<EducationContextType | undefined>(undefined);
@@ -176,7 +178,6 @@ export const EducationProvider: React.FC<{ children: ReactNode }> = ({ children 
     return getChild(id);
   }, [getChild]);
   
-  // Rename this function to avoid the naming conflict with the state setter
   const handleSelectedChildChange = useCallback((id: string | null) => {
     setSelectedChildId(id);
   }, []);
@@ -400,6 +401,14 @@ export const EducationProvider: React.FC<{ children: ReactNode }> = ({ children 
     console.log("Refreshing preceptors...");
   }, []);
   
+  const getPreceptorById = useCallback((id: string) => {
+    const preceptor = preceptorsData.find(p => p.id === id);
+    if (!preceptor) {
+      return null;
+    }
+    return preceptor;
+  }, [preceptorsData]);
+  
   const value = {
     children: childrenData,
     preceptors: preceptorsData,
@@ -415,7 +424,7 @@ export const EducationProvider: React.FC<{ children: ReactNode }> = ({ children 
     assignPreceptorToChild,
     getChild,
     getChildById,
-    setSelectedChildId: handleSelectedChildChange, // Use the renamed function here
+    setSelectedChildId: handleSelectedChildChange,
     
     startEducation,
     advanceEducationYear,
@@ -432,20 +441,6 @@ export const EducationProvider: React.FC<{ children: ReactNode }> = ({ children 
     
     findEducationPathById,
     getEducationPathById,
-    getAllEducationPaths
-  };
-  
-  return (
-    <EducationContext.Provider value={value}>
-      {children}
-    </EducationContext.Provider>
-  );
-};
+    getAllEducationPaths,
 
-export const useEducation = () => {
-  const context = useContext(EducationContext);
-  if (context === undefined) {
-    throw new Error('useEducation must be used within an EducationProvider');
-  }
-  return context;
-};
+

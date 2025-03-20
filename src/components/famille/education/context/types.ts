@@ -13,6 +13,7 @@ export interface EducationContextType {
   
   // Required methods for ChildEducationDetail.tsx
   getChild: (id: string) => Child | undefined;
+  getPreceptorById: (id: string) => Preceptor | null; // Added this method
   findEducationPathById: (pathType: string) => any;
   setSelectedChildId: (id: string | null) => void;
   startEducation: (childId: string, type: string, mentorId?: string, specialties?: string[]) => void;

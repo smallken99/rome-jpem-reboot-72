@@ -1,4 +1,3 @@
-
 export type EducationType = 'none' | 'military' | 'rhetoric' | 'academic' | 'religious' | 'political';
 export type Gender = 'male' | 'female';
 export type EducationPathType = EducationType;
@@ -41,6 +40,7 @@ export interface Preceptor {
   reputation?: number;
   background?: string;
   portrait?: string;
+  teachingStyle?: string;
 }
 
 export interface EducationSession {

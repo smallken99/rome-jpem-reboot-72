@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -17,6 +16,7 @@ interface MaintenanceTabProps {
   updateMaintenanceLevel: (buildingId: string, level: number) => void;
   updateSecurityLevel: (buildingId: string, level: number) => void;
   renovateBuilding: (buildingId: string) => void;
+  toggleMaintenance?: (enabled: boolean) => void;
 }
 
 const MAINTENANCE_LEVELS = ['Minimal', 'Basique', 'Standard', 'Élevé', 'Luxueux'];
@@ -26,11 +26,11 @@ export const MaintenanceTab: React.FC<MaintenanceTabProps> = ({
   building,
   updateMaintenanceLevel,
   updateSecurityLevel,
-  renovateBuilding
+  renovateBuilding,
+  toggleMaintenance
 }) => {
   const [activeSection, setActiveSection] = useState('maintenance');
   
-  // Handlers
   const handleMaintenanceChange = (value: number[]) => {
     updateMaintenanceLevel(building.id, value[0]);
   };
@@ -43,19 +43,14 @@ export const MaintenanceTab: React.FC<MaintenanceTabProps> = ({
     renovateBuilding(building.id);
   };
 
-  // Calculer le coût d'entretien actuel
   const maintenanceCost = calculateMaintenanceCost(building);
   
-  // Calculer le revenu avec le niveau d'entretien actuel
   const currentIncome = calculateIncomeByMaintenance(building);
   
-  // Calculer le ratio revenu/coût
   const profitRatio = maintenanceCost > 0 ? currentIncome / maintenanceCost : 0;
   
-  // Déterminer si la rénovation est nécessaire
   const needsRenovation = building.condition < 50;
   
-  // Calculer le coût de rénovation
   const renovationCost = building.buildingDescription 
     ? Math.round((100 - building.condition) / 100 * building.buildingDescription.cost * 0.5)
     : 5000;
