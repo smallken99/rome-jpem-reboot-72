@@ -50,3 +50,18 @@ export interface Equilibre {
   // Notes
   notes?: string;
 }
+
+export interface PoliticalEvent {
+  id: string;
+  title: string;
+  description: string;
+  type: string;
+  importance: 'mineure' | 'majeure' | 'critique' | 'normale';
+  faction?: string;
+  date?: {
+    year: number;
+    season: string;
+  };
+  effects?: Record<string, any>;
+  tags?: string[];
+}

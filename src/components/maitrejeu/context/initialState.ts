@@ -472,7 +472,6 @@ export const initialEquilibre: Equilibre = {
   facteurMilitaire: 60,
   facteurReligieux: 65,
   populaires: 45,
-  populaires: 45, // Ajout de l'alias
   optimates: 55,
   moderates: 30,
   population: 800000,
@@ -494,11 +493,14 @@ export const initialEquilibre: Equilibre = {
   plébéiens: 40,
   neutrales: 30,
   
-  // Propriétés requises manquantes
+  // Propriétés requises 
   stabilité: 65,
   mécontentement: 35,
   corruption: 25,
   influence_extérieure: 15,
+  
+  // Pour la compatibilité
+  populaires: 45,
   
   // Notes
   notes: "Etat actuel de l'équilibre de la République"

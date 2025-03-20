@@ -19,6 +19,7 @@ export const HistoireEntryForm: React.FC<HistoireEntryFormProps> = ({ year, seas
     titre: '',
     contenu: '',
     date: { year, season },
+    type: 'POLITIQUE', // Assurez-vous que type est défini
     catégorie: 'POLITIQUE',
     importance: 'normale',
     auteur: 'Système',
@@ -43,7 +44,7 @@ export const HistoireEntryForm: React.FC<HistoireEntryFormProps> = ({ year, seas
     } else if (name === 'catégorie') {
       setFormData(prev => ({
         ...prev,
-        type: value,
+        type: value, // Mettre à jour à la fois type et catégorie
         catégorie: value
       }));
     } else {
@@ -68,6 +69,7 @@ export const HistoireEntryForm: React.FC<HistoireEntryFormProps> = ({ year, seas
       titre: '',
       contenu: '',
       date: { year, season },
+      type: 'POLITIQUE', // S'assurer que le formulaire réinitialisé a un type
       catégorie: 'POLITIQUE',
       importance: 'normale',
       auteur: 'Système',

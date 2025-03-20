@@ -24,11 +24,12 @@ export const PropertyManagement: React.FC = () => {
     sellBuilding
   } = useBuildingManagement();
   
-  // Assurer que l'OwnedBuilding inclut la propriété type requise
+  // Assurer que l'OwnedBuilding inclut la propriété type et maintenanceLevel requise
   const buildingWithType = buildings.find(b => b.id === (buildingId || "building-1"));
   const building = buildingWithType ? {
     ...buildingWithType,
-    type: buildingWithType.type || 'other' as BuildingType
+    type: buildingWithType.type || 'other' as BuildingType,
+    maintenanceLevel: buildingWithType.maintenanceLevel || 1
   } : null;
 
   if (!building) {

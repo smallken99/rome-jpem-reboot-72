@@ -17,10 +17,10 @@ const mockBuildings: OwnedBuilding[] = [
     buildingId: 'domus-1',
     name: 'Domus Palatina',
     buildingType: 'urban',
-    type: 'domus', // Ajout de la propriété type obligatoire
+    type: 'domus', // Type obligatoire
     location: 'Rome',
     condition: 85,
-    maintenanceLevel: 2, // Obligation d'ajouter cette propriété
+    maintenanceLevel: 2, // Propriété obligatoire
     income: 2000,
     workers: 5,
     securityLevel: 2,
@@ -33,10 +33,10 @@ const mockBuildings: OwnedBuilding[] = [
     buildingId: 'villa-1',
     name: 'Villa Rustica',
     buildingType: 'rural',
-    type: 'villa', // Ajout de la propriété type obligatoire
+    type: 'villa', // Type obligatoire
     location: 'Campanie',
     condition: 70,
-    maintenanceLevel: 1, // Obligation d'ajouter cette propriété
+    maintenanceLevel: 1, // Propriété obligatoire
     income: 5000,
     workers: 50,
     securityLevel: 1,
