@@ -1,59 +1,58 @@
 
 import React from 'react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog';
+import { 
+  Dialog, 
+  DialogContent, 
+  DialogDescription, 
+  DialogHeader, 
+  DialogTitle,
+  DialogFooter 
+} from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { useEducation } from '../context/EducationContext';
 
-export interface FirePreceptorDialogProps {
+interface FirePreceptorDialogProps {
   isOpen: boolean;
   onOpenChange: (open: boolean) => void;
   preceptorId: string;
   onFire: () => void;
 }
 
-export const FirePreceptorDialog: React.FC<FirePreceptorDialogProps> = ({
-  isOpen,
-  onOpenChange,
-  preceptorId,
-  onFire
+export const FirePreceptorDialog: React.FC<FirePreceptorDialogProps> = ({ 
+  isOpen, 
+  onOpenChange, 
+  preceptorId, 
+  onFire 
 }) => {
-  const { preceptors } = useEducation();
-  const preceptor = preceptors.find(p => p.id === preceptorId);
-
+  const { getPreceptorById } = useEducation();
+  const preceptor = getPreceptorById(preceptorId);
+  
   if (!preceptor) {
     return null;
   }
-
-  const handleConfirm = () => {
-    onFire();
-    onOpenChange(false);
-  };
-
+  
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[425px]">
+      <DialogContent>
         <DialogHeader>
-          <DialogTitle>Renvoyer {preceptor.name}</DialogTitle>
+          <DialogTitle>Confirmer le renvoi</DialogTitle>
           <DialogDescription>
-            Êtes-vous sûr de vouloir renvoyer ce précepteur ?
+            Êtes-vous sûr de vouloir renvoyer {preceptor.name}? L'éducation de l'enfant assigné pourrait en souffrir.
           </DialogDescription>
         </DialogHeader>
-
-        <div className="mt-4 space-y-2">
-          <p className="text-sm text-amber-600">
-            Cette action est irréversible. L'éducation de l'enfant sera interrompue.
-          </p>
-          <p className="text-sm">
-            Vous pourrez engager un nouveau précepteur ultérieurement.
-          </p>
+        
+        <div className="py-4">
+          <div className="p-3 bg-amber-50 border border-amber-200 rounded-md text-amber-800">
+            <p>Attention: Renvoyer un précepteur avant la fin de l'éducation peut ralentir la progression de l'enfant.</p>
+          </div>
         </div>
-
-        <DialogFooter className="mt-6">
+        
+        <DialogFooter>
           <Button variant="outline" onClick={() => onOpenChange(false)}>
             Annuler
           </Button>
-          <Button variant="destructive" onClick={handleConfirm}>
-            Renvoyer le précepteur
+          <Button variant="destructive" onClick={onFire}>
+            Confirmer le renvoi
           </Button>
         </DialogFooter>
       </DialogContent>

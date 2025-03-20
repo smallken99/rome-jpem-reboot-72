@@ -1,76 +1,73 @@
-import React, { createContext, useContext, useState, useCallback, ReactNode } from 'react';
+
+import React, { createContext, useContext, useState, useCallback, ReactNode, useEffect } from 'react';
 import { Child, Preceptor, EducationType } from '../types/educationTypes';
+import { Character } from '@/types/character';
 import { v4 as uuidv4 } from 'uuid';
 import { toast } from 'sonner';
 import { militaryPath, religiousPath, rhetoricPath, academicPath } from '../data/paths';
-
-interface EducationContextType {
-  children: Child[];
-  preceptors: Preceptor[];
-  educatingChildren: string[];
-  isEducating: Record<string, boolean>;
-  hiredPreceptors: Preceptor[];
-  selectedChildId: string | null;
-  
-  addChild: (child: Omit<Child, 'id' | 'progress'>) => string;
-  removeChild: (id: string) => void;
-  updateChildName: (id: string, name: string) => void;
-  updateChildEducation: (id: string, educationType: EducationType) => void;
-  assignPreceptorToChild: (childId: string, preceptorId: string) => void;
-  getChild: (id: string) => Child | undefined;
-  getChildById: (id: string) => Child | undefined;
-  setSelectedChildId: (id: string | null) => void;
-  
-  startEducation: (childId: string, educationType?: EducationType, mentorId?: string, specialties?: string[]) => void;
-  advanceEducationYear: (childId: string) => void;
-  advanceEducation: (childId: string) => void;
-  completeEducation: (childId: string) => void;
-  cancelEducation: (childId: string) => void;
-  
-  addPreceptor: (preceptor: Omit<Preceptor, 'id'>) => string;
-  removePreceptor: (id: string) => void;
-  hirePreceptor: (id: string, childId?: string) => boolean;
-  firePreceptor: (id: string) => void;
-  loadPreceptorsByType: (type: string) => Preceptor[];
-  refreshPreceptors: () => void;
-  
-  findEducationPathById: (pathType: string) => any;
-  getEducationPathById: (pathType: string) => any;
-  getAllEducationPaths: () => any[];
-  
-  getPreceptorById: (id: string) => Preceptor | null;
-}
+import { EducationContextType, EducationProviderProps } from './types';
 
 const EducationContext = createContext<EducationContextType | undefined>(undefined);
 
-export const EducationProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
-  const [childrenData, setChildrenData] = useState<Child[]>([
-    {
-      id: '1',
-      name: 'Lucius Cornelius',
-      age: 10,
-      gender: 'male',
-      educationType: 'military',
-      progress: 35,
-      preceptorId: '2'
-    },
-    {
-      id: '2',
-      name: 'Julia Cornelia',
-      age: 12,
-      gender: 'female',
-      educationType: 'rhetoric',
-      progress: 60
-    },
-    {
-      id: '3',
-      name: 'Marcus Cornelius',
-      age: 8,
-      gender: 'male',
-      educationType: 'none',
-      progress: 0
+export const EducationProvider: React.FC<EducationProviderProps> = ({ 
+  children, 
+  characters = [],
+  onCharacterUpdate
+}) => {
+  // Initialize children from characters if available
+  const initializeChildrenFromCharacters = () => {
+    if (characters && characters.length > 0) {
+      return characters
+        .filter(char => char.age < 21) // Considérer uniquement les personnages jeunes comme des enfants
+        .map(char => ({
+          id: char.id,
+          name: char.name,
+          age: char.age,
+          gender: char.gender,
+          educationType: char.education?.type as EducationType || 'none',
+          progress: char.currentEducation?.progress || 0,
+          preceptorId: char.currentEducation?.mentorId,
+          specialties: char.education?.specialties || [],
+          status: char.currentEducation?.progress === 100 ? 'completed' : 'in_progress'
+        }));
     }
-  ]);
+    return [
+      {
+        id: '1',
+        name: 'Lucius Cornelius',
+        age: 10,
+        gender: 'male',
+        educationType: 'military',
+        progress: 35,
+        preceptorId: '2'
+      },
+      {
+        id: '2',
+        name: 'Julia Cornelia',
+        age: 12,
+        gender: 'female',
+        educationType: 'rhetoric',
+        progress: 60
+      },
+      {
+        id: '3',
+        name: 'Marcus Cornelius',
+        age: 8,
+        gender: 'male',
+        educationType: 'none',
+        progress: 0
+      }
+    ];
+  };
+
+  const [childrenData, setChildrenData] = useState<Child[]>(initializeChildrenFromCharacters());
+  
+  // Update children when characters change
+  useEffect(() => {
+    if (characters && characters.length > 0) {
+      setChildrenData(initializeChildrenFromCharacters());
+    }
+  }, [characters]);
   
   const [preceptorsData, setPreceptorsData] = useState<Preceptor[]>([
     {
@@ -80,7 +77,8 @@ export const EducationProvider: React.FC<{ children: ReactNode }> = ({ children 
       price: 5000,
       quality: 85,
       experience: 15,
-      assigned: false
+      assigned: false,
+      teachingStyle: 'Discursif'
     },
     {
       id: '2',
@@ -89,7 +87,8 @@ export const EducationProvider: React.FC<{ children: ReactNode }> = ({ children 
       price: 8000,
       quality: 90,
       experience: 20,
-      assigned: true
+      assigned: true,
+      teachingStyle: 'Rigoureux'
     },
     {
       id: '3',
@@ -98,7 +97,8 @@ export const EducationProvider: React.FC<{ children: ReactNode }> = ({ children 
       price: 6000,
       quality: 95,
       experience: 25,
-      assigned: false
+      assigned: false,
+      teachingStyle: 'Pédagogique'
     }
   ]);
   
@@ -107,6 +107,42 @@ export const EducationProvider: React.FC<{ children: ReactNode }> = ({ children 
   
   const [hiredPreceptors, setHiredPreceptors] = useState<Preceptor[]>([]);
   const [selectedChildId, setSelectedChildId] = useState<string | null>(null);
+  
+  // Synchronize character changes to parent component
+  const syncCharacterChanges = useCallback((childId: string, updates: Partial<Child>) => {
+    if (!onCharacterUpdate) return;
+    
+    const character = characters.find(c => c.id === childId);
+    if (!character) return;
+    
+    const characterUpdates: Partial<Character> = {};
+    
+    // Map education type changes
+    if (updates.educationType) {
+      characterUpdates.education = {
+        ...character.education,
+        type: updates.educationType,
+        specialties: updates.specialties || []
+      };
+    }
+    
+    // Map progress changes
+    if (updates.progress !== undefined) {
+      characterUpdates.currentEducation = {
+        ...character.currentEducation,
+        progress: updates.progress,
+        type: updates.educationType || character.currentEducation?.type || 'none',
+        mentor: updates.mentor || character.currentEducation?.mentor || null
+      };
+    }
+    
+    // Map name changes
+    if (updates.name) {
+      characterUpdates.name = updates.name;
+    }
+    
+    onCharacterUpdate(childId, characterUpdates);
+  }, [characters, onCharacterUpdate]);
   
   const addChild = useCallback((child: Omit<Child, 'id' | 'progress'>): string => {
     const id = uuidv4();
@@ -132,7 +168,10 @@ export const EducationProvider: React.FC<{ children: ReactNode }> = ({ children 
         child.id === id ? { ...child, name } : child
       )
     );
-  }, []);
+    
+    // Sync with parent
+    syncCharacterChanges(id, { name });
+  }, [syncCharacterChanges]);
   
   const updateChildEducation = useCallback((id: string, educationType: EducationType) => {
     setChildrenData(prev => 
@@ -141,8 +180,11 @@ export const EducationProvider: React.FC<{ children: ReactNode }> = ({ children 
       )
     );
     
+    // Sync with parent
+    syncCharacterChanges(id, { educationType, progress: 0 });
+    
     toast.success("Type d'éducation mis à jour");
-  }, []);
+  }, [syncCharacterChanges]);
   
   const assignPreceptorToChild = useCallback((childId: string, preceptorId: string) => {
     setChildrenData(prev => 
@@ -153,7 +195,7 @@ export const EducationProvider: React.FC<{ children: ReactNode }> = ({ children 
     
     setPreceptorsData(prev => 
       prev.map(preceptor => 
-        preceptor.id === preceptorId ? { ...preceptor, assigned: true } : preceptor
+        preceptor.id === preceptorId ? { ...preceptor, assigned: true, childId } : preceptor
       )
     );
     
@@ -161,9 +203,15 @@ export const EducationProvider: React.FC<{ children: ReactNode }> = ({ children 
     const child = childrenData.find(c => c.id === childId);
     
     if (preceptor && child) {
+      // Sync with parent
+      syncCharacterChanges(childId, { 
+        mentor: preceptor.name,
+        preceptorId
+      });
+      
       toast.success(`${preceptor.name} a été assigné à l'éducation de ${child.name}`);
     }
-  }, [childrenData, preceptorsData]);
+  }, [childrenData, preceptorsData, syncCharacterChanges]);
   
   const getChild = useCallback((id: string) => {
     return childrenData.find(child => child.id === id);
@@ -192,11 +240,39 @@ export const EducationProvider: React.FC<{ children: ReactNode }> = ({ children 
       return;
     }
     
+    // Update child with new education type and specialties if provided
+    setChildrenData(prev => 
+      prev.map(c => {
+        if (c.id === childId) {
+          return { 
+            ...c, 
+            educationType: type as EducationType,
+            specialties: specialties || c.specialties,
+            progress: 0
+          };
+        }
+        return c;
+      })
+    );
+    
+    // Assign mentor if provided
+    if (mentorId) {
+      assignPreceptorToChild(childId, mentorId);
+    }
+    
     setEducatingChildrenIds(prev => [...prev, childId]);
     setIsEducatingMap(prev => ({ ...prev, [childId]: true }));
     
+    // Sync with parent
+    syncCharacterChanges(childId, { 
+      educationType: type as EducationType,
+      specialties,
+      progress: 0,
+      mentor: mentorId ? preceptorsData.find(p => p.id === mentorId)?.name : null
+    });
+    
     toast.success(`L'éducation de ${child.name} a commencé`);
-  }, [childrenData]);
+  }, [childrenData, assignPreceptorToChild, syncCharacterChanges, preceptorsData]);
   
   const advanceEducationYear = useCallback((childId: string) => {
     const child = childrenData.find(c => c.id === childId);
@@ -227,6 +303,10 @@ export const EducationProvider: React.FC<{ children: ReactNode }> = ({ children 
             }
             
             const newProgress = Math.min(100, c.progress + progressIncrease);
+            
+            // Sync with parent
+            syncCharacterChanges(childId, { progress: newProgress });
+            
             return { ...c, progress: newProgress };
           }
           return c;
@@ -237,7 +317,7 @@ export const EducationProvider: React.FC<{ children: ReactNode }> = ({ children 
       
       toast.success(`L'éducation de ${child.name} a progressé !`);
     }, 2000);
-  }, [childrenData, preceptorsData]);
+  }, [childrenData, preceptorsData, syncCharacterChanges]);
   
   const advanceEducation = useCallback((childId: string) => {
     advanceEducationYear(childId);
@@ -270,8 +350,51 @@ export const EducationProvider: React.FC<{ children: ReactNode }> = ({ children 
     setEducatingChildrenIds(prev => prev.filter(id => id !== childId));
     setIsEducatingMap(prev => ({ ...prev, [childId]: false }));
     
+    // Determine stat bonus based on education type
+    const educationPath = findEducationPathById(child.educationType);
+    const statBonus = educationPath?.statBonus || 20;
+    const relatedStat = educationPath?.relatedStat || 'oratory';
+    
+    // Sync with parent - set education as completed and apply stat bonuses
+    syncCharacterChanges(childId, { 
+      progress: 100,
+      status: 'completed'
+    });
+    
+    if (onCharacterUpdate) {
+      const character = characters.find(c => c.id === childId);
+      if (character) {
+        const statUpdates: Partial<Character> = {
+          education: {
+            ...character.education,
+            completed: true,
+            completedAt: new Date().toISOString()
+          }
+        };
+        
+        // Apply stat bonuses based on education type
+        if (character.stats) {
+          statUpdates.stats = { ...character.stats };
+          if (relatedStat in statUpdates.stats) {
+            const currentStat = statUpdates.stats[relatedStat as keyof typeof statUpdates.stats];
+            
+            // Handle both number and CharacterStat types
+            if (typeof currentStat === 'number') {
+              (statUpdates.stats[relatedStat as keyof typeof statUpdates.stats] as number) += statBonus;
+            } else if (typeof currentStat === 'object') {
+              const statObj = { ...currentStat };
+              statObj.value += statBonus;
+              statUpdates.stats[relatedStat as keyof typeof statUpdates.stats] = statObj;
+            }
+          }
+        }
+        
+        onCharacterUpdate(childId, statUpdates);
+      }
+    }
+    
     toast.success(`L'éducation de ${child.name} est maintenant complète !`);
-  }, [childrenData]);
+  }, [childrenData, syncCharacterChanges, findEducationPathById, characters, onCharacterUpdate]);
   
   const cancelEducation = useCallback((childId: string) => {
     const child = childrenData.find(c => c.id === childId);
@@ -290,14 +413,21 @@ export const EducationProvider: React.FC<{ children: ReactNode }> = ({ children 
     setEducatingChildrenIds(prev => prev.filter(id => id !== childId));
     setIsEducatingMap(prev => ({ ...prev, [childId]: false }));
     
+    // Sync with parent
+    syncCharacterChanges(childId, { 
+      progress: 0,
+      status: 'canceled'
+    });
+    
     toast.success(`L'éducation de ${child.name} a été annulée.`);
-  }, [childrenData]);
+  }, [childrenData, syncCharacterChanges]);
   
   const addPreceptor = useCallback((preceptor: Omit<Preceptor, 'id'>): string => {
     const id = uuidv4();
     const newPreceptor: Preceptor = {
       ...preceptor,
-      id
+      id,
+      teachingStyle: preceptor.teachingStyle || 'Standard'
     };
     
     setPreceptorsData(prev => [...prev, newPreceptor]);
@@ -332,9 +462,36 @@ export const EducationProvider: React.FC<{ children: ReactNode }> = ({ children 
       return false;
     }
     
+    // Mettre à jour le statut du précepteur
+    setPreceptorsData(prev => 
+      prev.map(p => {
+        if (p.id === id) {
+          const updated = { ...p, assigned: true };
+          if (childId) {
+            updated.childId = childId;
+          }
+          return updated;
+        }
+        return p;
+      })
+    );
+    
+    // Ajouter à la liste des précepteurs engagés
+    setHiredPreceptors(prev => {
+      if (prev.some(p => p.id === id)) {
+        return prev;
+      }
+      return [...prev, preceptor];
+    });
+    
+    // Si un enfant est spécifié, l'assigner
+    if (childId) {
+      assignPreceptorToChild(childId, id);
+    }
+    
     toast.success(`${preceptor.name} a été embauché comme précepteur`);
     return true;
-  }, [preceptorsData]);
+  }, [preceptorsData, assignPreceptorToChild]);
   
   const firePreceptor = useCallback((id: string) => {
     const preceptor = preceptorsData.find(p => p.id === id);
@@ -344,20 +501,37 @@ export const EducationProvider: React.FC<{ children: ReactNode }> = ({ children 
       return;
     }
     
-    setChildrenData(prev => 
-      prev.map(child => 
-        child.preceptorId === id ? { ...child, preceptorId: undefined } : child
-      )
-    );
+    // Désassigner l'enfant s'il y en a un
+    if (preceptor.childId) {
+      const childToUpdate = childrenData.find(c => c.id === preceptor.childId);
+      if (childToUpdate) {
+        // Retirer le précepteur de l'enfant
+        setChildrenData(prev => 
+          prev.map(child => 
+            child.id === preceptor.childId ? { ...child, preceptorId: undefined } : child
+          )
+        );
+        
+        // Sync with parent
+        syncCharacterChanges(preceptor.childId, { 
+          preceptorId: undefined,
+          mentor: null
+        });
+      }
+    }
     
+    // Mettre à jour le statut du précepteur
     setPreceptorsData(prev => 
       prev.map(p => 
-        p.id === id ? { ...p, assigned: false } : p
+        p.id === id ? { ...p, assigned: false, childId: undefined } : p
       )
     );
     
+    // Supprimer de la liste des précepteurs engagés
+    setHiredPreceptors(prev => prev.filter(p => p.id !== id));
+    
     toast.success(`${preceptor.name} a été renvoyé`);
-  }, [preceptorsData]);
+  }, [preceptorsData, childrenData, syncCharacterChanges]);
   
   const findEducationPathById = useCallback((pathType: string) => {
     switch(pathType) {
@@ -389,7 +563,7 @@ export const EducationProvider: React.FC<{ children: ReactNode }> = ({ children 
   }, []);
   
   const loadPreceptorsByType = useCallback((type: string) => {
-    return preceptorsData.filter(p => p.specialty === type);
+    return preceptorsData.filter(p => p.specialty === type || p.speciality === type);
   }, [preceptorsData]);
   
   const refreshPreceptors = useCallback(() => {

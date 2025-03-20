@@ -1,88 +1,67 @@
 
-import { useState, useCallback } from 'react';
-import { useEducation } from '../context/EducationContext';
+import { useCallback } from 'react';
 import { Preceptor } from '../types/educationTypes';
-import { v4 as uuidv4 } from 'uuid';
+import { useEducation } from '../context/EducationContext';
 import { toast } from 'sonner';
 
 export const usePreceptorsManagement = () => {
-  const { preceptors: contextPreceptors, firePreceptor: contextFirePreceptor, hirePreceptor: contextHirePreceptor } = useEducation();
-  const [preceptors, setPreceptors] = useState<Preceptor[]>(contextPreceptors);
-
-  // Get all preceptors
-  const getAllPreceptors = useCallback(() => {
-    return preceptors;
-  }, [preceptors]);
-
-  // Get available preceptors
-  const getAvailablePreceptors = useCallback(() => {
-    return preceptors.filter(p => p.available !== false);
-  }, [preceptors]);
-
-  // Get preceptors by type
-  const getPreceptorsByType = useCallback((type: string) => {
-    return preceptors.filter(p => p.specialty === type);
-  }, [preceptors]);
-
-  // Get preceptors by ID
-  const getPreceptorById = useCallback((id: string) => {
-    const preceptor = preceptors.find(p => p.id === id);
-    if (!preceptor) {
-      console.error(`Preceptor with ID ${id} not found`);
-      return null;
+  const { 
+    preceptors, 
+    hirePreceptor: hirePreceptorContext, 
+    firePreceptor: firePreceptorContext,
+    assignPreceptorToChild,
+    getPreceptorById,
+    loadPreceptorsByType
+  } = useEducation();
+  
+  // Fonction pour embaucher un précepteur
+  const hirePreceptor = useCallback((preceptorId: string, childId?: string): boolean => {
+    try {
+      const success = hirePreceptorContext(preceptorId, childId);
+      if (success && !childId) {
+        toast.success("Le précepteur a été embauché avec succès");
+      }
+      return success;
+    } catch (error) {
+      console.error("Erreur lors de l'embauche du précepteur:", error);
+      toast.error("Une erreur s'est produite lors de l'embauche du précepteur");
+      return false;
     }
-    return preceptor;
-  }, [preceptors]);
-
-  // Get assigned preceptors
-  const getAssignedPreceptors = useCallback(() => {
-    return preceptors.filter(p => p.assigned);
-  }, [preceptors]);
-
-  // Hire a preceptor
-  const hirePreceptor = useCallback((preceptorId: string, childId?: string) => {
-    if (contextHirePreceptor) {
-      contextHirePreceptor(preceptorId, childId);
-    } else {
-      // Fallback implementation
-      setPreceptors(prev => 
-        prev.map(p => 
-          p.id === preceptorId 
-            ? { ...p, available: false, assigned: true, childId } 
-            : p
-        )
-      );
-      toast.success("Précepteur engagé avec succès");
-    }
-    return true;
-  }, [contextHirePreceptor, setPreceptors]);
-
-  // Fire a preceptor
+  }, [hirePreceptorContext]);
+  
+  // Fonction pour renvoyer un précepteur
   const firePreceptor = useCallback((preceptorId: string) => {
-    if (contextFirePreceptor) {
-      contextFirePreceptor(preceptorId);
-    } else {
-      // Fallback implementation
-      setPreceptors(prev => 
-        prev.map(p => 
-          p.id === preceptorId 
-            ? { ...p, available: true, assigned: false, childId: undefined } 
-            : p
-        )
-      );
-      toast.success("Précepteur renvoyé avec succès");
+    try {
+      firePreceptorContext(preceptorId);
+      toast.success("Le précepteur a été renvoyé");
+    } catch (error) {
+      console.error("Erreur lors du renvoi du précepteur:", error);
+      toast.error("Une erreur s'est produite lors du renvoi du précepteur");
     }
-  }, [contextFirePreceptor, setPreceptors]);
-
+  }, [firePreceptorContext]);
+  
+  // Fonction pour assigner un précepteur à un enfant
+  const assignPreceptor = useCallback((childId: string, preceptorId: string) => {
+    try {
+      assignPreceptorToChild(childId, preceptorId);
+      toast.success("Le précepteur a été assigné à l'enfant");
+    } catch (error) {
+      console.error("Erreur lors de l'assignation du précepteur:", error);
+      toast.error("Une erreur s'est produite lors de l'assignation du précepteur");
+    }
+  }, [assignPreceptorToChild]);
+  
+  // Fonction pour obtenir les précepteurs par type d'éducation
+  const getPreceptorsByType = useCallback((type: string): Preceptor[] => {
+    return loadPreceptorsByType(type);
+  }, [loadPreceptorsByType]);
+  
   return {
     preceptors,
-    setPreceptors,
-    getAllPreceptors,
-    availablePreceptors: getAvailablePreceptors(),
-    getPreceptorsByType,
-    getPreceptorById,
-    getAssignedPreceptors,
     hirePreceptor,
-    firePreceptor
+    firePreceptor,
+    assignPreceptor,
+    getPreceptorById,
+    getPreceptorsByType
   };
 };

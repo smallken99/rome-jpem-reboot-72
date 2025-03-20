@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -10,11 +9,12 @@ import { EducationProgressButtons } from './components/EducationProgressButtons'
 import { EducationStatus } from './components/EducationStatus';
 import { SpecialtySelector } from './components/SpecialtySelector';
 import { PreceptorSelector } from './components/PreceptorSelector';
+import { EducationStatistics } from './components/EducationStatistics';
+import { MentorInfo } from './components/MentorInfo';
 import { useEducation } from './context/EducationContext';
 import { Child, EducationType } from './types/educationTypes';
 import { HirePreceptorDialog } from './dialogs/HirePreceptorDialog';
 import { FirePreceptorDialog } from './dialogs/FirePreceptorDialog';
-import { usePreceptorsManagement } from './hooks/usePreceptorsManagement';
 import { toast } from 'sonner';
 
 export const ChildEducationDetail: React.FC = () => {
@@ -24,6 +24,7 @@ export const ChildEducationDetail: React.FC = () => {
   // Access context functions
   const { 
     children, 
+    preceptors,
     getChild,
     startEducation, 
     advanceEducationYear,
@@ -31,16 +32,11 @@ export const ChildEducationDetail: React.FC = () => {
     cancelEducation,
     isEducating,
     findEducationPathById,
-    getAllEducationPaths
-  } = useEducation();
-  
-  // Access preceptor management functions
-  const {
-    preceptors,
+    getAllEducationPaths,
     hirePreceptor,
     firePreceptor,
     getPreceptorById
-  } = usePreceptorsManagement();
+  } = useEducation();
   
   const [selectedPath, setSelectedPath] = useState<EducationType | null>(null);
   const [selectedSpecialty, setSelectedSpecialty] = useState<string | null>(null);
@@ -315,35 +311,20 @@ export const ChildEducationDetail: React.FC = () => {
           </div>
         </Card>
         
+        <EducationStatistics child={child} />
+        
         <Card>
           <div className="p-4">
             <h3 className="font-semibold mb-4">Précepteur</h3>
             
-            {preceptor ? (
-              <div className="space-y-4">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div>
-                    <p className="text-sm text-slate-500">Nom</p>
-                    <p className="font-medium">{preceptor.name}</p>
-                  </div>
-                  
-                  <div>
-                    <p className="text-sm text-slate-500">Spécialité</p>
-                    <p className="font-medium">{preceptor.specialty || preceptor.speciality}</p>
-                  </div>
-                  
-                  <div>
-                    <p className="text-sm text-slate-500">Qualité</p>
-                    <p className="font-medium">{preceptor.quality}/100</p>
-                  </div>
-                  
-                  <div>
-                    <p className="text-sm text-slate-500">Coût annuel</p>
-                    <p className="font-medium">{preceptor.price || preceptor.cost} as</p>
-                  </div>
-                </div>
-                
-                <div className="flex justify-between">
+            <MentorInfo 
+              mentor={preceptor} 
+              educationType={child.educationType} 
+            />
+            
+            <div className="mt-4 flex justify-between">
+              {preceptor ? (
+                <>
                   <Button 
                     variant="outline" 
                     onClick={() => navigate(`/famille/education/preceptor/${preceptor.id}`)}
@@ -357,16 +338,13 @@ export const ChildEducationDetail: React.FC = () => {
                   >
                     Renvoyer le précepteur
                   </Button>
-                </div>
-              </div>
-            ) : (
-              <div className="space-y-4">
-                <p className="text-slate-500">Aucun précepteur n'est assigné à cet enfant.</p>
+                </>
+              ) : (
                 <Button onClick={() => navigate('/famille/education/preceptors')}>
                   Trouver un précepteur
                 </Button>
-              </div>
-            )}
+              )}
+            </div>
           </div>
         </Card>
       </div>
