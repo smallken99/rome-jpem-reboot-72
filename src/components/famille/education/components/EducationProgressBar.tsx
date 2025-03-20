@@ -1,8 +1,9 @@
 
 import React from 'react';
 import { cn } from '@/lib/utils';
-import { Tooltip, TooltipTrigger, TooltipContent } from '@/components/ui/tooltip';
-import { Medal } from 'lucide-react';
+import { Tooltip, TooltipTrigger, TooltipContent, TooltipProvider } from '@/components/ui/tooltip';
+import { Medal, Calendar, Coins, GraduationCap } from 'lucide-react';
+import { Progress } from '@/components/ui/progress';
 
 interface EducationProgressBarProps {
   progress: number;
@@ -53,28 +54,28 @@ export const EducationProgressBar: React.FC<EducationProgressBarProps> = ({
   return (
     <div className={cn("space-y-2", className)}>
       <div className="flex justify-between items-center">
-        <div className="text-sm font-medium">Progression: {progress}%</div>
+        <div className="text-sm font-medium flex items-center">
+          <GraduationCap className="h-4 w-4 mr-1 text-blue-500" />
+          Progression: {progress}%
+        </div>
         {preceptorQuality && (
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <div className="flex items-center gap-1 cursor-help">
-                <Medal className="h-4 w-4 text-yellow-500" />
-                <span className="text-xs text-muted-foreground">+{preceptorBonus} vitesse</span>
-              </div>
-            </TooltipTrigger>
-            <TooltipContent>
-              <p>Le précepteur accélère l'éducation de {preceptorBonus * 3}% par an</p>
-            </TooltipContent>
-          </Tooltip>
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <div className="flex items-center gap-1 cursor-help">
+                  <Medal className="h-4 w-4 text-yellow-500" />
+                  <span className="text-xs text-muted-foreground">+{preceptorBonus} vitesse</span>
+                </div>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>Le précepteur accélère l'éducation de {preceptorBonus * 3}% par an</p>
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
         )}
       </div>
       
-      <div className="h-3 bg-gray-100 rounded-full overflow-hidden">
-        <div 
-          className={cn("h-full rounded-full transition-all", getProgressColor())} 
-          style={{ width: `${Math.min(100, progress)}%` }}
-        />
-      </div>
+      <Progress value={progress} className="h-3" indicatorClassName={getProgressColor()} />
       
       <div className="flex justify-between text-xs text-muted-foreground">
         <span>0%</span>
@@ -84,19 +85,22 @@ export const EducationProgressBar: React.FC<EducationProgressBarProps> = ({
         <span>100%</span>
       </div>
       
-      <div className="flex flex-wrap justify-between text-xs mt-1">
-        <div>
-          <span className="text-muted-foreground">Années complétées:</span>
-          <span className="ml-1 font-medium">{yearsCompleted}/{duration}</span>
+      <div className="grid grid-cols-2 md:grid-cols-3 gap-2 mt-2">
+        <div className="flex items-center text-xs">
+          <Calendar className="h-3 w-3 mr-1 text-gray-400" />
+          <span className="text-muted-foreground mr-1">Années:</span>
+          <span className="font-medium">{yearsCompleted}/{duration}</span>
         </div>
-        <div>
-          <span className="text-muted-foreground">Temps restant estimé:</span>
-          <span className="ml-1 font-medium">{remainingYears} an{remainingYears > 1 ? 's' : ''}</span>
+        <div className="flex items-center text-xs">
+          <Calendar className="h-3 w-3 mr-1 text-gray-400" />
+          <span className="text-muted-foreground mr-1">Restant:</span>
+          <span className="font-medium">{remainingYears} an{remainingYears > 1 ? 's' : ''}</span>
         </div>
         {cost && (
-          <div>
-            <span className="text-muted-foreground">Coût total estimé:</span>
-            <span className="ml-1 font-medium">{cost * (yearsCompleted + remainingYears)} as</span>
+          <div className="flex items-center text-xs col-span-2 md:col-span-1">
+            <Coins className="h-3 w-3 mr-1 text-amber-500" />
+            <span className="text-muted-foreground mr-1">Coût total:</span>
+            <span className="font-medium">{cost * (yearsCompleted + remainingYears)} as</span>
           </div>
         )}
       </div>

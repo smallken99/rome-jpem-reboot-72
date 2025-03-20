@@ -6,19 +6,23 @@ import { EducationProgressButtons } from './education/components/EducationProgre
 import { CardActions } from './education/components/CardActions';
 import { Child } from './education/types/educationTypes';
 import { useEducation } from './education/context/EducationContext';
+import { useNavigate } from 'react-router-dom';
 
 interface ChildEducationCardProps {
   child: Child;
 }
 
 const ChildEducationCard: React.FC<ChildEducationCardProps> = ({ child }) => {
+  const navigate = useNavigate();
+  
   // Use our education context for functionality
   const { 
     educatingChildren, 
     advanceEducationYear, 
     completeEducation,
     updateChildName,
-    isEducating 
+    isEducating,
+    cancelEducation
   } = useEducation();
   
   // Determine if the child has an ongoing education
@@ -41,9 +45,14 @@ const ChildEducationCard: React.FC<ChildEducationCardProps> = ({ child }) => {
   const handleNameChange = (id: string, newName: string) => {
     updateChildName(id, newName);
   };
+
+  // Handle navigation to detail page
+  const handleGoToDetail = () => {
+    navigate(`/famille/education/child/${child.id}`);
+  };
   
   return (
-    <div className="rounded-lg border bg-card text-card-foreground shadow-sm overflow-hidden">
+    <div className="rounded-lg border bg-card text-card-foreground shadow-sm overflow-hidden hover:shadow-md transition-shadow">
       <ChildHeader 
         child={child} 
         onNameChange={handleNameChange}
@@ -64,6 +73,7 @@ const ChildEducationCard: React.FC<ChildEducationCardProps> = ({ child }) => {
           onAdvanceYear={handleAdvanceYear}
           onCompleteEducation={() => completeEducation(child.id)}
           canComplete={child.progress >= 75}
+          onCancel={() => cancelEducation(child.id)}
         />
         
         <CardActions 
@@ -71,6 +81,8 @@ const ChildEducationCard: React.FC<ChildEducationCardProps> = ({ child }) => {
           childId={child.id}
           childGender={child.gender}
           childAge={child.age}
+          onStartEducation={handleGoToDetail}
+          onChangeEducation={handleGoToDetail}
         />
       </div>
     </div>
