@@ -1,6 +1,5 @@
-
 import React, { createContext, useContext, useState, useCallback, ReactNode, useEffect } from 'react';
-import { Child, Preceptor, EducationType } from '../types/educationTypes';
+import { Child, Preceptor, EducationType, Gender } from '../types/educationTypes';
 import { Character } from '@/types/character';
 import { v4 as uuidv4 } from 'uuid';
 import { toast } from 'sonner';
@@ -14,16 +13,15 @@ export const EducationProvider: React.FC<EducationProviderProps> = ({
   characters = [],
   onCharacterUpdate
 }) => {
-  // Initialize children from characters if available
   const initializeChildrenFromCharacters = () => {
     if (characters && characters.length > 0) {
       return characters
-        .filter(char => char.age < 21) // Considérer uniquement les personnages jeunes comme des enfants
+        .filter(char => char.age < 21)
         .map(char => ({
           id: char.id,
           name: char.name,
           age: char.age,
-          gender: char.gender,
+          gender: char.gender as Gender,
           educationType: char.education?.type as EducationType || 'none',
           progress: char.currentEducation?.progress || 0,
           preceptorId: char.currentEducation?.mentorId,
@@ -36,7 +34,7 @@ export const EducationProvider: React.FC<EducationProviderProps> = ({
         id: '1',
         name: 'Lucius Cornelius',
         age: 10,
-        gender: 'male',
+        gender: 'male' as Gender,
         educationType: 'military',
         progress: 35,
         preceptorId: '2'
@@ -45,7 +43,7 @@ export const EducationProvider: React.FC<EducationProviderProps> = ({
         id: '2',
         name: 'Julia Cornelia',
         age: 12,
-        gender: 'female',
+        gender: 'female' as Gender,
         educationType: 'rhetoric',
         progress: 60
       },
@@ -53,16 +51,15 @@ export const EducationProvider: React.FC<EducationProviderProps> = ({
         id: '3',
         name: 'Marcus Cornelius',
         age: 8,
-        gender: 'male',
+        gender: 'male' as Gender,
         educationType: 'none',
         progress: 0
       }
-    ];
+    ] as Child[];
   };
 
   const [childrenData, setChildrenData] = useState<Child[]>(initializeChildrenFromCharacters());
   
-  // Update children when characters change
   useEffect(() => {
     if (characters && characters.length > 0) {
       setChildrenData(initializeChildrenFromCharacters());
@@ -108,7 +105,6 @@ export const EducationProvider: React.FC<EducationProviderProps> = ({
   const [hiredPreceptors, setHiredPreceptors] = useState<Preceptor[]>([]);
   const [selectedChildId, setSelectedChildId] = useState<string | null>(null);
   
-  // Synchronize character changes to parent component
   const syncCharacterChanges = useCallback((childId: string, updates: Partial<Child>) => {
     if (!onCharacterUpdate) return;
     
@@ -117,7 +113,6 @@ export const EducationProvider: React.FC<EducationProviderProps> = ({
     
     const characterUpdates: Partial<Character> = {};
     
-    // Map education type changes
     if (updates.educationType) {
       characterUpdates.education = {
         ...character.education,
@@ -126,7 +121,6 @@ export const EducationProvider: React.FC<EducationProviderProps> = ({
       };
     }
     
-    // Map progress changes
     if (updates.progress !== undefined) {
       characterUpdates.currentEducation = {
         ...character.currentEducation,
@@ -136,7 +130,6 @@ export const EducationProvider: React.FC<EducationProviderProps> = ({
       };
     }
     
-    // Map name changes
     if (updates.name) {
       characterUpdates.name = updates.name;
     }
@@ -169,7 +162,6 @@ export const EducationProvider: React.FC<EducationProviderProps> = ({
       )
     );
     
-    // Sync with parent
     syncCharacterChanges(id, { name });
   }, [syncCharacterChanges]);
   
@@ -180,7 +172,6 @@ export const EducationProvider: React.FC<EducationProviderProps> = ({
       )
     );
     
-    // Sync with parent
     syncCharacterChanges(id, { educationType, progress: 0 });
     
     toast.success("Type d'éducation mis à jour");
@@ -203,7 +194,6 @@ export const EducationProvider: React.FC<EducationProviderProps> = ({
     const child = childrenData.find(c => c.id === childId);
     
     if (preceptor && child) {
-      // Sync with parent
       syncCharacterChanges(childId, { 
         mentor: preceptor.name,
         preceptorId
@@ -240,7 +230,6 @@ export const EducationProvider: React.FC<EducationProviderProps> = ({
       return;
     }
     
-    // Update child with new education type and specialties if provided
     setChildrenData(prev => 
       prev.map(c => {
         if (c.id === childId) {
@@ -255,7 +244,6 @@ export const EducationProvider: React.FC<EducationProviderProps> = ({
       })
     );
     
-    // Assign mentor if provided
     if (mentorId) {
       assignPreceptorToChild(childId, mentorId);
     }
@@ -263,7 +251,6 @@ export const EducationProvider: React.FC<EducationProviderProps> = ({
     setEducatingChildrenIds(prev => [...prev, childId]);
     setIsEducatingMap(prev => ({ ...prev, [childId]: true }));
     
-    // Sync with parent
     syncCharacterChanges(childId, { 
       educationType: type as EducationType,
       specialties,
@@ -304,7 +291,6 @@ export const EducationProvider: React.FC<EducationProviderProps> = ({
             
             const newProgress = Math.min(100, c.progress + progressIncrease);
             
-            // Sync with parent
             syncCharacterChanges(childId, { progress: newProgress });
             
             return { ...c, progress: newProgress };
@@ -322,6 +308,24 @@ export const EducationProvider: React.FC<EducationProviderProps> = ({
   const advanceEducation = useCallback((childId: string) => {
     advanceEducationYear(childId);
   }, [advanceEducationYear]);
+  
+  const findEducationPathById = useCallback((pathType: string) => {
+    switch(pathType) {
+      case 'military': return militaryPath;
+      case 'religious': return religiousPath;
+      case 'rhetoric': return rhetoricPath;
+      case 'academic': return academicPath;
+      default: return {
+        name: pathType.charAt(0).toUpperCase() + pathType.slice(1),
+        duration: 3,
+        minAge: 8,
+        suitableFor: { gender: 'both' },
+        specialties: [],
+        statBonus: 0,
+        relatedStat: 'popularity'
+      };
+    }
+  }, []);
   
   const completeEducation = useCallback((childId: string) => {
     const child = childrenData.find(c => c.id === childId);
@@ -350,12 +354,10 @@ export const EducationProvider: React.FC<EducationProviderProps> = ({
     setEducatingChildrenIds(prev => prev.filter(id => id !== childId));
     setIsEducatingMap(prev => ({ ...prev, [childId]: false }));
     
-    // Determine stat bonus based on education type
     const educationPath = findEducationPathById(child.educationType);
-    const statBonus = educationPath?.statBonus || 20;
-    const relatedStat = educationPath?.relatedStat || 'oratory';
+    const statBonus = educationPath.statBonus || 20;
+    const relatedStat = educationPath.relatedStat || 'oratory';
     
-    // Sync with parent - set education as completed and apply stat bonuses
     syncCharacterChanges(childId, { 
       progress: 100,
       status: 'completed'
@@ -372,13 +374,11 @@ export const EducationProvider: React.FC<EducationProviderProps> = ({
           }
         };
         
-        // Apply stat bonuses based on education type
         if (character.stats) {
           statUpdates.stats = { ...character.stats };
           if (relatedStat in statUpdates.stats) {
             const currentStat = statUpdates.stats[relatedStat as keyof typeof statUpdates.stats];
             
-            // Handle both number and CharacterStat types
             if (typeof currentStat === 'number') {
               (statUpdates.stats[relatedStat as keyof typeof statUpdates.stats] as number) += statBonus;
             } else if (typeof currentStat === 'object') {
@@ -413,7 +413,6 @@ export const EducationProvider: React.FC<EducationProviderProps> = ({
     setEducatingChildrenIds(prev => prev.filter(id => id !== childId));
     setIsEducatingMap(prev => ({ ...prev, [childId]: false }));
     
-    // Sync with parent
     syncCharacterChanges(childId, { 
       progress: 0,
       status: 'canceled'
@@ -462,7 +461,6 @@ export const EducationProvider: React.FC<EducationProviderProps> = ({
       return false;
     }
     
-    // Mettre à jour le statut du précepteur
     setPreceptorsData(prev => 
       prev.map(p => {
         if (p.id === id) {
@@ -476,7 +474,6 @@ export const EducationProvider: React.FC<EducationProviderProps> = ({
       })
     );
     
-    // Ajouter à la liste des précepteurs engagés
     setHiredPreceptors(prev => {
       if (prev.some(p => p.id === id)) {
         return prev;
@@ -484,7 +481,6 @@ export const EducationProvider: React.FC<EducationProviderProps> = ({
       return [...prev, preceptor];
     });
     
-    // Si un enfant est spécifié, l'assigner
     if (childId) {
       assignPreceptorToChild(childId, id);
     }
@@ -501,18 +497,15 @@ export const EducationProvider: React.FC<EducationProviderProps> = ({
       return;
     }
     
-    // Désassigner l'enfant s'il y en a un
     if (preceptor.childId) {
       const childToUpdate = childrenData.find(c => c.id === preceptor.childId);
       if (childToUpdate) {
-        // Retirer le précepteur de l'enfant
         setChildrenData(prev => 
           prev.map(child => 
             child.id === preceptor.childId ? { ...child, preceptorId: undefined } : child
           )
         );
         
-        // Sync with parent
         syncCharacterChanges(preceptor.childId, { 
           preceptorId: undefined,
           mentor: null
@@ -520,34 +513,16 @@ export const EducationProvider: React.FC<EducationProviderProps> = ({
       }
     }
     
-    // Mettre à jour le statut du précepteur
     setPreceptorsData(prev => 
       prev.map(p => 
         p.id === id ? { ...p, assigned: false, childId: undefined } : p
       )
     );
     
-    // Supprimer de la liste des précepteurs engagés
     setHiredPreceptors(prev => prev.filter(p => p.id !== id));
     
     toast.success(`${preceptor.name} a été renvoyé`);
   }, [preceptorsData, childrenData, syncCharacterChanges]);
-  
-  const findEducationPathById = useCallback((pathType: string) => {
-    switch(pathType) {
-      case 'military': return militaryPath;
-      case 'religious': return religiousPath;
-      case 'rhetoric': return rhetoricPath;
-      case 'academic': return academicPath;
-      default: return {
-        name: pathType.charAt(0).toUpperCase() + pathType.slice(1),
-        duration: 3,
-        minAge: 8,
-        suitableFor: { gender: 'both' },
-        specialties: []
-      };
-    }
-  }, []);
   
   const getEducationPathById = useCallback((pathType: string) => {
     return findEducationPathById(pathType);
