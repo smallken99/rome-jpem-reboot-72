@@ -2,8 +2,9 @@
 import React from 'react';
 import { cn } from '@/lib/utils';
 import { Tooltip, TooltipTrigger, TooltipContent, TooltipProvider } from '@/components/ui/tooltip';
-import { Medal, Calendar, Coins, GraduationCap } from 'lucide-react';
+import { Medal, Calendar, Coins, GraduationCap, Clock, AlertCircle } from 'lucide-react';
 import { Progress } from '@/components/ui/progress';
+import { motion } from 'framer-motion';
 
 interface EducationProgressBarProps {
   progress: number;
@@ -12,6 +13,7 @@ interface EducationProgressBarProps {
   yearsCompleted?: number;
   cost?: number;
   className?: string;
+  animate?: boolean;
 }
 
 export const EducationProgressBar: React.FC<EducationProgressBarProps> = ({
@@ -20,7 +22,8 @@ export const EducationProgressBar: React.FC<EducationProgressBarProps> = ({
   duration = 3,
   yearsCompleted = 0,
   cost,
-  className
+  className,
+  animate = true
 }) => {
   // Déterminer la couleur en fonction de la progression
   const getProgressColor = () => {
@@ -75,7 +78,17 @@ export const EducationProgressBar: React.FC<EducationProgressBarProps> = ({
         )}
       </div>
       
-      <Progress value={progress} className="h-3" indicatorClassName={getProgressColor()} />
+      {animate ? (
+        <motion.div
+          initial={{ width: 0 }}
+          animate={{ width: '100%' }}
+          transition={{ duration: 0.5 }}
+        >
+          <Progress value={progress} className="h-3" indicatorClassName={getProgressColor()} />
+        </motion.div>
+      ) : (
+        <Progress value={progress} className="h-3" indicatorClassName={getProgressColor()} />
+      )}
       
       <div className="flex justify-between text-xs text-muted-foreground">
         <span>0%</span>
@@ -85,22 +98,31 @@ export const EducationProgressBar: React.FC<EducationProgressBarProps> = ({
         <span>100%</span>
       </div>
       
-      <div className="grid grid-cols-2 md:grid-cols-3 gap-2 mt-2">
-        <div className="flex items-center text-xs">
-          <Calendar className="h-3 w-3 mr-1 text-gray-400" />
-          <span className="text-muted-foreground mr-1">Années:</span>
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-2 mt-3">
+        <div className="flex items-center text-xs bg-slate-50 p-1.5 rounded border border-slate-100">
+          <Calendar className="h-3 w-3 mr-1 text-slate-400" />
+          <span className="text-muted-foreground mr-1">Terminé:</span>
           <span className="font-medium">{yearsCompleted}/{duration}</span>
         </div>
-        <div className="flex items-center text-xs">
-          <Calendar className="h-3 w-3 mr-1 text-gray-400" />
+        
+        <div className="flex items-center text-xs bg-slate-50 p-1.5 rounded border border-slate-100">
+          <Clock className="h-3 w-3 mr-1 text-amber-500" />
           <span className="text-muted-foreground mr-1">Restant:</span>
           <span className="font-medium">{remainingYears} an{remainingYears > 1 ? 's' : ''}</span>
         </div>
+        
         {cost && (
-          <div className="flex items-center text-xs col-span-2 md:col-span-1">
+          <div className="flex items-center text-xs bg-slate-50 p-1.5 rounded border border-slate-100 sm:col-span-2">
             <Coins className="h-3 w-3 mr-1 text-amber-500" />
             <span className="text-muted-foreground mr-1">Coût total:</span>
             <span className="font-medium">{cost * (yearsCompleted + remainingYears)} as</span>
+          </div>
+        )}
+        
+        {preceptorQuality && preceptorQuality < 60 && (
+          <div className="flex items-center text-xs bg-amber-50 p-1.5 rounded border border-amber-100 sm:col-span-2">
+            <AlertCircle className="h-3 w-3 mr-1 text-amber-500" />
+            <span className="text-amber-600">Un précepteur plus qualifié accélérerait l'apprentissage</span>
           </div>
         )}
       </div>

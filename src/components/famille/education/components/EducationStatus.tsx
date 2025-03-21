@@ -3,21 +3,25 @@ import React from 'react';
 import { Child } from '../types/educationTypes';
 import { Scroll, Sword, BookOpen, Scale, AlertTriangle } from 'lucide-react';
 import { Progress } from '@/components/ui/progress';
+import { Badge } from '@/components/ui/badge';
+import { cn } from '@/lib/utils';
 
 interface EducationStatusProps {
   child: Child;
   hasEducation: boolean;
   hasInvalidEducation?: boolean;
+  className?: string;
 }
 
 export const EducationStatus: React.FC<EducationStatusProps> = ({ 
   child, 
   hasEducation, 
-  hasInvalidEducation = false 
+  hasInvalidEducation = false,
+  className
 }) => {
   if (!hasEducation) {
     return (
-      <div className="p-2 mb-4 bg-slate-100 rounded text-slate-600 text-sm flex items-center">
+      <div className={cn("p-2 mb-4 bg-slate-100 rounded text-slate-600 text-sm flex items-center", className)}>
         <BookOpen className="h-4 w-4 mr-2 text-slate-400" />
         Aucune éducation en cours
       </div>
@@ -71,11 +75,17 @@ export const EducationStatus: React.FC<EducationStatusProps> = ({
   };
   
   return (
-    <div className="my-4 space-y-3">
+    <div className={cn("my-4 space-y-3 animate-fade-in", className)}>
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
           {getEducationIcon()}
           <span className="font-medium">Éducation {getEducationName()}</span>
+          {hasInvalidEducation && (
+            <Badge variant="outline" className="text-red-500 border-red-200 bg-red-50">
+              <AlertTriangle className="h-3 w-3 mr-1" />
+              Incompatible
+            </Badge>
+          )}
         </div>
         <div className="flex items-center gap-2">
           <span className="text-xs text-muted-foreground">{getYearLabel()}</span>
@@ -83,7 +93,11 @@ export const EducationStatus: React.FC<EducationStatusProps> = ({
         </div>
       </div>
       
-      <Progress value={child.progress} className="h-2" indicatorClassName={getProgressColor()} />
+      <Progress 
+        value={child.progress} 
+        className="h-2" 
+        indicatorClassName={getProgressColor()} 
+      />
       
       {hasInvalidEducation && (
         <div className="p-2 bg-red-50 border border-red-200 rounded text-red-700 text-sm flex items-center">
