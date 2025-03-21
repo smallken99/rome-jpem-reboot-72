@@ -26,50 +26,43 @@ export const MaitreJeuContent: React.FC<MaitreJeuContentProps> = ({ activeTab })
   const showTimePanel = activeTab !== 'accueil';
   
   // Vérifier si l'onglet actif est en développement
-  const isUnderDevelopment = ['equilibre', 'histoire', 'statistiques'].includes(activeTab);
-  
-  // Générer les fonctionnalités prévues en fonction de l'onglet
-  const getPlannedFeatures = () => {
-    switch (activeTab) {
-      case 'equilibre':
-        return [
-          "Gestion de l'équilibre des pouvoirs entre les factions",
-          "Visualisation graphique des tendances politiques",
-          "Simulation des effets des décisions politiques",
-          "Système d'alerte pour les déséquilibres critiques"
-        ];
-      case 'histoire':
-        return [
-          "Chronologie interactive des événements majeurs",
-          "Création et édition d'entrées historiques",
-          "Archivage automatique des décisions importantes",
-          "Exportation des chroniques pour les joueurs"
-        ];
-      case 'statistiques':
-        return [
-          "Tableaux de bord interactifs avec graphiques",
-          "Statistiques détaillées sur tous les aspects du jeu",
-          "Comparaisons historiques des performances",
-          "Exportation des données au format PDF"
-        ];
-      default:
-        return [];
+  const developmentSections: Record<string, { title: string, description: string, release: string, features: string[] }> = {
+    'equilibre': {
+      title: "Gestion de l'Équilibre des Pouvoirs",
+      description: "Surveillez et influencez l'équilibre politique et social de la République romaine.",
+      release: "Prochaine mise à jour",
+      features: [
+        "Gestion de l'équilibre des pouvoirs entre les factions",
+        "Visualisation graphique des tendances politiques",
+        "Simulation des effets des décisions politiques",
+        "Système d'alerte pour les déséquilibres critiques"
+      ]
+    },
+    'histoire': {
+      title: "Chroniques de la République",
+      description: "Enregistrez et consultez les événements marquants de l'histoire de Rome.",
+      release: "Deux mises à jour à venir",
+      features: [
+        "Chronologie interactive des événements majeurs",
+        "Création et édition d'entrées historiques",
+        "Archivage automatique des décisions importantes",
+        "Exportation des chroniques pour les joueurs"
+      ]
+    },
+    'statistiques': {
+      title: "Statistiques Globales",
+      description: "Analysez en détail tous les aspects de la République à travers des tableaux de bord interactifs.",
+      release: "Prochaine mise à jour",
+      features: [
+        "Tableaux de bord interactifs avec graphiques",
+        "Statistiques détaillées sur tous les aspects du jeu",
+        "Comparaisons historiques des performances",
+        "Exportation des données au format PDF"
+      ]
     }
   };
   
-  // Obtenir le titre pour la section en développement
-  const getUnderDevelopmentTitle = () => {
-    switch (activeTab) {
-      case 'equilibre':
-        return "Gestion de l'Équilibre des Pouvoirs";
-      case 'histoire':
-        return "Chroniques de la République";
-      case 'statistiques':
-        return "Statistiques Globales";
-      default:
-        return "Section en Développement";
-    }
-  };
+  const isUnderDevelopment = Object.keys(developmentSections).includes(activeTab);
   
   const containerVariants = {
     hidden: { opacity: 0 },
@@ -97,9 +90,10 @@ export const MaitreJeuContent: React.FC<MaitreJeuContentProps> = ({ activeTab })
       {isUnderDevelopment ? (
         <div className="p-6">
           <UnderDevelopmentSection 
-            title={getUnderDevelopmentTitle()}
-            estimatedRelease="Prochaine mise à jour"
-            features={getPlannedFeatures()}
+            title={developmentSections[activeTab].title}
+            description={developmentSections[activeTab].description}
+            estimatedRelease={developmentSections[activeTab].release}
+            features={developmentSections[activeTab].features}
           />
         </div>
       ) : (

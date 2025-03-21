@@ -1,117 +1,111 @@
 
-export type Season = 'SPRING' | 'SUMMER' | 'AUTUMN' | 'WINTER' | 'Ver' | 'Aestas' | 'Autumnus' | 'Hiems';
+// Types pour le système de temps
+export type Season = 'Ver' | 'Aestas' | 'Autumnus' | 'Hiems';
+export type GamePhase = 'SENATE' | 'ECONOMY' | 'ELECTION' | 'DIPLOMACY' | 'MILITARY' | 'RELIGION' | 'VOTE' | 'ACTIONS' | 'EVENTS';
 
 export interface GameDate {
   year: number;
   season: Season;
 }
 
+// Fonctions d'aide pour la gestion du temps
 export const formatSeasonDisplay = (season: Season | string): string => {
-  const seasonMappings: Record<string, string> = {
-    SPRING: 'Printemps',
-    SUMMER: 'Été',
-    AUTUMN: 'Automne',
-    WINTER: 'Hiver',
-    Ver: 'Printemps',
-    Aestas: 'Été',
-    Autumnus: 'Automne',
-    Hiems: 'Hiver'
+  const seasonMap: Record<string, string> = {
+    'Ver': 'Printemps',
+    'Aestas': 'Été',
+    'Autumnus': 'Automne',
+    'Hiems': 'Hiver',
+    'SPRING': 'Printemps',
+    'SUMMER': 'Été',
+    'AUTUMN': 'Automne',
+    'WINTER': 'Hiver'
   };
-  
-  return seasonMappings[season] || season;
+  return seasonMap[season] || season;
 };
 
-export const formatDate = (date: GameDate | string): string => {
-  if (!date) return '';
-  
-  if (typeof date === 'object' && 'year' in date && 'season' in date) {
-    return `${Math.abs(date.year)} ${date.year < 0 ? 'av. J.-C.' : 'ap. J.-C.'} - ${formatSeasonDisplay(date.season as Season)}`;
+export const formatGameDate = (date: GameDate): string => {
+  return `An ${date.year} AUC - ${formatSeasonDisplay(date.season)}`;
+};
+
+export const nextSeason = (currentSeason: Season): Season => {
+  switch (currentSeason) {
+    case 'Ver': return 'Aestas';
+    case 'Aestas': return 'Autumnus';
+    case 'Autumnus': return 'Hiems';
+    case 'Hiems': return 'Ver';
+    default: return 'Ver';
   }
-  
-  return String(date);
 };
 
-export const parseGameDate = (dateString: string): GameDate | null => {
-  if (!dateString) return null;
-  
+export const nextGameDate = (date: GameDate): GameDate => {
+  if (date.season === 'Hiems') {
+    return { year: date.year + 1, season: 'Ver' };
+  } else {
+    return { year: date.year, season: nextSeason(date.season) };
+  }
+};
+
+export const seasonToNumber = (season: Season): number => {
+  switch (season) {
+    case 'Ver': return 0;
+    case 'Aestas': return 1;
+    case 'Autumnus': return 2;
+    case 'Hiems': return 3;
+    default: return 0;
+  }
+};
+
+export const numberToSeason = (num: number): Season => {
+  switch (num % 4) {
+    case 0: return 'Ver';
+    case 1: return 'Aestas';
+    case 2: return 'Autumnus';
+    case 3: return 'Hiems';
+    default: return 'Ver';
+  }
+};
+
+export const dateToString = (date: GameDate): string => {
+  return `${date.year}-${date.season}`;
+};
+
+export const stringToDate = (dateString: string): GameDate | null => {
   try {
-    const [yearPart, seasonPart] = dateString.split(' ');
-    const year = parseInt(yearPart, 10);
+    const [yearStr, seasonStr] = dateString.split('-');
+    const year = parseInt(yearStr, 10);
     
     if (isNaN(year)) return null;
     
+    // Vérifier que la saison est valide
+    if (!['Ver', 'Aestas', 'Autumnus', 'Hiems'].includes(seasonStr)) {
+      return null;
+    }
+    
     return {
       year,
-      season: seasonPart as Season
+      season: seasonStr as Season
     };
   } catch (error) {
-    console.error('Error parsing game date:', dateString);
+    console.error("Error parsing date string:", error);
     return null;
   }
 };
 
-export type PlayerSeason = Season;
-
-export const reverseSeasonMapping: Record<string, Season> = {
-  'Printemps': 'Ver',
-  'Été': 'Aestas',
-  'Automne': 'Autumnus',
-  'Hiver': 'Hiems',
-  'Spring': 'Ver',
-  'Summer': 'Aestas',
-  'Autumn': 'Autumnus',
-  'Winter': 'Hiems'
+export const getTotalSeasons = (startDate: GameDate, endDate: GameDate): number => {
+  const yearDiff = endDate.year - startDate.year;
+  const seasonDiff = seasonToNumber(endDate.season) - seasonToNumber(startDate.season);
+  return yearDiff * 4 + seasonDiff;
 };
 
-export const convertSeasonBetweenSystems = (season: string): Season => {
-  const latinSeasons: Record<string, Season> = {
-    'SPRING': 'Ver',
-    'SUMMER': 'Aestas',
-    'AUTUMN': 'Autumnus',
-    'WINTER': 'Hiems',
-    'Printemps': 'Ver',
-    'Été': 'Aestas',
-    'Automne': 'Autumnus',
-    'Hiver': 'Hiems'
-  };
+export const addSeasons = (date: GameDate, seasons: number): GameDate => {
+  if (seasons === 0) return { ...date };
   
-  return latinSeasons[season] || season as Season;
-};
-
-const createTimeStore = () => {
-  let year = 750; // AUC (Ab Urbe Condita) starting year
-  let season: Season = 'Ver';
-  
-  const getYear = () => year;
-  const getSeason = () => season;
-  
-  const advanceTime = () => {
-    const seasons: Season[] = ['Ver', 'Aestas', 'Autumnus', 'Hiems'];
-    const currentIndex = seasons.indexOf(season);
-    const nextIndex = (currentIndex + 1) % seasons.length;
-    
-    season = seasons[nextIndex];
-    
-    if (nextIndex === 0) {
-      year += 1;
-    }
-    
-    return { year, season };
-  };
-  
-  const setDate = (newYear: number, newSeason: Season) => {
-    year = newYear;
-    season = newSeason;
-  };
+  const totalSeasons = seasonToNumber(date.season) + seasons;
+  const yearsToAdd = Math.floor(totalSeasons / 4);
+  const newSeasonIndex = totalSeasons % 4;
   
   return {
-    year,
-    season,
-    getYear,
-    getSeason,
-    advanceTime,
-    setDate
+    year: date.year + yearsToAdd,
+    season: numberToSeason(newSeasonIndex)
   };
 };
-
-export const useTimeStore = createTimeStore();

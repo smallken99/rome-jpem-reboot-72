@@ -1,20 +1,6 @@
 
 import { useEffect, useState } from 'react';
-import { GameDate, Season } from '@/components/maitrejeu/types/common';
-
-const formatDate = (date: Date): string => {
-  return date.toLocaleDateString();
-};
-
-const formatSeason = (season: Season): string => {
-  switch (season) {
-    case 'Ver': return 'Printemps';
-    case 'Aestas': return 'Été';
-    case 'Autumnus': return 'Automne';
-    case 'Hiems': return 'Hiver';
-    default: return season;
-  }
-};
+import { GameDate, Season, formatSeasonDisplay, formatGameDate, nextGameDate, seasonToNumber, numberToSeason, addSeasons, dateToString, stringToDate } from '@/utils/timeSystem';
 
 export const useGameDate = (initialDate?: GameDate) => {
   const [currentDate, setCurrentDate] = useState<GameDate>(
@@ -37,30 +23,7 @@ export const useGameDate = (initialDate?: GameDate) => {
   };
 
   const advanceSeason = () => {
-    setCurrentDate(prev => {
-      let newYear = prev.year;
-      let newSeason: Season;
-      
-      switch (prev.season) {
-        case 'Ver':
-          newSeason = 'Aestas';
-          break;
-        case 'Aestas':
-          newSeason = 'Autumnus';
-          break;
-        case 'Autumnus':
-          newSeason = 'Hiems';
-          break;
-        case 'Hiems':
-          newSeason = 'Ver';
-          newYear += 1;
-          break;
-        default:
-          newSeason = prev.season;
-      }
-      
-      return { year: newYear, season: newSeason };
-    });
+    setCurrentDate(prev => nextGameDate(prev));
   };
 
   const advanceYear = () => {
@@ -106,14 +69,6 @@ export const useGameDate = (initialDate?: GameDate) => {
     return date1.year === date2.year && date1.season === date2.season;
   };
 
-  const formatGameDate = (date: GameDate): string => {
-    return `An ${date.year}, ${formatSeason(date.season)}`;
-  };
-
-  const gameDateToCompatibleString = (gameDate: GameDate): string => {
-    return `${gameDate.year}-${gameDate.season}`;
-  };
-
   const gameDateToDate = (gameDate: GameDate): Date => {
     let month = 0;
     switch (gameDate.season) {
@@ -126,55 +81,46 @@ export const useGameDate = (initialDate?: GameDate) => {
     return new Date(2000 + gameDate.year - 753, month, 15);
   };
 
-  const stringToDate = (dateString: string | Date): Date => {
-    if (!dateString) return new Date();
-    
-    // Check if dateString is already a Date object
-    if (dateString instanceof Date) {
-      return dateString;
-    }
-    
-    return new Date(dateString);
-  };
-
-  const stringToGameDate = (dateString: string): GameDate | null => {
-    try {
-      const [yearStr, seasonStr] = dateString.split('-');
-      const year = parseInt(yearStr, 10);
-      
-      if (isNaN(year)) return null;
-      
-      return {
-        year,
-        season: seasonStr as Season
-      };
-    } catch (error) {
-      console.error("Error parsing date string:", error);
-      return null;
-    }
-  };
-
-  const gameToStringOrDate = (gameDate: GameDate): string => {
-    return `${gameDate.year}-${gameDate.season}`;
-  };
-  
-  const addSeasons = (date: GameDate, seasons: number): GameDate => {
-    if (seasons === 0) return { ...date };
-    
-    const seasonValues: Season[] = ['Ver', 'Aestas', 'Autumnus', 'Hiems'];
-    let currentSeasonIndex = seasonValues.indexOf(date.season);
-    let yearsToAdd = Math.floor((currentSeasonIndex + seasons) / 4);
-    let newSeasonIndex = (currentSeasonIndex + seasons) % 4;
-    
-    if (newSeasonIndex < 0) {
-      newSeasonIndex += 4;
-      yearsToAdd -= 1;
-    }
+  const getDateDifference = (date1: GameDate, date2: GameDate): { years: number, seasons: number } => {
+    const totalSeasons1 = date1.year * 4 + seasonToNumber(date1.season);
+    const totalSeasons2 = date2.year * 4 + seasonToNumber(date2.season);
+    const diffSeasons = totalSeasons2 - totalSeasons1;
     
     return {
-      year: date.year + yearsToAdd,
-      season: seasonValues[newSeasonIndex]
+      years: Math.floor(diffSeasons / 4),
+      seasons: diffSeasons % 4
     };
+  };
+
+  // Calculer une date à partir d'une occurrence (ex: "la 3ème Ver après l'an 750")
+  const getNthOccurrence = (startDate: GameDate, targetSeason: Season, occurrence: number): GameDate => {
+    let currentDate = { ...startDate };
+    let count = 0;
+    
+    // Si nous sommes déjà sur la saison cible, on compte cette occurrence
+    if (currentDate.season === targetSeason) {
+      count++;
+    }
+    
+    // Avancer jusqu'à ce qu'on atteigne le nombre d'occurrences désiré
+    while (count < occurrence) {
+      currentDate = nextGameDate(currentDate);
+      if (currentDate.season === targetSeason) {
+        count++;
+      }
+    }
+    
+    return currentDate;
+  };
+
+  // Formatter une date pour l'affichage
+  const formatDateLong = (date: GameDate): string => {
+    return `An ${date.year} AUC, ${formatSeasonDisplay(date.season)}`;
+  };
+
+  // Formatter une date en style romain
+  const formatDateRoman = (date: GameDate): string => {
+    return `An ${date.year} ab Urbe condita, ${date.season}`;
   };
 
   return {
@@ -187,14 +133,15 @@ export const useGameDate = (initialDate?: GameDate) => {
     isBefore,
     isAfter,
     isEqual,
-    formatGameDate,
-    formatSeason,
+    formatGameDate: formatDateLong,
+    formatDateRoman,
+    formatSeason: formatSeasonDisplay,
     gameDateToJs: gameDateToDate,
-    gameDateToString: gameToStringOrDate,
-    gameDateToCompatibleString,
     gameDateToDate,
-    stringToDate,
-    stringToGameDate,
+    gameDateToString: dateToString,
+    stringToGameDate: stringToDate,
+    getDateDifference,
+    getNthOccurrence,
     addSeasons
   };
 };

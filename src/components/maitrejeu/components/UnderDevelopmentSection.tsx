@@ -33,7 +33,7 @@ export const UnderDevelopmentSection: React.FC<UnderDevelopmentSectionProps> = (
       transition: { 
         duration: 2, 
         repeat: Infinity, 
-        repeatType: "reverse", 
+        repeatType: "reverse" as const, 
         ease: "easeInOut" 
       }
     }

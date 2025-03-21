@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
 import { MaitreJeuProvider } from '@/components/maitrejeu/context/MaitreJeuContext';
 import { MaitreJeuLayout } from '@/components/maitrejeu/layout/MaitreJeuLayout';
@@ -9,6 +9,19 @@ import { AnimatePresence } from 'framer-motion';
 
 const MaitreJeu = () => {
   const [activeTab, setActiveTab] = useState('accueil');
+  const [isFirstLoad, setIsFirstLoad] = useState(true);
+
+  // Effet d'initialisation
+  useEffect(() => {
+    if (isFirstLoad) {
+      // Mettre un petit délai pour permettre l'animation d'entrée
+      const timer = setTimeout(() => {
+        setIsFirstLoad(false);
+      }, 500);
+      
+      return () => clearTimeout(timer);
+    }
+  }, [isFirstLoad]);
 
   return (
     <MaitreJeuProvider>

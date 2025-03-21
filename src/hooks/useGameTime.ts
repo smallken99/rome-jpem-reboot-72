@@ -1,8 +1,7 @@
 
 import { useState, useEffect } from 'react';
 import { useMaitreJeu } from '@/components/maitrejeu/context';
-import { GamePhase, Season } from '@/components/maitrejeu/types/common';
-import { formatSeasonDisplay } from '@/utils/timeSystem';
+import { GamePhase, Season, formatSeasonDisplay, formatGameDate } from '@/utils/timeSystem';
 
 export const useGameTime = () => {
   const { 
@@ -30,9 +29,52 @@ export const useGameTime = () => {
     }
   };
 
-  // Get current year
-  const getYear = () => {
-    return currentYear;
+  // Format full date
+  const formatDate = () => {
+    return formatGameDate(currentDate);
+  };
+
+  // Translate phase name
+  const translatePhase = (phase: string): string => {
+    const phaseMap: Record<string, string> = {
+      'SENATE': 'Sénat',
+      'ECONOMY': 'Économie',
+      'ELECTIONS': 'Élections',
+      'DIPLOMACY': 'Diplomatie',
+      'MILITARY': 'Militaire',
+      'RELIGION': 'Religion',
+      'VOTE': 'Vote',
+      'ACTIONS': 'Actions',
+      'EVENTS': 'Événements'
+    };
+    return phaseMap[phase] || phase;
+  };
+
+  // Get phase description
+  const getPhaseDescription = (): string => {
+    switch (currentPhase) {
+      case 'SENATE': 
+        return "Phase de réunion du Sénat où les décisions importantes sont débattues.";
+      case 'ECONOMY': 
+        return "Gérez les finances et l'économie de la République.";
+      case 'ELECTION': 
+      case 'ELECTIONS':
+        return "Les citoyens élisent leurs magistrats pour l'année à venir.";
+      case 'DIPLOMACY': 
+        return "Négociez avec d'autres nations et établissez des relations diplomatiques.";
+      case 'MILITARY': 
+        return "Planifiez et exécutez des campagnes militaires.";
+      case 'RELIGION': 
+        return "Organisez des cérémonies religieuses et consultez les augures.";
+      case 'VOTE': 
+        return "Votez sur les propositions présentées au Sénat.";
+      case 'ACTIONS': 
+        return "Les joueurs peuvent effectuer des actions personnelles.";
+      case 'EVENTS': 
+        return "Résolution des événements aléatoires affectant la République.";
+      default:
+        return "Phase actuelle du jeu.";
+    }
   };
 
   return {
@@ -44,6 +86,8 @@ export const useGameTime = () => {
     season: currentSeason,
     formatSeason,
     formatRomanSeason,
-    getYear
+    formatDate,
+    translatePhase,
+    getPhaseDescription
   };
 };
