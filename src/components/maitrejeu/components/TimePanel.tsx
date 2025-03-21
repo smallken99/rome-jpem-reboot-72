@@ -5,6 +5,7 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { AlertCircle, Calendar, FastForward, Clock } from 'lucide-react';
 import { useMaitreJeu } from '../context';
 import { toast } from 'sonner';
+import { motion } from 'framer-motion';
 
 export const TimePanel: React.FC = () => {
   const { currentDate, currentPhase, advanceTime, changePhase } = useMaitreJeu();
@@ -27,7 +28,11 @@ export const TimePanel: React.FC = () => {
       'ELECTIONS': 'Élections',
       'DIPLOMACY': 'Diplomatie',
       'MILITARY': 'Militaire',
-      'RELIGION': 'Religion'
+      'RELIGION': 'Religion',
+      'VOTE': 'Vote',
+      'ACTIONS': 'Actions',
+      'EVENTS': 'Événements',
+      'ELECTION': 'Élections'
     };
     return phaseMap[phase] || phase;
   };
@@ -47,7 +52,12 @@ export const TimePanel: React.FC = () => {
   };
   
   return (
-    <div className="flex items-center justify-between p-4 bg-muted/40 border-b rounded-t-lg">
+    <motion.div 
+      initial={{ opacity: 0, y: -10 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.3 }}
+      className="flex items-center justify-between p-4 bg-muted/40 border-b rounded-t-lg"
+    >
       <div className="flex items-center gap-3">
         <div className="flex items-center gap-1">
           <Calendar className="h-5 w-5 text-primary" />
@@ -93,6 +103,6 @@ export const TimePanel: React.FC = () => {
           </DialogFooter>
         </DialogContent>
       </Dialog>
-    </div>
+    </motion.div>
   );
 };

@@ -1,7 +1,7 @@
+
 import { useEffect, useState } from 'react';
 import { GameDate, Season } from '@/components/maitrejeu/types/common';
 
-// Utility functions for formatting
 const formatDate = (date: Date): string => {
   return date.toLocaleDateString();
 };
@@ -102,6 +102,10 @@ export const useGameDate = (initialDate?: GameDate) => {
     return seasonOrder[date1.season] > seasonOrder[date2.season];
   };
 
+  const isEqual = (date1: GameDate, date2: GameDate): boolean => {
+    return date1.year === date2.year && date1.season === date2.season;
+  };
+
   const formatGameDate = (date: GameDate): string => {
     return `An ${date.year}, ${formatSeason(date.season)}`;
   };
@@ -133,8 +137,44 @@ export const useGameDate = (initialDate?: GameDate) => {
     return new Date(dateString);
   };
 
+  const stringToGameDate = (dateString: string): GameDate | null => {
+    try {
+      const [yearStr, seasonStr] = dateString.split('-');
+      const year = parseInt(yearStr, 10);
+      
+      if (isNaN(year)) return null;
+      
+      return {
+        year,
+        season: seasonStr as Season
+      };
+    } catch (error) {
+      console.error("Error parsing date string:", error);
+      return null;
+    }
+  };
+
   const gameToStringOrDate = (gameDate: GameDate): string => {
     return `${gameDate.year}-${gameDate.season}`;
+  };
+  
+  const addSeasons = (date: GameDate, seasons: number): GameDate => {
+    if (seasons === 0) return { ...date };
+    
+    const seasonValues: Season[] = ['Ver', 'Aestas', 'Autumnus', 'Hiems'];
+    let currentSeasonIndex = seasonValues.indexOf(date.season);
+    let yearsToAdd = Math.floor((currentSeasonIndex + seasons) / 4);
+    let newSeasonIndex = (currentSeasonIndex + seasons) % 4;
+    
+    if (newSeasonIndex < 0) {
+      newSeasonIndex += 4;
+      yearsToAdd -= 1;
+    }
+    
+    return {
+      year: date.year + yearsToAdd,
+      season: seasonValues[newSeasonIndex]
+    };
   };
 
   return {
@@ -146,12 +186,15 @@ export const useGameDate = (initialDate?: GameDate) => {
     toGameDate,
     isBefore,
     isAfter,
+    isEqual,
     formatGameDate,
     formatSeason,
     gameDateToJs: gameDateToDate,
     gameDateToString: gameToStringOrDate,
     gameDateToCompatibleString,
     gameDateToDate,
-    stringToDate
+    stringToDate,
+    stringToGameDate,
+    addSeasons
   };
 };

@@ -18,11 +18,49 @@ export const UnderDevelopmentSection: React.FC<UnderDevelopmentSectionProps> = (
   estimatedRelease,
   features
 }) => {
+  const cardVariants = {
+    hidden: { opacity: 0, y: 20 },
+    visible: { 
+      opacity: 1, 
+      y: 0,
+      transition: { duration: 0.5 }
+    }
+  };
+  
+  const iconVariants = {
+    animate: {
+      rotate: [0, 15, -15, 0],
+      transition: { 
+        duration: 2, 
+        repeat: Infinity, 
+        repeatType: "reverse", 
+        ease: "easeInOut" 
+      }
+    }
+  };
+  
+  const listVariants = {
+    hidden: { opacity: 0 },
+    visible: { 
+      opacity: 1,
+      transition: { delay: 0.3, duration: 0.5 }
+    }
+  };
+  
+  const itemVariants = {
+    hidden: { opacity: 0, x: -10 },
+    visible: {
+      opacity: 1,
+      x: 0,
+      transition: { duration: 0.3 }
+    }
+  };
+  
   return (
     <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.5 }}
+      variants={cardVariants}
+      initial="hidden"
+      animate="visible"
     >
       <Card className="border-amber-300">
         <CardHeader className="border-b border-amber-200 bg-amber-50 pb-3">
@@ -43,8 +81,8 @@ export const UnderDevelopmentSection: React.FC<UnderDevelopmentSectionProps> = (
           <div className="flex flex-col items-center justify-center text-center p-6">
             <motion.div 
               className="bg-amber-100 p-4 rounded-full mb-4"
-              animate={{ rotate: [0, 15, -15, 0] }}
-              transition={{ duration: 2, repeat: Infinity, repeatType: "reverse", ease: "easeInOut" }}
+              variants={iconVariants}
+              animate="animate"
             >
               <Wrench className="h-12 w-12 text-amber-500" />
             </motion.div>
@@ -58,9 +96,9 @@ export const UnderDevelopmentSection: React.FC<UnderDevelopmentSectionProps> = (
             {features && features.length > 0 && (
               <motion.div 
                 className="w-full max-w-md mb-4"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ delay: 0.3, duration: 0.5 }}
+                variants={listVariants}
+                initial="hidden"
+                animate="visible"
               >
                 <h4 className="text-sm font-medium text-amber-800 mb-2">Fonctionnalités prévues :</h4>
                 <ul className="space-y-1 text-sm text-muted-foreground">
@@ -68,9 +106,10 @@ export const UnderDevelopmentSection: React.FC<UnderDevelopmentSectionProps> = (
                     <motion.li 
                       key={index} 
                       className="flex items-start"
-                      initial={{ opacity: 0, x: -10 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      transition={{ delay: 0.3 + (index * 0.1), duration: 0.3 }}
+                      variants={itemVariants}
+                      initial="hidden"
+                      animate="visible"
+                      transition={{ delay: 0.3 + (index * 0.1) }}
                     >
                       <span className="mr-2">•</span>
                       <span>{feature}</span>
