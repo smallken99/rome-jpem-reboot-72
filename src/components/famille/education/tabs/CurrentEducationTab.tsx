@@ -22,7 +22,7 @@ export const CurrentEducationTab: React.FC = () => {
   const nonEducatingChildren = eligibleChildren.filter(child => child.educationType === 'none');
 
   return (
-    <TabsContent value="current">
+    <TabsContent value="current" className="animate-fade-in">
       <div className="space-y-6">
         {educatingChildren.length > 0 && (
           <div className="space-y-4">
@@ -51,7 +51,7 @@ export const CurrentEducationTab: React.FC = () => {
             
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {nonEducatingChildren.map(child => (
-                <div key={child.id} className="border rounded-lg p-4 bg-slate-50 hover:bg-white hover:shadow-sm transition-all">
+                <div key={child.id} className="border rounded-lg p-4 bg-slate-50 hover:bg-white hover:shadow-sm transition-all hover-scale">
                   <div className="flex items-center justify-between mb-2">
                     <div className="font-medium">{child.name}</div>
                     <div className="text-xs text-muted-foreground">{child.age} ans</div>
