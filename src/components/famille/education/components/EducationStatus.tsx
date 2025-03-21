@@ -5,6 +5,7 @@ import { Scroll, Sword, BookOpen, Scale, AlertTriangle } from 'lucide-react';
 import { Progress } from '@/components/ui/progress';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
+import { motion } from 'framer-motion';
 
 interface EducationStatusProps {
   child: Child;
@@ -21,10 +22,15 @@ export const EducationStatus: React.FC<EducationStatusProps> = ({
 }) => {
   if (!hasEducation) {
     return (
-      <div className={cn("p-2 mb-4 bg-slate-100 rounded text-slate-600 text-sm flex items-center", className)}>
+      <motion.div 
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.3 }}
+        className={cn("p-2 mb-4 bg-slate-100 rounded text-slate-600 text-sm flex items-center", className)}
+      >
         <BookOpen className="h-4 w-4 mr-2 text-slate-400" />
         Aucune éducation en cours
-      </div>
+      </motion.div>
     );
   }
   
@@ -75,10 +81,21 @@ export const EducationStatus: React.FC<EducationStatusProps> = ({
   };
   
   return (
-    <div className={cn("my-4 space-y-3 animate-fade-in", className)}>
+    <motion.div 
+      className={cn("my-4 space-y-3", className)}
+      initial={{ opacity: 0, y: 10 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.4 }}
+    >
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
-          {getEducationIcon()}
+          <motion.div
+            initial={{ scale: 0.8 }}
+            animate={{ scale: 1 }}
+            transition={{ duration: 0.3 }}
+          >
+            {getEducationIcon()}
+          </motion.div>
           <span className="font-medium">Éducation {getEducationName()}</span>
           {hasInvalidEducation && (
             <Badge variant="outline" className="text-red-500 border-red-200 bg-red-50">
@@ -89,7 +106,15 @@ export const EducationStatus: React.FC<EducationStatusProps> = ({
         </div>
         <div className="flex items-center gap-2">
           <span className="text-xs text-muted-foreground">{getYearLabel()}</span>
-          <span className="text-sm font-medium">{child.progress}%</span>
+          <motion.span 
+            className="text-sm font-medium"
+            key={child.progress}
+            initial={{ scale: 1.2 }}
+            animate={{ scale: 1 }}
+            transition={{ duration: 0.3 }}
+          >
+            {child.progress}%
+          </motion.span>
         </div>
       </div>
       
@@ -100,10 +125,15 @@ export const EducationStatus: React.FC<EducationStatusProps> = ({
       />
       
       {hasInvalidEducation && (
-        <div className="p-2 bg-red-50 border border-red-200 rounded text-red-700 text-sm flex items-center">
+        <motion.div 
+          className="p-2 bg-red-50 border border-red-200 rounded text-red-700 text-sm flex items-center"
+          initial={{ opacity: 0, height: 0 }}
+          animate={{ opacity: 1, height: 'auto' }}
+          transition={{ duration: 0.3 }}
+        >
           <AlertTriangle className="h-4 w-4 mr-2 text-red-500" />
           Éducation militaire non adaptée aux filles romaines.
-        </div>
+        </motion.div>
       )}
 
       {child.preceptorId && (
@@ -112,6 +142,6 @@ export const EducationStatus: React.FC<EducationStatusProps> = ({
           <div className="w-2 h-2 bg-green-500 rounded-full"></div>
         </div>
       )}
-    </div>
+    </motion.div>
   );
 };

@@ -5,6 +5,7 @@ import { MaitreJeuProvider } from '@/components/maitrejeu/context/MaitreJeuConte
 import { MaitreJeuLayout } from '@/components/maitrejeu/layout/MaitreJeuLayout';
 import { MaitreJeuContent } from '@/components/maitrejeu/layout/MaitreJeuContent';
 import { Toaster } from 'sonner';
+import { AnimatePresence } from 'framer-motion';
 
 const MaitreJeu = () => {
   const [activeTab, setActiveTab] = useState('accueil');
@@ -12,17 +13,19 @@ const MaitreJeu = () => {
   return (
     <MaitreJeuProvider>
       <Toaster richColors position="top-right" />
-      <Routes>
-        <Route path="/" element={
-          <MaitreJeuLayout 
-            activeTab={activeTab}
-            setActiveTab={setActiveTab}
-          >
-            <MaitreJeuContent activeTab={activeTab} />
-          </MaitreJeuLayout>
-        } />
-        <Route path="*" element={<Navigate to="/maitre-jeu/" replace />} />
-      </Routes>
+      <AnimatePresence mode="wait">
+        <Routes>
+          <Route path="/" element={
+            <MaitreJeuLayout 
+              activeTab={activeTab}
+              setActiveTab={setActiveTab}
+            >
+              <MaitreJeuContent activeTab={activeTab} />
+            </MaitreJeuLayout>
+          } />
+          <Route path="*" element={<Navigate to="/maitre-jeu/" replace />} />
+        </Routes>
+      </AnimatePresence>
     </MaitreJeuProvider>
   );
 };

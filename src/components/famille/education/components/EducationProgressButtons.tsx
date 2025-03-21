@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { FastForward, Check, Clock, Ban, AlertTriangle } from 'lucide-react';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { cn } from '@/lib/utils';
+import { motion } from 'framer-motion';
 
 interface EducationProgressButtonsProps {
   isEducating: boolean;
@@ -33,54 +34,73 @@ export const EducationProgressButtons: React.FC<EducationProgressButtonsProps> =
   // Si l'éducation est terminée, afficher uniquement le bouton "Terminé"
   if (educationProgress >= 100) {
     return (
-      <div className={cn("flex justify-end mt-4", className)}>
-        <Button variant="outline" className="text-green-600 hover-scale" disabled>
+      <motion.div 
+        className={cn("flex justify-end mt-4", className)}
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.3 }}
+      >
+        <Button variant="outline" className="text-green-600" disabled>
           <Check className="mr-2 h-4 w-4" />
           Éducation complétée
         </Button>
-      </div>
+      </motion.div>
     );
   }
   
   return (
-    <div className={cn("flex flex-wrap justify-end gap-2 mt-4", className)}>
+    <motion.div 
+      className={cn("flex flex-wrap justify-end gap-2 mt-4", className)}
+      initial={{ opacity: 0, y: 10 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.3 }}
+    >
       <TooltipProvider>
         {isEducating ? (
           <Tooltip>
             <TooltipTrigger asChild>
-              <Button variant="outline" className="text-amber-600" disabled>
-                <Clock className="mr-2 h-4 w-4 animate-pulse" />
-                Progression en cours...
-              </Button>
+              <motion.div
+                animate={{ scale: [1, 1.03, 1] }}
+                transition={{ duration: 1.5, repeat: Infinity }}
+              >
+                <Button variant="outline" className="text-amber-600" disabled>
+                  <Clock className="mr-2 h-4 w-4 animate-pulse" />
+                  Progression en cours...
+                </Button>
+              </motion.div>
             </TooltipTrigger>
             <TooltipContent>
               <p>L'éducation progresse automatiquement</p>
             </TooltipContent>
           </Tooltip>
         ) : (
-          <Button 
-            variant="outline" 
-            onClick={onAdvanceYear}
-            className="text-blue-600 hover-scale transition-all"
-            disabled={isInvalidEducation}
-          >
-            <FastForward className="mr-2 h-4 w-4" />
-            Avancer d'une année
-          </Button>
+          <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+            <Button 
+              variant="outline" 
+              onClick={onAdvanceYear}
+              className="text-blue-600 transition-all"
+              disabled={isInvalidEducation}
+            >
+              <FastForward className="mr-2 h-4 w-4" />
+              Avancer d'une année
+            </Button>
+          </motion.div>
         )}
         
         {canComplete && !isEducating && (
           <Tooltip>
             <TooltipTrigger asChild>
-              <Button 
-                onClick={onCompleteEducation} 
-                variant="default"
-                className="hover-scale transition-all"
-                disabled={isInvalidEducation}
-              >
-                <Check className="mr-2 h-4 w-4" />
-                Terminer l'éducation
-              </Button>
+              <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+                <Button 
+                  onClick={onCompleteEducation} 
+                  variant="default"
+                  className="transition-all"
+                  disabled={isInvalidEducation}
+                >
+                  <Check className="mr-2 h-4 w-4" />
+                  Terminer l'éducation
+                </Button>
+              </motion.div>
             </TooltipTrigger>
             <TooltipContent>
               <p>Finaliser l'éducation avec les connaissances actuelles</p>
@@ -109,14 +129,16 @@ export const EducationProgressButtons: React.FC<EducationProgressButtonsProps> =
         {onCancel && !isEducating && educationProgress < 100 && (
           <Tooltip>
             <TooltipTrigger asChild>
-              <Button 
-                variant="outline" 
-                onClick={onCancel} 
-                className="text-red-600 hover:text-red-700 hover:bg-red-50 transition-all"
-              >
-                <Ban className="mr-2 h-4 w-4" />
-                Annuler l'éducation
-              </Button>
+              <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+                <Button 
+                  variant="outline" 
+                  onClick={onCancel} 
+                  className="text-red-600 hover:text-red-700 hover:bg-red-50 transition-all"
+                >
+                  <Ban className="mr-2 h-4 w-4" />
+                  Annuler l'éducation
+                </Button>
+              </motion.div>
             </TooltipTrigger>
             <TooltipContent>
               <p>Arrêter cette éducation. L'enfant devra recommencer.</p>
@@ -124,6 +146,6 @@ export const EducationProgressButtons: React.FC<EducationProgressButtonsProps> =
           </Tooltip>
         )}
       </TooltipProvider>
-    </div>
+    </motion.div>
   );
 };

@@ -25,6 +25,7 @@ import { Badge } from '@/components/ui/badge';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { toast } from 'sonner';
+import { motion } from 'framer-motion';
 
 export interface MaitreJeuSidebarProps {
   activeTab: string;
@@ -78,16 +79,41 @@ export const MaitreJeuSidebar: React.FC<MaitreJeuSidebarProps> = ({
     return `An ${date.year} AUC - ${seasonMap[date.season] || date.season}`;
   };
   
+  const parentVariants = {
+    hidden: { opacity: 0 },
+    show: {
+      opacity: 1,
+      transition: {
+        staggerChildren: 0.05
+      }
+    }
+  };
+  
+  const itemVariants = {
+    hidden: { opacity: 0, x: -10 },
+    show: { opacity: 1, x: 0 }
+  };
+  
   return (
     <div className="h-full w-56 border-r bg-background flex flex-col">
-      <div className="p-4">
+      <motion.div 
+        className="p-4"
+        initial={{ opacity: 0, y: -10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.3 }}
+      >
         <h2 className="font-cinzel text-lg font-semibold mb-2">Maître du Jeu</h2>
         <div className="text-sm text-muted-foreground mb-2">
           Panneau d'administration
         </div>
-      </div>
+      </motion.div>
       
-      <div className="p-3 bg-muted/50">
+      <motion.div 
+        className="p-3 bg-muted/50"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ delay: 0.2, duration: 0.3 }}
+      >
         <div className="flex items-center gap-2 text-sm">
           <CalendarClock className="h-4 w-4 text-muted-foreground" />
           <span>Date:</span>
@@ -101,14 +127,19 @@ export const MaitreJeuSidebar: React.FC<MaitreJeuSidebarProps> = ({
           <span>Phase:</span>
           <span className="font-medium">{currentPhase}</span>
         </div>
-      </div>
+      </motion.div>
       
       <Separator />
       
       <nav className="flex-1 p-2 overflow-y-auto">
-        <ul className="space-y-1">
+        <motion.ul 
+          className="space-y-1"
+          variants={parentVariants}
+          initial="hidden"
+          animate="show"
+        >
           {navItems.map(item => (
-            <li key={item.id}>
+            <motion.li key={item.id} variants={itemVariants}>
               <TooltipProvider>
                 <Tooltip>
                   <TooltipTrigger asChild>
@@ -135,34 +166,43 @@ export const MaitreJeuSidebar: React.FC<MaitreJeuSidebarProps> = ({
                   </TooltipContent>
                 </Tooltip>
               </TooltipProvider>
-            </li>
+            </motion.li>
           ))}
-        </ul>
+        </motion.ul>
       </nav>
       
       <Separator />
       
-      <div className="p-3 space-y-2">
-        <Button 
-          variant="outline" 
-          size="sm" 
-          className="w-full flex items-center gap-2"
-          onClick={handleAdvanceTime}
-        >
-          <CalendarClock className="h-4 w-4" />
-          Avancer le temps
-        </Button>
+      <motion.div 
+        className="p-3 space-y-2"
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.3, duration: 0.3 }}
+      >
+        <motion.div whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}>
+          <Button 
+            variant="outline" 
+            size="sm" 
+            className="w-full flex items-center gap-2"
+            onClick={handleAdvanceTime}
+          >
+            <CalendarClock className="h-4 w-4" />
+            Avancer le temps
+          </Button>
+        </motion.div>
         
-        <Button 
-          variant="outline" 
-          size="sm" 
-          className="w-full flex items-center gap-2"
-          onClick={() => setActiveTab('statistiques')}
-        >
-          <BarChart2 className="h-4 w-4" />
-          Statistiques
-        </Button>
-      </div>
+        <motion.div whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}>
+          <Button 
+            variant="outline" 
+            size="sm" 
+            className="w-full flex items-center gap-2"
+            onClick={() => setActiveTab('statistiques')}
+          >
+            <BarChart2 className="h-4 w-4" />
+            Statistiques
+          </Button>
+        </motion.div>
+      </motion.div>
       
       <Dialog open={timeDialogOpen} onOpenChange={setTimeDialogOpen}>
         <DialogContent>

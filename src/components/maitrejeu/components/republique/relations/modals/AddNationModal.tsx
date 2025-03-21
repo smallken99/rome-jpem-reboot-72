@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
@@ -7,17 +7,80 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { AddNationModalProps } from '../types';
+import { toast } from 'sonner';
+import { motion } from 'framer-motion';
 
-export const AddNationModal: React.FC<AddNationModalProps> = ({ isOpen, onClose }) => {
+export const AddNationModal: React.FC<AddNationModalProps> = ({ isOpen, onClose, onSave }) => {
+  const [formData, setFormData] = useState({
+    name: '',
+    region: '',
+    status: 'neutral',
+    population: 100000,
+    description: '',
+    leader: '',
+    leaderTitle: '',
+    militaryStrength: 50,
+    diplomaticInfluence: 50,
+    tradeValue: 50,
+    lastContact: '',
+    leaders: ''
+  });
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    const { id, value } = e.target;
+    setFormData(prev => ({ ...prev, [id]: value }));
+  };
+
+  const handleSelectChange = (field: string, value: string) => {
+    setFormData(prev => ({ ...prev, [field]: value }));
+  };
+
+  const handleNumberChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { id, value } = e.target;
+    setFormData(prev => ({ ...prev, [id]: Number(value) }));
+  };
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    // Traitement du formulaire
+    
+    if (!formData.name.trim()) {
+      toast.error("Le nom de la nation est requis");
+      return;
+    }
+    
+    if (!formData.region.trim()) {
+      toast.error("La région est requise");
+      return;
+    }
+    
+    if (onSave) {
+      onSave(formData);
+    }
+    
+    toast.success(`Nation "${formData.name}" ajoutée avec succès`);
     onClose();
+  };
+
+  const formVariants = {
+    hidden: { opacity: 0, y: 20 },
+    visible: { 
+      opacity: 1, 
+      y: 0,
+      transition: {
+        duration: 0.3,
+        staggerChildren: 0.1
+      }
+    }
+  };
+  
+  const itemVariants = {
+    hidden: { opacity: 0, y: 10 },
+    visible: { opacity: 1, y: 0 }
   };
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-[550px]">
+      <DialogContent className="sm:max-w-[600px]">
         <DialogHeader>
           <DialogTitle>Ajouter une nouvelle nation</DialogTitle>
           <DialogDescription>
@@ -25,23 +88,42 @@ export const AddNationModal: React.FC<AddNationModalProps> = ({ isOpen, onClose 
           </DialogDescription>
         </DialogHeader>
         
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="grid grid-cols-2 gap-4">
+        <motion.form 
+          onSubmit={handleSubmit} 
+          className="space-y-4"
+          variants={formVariants}
+          initial="hidden"
+          animate="visible"
+        >
+          <motion.div variants={itemVariants} className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label htmlFor="name">Nom</Label>
-              <Input id="name" required />
+              <Input 
+                id="name" 
+                value={formData.name}
+                onChange={handleChange}
+                required 
+              />
             </div>
             
             <div className="space-y-2">
               <Label htmlFor="region">Région</Label>
-              <Input id="region" required />
+              <Input 
+                id="region" 
+                value={formData.region}
+                onChange={handleChange}
+                required 
+              />
             </div>
-          </div>
+          </motion.div>
           
-          <div className="grid grid-cols-2 gap-4">
+          <motion.div variants={itemVariants} className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label htmlFor="status">Statut</Label>
-              <Select defaultValue="neutral">
+              <Select 
+                value={formData.status}
+                onValueChange={(value) => handleSelectChange('status', value)}
+              >
                 <SelectTrigger id="status">
                   <SelectValue placeholder="Statut" />
                 </SelectTrigger>
@@ -59,33 +141,46 @@ export const AddNationModal: React.FC<AddNationModalProps> = ({ isOpen, onClose 
               <Input 
                 id="population" 
                 type="number" 
-                defaultValue={100000}
+                value={formData.population}
+                onChange={handleNumberChange}
                 required 
               />
             </div>
-          </div>
+          </motion.div>
           
-          <div className="space-y-2">
+          <motion.div variants={itemVariants} className="space-y-2">
             <Label htmlFor="description">Description</Label>
             <Textarea 
               id="description" 
               rows={3}
+              value={formData.description}
+              onChange={handleChange}
             />
-          </div>
+          </motion.div>
           
-          <div className="grid grid-cols-2 gap-4">
+          <motion.div variants={itemVariants} className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label htmlFor="leader">Dirigeant</Label>
-              <Input id="leader" required />
+              <Input 
+                id="leader" 
+                value={formData.leader}
+                onChange={handleChange}
+                required 
+              />
             </div>
             
             <div className="space-y-2">
               <Label htmlFor="leaderTitle">Titre du dirigeant</Label>
-              <Input id="leaderTitle" required />
+              <Input 
+                id="leaderTitle" 
+                value={formData.leaderTitle}
+                onChange={handleChange}
+                required 
+              />
             </div>
-          </div>
+          </motion.div>
           
-          <div className="grid grid-cols-3 gap-4">
+          <motion.div variants={itemVariants} className="grid grid-cols-3 gap-4">
             <div className="space-y-2">
               <Label htmlFor="militaryStrength">Force militaire (1-100)</Label>
               <Input 
@@ -93,7 +188,8 @@ export const AddNationModal: React.FC<AddNationModalProps> = ({ isOpen, onClose 
                 type="number" 
                 min="1" 
                 max="100"
-                defaultValue={50}
+                value={formData.militaryStrength}
+                onChange={handleNumberChange}
               />
             </div>
             
@@ -104,7 +200,8 @@ export const AddNationModal: React.FC<AddNationModalProps> = ({ isOpen, onClose 
                 type="number" 
                 min="1" 
                 max="100"
-                defaultValue={50}
+                value={formData.diplomaticInfluence}
+                onChange={handleNumberChange}
               />
             </div>
             
@@ -115,28 +212,39 @@ export const AddNationModal: React.FC<AddNationModalProps> = ({ isOpen, onClose 
                 type="number" 
                 min="1" 
                 max="100"
-                defaultValue={50}
+                value={formData.tradeValue}
+                onChange={handleNumberChange}
               />
             </div>
-          </div>
+          </motion.div>
           
-          <div className="space-y-2">
+          <motion.div variants={itemVariants} className="space-y-2">
             <Label htmlFor="lastContact">Dernier contact</Label>
-            <Input id="lastContact" />
-          </div>
+            <Input 
+              id="lastContact" 
+              value={formData.lastContact}
+              onChange={handleChange}
+            />
+          </motion.div>
           
-          <div className="space-y-2">
-            <Label htmlFor="leaders">Dirigeants (séparés par des virgules)</Label>
-            <Input id="leaders" />
-          </div>
+          <motion.div variants={itemVariants} className="space-y-2">
+            <Label htmlFor="leaders">Dirigeants historiques (séparés par des virgules)</Label>
+            <Input 
+              id="leaders" 
+              value={formData.leaders}
+              onChange={handleChange}
+            />
+          </motion.div>
           
-          <DialogFooter>
-            <Button type="button" variant="outline" onClick={onClose}>
-              Annuler
-            </Button>
-            <Button type="submit">Enregistrer</Button>
-          </DialogFooter>
-        </form>
+          <motion.div variants={itemVariants}>
+            <DialogFooter className="mt-6">
+              <Button type="button" variant="outline" onClick={onClose}>
+                Annuler
+              </Button>
+              <Button type="submit">Enregistrer</Button>
+            </DialogFooter>
+          </motion.div>
+        </motion.form>
       </DialogContent>
     </Dialog>
   );
