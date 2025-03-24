@@ -1,159 +1,138 @@
 
-import { useState, useEffect, useCallback } from 'react';
-import { v4 as uuidv4 } from 'uuid';
-import { Transaction, EconomyStats } from '@/types/EconomyTypes';
-import { useToast } from '@/components/ui/use-toast';
+import { useState, useCallback } from 'react';
+import { toast } from 'sonner';
 
-interface EconomyState {
-  balance: number;
-  transactions: Transaction[];
-  stats: EconomyStats;
+export interface Transaction {
+  id: string;
+  amount: number;
+  source: string;
+  category: string;
+  description: string;
+  date: Date;
+  type: 'income' | 'expense';
 }
 
-export const useEconomy = () => {
-  const [state, setState] = useState<EconomyState>({
-    balance: 150000,
-    transactions: [],
-    stats: {
-      balance: 150000,
-      monthlyIncome: 42000,
-      monthlyExpenses: 30000,
-      annualTaxes: 25000,
-      inflation: 2.5
-    }
-  });
+export const useEconomy = (initialBalance = 100000) => {
+  const [balance, setBalance] = useState(initialBalance);
+  const [transactions, setTransactions] = useState<Transaction[]>([]);
   
-  const { toast } = useToast();
-  
-  useEffect(() => {
-    // Charger les transactions simulées
-    const mockTransactions: Transaction[] = [
-      {
-        id: uuidv4(),
-        date: new Date(2023, 6, 15),
-        amount: 25000,
-        description: "Fermage: Domaine viticole",
-        category: "Revenus agricoles",
-        type: "income"
-      },
-      {
-        id: uuidv4(),
-        date: new Date(2023, 6, 12),
-        amount: 15000,
-        description: "Loyers: Insula Via Sacra",
-        category: "Loyers urbains",
-        type: "income"
-      },
-      {
-        id: uuidv4(),
-        date: new Date(2023, 6, 10),
-        amount: 8000,
-        description: "Entretien: Villa Urbana",
-        category: "Entretien",
-        type: "expense"
-      },
-      {
-        id: uuidv4(),
-        date: new Date(2023, 6, 5),
-        amount: 12000,
-        description: "Salaires: Personnel domestique",
-        category: "Personnel",
-        type: "expense"
-      },
-      {
-        id: uuidv4(),
-        date: new Date(2023, 6, 1),
-        amount: 5000,
-        description: "Tribut: Quaestor Urbanus",
-        category: "Impôts",
-        type: "expense"
-      }
-    ];
-    
-    setState(prev => ({
-      ...prev,
-      transactions: mockTransactions,
-    }));
-  }, []);
-  
-  // Vérifier si les fonds sont suffisants
+  /**
+   * Vérifie si l'utilisateur a assez de fonds pour une dépense
+   */
   const canAfford = useCallback((amount: number): boolean => {
-    return state.balance >= amount;
-  }, [state.balance]);
+    return balance >= amount;
+  }, [balance]);
   
-  // Effectuer un paiement
-  const makePayment = useCallback((amount: number, recipient: string, category: string): boolean => {
+  /**
+   * Effectue un paiement (dépense)
+   */
+  const makePayment = useCallback((amount: number, recipient: string, category: string, description?: string): boolean => {
     if (!canAfford(amount)) {
-      toast({
-        title: "Fonds insuffisants",
-        description: "Vous ne disposez pas des fonds nécessaires pour cette transaction.",
-        variant: "destructive"
-      });
+      toast.error(`Fonds insuffisants pour effectuer ce paiement de ${amount.toLocaleString()} As`);
       return false;
     }
     
+    // Générer un ID unique
+    const id = `trans-${Date.now()}-${Math.floor(Math.random() * 1000)}`;
+    
+    // Créer la transaction
     const transaction: Transaction = {
-      id: uuidv4(),
-      date: new Date(),
-      amount,
-      description: `Paiement à: ${recipient}`,
+      id,
+      amount: -amount, // Montant négatif pour une dépense
+      source: recipient, // Le destinataire devient la source de la transaction
       category,
-      type: "expense"
+      description: description || `Paiement à ${recipient}`,
+      date: new Date(),
+      type: 'expense'
     };
     
-    setState(prev => ({
-      ...prev,
-      balance: prev.balance - amount,
-      transactions: [transaction, ...prev.transactions],
-      stats: {
-        ...prev.stats,
-        balance: prev.stats.balance - amount
-      }
-    }));
+    // Ajouter la transaction
+    setTransactions(prev => [transaction, ...prev]);
     
-    toast({
-      title: "Paiement effectué",
-      description: `${amount.toLocaleString()} As ont été versés à ${recipient}.`
-    });
+    // Mettre à jour le solde
+    setBalance(prev => prev - amount);
     
     return true;
-  }, [canAfford, toast]);
+  }, [canAfford]);
   
-  // Recevoir un paiement
-  const receivePayment = useCallback((amount: number, source: string, category: string): boolean => {
+  /**
+   * Reçoit un paiement (revenu)
+   */
+  const receivePayment = useCallback((amount: number, source: string, category: string, description?: string): boolean => {
+    // Générer un ID unique
+    const id = `trans-${Date.now()}-${Math.floor(Math.random() * 1000)}`;
+    
+    // Créer la transaction
     const transaction: Transaction = {
-      id: uuidv4(),
-      date: new Date(),
+      id,
       amount,
-      description: `Reçu de: ${source}`,
+      source,
       category,
-      type: "income"
+      description: description || `Paiement reçu de ${source}`,
+      date: new Date(),
+      type: 'income'
     };
     
-    setState(prev => ({
-      ...prev,
-      balance: prev.balance + amount,
-      transactions: [transaction, ...prev.transactions],
-      stats: {
-        ...prev.stats,
-        balance: prev.stats.balance + amount
-      }
-    }));
+    // Ajouter la transaction
+    setTransactions(prev => [transaction, ...prev]);
     
-    toast({
-      title: "Paiement reçu",
-      description: `${amount.toLocaleString()} As ont été reçus de ${source}.`
-    });
+    // Mettre à jour le solde
+    setBalance(prev => prev + amount);
     
     return true;
-  }, [toast]);
+  }, []);
+  
+  /**
+   * Calculer les statistiques financières
+   */
+  const getFinancialStats = useCallback(() => {
+    const now = new Date();
+    const oneMonthAgo = new Date();
+    oneMonthAgo.setMonth(now.getMonth() - 1);
+    
+    // Filtrer les transactions du dernier mois
+    const recentTransactions = transactions.filter(t => t.date >= oneMonthAgo);
+    
+    // Calculer les revenus et dépenses
+    const monthlyIncome = recentTransactions
+      .filter(t => t.type === 'income')
+      .reduce((sum, t) => sum + t.amount, 0);
+    
+    const monthlyExpenses = recentTransactions
+      .filter(t => t.type === 'expense')
+      .reduce((sum, t) => sum + Math.abs(t.amount), 0);
+    
+    // Calculer par catégorie
+    const incomeByCategory = transactions
+      .filter(t => t.type === 'income')
+      .reduce((acc, t) => {
+        acc[t.category] = (acc[t.category] || 0) + t.amount;
+        return acc;
+      }, {} as Record<string, number>);
+    
+    const expensesByCategory = transactions
+      .filter(t => t.type === 'expense')
+      .reduce((acc, t) => {
+        acc[t.category] = (acc[t.category] || 0) + Math.abs(t.amount);
+        return acc;
+      }, {} as Record<string, number>);
+    
+    return {
+      balance,
+      monthlyIncome,
+      monthlyExpenses,
+      netIncome: monthlyIncome - monthlyExpenses,
+      incomeByCategory,
+      expensesByCategory
+    };
+  }, [balance, transactions]);
   
   return {
-    balance: state.balance,
-    transactions: state.transactions,
-    economyStats: state.stats,
+    balance,
+    transactions,
     canAfford,
     makePayment,
-    receivePayment
+    receivePayment,
+    getFinancialStats
   };
 };

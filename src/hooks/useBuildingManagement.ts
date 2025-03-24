@@ -1,135 +1,154 @@
 
 import { useState, useCallback } from 'react';
 import { OwnedBuilding, BuildingType } from '@/types/buildings';
-import { v4 as uuidv4 } from 'uuid';
+import { useEconomy } from './useEconomy';
 import { toast } from 'sonner';
 
-export const useBuildingManagement = () => {
-  const [buildings, setBuildings] = useState<OwnedBuilding[]>([]);
-
-  // Ajouter un nouveau bâtiment
-  const addBuilding = useCallback((building: Omit<OwnedBuilding, 'id'>) => {
+export const useBuildingManagement = (initialBuildings: OwnedBuilding[] = []) => {
+  const [buildings, setBuildings] = useState<OwnedBuilding[]>(initialBuildings);
+  const { makePayment, receivePayment } = useEconomy();
+  
+  // Ajouter un bâtiment
+  const addBuilding = useCallback((building: Omit<OwnedBuilding, 'id'>): string => {
+    const newId = `building-${Date.now()}`;
     const newBuilding: OwnedBuilding = {
       ...building,
-      id: uuidv4(), // Générer un ID string
-      type: (building.type || 'other') as BuildingType, // Assurer que type est défini
-      purchaseDate: new Date(),
-      condition: 100,
-      maintenanceLevel: 2, // Niveau standard par défaut
-      securityLevel: 1, // Niveau basique par défaut
+      id: newId,
+      condition: building.condition || 100,
+      maintenanceEnabled: building.maintenanceEnabled || false,
+      purchaseDate: building.purchaseDate || new Date()
     };
     
     setBuildings(prev => [...prev, newBuilding]);
-    toast.success(`Bâtiment "${building.name}" ajouté avec succès.`);
-    return newBuilding.id;
+    return newId;
   }, []);
-
-  // Mettre à jour un bâtiment existant
-  const updateBuilding = useCallback((id: string, updates: Partial<OwnedBuilding>) => {
-    setBuildings(prev => 
-      prev.map(building => 
-        building.id === id ? { ...building, ...updates } : building
-      )
-    );
-    toast.success(`Bâtiment mis à jour.`);
-  }, []);
-
-  // Supprimer un bâtiment
-  const removeBuilding = useCallback((id: string) => {
-    setBuildings(prev => prev.filter(building => building.id !== id));
-    toast.success(`Bâtiment supprimé.`);
-  }, []);
-
-  // Mise à jour du niveau d'entretien
-  const updateMaintenanceLevel = useCallback((id: string, level: number) => {
-    setBuildings(prev => 
-      prev.map(building => 
-        building.id === id ? { ...building, maintenanceLevel: level } : building
-      )
-    );
-    toast.success(`Niveau d'entretien mis à jour.`);
-  }, []);
-
-  // Activer/désactiver la maintenance
-  const updateMaintenanceEnabled = useCallback((id: string, enabled: boolean) => {
-    setBuildings(prev => 
-      prev.map(building => 
-        building.id === id ? { ...building, maintenanceEnabled: enabled } : building
-      )
-    );
-    toast.success(`Maintenance ${enabled ? 'activée' : 'désactivée'}.`);
-  }, []);
-
-  // Mise à jour de l'état du bâtiment
-  const updateBuildingCondition = useCallback((id: string, condition: number) => {
-    setBuildings(prev => 
-      prev.map(building => 
-        building.id === id ? { ...building, condition: Math.min(100, condition) } : building
-      )
-    );
-    toast.success(`État du bâtiment mis à jour.`);
-  }, []);
-
-  // Mise à jour du niveau de sécurité
-  const updateSecurityLevel = useCallback((id: string, level: number) => {
-    setBuildings(prev => 
-      prev.map(building => 
-        building.id === id ? { ...building, securityLevel: level } : building
-      )
-    );
-    toast.success(`Niveau de sécurité mis à jour.`);
-  }, []);
-
-  // Mise à jour du nombre de travailleurs
-  const updateWorkers = useCallback((id: string, count: number) => {
-    setBuildings(prev => 
-      prev.map(building => 
-        building.id === id ? { ...building, workers: count } : building
-      )
-    );
-    toast.success(`Nombre de travailleurs mis à jour.`);
-  }, []);
-
-  // Assignation d'esclaves
-  const assignSlaves = useCallback((id: string, count: number) => {
-    setBuildings(prev => 
-      prev.map(building => 
-        building.id === id ? { ...building, slaves: count } : building
-      )
-    );
-    toast.success(`Nombre d'esclaves assignés mis à jour.`);
-  }, []);
-
-  // Rénovation d'un bâtiment
-  const renovateBuilding = useCallback((id: string) => {
-    setBuildings(prev => 
-      prev.map(building => 
-        building.id === id ? { ...building, condition: Math.min(100, building.condition + 25) } : building
-      )
-    );
-    toast.success(`Bâtiment rénové avec succès.`);
-  }, []);
-
-  // Vente d'un bâtiment
-  const sellBuilding = useCallback((id: string) => {
-    setBuildings(prev => prev.filter(building => building.id !== id));
-    toast.success(`Bâtiment vendu avec succès.`);
+  
+  // Acheter un bâtiment
+  const purchaseBuilding = useCallback((building: Omit<OwnedBuilding, 'id'>, cost: number): string | null => {
+    // Vérifier si les fonds sont suffisants
+    if (!makePayment(cost, "Vendeur de propriété", "Acquisition immobilière", `Achat de ${building.name}`)) {
+      return null;
+    }
+    
+    return addBuilding(building);
+  }, [makePayment, addBuilding]);
+  
+  // Vendre un bâtiment
+  const sellBuilding = useCallback((buildingId: string | number): boolean => {
+    const building = buildings.find(b => b.id === buildingId);
+    if (!building) return false;
+    
+    // Calculer la valeur de vente (exemple: 80% de la valeur d'achat)
+    const saleValue = (building.maintenanceCost || 0) * 100 * (building.condition / 100);
+    
+    // Recevoir le paiement
+    receivePayment(saleValue, "Acheteur de propriété", "Vente immobilière", `Vente de ${building.name}`);
+    
+    // Supprimer le bâtiment
+    setBuildings(prev => prev.filter(b => b.id !== buildingId));
+    
     return true;
+  }, [buildings, receivePayment]);
+  
+  // Activer/désactiver la maintenance automatique
+  const updateMaintenanceEnabled = useCallback((buildingId: string | number, enabled: boolean): void => {
+    setBuildings(prev => prev.map(building => 
+      building.id === buildingId 
+        ? { ...building, maintenanceEnabled: enabled } 
+        : building
+    ));
   }, []);
-
+  
+  // Mettre à jour le niveau de maintenance
+  const updateMaintenanceLevel = useCallback((buildingId: string | number, level: number): void => {
+    setBuildings(prev => prev.map(building => 
+      building.id === buildingId 
+        ? { ...building, maintenanceLevel: level } 
+        : building
+    ));
+  }, []);
+  
+  // Mettre à jour le niveau de sécurité
+  const updateSecurityLevel = useCallback((buildingId: string | number, level: number): void => {
+    setBuildings(prev => prev.map(building => 
+      building.id === buildingId 
+        ? { ...building, securityLevel: level } 
+        : building
+    ));
+  }, []);
+  
+  // Mettre à jour l'état du bâtiment
+  const updateBuildingCondition = useCallback((buildingId: string | number, newCondition: number): boolean => {
+    const building = buildings.find(b => b.id === buildingId);
+    if (!building) return false;
+    
+    // Calculer le coût des réparations
+    const repairCost = newCondition > building.condition 
+      ? Math.round((newCondition - building.condition) * 50)
+      : 0;
+    
+    // Si le coût est supérieur à 0, effectuer le paiement
+    if (repairCost > 0) {
+      const paymentSuccess = makePayment(
+        repairCost, 
+        "Travaux de réparation", 
+        "Entretien des propriétés", 
+        `Réparation de ${building.name}`
+      );
+      
+      if (!paymentSuccess) return false;
+    }
+    
+    // Mettre à jour l'état du bâtiment
+    setBuildings(prev => prev.map(b => 
+      b.id === buildingId 
+        ? { ...b, condition: newCondition } 
+        : b
+    ));
+    
+    return true;
+  }, [buildings, makePayment]);
+  
+  // Effectuer une rénovation complète
+  const renovateBuilding = useCallback((buildingId: string | number): boolean => {
+    return updateBuildingCondition(buildingId, 100);
+  }, [updateBuildingCondition]);
+  
+  // Assigner des esclaves à un bâtiment
+  const assignSlaves = useCallback((buildingId: string | number, count: number): void => {
+    setBuildings(prev => prev.map(building => 
+      building.id === buildingId 
+        ? { ...building, slaves: count } 
+        : building
+    ));
+  }, []);
+  
+  // Mettre à jour le nombre de travailleurs
+  const updateWorkers = useCallback((buildingId: string | number, workers: number): void => {
+    setBuildings(prev => prev.map(building => 
+      building.id === buildingId 
+        ? { ...building, workers } 
+        : building
+    ));
+  }, []);
+  
+  // Trouver un bâtiment par ID
+  const findBuildingById = useCallback((id: string | number): OwnedBuilding | undefined => {
+    return buildings.find(building => building.id === id);
+  }, [buildings]);
+  
   return {
     buildings,
     addBuilding,
-    updateBuilding,
-    removeBuilding,
+    purchaseBuilding,
+    sellBuilding,
+    updateMaintenanceEnabled,
     updateMaintenanceLevel,
     updateSecurityLevel,
-    updateWorkers,
-    renovateBuilding,
-    // Nouvelles méthodes
-    updateMaintenanceEnabled,
     updateBuildingCondition,
+    renovateBuilding,
     assignSlaves,
-    sellBuilding
+    updateWorkers,
+    findBuildingById
   };
 };

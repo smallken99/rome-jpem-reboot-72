@@ -1,74 +1,93 @@
 
 import React from 'react';
+import { OwnedBuilding } from '../../hooks/building/types';
+import { Button } from '@/components/ui/button';
+import { Switch } from '@/components/ui/switch';
 import { ActionsGroup } from '@/components/ui-custom/ActionsGroup';
-import { ActionButton } from '@/components/ui-custom/ActionButton';
-import { Wrench, Users, TrendingDown, Eye } from 'lucide-react';
+import { Eye, Tool, Wrench, Settings, Users, Coins, BookOpen } from 'lucide-react';
 
 interface PropertyCardActionsProps {
-  onOpenMaintenanceDialog: () => void;
-  onOpenSlaveDialog: () => void;
-  onOpenSaleDialog: () => void;
-  onViewDetails?: () => void;
-  showSlaveManagement: boolean;
-  buildingId?: string;
+  building: OwnedBuilding;
+  onViewDetails: () => void;
+  onPerformMaintenance: () => void;
+  onAssignSlaves: () => void;
+  onToggleMaintenance: (enabled: boolean) => void;
+  onSell: () => void;
+  maintenanceEnabled: boolean;
+  canPerformMaintenance: boolean;
 }
 
 export const PropertyCardActions: React.FC<PropertyCardActionsProps> = ({
-  onOpenMaintenanceDialog,
-  onOpenSlaveDialog,
-  onOpenSaleDialog,
+  building,
   onViewDetails,
-  showSlaveManagement,
-  buildingId
+  onPerformMaintenance,
+  onAssignSlaves,
+  onToggleMaintenance,
+  onSell,
+  maintenanceEnabled,
+  canPerformMaintenance
 }) => {
   const actions = [
     {
-      icon: <Wrench className="h-3.5 w-3.5" />,
-      label: "Maintenance",
-      onClick: onOpenMaintenanceDialog,
+      icon: <Eye className="h-4 w-4" />,
+      label: "Détails",
+      onClick: onViewDetails,
       variant: "outline" as const,
       size: "sm" as const,
-      className: "h-8 px-2 text-xs roman-btn-outline",
-      title: "Gérer la maintenance du bâtiment"
+      className: ""
     },
-    ...(showSlaveManagement ? [{
-      icon: <Users className="h-3.5 w-3.5" />,
-      label: "Esclaves",
-      onClick: onOpenSlaveDialog,
-      variant: "outline" as const,
-      size: "sm" as const,
-      className: "h-8 px-2 text-xs roman-btn-outline",
-      title: "Gérer les esclaves assignés"
-    }] : []),
     {
-      icon: <TrendingDown className="h-3.5 w-3.5" />,
-      label: "Vendre",
-      onClick: onOpenSaleDialog,
+      icon: <Wrench className="h-4 w-4" />,
+      label: "Réparer",
+      onClick: onPerformMaintenance,
       variant: "outline" as const,
       size: "sm" as const,
-      className: "h-8 px-2 text-xs roman-btn-outline text-red-600 hover:text-red-700 border-red-200 hover:border-red-300",
-      title: "Mettre en vente cette propriété"
+      className: "",
+      disabled: !canPerformMaintenance,
+      title: !canPerformMaintenance ? "Fonds insuffisants pour les réparations" : ""
+    },
+    {
+      icon: <Users className="h-4 w-4" />,
+      label: "Personnel",
+      onClick: onAssignSlaves,
+      variant: "outline" as const,
+      size: "sm" as const,
+      className: ""
+    },
+    {
+      icon: <Coins className="h-4 w-4" />,
+      label: "Vendre",
+      onClick: onSell,
+      variant: "outline" as const,
+      size: "sm" as const,
+      className: ""
     }
   ];
-  
-  if (onViewDetails && buildingId) {
-    actions.unshift({
-      icon: <Eye className="h-3.5 w-3.5" />,
-      label: "Détails",
-      onClick: onViewDetails, // Remplacer to par onClick
-      variant: "outline" as const,
-      size: "sm" as const,
-      className: "h-8 px-2 text-xs roman-btn-outline",
-      title: "Voir les détails de la propriété"
-    });
-  }
-  
+
   return (
-    <div className="mt-3">
-      <ActionsGroup 
+    <div className="space-y-3">
+      <div className="flex items-center justify-between">
+        <div className="flex items-center space-x-2">
+          <Switch 
+            id={`maintenance-${building.id}`}
+            checked={maintenanceEnabled}
+            onCheckedChange={onToggleMaintenance}
+          />
+          <label 
+            htmlFor={`maintenance-${building.id}`}
+            className="text-sm cursor-pointer"
+          >
+            Maintenance automatique
+          </label>
+        </div>
+      </div>
+      
+      <ActionsGroup
         actions={actions}
-        justify="end"
-        spacing="xs"
+        direction="row"
+        justify="between"
+        wrap={true}
+        spacing="sm"
       />
     </div>
   );

@@ -1,27 +1,14 @@
 
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { 
-  Card, CardContent, CardDescription, CardFooter, 
-  CardHeader, CardTitle 
-} from '@/components/ui/card';
-import { 
-  Form, FormControl, FormDescription, FormField, 
-  FormItem, FormLabel, FormMessage 
-} from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Textarea } from '@/components/ui/textarea';
-import { 
-  AlertCircle, Check, Coins, HelpCircle, Info, 
-  Percent, ShieldAlert, AlertTriangle
-} from 'lucide-react';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { useForm } from 'react-hook-form';
-import * as z from 'zod';
 import { Slider } from '@/components/ui/slider';
-import { formatCurrency } from '@/utils/currencyUtils';
 import { Lender } from './hooks/useLoanManagement';
+import { formatCurrency } from '@/utils/currencyUtils';
+import { RomanCard } from '@/components/ui-custom/RomanCard';
+import { Coins, Calendar, TrendingUp, Info } from 'lucide-react';
 
 interface NewLoanRequestProps {
   lenders: Lender[];
@@ -29,288 +16,212 @@ interface NewLoanRequestProps {
   balance: number;
 }
 
-// Schéma de validation du formulaire
-const loanRequestSchema = z.object({
-  amount: z.number()
-    .min(5000, { message: 'Le montant minimum est de 5,000 As' })
-    .max(200000, { message: 'Le montant maximum est de 200,000 As' }),
-  lenderId: z.string({ required_error: 'Veuillez sélectionner un prêteur' }),
-  duration: z.number()
-    .min(0.5, { message: 'La durée minimale est de 6 mois' })
-    .max(5, { message: 'La durée maximale est de 5 ans' }),
-  purpose: z.string()
-    .min(5, { message: 'Veuillez fournir une description d\'au moins 5 caractères' })
-    .max(200, { message: 'La description ne doit pas dépasser 200 caractères' })
-});
-
 export const NewLoanRequest: React.FC<NewLoanRequestProps> = ({ 
   lenders, 
   onRequestLoan,
   balance
 }) => {
-  const [selectedLenderId, setSelectedLenderId] = useState<string>('');
+  const [amount, setAmount] = useState(10000);
+  const [selectedLenderId, setSelectedLenderId] = useState('');
+  const [duration, setDuration] = useState(1);
+  const [purpose, setPurpose] = useState('');
   
-  const form = useForm<z.infer<typeof loanRequestSchema>>({
-    resolver: zodResolver(loanRequestSchema),
-    defaultValues: {
-      amount: 20000,
-      lenderId: '',
-      duration: 1,
-      purpose: ''
-    }
-  });
+  // Trouver le prêteur sélectionné
+  const selectedLender = lenders.find(l => l.id === selectedLenderId);
   
-  const watchedAmount = form.watch('amount');
-  const watchedDuration = form.watch('duration');
-  const watchedLenderId = form.watch('lenderId');
-  
-  // Obtenir le prêteur sélectionné
-  const selectedLender = lenders.find(l => l.id === watchedLenderId);
-  
-  // Calculer le taux d'intérêt appliqué
-  const getAppliedRate = (): number => {
+  // Calculer le taux d'intérêt (simplifié pour l'exemple)
+  const getInterestRate = () => {
     if (!selectedLender) return 0;
     
     const baseRate = selectedLender.baseInterestRate;
-    // Ajuster le taux en fonction du montant
-    const amountAdjustment = watchedAmount > 50000 ? 2 : 0;
-    // Ajuster le taux en fonction de la durée
-    const durationAdjustment = watchedDuration > 2 ? 1 : 0;
+    const amountModifier = amount > 50000 ? 2 : 0;
+    const durationModifier = duration > 3 ? 1 : 0;
     
-    return baseRate + amountAdjustment + durationAdjustment;
+    return baseRate + amountModifier + durationModifier;
   };
   
-  // Calculer le coût total du prêt
-  const calculateTotalCost = (): number => {
-    const amount = watchedAmount || 0;
-    const duration = watchedDuration || 0;
-    const rate = getAppliedRate();
-    
-    return amount + (amount * rate / 100 * duration);
+  // Calculer le montant total à rembourser
+  const calculateTotalRepayment = () => {
+    const interestRate = getInterestRate();
+    const interestAmount = amount * (interestRate / 100) * duration;
+    return amount + interestAmount;
   };
   
   // Calculer le paiement trimestriel
-  const calculateQuarterlyPayment = (): number => {
-    const amount = watchedAmount || 0;
-    const duration = watchedDuration || 0;
-    const totalCost = calculateTotalCost();
-    
-    // 4 paiements par an
-    const totalPayments = duration * 4;
-    
-    return Math.round(totalCost / totalPayments);
+  const calculateQuarterlyPayment = () => {
+    const totalRepayment = calculateTotalRepayment();
+    return totalRepayment / (duration * 4); // 4 paiements par an
   };
   
-  const onSubmit = (data: z.infer<typeof loanRequestSchema>) => {
-    onRequestLoan(data.amount, data.lenderId, data.duration, data.purpose);
+  // Vérifier si la demande est valide
+  const isValidRequest = !!selectedLenderId && amount > 0 && duration > 0 && purpose.trim() !== '';
+  
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (isValidRequest) {
+      onRequestLoan(amount, selectedLenderId, duration, purpose);
+    }
   };
   
   return (
-    <div className="space-y-6">
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium flex items-center">
-              <Coins className="h-4 w-4 mr-2 text-muted-foreground" />
-              Solde actuel
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{formatCurrency(balance)}</div>
-            <p className="text-xs text-muted-foreground mt-1">Fonds disponibles pour garantir le prêt</p>
-          </CardContent>
-        </Card>
-      </div>
-      
-      <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-          <Card>
-            <CardHeader>
-              <CardTitle>Nouvelle demande de prêt</CardTitle>
-              <CardDescription>
-                Complétez le formulaire ci-dessous pour soumettre une demande de prêt.
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-6">
-              <FormField
-                control={form.control}
-                name="lenderId"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Prêteur</FormLabel>
-                    <Select 
-                      onValueChange={(value) => {
-                        field.onChange(value);
-                        setSelectedLenderId(value);
-                      }}
-                      value={field.value}
-                    >
-                      <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Sélectionnez un prêteur" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        {lenders.map((lender) => (
-                          <SelectItem key={lender.id} value={lender.id}>
-                            {lender.name} ({lender.baseInterestRate}%)
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
-                )}
+    <form onSubmit={handleSubmit} className="space-y-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div>
+          <div className="space-y-4">
+            <div>
+              <Label htmlFor="lender">Sélectionner un prêteur</Label>
+              <Select value={selectedLenderId} onValueChange={setSelectedLenderId}>
+                <SelectTrigger id="lender">
+                  <SelectValue placeholder="Choisir un prêteur" />
+                </SelectTrigger>
+                <SelectContent>
+                  {lenders.map((lender) => (
+                    <SelectItem key={lender.id} value={lender.id}>
+                      {lender.name} ({lender.baseInterestRate}% de base)
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            
+            <div className="space-y-2">
+              <div className="flex justify-between">
+                <Label htmlFor="amount">Montant du prêt</Label>
+                <span className="text-sm text-muted-foreground">
+                  {formatCurrency(amount)}
+                </span>
+              </div>
+              <Slider
+                id="amount"
+                value={[amount]}
+                min={1000}
+                max={selectedLender ? selectedLender.maxLoanAmount : 100000}
+                step={1000}
+                onValueChange={(value) => setAmount(value[0])}
               />
-              
-              {selectedLender && (
-                <div className="bg-stone-50 p-3 rounded-md border text-sm space-y-2">
-                  <p className="font-medium">{selectedLender.name}</p>
-                  <p>{selectedLender.description}</p>
-                  {selectedLender.requirements && (
-                    <div className="flex items-start gap-2 text-amber-700 bg-amber-50 p-2 rounded border border-amber-200 mt-2">
-                      <AlertTriangle className="h-4 w-4 text-amber-500 flex-shrink-0 mt-0.5" />
-                      <p className="text-xs">{selectedLender.requirements}</p>
-                    </div>
-                  )}
-                </div>
-              )}
-              
-              <FormField
-                control={form.control}
-                name="amount"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Montant du prêt</FormLabel>
-                    <div className="space-y-2">
-                      <div className="flex items-center justify-between">
-                        <FormControl>
-                          <Input
-                            type="number"
-                            {...field}
-                            onChange={(e) => field.onChange(parseInt(e.target.value, 10) || 0)}
-                          />
-                        </FormControl>
-                        <span className="ml-2 text-sm font-medium">As</span>
-                      </div>
-                      <Slider
-                        value={[field.value]}
-                        min={5000}
-                        max={200000}
-                        step={1000}
-                        onValueChange={(value) => field.onChange(value[0])}
-                      />
-                      <div className="flex justify-between text-xs text-muted-foreground">
-                        <span>5,000 As</span>
-                        <span>200,000 As</span>
-                      </div>
-                    </div>
-                    <FormMessage />
-                  </FormItem>
-                )}
+              <div className="flex justify-between text-xs text-muted-foreground">
+                <span>1,000 As</span>
+                <span>{formatCurrency(selectedLender ? selectedLender.maxLoanAmount : 100000)}</span>
+              </div>
+            </div>
+            
+            <div className="space-y-2">
+              <div className="flex justify-between">
+                <Label htmlFor="duration">Durée (années)</Label>
+                <span className="text-sm text-muted-foreground">
+                  {duration} an{duration > 1 ? 's' : ''}
+                </span>
+              </div>
+              <Slider
+                id="duration"
+                value={[duration]}
+                min={1}
+                max={5}
+                step={1}
+                onValueChange={(value) => setDuration(value[0])}
               />
-              
-              <FormField
-                control={form.control}
-                name="duration"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Durée du prêt (en années)</FormLabel>
-                    <div className="space-y-2">
-                      <div className="flex items-center justify-between">
-                        <FormControl>
-                          <Input
-                            type="number"
-                            step="0.5"
-                            {...field}
-                            onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
-                          />
-                        </FormControl>
-                        <span className="ml-2 text-sm font-medium">
-                          {watchedDuration > 1 ? 'années' : 'année'}
-                        </span>
-                      </div>
-                      <Slider
-                        value={[field.value]}
-                        min={0.5}
-                        max={5}
-                        step={0.5}
-                        onValueChange={(value) => field.onChange(value[0])}
-                      />
-                      <div className="flex justify-between text-xs text-muted-foreground">
-                        <span>6 mois</span>
-                        <span>5 ans</span>
-                      </div>
-                    </div>
-                    <FormMessage />
-                  </FormItem>
-                )}
+              <div className="flex justify-between text-xs text-muted-foreground">
+                <span>1 an</span>
+                <span>5 ans</span>
+              </div>
+            </div>
+            
+            <div>
+              <Label htmlFor="purpose">Objet du prêt</Label>
+              <Input
+                id="purpose"
+                value={purpose}
+                onChange={(e) => setPurpose(e.target.value)}
+                placeholder="Acquisition de propriété, investissement commercial..."
               />
-              
-              <FormField
-                control={form.control}
-                name="purpose"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Objet du prêt</FormLabel>
-                    <FormControl>
-                      <Textarea 
-                        placeholder="Décrivez la raison pour laquelle vous demandez ce prêt..."
-                        className="resize-none"
-                        {...field}
-                      />
-                    </FormControl>
-                    <FormDescription>
-                      Soyez précis dans votre demande pour augmenter vos chances d'obtenir le prêt.
-                    </FormDescription>
-                    <FormMessage />
-                  </FormItem>
+            </div>
+          </div>
+        </div>
+        
+        <div className="space-y-4">
+          {selectedLender && (
+            <RomanCard>
+              <RomanCard.Header>
+                <h4 className="text-lg font-medium">{selectedLender.name}</h4>
+                <p className="text-sm text-muted-foreground">{selectedLender.type}</p>
+              </RomanCard.Header>
+              <RomanCard.Content>
+                <p className="text-sm mb-4">{selectedLender.description}</p>
+                
+                {selectedLender.requirements && (
+                  <div className="bg-blue-50 border border-blue-200 rounded-md p-3 mb-4 text-sm text-blue-700 flex gap-2">
+                    <Info className="h-5 w-5 shrink-0" />
+                    <p>{selectedLender.requirements}</p>
+                  </div>
                 )}
-              />
-              
-              {selectedLender && (
-                <div className="bg-blue-50 border border-blue-200 rounded-md p-4 mt-6 space-y-3">
-                  <div className="flex justify-between items-center">
-                    <div className="flex items-center">
-                      <Percent className="h-4 w-4 text-blue-500 mr-2" />
-                      <span className="font-medium">Taux d'intérêt appliqué</span>
+                
+                <div className="grid grid-cols-2 gap-3 mb-4">
+                  <div className="flex items-center gap-2">
+                    <TrendingUp className="h-4 w-4 text-muted-foreground" />
+                    <div>
+                      <div className="text-xs text-muted-foreground">Taux d'intérêt</div>
+                      <div className="font-medium">{getInterestRate()}%</div>
                     </div>
-                    <span className="font-bold text-lg">{getAppliedRate()}%</span>
                   </div>
                   
-                  <div className="flex justify-between items-center">
-                    <div className="flex items-center">
-                      <Coins className="h-4 w-4 text-blue-500 mr-2" />
-                      <span className="font-medium">Coût total du prêt</span>
+                  <div className="flex items-center gap-2">
+                    <Calendar className="h-4 w-4 text-muted-foreground" />
+                    <div>
+                      <div className="text-xs text-muted-foreground">Paiements</div>
+                      <div className="font-medium">{duration * 4} (trimestriels)</div>
                     </div>
-                    <span className="font-bold text-lg">{formatCurrency(calculateTotalCost())}</span>
-                  </div>
-                  
-                  <div className="flex justify-between items-center">
-                    <div className="flex items-center">
-                      <AlertCircle className="h-4 w-4 text-blue-500 mr-2" />
-                      <span className="font-medium">Paiement trimestriel</span>
-                    </div>
-                    <span className="font-bold text-lg">{formatCurrency(calculateQuarterlyPayment())}</span>
                   </div>
                 </div>
-              )}
-            </CardContent>
-            <CardFooter className="flex justify-between">
-              <div className="flex items-start gap-2 text-sm text-muted-foreground">
-                <Info className="h-4 w-4 mt-0.5" />
-                <p>
-                  Les prêts doivent être remboursés trimestriellement. 
-                  Une pénalité s'applique en cas de retard de paiement.
+                
+                <div className="space-y-2 bg-muted/20 p-3 rounded-md">
+                  <div className="flex justify-between">
+                    <span className="text-sm">Montant emprunté:</span>
+                    <span className="font-medium">{formatCurrency(amount)}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-sm">Intérêts totaux:</span>
+                    <span className="font-medium">{formatCurrency(calculateTotalRepayment() - amount)}</span>
+                  </div>
+                  <div className="flex justify-between pt-2 border-t">
+                    <span className="text-sm font-medium">Montant total à rembourser:</span>
+                    <span className="font-bold">{formatCurrency(calculateTotalRepayment())}</span>
+                  </div>
+                  <div className="flex justify-between pt-2 border-t">
+                    <span className="text-sm">Paiement trimestriel:</span>
+                    <span className="font-medium">{formatCurrency(calculateQuarterlyPayment())}</span>
+                  </div>
+                </div>
+              </RomanCard.Content>
+            </RomanCard>
+          )}
+          
+          {!selectedLender && (
+            <div className="h-full flex items-center justify-center p-8 bg-muted/10 border rounded-md">
+              <div className="text-center">
+                <Coins className="h-12 w-12 mx-auto text-muted-foreground/50 mb-3" />
+                <p className="text-muted-foreground">
+                  Veuillez sélectionner un prêteur pour voir les détails du prêt
                 </p>
               </div>
-              <Button type="submit" disabled={!selectedLender}>
-                Soumettre la demande
-              </Button>
-            </CardFooter>
-          </Card>
-        </form>
-      </Form>
-    </div>
+            </div>
+          )}
+        </div>
+      </div>
+      
+      <div className="flex justify-between items-center pt-4 border-t">
+        <div className="text-sm text-muted-foreground">
+          Solde actuel: <span className="font-medium">{formatCurrency(balance)}</span>
+        </div>
+        
+        <Button 
+          type="submit" 
+          disabled={!isValidRequest}
+          className="roman-btn"
+        >
+          <Coins className="mr-2 h-4 w-4" />
+          Soumettre la demande de prêt
+        </Button>
+      </div>
+    </form>
   );
 };
