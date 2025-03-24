@@ -10,14 +10,20 @@ import {
   MIN_PATERNAL_AGE,
   MAX_PATERNAL_AGE,
   MALE_CHANCE,
-  SEASON_MODIFIERS 
+  SEASON_MODIFIERS,
+  MIN_YEARS_BETWEEN_BIRTHS
 } from './fertility/birthConstants';
 import { generateFertilityFactors } from './fertility/fertilityFactors';
 
 /**
  * Determines if a birth occurs for a married couple
  */
-export const checkForBirth = (wife: Character, husband?: Character, season: Season = 'Ver'): boolean => {
+export const checkForBirth = (
+  wife: Character, 
+  husband?: Character, 
+  season: Season = 'Ver',
+  currentYear: number = 0
+): boolean => {
   if (wife.age < MIN_MATERNAL_AGE || wife.age > MAX_MATERNAL_AGE) {
     return false;
   }
@@ -31,26 +37,26 @@ export const checkForBirth = (wife: Character, husband?: Character, season: Seas
   }
   
   // Obtenir les facteurs de fertilité
-  const fertilityFactors = generateFertilityFactors(wife, husband);
+  const fertilityFactors = generateFertilityFactors(wife, husband, currentYear);
+  
+  // Vérifier si assez de temps s'est écoulé depuis la dernière naissance
+  if (fertilityFactors.yearsSinceLastBirth < MIN_YEARS_BETWEEN_BIRTHS) {
+    return false; // Pas assez de temps depuis la dernière naissance
+  }
   
   // Calcul de la chance de base ajustée
   let adjustedChance = BASE_BIRTH_CHANCE_PER_YEAR;
   
   // Ajustement par âge maternel
   if (wife.age >= 20 && wife.age <= 30) {
-    adjustedChance += 0.1;
+    adjustedChance += 0.05;
   } else if (wife.age > 35) {
     adjustedChance -= (wife.age - 35) * 0.025; // Diminution plus rapide après 35 ans
   }
   
-  // Appliquer les facteurs de fertilité
-  adjustedChance *= fertilityFactors.maternalHealth;
-  adjustedChance *= fertilityFactors.paternalHealth;
-  adjustedChance *= fertilityFactors.familyFertility;
-  
   // Réduire la chance après plusieurs naissances
   if (fertilityFactors.previousBirths > 0) {
-    adjustedChance *= Math.max(0.6, 1 - (fertilityFactors.previousBirths * 0.1));
+    adjustedChance *= Math.max(0.7, 1 - (fertilityFactors.previousBirths * 0.05));
   }
   
   // Appliquer le modificateur saisonnier
@@ -59,7 +65,7 @@ export const checkForBirth = (wife: Character, husband?: Character, season: Seas
   }
   
   // Assurer que la chance est dans des limites raisonnables
-  adjustedChance = Math.max(0.02, Math.min(0.4, adjustedChance));
+  adjustedChance = Math.max(0.02, Math.min(0.3, adjustedChance));
   
   // Vérifier si une naissance se produit
   const birthOccurs = Math.random() < adjustedChance;
@@ -92,7 +98,7 @@ export const generateChild = (
   
   // Create the child character
   return {
-    id: `child-${Date.now()}`,
+    id: `child-${Date.now()}-${Math.floor(Math.random() * 1000)}`,
     name,
     age: 0,
     gender,

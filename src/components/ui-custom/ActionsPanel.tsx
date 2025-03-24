@@ -1,76 +1,46 @@
 
 import React from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { cn } from '@/lib/utils';
-import { ActionsGroup } from './ActionsGroup';
-import { ActionButtonProps } from './ActionButton';
-import { motion } from 'framer-motion';
+import { ActionButton, ActionButtonProps } from './ActionButton';
 
-interface ActionsPanelProps {
+export interface ActionItem extends Omit<ActionButtonProps, 'ref'> {}
+
+export interface ActionsPanelProps {
   title?: string;
   description?: string;
-  actions: Omit<ActionButtonProps, 'ref'>[];
+  actions: ActionItem[];
   className?: string;
-  variant?: 'default' | 'bordered' | 'ghost';
-  spacing?: 'none' | 'xs' | 'sm' | 'md' | 'lg';
-  justify?: 'start' | 'end' | 'center' | 'between' | 'around' | 'evenly';
-  wrap?: boolean;
-  animate?: boolean;
+  showDivider?: boolean;
 }
 
 export const ActionsPanel: React.FC<ActionsPanelProps> = ({
-  title = "Actions disponibles",
+  title,
   description,
   actions,
   className,
-  variant = 'default',
-  spacing = 'sm',
-  justify = 'start',
-  wrap = true,
-  animate = true
+  showDivider = true
 }) => {
-  const CardComponent = animate ? motion.div : 'div';
-  const animationProps = animate ? {
-    initial: { opacity: 0, y: 20 },
-    animate: { opacity: 1, y: 0 },
-    transition: { duration: 0.3 }
-  } : {};
-  
-  const getCardClass = () => {
-    switch (variant) {
-      case 'bordered':
-        return "bg-white border border-rome-gold/30 rounded-md";
-      case 'ghost':
-        return "bg-transparent border-none shadow-none";
-      default:
-        return "bg-white border border-gray-100 rounded-md shadow-sm";
-    }
-  };
-  
   return (
-    <CardComponent 
-      className={cn(getCardClass(), className)} 
-      {...animationProps}
-    >
+    <div className={cn("border rounded-lg overflow-hidden", className)}>
       {(title || description) && (
-        <CardHeader className="pb-2">
-          {title && <CardTitle className="font-cinzel text-lg text-rome-navy">{title}</CardTitle>}
-          {description && (
-            <CardDescription className="text-sm text-muted-foreground mt-1">
-              {description}
-            </CardDescription>
-          )}
-        </CardHeader>
+        <div className="p-4 bg-muted/50">
+          {title && <h3 className="text-lg font-medium">{title}</h3>}
+          {description && <p className="text-sm text-muted-foreground">{description}</p>}
+        </div>
       )}
       
-      <CardContent className={cn("pt-0", !title && !description && "pt-4")}>
-        <ActionsGroup 
-          actions={actions}
-          spacing={spacing}
-          justify={justify}
-          wrap={wrap}
-        />
-      </CardContent>
-    </CardComponent>
+      <div className={cn("flex flex-col", showDivider && "divide-y")}>
+        {actions.map((action, index) => (
+          <ActionButton
+            key={index}
+            {...action}
+            className={cn(
+              "justify-between hover:bg-muted/50 transition-colors py-3 px-4",
+              action.className
+            )}
+          />
+        ))}
+      </div>
+    </div>
   );
 };

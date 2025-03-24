@@ -16,9 +16,14 @@ export const checkAllianceForBirths = (
   const wife = characters.find(char => char.name === alliance.spouse);
   
   if (husband && wife) {
+    // Vérifier si la femme a déjà eu un enfant cette année
+    if (wife.lastChildBirthYear === year) {
+      return false; // Déjà une naissance cette année
+    }
+    
     // Check if a birth occurs, passing both husband and wife plus the current season
-    if (checkForBirth(wife, husband, season)) {
-      // Generate a child
+    if (checkForBirth(wife, husband, season, year)) {
+      // Génération d'un enfant
       const newChild = generateChild(husband, wife);
       
       // Update the parent component about the new child
@@ -26,9 +31,25 @@ export const checkAllianceForBirths = (
         onChildBirth(newChild);
       }
       
-      // Update the last birth year
+      // Update the last birth year for the wife
+      wife.lastChildBirthYear = year;
+      
+      // Update the last birth year in parent component
       if (onBirthOccurred) {
         onBirthOccurred(year);
+      }
+      
+      // Vérifier la possibilité de jumeaux (environ 3% de chance)
+      const twinBirth = Math.random() < 0.03;
+      
+      if (twinBirth) {
+        // Générer un jumeau
+        const twinChild = generateChild(husband, wife);
+        
+        // Informer le composant parent du jumeau
+        if (onChildBirth) {
+          onChildBirth(twinChild);
+        }
       }
       
       return true;

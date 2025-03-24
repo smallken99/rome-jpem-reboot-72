@@ -28,6 +28,8 @@ export interface Character {
     totalYears?: number;
     statBonus?: number;
   };
+  childrenIds?: string[]; // IDs des enfants
+  lastChildBirthYear?: number; // Année de la dernière naissance
 }
 
 // Type pour les statistiques de personnage pour la rétrocompatibilité
