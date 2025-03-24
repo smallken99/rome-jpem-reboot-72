@@ -37,7 +37,7 @@ export const PreceptorActions: React.FC<PreceptorActionsProps> = ({
       icon: isLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <X className="h-4 w-4" />,
       label: "Licencier",
       onClick: onFire,
-      variant: "destructive" as const,
+      variant: "outline" as const, // Correction de "destructive" à "outline"
       size: "sm" as const,
       disabled: isLoading
     });
@@ -46,7 +46,7 @@ export const PreceptorActions: React.FC<PreceptorActionsProps> = ({
       icon: isLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Check className="h-4 w-4" />,
       label: isHired ? "Assigner" : "Embaucher",
       onClick: onHire,
-      variant: "default" as const,
+      variant: "outline" as const, // Correction de "default" à "outline"
       size: "sm" as const,
       disabled: !isAvailable || isLoading
     });

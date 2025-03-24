@@ -55,7 +55,7 @@ export const PropertyCardActions: React.FC<PropertyCardActionsProps> = ({
     actions.unshift({
       icon: <Eye className="h-3.5 w-3.5" />,
       label: "Détails",
-      to: `/patrimoine/propriete/${buildingId}`,
+      onClick: onViewDetails, // Remplacer to par onClick
       variant: "outline" as const,
       size: "sm" as const,
       className: "h-8 px-2 text-xs roman-btn-outline",

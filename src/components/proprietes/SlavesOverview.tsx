@@ -10,7 +10,7 @@ import {
   Plus, Minus, DollarSign, UserCheck, BarChart3, ShoppingCart, Store
 } from 'lucide-react';
 import { SlaveMarket } from './property-management/slaves/SlaveMarket';
-import { SlaveAssignments } from './property-management/slaves/SlaveAssignments';
+import { SlaveAssignments, SlaveAssignment } from './property-management/slaves/SlaveAssignments';
 import { toast } from 'sonner';
 
 export const SlavesOverview: React.FC = () => {
@@ -214,7 +214,7 @@ export const SlavesOverview: React.FC = () => {
         
         <TabsContent value="assignments">
           <SlaveAssignments 
-            slaveAssignments={slaveAssignments}
+            slaveAssignments={slaveAssignments as SlaveAssignment[]}
             availableSlaves={totalSlaves - assignedSlaves}
             onAssignSlaves={assignSlavesToProperty}
             onRemoveAssignment={removeSlaveAssignment}

@@ -16,10 +16,10 @@ export interface ActionButtonProps extends ButtonProps {
   label: string;
   variant?: 'default' | 'outline' | 'destructive' | 'secondary' | 'ghost' | 'link';
   size?: 'default' | 'sm' | 'lg' | 'icon';
-  to?: string; // Property for routing
+  to?: string; // Propriété pour le routage
   onClick?: (e: React.MouseEvent) => void;
   className?: string;
-  title?: string; // For tooltip
+  title?: string; // Pour tooltip
   disabled?: boolean;
   showTooltip?: boolean;
   animateHover?: boolean;

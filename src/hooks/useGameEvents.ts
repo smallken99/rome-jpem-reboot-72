@@ -1,9 +1,26 @@
 
 import { useState, useCallback } from 'react';
-import { GameEvent, EvenementAction, EvenementType, ImportanceType } from '@/components/maitrejeu/types/evenements';
+import { EvenementAction, EvenementType, ImportanceType } from '@/components/maitrejeu/types/evenements';
 import { Season } from '@/utils/timeSystem';
 import { toEvenementType } from '@/utils/gameEventTypes';
 import { toast } from 'sonner';
+
+// Définir l'interface GameEvent localement puisqu'elle n'est pas exportée par le module
+export interface GameEvent {
+  id: string;
+  title: string;
+  description: string;
+  type: EvenementType;
+  importance: string[];
+  season?: Season;
+  year?: number;
+  actions?: {
+    label: string;
+    consequence: string;
+  }[];
+  resolved: boolean;
+  resolution?: string;
+}
 
 export const useGameEvents = () => {
   const [events, setEvents] = useState<GameEvent[]>([]);
