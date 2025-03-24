@@ -1,7 +1,7 @@
 
 import { useState, useEffect } from 'react';
 import { useMaitreJeu } from '@/components/maitrejeu/context';
-import { GamePhase, Season, formatSeasonDisplay, formatGameDate } from '@/utils/timeSystem';
+import { GamePhase, Season, formatSeasonDisplay, formatGameDate, convertToStandardSeason } from '@/utils/timeSystem';
 
 export const useGameTime = () => {
   const { 
@@ -31,7 +31,12 @@ export const useGameTime = () => {
 
   // Format full date
   const formatDate = () => {
-    return formatGameDate(currentDate);
+    // Ensure the season is correctly typed
+    const standardizedDate = {
+      year: currentDate.year,
+      season: convertToStandardSeason(currentDate.season as string)
+    };
+    return formatGameDate(standardizedDate);
   };
 
   // Translate phase name
@@ -40,6 +45,7 @@ export const useGameTime = () => {
       'SENATE': 'Sénat',
       'ECONOMY': 'Économie',
       'ELECTIONS': 'Élections',
+      'ELECTION': 'Élections',
       'DIPLOMACY': 'Diplomatie',
       'MILITARY': 'Militaire',
       'RELIGION': 'Religion',

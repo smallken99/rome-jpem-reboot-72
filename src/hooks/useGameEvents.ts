@@ -2,7 +2,7 @@
 import { useState, useEffect } from 'react';
 import { useMaitreJeu } from '@/components/maitrejeu/context';
 import { toast } from 'sonner';
-import { GameDate, formatGameDate } from '@/utils/timeSystem';
+import { GameDate, formatGameDate, convertToStandardSeason } from '@/utils/timeSystem';
 
 export const useGameEvents = () => {
   const { 
@@ -32,7 +32,9 @@ export const useGameEvents = () => {
     let nextSeason = currentDate.season;
     let nextYear = currentDate.year;
     
-    switch (currentDate.season) {
+    const currentSeason = convertToStandardSeason(currentDate.season as string);
+    
+    switch (currentSeason) {
       case 'Ver': nextSeason = 'Aestas'; break;
       case 'Aestas': nextSeason = 'Autumnus'; break;
       case 'Autumnus': nextSeason = 'Hiems'; break;
@@ -57,21 +59,22 @@ export const useGameEvents = () => {
     }
   ) => {
     const newEvent = {
-      id: `event-${Date.now()}`,
-      title,
+      titre: title,
       description,
       date: { ...currentDate },
       importance,
       type,
       resolved: false,
-      effects: options?.effects || [],
-      choices: options?.choices || []
+      options: {
+        effects: options?.effects || [],
+        choices: options?.choices || []
+      }
     };
     
     addEvenement(newEvent);
     toast.success(`Événement ajouté : ${title}`);
     
-    return newEvent.id;
+    return title;
   };
   
   // Ajouter un événement pour une date future
@@ -87,26 +90,34 @@ export const useGameEvents = () => {
     }
   ) => {
     const newEvent = {
-      id: `event-${Date.now()}`,
-      title,
+      titre: title,
       description,
       date: { ...targetDate },
       importance,
       type,
       resolved: false,
-      effects: options?.effects || [],
-      choices: options?.choices || []
+      options: {
+        effects: options?.effects || [],
+        choices: options?.choices || []
+      }
     };
     
     addEvenement(newEvent);
-    toast.success(`Événement programmé pour ${formatGameDate(targetDate)} : ${title}`);
     
-    return newEvent.id;
+    // Standardiser la date pour l'affichage
+    const standardizedDate = {
+      year: targetDate.year,
+      season: convertToStandardSeason(targetDate.season)
+    };
+    
+    toast.success(`Événement programmé pour ${formatGameDate(standardizedDate)} : ${title}`);
+    
+    return title;
   };
   
   // Résoudre un événement avec un résultat donné
-  const resolveEvent = (eventId: string, resolution: string, appliedEffects: string[] = []) => {
-    resolveEvenement(eventId, resolution, appliedEffects);
+  const resolveEvent = (eventId: string, resolution: string) => {
+    resolveEvenement(eventId, resolution);
     toast.success("Événement résolu");
   };
   
@@ -131,7 +142,7 @@ export const useGameEvents = () => {
     if (hasPendingEvents) {
       // Résoudre automatiquement tous les événements en suspens
       currentEvents.forEach(event => {
-        resolveEvenement(event.id, "Résolution automatique", []);
+        resolveEvenement(event.id, "Résolution automatique");
       });
     }
     

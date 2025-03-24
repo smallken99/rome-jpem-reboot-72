@@ -1,21 +1,24 @@
 
 import React, { useState } from 'react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
-import { Label } from '@/components/ui/label';
+import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { AddTraiteModalProps } from '../types';
-import { Nation } from '../types';
-import { toast } from 'sonner';
-import { motion } from 'framer-motion';
+import { v4 as uuidv4 } from 'uuid';
 
-export const AddTraiteModal: React.FC<AddTraiteModalProps> = ({ isOpen, onClose, nations, onSave }) => {
+export const AddTraiteModal: React.FC<AddTraiteModalProps> = ({
+  isOpen,
+  onClose,
+  nations,
+  onSave
+}) => {
   const [formData, setFormData] = useState({
     name: '',
     type: 'commercial',
-    status: 'active',
+    status: 'draft',
     dateCreation: '',
     dateExpiration: '',
     nationId: '',
@@ -26,88 +29,62 @@ export const AddTraiteModal: React.FC<AddTraiteModalProps> = ({ isOpen, onClose,
   });
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    const { id, value } = e.target;
-    setFormData(prev => ({ ...prev, [id]: value }));
+    const { name, value } = e.target;
+    setFormData(prev => ({ ...prev, [name]: value }));
   };
 
-  const handleSelectChange = (field: string, value: string) => {
-    setFormData(prev => ({ ...prev, [field]: value }));
+  const handleSelectChange = (name: string, value: string) => {
+    setFormData(prev => ({ ...prev, [name]: value }));
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    
-    if (!formData.name.trim()) {
-      toast.error("Le nom du traité est requis");
-      return;
-    }
-    
-    if (!formData.nationId) {
-      toast.error("Veuillez sélectionner une nation");
-      return;
-    }
-    
-    if (onSave) {
-      onSave(formData);
-    }
-    
-    toast.success(`Traité "${formData.name}" créé avec succès`);
+  const handleSubmit = () => {
+    // Convertir en objet Traite avec les propriétés requises
+    const newTraite = {
+      id: uuidv4(),
+      name: formData.name,
+      type: formData.type as "commercial" | "peace" | "military" | "territorial",
+      parties: [formData.nationId], // Ajouter Rome et la nation sélectionnée
+      status: formData.status as "active" | "draft" | "expired" | "revoked",
+      description: formData.description,
+      dateSignature: formData.dateCreation,
+      dateExpiration: formData.dateExpiration,
+      clauses: formData.terms.split('\n').filter(Boolean),
+      benefits: formData.benefits.split('\n').filter(Boolean),
+      obligations: formData.obligations.split('\n').filter(Boolean)
+    };
+
+    onSave(newTraite);
     onClose();
-  };
-
-  const formVariants = {
-    hidden: { opacity: 0, y: 20 },
-    visible: { 
-      opacity: 1, 
-      y: 0,
-      transition: {
-        duration: 0.3,
-        staggerChildren: 0.1
-      }
-    }
-  };
-  
-  const itemVariants = {
-    hidden: { opacity: 0, y: 10 },
-    visible: { opacity: 1, y: 0 }
   };
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-[600px]">
+      <DialogContent className="max-w-md">
         <DialogHeader>
-          <DialogTitle>Ajouter un nouveau traité</DialogTitle>
-          <DialogDescription>
-            Saisissez les informations pour créer un nouveau traité diplomatique.
-          </DialogDescription>
+          <DialogTitle>Nouveau traité</DialogTitle>
         </DialogHeader>
         
-        <motion.form 
-          onSubmit={handleSubmit} 
-          className="space-y-4"
-          variants={formVariants}
-          initial="hidden"
-          animate="visible"
-        >
-          <motion.div variants={itemVariants} className="space-y-2">
-            <Label htmlFor="name">Nom du traité</Label>
+        <div className="grid gap-4">
+          <div className="space-y-2">
+            <Label htmlFor="name">Titre du traité</Label>
             <Input 
               id="name" 
-              value={formData.name}
-              onChange={handleChange}
-              required 
+              name="name" 
+              value={formData.name} 
+              onChange={handleChange} 
+              placeholder="Foedus Romanus..."
             />
-          </motion.div>
+          </div>
           
-          <motion.div variants={itemVariants} className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="type">Type</Label>
+              <Label htmlFor="type">Type de traité</Label>
               <Select 
-                value={formData.type}
+                value={formData.type} 
                 onValueChange={(value) => handleSelectChange('type', value)}
               >
-                <SelectTrigger id="type">
-                  <SelectValue placeholder="Type" />
+                <SelectTrigger>
+                  <SelectValue placeholder="Type de traité" />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="commercial">Commercial</SelectItem>
@@ -117,117 +94,121 @@ export const AddTraiteModal: React.FC<AddTraiteModalProps> = ({ isOpen, onClose,
                 </SelectContent>
               </Select>
             </div>
-            
             <div className="space-y-2">
               <Label htmlFor="status">Statut</Label>
               <Select 
-                value={formData.status}
+                value={formData.status} 
                 onValueChange={(value) => handleSelectChange('status', value)}
               >
-                <SelectTrigger id="status">
-                  <SelectValue placeholder="Statut" />
+                <SelectTrigger>
+                  <SelectValue placeholder="Statut du traité" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="active">Actif</SelectItem>
                   <SelectItem value="draft">Brouillon</SelectItem>
+                  <SelectItem value="active">Actif</SelectItem>
                   <SelectItem value="expired">Expiré</SelectItem>
                   <SelectItem value="revoked">Révoqué</SelectItem>
                 </SelectContent>
               </Select>
             </div>
-          </motion.div>
+          </div>
           
-          <motion.div variants={itemVariants} className="grid grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="dateCreation">Date de création</Label>
-              <Input 
-                id="dateCreation" 
-                value={formData.dateCreation}
-                onChange={handleChange}
-                required 
-              />
-            </div>
-            
-            <div className="space-y-2">
-              <Label htmlFor="dateExpiration">Date d'expiration</Label>
-              <Input 
-                id="dateExpiration"
-                value={formData.dateExpiration}
-                onChange={handleChange}
-              />
-            </div>
-          </motion.div>
-          
-          <motion.div variants={itemVariants} className="space-y-2">
-            <Label htmlFor="nationId">Nation impliquée</Label>
-            <Select
-              value={formData.nationId}
+          <div className="space-y-2">
+            <Label htmlFor="nationId">Nation concernée</Label>
+            <Select 
+              value={formData.nationId} 
               onValueChange={(value) => handleSelectChange('nationId', value)}
             >
-              <SelectTrigger id="nationId">
-                <SelectValue placeholder="Sélectionnez une nation" />
+              <SelectTrigger>
+                <SelectValue placeholder="Sélectionner une nation" />
               </SelectTrigger>
               <SelectContent>
-                {nations.map((nation: Nation) => (
+                {nations.map(nation => (
                   <SelectItem key={nation.id} value={nation.id}>
                     {nation.name}
                   </SelectItem>
                 ))}
               </SelectContent>
             </Select>
-          </motion.div>
+          </div>
           
-          <motion.div variants={itemVariants} className="space-y-2">
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="dateCreation">Date de signature</Label>
+              <Input 
+                id="dateCreation" 
+                name="dateCreation" 
+                value={formData.dateCreation} 
+                onChange={handleChange} 
+                placeholder="705 AUC"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="dateExpiration">Date d'expiration</Label>
+              <Input 
+                id="dateExpiration" 
+                name="dateExpiration" 
+                value={formData.dateExpiration} 
+                onChange={handleChange} 
+                placeholder="710 AUC"
+              />
+            </div>
+          </div>
+          
+          <div className="space-y-2">
             <Label htmlFor="description">Description</Label>
             <Textarea 
               id="description" 
+              name="description" 
+              value={formData.description} 
+              onChange={handleChange} 
+              placeholder="Description du traité..."
               rows={3}
-              value={formData.description}
-              onChange={handleChange}
             />
-          </motion.div>
+          </div>
           
-          <motion.div variants={itemVariants} className="space-y-2">
-            <Label htmlFor="terms">Termes (séparés par des virgules)</Label>
+          <div className="space-y-2">
+            <Label htmlFor="terms">Clauses</Label>
             <Textarea 
               id="terms" 
-              rows={2}
-              value={formData.terms}
-              onChange={handleChange}
+              name="terms" 
+              value={formData.terms} 
+              onChange={handleChange} 
+              placeholder="Chaque clause sur une ligne..."
+              rows={3}
             />
-          </motion.div>
+          </div>
           
-          <motion.div variants={itemVariants} className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="benefits">Avantages (séparés par des virgules)</Label>
+              <Label htmlFor="benefits">Avantages</Label>
               <Textarea 
                 id="benefits" 
-                rows={2}
-                value={formData.benefits}
-                onChange={handleChange}
+                name="benefits" 
+                value={formData.benefits} 
+                onChange={handleChange} 
+                placeholder="Avantages pour Rome..."
+                rows={3}
               />
             </div>
-            
             <div className="space-y-2">
-              <Label htmlFor="obligations">Obligations (séparées par des virgules)</Label>
+              <Label htmlFor="obligations">Obligations</Label>
               <Textarea 
                 id="obligations" 
-                rows={2}
-                value={formData.obligations}
-                onChange={handleChange}
+                name="obligations" 
+                value={formData.obligations} 
+                onChange={handleChange} 
+                placeholder="Obligations de Rome..."
+                rows={3}
               />
             </div>
-          </motion.div>
-          
-          <motion.div variants={itemVariants}>
-            <DialogFooter className="mt-6">
-              <Button type="button" variant="outline" onClick={onClose}>
-                Annuler
-              </Button>
-              <Button type="submit">Enregistrer</Button>
-            </DialogFooter>
-          </motion.div>
-        </motion.form>
+          </div>
+        </div>
+        
+        <DialogFooter>
+          <Button variant="outline" onClick={onClose}>Annuler</Button>
+          <Button onClick={handleSubmit}>Créer le traité</Button>
+        </DialogFooter>
       </DialogContent>
     </Dialog>
   );

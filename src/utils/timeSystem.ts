@@ -1,7 +1,7 @@
 
 // Types pour le système de temps
 export type Season = 'Ver' | 'Aestas' | 'Autumnus' | 'Hiems';
-export type GamePhase = 'SENATE' | 'ECONOMY' | 'ELECTION' | 'DIPLOMACY' | 'MILITARY' | 'RELIGION' | 'VOTE' | 'ACTIONS' | 'EVENTS';
+export type GamePhase = 'SENATE' | 'ECONOMY' | 'ELECTIONS' | 'ELECTION' | 'DIPLOMACY' | 'MILITARY' | 'RELIGION' | 'VOTE' | 'ACTIONS' | 'EVENTS';
 
 export interface GameDate {
   year: number;
@@ -89,6 +89,22 @@ export const stringToDate = (dateString: string): GameDate | null => {
     console.error("Error parsing date string:", error);
     return null;
   }
+};
+
+// Fonction pour convertir d'autres formats de saison vers le format standard
+export const convertToStandardSeason = (season: string): Season => {
+  const seasonMap: Record<string, Season> = {
+    'SPRING': 'Ver',
+    'SUMMER': 'Aestas', 
+    'AUTUMN': 'Autumnus',
+    'WINTER': 'Hiems',
+    'Printemps': 'Ver',
+    'Été': 'Aestas',
+    'Automne': 'Autumnus',
+    'Hiver': 'Hiems'
+  };
+  
+  return (seasonMap[season] || season) as Season;
 };
 
 export const getTotalSeasons = (startDate: GameDate, endDate: GameDate): number => {

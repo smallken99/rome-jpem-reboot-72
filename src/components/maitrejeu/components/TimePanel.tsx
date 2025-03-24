@@ -6,7 +6,7 @@ import { AlertCircle, Calendar, FastForward, Clock, AlertTriangle } from 'lucide
 import { useMaitreJeu } from '../context';
 import { toast } from 'sonner';
 import { motion } from 'framer-motion';
-import { formatSeasonDisplay, formatGameDate } from '@/utils/timeSystem';
+import { formatSeasonDisplay, formatGameDate, convertToStandardSeason } from '@/utils/timeSystem';
 
 export const TimePanel: React.FC = () => {
   const { currentDate, currentPhase, advanceTime, changePhase } = useMaitreJeu();
@@ -19,8 +19,15 @@ export const TimePanel: React.FC = () => {
   const confirmAdvance = () => {
     advanceTime();
     setConfirmDialogOpen(false);
+    
+    // Standardiser le format de date pour utiliser formatGameDate
+    const standardizedDate = {
+      year: currentDate.year,
+      season: convertToStandardSeason(currentDate.season as string)
+    };
+    
     toast.success("Le temps a avancé à la saison suivante", {
-      description: `Nous sommes maintenant à l'${formatGameDate(currentDate)}`
+      description: `Nous sommes maintenant à l'${formatGameDate(standardizedDate)}`
     });
   };
   
@@ -51,7 +58,7 @@ export const TimePanel: React.FC = () => {
         <div className="flex items-center gap-1">
           <Calendar className="h-5 w-5 text-primary" />
           <span className="font-medium">
-            An {currentDate.year} AUC - {formatSeasonDisplay(currentDate.season)}
+            An {currentDate.year} AUC - {formatSeasonDisplay(currentDate.season as string)}
           </span>
         </div>
         <div className="h-6 border-l border-muted-foreground/20"></div>

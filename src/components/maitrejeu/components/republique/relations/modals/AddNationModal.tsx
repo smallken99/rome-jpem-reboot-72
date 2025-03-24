@@ -1,21 +1,24 @@
 
 import React, { useState } from 'react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
-import { Label } from '@/components/ui/label';
+import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { AddNationModalProps } from '../types';
-import { toast } from 'sonner';
-import { motion } from 'framer-motion';
+import { v4 as uuidv4 } from 'uuid';
 
-export const AddNationModal: React.FC<AddNationModalProps> = ({ isOpen, onClose, onSave }) => {
+export const AddNationModal: React.FC<AddNationModalProps> = ({
+  isOpen,
+  onClose,
+  onSave
+}) => {
   const [formData, setFormData] = useState({
     name: '',
     region: '',
     status: 'neutral',
-    population: 100000,
+    population: 0,
     description: '',
     leader: '',
     leaderTitle: '',
@@ -27,224 +30,191 @@ export const AddNationModal: React.FC<AddNationModalProps> = ({ isOpen, onClose,
   });
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    const { id, value } = e.target;
-    setFormData(prev => ({ ...prev, [id]: value }));
+    const { name, value } = e.target;
+    setFormData(prev => ({ ...prev, [name]: value }));
   };
 
-  const handleSelectChange = (field: string, value: string) => {
-    setFormData(prev => ({ ...prev, [field]: value }));
+  const handleSelectChange = (name: string, value: string) => {
+    setFormData(prev => ({ ...prev, [name]: value }));
   };
 
-  const handleNumberChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { id, value } = e.target;
-    setFormData(prev => ({ ...prev, [id]: Number(value) }));
-  };
+  const handleSubmit = () => {
+    // Convertir en objet Nation avec les propriétés requises
+    const newNation = {
+      id: uuidv4(),
+      name: formData.name,
+      region: formData.region,
+      status: formData.status as "ally" | "neutral" | "hostile" | "vassal" | "tributary" | "enemy",
+      relationScore: 50, // Valeur par défaut
+      population: formData.population,
+      description: formData.description,
+      leader: formData.leader,
+      leaderTitle: formData.leaderTitle,
+      militaryStrength: formData.militaryStrength,
+      diplomaticInfluence: formData.diplomaticInfluence,
+      tradeValue: formData.tradeValue,
+      lastContact: formData.lastContact,
+      leaders: [formData.leader], // Convertir en tableau
+    };
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    
-    if (!formData.name.trim()) {
-      toast.error("Le nom de la nation est requis");
-      return;
-    }
-    
-    if (!formData.region.trim()) {
-      toast.error("La région est requise");
-      return;
-    }
-    
-    if (onSave) {
-      onSave(formData);
-    }
-    
-    toast.success(`Nation "${formData.name}" ajoutée avec succès`);
+    onSave(newNation);
     onClose();
-  };
-
-  const formVariants = {
-    hidden: { opacity: 0, y: 20 },
-    visible: { 
-      opacity: 1, 
-      y: 0,
-      transition: {
-        duration: 0.3,
-        staggerChildren: 0.1
-      }
-    }
-  };
-  
-  const itemVariants = {
-    hidden: { opacity: 0, y: 10 },
-    visible: { opacity: 1, y: 0 }
   };
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-[600px]">
+      <DialogContent className="max-w-md">
         <DialogHeader>
           <DialogTitle>Ajouter une nouvelle nation</DialogTitle>
-          <DialogDescription>
-            Saisissez les informations pour ajouter une nouvelle nation.
-          </DialogDescription>
         </DialogHeader>
         
-        <motion.form 
-          onSubmit={handleSubmit} 
-          className="space-y-4"
-          variants={formVariants}
-          initial="hidden"
-          animate="visible"
-        >
-          <motion.div variants={itemVariants} className="grid grid-cols-2 gap-4">
+        <div className="grid gap-4">
+          <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label htmlFor="name">Nom</Label>
               <Input 
                 id="name" 
-                value={formData.name}
-                onChange={handleChange}
-                required 
+                name="name" 
+                value={formData.name} 
+                onChange={handleChange} 
+                placeholder="Nom de la nation"
               />
             </div>
-            
             <div className="space-y-2">
               <Label htmlFor="region">Région</Label>
               <Input 
                 id="region" 
-                value={formData.region}
-                onChange={handleChange}
-                required 
+                name="region" 
+                value={formData.region} 
+                onChange={handleChange} 
+                placeholder="Région géographique"
               />
             </div>
-          </motion.div>
+          </div>
           
-          <motion.div variants={itemVariants} className="grid grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="status">Statut</Label>
-              <Select 
-                value={formData.status}
-                onValueChange={(value) => handleSelectChange('status', value)}
-              >
-                <SelectTrigger id="status">
-                  <SelectValue placeholder="Statut" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="ally">Allié</SelectItem>
-                  <SelectItem value="enemy">Ennemi</SelectItem>
-                  <SelectItem value="neutral">Neutre</SelectItem>
-                  <SelectItem value="tributary">Tributaire</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-            
-            <div className="space-y-2">
-              <Label htmlFor="population">Population</Label>
-              <Input 
-                id="population" 
-                type="number" 
-                value={formData.population}
-                onChange={handleNumberChange}
-                required 
-              />
-            </div>
-          </motion.div>
+          <div className="space-y-2">
+            <Label htmlFor="status">Statut</Label>
+            <Select 
+              value={formData.status} 
+              onValueChange={(value) => handleSelectChange('status', value)}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Sélectionner un statut" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="ally">Allié</SelectItem>
+                <SelectItem value="neutral">Neutre</SelectItem>
+                <SelectItem value="hostile">Hostile</SelectItem>
+                <SelectItem value="vassal">Vassal</SelectItem>
+                <SelectItem value="tributary">Tributaire</SelectItem>
+                <SelectItem value="enemy">Ennemi</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
           
-          <motion.div variants={itemVariants} className="space-y-2">
+          <div className="space-y-2">
             <Label htmlFor="description">Description</Label>
             <Textarea 
               id="description" 
+              name="description" 
+              value={formData.description} 
+              onChange={handleChange} 
+              placeholder="Description de la nation"
               rows={3}
-              value={formData.description}
-              onChange={handleChange}
             />
-          </motion.div>
+          </div>
           
-          <motion.div variants={itemVariants} className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label htmlFor="leader">Dirigeant</Label>
               <Input 
                 id="leader" 
-                value={formData.leader}
-                onChange={handleChange}
-                required 
+                name="leader" 
+                value={formData.leader} 
+                onChange={handleChange} 
+                placeholder="Nom du dirigeant"
               />
             </div>
-            
             <div className="space-y-2">
               <Label htmlFor="leaderTitle">Titre du dirigeant</Label>
               <Input 
                 id="leaderTitle" 
-                value={formData.leaderTitle}
-                onChange={handleChange}
-                required 
+                name="leaderTitle" 
+                value={formData.leaderTitle} 
+                onChange={handleChange} 
+                placeholder="Titre officiel"
               />
             </div>
-          </motion.div>
+          </div>
           
-          <motion.div variants={itemVariants} className="grid grid-cols-3 gap-4">
+          <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="militaryStrength">Force militaire (1-100)</Label>
+              <Label htmlFor="population">Population</Label>
+              <Input 
+                id="population" 
+                name="population" 
+                type="number" 
+                value={formData.population.toString()} 
+                onChange={handleChange} 
+                placeholder="Population estimée"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="lastContact">Dernier contact</Label>
+              <Input 
+                id="lastContact" 
+                name="lastContact" 
+                value={formData.lastContact} 
+                onChange={handleChange} 
+                placeholder="Date du dernier contact"
+              />
+            </div>
+          </div>
+          
+          <div className="grid grid-cols-3 gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="militaryStrength">Force militaire</Label>
               <Input 
                 id="militaryStrength" 
+                name="militaryStrength" 
                 type="number" 
-                min="1" 
+                value={formData.militaryStrength.toString()} 
+                onChange={handleChange} 
+                min="0"
                 max="100"
-                value={formData.militaryStrength}
-                onChange={handleNumberChange}
               />
             </div>
-            
             <div className="space-y-2">
-              <Label htmlFor="diplomaticInfluence">Influence (1-100)</Label>
+              <Label htmlFor="diplomaticInfluence">Influence</Label>
               <Input 
                 id="diplomaticInfluence" 
+                name="diplomaticInfluence" 
                 type="number" 
-                min="1" 
+                value={formData.diplomaticInfluence.toString()} 
+                onChange={handleChange} 
+                min="0"
                 max="100"
-                value={formData.diplomaticInfluence}
-                onChange={handleNumberChange}
               />
             </div>
-            
             <div className="space-y-2">
-              <Label htmlFor="tradeValue">Commerce (1-100)</Label>
+              <Label htmlFor="tradeValue">Valeur commerciale</Label>
               <Input 
                 id="tradeValue" 
+                name="tradeValue" 
                 type="number" 
-                min="1" 
+                value={formData.tradeValue.toString()} 
+                onChange={handleChange} 
+                min="0"
                 max="100"
-                value={formData.tradeValue}
-                onChange={handleNumberChange}
               />
             </div>
-          </motion.div>
-          
-          <motion.div variants={itemVariants} className="space-y-2">
-            <Label htmlFor="lastContact">Dernier contact</Label>
-            <Input 
-              id="lastContact" 
-              value={formData.lastContact}
-              onChange={handleChange}
-            />
-          </motion.div>
-          
-          <motion.div variants={itemVariants} className="space-y-2">
-            <Label htmlFor="leaders">Dirigeants historiques (séparés par des virgules)</Label>
-            <Input 
-              id="leaders" 
-              value={formData.leaders}
-              onChange={handleChange}
-            />
-          </motion.div>
-          
-          <motion.div variants={itemVariants}>
-            <DialogFooter className="mt-6">
-              <Button type="button" variant="outline" onClick={onClose}>
-                Annuler
-              </Button>
-              <Button type="submit">Enregistrer</Button>
-            </DialogFooter>
-          </motion.div>
-        </motion.form>
+          </div>
+        </div>
+        
+        <DialogFooter>
+          <Button variant="outline" onClick={onClose}>Annuler</Button>
+          <Button onClick={handleSubmit}>Ajouter</Button>
+        </DialogFooter>
       </DialogContent>
     </Dialog>
   );
