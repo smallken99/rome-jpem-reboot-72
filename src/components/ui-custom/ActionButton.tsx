@@ -9,8 +9,9 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from '@/components/ui/tooltip';
+import { motion } from 'framer-motion';
 
-interface ActionButtonProps extends ButtonProps {
+export interface ActionButtonProps extends ButtonProps {
   icon?: React.ReactNode;
   label: string;
   variant?: 'default' | 'outline' | 'destructive' | 'secondary' | 'ghost' | 'link';
@@ -21,6 +22,8 @@ interface ActionButtonProps extends ButtonProps {
   title?: string; // For tooltip
   disabled?: boolean;
   showTooltip?: boolean;
+  animateHover?: boolean;
+  animateClick?: boolean;
 }
 
 export const ActionButton: React.FC<ActionButtonProps> = ({ 
@@ -34,6 +37,8 @@ export const ActionButton: React.FC<ActionButtonProps> = ({
   title,
   disabled = false,
   showTooltip = true,
+  animateHover = true,
+  animateClick = true,
   ...props 
 }) => {
   // Determine class to use based on variant
@@ -55,42 +60,43 @@ export const ActionButton: React.FC<ActionButtonProps> = ({
   const buttonClass = getButtonClass();
   const buttonContent = (
     <>
-      {icon && <span className="mr-1">{icon}</span>}
+      {icon && <span className={`${label ? 'mr-1.5' : ''}`}>{icon}</span>}
       {label && <span>{label}</span>}
     </>
   );
   
-  const renderButton = () => {
-    // Si un chemin de redirection est fourni, utiliser Link
-    if (to) {
-      return (
-        <Button 
-          variant={variant} 
-          size={size} 
-          className={cn(buttonClass, "flex items-center gap-1", className)}
-          disabled={disabled}
-          asChild
-          {...props}
-        >
-          <Link to={to}>
-            {buttonContent}
-          </Link>
-        </Button>
-      );
+  const buttonElement = (
+    <Button 
+      variant={variant} 
+      size={size} 
+      className={cn(buttonClass, "flex items-center gap-1", className)}
+      onClick={onClick}
+      disabled={disabled}
+      asChild={!!to}
+      {...props}
+    >
+      {to ? (
+        <Link to={to}>{buttonContent}</Link>
+      ) : (
+        buttonContent
+      )}
+    </Button>
+  );
+  
+  // Décidez si nous devons animer le bouton
+  const renderAnimatedButton = () => {
+    if (!animateHover && !animateClick) {
+      return buttonElement;
     }
     
-    // Sinon, utilisons un bouton standard
     return (
-      <Button 
-        variant={variant} 
-        size={size} 
-        className={cn(buttonClass, "flex items-center gap-1", className)}
-        onClick={onClick}
-        disabled={disabled}
-        {...props}
+      <motion.div
+        whileHover={animateHover ? { scale: 1.03 } : undefined}
+        whileTap={animateClick ? { scale: 0.97 } : undefined}
+        transition={{ type: 'spring', stiffness: 400, damping: 17 }}
       >
-        {buttonContent}
-      </Button>
+        {buttonElement}
+      </motion.div>
     );
   };
   
@@ -100,7 +106,7 @@ export const ActionButton: React.FC<ActionButtonProps> = ({
       <TooltipProvider>
         <Tooltip>
           <TooltipTrigger asChild>
-            {renderButton()}
+            {renderAnimatedButton()}
           </TooltipTrigger>
           <TooltipContent>
             <p>{title}</p>
@@ -111,5 +117,5 @@ export const ActionButton: React.FC<ActionButtonProps> = ({
   }
   
   // Sinon, juste rendre le bouton
-  return renderButton();
+  return renderAnimatedButton();
 };

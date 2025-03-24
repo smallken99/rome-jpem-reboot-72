@@ -1,7 +1,6 @@
 
 import React from 'react';
-import { Button } from '@/components/ui/button';
-import { useNavigate } from 'react-router-dom';
+import { ActionsGroup } from '@/components/ui-custom/ActionsGroup';
 import { Check, ArrowLeft, X, Loader2 } from 'lucide-react';
 
 export interface PreceptorActionsProps {
@@ -23,15 +22,35 @@ export const PreceptorActions: React.FC<PreceptorActionsProps> = ({
   isHired = false,
   cost
 }) => {
-  const navigate = useNavigate();
-  
-  const handleCancel = () => {
-    if (onCancel) {
-      onCancel();
-    } else {
-      navigate('/famille/education/preceptors');
+  const actions = [
+    {
+      icon: <ArrowLeft className="h-4 w-4" />,
+      label: "Retour",
+      onClick: onCancel,
+      variant: "outline" as const,
+      size: "sm" as const
     }
-  };
+  ];
+  
+  if (isHired && onFire) {
+    actions.push({
+      icon: isLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <X className="h-4 w-4" />,
+      label: "Licencier",
+      onClick: onFire,
+      variant: "destructive" as const,
+      size: "sm" as const,
+      disabled: isLoading
+    });
+  } else {
+    actions.push({
+      icon: isLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Check className="h-4 w-4" />,
+      label: isHired ? "Assigner" : "Embaucher",
+      onClick: onHire,
+      variant: "default" as const,
+      size: "sm" as const,
+      disabled: !isAvailable || isLoading
+    });
+  }
   
   return (
     <div className="flex justify-between items-center border-t pt-4 mt-4">
@@ -43,45 +62,11 @@ export const PreceptorActions: React.FC<PreceptorActionsProps> = ({
         )}
       </div>
       
-      <div className="flex space-x-2">
-        <Button
-          variant="outline"
-          onClick={handleCancel}
-          size="sm"
-        >
-          <ArrowLeft className="mr-2 h-4 w-4" />
-          Retour
-        </Button>
-        
-        {isHired && onFire ? (
-          <Button
-            variant="destructive"
-            onClick={onFire}
-            size="sm"
-            disabled={isLoading}
-          >
-            {isLoading ? (
-              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-            ) : (
-              <X className="mr-2 h-4 w-4" />
-            )}
-            Licencier
-          </Button>
-        ) : (
-          <Button
-            onClick={onHire}
-            disabled={!isAvailable || isLoading}
-            size="sm"
-          >
-            {isLoading ? (
-              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-            ) : (
-              <Check className="mr-2 h-4 w-4" />
-            )}
-            {isHired ? "Assigner" : "Embaucher"}
-          </Button>
-        )}
-      </div>
+      <ActionsGroup 
+        actions={actions}
+        spacing="sm"
+        justify="end"
+      />
     </div>
   );
 };

@@ -17,18 +17,18 @@ export const generateFertilityFactors = (
   husband?: Character
 ): FertilityFactors => {
   // Facteur de santé maternelle (de 0.5 à 1.5)
-  const maternalHealth = wife.healthStatus ? 
-    calculateHealthFactor(wife.healthStatus) : 
+  const maternalHealth = wife.health ? 
+    calculateHealthFactor(wife.health) : 
     1.0;
   
   // Facteur de santé paternelle (de 0.8 à 1.2)
-  const paternalHealth = husband && husband.healthStatus ? 
-    calculateHealthFactor(husband.healthStatus, 0.8, 1.2) : 
+  const paternalHealth = husband && husband.health ? 
+    calculateHealthFactor(husband.health, 0.8, 1.2) : 
     1.0;
   
   // Facteur de fertilité familiale (de 0.8 à 1.3)
   // Simuler une tendance familiale à avoir plus ou moins d'enfants
-  const familyFertility = wife.familyFertility || husband?.familyFertility || 1.0;
+  const familyFertility = wife.fertilityFactor || husband?.fertilityFactor || 1.0;
   
   // Nombre d'enfants déjà nés
   const previousBirths = wife.children?.length || 0;
@@ -84,8 +84,8 @@ const calculateMiscarriageChance = (character: Character): number => {
   }
   
   // Facteur de santé
-  if (character.healthStatus) {
-    switch (character.healthStatus.toLowerCase()) {
+  if (character.health) {
+    switch (character.health.toLowerCase()) {
       case 'bad':
         chance += 0.1; // +10%
         break;

@@ -1,229 +1,170 @@
 
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from '@/components/ui/table';
-import { UserCheck, Building, Plus, XCircle } from 'lucide-react';
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
-import { Input } from '@/components/ui/input';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Slider } from '@/components/ui/slider';
-import { useBuildingInventory } from '../../hooks/building/useBuildingInventory';
-import { usePatrimoine } from '@/hooks/usePatrimoine';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Button } from '@/components/ui/button';
+import { ChevronRight, Save, UserMinus } from 'lucide-react';
+import { SlaveAssignment } from './useSlaveManagement';
 import { toast } from 'sonner';
-
-interface SlaveAssignment {
-  propertyId: string;
-  propertyName: string;
-  assignedSlaves: number;
-}
 
 interface SlaveAssignmentsProps {
   slaveAssignments: SlaveAssignment[];
-  availableSlaves: number;
+  properties: { id: string; name: string }[];
+  totalSlaves: number;
+  assignedSlaves: number;
   onAssignSlaves: (propertyId: string, propertyName: string, amount: number) => boolean;
   onRemoveAssignment: (propertyId: string) => boolean;
 }
 
 export const SlaveAssignments: React.FC<SlaveAssignmentsProps> = ({
   slaveAssignments,
-  availableSlaves,
+  properties,
+  totalSlaves,
+  assignedSlaves,
   onAssignSlaves,
   onRemoveAssignment
 }) => {
-  const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [selectedPropertyId, setSelectedPropertyId] = useState<string | null>(null);
-  const [selectedPropertyName, setSelectedPropertyName] = useState<string>('');
-  const [assignmentAmount, setAssignmentAmount] = useState(1);
+  const [selectedProperty, setSelectedProperty] = useState<string>('');
+  const [slaveCount, setSlaveCount] = useState<number>(5);
   
-  const { ownedBuildings } = useBuildingInventory();
-  const { properties } = usePatrimoine();
-  
-  // Obtenir toutes les propriétés disponibles (bâtiments + propriétés)
-  const allProperties = [
-    ...ownedBuildings.map(b => ({ id: b.id, name: b.name || 'Bâtiment sans nom' })),
-    ...properties.map(p => ({ id: p.id, name: p.name }))
-  ];
-  
-  // Filtrer les propriétés qui n'ont pas encore d'esclaves assignés
-  const unassignedProperties = allProperties.filter(
-    property => !slaveAssignments.some(a => a.propertyId === property.id)
+  // Propriétés sans assignation
+  const unassignedProperties = properties.filter(
+    property => !slaveAssignments.some(assignment => assignment.propertyId === property.id)
   );
   
-  const handleSelectProperty = (id: string, name: string) => {
-    setSelectedPropertyId(id);
-    setSelectedPropertyName(name);
+  // Esclaves disponibles
+  const availableSlaves = totalSlaves - assignedSlaves;
+  
+  const handleSliderChange = (value: number[]) => {
+    setSlaveCount(value[0]);
   };
   
   const handleAssignSlaves = () => {
-    if (!selectedPropertyId || !selectedPropertyName) {
-      toast.error("Veuillez sélectionner une propriété");
+    if (!selectedProperty) {
+      toast.error('Veuillez sélectionner une propriété');
       return;
     }
     
-    if (assignmentAmount <= 0) {
-      toast.error("Veuillez entrer une quantité valide");
+    if (slaveCount <= 0) {
+      toast.error('Le nombre d\'esclaves doit être supérieur à 0');
       return;
     }
     
-    if (assignmentAmount > availableSlaves) {
-      toast.error(`Vous ne pouvez assigner que ${availableSlaves} esclaves`);
+    const property = properties.find(p => p.id === selectedProperty);
+    if (!property) {
+      toast.error('Propriété invalide');
       return;
     }
     
-    const success = onAssignSlaves(selectedPropertyId, selectedPropertyName, assignmentAmount);
+    const success = onAssignSlaves(property.id, property.name, slaveCount);
     
     if (success) {
-      setIsDialogOpen(false);
-      setSelectedPropertyId(null);
-      setSelectedPropertyName('');
-      setAssignmentAmount(1);
+      setSelectedProperty('');
+      setSlaveCount(5);
+    }
+  };
+  
+  const handleManualInput = (value: string) => {
+    const numericValue = parseInt(value, 10);
+    if (!isNaN(numericValue)) {
+      setSlaveCount(Math.min(numericValue, availableSlaves));
     }
   };
   
   return (
-    <div className="space-y-6">
-      <Card>
-        <CardHeader className="flex flex-row items-center justify-between">
-          <CardTitle>Esclaves assignés</CardTitle>
-          <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-            <DialogTrigger asChild>
-              <Button 
-                variant="default" 
-                className="gap-1" 
-                disabled={unassignedProperties.length === 0 || availableSlaves === 0}
-              >
-                <Plus className="h-4 w-4" />
-                <span>Nouvelle affectation</span>
-              </Button>
-            </DialogTrigger>
-            <DialogContent>
-              <DialogHeader>
-                <DialogTitle>Assigner des esclaves</DialogTitle>
-                <DialogDescription>
-                  Choisissez une propriété et le nombre d'esclaves à y assigner
-                </DialogDescription>
-              </DialogHeader>
-              
-              <div className="grid gap-4 py-4">
-                <div className="space-y-2">
-                  <h3 className="text-sm font-medium">Propriété</h3>
-                  <div className="grid grid-cols-2 gap-2 max-h-40 overflow-y-auto">
-                    {unassignedProperties.map(property => (
-                      <Button
-                        key={property.id}
-                        variant={selectedPropertyId === property.id ? "default" : "outline"}
-                        className="justify-start"
-                        onClick={() => handleSelectProperty(property.id, property.name)}
-                      >
-                        <Building className="h-4 w-4 mr-2" />
-                        <span className="truncate">{property.name}</span>
-                      </Button>
-                    ))}
-                  </div>
+    <Card>
+      <CardHeader>
+        <CardTitle className="text-base font-cinzel">Assignation des esclaves</CardTitle>
+      </CardHeader>
+      <CardContent className="space-y-4">
+        {slaveAssignments.length > 0 ? (
+          <div className="space-y-3">
+            <h4 className="text-sm font-medium">Esclaves assignés</h4>
+            {slaveAssignments.map((assignment) => (
+              <div key={assignment.propertyId} className="flex items-center justify-between bg-muted/50 p-2 rounded-md">
+                <div>
+                  <p className="font-medium text-sm">{assignment.propertyName}</p>
+                  <p className="text-xs text-muted-foreground">{assignment.assignedSlaves} esclaves</p>
                 </div>
-                
-                <div className="space-y-2">
-                  <div className="flex justify-between">
-                    <h3 className="text-sm font-medium">Nombre d'esclaves</h3>
-                    <span className="text-sm">{assignmentAmount} / {availableSlaves}</span>
-                  </div>
-                  
-                  <div className="flex gap-2">
-                    <div className="flex-1">
-                      <Slider
-                        value={[assignmentAmount]}
-                        onValueChange={(values) => setAssignmentAmount(values[0])}
-                        min={1}
-                        max={availableSlaves}
-                        step={1}
-                      />
-                    </div>
-                    <Input
-                      type="number"
-                      value={assignmentAmount}
-                      onChange={(e) => setAssignmentAmount(Math.max(1, parseInt(e.target.value) || 1))}
-                      className="w-20"
-                      min={1}
-                      max={availableSlaves}
-                    />
-                  </div>
-                </div>
-              </div>
-              
-              <div className="flex justify-end gap-2">
-                <Button variant="outline" onClick={() => setIsDialogOpen(false)}>
-                  Annuler
-                </Button>
-                <Button onClick={handleAssignSlaves}>
-                  <UserCheck className="h-4 w-4 mr-2" />
-                  Assigner
-                </Button>
-              </div>
-            </DialogContent>
-          </Dialog>
-        </CardHeader>
-        <CardContent>
-          {slaveAssignments.length > 0 ? (
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Propriété</TableHead>
-                  <TableHead>Esclaves assignés</TableHead>
-                  <TableHead className="text-right">Actions</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {slaveAssignments.map((assignment) => (
-                  <TableRow key={assignment.propertyId}>
-                    <TableCell className="font-medium">{assignment.propertyName}</TableCell>
-                    <TableCell>{assignment.assignedSlaves}</TableCell>
-                    <TableCell className="text-right">
-                      <Button 
-                        variant="ghost" 
-                        size="sm"
-                        onClick={() => onRemoveAssignment(assignment.propertyId)}
-                      >
-                        <XCircle className="h-4 w-4 text-destructive" />
-                      </Button>
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          ) : (
-            <div className="text-center py-6 text-muted-foreground">
-              <UserCheck className="h-12 w-12 mx-auto mb-2 opacity-20" />
-              <p>Aucun esclave n'est actuellement assigné à une propriété</p>
-              {availableSlaves > 0 ? (
                 <Button 
-                  variant="outline" 
-                  className="mt-4"
-                  onClick={() => setIsDialogOpen(true)}
-                  disabled={unassignedProperties.length === 0}
+                  variant="ghost" 
+                  size="sm" 
+                  onClick={() => onRemoveAssignment(assignment.propertyId)}
+                  className="text-red-500 hover:text-red-700 hover:bg-red-100/50"
                 >
-                  <Plus className="h-4 w-4 mr-2" />
-                  Créer une affectation
+                  <UserMinus className="h-4 w-4" />
                 </Button>
-              ) : null}
+              </div>
+            ))}
+          </div>
+        ) : (
+          <p className="text-sm text-muted-foreground">Aucune assignation d'esclaves active.</p>
+        )}
+        
+        <div className="space-y-4 pt-4 border-t">
+          <h4 className="text-sm font-medium">Nouvelle assignation</h4>
+          
+          <div className="space-y-3">
+            <div className="space-y-1">
+              <Label htmlFor="property">Propriété</Label>
+              <Select value={selectedProperty} onValueChange={setSelectedProperty}>
+                <SelectTrigger id="property">
+                  <SelectValue placeholder="Sélectionner une propriété" />
+                </SelectTrigger>
+                <SelectContent>
+                  {unassignedProperties.map((property) => (
+                    <SelectItem key={property.id} value={property.id}>{property.name}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
-          )}
-        </CardContent>
-      </Card>
-      
-      <div className="p-4 bg-muted rounded-md">
-        <h3 className="text-sm font-medium mb-2">Instructions d'affectation</h3>
-        <p className="text-sm text-muted-foreground">
-          Les esclaves assignés aux propriétés augmentent leur productivité et réduisent les coûts de maintenance. 
-          Chaque propriété a une capacité maximale d'esclaves qui lui est propre en fonction de sa taille et de son type.
-        </p>
-      </div>
-    </div>
+            
+            <div className="space-y-1">
+              <div className="flex justify-between">
+                <Label htmlFor="slave-count">Nombre d'esclaves</Label>
+                <span className="text-xs text-muted-foreground">{availableSlaves} disponibles</span>
+              </div>
+              <div className="flex gap-2">
+                <div className="relative flex-1">
+                  <Slider
+                    id="slave-count"
+                    min={1}
+                    max={availableSlaves || 1}
+                    step={1}
+                    value={[slaveCount]}
+                    onValueChange={handleSliderChange}
+                    disabled={availableSlaves === 0}
+                  />
+                </div>
+                <Input
+                  type="number"
+                  value={slaveCount}
+                  onChange={(e) => handleManualInput(e.target.value)}
+                  className="w-16"
+                  min={1}
+                  max={availableSlaves}
+                  disabled={availableSlaves === 0}
+                />
+              </div>
+            </div>
+          </div>
+          
+          <div className="flex justify-end">
+            <Button 
+              onClick={handleAssignSlaves}
+              disabled={!selectedProperty || availableSlaves === 0}
+              size="sm"
+              className="gap-1"
+            >
+              <Save className="h-4 w-4" />
+              Assigner
+            </Button>
+          </div>
+        </div>
+      </CardContent>
+    </Card>
   );
 };

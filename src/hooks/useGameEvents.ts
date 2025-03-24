@@ -1,153 +1,120 @@
 
 import { useState, useCallback } from 'react';
-import { useMaitreJeu } from '@/components/maitrejeu/context';
-import { formatGameDate, Season } from '@/utils/timeSystem';
-import { EvenementType, toEvenementType } from '@/utils/gameEventTypes';
+import { GameEvent, EvenementAction, EvenementType, ImportanceType } from '@/components/maitrejeu/types/evenements';
+import { Season } from '@/utils/timeSystem';
+import { toEvenementType } from '@/utils/gameEventTypes';
 import { toast } from 'sonner';
 
-// Types locaux pour les événements
-export type PlayerSeason = 'Ver' | 'Aestas' | 'Autumnus' | 'Hiems';
-
 export const useGameEvents = () => {
-  const { 
-    currentDate,
-    currentPhase,
-    addEvenement,
-    resolveEvenement,
-    evenements
-  } = useMaitreJeu();
+  const [events, setEvents] = useState<GameEvent[]>([]);
+  const [activeEvents, setActiveEvents] = useState<GameEvent[]>([]);
+  const [historicalEvents, setHistoricalEvents] = useState<GameEvent[]>([]);
   
-  const [showModal, setShowModal] = useState(false);
-  const [selectedEvent, setSelectedEvent] = useState<any>(null);
-  
-  // Récupérer les événements actifs (non résolus)
-  const activeEvents = evenements?.filter(event => !event.resolved) || [];
-  
-  // Récupérer les événements résolus
-  const pastEvents = evenements?.filter(event => event.resolved) || [];
-  
-  // Filtre les événements par saison et année
-  const filterEventsBySeason = useCallback((events: any[], season: PlayerSeason, year: number) => {
-    return events.filter(event => {
-      return event.date?.season === season && event.date?.year === year;
-    });
-  }, []);
-  
-  // Vérifie s'il y a des événements pour une date spécifique
-  const hasEventsForDate = useCallback((season: PlayerSeason, year: number) => {
-    return activeEvents.some(event => 
-      event.date?.season === season && event.date?.year === year
-    );
-  }, [activeEvents]);
-  
-  // Formate les événements pour l'affichage
-  const formatEvent = useCallback((event: any) => {
-    const formattedDate = event.date 
-      ? formatGameDate({ year: event.date.year, season: event.date.season })
-      : 'Date inconnue';
-      
-    return {
+  // Créer un nouvel événement
+  const createEvent = useCallback((event: Omit<GameEvent, 'id'>) => {
+    const id = `event-${Date.now()}`;
+    const newEvent: GameEvent = {
       ...event,
-      formattedDate
+      id
     };
+    
+    setEvents(prev => [...prev, newEvent]);
+    setActiveEvents(prev => [...prev, newEvent]);
+    
+    return id;
   }, []);
   
-  // Sélectionne un événement pour l'affichage détaillé
-  const selectEvent = useCallback((event: any) => {
-    setSelectedEvent(formatEvent(event));
-    setShowModal(true);
-  }, [formatEvent]);
-  
-  // Crée un nouvel événement politique
-  const createPoliticalEvent = useCallback(() => {
-    // Événement politique pour l'année suivante
-    const nextYear = currentDate.year;
-    const nextSeason = currentDate.season as Season;
+  // Résoudre un événement
+  const resolveEvent = useCallback((eventId: string, resolution: string) => {
+    setEvents(prev => 
+      prev.map(event => 
+        event.id === eventId 
+          ? { ...event, resolved: true, resolution } 
+          : event
+      )
+    );
     
-    addEvenement({
-      titre: "Débat au Sénat",
-      description: "Un débat important concernant les politiques de la République aura lieu au Sénat.",
-      date: {
-        year: nextYear,
-        season: nextSeason
-      },
-      importance: ['politique', 'général'],
-      type: toEvenementType('politique'),
-      resolved: false,
-      options: {
-        effects: [
-          "Influence sur l'équilibre des factions",
-          "Répercussions sur les prochaines élections"
-        ],
-        choices: [
-          {
-            text: "Participer activement au débat",
-            outcome: "Votre participation active augmente votre visibilité politique."
-          },
-          {
-            text: "Observer discrètement",
-            outcome: "Vous restez informé sans vous exposer politiquement."
-          }
-        ]
+    setActiveEvents(prev => prev.filter(event => event.id !== eventId));
+    setHistoricalEvents(prev => [
+      ...prev,
+      { 
+        ...events.find(e => e.id === eventId)!,
+        resolved: true,
+        resolution
       }
-    });
+    ]);
     
-    toast.success("Événement politique créé pour la prochaine saison");
-  }, [addEvenement, currentDate]);
+    toast.success('Événement résolu');
+  }, [events]);
   
-  // Crée un nouvel événement social
-  const createSocialEvent = useCallback(() => {
-    // Événement social pour la date actuelle
-    addEvenement({
-      titre: "Banquet chez un patricien",
-      description: "Un important patricien organise un banquet somptueux auquel vous êtes convié.",
-      date: {
-        year: currentDate.year,
-        season: currentDate.season as Season
-      },
-      importance: ['social', 'réseau'],
-      type: toEvenementType('social'),
-      resolved: false,
-      options: {
-        effects: [
-          "Nouvelles connexions sociales",
-          "Possibilité d'alliance familiale"
-        ],
-        choices: [
-          {
-            text: "Assister au banquet",
-            outcome: "Vous renforcez vos relations avec d'autres familles influentes."
-          },
-          {
-            text: "Décliner l'invitation",
-            outcome: "Vous manquez une opportunité sociale mais préservez votre temps."
-          }
-        ]
-      }
-    });
+  // Générer des événements aléatoires pour une saison
+  const generateEventsForSeason = useCallback((season: Season, year: number) => {
+    // Exemple d'événement politique
+    const politicalEvent: GameEvent = {
+      id: `event-${Date.now()}-1`,
+      title: 'Proposition de loi agraire',
+      description: 'Une nouvelle loi agraire est proposée par le tribun de la plèbe',
+      importance: ['SENAT', 'POLITIQUE'],
+      type: 'POLITIQUE' as EvenementType,
+      season,
+      year,
+      actions: [
+        {
+          label: 'Soutenir',
+          consequence: 'Augmente votre popularité auprès de la plèbe mais irrite les patriciens'
+        },
+        {
+          label: 'S\'opposer',
+          consequence: 'Maintient le soutien des patriciens mais diminue votre popularité'
+        }
+      ],
+      resolved: false
+    };
     
-    toast.success("Événement social créé");
-  }, [addEvenement, currentDate]);
+    // Exemple d'événement économique
+    const economicEvent: GameEvent = {
+      id: `event-${Date.now()}-2`,
+      title: 'Fluctuation des prix du grain',
+      description: 'Les prix du grain ont considérablement augmenté suite à une mauvaise récolte',
+      importance: ['ECONOMIE', 'POPULATION'],
+      type: 'ECONOMIQUE' as EvenementType,
+      season,
+      year,
+      actions: [
+        {
+          label: 'Subventionner les importations',
+          consequence: 'Coûteux pour le trésor mais populaire auprès du peuple'
+        },
+        {
+          label: 'Laisser le marché s\'ajuster',
+          consequence: 'Économise de l\'argent mais risque de mécontentement'
+        }
+      ],
+      resolved: false
+    };
+    
+    setEvents(prev => [...prev, politicalEvent, economicEvent]);
+    setActiveEvents(prev => [...prev, politicalEvent, economicEvent]);
+    
+    return [politicalEvent.id, economicEvent.id];
+  }, []);
   
-  // Résout un événement avec une option choisie
-  const resolveEvent = useCallback((eventId: string, optionId: string) => {
-    resolveEvenement(eventId, optionId);
-    setShowModal(false);
-    toast.success("Événement résolu");
-  }, [resolveEvenement]);
+  // Supprimer un événement
+  const deleteEvent = useCallback((eventId: string) => {
+    setEvents(prev => prev.filter(event => event.id !== eventId));
+    setActiveEvents(prev => prev.filter(event => event.id !== eventId));
+    setHistoricalEvents(prev => prev.filter(event => event.id !== eventId));
+    
+    toast.info('Événement supprimé');
+  }, []);
   
   return {
+    events,
     activeEvents,
-    pastEvents,
-    filterEventsBySeason,
-    hasEventsForDate,
-    formatEvent,
-    selectEvent,
-    selectedEvent,
-    showModal,
-    setShowModal,
-    createPoliticalEvent,
-    createSocialEvent,
-    resolveEvent
+    historicalEvents,
+    createEvent,
+    resolveEvent,
+    generateEventsForSeason,
+    deleteEvent
   };
 };
