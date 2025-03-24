@@ -3,6 +3,16 @@ import { Season } from '@/utils/timeSystem';
 
 // Taux de natalité de base (annuel, en pourcentage)
 export const BASE_BIRTH_RATE = 15;
+export const BASE_BIRTH_CHANCE_PER_YEAR = 0.15; // 15% de chance par an
+
+// Âges limites pour la reproduction
+export const MIN_MATERNAL_AGE = 16;
+export const MAX_MATERNAL_AGE = 45;
+export const MIN_PATERNAL_AGE = 16;
+export const MAX_PATERNAL_AGE = 70;
+
+// Chance d'avoir un garçon vs une fille
+export const MALE_CHANCE = 0.52; // 52% de chance d'avoir un garçon
 
 // Modificateurs d'âge pour la fertilité
 export const AGE_MODIFIERS = {
@@ -25,6 +35,9 @@ export const SEASON_MODIFIERS: Partial<Record<Season, number>> = {
   'Autumnus': -1, // Automne: -1%
   'Hiems': -3 // Hiver: -3%
 };
+
+// Version exportée avec un nom différent pour la compatibilité
+export const SEASONAL_BIRTH_MODIFIERS = SEASON_MODIFIERS;
 
 // Chance de naissance gémellaire
 export const TWIN_CHANCE = 3; // 3%

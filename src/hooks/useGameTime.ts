@@ -44,7 +44,6 @@ export const useGameTime = () => {
     const phaseMap: Record<string, string> = {
       'SENATE': 'Sénat',
       'ECONOMY': 'Économie',
-      'ELECTIONS': 'Élections',
       'ELECTION': 'Élections',
       'DIPLOMACY': 'Diplomatie',
       'MILITARY': 'Militaire',
@@ -58,13 +57,13 @@ export const useGameTime = () => {
 
   // Get phase description
   const getPhaseDescription = (): string => {
-    switch (currentPhase) {
+    const phase = currentPhase as string;
+    switch (phase) {
       case 'SENATE': 
         return "Phase de réunion du Sénat où les décisions importantes sont débattues.";
       case 'ECONOMY': 
         return "Gérez les finances et l'économie de la République.";
       case 'ELECTION': 
-      case 'ELECTIONS':
         return "Les citoyens élisent leurs magistrats pour l'année à venir.";
       case 'DIPLOMACY': 
         return "Négociez avec d'autres nations et établissez des relations diplomatiques.";

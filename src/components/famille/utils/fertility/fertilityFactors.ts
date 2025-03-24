@@ -1,56 +1,103 @@
 
 import { Character } from '@/types/character';
-import { getStatValue } from '@/utils/characterUtils';
 
-// Facteurs de fécondité
 export interface FertilityFactors {
-  maternalHealth: number;   // Santé de la mère (0-1)
-  paternalHealth: number;   // Santé du père (0-1)
-  previousBirths: number;   // Nombre de naissances précédentes
-  miscarriageChance: number; // Risque de fausse couche (0-1)
-  familyFertility: number;  // Fertilité familiale héréditaire (0.5-1.5)
+  maternalHealth: number;
+  paternalHealth: number;
+  familyFertility: number;
+  previousBirths: number;
+  miscarriageChance: number;
 }
 
-// Cache pour stocker les facteurs de fertilité par famille
-const familyFertilityCache: Record<string, number> = {};
-
 /**
- * Génère des facteurs de fertilité pour un couple
+ * Génère les facteurs de fertilité pour un couple
  */
-export const generateFertilityFactors = (wife: Character, husband: Character): FertilityFactors => {
-  // Extraire le nom de famille du mari pour la fertilitéa familiale
-  const familyName = husband.name.split(' ')[1] || husband.name;
+export const generateFertilityFactors = (
+  wife: Character,
+  husband?: Character
+): FertilityFactors => {
+  // Facteur de santé maternelle (de 0.5 à 1.5)
+  const maternalHealth = wife.healthStatus ? 
+    calculateHealthFactor(wife.healthStatus) : 
+    1.0;
   
-  // Créer ou récupérer la fertilité familiale héréditaire
-  if (!familyFertilityCache[familyName]) {
-    // Fertilité familiale entre 0.5 et 1.5 (certaines familles sont naturellement plus fertiles)
-    familyFertilityCache[familyName] = 0.5 + Math.random();
-  }
+  // Facteur de santé paternelle (de 0.8 à 1.2)
+  const paternalHealth = husband && husband.healthStatus ? 
+    calculateHealthFactor(husband.healthStatus, 0.8, 1.2) : 
+    1.0;
   
-  // Santé maternelle basée sur l'âge et les statistiques
-  const maternalHealthBase = wife.age >= 20 && wife.age <= 30 ? 0.9 : 0.7;
-  const maternalHealthMod = Math.min(getStatValue(wife.stats.piety) / 200, 0.5); // La piété influence la santé
-  const maternalHealth = Math.min(maternalHealthBase + maternalHealthMod, 1);
+  // Facteur de fertilité familiale (de 0.8 à 1.3)
+  // Simuler une tendance familiale à avoir plus ou moins d'enfants
+  const familyFertility = wife.familyFertility || husband?.familyFertility || 1.0;
   
-  // Santé paternelle
-  const paternalHealthBase = husband.age >= 25 && husband.age <= 45 ? 0.9 : 0.7;
-  const paternalHealthMod = Math.min(getStatValue(husband.stats.piety) / 200, 0.5);
-  const paternalHealth = Math.min(paternalHealthBase + paternalHealthMod, 1);
+  // Nombre d'enfants déjà nés
+  const previousBirths = wife.children?.length || 0;
   
-  // Nombre de naissances précédentes (estimation)
-  const previousBirths = Math.min(wife.age - 16, 0) / 3;
-  
-  // Risque de fausse couche augmente avec l'âge
-  let miscarriageChance = 0.05; // 5% de base
-  if (wife.age > 35) {
-    miscarriageChance += (wife.age - 35) * 0.02; // +2% par an après 35 ans
-  }
+  // Risque de fausse couche (5-15% selon l'âge et la santé)
+  const miscarriageChance = calculateMiscarriageChance(wife);
   
   return {
     maternalHealth,
     paternalHealth,
+    familyFertility,
     previousBirths,
-    miscarriageChance,
-    familyFertility: familyFertilityCache[familyName]
+    miscarriageChance
   };
+};
+
+/**
+ * Calcule un facteur basé sur la santé
+ */
+const calculateHealthFactor = (
+  health: string, 
+  min: number = 0.5, 
+  max: number = 1.5
+): number => {
+  switch (health.toLowerCase()) {
+    case 'excellent':
+      return max;
+    case 'good':
+      return min + (max - min) * 0.75;
+    case 'average':
+      return min + (max - min) * 0.5;
+    case 'poor':
+      return min + (max - min) * 0.25;
+    case 'bad':
+      return min;
+    default:
+      return min + (max - min) * 0.5; // Valeur moyenne par défaut
+  }
+};
+
+/**
+ * Calcule la chance de fausse couche
+ */
+const calculateMiscarriageChance = (character: Character): number => {
+  // Base: 5%
+  let chance = 0.05;
+  
+  // Augmente avec l'âge
+  if (character.age > 35) {
+    chance += (character.age - 35) * 0.005; // +0.5% par année au-dessus de 35 ans
+  } else if (character.age < 20) {
+    chance += (20 - character.age) * 0.003; // +0.3% par année en-dessous de 20 ans
+  }
+  
+  // Facteur de santé
+  if (character.healthStatus) {
+    switch (character.healthStatus.toLowerCase()) {
+      case 'bad':
+        chance += 0.1; // +10%
+        break;
+      case 'poor':
+        chance += 0.05; // +5%
+        break;
+      case 'excellent':
+        chance -= 0.02; // -2%
+        break;
+    }
+  }
+  
+  // S'assurer que la chance reste dans des limites raisonnables
+  return Math.max(0.01, Math.min(0.3, chance));
 };

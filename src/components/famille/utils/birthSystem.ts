@@ -10,7 +10,7 @@ import {
   MIN_PATERNAL_AGE,
   MAX_PATERNAL_AGE,
   MALE_CHANCE,
-  SEASONAL_BIRTH_MODIFIERS 
+  SEASON_MODIFIERS 
 } from './fertility/birthConstants';
 import { generateFertilityFactors } from './fertility/fertilityFactors';
 
@@ -54,7 +54,9 @@ export const checkForBirth = (wife: Character, husband?: Character, season: Seas
   }
   
   // Appliquer le modificateur saisonnier
-  adjustedChance += SEASONAL_BIRTH_MODIFIERS[season];
+  if (SEASON_MODIFIERS[season]) {
+    adjustedChance += (SEASON_MODIFIERS[season] || 0) / 100;
+  }
   
   // Assurer que la chance est dans des limites raisonnables
   adjustedChance = Math.max(0.02, Math.min(0.4, adjustedChance));

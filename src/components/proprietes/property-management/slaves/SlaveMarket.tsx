@@ -1,115 +1,197 @@
 
 import React, { useState } from 'react';
-import { Label } from '@/components/ui/label';
-import { Input } from '@/components/ui/input';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { ShoppingCart, CoinsIcon, AlertCircle } from 'lucide-react';
+import { Input } from '@/components/ui/input';
+import { ShoppingCart, Store, AlertTriangle, Info } from 'lucide-react';
+import { Slider } from '@/components/ui/slider';
 import { toast } from 'sonner';
 
 interface SlaveMarketProps {
   slavePrice: number;
   balance: number;
-  onPurchase: (amount: number) => void;
+  availableSlaves: number;
+  onPurchase: (amount: number) => boolean;
+  onSell: (amount: number) => boolean;
 }
 
 export const SlaveMarket: React.FC<SlaveMarketProps> = ({
   slavePrice,
   balance,
-  onPurchase
+  availableSlaves,
+  onPurchase,
+  onSell
 }) => {
   const [purchaseAmount, setPurchaseAmount] = useState(1);
-  const [isLoading, setIsLoading] = useState(false);
+  const [sellAmount, setSellAmount] = useState(1);
   
-  const handlePurchaseAmountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = parseInt(e.target.value);
-    if (!isNaN(value) && value > 0) {
-      setPurchaseAmount(value);
-    }
-  };
+  const maxPurchaseAmount = Math.floor(balance / slavePrice);
+  const purchaseCost = purchaseAmount * slavePrice;
+  const sellValue = Math.floor(sellAmount * slavePrice * 0.7); // 70% of purchase price
   
-  const handlePurchase = (amount: number) => {
-    const totalCost = amount * slavePrice;
-    
-    if (balance < totalCost) {
-      toast.error(`Fonds insuffisants pour acheter ${amount} esclaves (coût: ${totalCost.toLocaleString()} As)`);
+  const handlePurchase = () => {
+    if (purchaseAmount <= 0) {
+      toast.error("Veuillez entrer une quantité valide");
       return;
     }
     
-    setIsLoading(true);
+    if (purchaseCost > balance) {
+      toast.error("Fonds insuffisants pour cet achat");
+      return;
+    }
     
-    setTimeout(() => {
-      onPurchase(amount);
-      setIsLoading(false);
-    }, 1000);
+    onPurchase(purchaseAmount);
+  };
+  
+  const handleSell = () => {
+    if (sellAmount <= 0) {
+      toast.error("Veuillez entrer une quantité valide");
+      return;
+    }
+    
+    if (sellAmount > availableSlaves) {
+      toast.error(`Vous ne pouvez vendre que ${availableSlaves} esclaves non assignés`);
+      return;
+    }
+    
+    onSell(sellAmount);
   };
   
   return (
-    <div className="border border-rome-gold/30 rounded-md p-4 bg-white">
-      <h4 className="font-cinzel text-rome-navy mb-4 flex items-center">
-        <ShoppingCart className="h-5 w-5 mr-2" />
-        Marché aux esclaves
-      </h4>
-      
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-        <div>
-          <Label className="mb-2 block">Prix actuel du marché</Label>
-          <div className="text-lg font-bold text-rome-navy flex items-center">
-            <CoinsIcon className="h-4 w-4 mr-2 text-rome-gold" />
-            {slavePrice} As par esclave
-          </div>
-        </div>
+    <div className="space-y-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <Card>
+          <CardHeader>
+            <CardTitle>Acheter des esclaves</CardTitle>
+            <CardDescription>
+              Acquérir de nouveaux esclaves pour vos propriétés
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="flex flex-col gap-2">
+              <label className="text-sm font-medium">Quantité à acheter</label>
+              <div className="flex gap-2">
+                <div className="flex-1">
+                  <Slider
+                    value={[purchaseAmount]}
+                    onValueChange={(values) => setPurchaseAmount(values[0])}
+                    min={1}
+                    max={Math.min(50, maxPurchaseAmount)}
+                    step={1}
+                  />
+                </div>
+                <Input
+                  type="number"
+                  value={purchaseAmount}
+                  onChange={(e) => setPurchaseAmount(Math.max(1, parseInt(e.target.value) || 1))}
+                  className="w-20"
+                  min={1}
+                  max={maxPurchaseAmount}
+                />
+              </div>
+            </div>
+            
+            <div className="bg-muted p-4 rounded-md space-y-2">
+              <div className="flex justify-between">
+                <span>Prix unitaire:</span>
+                <span className="font-medium">{slavePrice.toLocaleString()} As</span>
+              </div>
+              <div className="flex justify-between">
+                <span>Coût total:</span>
+                <span className="font-medium">{purchaseCost.toLocaleString()} As</span>
+              </div>
+              <div className="flex justify-between">
+                <span>Balance après achat:</span>
+                <span className={`font-medium ${balance - purchaseCost < 0 ? 'text-red-500' : ''}`}>
+                  {(balance - purchaseCost).toLocaleString()} As
+                </span>
+              </div>
+            </div>
+            
+            {purchaseCost > balance && (
+              <div className="flex items-start gap-2 p-3 bg-red-50 rounded-md text-red-700 text-sm">
+                <AlertTriangle className="h-4 w-4 mt-0.5" />
+                <span>Fonds insuffisants pour cet achat</span>
+              </div>
+            )}
+            
+            <Button 
+              onClick={handlePurchase}
+              className="w-full"
+              disabled={purchaseCost > balance || purchaseAmount <= 0}
+            >
+              <ShoppingCart className="h-4 w-4 mr-2" />
+              Acheter {purchaseAmount} esclave{purchaseAmount > 1 ? 's' : ''}
+            </Button>
+          </CardContent>
+        </Card>
         
-        <div className="space-y-4">
-          <Label className="mb-2 block">Acquérir des esclaves</Label>
-          <div className="flex gap-2">
-            <Input
-              type="number"
-              min="1"
-              value={purchaseAmount}
-              onChange={handlePurchaseAmountChange}
-              className="w-20"
-            />
+        <Card>
+          <CardHeader>
+            <CardTitle>Vendre des esclaves</CardTitle>
+            <CardDescription>
+              Vendre des esclaves non assignés
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="flex flex-col gap-2">
+              <label className="text-sm font-medium">Quantité à vendre</label>
+              <div className="flex gap-2">
+                <div className="flex-1">
+                  <Slider
+                    value={[sellAmount]}
+                    onValueChange={(values) => setSellAmount(values[0])}
+                    min={1}
+                    max={availableSlaves > 0 ? availableSlaves : 1}
+                    step={1}
+                    disabled={availableSlaves === 0}
+                  />
+                </div>
+                <Input
+                  type="number"
+                  value={sellAmount}
+                  onChange={(e) => setSellAmount(Math.max(1, parseInt(e.target.value) || 1))}
+                  className="w-20"
+                  min={1}
+                  max={availableSlaves}
+                  disabled={availableSlaves === 0}
+                />
+              </div>
+            </div>
+            
+            <div className="bg-muted p-4 rounded-md space-y-2">
+              <div className="flex justify-between">
+                <span>Prix de vente unitaire:</span>
+                <span className="font-medium">{Math.floor(slavePrice * 0.7).toLocaleString()} As</span>
+              </div>
+              <div className="flex justify-between">
+                <span>Revenu total:</span>
+                <span className="font-medium">{sellValue.toLocaleString()} As</span>
+              </div>
+              <div className="flex justify-between">
+                <span>Balance après vente:</span>
+                <span className="font-medium">{(balance + sellValue).toLocaleString()} As</span>
+              </div>
+            </div>
+            
+            {availableSlaves === 0 && (
+              <div className="flex items-start gap-2 p-3 bg-amber-50 rounded-md text-amber-700 text-sm">
+                <Info className="h-4 w-4 mt-0.5" />
+                <span>Vous n'avez pas d'esclaves disponibles à vendre</span>
+              </div>
+            )}
+            
             <Button 
-              className="roman-btn"
-              onClick={() => handlePurchase(purchaseAmount)}
-              disabled={isLoading || balance < purchaseAmount * slavePrice}
+              onClick={handleSell}
+              className="w-full"
+              variant="secondary"
+              disabled={availableSlaves === 0 || sellAmount <= 0}
             >
-              {isLoading ? "Transaction..." : `Acheter (${(purchaseAmount * slavePrice).toLocaleString()} As)`}
+              <Store className="h-4 w-4 mr-2" />
+              Vendre {sellAmount} esclave{sellAmount > 1 ? 's' : ''}
             </Button>
-          </div>
-          
-          <div className="flex gap-2">
-            <Button 
-              variant="outline" 
-              className="roman-btn-outline"
-              onClick={() => handlePurchase(1)}
-              disabled={isLoading || balance < slavePrice}
-            >
-              +1
-            </Button>
-            <Button 
-              variant="outline" 
-              className="roman-btn-outline"
-              onClick={() => handlePurchase(5)}
-              disabled={isLoading || balance < 5 * slavePrice}
-            >
-              +5
-            </Button>
-            <Button 
-              variant="outline" 
-              className="roman-btn-outline"
-              onClick={() => handlePurchase(10)}
-              disabled={isLoading || balance < 10 * slavePrice}
-            >
-              +10
-            </Button>
-          </div>
-        </div>
-      </div>
-      
-      <div className="text-sm text-muted-foreground flex items-center">
-        <AlertCircle className="h-4 w-4 mr-1" />
-        Le prix varie selon la disponibilité des esclaves sur le marché et leur qualité.
+          </CardContent>
+        </Card>
       </div>
     </div>
   );

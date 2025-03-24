@@ -1,171 +1,153 @@
 
-import { useState, useEffect } from 'react';
+import { useState, useCallback } from 'react';
 import { useMaitreJeu } from '@/components/maitrejeu/context';
+import { formatGameDate, Season } from '@/utils/timeSystem';
+import { EvenementType, toEvenementType } from '@/utils/gameEventTypes';
 import { toast } from 'sonner';
-import { GameDate, formatGameDate, convertToStandardSeason } from '@/utils/timeSystem';
+
+// Types locaux pour les événements
+export type PlayerSeason = 'Ver' | 'Aestas' | 'Autumnus' | 'Hiems';
 
 export const useGameEvents = () => {
   const { 
-    currentDate, 
-    evenements, 
-    addEvenement, 
+    currentDate,
+    currentPhase,
+    addEvenement,
     resolveEvenement,
-    advanceTime
+    evenements
   } = useMaitreJeu();
   
-  // Événements actifs pour la date actuelle
-  const currentEvents = evenements.filter(event => 
-    event.date.year === currentDate.year && 
-    event.date.season === currentDate.season && 
-    !event.resolved
-  );
+  const [showModal, setShowModal] = useState(false);
+  const [selectedEvent, setSelectedEvent] = useState<any>(null);
   
-  // Événements résolus pour la date actuelle
-  const resolvedEvents = evenements.filter(event => 
-    event.date.year === currentDate.year && 
-    event.date.season === currentDate.season && 
-    event.resolved
-  );
+  // Récupérer les événements actifs (non résolus)
+  const activeEvents = evenements?.filter(event => !event.resolved) || [];
   
-  // Événements à venir (prochaine saison)
-  const getUpcomingEvents = () => {
-    let nextSeason = currentDate.season;
-    let nextYear = currentDate.year;
-    
-    const currentSeason = convertToStandardSeason(currentDate.season as string);
-    
-    switch (currentSeason) {
-      case 'Ver': nextSeason = 'Aestas'; break;
-      case 'Aestas': nextSeason = 'Autumnus'; break;
-      case 'Autumnus': nextSeason = 'Hiems'; break;
-      case 'Hiems': nextSeason = 'Ver'; nextYear++; break;
-    }
-    
-    return evenements.filter(event => 
-      event.date.year === nextYear && 
-      event.date.season === nextSeason
+  // Récupérer les événements résolus
+  const pastEvents = evenements?.filter(event => event.resolved) || [];
+  
+  // Filtre les événements par saison et année
+  const filterEventsBySeason = useCallback((events: any[], season: PlayerSeason, year: number) => {
+    return events.filter(event => {
+      return event.date?.season === season && event.date?.year === year;
+    });
+  }, []);
+  
+  // Vérifie s'il y a des événements pour une date spécifique
+  const hasEventsForDate = useCallback((season: PlayerSeason, year: number) => {
+    return activeEvents.some(event => 
+      event.date?.season === season && event.date?.year === year
     );
-  };
+  }, [activeEvents]);
   
-  // Ajouter un événement pour la date actuelle
-  const addCurrentEvent = (
-    title: string, 
-    description: string, 
-    importance: string[], 
-    type: string, 
-    options?: { 
-      effects?: string[]; 
-      choices?: { text: string; outcome: string }[] 
-    }
-  ) => {
-    const newEvent = {
-      titre: title,
-      description,
-      date: { ...currentDate },
-      importance,
-      type,
+  // Formate les événements pour l'affichage
+  const formatEvent = useCallback((event: any) => {
+    const formattedDate = event.date 
+      ? formatGameDate({ year: event.date.year, season: event.date.season })
+      : 'Date inconnue';
+      
+    return {
+      ...event,
+      formattedDate
+    };
+  }, []);
+  
+  // Sélectionne un événement pour l'affichage détaillé
+  const selectEvent = useCallback((event: any) => {
+    setSelectedEvent(formatEvent(event));
+    setShowModal(true);
+  }, [formatEvent]);
+  
+  // Crée un nouvel événement politique
+  const createPoliticalEvent = useCallback(() => {
+    // Événement politique pour l'année suivante
+    const nextYear = currentDate.year;
+    const nextSeason = currentDate.season as Season;
+    
+    addEvenement({
+      titre: "Débat au Sénat",
+      description: "Un débat important concernant les politiques de la République aura lieu au Sénat.",
+      date: {
+        year: nextYear,
+        season: nextSeason
+      },
+      importance: ['politique', 'général'],
+      type: toEvenementType('politique'),
       resolved: false,
       options: {
-        effects: options?.effects || [],
-        choices: options?.choices || []
+        effects: [
+          "Influence sur l'équilibre des factions",
+          "Répercussions sur les prochaines élections"
+        ],
+        choices: [
+          {
+            text: "Participer activement au débat",
+            outcome: "Votre participation active augmente votre visibilité politique."
+          },
+          {
+            text: "Observer discrètement",
+            outcome: "Vous restez informé sans vous exposer politiquement."
+          }
+        ]
       }
-    };
+    });
     
-    addEvenement(newEvent);
-    toast.success(`Événement ajouté : ${title}`);
-    
-    return title;
-  };
+    toast.success("Événement politique créé pour la prochaine saison");
+  }, [addEvenement, currentDate]);
   
-  // Ajouter un événement pour une date future
-  const scheduleEvent = (
-    title: string, 
-    description: string, 
-    targetDate: GameDate, 
-    importance: string[], 
-    type: string, 
-    options?: { 
-      effects?: string[]; 
-      choices?: { text: string; outcome: string }[] 
-    }
-  ) => {
-    const newEvent = {
-      titre: title,
-      description,
-      date: { ...targetDate },
-      importance,
-      type,
+  // Crée un nouvel événement social
+  const createSocialEvent = useCallback(() => {
+    // Événement social pour la date actuelle
+    addEvenement({
+      titre: "Banquet chez un patricien",
+      description: "Un important patricien organise un banquet somptueux auquel vous êtes convié.",
+      date: {
+        year: currentDate.year,
+        season: currentDate.season as Season
+      },
+      importance: ['social', 'réseau'],
+      type: toEvenementType('social'),
       resolved: false,
       options: {
-        effects: options?.effects || [],
-        choices: options?.choices || []
+        effects: [
+          "Nouvelles connexions sociales",
+          "Possibilité d'alliance familiale"
+        ],
+        choices: [
+          {
+            text: "Assister au banquet",
+            outcome: "Vous renforcez vos relations avec d'autres familles influentes."
+          },
+          {
+            text: "Décliner l'invitation",
+            outcome: "Vous manquez une opportunité sociale mais préservez votre temps."
+          }
+        ]
       }
-    };
+    });
     
-    addEvenement(newEvent);
-    
-    // Standardiser la date pour l'affichage
-    const standardizedDate = {
-      year: targetDate.year,
-      season: convertToStandardSeason(targetDate.season)
-    };
-    
-    toast.success(`Événement programmé pour ${formatGameDate(standardizedDate)} : ${title}`);
-    
-    return title;
-  };
+    toast.success("Événement social créé");
+  }, [addEvenement, currentDate]);
   
-  // Résoudre un événement avec un résultat donné
-  const resolveEvent = (eventId: string, resolution: string) => {
-    resolveEvenement(eventId, resolution);
+  // Résout un événement avec une option choisie
+  const resolveEvent = useCallback((eventId: string, optionId: string) => {
+    resolveEvenement(eventId, optionId);
+    setShowModal(false);
     toast.success("Événement résolu");
-  };
-  
-  // Vérifier s'il y a des événements non résolus avant d'avancer le temps
-  const checkPendingEvents = (): boolean => {
-    const hasPendingEvents = currentEvents.length > 0;
-    
-    if (hasPendingEvents) {
-      toast.warning(
-        "Événements non résolus", 
-        { description: `Il y a ${currentEvents.length} événements non résolus dans la saison actuelle.` }
-      );
-    }
-    
-    return hasPendingEvents;
-  };
-  
-  // Avancer le temps avec résolution automatique d'événements si nécessaire
-  const advanceTimeWithEventCheck = () => {
-    const hasPendingEvents = checkPendingEvents();
-    
-    if (hasPendingEvents) {
-      // Résoudre automatiquement tous les événements en suspens
-      currentEvents.forEach(event => {
-        resolveEvenement(event.id, "Résolution automatique");
-      });
-    }
-    
-    advanceTime();
-    
-    // Notifier des nouveaux événements de la saison
-    const newEvents = getUpcomingEvents();
-    if (newEvents.length > 0) {
-      toast.info(
-        `${newEvents.length} événement(s) pour cette saison`, 
-        { description: "Consultez la section événements pour plus de détails." }
-      );
-    }
-  };
+  }, [resolveEvenement]);
   
   return {
-    currentEvents,
-    resolvedEvents,
-    upcomingEvents: getUpcomingEvents(),
-    addCurrentEvent,
-    scheduleEvent,
-    resolveEvent,
-    checkPendingEvents,
-    advanceTimeWithEventCheck
+    activeEvents,
+    pastEvents,
+    filterEventsBySeason,
+    hasEventsForDate,
+    formatEvent,
+    selectEvent,
+    selectedEvent,
+    showModal,
+    setShowModal,
+    createPoliticalEvent,
+    createSocialEvent,
+    resolveEvent
   };
 };
