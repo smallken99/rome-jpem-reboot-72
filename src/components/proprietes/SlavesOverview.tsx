@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useSlaveManagement } from './property-management/slaves/useSlaveManagement';
 import { SlaveStatistics } from './property-management/slaves/SlaveStatistics';
@@ -214,7 +213,7 @@ export const SlavesOverview: React.FC = () => {
         
         <TabsContent value="assignments">
           <SlaveAssignments 
-            slaveAssignments={slaveAssignments as SlaveAssignment[]}
+            slaveAssignments={slaveAssignments}
             availableSlaves={totalSlaves - assignedSlaves}
             onAssignSlaves={assignSlavesToProperty}
             onRemoveAssignment={removeSlaveAssignment}

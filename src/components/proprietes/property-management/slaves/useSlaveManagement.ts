@@ -3,12 +3,7 @@ import { useState } from 'react';
 import { toast } from 'sonner';
 import { usePatrimoine } from '@/hooks/usePatrimoine';
 import { useEconomy } from '@/hooks/useEconomy';
-
-interface SlaveAssignment {
-  propertyId: string;
-  propertyName: string;
-  assignedSlaves: number;
-}
+import { SlaveAssignment } from '../slaves/SlaveAssignments';
 
 export const useSlaveManagement = (initialSlaves: number = 25) => {
   const [totalSlaves, setTotalSlaves] = useState(initialSlaves);
@@ -19,7 +14,7 @@ export const useSlaveManagement = (initialSlaves: number = 25) => {
   
   // Calculer le nombre total d'esclaves assignés
   const assignedSlaves = slaveAssignments.reduce(
-    (total, assignment) => total + assignment.assignedSlaves, 
+    (total, assignment) => total + assignment.count, 
     0
   );
   
@@ -87,7 +82,7 @@ export const useSlaveManagement = (initialSlaves: number = 25) => {
       setSlaveAssignments(prev => 
         prev.map(a => 
           a.propertyId === propertyId 
-            ? { ...a, assignedSlaves: amount }
+            ? { ...a, count: amount }
             : a
         )
       );
@@ -95,7 +90,7 @@ export const useSlaveManagement = (initialSlaves: number = 25) => {
       // Créer une nouvelle affectation
       setSlaveAssignments(prev => [
         ...prev,
-        { propertyId, propertyName, assignedSlaves: amount }
+        { propertyId, propertyName, count: amount }
       ]);
     }
     
