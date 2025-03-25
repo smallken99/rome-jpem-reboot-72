@@ -1,22 +1,23 @@
 
 import React from 'react';
 import { useParams } from 'react-router-dom';
-import Layout from '@/components/layout/Layout';
-import { PageHeader } from '@/components/ui-custom/PageHeader';
-import { PreceptorDetail } from '@/components/famille/education/PreceptorDetail';
+import { PreceptorDetail } from '../education/PreceptorDetail';
+import { usePreceptors } from '../hooks/usePreceptors';
+import { NotFound } from '@/components/ui-custom/NotFound';
 
 export const PreceptorDetailPage: React.FC = () => {
   const { preceptorId } = useParams<{ preceptorId: string }>();
+  const { getPreceptorById } = usePreceptors();
   
-  return (
-    <Layout>
-      <PageHeader 
-        title="Détail du Précepteur"
-        subtitle="Gestion et affectation du précepteur"
-      />
-      <div className="roman-card">
-        <PreceptorDetail preceptorId={preceptorId || ''} />
-      </div>
-    </Layout>
-  );
+  if (!preceptorId) {
+    return <NotFound title="Précepteur non trouvé" description="L'identifiant du précepteur n'est pas valide." />;
+  }
+  
+  const preceptor = getPreceptorById(preceptorId);
+  
+  if (!preceptor) {
+    return <NotFound title="Précepteur non trouvé" description="Le précepteur demandé n'existe pas ou a été supprimé." />;
+  }
+  
+  return <PreceptorDetail preceptor={preceptor} onBack={() => window.history.back()} />;
 };

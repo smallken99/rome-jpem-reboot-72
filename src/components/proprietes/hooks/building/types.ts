@@ -1,66 +1,87 @@
 
-export interface OwnedBuilding {
-  id: number | string;
-  buildingId: string;
-  buildingType: "urban" | "rural" | "religious" | "public";
+export interface BuildingDescription {
+  id: string;
   name: string;
-  location: string;
-  maintenanceEnabled: boolean;
+  type: string;
+  description: string;
+  cost: number;
   maintenanceCost: number;
-  slaves: number;
+  income?: number;
+  piete?: number;
+  popularite?: number;
+  reputation?: number;
+  production?: number;
+  workers: {
+    required: number;
+    optimal: number;
+    maxProfit: number;
+  };
+  subType?: string;
+  requirements?: string[];
+  maintenance?: number;
+  security?: number;
+  initialCost?: number;
+  slaves?: {
+    required: number;
+    optimal: number;
+    maxProfit?: number;
+  };
+  prestige?: number;
+  advantages?: string[];
+}
+
+export interface OwnedBuilding {
+  id: string | number;
+  buildingId: string;
+  name: string;
+  type?: string;
+  location: string;
   condition: number;
-  purchaseDate: Date;
+  maintenanceLevel?: number;
+  income?: number;
+  workers?: number;
+  securityLevel?: number;
+  description?: string;
+  buildingDescription?: BuildingDescription;
+  buildingType?: string;
+  maintenanceEnabled?: boolean;
+  maintenanceCost?: number;
+  slaves?: number;
+  purchaseDate?: Date;
   lastMaintenance?: Date;
   size?: string;
   status?: string;
-  income?: number;
+}
+
+export interface BuildingOperations {
+  maintenance: (buildingId: string, level: number) => void;
+  security: (buildingId: string, level: number) => void;
+  workers: (buildingId: string, workers: number) => void;
+  sell: (buildingId: string) => void;
+  renovate: (buildingId: string) => void;
+}
+
+export interface BuildingMaintenanceLevels {
+  MINIMAL: number;
+  BASIC: number;
+  STANDARD: number;
+  HIGH: number;
+  LUXURY: number;
 }
 
 export interface BuildingPurchaseOptions {
   buildingId: string;
-  type: "urban" | "rural" | "religious" | "public";
+  type: string;
   name: string;
   location: string;
   initialCost: number;
   maintenanceCost: number;
   slaves?: number;
   customName?: string;
-  buildingType?: "urban" | "rural" | "religious" | "public"; // Alternative to type
-  income?: number;
-}
-
-export interface BuildingDescription {
-  id: string;
-  name: string;
-  description: string;
-  basePrice: number;
-  maintenanceCost: number;
-  revenuePerTurn?: number;
-  type: "urban" | "rural" | "religious" | "public";
-  requiredSlaves?: number;
-  prestigeBonus?: number;
-  size?: "small" | "medium" | "large";
-  advantages: string[];  
-  initialCost: number;   
-  prestige: number;      
-  slaves?: {
-    required: number;
-    optimal: number;
-    maxProfit?: number;
-  };
-  income?: number;
-}
-
-export interface OwnedBuildingProps {
-  building: OwnedBuilding;
-  onMaintenance: (id: number | string) => void;
-  onSell: (id: number | string) => void;
-  onRename?: (id: number | string, newName: string) => void;
-  estimatedValue: number;
 }
 
 export interface SlaveAssignment {
-  buildingId: number | string;
+  buildingId: string | number;
   buildingName: string;
   count: number;
   maxCount: number;

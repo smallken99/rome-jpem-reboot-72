@@ -13,7 +13,7 @@ export function useSlaveAssignment() {
   
   // Calculer le nombre d'esclaves déjà assignés
   const calculateAssignedSlaves = () => {
-    return buildings.reduce((total, building) => total + building.slaves, 0);
+    return buildings.reduce((total, building) => total + (building.slaves || 0), 0);
   };
   
   // Obtenir le nombre d'esclaves disponibles
@@ -60,13 +60,13 @@ export function useSlaveAssignment() {
         return false;
       }
       
-      const building = buildings.find(b => b.id === buildingId);
+      const building = buildings.find(b => b.id.toString() === buildingId.toString());
       if (!building) {
         toast.error("Bâtiment introuvable");
         return false;
       }
       
-      const currentSlaves = building.slaves;
+      const currentSlaves = building.slaves || 0;
       const diff = slaveCount - currentSlaves;
       
       // Si on veut ajouter des esclaves, vérifier qu'on en a assez de disponibles
@@ -97,12 +97,17 @@ export function useSlaveAssignment() {
     }
   };
   
+  // Alias pour assignSlaves (pour compatibilité avec le code existant)
+  const assignSlavesToBuilding = (buildingId: string, count: number): boolean => {
+    return assignSlaves(buildingId, count);
+  };
+  
   // Obtenir les assignations actuelles des esclaves
   const getCurrentAssignments = (): SlaveAssignment[] => {
     return buildings.map(building => ({
       buildingId: building.id,
       buildingName: building.name,
-      count: building.slaves,
+      count: building.slaves || 0,
       maxCount: calcOptimalSlaveCount(building),
       efficiency: calculateEfficiency(building)
     }));
@@ -126,7 +131,7 @@ export function useSlaveAssignment() {
   // Calculer l'efficacité actuelle des esclaves dans un bâtiment
   const calculateEfficiency = (building: any): number => {
     const optimal = calcOptimalSlaveCount(building);
-    const current = building.slaves;
+    const current = building.slaves || 0;
     
     if (current === 0) return 0;
     if (optimal === 0) return 100;
@@ -140,14 +145,22 @@ export function useSlaveAssignment() {
     return (current / optimal) * 100;
   };
   
+  // Alias pour calculateEfficiency (pour compatibilité avec le code existant)
+  const getEfficiency = (buildingId: string): number => {
+    const building = buildings.find(b => b.id.toString() === buildingId);
+    return building ? calculateEfficiency(building) : 0;
+  };
+  
   return {
     assignSlaves,
+    assignSlavesToBuilding,
     getAvailableSlaves,
     purchaseSlaves,
     totalSlaves,
     assignedSlaves,
     getCurrentAssignments,
     calcOptimalSlaveCount,
-    calculateEfficiency
+    calculateEfficiency,
+    getEfficiency
   };
 }
