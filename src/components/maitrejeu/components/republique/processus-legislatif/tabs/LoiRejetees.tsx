@@ -5,6 +5,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Eye } from 'lucide-react';
 import { Loi } from '@/components/maitrejeu/types/lois';
+import { formatGameDateForRender } from '@/components/maitrejeu/components/lois/utils/formatGameDate';
 
 interface LoiRejeteesProps {
   lois: Loi[];
@@ -34,21 +35,19 @@ export const LoiRejetees: React.FC<LoiRejeteesProps> = ({ lois, onViewLoi, forma
             {lois.map((loi) => (
               <TableRow key={loi.id}>
                 <TableCell className="font-medium">
-                  {loi.titre || loi.name}
+                  {loi.titre || loi.name || loi.title}
                   {loi.catégorie && (
                     <Badge variant="outline" className="ml-2">
                       {loi.catégorie}
                     </Badge>
                   )}
                 </TableCell>
-                <TableCell>{loi.proposeur || loi.auteur}</TableCell>
+                <TableCell>{loi.proposeur || loi.auteur || loi.proposedBy}</TableCell>
                 <TableCell>
-                  {loi.date && typeof loi.date === 'object' && 'year' in loi.date 
-                    ? `${formatSeason(loi.date.season)} ${loi.date.year}`
-                    : loi.date}
+                  {formatGameDateForRender(loi.date)}
                 </TableCell>
                 <TableCell>
-                  {loi.votes ? loi.votes.contre : "N/A"}
+                  {loi.votes ? loi.votes.contre : (loi.votesNégatifs || loi.votesAgainst || "N/A")}
                 </TableCell>
                 <TableCell className="text-right">
                   <Button

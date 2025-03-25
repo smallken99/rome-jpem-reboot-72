@@ -21,7 +21,7 @@ export interface BuildingDescription {
   maintenance?: number;
   security?: number;
   initialCost?: number;
-  slaves?: {
+  slaves: {
     required: number;
     optimal: number;
     maxProfit: number;
@@ -78,7 +78,7 @@ export interface BuildingPurchaseOptions {
   maintenanceCost: number;
   slaves?: number;
   customName?: string;
-  buildingType?: "urban" | "rural" | "religious" | "public";
+  buildingType?: string;
 }
 
 export interface SlaveAssignment {

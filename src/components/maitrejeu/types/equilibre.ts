@@ -4,11 +4,10 @@
 export interface Equilibre {
   // Propriétés pour l'équilibre politique
   populaires: number;
+  populares?: number; // Alias pour compatibilité
   optimates: number;
   moderates: number;
-  
-  // Alias pour compatibilité
-  populares?: number;
+  neutrales?: number;
   
   // Facteurs d'équilibre
   facteurSenat?: number;
@@ -39,7 +38,6 @@ export interface Equilibre {
   loyauté?: number;
   patriciens?: number;
   plébéiens?: number;
-  neutrales?: number;
   
   // Nouveaux paramètres requis
   stabilité?: number;
@@ -54,12 +52,13 @@ export interface Equilibre {
 export interface PoliticalEvent {
   id: string;
   title: string;
+  name?: string; // Pour compatibilité
   description: string;
   type: string;
   importance: 'mineure' | 'majeure' | 'critique' | 'normale';
-  name?: string; // Pour compatibilité
   date?: Date | { year: number; season: string };
   effects?: Record<string, any>;
   tags?: string[];
   impact?: Record<string, number>; // Pour compatibilité
+  faction?: string; // Pour compatibilité
 }

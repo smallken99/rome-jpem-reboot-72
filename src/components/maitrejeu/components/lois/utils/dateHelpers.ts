@@ -1,13 +1,15 @@
 
 import { GameDate } from '@/components/maitrejeu/types/common';
 
-// Ensure a consistent GameDate structure regardless of input format
+// Function to ensure a value is a GameDate object
 export const ensureGameDate = (date: any): GameDate => {
   if (!date) {
-    return { year: new Date().getFullYear() - 1800, season: 'SPRING' };
+    // Default date if none provided
+    return { year: new Date().getFullYear(), season: 'SPRING' };
   }
   
   if (typeof date === 'string') {
+    // Try to parse from string format like "632 SUMMER"
     const parts = date.split(' ');
     if (parts.length >= 2) {
       return {
@@ -15,43 +17,60 @@ export const ensureGameDate = (date: any): GameDate => {
         season: parts[1]
       };
     }
-    return { year: new Date().getFullYear() - 1800, season: 'SPRING' };
+    
+    // If can't parse, return current date
+    return { year: new Date().getFullYear(), season: 'SPRING' };
   }
   
-  if (date && typeof date === 'object') {
-    if ('year' in date && 'season' in date) {
+  if (typeof date === 'object') {
+    if (date instanceof Date) {
+      // Convert JS Date to GameDate
+      const months = ['WINTER', 'WINTER', 'SPRING', 'SPRING', 'SPRING', 
+                      'SUMMER', 'SUMMER', 'SUMMER', 
+                      'AUTUMN', 'AUTUMN', 'AUTUMN', 'WINTER'];
       return {
-        year: date.year,
-        season: date.season
+        year: date.getFullYear(),
+        season: months[date.getMonth()]
       };
+    }
+    
+    if ('year' in date && 'season' in date) {
+      // Already a GameDate
+      return date as GameDate;
     }
   }
   
-  return { year: new Date().getFullYear() - 1800, season: 'SPRING' };
+  // Default fallback
+  return { year: new Date().getFullYear(), season: 'SPRING' };
 };
 
-// Format any date representation to a consistent string
+// Format any date type to a readable string
 export const formatAnyGameDate = (date: any): string => {
+  if (!date) return '';
+  
+  if (typeof date === 'string') {
+    return date;
+  }
+  
   const gameDate = ensureGameDate(date);
-  return `${gameDate.year} ${gameDate.season}`;
+  
+  // Format the date
+  return `${gameDate.season} ${gameDate.year}`;
 };
 
-// Format a season name to a human-readable format
-export const formatSeason = (season: string): string => {
-  switch (season.toUpperCase()) {
-    case 'SPRING':
-    case 'VER':
-      return 'Printemps';
-    case 'SUMMER':
-    case 'AESTAS':
-      return 'Été';
-    case 'AUTUMN':
-    case 'AUTUMNUS':
-      return 'Automne';
-    case 'WINTER':
-    case 'HIEMS':
-      return 'Hiver';
-    default:
-      return season;
-  }
+// Convert a GameDate to a JS Date (approximate - for sorting purposes)
+export const gameDateToJsDate = (gameDate: GameDate): Date => {
+  const seasonMonths: Record<string, number> = {
+    'SPRING': 3,
+    'Ver': 3,
+    'SUMMER': 6,
+    'Aestas': 6,
+    'AUTUMN': 9,
+    'Autumnus': 9,
+    'WINTER': 12,
+    'Hiems': 12
+  };
+  
+  const month = seasonMonths[gameDate.season] || 1;
+  return new Date(gameDate.year, month, 1);
 };

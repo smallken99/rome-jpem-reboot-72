@@ -4,7 +4,7 @@ export interface RepublicEquilibre {
   populares: number;
   optimates: number;
   moderates: number;
-  populaires?: number; // Pour compatibilité avec l'ancien nom
+  populaires: number; // Pour compatibilité avec l'ancien nom
   neutrales?: number; // Pour compatibilité
   armée?: number;
   facteurMilitaire?: number;

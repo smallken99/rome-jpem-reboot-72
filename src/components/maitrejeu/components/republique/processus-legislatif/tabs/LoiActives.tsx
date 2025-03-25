@@ -3,14 +3,15 @@ import React from 'react';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Eye, FileText } from 'lucide-react';
+import { Eye, CheckCircle } from 'lucide-react';
 import { Loi } from '@/components/maitrejeu/types/lois';
+import { formatGameDateForRender } from '@/components/maitrejeu/components/lois/utils/formatGameDate';
 
 interface LoiActivesProps {
   lois: Loi[];
   onViewLoi: (loi: Loi) => void;
   formatSeason: (season: string) => string;
-  onPromulguer: (loiId: string) => void;
+  onPromulguer?: (loiId: string) => void;
 }
 
 export const LoiActives: React.FC<LoiActivesProps> = ({ lois, onViewLoi, formatSeason, onPromulguer }) => {
@@ -18,7 +19,7 @@ export const LoiActives: React.FC<LoiActivesProps> = ({ lois, onViewLoi, formatS
     <div className="space-y-4">
       {lois.length === 0 ? (
         <div className="text-center py-8 text-muted-foreground">
-          Aucune loi actuellement en vigueur
+          Aucune loi active dans la période actuelle
         </div>
       ) : (
         <Table>
@@ -26,8 +27,8 @@ export const LoiActives: React.FC<LoiActivesProps> = ({ lois, onViewLoi, formatS
             <TableRow>
               <TableHead>Loi</TableHead>
               <TableHead>Proposeur</TableHead>
-              <TableHead>Date</TableHead>
-              <TableHead>État</TableHead>
+              <TableHead>Date d'application</TableHead>
+              <TableHead>Catégorie</TableHead>
               <TableHead className="text-right">Actions</TableHead>
             </TableRow>
           </TableHeader>
@@ -35,25 +36,18 @@ export const LoiActives: React.FC<LoiActivesProps> = ({ lois, onViewLoi, formatS
             {lois.map((loi) => (
               <TableRow key={loi.id}>
                 <TableCell className="font-medium">
-                  {loi.titre || loi.name}
-                  {loi.catégorie && (
-                    <Badge variant="outline" className="ml-2">
-                      {loi.catégorie}
-                    </Badge>
-                  )}
-                </TableCell>
-                <TableCell>{loi.proposeur || loi.auteur}</TableCell>
-                <TableCell>
-                  {loi.date && typeof loi.date === 'object' && 'year' in loi.date 
-                    ? `${formatSeason(loi.date.season)} ${loi.date.year}`
-                    : loi.date}
-                </TableCell>
-                <TableCell>
-                  <Badge 
-                    variant={loi.état === 'En vigueur' ? 'default' : 'secondary'}
-                  >
-                    {loi.état}
+                  {loi.titre || loi.title || loi.name}
+                  <Badge variant="success" className="ml-2">
+                    <CheckCircle className="h-3 w-3 mr-1" />
+                    En vigueur
                   </Badge>
+                </TableCell>
+                <TableCell>{loi.proposeur || loi.auteur || loi.proposedBy}</TableCell>
+                <TableCell>
+                  {formatGameDateForRender(loi.date)}
+                </TableCell>
+                <TableCell>
+                  <Badge variant="outline">{loi.catégorie || loi.category || loi.catégorieId}</Badge>
                 </TableCell>
                 <TableCell className="text-right">
                   <Button
@@ -65,17 +59,6 @@ export const LoiActives: React.FC<LoiActivesProps> = ({ lois, onViewLoi, formatS
                     <Eye className="h-4 w-4" />
                     <span className="sr-only">Voir</span>
                   </Button>
-                  {loi.état === 'Adoptée' && (
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => onPromulguer(loi.id)}
-                      className="h-8 w-8 p-0"
-                    >
-                      <FileText className="h-4 w-4" />
-                      <span className="sr-only">Promulguer</span>
-                    </Button>
-                  )}
                 </TableCell>
               </TableRow>
             ))}

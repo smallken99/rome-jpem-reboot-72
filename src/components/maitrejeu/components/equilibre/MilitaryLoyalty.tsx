@@ -1,302 +1,322 @@
 
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Slider } from '@/components/ui/slider';
-import { AlertCircle, Swords, User, Shield, Medal, ArrowRight, Save } from 'lucide-react';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
+import { Label } from '@/components/ui/label';
+import { Progress } from '@/components/ui/progress';
+import { ChevronDown, ChevronUp, Save, RefreshCw } from 'lucide-react';
+import { 
+  LineChart, 
+  Line,
+  XAxis, 
+  YAxis, 
+  CartesianGrid, 
+  Tooltip, 
+  Legend, 
+  ResponsiveContainer 
+} from 'recharts';
 import { Equilibre } from '@/components/maitrejeu/types/equilibre';
-import Chart from '@/components/ui/chart';
 
 interface MilitaryLoyaltyProps {
   equilibre: Equilibre;
-  onUpdate: (armée: number, loyauté: number, morale: number) => void;
+  onUpdate: (armee: number, loyaute: number, morale: number) => void;
 }
 
+interface MilitaryHistory {
+  month: string;
+  armee: number;
+  loyaute: number;
+  morale: number;
+}
+
+const militaryHistory: MilitaryHistory[] = [
+  { month: 'Jan', armee: 65, loyaute: 80, morale: 70 },
+  { month: 'Feb', armee: 68, loyaute: 82, morale: 75 },
+  { month: 'Mar', armee: 72, loyaute: 78, morale: 72 },
+  { month: 'Apr', armee: 75, loyaute: 75, morale: 68 },
+  { month: 'May', armee: 70, loyaute: 77, morale: 72 },
+  { month: 'Jun', armee: 68, loyaute: 80, morale: 78 },
+];
+
+const factorThresholds = {
+  danger: 30,
+  warning: 50,
+  good: 70,
+  excellent: 90
+};
+
 export const MilitaryLoyalty: React.FC<MilitaryLoyaltyProps> = ({ equilibre, onUpdate }) => {
-  const [armée, setArmée] = useState(equilibre.armée || equilibre.facteurMilitaire || 50);
-  const [loyauté, setLoyauté] = useState(equilibre.loyauté || 50);
+  const [armee, setArmee] = useState(equilibre.armée || 50);
+  const [loyaute, setLoyaute] = useState(equilibre.loyauté || 50);
   const [morale, setMorale] = useState(equilibre.morale || 50);
-  const [selectedLegion, setSelectedLegion] = useState('1');
-  const [selectedGeneral, setSelectedGeneral] = useState('');
+  const [activeTab, setActiveTab] = useState('vue-generale');
   
-  // Données des légions (mockées pour l'exemple)
-  const legions = [
-    { id: '1', number: 'I', name: 'Augusta', strength: 4800, loyalty: 85, morale: 78, location: 'Gallia' },
-    { id: '2', number: 'II', name: 'Sabina', strength: 4500, loyalty: 92, morale: 85, location: 'Italia' },
-    { id: '3', number: 'III', name: 'Cyrenaica', strength: 4200, loyalty: 68, morale: 72, location: 'Africa' },
-    { id: '4', number: 'IV', name: 'Macedonica', strength: 4600, loyalty: 75, morale: 80, location: 'Macedonia' },
-    { id: '5', number: 'V', name: 'Alaudae', strength: 4300, loyalty: 88, morale: 76, location: 'Hispania' },
-  ];
-  
-  // Données des généraux (mockées pour l'exemple)
-  const generals = [
-    { id: '1', name: 'Marcus Valerius', loyalty: 90, skill: 85, experience: 78, victories: 12 },
-    { id: '2', name: 'Titus Claudius', loyalty: 75, skill: 92, experience: 82, victories: 8 },
-    { id: '3', name: 'Gaius Flaminius', loyalty: 65, skill: 78, experience: 70, victories: 5 },
-  ];
-  
-  // Obtenir les détails de la légion sélectionnée
-  const selectedLegionDetails = legions.find(legion => legion.id === selectedLegion);
-  
-  // Obtenir les détails du général sélectionné
-  const selectedGeneralDetails = generals.find(general => general.id === selectedGeneral);
-  
-  // Données historiques pour le graphique (mockées)
-  const loyaltyHistoryData = [
-    { month: 'Janvier', armée: 65, loyauté: 70, morale: 68 },
-    { month: 'Février', armée: 67, loyauté: 72, morale: 70 },
-    { month: 'Mars', armée: 70, loyauté: 74, morale: 72 },
-    { month: 'Avril', armée: 72, loyauté: 78, morale: 75 },
-    { month: 'Mai', armée: 75, loyauté: 80, morale: 76 },
-    { month: 'Juin', armée: 73, loyauté: 76, morale: 73 },
-  ];
-  
-  // Fonction pour mettre à jour les valeurs
-  const handleSaveChanges = () => {
-    onUpdate(armée, loyauté, morale);
+  const getStatusColor = (value: number) => {
+    if (value < factorThresholds.danger) return 'text-red-500';
+    if (value < factorThresholds.warning) return 'text-amber-500';
+    if (value < factorThresholds.good) return 'text-blue-500';
+    if (value < factorThresholds.excellent) return 'text-emerald-500';
+    return 'text-purple-500';
   };
   
-  // Fonction pour réinitialiser les valeurs
-  const handleReset = () => {
-    setArmée(equilibre.armée || equilibre.facteurMilitaire || 50);
-    setLoyauté(equilibre.loyauté || 50);
+  const getStatusText = (value: number) => {
+    if (value < factorThresholds.danger) return 'Critique';
+    if (value < factorThresholds.warning) return 'Inquiétant';
+    if (value < factorThresholds.good) return 'Stable';
+    if (value < factorThresholds.excellent) return 'Solide';
+    return 'Excellent';
+  };
+  
+  const getProgressColor = (value: number) => {
+    if (value < factorThresholds.danger) return 'bg-red-500';
+    if (value < factorThresholds.warning) return 'bg-amber-500';
+    if (value < factorThresholds.good) return 'bg-blue-500';
+    if (value < factorThresholds.excellent) return 'bg-emerald-500';
+    return 'bg-purple-500';
+  };
+  
+  const handleArmeePlus = () => {
+    setArmee(prev => Math.min(prev + 5, 100));
+  };
+  
+  const handleArmeeMinus = () => {
+    setArmee(prev => Math.max(prev - 5, 0));
+  };
+  
+  const handleLoyautePlus = () => {
+    setLoyaute(prev => Math.min(prev + 5, 100));
+  };
+  
+  const handleLoyauteMinus = () => {
+    setLoyaute(prev => Math.max(prev - 5, 0));
+  };
+  
+  const handleMoralePlus = () => {
+    setMorale(prev => Math.min(prev + 5, 100));
+  };
+  
+  const handleMoraleMinus = () => {
+    setMorale(prev => Math.max(prev - 5, 0));
+  };
+  
+  const handleSaveChanges = () => {
+    onUpdate(armee, loyaute, morale);
+  };
+  
+  const handleResetChanges = () => {
+    setArmee(equilibre.armée || 50);
+    setLoyaute(equilibre.loyauté || 50);
     setMorale(equilibre.morale || 50);
   };
   
-  // Fonction pour calculer la classe de couleur en fonction de la valeur
-  const getValueColorClass = (value: number) => {
-    if (value >= 80) return 'text-green-600';
-    if (value >= 60) return 'text-amber-600';
-    if (value >= 40) return 'text-orange-600';
-    return 'text-red-600';
+  // Générer des recommandations basées sur l'état actuel
+  const generateRecommendations = () => {
+    const recommendations = [];
+    
+    if (armee < factorThresholds.warning) {
+      recommendations.push("Augmentez le budget militaire pour renforcer les légions.");
+      recommendations.push("Recrutez de nouveaux légionnaires dans les provinces.");
+    }
+    
+    if (loyaute < factorThresholds.warning) {
+      recommendations.push("Offrez des terres aux vétérans pour assurer leur loyauté.");
+      recommendations.push("Nommez des commandants fidèles au Sénat.");
+    }
+    
+    if (morale < factorThresholds.warning) {
+      recommendations.push("Organisez des jeux militaires pour remonter le moral des troupes.");
+      recommendations.push("Augmentez la solde des légionnaires.");
+    }
+    
+    return recommendations.length > 0 ? recommendations : ["Aucune action urgente n'est requise. Les forces militaires sont en bon état."];
   };
   
   return (
     <div className="space-y-6">
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
         <Card>
           <CardHeader className="pb-2">
-            <CardTitle className="text-lg flex items-center gap-2">
-              <Swords className="h-5 w-5" />
-              Force militaire
-            </CardTitle>
+            <CardTitle className="text-base font-medium">Force militaire</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="space-y-6">
-              <div className="space-y-2">
-                <div className="flex justify-between">
-                  <span className="text-sm">Force militaire globale</span>
-                  <span className={`font-medium ${getValueColorClass(armée)}`}>{armée}%</span>
+            <div className="space-y-4">
+              <div className="flex justify-between items-center">
+                <span className={`font-medium ${getStatusColor(armee)}`}>{getStatusText(armee)}</span>
+                <div className="flex items-center space-x-1">
+                  <Button variant="outline" size="sm" onClick={handleArmeeMinus} className="h-6 w-6 p-0">
+                    <ChevronDown className="h-3 w-3" />
+                  </Button>
+                  <span className="font-bold w-8 text-center">{armee}</span>
+                  <Button variant="outline" size="sm" onClick={handleArmeePlus} className="h-6 w-6 p-0">
+                    <ChevronUp className="h-3 w-3" />
+                  </Button>
                 </div>
-                <Slider 
-                  value={[armée]} 
-                  min={0} 
-                  max={100} 
-                  step={1} 
-                  onValueChange={(value) => setArmée(value[0])} 
-                />
               </div>
-              <div className="space-y-2">
-                <div className="flex justify-between">
-                  <span className="text-sm">Loyauté des légions</span>
-                  <span className={`font-medium ${getValueColorClass(loyauté)}`}>{loyauté}%</span>
-                </div>
-                <Slider 
-                  value={[loyauté]} 
-                  min={0} 
-                  max={100} 
-                  step={1} 
-                  onValueChange={(value) => setLoyauté(value[0])} 
-                />
+              <Progress className={getProgressColor(armee)} value={armee} />
+              <div className="text-xs text-muted-foreground">
+                <p>Représente la force brute de vos légions, leur nombre et leur équipement.</p>
               </div>
-              <div className="space-y-2">
-                <div className="flex justify-between">
-                  <span className="text-sm">Moral des troupes</span>
-                  <span className={`font-medium ${getValueColorClass(morale)}`}>{morale}%</span>
-                </div>
-                <Slider 
-                  value={[morale]} 
-                  min={0} 
-                  max={100} 
-                  step={1} 
-                  onValueChange={(value) => setMorale(value[0])} 
-                />
-              </div>
-            </div>
-            <div className="flex gap-2 mt-6">
-              <Button variant="outline" onClick={handleReset} className="flex-1">Réinitialiser</Button>
-              <Button onClick={handleSaveChanges} className="flex-1">Sauvegarder</Button>
             </div>
           </CardContent>
         </Card>
         
         <Card>
           <CardHeader className="pb-2">
-            <CardTitle className="text-lg flex items-center gap-2">
-              <Shield className="h-5 w-5" />
-              Légions
-            </CardTitle>
+            <CardTitle className="text-base font-medium">Loyauté des généraux</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
-              <div>
-                <Select value={selectedLegion} onValueChange={setSelectedLegion}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Sélectionner une légion" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {legions.map(legion => (
-                      <SelectItem key={legion.id} value={legion.id}>
-                        Légion {legion.number} {legion.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-              
-              {selectedLegionDetails && (
-                <div className="space-y-3 pt-2">
-                  <div className="flex justify-between text-sm">
-                    <span>Force d'effectif</span>
-                    <span className="font-medium">{selectedLegionDetails.strength} hommes</span>
-                  </div>
-                  <div className="flex justify-between text-sm">
-                    <span>Loyauté</span>
-                    <span className={`font-medium ${getValueColorClass(selectedLegionDetails.loyalty)}`}>
-                      {selectedLegionDetails.loyalty}%
-                    </span>
-                  </div>
-                  <div className="flex justify-between text-sm">
-                    <span>Moral</span>
-                    <span className={`font-medium ${getValueColorClass(selectedLegionDetails.morale)}`}>
-                      {selectedLegionDetails.morale}%
-                    </span>
-                  </div>
-                  <div className="flex justify-between text-sm">
-                    <span>Stationnement</span>
-                    <span className="font-medium">{selectedLegionDetails.location}</span>
-                  </div>
+              <div className="flex justify-between items-center">
+                <span className={`font-medium ${getStatusColor(loyaute)}`}>{getStatusText(loyaute)}</span>
+                <div className="flex items-center space-x-1">
+                  <Button variant="outline" size="sm" onClick={handleLoyauteMinus} className="h-6 w-6 p-0">
+                    <ChevronDown className="h-3 w-3" />
+                  </Button>
+                  <span className="font-bold w-8 text-center">{loyaute}</span>
+                  <Button variant="outline" size="sm" onClick={handleLoyautePlus} className="h-6 w-6 p-0">
+                    <ChevronUp className="h-3 w-3" />
+                  </Button>
                 </div>
-              )}
-              
-              <Button variant="outline" size="sm" className="w-full mt-2">
-                Gérer les légions
-                <ArrowRight className="h-4 w-4 ml-2" />
-              </Button>
+              </div>
+              <Progress className={getProgressColor(loyaute)} value={loyaute} />
+              <div className="text-xs text-muted-foreground">
+                <p>Indique à quel point vos commandants et généraux sont fidèles au Sénat.</p>
+              </div>
             </div>
           </CardContent>
         </Card>
         
         <Card>
           <CardHeader className="pb-2">
-            <CardTitle className="text-lg flex items-center gap-2">
-              <Medal className="h-5 w-5" />
-              Généraux
-            </CardTitle>
+            <CardTitle className="text-base font-medium">Moral des troupes</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
-              <div>
-                <Select value={selectedGeneral} onValueChange={setSelectedGeneral}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Sélectionner un général" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {generals.map(general => (
-                      <SelectItem key={general.id} value={general.id}>
-                        {general.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-              
-              {selectedGeneralDetails && (
-                <div className="space-y-3 pt-2">
-                  <div className="flex justify-between text-sm">
-                    <span>Loyauté</span>
-                    <span className={`font-medium ${getValueColorClass(selectedGeneralDetails.loyalty)}`}>
-                      {selectedGeneralDetails.loyalty}%
-                    </span>
-                  </div>
-                  <div className="flex justify-between text-sm">
-                    <span>Compétence</span>
-                    <span className={`font-medium ${getValueColorClass(selectedGeneralDetails.skill)}`}>
-                      {selectedGeneralDetails.skill}%
-                    </span>
-                  </div>
-                  <div className="flex justify-between text-sm">
-                    <span>Expérience</span>
-                    <span className={`font-medium ${getValueColorClass(selectedGeneralDetails.experience)}`}>
-                      {selectedGeneralDetails.experience}%
-                    </span>
-                  </div>
-                  <div className="flex justify-between text-sm">
-                    <span>Victoires</span>
-                    <span className="font-medium">{selectedGeneralDetails.victories}</span>
-                  </div>
+              <div className="flex justify-between items-center">
+                <span className={`font-medium ${getStatusColor(morale)}`}>{getStatusText(morale)}</span>
+                <div className="flex items-center space-x-1">
+                  <Button variant="outline" size="sm" onClick={handleMoraleMinus} className="h-6 w-6 p-0">
+                    <ChevronDown className="h-3 w-3" />
+                  </Button>
+                  <span className="font-bold w-8 text-center">{morale}</span>
+                  <Button variant="outline" size="sm" onClick={handleMoralePlus} className="h-6 w-6 p-0">
+                    <ChevronUp className="h-3 w-3" />
+                  </Button>
                 </div>
-              )}
-              
-              <Button variant="outline" size="sm" className="w-full mt-2">
-                Gérer les généraux
-                <ArrowRight className="h-4 w-4 ml-2" />
-              </Button>
+              </div>
+              <Progress className={getProgressColor(morale)} value={morale} />
+              <div className="text-xs text-muted-foreground">
+                <p>Reflète la motivation et l'état d'esprit des légionnaires.</p>
+              </div>
             </div>
           </CardContent>
         </Card>
       </div>
       
-      <Card>
-        <CardHeader>
-          <CardTitle>Évolution de la loyauté militaire</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <Chart 
-            data={loyaltyHistoryData}
-            type="line"
-            xAxisDataKey="month"
-            height={250}
-          >
-            <Chart.Line 
-              type="monotone"
-              dataKey="armée"
-              stroke="#ef4444"
-              strokeWidth={2}
-              dot={{ r: 4 }}
-            />
-            <Chart.Line 
-              type="monotone"
-              dataKey="loyauté"
-              stroke="#3b82f6"
-              strokeWidth={2}
-              dot={{ r: 4 }}
-            />
-            <Chart.Line 
-              type="monotone"
-              dataKey="morale"
-              stroke="#84cc16"
-              strokeWidth={2}
-              dot={{ r: 4 }}
-            />
-          </Chart>
-        </CardContent>
-      </Card>
+      <div className="flex justify-end space-x-2">
+        <Button variant="outline" size="sm" onClick={handleResetChanges} className="flex items-center gap-1">
+          <RefreshCw className="h-4 w-4" />
+          Réinitialiser
+        </Button>
+        <Button size="sm" onClick={handleSaveChanges} className="flex items-center gap-1">
+          <Save className="h-4 w-4" />
+          Sauvegarder
+        </Button>
+      </div>
       
-      <Card className="border-amber-200 bg-amber-50">
-        <CardContent className="p-4 flex items-center gap-3">
-          <AlertCircle className="h-5 w-5 text-amber-600" />
-          <div>
-            <p className="text-amber-800 text-sm font-medium">Alerte de loyauté</p>
-            <p className="text-amber-700 text-xs">
-              La loyauté des troupes en Gaule est en baisse suite aux retards de paiement. 
-              Considérez une augmentation de la solde ou des récompenses spéciales.
-            </p>
-          </div>
-        </CardContent>
-      </Card>
+      <Tabs defaultValue="vue-generale" value={activeTab} onValueChange={setActiveTab}>
+        <TabsList className="grid w-full grid-cols-3">
+          <TabsTrigger value="vue-generale">Vue générale</TabsTrigger>
+          <TabsTrigger value="tendances">Tendances</TabsTrigger>
+          <TabsTrigger value="recommandations">Recommandations</TabsTrigger>
+        </TabsList>
+        
+        <TabsContent value="vue-generale">
+          <Card>
+            <CardContent className="p-4 space-y-4">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div className="space-y-2">
+                  <Label className="text-sm font-medium">Légions actives</Label>
+                  <div className="flex justify-between">
+                    <span className="text-2xl font-bold">{Math.floor(armee / 10)}</span>
+                    <span className="text-muted-foreground">/{Math.floor(100 / 10)}</span>
+                  </div>
+                </div>
+                
+                <div className="space-y-2">
+                  <Label className="text-sm font-medium">Généraux influents</Label>
+                  <div className="flex justify-between">
+                    <span className="text-2xl font-bold">{Math.ceil(loyaute / 20)}</span>
+                    <span className="text-muted-foreground">/{Math.ceil(100 / 20)}</span>
+                  </div>
+                </div>
+                
+                <div className="space-y-2">
+                  <Label className="text-sm font-medium">Efficacité en combat</Label>
+                  <div className="flex justify-between">
+                    <span className="text-2xl font-bold">{Math.floor((armee + morale) / 2)}%</span>
+                    <span className="text-muted-foreground">/100%</span>
+                  </div>
+                </div>
+              </div>
+              
+              <div className="bg-muted p-4 rounded-md">
+                <h4 className="font-medium mb-2">Analyse de sécurité</h4>
+                <p className="text-sm text-muted-foreground">
+                  {armee < factorThresholds.warning ? 
+                    "Les forces militaires de la République sont insuffisantes pour assurer sa sécurité. Un renforcement urgent est nécessaire." : 
+                    loyaute < factorThresholds.warning ? 
+                    "La loyauté des généraux est préoccupante. Des mesures doivent être prises pour éviter un possible coup d'État." :
+                    "La situation militaire est stable. Les légions sont en nombre suffisant et les officiers restent loyaux au Sénat."}
+                </p>
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+        
+        <TabsContent value="tendances">
+          <Card>
+            <CardContent className="p-4">
+              <ResponsiveContainer width="100%" height={300}>
+                <LineChart data={militaryHistory}>
+                  <CartesianGrid strokeDasharray="3 3" />
+                  <XAxis dataKey="month" />
+                  <YAxis />
+                  <Tooltip />
+                  <Legend />
+                  <Line type="monotone" dataKey="armee" stroke="#3b82f6" activeDot={{ r: 8 }} name="Force militaire" />
+                  <Line type="monotone" dataKey="loyaute" stroke="#10b981" name="Loyauté" />
+                  <Line type="monotone" dataKey="morale" stroke="#f59e0b" name="Moral" />
+                </LineChart>
+              </ResponsiveContainer>
+              
+              <div className="mt-4 text-sm text-muted-foreground">
+                <p>Évolution des facteurs militaires sur les 6 derniers mois.</p>
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+        
+        <TabsContent value="recommandations">
+          <Card>
+            <CardContent className="p-4">
+              <h4 className="font-medium mb-4">Actions recommandées</h4>
+              <ul className="space-y-2">
+                {generateRecommendations().map((rec, index) => (
+                  <li key={index} className="flex items-start gap-2">
+                    <div className="rounded-full h-5 w-5 bg-primary flex items-center justify-center text-primary-foreground text-xs mt-0.5">
+                      {index + 1}
+                    </div>
+                    <span className="text-sm">{rec}</span>
+                  </li>
+                ))}
+              </ul>
+            </CardContent>
+          </Card>
+        </TabsContent>
+      </Tabs>
     </div>
   );
 };

@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
 import { useMaitreJeu } from './context';
-import { Loi, LoiType } from './types/lois';
+import { Loi } from './types/lois';
 import { LoisList } from './components/lois/LoisList';
 import { LoiForm } from './components/lois/LoiForm';
 import { ElectionPlanner } from './components/elections/ElectionPlanner';
@@ -14,9 +14,9 @@ interface LoiFormData {
   titre: string;
   description: string;
   proposeur: string;
-  type: LoiType;
-  catégorie: string;
-  importance: 'majeure' | 'normale' | 'mineure';
+  type?: string;
+  catégorie?: string;
+  importance?: 'faible' | 'normale' | 'haute' | 'critique' | 'mineure' | 'majeure';
 }
 
 export const GestionPolitique = () => {
@@ -38,36 +38,20 @@ export const GestionPolitique = () => {
     
     const loiWithId: Loi = {
       id: uuidv4(),
-      title: newLoi.titre,
+      titre: newLoi.titre,
       description: newLoi.description,
-      proposedBy: newLoi.proposeur,
-      category: newLoi.catégorie,
+      proposeur: newLoi.proposeur,
+      catégorie: newLoi.catégorie,
       type: newLoi.type,
-      nom: newLoi.titre,
       date: { year: currentYear, season: currentSeason },
       dateProposition: { year: currentYear, season: currentSeason },
-      status: "proposed",
-      état: "En délibération",
-      votesPositifs: 0,
-      votesNégatifs: 0,
-      votesAbstention: 0,
-      votesFor: 0,
-      votesAgainst: 0,
+      état: "Proposée",
       votes: {
         pour: 0,
         contre: 0,
         abstention: 0
       },
-      titre: newLoi.titre,
-      proposeur: newLoi.proposeur,
-      catégorie: newLoi.catégorie,
-      importance: newLoi.importance,
-      clauses: [],
-      commentaires: [],
-      tags: [],
-      effets: {},
-      conditions: [],
-      pénalités: []
+      importance: newLoi.importance || 'normale'
     };
     
     addLoi(loiWithId);

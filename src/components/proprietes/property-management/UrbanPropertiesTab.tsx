@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
@@ -10,7 +9,7 @@ import { BaseBuildingDescription } from '@/types/buildings';
 import { useBuildingPurchase } from '../hooks/building/useBuildingPurchase';
 import { useOwnedBuildings } from '../hooks/building/useOwnedBuildings';
 
-const urbanPropertyTypes = [
+export const urbanBuildingData: BuildingDescription[] = [
   {
     id: 'domus',
     name: 'Domus',
@@ -28,15 +27,20 @@ const urbanPropertyTypes = [
   {
     id: 'insula',
     name: 'Insula',
-    type: 'urban',
-    description: 'Un immeuble de rapport à plusieurs étages avec des appartements à louer.',
-    initialCost: 35000,
-    maintenanceCost: 3500,
-    prestige: 2,
-    advantages: ['Revenus locatifs réguliers', 'Investissement rentable', 'Facile à gérer'],
+    type: 'housing',
+    description: 'Appartements de location pour les classes populaires',
+    cost: 5000,
+    maintenanceCost: 200,
+    income: 500,
+    workers: {
+      required: 2,
+      optimal: 4,
+      maxProfit: 500
+    },
     slaves: {
-      required: 1,
-      optimal: 5
+      required: 0,
+      optimal: 2,
+      maxProfit: 600
     }
   },
   {
@@ -96,7 +100,7 @@ export function UrbanPropertiesTab() {
         
         <TabsContent value="available" className="space-y-6">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {urbanPropertyTypes.map((property) => (
+            {urbanBuildingData.map((property) => (
               <div 
                 key={property.id} 
                 className="border rounded-lg p-6 hover:border-primary/50 transition-colors cursor-pointer"
@@ -104,7 +108,7 @@ export function UrbanPropertiesTab() {
               >
                 <div className="flex items-center justify-between mb-4">
                   <h3 className="text-xl font-medium">{property.name}</h3>
-                  <span className="font-bold">{property.initialCost.toLocaleString()} As</span>
+                  <span className="font-bold">{property.cost.toLocaleString()} As</span>
                 </div>
                 
                 <p className="text-muted-foreground mb-4">{property.description}</p>

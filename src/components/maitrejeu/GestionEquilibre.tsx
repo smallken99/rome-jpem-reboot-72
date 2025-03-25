@@ -11,16 +11,20 @@ import { RefreshCw, Save, AlertTriangle } from 'lucide-react';
 import { useRepublicData } from '@/hooks/useRepublicData';
 import { useGameTime } from '@/hooks/useGameTime';
 import { PoliticalEvent } from './types/equilibre';
+import { Equilibre } from './types/equilibre';
 
 export const GestionEquilibre = () => {
   const [activeTab, setActiveTab] = useState('apercu');
   const { equiplibre, updateFactionBalance, updateRepublicFactor } = useRepublicData();
   const { formatDate } = useGameTime();
   
-  // Assurons-nous que equiplibre contient bien le champ population
-  const equilibreWithPopulation = {
+  // Assurons-nous que equiplibre contient bien tous les champs requis
+  const equilibreWithDefaults: Equilibre = {
     ...equiplibre,
     population: equiplibre.population || 750000, // Valeur par défaut
+    populaires: equiplibre.populaires || equiplibre.populares || 33, // Valeur par défaut
+    optimates: equiplibre.optimates || 33,
+    moderates: equiplibre.moderates || 34
   };
   
   // Événements récents qui ont influencé l'équilibre
@@ -32,7 +36,7 @@ export const GestionEquilibre = () => {
       description: 'Un discours enflammé qui a rallié le peuple',
       type: 'politique',
       importance: 'majeure',
-      date: new Date(2023, 1, 15),
+      date: { year: 2023, season: 'SPRING' },
       impact: { populares: 5, optimates: -3, armée: 0, morale: 2 }
     },
     {
@@ -42,7 +46,7 @@ export const GestionEquilibre = () => {
       description: 'Une nouvelle distribution des terres aux plébéiens',
       type: 'législation',
       importance: 'critique',
-      date: new Date(2023, 1, 10),
+      date: { year: 2023, season: 'WINTER' },
       impact: { populares: 8, optimates: -6, morale: -2, plébéiens: 10 }
     },
     {
@@ -52,7 +56,7 @@ export const GestionEquilibre = () => {
       description: 'Une victoire éclatante pour Rome',
       type: 'militaire',
       importance: 'majeure',
-      date: new Date(2023, 0, 28),
+      date: { year: 2023, season: 'AUTUMN' },
       impact: { armée: 5, patriciens: 2, morale: 3 }
     }
   ];
@@ -135,7 +139,7 @@ export const GestionEquilibre = () => {
         
         <TabsContent value="apercu">
           <EquilibreOverview 
-            equilibre={equilibreWithPopulation}
+            equilibre={equilibreWithDefaults}
             recentEvents={recentEvents}
             currentThreats={currentThreats}
             formatDate={formatDate}
@@ -144,21 +148,21 @@ export const GestionEquilibre = () => {
         
         <TabsContent value="factions">
           <PoliticalFactions 
-            equilibre={equilibreWithPopulation}
+            equilibre={equilibreWithDefaults}
             onUpdate={handleUpdateFactions}
           />
         </TabsContent>
         
         <TabsContent value="social">
           <SocialTensions 
-            equilibre={equilibreWithPopulation}
+            equilibre={equilibreWithDefaults}
             onUpdate={handleUpdateSocialFactors}
           />
         </TabsContent>
         
         <TabsContent value="armee">
           <MilitaryLoyalty 
-            equilibre={equilibreWithPopulation}
+            equilibre={equilibreWithDefaults}
             onUpdate={handleUpdateMilitaryFactors}
           />
         </TabsContent>
