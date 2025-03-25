@@ -17,7 +17,8 @@ export const useRepublicData = () => {
     morale: 60,
     loyauté: 75,
     patriciens: 80,
-    plébéiens: 45
+    plébéiens: 45,
+    population: 750000 // Ajout du champ population requis
   });
   
   const [elections, setElections] = useState<Election[]>([

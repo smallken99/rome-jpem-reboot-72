@@ -39,7 +39,7 @@ export const useUrbanPropertiesTab = () => {
       // Appeler la fonction d'achat
       const success = handleAddProperty(
         options.buildingId,
-        type,
+        type as "urban" | "rural" | "religious" | "public",
         options.location,
         customName
       );

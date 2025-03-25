@@ -10,36 +10,55 @@ import { Button } from '@/components/ui/button';
 import { RefreshCw, Save, AlertTriangle } from 'lucide-react';
 import { useRepublicData } from '@/hooks/useRepublicData';
 import { useGameTime } from '@/hooks/useGameTime';
+import { PoliticalEvent } from './types/equilibre';
 
 export const GestionEquilibre = () => {
   const [activeTab, setActiveTab] = useState('apercu');
   const { equiplibre, updateFactionBalance, updateRepublicFactor } = useRepublicData();
   const { formatDate } = useGameTime();
   
+  // Assurons-nous que equiplibre contient bien le champ population
+  const equilibreWithPopulation = {
+    ...equiplibre,
+    population: equiplibre.population || 750000, // Valeur par défaut
+  };
+  
   // Événements récents qui ont influencé l'équilibre
-  const recentEvents = [
+  const recentEvents: PoliticalEvent[] = [
     {
       id: '1',
+      title: 'Discours de Gracchus au Sénat',
       name: 'Discours de Gracchus au Sénat',
+      description: 'Un discours enflammé qui a rallié le peuple',
+      type: 'politique',
+      importance: 'majeure',
       date: new Date(2023, 1, 15),
       impact: { populares: 5, optimates: -3, armée: 0, morale: 2 }
     },
     {
       id: '2',
+      title: 'Proposition de loi agraire',
       name: 'Proposition de loi agraire',
+      description: 'Une nouvelle distribution des terres aux plébéiens',
+      type: 'législation',
+      importance: 'critique',
       date: new Date(2023, 1, 10),
       impact: { populares: 8, optimates: -6, morale: -2, plébéiens: 10 }
     },
     {
       id: '3',
+      title: 'Bataille contre les Gaulois',
       name: 'Bataille contre les Gaulois',
+      description: 'Une victoire éclatante pour Rome',
+      type: 'militaire',
+      importance: 'majeure',
       date: new Date(2023, 0, 28),
       impact: { armée: 5, patriciens: 2, morale: 3 }
     }
   ];
   
   // Menaces actuelles à l'équilibre
-  const currentThreats = [
+  const currentThreats: { id: string; name: string; severity: 'low' | 'medium' | 'high'; description: string; }[] = [
     {
       id: '1',
       name: 'Insatisfaction de la plèbe',
@@ -116,7 +135,7 @@ export const GestionEquilibre = () => {
         
         <TabsContent value="apercu">
           <EquilibreOverview 
-            equilibre={equiplibre}
+            equilibre={equilibreWithPopulation}
             recentEvents={recentEvents}
             currentThreats={currentThreats}
             formatDate={formatDate}
@@ -125,21 +144,21 @@ export const GestionEquilibre = () => {
         
         <TabsContent value="factions">
           <PoliticalFactions 
-            equilibre={equiplibre}
+            equilibre={equilibreWithPopulation}
             onUpdate={handleUpdateFactions}
           />
         </TabsContent>
         
         <TabsContent value="social">
           <SocialTensions 
-            equilibre={equiplibre}
+            equilibre={equilibreWithPopulation}
             onUpdate={handleUpdateSocialFactors}
           />
         </TabsContent>
         
         <TabsContent value="armee">
           <MilitaryLoyalty 
-            equilibre={equiplibre}
+            equilibre={equilibreWithPopulation}
             onUpdate={handleUpdateMilitaryFactors}
           />
         </TabsContent>

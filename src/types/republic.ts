@@ -16,6 +16,8 @@ export interface RepublicEquilibre {
   facteurPatriciens?: number;
   plébéiens?: number;
   facteurPlebs?: number;
+  // Ajout du champ population requis par Equilibre
+  population: number;
 }
 
 // Alias pour la compatibilité avec le code existant - important de définir les propriétés requises!

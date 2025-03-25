@@ -71,14 +71,14 @@ export interface BuildingMaintenanceLevels {
 
 export interface BuildingPurchaseOptions {
   buildingId: string;
-  type: string;
+  type: "urban" | "rural" | "religious" | "public";
   name: string;
   location: string;
   initialCost: number;
   maintenanceCost: number;
   slaves?: number;
   customName?: string;
-  buildingType?: string;
+  buildingType?: "urban" | "rural" | "religious" | "public";
 }
 
 export interface SlaveAssignment {

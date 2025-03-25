@@ -53,6 +53,15 @@ export const RecentEventsTable: React.FC<RecentEventsTableProps> = ({ events, fo
       </Badge>
     );
   };
+
+  // Fonction pour gérer différents formats de date  
+  const formatEventDate = (date: Date | { year: number; season: string } | undefined): string => {
+    if (!date) return 'Date inconnue';
+    if (date instanceof Date) return formatDate(date);
+    
+    // Gérer le format { year, season }
+    return `${date.season} ${date.year}`;
+  };
   
   return (
     <Table>
@@ -73,13 +82,13 @@ export const RecentEventsTable: React.FC<RecentEventsTableProps> = ({ events, fo
         ) : (
           events.map((event) => (
             <TableRow key={event.id}>
-              <TableCell className="font-medium text-sm">{event.name}</TableCell>
-              <TableCell>{formatDate(event.date)}</TableCell>
+              <TableCell className="font-medium text-sm">{event.title || event.name}</TableCell>
+              <TableCell>{formatEventDate(event.date)}</TableCell>
               <TableCell>
                 <div className="flex flex-wrap gap-1">
-                  {Object.entries(event.impact).map(([key, value]) => (
+                  {event.impact && Object.entries(event.impact).map(([key, value]) => (
                     <div key={key} className="mb-1">
-                      {getImpactLabel(key, value)}
+                      {getImpactLabel(key, Number(value))}
                     </div>
                   ))}
                 </div>

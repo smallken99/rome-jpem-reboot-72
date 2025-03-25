@@ -57,11 +57,9 @@ export interface PoliticalEvent {
   description: string;
   type: string;
   importance: 'mineure' | 'majeure' | 'critique' | 'normale';
-  faction?: string;
-  date?: {
-    year: number;
-    season: string;
-  };
+  name?: string; // Pour compatibilité
+  date?: Date | { year: number; season: string };
   effects?: Record<string, any>;
   tags?: string[];
+  impact?: Record<string, number>; // Pour compatibilité
 }
