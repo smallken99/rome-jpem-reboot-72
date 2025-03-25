@@ -1,8 +1,13 @@
 
 import { useState } from 'react';
 import { OwnedBuilding } from './types';
+import { useEconomy } from '@/hooks/useEconomy';
+import { toast } from 'sonner';
 
 export function useBuildingInventory() {
+  // Accès au système économique
+  const { receivePayment } = useEconomy();
+  
   // Initial building inventory state
   const [ownedBuildings, setOwnedBuildings] = useState<OwnedBuilding[]>([
     {
@@ -15,7 +20,8 @@ export function useBuildingInventory() {
       maintenanceCost: 1200,
       slaves: 3,
       condition: 85,
-      purchaseDate: new Date(2023, 1, 15)
+      purchaseDate: new Date(2023, 1, 15),
+      income: 2500
     },
     {
       id: 2,
@@ -27,7 +33,8 @@ export function useBuildingInventory() {
       maintenanceCost: 6000,
       slaves: 25,
       condition: 92,
-      purchaseDate: new Date(2022, 5, 10)
+      purchaseDate: new Date(2022, 5, 10),
+      income: 12000
     },
     {
       id: 3,
@@ -39,7 +46,8 @@ export function useBuildingInventory() {
       maintenanceCost: 5000,
       slaves: 12,
       condition: 95,
-      purchaseDate: new Date(2022, 3, 20)
+      purchaseDate: new Date(2022, 3, 20),
+      income: 8000
     },
     {
       id: 4,
@@ -51,7 +59,8 @@ export function useBuildingInventory() {
       maintenanceCost: 4000,
       slaves: 0,
       condition: 75,
-      purchaseDate: new Date(2023, 8, 5)
+      purchaseDate: new Date(2023, 8, 5),
+      income: 0
     }
   ]);
 
@@ -89,6 +98,64 @@ export function useBuildingInventory() {
     );
   };
 
+  // Fonction pour collecter les revenus de tous les bâtiments
+  const collectAllBuildingIncomes = () => {
+    let totalIncome = 0;
+    
+    ownedBuildings.forEach(building => {
+      if (building.income && building.income > 0) {
+        // Ajustement du revenu en fonction de l'état du bâtiment
+        const conditionFactor = building.condition / 100;
+        const adjustedIncome = Math.round(building.income * conditionFactor);
+        
+        // Ajouter au revenu total
+        totalIncome += adjustedIncome;
+        
+        // Enregistrer la transaction pour ce bâtiment
+        receivePayment(
+          adjustedIncome,
+          building.name,
+          "Revenus immobiliers",
+          `Revenus de ${building.name}`
+        );
+      }
+    });
+    
+    if (totalIncome > 0) {
+      toast.success(`Revenus immobiliers collectés: ${totalIncome.toLocaleString()} As`);
+    } else {
+      toast.info("Aucun revenu à collecter pour le moment");
+    }
+    
+    return totalIncome;
+  };
+
+  // Fonction pour collecter les revenus d'un bâtiment spécifique
+  const collectBuildingIncome = (buildingId: number | string) => {
+    const building = ownedBuildings.find(b => b.id === buildingId);
+    
+    if (!building || !building.income || building.income <= 0) {
+      toast.error("Ce bâtiment ne génère pas de revenus");
+      return 0;
+    }
+    
+    // Ajustement du revenu en fonction de l'état du bâtiment
+    const conditionFactor = building.condition / 100;
+    const adjustedIncome = Math.round(building.income * conditionFactor);
+    
+    // Enregistrer la transaction
+    receivePayment(
+      adjustedIncome,
+      building.name,
+      "Revenus immobiliers",
+      `Revenus de ${building.name}`
+    );
+    
+    toast.success(`Revenus collectés: ${adjustedIncome.toLocaleString()} As de ${building.name}`);
+    
+    return adjustedIncome;
+  };
+
   // Add the missing methods for compatibility
   const toggleBuildingMaintenance = (buildingId: number | string) => {
     const building = ownedBuildings.find(b => b.id === buildingId);
@@ -120,6 +187,8 @@ export function useBuildingInventory() {
     updateBuilding,
     updateBuildingProperty,
     toggleBuildingMaintenance,
-    performBuildingMaintenance
+    performBuildingMaintenance,
+    collectAllBuildingIncomes,
+    collectBuildingIncome
   };
 }

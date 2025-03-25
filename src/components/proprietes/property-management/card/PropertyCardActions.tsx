@@ -4,7 +4,7 @@ import { OwnedBuilding } from '../../hooks/building/types';
 import { Button } from '@/components/ui/button';
 import { Switch } from '@/components/ui/switch';
 import { ActionsGroup } from '@/components/ui-custom/ActionsGroup';
-import { Eye, Tool, Wrench, Settings, Users, Coins, BookOpen } from 'lucide-react';
+import { Eye, Wrench, Settings, Users, Coins, BookOpen } from 'lucide-react';
 
 interface PropertyCardActionsProps {
   building: OwnedBuilding;

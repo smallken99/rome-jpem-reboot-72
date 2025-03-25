@@ -1,67 +1,70 @@
 
 import React from 'react';
+import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
-import { ActionButton, ActionButtonProps } from './ActionButton';
 
-export interface ActionsGroupProps {
-  actions: Omit<ActionButtonProps, 'ref'>[];
+export interface ActionButtonProps {
+  icon?: React.ReactNode;
+  label: string;
+  onClick: () => void;
+  variant?: "default" | "destructive" | "outline" | "secondary" | "ghost" | "link";
+  size?: "default" | "sm" | "lg" | "icon";
   className?: string;
-  direction?: 'row' | 'column';
+  disabled?: boolean;
+  title?: string;
+}
+
+interface ActionsGroupProps {
+  actions: ActionButtonProps[];
+  direction?: 'row' | 'col';
   justify?: 'start' | 'end' | 'center' | 'between' | 'around' | 'evenly';
   wrap?: boolean;
   spacing?: 'none' | 'xs' | 'sm' | 'md' | 'lg';
-  divider?: boolean;
 }
 
 export const ActionsGroup: React.FC<ActionsGroupProps> = ({
   actions,
-  className,
   direction = 'row',
   justify = 'start',
-  wrap = true,
-  spacing = 'sm',
-  divider = false
+  wrap = false,
+  spacing = 'md'
 }) => {
-  const spacingClasses = {
-    none: 'gap-0',
-    xs: 'gap-1',
-    sm: 'gap-2',
-    md: 'gap-3',
-    lg: 'gap-4'
-  };
+  const directionClass = direction === 'row' ? 'flex-row' : 'flex-col';
   
-  const justifyClasses = {
-    start: 'justify-start',
-    end: 'justify-end',
-    center: 'justify-center',
-    between: 'justify-between',
-    around: 'justify-around',
-    evenly: 'justify-evenly'
-  };
+  const justifyClass = {
+    'start': 'justify-start',
+    'end': 'justify-end',
+    'center': 'justify-center',
+    'between': 'justify-between',
+    'around': 'justify-around',
+    'evenly': 'justify-evenly'
+  }[justify];
+  
+  const wrapClass = wrap ? 'flex-wrap' : 'flex-nowrap';
+  
+  const spacingClass = {
+    'none': direction === 'row' ? 'gap-0' : 'gap-0',
+    'xs': direction === 'row' ? 'gap-1' : 'gap-1',
+    'sm': direction === 'row' ? 'gap-2' : 'gap-2',
+    'md': direction === 'row' ? 'gap-4' : 'gap-3',
+    'lg': direction === 'row' ? 'gap-6' : 'gap-4'
+  }[spacing];
   
   return (
-    <div 
-      className={cn(
-        'flex',
-        direction === 'row' ? 'flex-row' : 'flex-col',
-        wrap && direction === 'row' ? 'flex-wrap' : '',
-        justifyClasses[justify],
-        spacingClasses[spacing],
-        divider && direction === 'row' ? 'divide-x divide-gray-200' : '',
-        divider && direction === 'column' ? 'divide-y divide-gray-200' : '',
-        className
-      )}
-    >
+    <div className={cn('flex', directionClass, justifyClass, wrapClass, spacingClass)}>
       {actions.map((action, index) => (
-        <ActionButton 
+        <Button
           key={index}
-          {...action}
-          className={cn(
-            action.className,
-            divider && direction === 'row' ? 'pl-2 first:pl-0' : '',
-            divider && direction === 'column' ? 'pt-2 first:pt-0' : ''
-          )}
-        />
+          variant={action.variant || 'default'}
+          size={action.size || 'default'}
+          onClick={action.onClick}
+          className={action.className}
+          disabled={action.disabled}
+          title={action.title}
+        >
+          {action.icon && <span className="mr-2">{action.icon}</span>}
+          {action.label}
+        </Button>
       ))}
     </div>
   );

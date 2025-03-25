@@ -2,12 +2,14 @@
 import { useState } from 'react';
 import { useBuildingInventory } from './useBuildingInventory';
 import { usePatrimoine } from '@/hooks/usePatrimoine';
+import { useEconomy } from '@/hooks/useEconomy';
 import { toast } from 'sonner';
 
 export function useBuildingMaintenance() {
   const [isLoading, setIsLoading] = useState(false);
   const { updateBuildingProperty, buildings } = useBuildingInventory();
   const { addTransaction } = usePatrimoine();
+  const { canAfford, makePayment } = useEconomy();
   
   // Toggle maintenance setting for a building
   const toggleMaintenance = (buildingId: number | string, enabled: boolean = true): boolean => {
@@ -122,13 +124,24 @@ export function useBuildingMaintenance() {
       const maintenanceOptions = getMaintenanceOptions(buildingId);
       const selectedOption = maintenanceOptions[level];
       
-      // Register the transaction
-      addTransaction({
-        amount: -selectedOption.cost,
-        description: `Maintenance ${level} de ${building.name}`,
-        category: "Entretien",
-        type: 'expense'
-      });
+      // Vérifier si le joueur a assez d'argent
+      if (!canAfford(selectedOption.cost)) {
+        toast.error(`Fonds insuffisants pour effectuer cette maintenance (${selectedOption.cost} As requis)`);
+        return false;
+      }
+      
+      // Effectuer le paiement via useEconomy
+      const paymentResult = makePayment(
+        selectedOption.cost, 
+        "Service de maintenance", 
+        "Entretien", 
+        `Maintenance ${level} de ${building.name}`
+      );
+      
+      if (!paymentResult) {
+        toast.error("Problème lors du paiement");
+        return false;
+      }
       
       // Update the building condition
       const newCondition = Math.min(100, building.condition + selectedOption.improvement);
@@ -152,12 +165,20 @@ export function useBuildingMaintenance() {
     }
   };
   
+  // Vérifier si le joueur peut se permettre de faire la maintenance
+  const canPerformMaintenance = (buildingId: number | string, level: 'basic' | 'standard' | 'premium' = 'standard'): boolean => {
+    const options = getMaintenanceOptions(buildingId);
+    const cost = options[level].cost;
+    return canAfford(cost);
+  };
+  
   return {
     isLoading,
     toggleMaintenance,
     performMaintenance,
     needsMaintenance,
     calculateMaintenanceCost,
-    getMaintenanceOptions
+    getMaintenanceOptions,
+    canPerformMaintenance
   };
 }

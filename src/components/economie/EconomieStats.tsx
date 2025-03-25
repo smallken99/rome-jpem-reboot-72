@@ -1,95 +1,52 @@
 
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { ArrowUp, ArrowDown, Coins, TrendingUp, TrendingDown } from 'lucide-react';
+import { TrendingUp, TrendingDown, Wallet } from 'lucide-react';
 import { useEconomy } from '@/hooks/useEconomy';
-import { EconomyStats } from '@/types/EconomyTypes';
+import { formatCurrency } from '@/utils/currencyUtils';
 
 export const EconomieStats: React.FC = () => {
-  const { economyStats, transactions } = useEconomy();
-  
-  // Fonction pour obtenir les transactions récentes (les 30 derniers jours)
-  const getRecentTransactions = () => {
-    const thirtyDaysAgo = new Date();
-    thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
-    return transactions.filter(t => new Date(t.date) >= thirtyDaysAgo);
-  };
-  
-  const recentTransactions = getRecentTransactions();
+  const { balance, getFinancialStats } = useEconomy();
+  const stats = getFinancialStats();
   
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
       <Card>
         <CardHeader className="pb-2">
-          <CardTitle className="text-sm font-medium text-gray-500">Revenu Mensuel</CardTitle>
+          <CardTitle className="text-lg flex items-center">
+            <Wallet className="mr-2 h-5 w-5 text-muted-foreground" />
+            Solde actuel
+          </CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="flex items-center justify-between">
-            <div className="text-2xl font-bold">{economyStats.monthlyIncome.toLocaleString()} As</div>
-            <div className="p-2 bg-green-100 rounded-full">
-              <ArrowUp className="h-4 w-4 text-green-600" />
-            </div>
-          </div>
-          <div className="text-xs text-gray-500 mt-1">
-            +2.5% depuis le mois dernier
-          </div>
+          <p className="text-2xl font-semibold">{formatCurrency(balance)}</p>
+          <p className="text-sm text-muted-foreground">Trésorerie disponible</p>
         </CardContent>
       </Card>
       
       <Card>
         <CardHeader className="pb-2">
-          <CardTitle className="text-sm font-medium text-gray-500">Dépenses Mensuelles</CardTitle>
+          <CardTitle className="text-lg flex items-center">
+            <TrendingUp className="mr-2 h-5 w-5 text-green-600" />
+            Revenus mensuels
+          </CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="flex items-center justify-between">
-            <div className="text-2xl font-bold">{economyStats.monthlyExpenses.toLocaleString()} As</div>
-            <div className="p-2 bg-red-100 rounded-full">
-              <ArrowDown className="h-4 w-4 text-red-600" />
-            </div>
-          </div>
-          <div className="text-xs text-gray-500 mt-1">
-            +3.2% depuis le mois dernier
-          </div>
+          <p className="text-2xl font-semibold text-green-600">+{formatCurrency(stats.monthlyIncome)}</p>
+          <p className="text-sm text-muted-foreground">Derniers 30 jours</p>
         </CardContent>
       </Card>
       
       <Card>
         <CardHeader className="pb-2">
-          <CardTitle className="text-sm font-medium text-gray-500">Impôts Annuels</CardTitle>
+          <CardTitle className="text-lg flex items-center">
+            <TrendingDown className="mr-2 h-5 w-5 text-red-600" />
+            Dépenses mensuelles
+          </CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="flex items-center justify-between">
-            <div className="text-2xl font-bold">{economyStats.annualTaxes.toLocaleString()} As</div>
-            <div className="p-2 bg-blue-100 rounded-full">
-              <Coins className="h-4 w-4 text-blue-600" />
-            </div>
-          </div>
-          <div className="text-xs text-gray-500 mt-1">
-            Taux d'inflation: {economyStats.inflation.toFixed(1)}%
-          </div>
-        </CardContent>
-      </Card>
-      
-      <Card>
-        <CardHeader className="pb-2">
-          <CardTitle className="text-sm font-medium text-gray-500">Bilan Global</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="flex items-center justify-between">
-            <div className="text-2xl font-bold">{economyStats.balance.toLocaleString()} As</div>
-            <div className={`p-2 ${economyStats.balance >= 0 ? 'bg-green-100' : 'bg-red-100'} rounded-full`}>
-              {economyStats.balance >= 0 
-                ? <TrendingUp className="h-4 w-4 text-green-600" />
-                : <TrendingDown className="h-4 w-4 text-red-600" />
-              }
-            </div>
-          </div>
-          <div className="text-xs text-gray-500 mt-1">
-            {economyStats.balance >= 0 
-              ? 'Position financière solide'
-              : 'Attention: déficit en cours'
-            }
-          </div>
+          <p className="text-2xl font-semibold text-red-600">-{formatCurrency(stats.monthlyExpenses)}</p>
+          <p className="text-sm text-muted-foreground">Derniers 30 jours</p>
         </CardContent>
       </Card>
     </div>

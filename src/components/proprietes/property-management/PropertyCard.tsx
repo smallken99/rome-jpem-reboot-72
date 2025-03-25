@@ -1,160 +1,134 @@
 
-import React, { useState } from 'react';
-import { OwnedBuilding, BuildingDescription } from '../hooks/building/types';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import React from 'react';
+import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import { Eye, Tool, Wrench, Settings, Users, Coins, AlertTriangle } from 'lucide-react';
-import { formatCurrency } from '@/utils/currencyUtils';
 import { Progress } from '@/components/ui/progress';
-import { useNavigate } from 'react-router-dom';
-import { SlaveAssignmentDialog } from './slaves/SlaveAssignmentDialog';
-import { MaintenanceDialog } from './maintenance/MaintenanceDialog';
+import { OwnedBuilding } from '../hooks/building/types';
+import { Coins, Calendar, Map, Wrench, Users } from 'lucide-react'; 
 import { PropertyCardActions } from './card/PropertyCardActions';
-import { toast } from 'sonner';
+import { formatCurrency, formatCompactCurrency } from '@/utils/currencyUtils';
 
 interface PropertyCardProps {
   building: OwnedBuilding;
-  buildingDetails: BuildingDescription | null;
-  onToggleMaintenance: (buildingId: string | number, enabled: boolean) => void;
-  onPerformMaintenance: (buildingId: string | number) => boolean;
-  onAssignSlaves: (buildingId: string | number, slaveCount: number) => void;
-  onSell: (buildingId: string | number, value: number) => boolean;
-  balance: number;
-  totalAvailableSlaves: number;
-  buildingValue: number;
+  estimatedValue: number;
+  onViewDetails: () => void;
+  onPerformMaintenance: () => void;
+  onToggleMaintenance: (enabled: boolean) => void;
+  onAssignSlaves: () => void;
+  onSell: () => void;
+  maintenanceEnabled: boolean;
+  canPerformMaintenance: boolean;
 }
 
 export const PropertyCard: React.FC<PropertyCardProps> = ({
   building,
-  buildingDetails,
-  onToggleMaintenance,
+  estimatedValue,
+  onViewDetails,
   onPerformMaintenance,
+  onToggleMaintenance,
   onAssignSlaves,
   onSell,
-  balance,
-  totalAvailableSlaves,
-  buildingValue
+  maintenanceEnabled,
+  canPerformMaintenance
 }) => {
-  const navigate = useNavigate();
-  const [showAssignSlavesDialog, setShowAssignSlavesDialog] = useState(false);
-  const [showMaintenanceDialog, setShowMaintenanceDialog] = useState(false);
-  
-  // Calculer les données d'affichage
-  const conditionColor = building.condition >= 70 ? 'green' : building.condition >= 40 ? 'amber' : 'red';
-  const maintenanceEnabled = building.maintenanceEnabled || false;
-  const needsUrgentMaintenance = building.condition < 30;
-  
-  // Gérer la vente d'une propriété
-  const handleSellProperty = () => {
-    if (confirm(`Êtes-vous sûr de vouloir vendre ${building.name} pour ${formatCurrency(buildingValue)}?`)) {
-      if (onSell(building.id, buildingValue)) {
-        toast.success(`${building.name} a été vendu pour ${formatCurrency(buildingValue)}`);
-      } else {
-        toast.error("La vente n'a pas pu être effectuée");
-      }
-    }
+  // Fonction pour obtenir la classe CSS de couleur en fonction de la condition
+  const getConditionColor = (condition: number) => {
+    if (condition >= 80) return "text-green-600";
+    if (condition >= 60) return "text-amber-600";
+    if (condition >= 40) return "text-orange-500";
+    return "text-red-600";
   };
   
-  // Effectuer une maintenance
-  const handlePerformMaintenance = () => {
-    if (balance < 1000) {
-      toast.error("Fonds insuffisants pour effectuer la maintenance");
-      return;
-    }
-    
-    if (onPerformMaintenance(building.id)) {
-      toast.success(`Maintenance effectuée sur ${building.name}`);
-    } else {
-      toast.error("La maintenance n'a pas pu être effectuée");
-    }
+  // Fonction pour obtenir la classe CSS de couleur pour la barre de progression
+  const getProgressColor = (condition: number) => {
+    if (condition >= 80) return "bg-green-600";
+    if (condition >= 60) return "bg-amber-600";
+    if (condition >= 40) return "bg-orange-500";
+    return "bg-red-600";
+  };
+  
+  // Fonction pour formater la date
+  const formatDate = (date: Date) => {
+    return new Intl.DateTimeFormat('fr-FR', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric'
+    }).format(date);
   };
   
   return (
-    <Card className="overflow-hidden border-rome-gold/30 hover:shadow-md transition-all">
-      <CardHeader className="bg-white pb-2">
-        <div className="flex justify-between items-start">
-          <div>
-            <CardTitle className="text-lg font-cinzel">{building.name}</CardTitle>
-            <p className="text-sm text-muted-foreground">{building.location}</p>
+    <Card className="h-full flex flex-col border-t-4 hover:shadow-md transition-shadow" 
+      style={{ borderTopColor: building.condition >= 60 ? '#22c55e' : '#f97316' }}>
+      <CardHeader className="pb-2">
+        <CardTitle className="font-cinzel text-lg">{building.name}</CardTitle>
+        <div className="flex justify-between items-center text-sm text-muted-foreground">
+          <div className="flex items-center">
+            <Map className="h-4 w-4 mr-1" />
+            <span>{building.location}</span>
           </div>
-          <Badge className={`bg-${conditionColor}-100 text-${conditionColor}-800 border-${conditionColor}-300`}>
-            État: {building.condition}%
+          <Badge variant="outline" className="capitalize">
+            {building.buildingType}
           </Badge>
         </div>
       </CardHeader>
       
-      <CardContent className="pt-4">
-        <div className="space-y-4">
-          <div>
-            <div className="flex justify-between items-center mb-1">
-              <span className="text-sm">État</span>
-              <span className="text-sm font-medium">{building.condition}%</span>
-            </div>
-            <Progress value={building.condition} className="h-2" 
-              indicatorClassName={`bg-${conditionColor}-500`} />
-          </div>
-          
+      <CardContent className="pb-2 flex-grow">
+        <div className="space-y-3">
           <div className="grid grid-cols-2 gap-3">
-            <div className="flex flex-col">
-              <span className="text-xs text-muted-foreground">Revenu</span>
-              <span className="font-medium">{formatCurrency(building.income || 0)}/mois</span>
+            <div className="flex flex-col gap-1">
+              <span className="text-xs text-muted-foreground">Valeur estimée</span>
+              <span className="font-bold">
+                {formatCompactCurrency(estimatedValue)}
+              </span>
             </div>
             
-            <div className="flex flex-col">
+            <div className="flex flex-col gap-1">
               <span className="text-xs text-muted-foreground">Maintenance</span>
-              <span className="font-medium">{formatCurrency(building.maintenanceCost || 0)}/mois</span>
+              <span className="font-bold">
+                {formatCompactCurrency(building.maintenanceCost)}
+              </span>
             </div>
             
-            <div className="flex flex-col">
-              <span className="text-xs text-muted-foreground">Personnel</span>
-              <span className="font-medium">{building.slaves || 0} esclaves</span>
+            <div className="flex flex-col gap-1">
+              <span className="text-xs text-muted-foreground">Esclaves</span>
+              <span className="font-bold flex items-center">
+                <Users className="h-3.5 w-3.5 mr-1 text-muted-foreground" />
+                {building.slaves}
+              </span>
             </div>
             
-            <div className="flex flex-col">
-              <span className="text-xs text-muted-foreground">Valeur</span>
-              <span className="font-medium">{formatCurrency(buildingValue)}</span>
+            <div className="flex flex-col gap-1">
+              <span className="text-xs text-muted-foreground">Acquisition</span>
+              <span className="font-bold text-sm">
+                {formatDate(building.purchaseDate)}
+              </span>
             </div>
           </div>
           
-          {needsUrgentMaintenance && (
-            <div className="p-2 bg-red-50 border border-red-200 rounded-md flex items-center gap-2 text-sm text-red-700">
-              <AlertTriangle className="h-4 w-4" />
-              <span>Réparations urgentes requises</span>
+          <div className="space-y-1">
+            <div className="flex justify-between items-center">
+              <span className="text-sm">État</span>
+              <span className={`text-sm font-bold ${getConditionColor(building.condition)}`}>
+                {building.condition}%
+              </span>
             </div>
-          )}
-          
-          <PropertyCardActions 
-            building={building}
-            onViewDetails={() => navigate(`/patrimoine/proprietes/${building.id}`)}
-            onPerformMaintenance={handlePerformMaintenance}
-            onAssignSlaves={() => setShowAssignSlavesDialog(true)}
-            onToggleMaintenance={(enabled) => onToggleMaintenance(building.id, enabled)}
-            onSell={handleSellProperty}
-            maintenanceEnabled={maintenanceEnabled}
-            canPerformMaintenance={balance >= 1000}
-          />
+            <Progress value={building.condition} className={getProgressColor(building.condition)} />
+          </div>
         </div>
       </CardContent>
       
-      {/* Dialogs */}
-      <SlaveAssignmentDialog 
-        open={showAssignSlavesDialog}
-        onClose={() => setShowAssignSlavesDialog(false)}
-        building={building}
-        availableSlaves={totalAvailableSlaves}
-        onAssignSlaves={(count) => {
-          onAssignSlaves(building.id, count);
-          setShowAssignSlavesDialog(false);
-        }}
-      />
-      
-      <MaintenanceDialog 
-        open={showMaintenanceDialog}
-        onClose={() => setShowMaintenanceDialog(false)}
-        building={building}
-        onPerformMaintenance={handlePerformMaintenance}
-      />
+      <CardFooter className="pt-2">
+        <PropertyCardActions 
+          building={building}
+          onViewDetails={onViewDetails}
+          onPerformMaintenance={onPerformMaintenance}
+          onAssignSlaves={onAssignSlaves}
+          onToggleMaintenance={onToggleMaintenance}
+          onSell={onSell}
+          maintenanceEnabled={maintenanceEnabled}
+          canPerformMaintenance={canPerformMaintenance}
+        />
+      </CardFooter>
     </Card>
   );
 };

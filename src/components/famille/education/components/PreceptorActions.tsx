@@ -1,72 +1,72 @@
 
 import React from 'react';
 import { ActionsGroup } from '@/components/ui-custom/ActionsGroup';
-import { Check, ArrowLeft, X, Loader2 } from 'lucide-react';
+import { UserCheck, UserX, BookOpen, Coin } from 'lucide-react';
 
-export interface PreceptorActionsProps {
-  onHire: () => void;
-  isAvailable: boolean;
-  isLoading?: boolean;
-  onCancel?: () => void;
-  onFire?: () => void;
-  isHired?: boolean;
-  cost?: number;
+interface PreceptorActionsProps {
+  preceptorId: string;
+  isAssigned: boolean;
+  onAssign: (preceptorId: string) => void;
+  onDismiss: (preceptorId: string) => void;
+  onViewDetails: (preceptorId: string) => void;
+  onPaySalary: (preceptorId: string) => void;
+  canAssign: boolean;
+  canDismiss: boolean;
+  canPaySalary: boolean;
 }
 
-export const PreceptorActions: React.FC<PreceptorActionsProps> = ({ 
-  onHire, 
-  isAvailable, 
-  isLoading = false,
-  onCancel,
-  onFire,
-  isHired = false,
-  cost
+export const PreceptorActions: React.FC<PreceptorActionsProps> = ({
+  preceptorId,
+  isAssigned,
+  onAssign,
+  onDismiss,
+  onViewDetails,
+  onPaySalary,
+  canAssign,
+  canDismiss,
+  canPaySalary
 }) => {
   const actions = [
     {
-      icon: <ArrowLeft className="h-4 w-4" />,
-      label: "Retour",
-      onClick: onCancel,
+      icon: <BookOpen className="h-4 w-4" />,
+      label: "Détails",
+      onClick: () => onViewDetails(preceptorId),
       variant: "outline" as const,
       size: "sm" as const
+    },
+    {
+      icon: <UserCheck className="h-4 w-4" />,
+      label: "Engager",
+      onClick: () => onAssign(preceptorId),
+      variant: "outline" as const,
+      size: "sm" as const,
+      disabled: !canAssign || isAssigned
+    },
+    {
+      icon: <UserX className="h-4 w-4" />,
+      label: "Renvoyer",
+      onClick: () => onDismiss(preceptorId),
+      variant: "outline" as const,
+      size: "sm" as const,
+      disabled: !canDismiss || !isAssigned
+    },
+    {
+      icon: <Coin className="h-4 w-4" />,
+      label: "Payer",
+      onClick: () => onPaySalary(preceptorId),
+      variant: "outline" as const,
+      size: "sm" as const,
+      disabled: !canPaySalary || !isAssigned
     }
   ];
-  
-  if (isHired && onFire) {
-    actions.push({
-      icon: isLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <X className="h-4 w-4" />,
-      label: "Licencier",
-      onClick: onFire,
-      variant: "outline" as const,
-      size: "sm" as const,
-      disabled: isLoading
-    });
-  } else {
-    actions.push({
-      icon: isLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Check className="h-4 w-4" />,
-      label: isHired ? "Assigner" : "Embaucher",
-      onClick: onHire,
-      variant: "outline" as const,
-      size: "sm" as const,
-      disabled: !isAvailable || isLoading
-    });
-  }
-  
+
   return (
-    <div className="flex justify-between items-center border-t pt-4 mt-4">
-      <div className="text-muted-foreground">
-        {cost && (
-          <span className="flex items-center gap-1 text-sm">
-            Coût: <span className="font-medium text-foreground">{cost} as/an</span>
-          </span>
-        )}
-      </div>
-      
-      <ActionsGroup 
-        actions={actions}
-        spacing="sm"
-        justify="end"
-      />
-    </div>
+    <ActionsGroup
+      actions={actions}
+      direction="row"
+      justify="start"
+      wrap={true}
+      spacing="sm"
+    />
   );
 };

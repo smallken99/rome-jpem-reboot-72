@@ -13,6 +13,7 @@ export interface OwnedBuilding {
   lastMaintenance?: Date;
   size?: string;
   status?: string;
+  income?: number;
 }
 
 export interface BuildingPurchaseOptions {
@@ -25,6 +26,7 @@ export interface BuildingPurchaseOptions {
   slaves?: number;
   customName?: string;
   buildingType?: "urban" | "rural" | "religious" | "public"; // Alternative to type
+  income?: number;
 }
 
 export interface BuildingDescription {
@@ -46,6 +48,7 @@ export interface BuildingDescription {
     optimal: number;
     maxProfit?: number;
   };
+  income?: number;
 }
 
 export interface OwnedBuildingProps {
@@ -54,4 +57,12 @@ export interface OwnedBuildingProps {
   onSell: (id: number | string) => void;
   onRename?: (id: number | string, newName: string) => void;
   estimatedValue: number;
+}
+
+export interface SlaveAssignment {
+  buildingId: number | string;
+  buildingName: string;
+  count: number;
+  maxCount: number;
+  efficiency: number;
 }

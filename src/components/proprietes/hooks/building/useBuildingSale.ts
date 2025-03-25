@@ -2,11 +2,13 @@
 import { useState } from 'react';
 import { useBuildingInventory } from './useBuildingInventory';
 import { OwnedBuilding } from './types';
+import { useEconomy } from '@/hooks/useEconomy';
 import { toast } from 'sonner';
 
 export function useBuildingSale() {
   const [isLoading, setIsLoading] = useState(false);
   const { ownedBuildings, removeBuilding } = useBuildingInventory();
+  const { receivePayment } = useEconomy();
   
   // Calculate the value of a building
   const calculateBuildingValue = (building: OwnedBuilding): number => {
@@ -64,10 +66,15 @@ export function useBuildingSale() {
       // Remove the building from inventory
       removeBuilding(buildingId);
       
-      // TODO: Add the money to the player's account
-      // usePatrimoine().addTransaction({...})
+      // Ajouter l'argent au compte du joueur via useEconomy
+      receivePayment(
+        sellingPrice,
+        "Vente immobilière",
+        "Vente de propriété",
+        `Vente de ${building.name}`
+      );
       
-      toast.success(`${building.name} vendu pour ${sellingPrice} As`);
+      toast.success(`${building.name} vendu pour ${sellingPrice.toLocaleString()} As`);
       return true;
     } catch (error) {
       console.error("Erreur lors de la vente du bâtiment:", error);

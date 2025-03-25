@@ -1,137 +1,148 @@
 
-import { useState, useCallback } from 'react';
-import { EvenementAction, EvenementType, ImportanceType } from '@/components/maitrejeu/types/evenements';
-import { Season } from '@/utils/timeSystem';
-import { toEvenementType } from '@/utils/gameEventTypes';
-import { toast } from 'sonner';
+import { useState, useEffect } from 'react';
 
-// Définir l'interface GameEvent localement puisqu'elle n'est pas exportée par le module
+// Définition locale de l'interface GameEvent
 export interface GameEvent {
   id: string;
   title: string;
   description: string;
-  type: EvenementType;
-  importance: string[];
-  season?: Season;
-  year?: number;
+  date: Date;
+  category: 'politique' | 'économie' | 'militaire' | 'social' | 'familial' | 'religieux';
+  impact: 'positive' | 'negative' | 'neutral';
+  severity: 1 | 2 | 3 | 4 | 5;
+  read: boolean;
   actions?: {
     label: string;
-    consequence: string;
+    effect: string;
+    onClick: () => void;
   }[];
-  resolved: boolean;
-  resolution?: string;
 }
 
 export const useGameEvents = () => {
   const [events, setEvents] = useState<GameEvent[]>([]);
-  const [activeEvents, setActiveEvents] = useState<GameEvent[]>([]);
-  const [historicalEvents, setHistoricalEvents] = useState<GameEvent[]>([]);
+  const [unreadCount, setUnreadCount] = useState(0);
   
-  // Créer un nouvel événement
-  const createEvent = useCallback((event: Omit<GameEvent, 'id'>) => {
-    const id = `event-${Date.now()}`;
-    const newEvent: GameEvent = {
-      ...event,
-      id
+  // Fonction pour ajouter un nouvel événement
+  const addEvent = (newEvent: Omit<GameEvent, 'id' | 'read'>) => {
+    const event: GameEvent = {
+      id: `event-${Date.now()}`,
+      read: false,
+      ...newEvent
     };
     
-    setEvents(prev => [...prev, newEvent]);
-    setActiveEvents(prev => [...prev, newEvent]);
+    setEvents(prev => [event, ...prev]);
+    setUnreadCount(prev => prev + 1);
     
-    return id;
-  }, []);
+    return event.id;
+  };
   
-  // Résoudre un événement
-  const resolveEvent = useCallback((eventId: string, resolution: string) => {
+  // Fonction pour marquer un événement comme lu
+  const markAsRead = (eventId: string) => {
     setEvents(prev => 
       prev.map(event => 
-        event.id === eventId 
-          ? { ...event, resolved: true, resolution } 
+        event.id === eventId && !event.read 
+          ? { ...event, read: true } 
           : event
       )
     );
     
-    setActiveEvents(prev => prev.filter(event => event.id !== eventId));
-    setHistoricalEvents(prev => [
-      ...prev,
-      { 
-        ...events.find(e => e.id === eventId)!,
-        resolved: true,
-        resolution
-      }
-    ]);
-    
-    toast.success('Événement résolu');
-  }, [events]);
+    // Mettre à jour le compteur d'événements non lus
+    const wasUnread = events.find(e => e.id === eventId && !e.read);
+    if (wasUnread) {
+      setUnreadCount(prev => Math.max(0, prev - 1));
+    }
+  };
   
-  // Générer des événements aléatoires pour une saison
-  const generateEventsForSeason = useCallback((season: Season, year: number) => {
-    // Exemple d'événement politique
-    const politicalEvent: GameEvent = {
-      id: `event-${Date.now()}-1`,
-      title: 'Proposition de loi agraire',
-      description: 'Une nouvelle loi agraire est proposée par le tribun de la plèbe',
-      importance: ['SENAT', 'POLITIQUE'],
-      type: 'POLITIQUE' as EvenementType,
-      season,
-      year,
-      actions: [
-        {
-          label: 'Soutenir',
-          consequence: 'Augmente votre popularité auprès de la plèbe mais irrite les patriciens'
-        },
-        {
-          label: 'S\'opposer',
-          consequence: 'Maintient le soutien des patriciens mais diminue votre popularité'
-        }
-      ],
-      resolved: false
-    };
-    
-    // Exemple d'événement économique
-    const economicEvent: GameEvent = {
-      id: `event-${Date.now()}-2`,
-      title: 'Fluctuation des prix du grain',
-      description: 'Les prix du grain ont considérablement augmenté suite à une mauvaise récolte',
-      importance: ['ECONOMIE', 'POPULATION'],
-      type: 'ECONOMIQUE' as EvenementType,
-      season,
-      year,
-      actions: [
-        {
-          label: 'Subventionner les importations',
-          consequence: 'Coûteux pour le trésor mais populaire auprès du peuple'
-        },
-        {
-          label: 'Laisser le marché s\'ajuster',
-          consequence: 'Économise de l\'argent mais risque de mécontentement'
-        }
-      ],
-      resolved: false
-    };
-    
-    setEvents(prev => [...prev, politicalEvent, economicEvent]);
-    setActiveEvents(prev => [...prev, politicalEvent, economicEvent]);
-    
-    return [politicalEvent.id, economicEvent.id];
-  }, []);
+  // Fonction pour marquer tous les événements comme lus
+  const markAllAsRead = () => {
+    setEvents(prev => prev.map(event => ({ ...event, read: true })));
+    setUnreadCount(0);
+  };
   
-  // Supprimer un événement
-  const deleteEvent = useCallback((eventId: string) => {
+  // Fonction pour supprimer un événement
+  const deleteEvent = (eventId: string) => {
+    const eventToDelete = events.find(e => e.id === eventId);
     setEvents(prev => prev.filter(event => event.id !== eventId));
-    setActiveEvents(prev => prev.filter(event => event.id !== eventId));
-    setHistoricalEvents(prev => prev.filter(event => event.id !== eventId));
     
-    toast.info('Événement supprimé');
+    // Mettre à jour le compteur d'événements non lus si nécessaire
+    if (eventToDelete && !eventToDelete.read) {
+      setUnreadCount(prev => Math.max(0, prev - 1));
+    }
+  };
+  
+  // Fonction pour obtenir les événements filtrés
+  const getFilteredEvents = (
+    category?: string, 
+    readStatus?: boolean, 
+    limit?: number
+  ) => {
+    let filteredEvents = [...events];
+    
+    if (category) {
+      filteredEvents = filteredEvents.filter(e => e.category === category);
+    }
+    
+    if (readStatus !== undefined) {
+      filteredEvents = filteredEvents.filter(e => e.read === readStatus);
+    }
+    
+    // Trier par date (les plus récents d'abord)
+    filteredEvents.sort((a, b) => b.date.getTime() - a.date.getTime());
+    
+    // Limiter le nombre de résultats si nécessaire
+    if (limit && limit > 0) {
+      filteredEvents = filteredEvents.slice(0, limit);
+    }
+    
+    return filteredEvents;
+  };
+  
+  // Générer quelques événements fictifs pour la démo
+  useEffect(() => {
+    if (events.length === 0) {
+      const demoEvents: Omit<GameEvent, 'id' | 'read'>[] = [
+        {
+          title: "Campagne électorale pour le poste de questeur",
+          description: "Votre candidature au poste de questeur a été acceptée. La campagne électorale commence.",
+          date: new Date(),
+          category: 'politique',
+          impact: 'neutral',
+          severity: 3,
+          actions: [
+            {
+              label: "Organiser un banquet public",
+              effect: "Augmente votre popularité mais coûte 5000 As",
+              onClick: () => console.log("Banquet organisé")
+            },
+            {
+              label: "Faire un discours au forum",
+              effect: "Augmente légèrement votre popularité",
+              onClick: () => console.log("Discours effectué")
+            }
+          ]
+        },
+        {
+          title: "Mauvaise récolte dans vos domaines",
+          description: "La récolte de cette année a été mauvaise. Vos revenus agricoles sont réduits de 30%.",
+          date: new Date(Date.now() - 86400000), // Hier
+          category: 'économie',
+          impact: 'negative',
+          severity: 2
+        }
+      ];
+      
+      demoEvents.forEach(event => addEvent(event));
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
   
   return {
     events,
-    activeEvents,
-    historicalEvents,
-    createEvent,
-    resolveEvent,
-    generateEventsForSeason,
-    deleteEvent
+    unreadCount,
+    addEvent,
+    markAsRead,
+    markAllAsRead,
+    deleteEvent,
+    getFilteredEvents
   };
 };
