@@ -24,7 +24,7 @@ export interface BuildingDescription {
   slaves?: {
     required: number;
     optimal: number;
-    maxProfit?: number;
+    maxProfit: number;
   };
   prestige?: number;
   advantages?: string[];
@@ -78,6 +78,7 @@ export interface BuildingPurchaseOptions {
   maintenanceCost: number;
   slaves?: number;
   customName?: string;
+  buildingType?: string;
 }
 
 export interface SlaveAssignment {

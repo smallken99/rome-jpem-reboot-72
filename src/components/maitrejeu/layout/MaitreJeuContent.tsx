@@ -11,6 +11,7 @@ import { GestionFamilles } from '../GestionFamilles';
 import { GestionRepublique } from '../GestionRepublique';
 import { GestionBatiments } from '../GestionBatiments';
 import { GestionLois } from '../GestionLois';
+import { GestionDatabase } from '../GestionDatabase';
 import { MaitreJeuStats } from '../MaitreJeuStats';
 import { TimePanel } from '../components/TimePanel';
 import { MaitreJeuWelcome } from '../MaitreJeuWelcome';
@@ -27,17 +28,6 @@ export const MaitreJeuContent: React.FC<MaitreJeuContentProps> = ({ activeTab })
   
   // Vérifier si l'onglet actif est en développement
   const developmentSections: Record<string, { title: string, description: string, release: string, features: string[] }> = {
-    'equilibre': {
-      title: "Gestion de l'Équilibre des Pouvoirs",
-      description: "Surveillez et influencez l'équilibre politique et social de la République romaine.",
-      release: "Prochaine mise à jour",
-      features: [
-        "Gestion de l'équilibre des pouvoirs entre les factions",
-        "Visualisation graphique des tendances politiques",
-        "Simulation des effets des décisions politiques",
-        "Système d'alerte pour les déséquilibres critiques"
-      ]
-    },
     'histoire': {
       title: "Chroniques de la République",
       description: "Enregistrez et consultez les événements marquants de l'histoire de Rome.",
@@ -105,12 +95,14 @@ export const MaitreJeuContent: React.FC<MaitreJeuContentProps> = ({ activeTab })
           {activeTab === 'senateurs' && <GestionSenateurs />}
           {activeTab === 'provinces' && <GestionProvinces />}
           {activeTab === 'politique' && <GestionPolitique />}
+          {activeTab === 'equilibre' && <GestionEquilibre />}
           {activeTab === 'clients' && <GestionClients />}
           {activeTab === 'economie' && <GestionEconomie />}
           {activeTab === 'familles' && <GestionFamilles />}
           {activeTab === 'republique' && <GestionRepublique />}
           {activeTab === 'batiments' && <GestionBatiments />}
           {activeTab === 'lois' && <GestionLois />}
+          {activeTab === 'database' && <GestionDatabase />}
         </>
       )}
     </motion.div>
