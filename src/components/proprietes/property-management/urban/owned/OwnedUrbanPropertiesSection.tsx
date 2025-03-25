@@ -1,65 +1,112 @@
 
-import React from 'react';
-import { Button } from '@/components/ui/button';
-import { PlusCircle } from 'lucide-react';
-import { PropertyCard } from '@/components/proprietes/property-management/PropertyCard';
-import { OwnedBuilding } from '../../../hooks/building/types';
+import React, { useState } from 'react';
+import { OwnedUrbanPropertyList } from './OwnedUrbanPropertyList';
+import { OwnedUrbanPropertyDetail } from './OwnedUrbanPropertyDetail';
+import { useOwnedBuildings } from '@/components/proprietes/hooks/building/useOwnedBuildings';
+import { useSlaveAssignment } from '@/components/proprietes/hooks/building/useSlaveAssignment';
+import { OwnedBuilding } from '@/components/proprietes/hooks/building/types';
+import { UrbanBuildingFilter } from '../UrbanBuildingFilter';
 
-interface OwnedUrbanPropertiesSectionProps {
-  buildings: OwnedBuilding[];
-  onSell: (id: number | string) => boolean;
-  estimatedValue: (building: OwnedBuilding) => number;
-}
-
-export const OwnedUrbanPropertiesSection: React.FC<OwnedUrbanPropertiesSectionProps> = ({
-  buildings,
-  onSell,
-  estimatedValue
-}) => {
-  // Convertir un ID de type string en number si nécessaire
-  const handleSell = (id: number | string) => {
-    return onSell(id);
+export const OwnedUrbanPropertiesSection: React.FC = () => {
+  const [selectedBuildingId, setSelectedBuildingId] = useState<string | null>(null);
+  const [filterText, setFilterText] = useState('');
+  const [locationFilter, setLocationFilter] = useState<string | null>(null);
+  const [statusFilter, setStatusFilter] = useState<string | null>(null);
+  
+  const { 
+    ownedBuildings, 
+    performMaintenance, 
+    sellBuilding, 
+    renameBuilding,
+    toggleMaintenanceStatus,
+    getEstimatedValue,
+    collectIncome
+  } = useOwnedBuildings();
+  
+  const { 
+    assignSlavesToBuilding,
+    getEfficiency
+  } = useSlaveAssignment();
+  
+  // Filtrer les bâtiments urbains
+  const urbanBuildings = ownedBuildings.filter(building => 
+    building.buildingType === "urban"
+  );
+  
+  // Appliquer les filtres
+  const filteredBuildings = urbanBuildings.filter(building => {
+    // Filtre de texte
+    if (filterText && !building.name.toLowerCase().includes(filterText.toLowerCase())) {
+      return false;
+    }
+    
+    // Filtre de localisation
+    if (locationFilter && building.location !== locationFilter) {
+      return false;
+    }
+    
+    // Filtre de statut
+    if (statusFilter) {
+      if (statusFilter === 'maintained' && !building.maintenanceEnabled) {
+        return false;
+      } else if (statusFilter === 'not-maintained' && building.maintenanceEnabled) {
+        return false;
+      }
+    }
+    
+    return true;
+  });
+  
+  const selectedBuilding = selectedBuildingId 
+    ? urbanBuildings.find(b => b.id.toString() === selectedBuildingId) 
+    : null;
+  
+  const handleBuildingSelect = (buildingId: string) => {
+    setSelectedBuildingId(buildingId);
   };
-
+  
+  const handleBackToList = () => {
+    setSelectedBuildingId(null);
+  };
+  
+  const handleToggleMaintenance = (buildingId: string, enabled: boolean) => {
+    toggleMaintenanceStatus(buildingId, enabled);
+  };
+  
   return (
-    <div className="space-y-4">
-      <div className="flex justify-between items-center">
-        <h3 className="font-cinzel text-lg text-rome-navy">Mes Propriétés Urbaines</h3>
-      </div>
-      
-      {buildings.length === 0 ? (
-        <div className="bg-white border border-rome-gold/30 rounded-md p-8 text-center">
-          <p className="text-muted-foreground">
-            Vous ne possédez pas encore de propriétés urbaines.
-          </p>
-          <Button 
-            className="roman-btn mt-4"
-          >
-            <PlusCircle className="mr-1 h-4 w-4" />
-            Acquérir votre première propriété
-          </Button>
-        </div>
+    <div className="space-y-6">
+      {selectedBuildingId ? (
+        <OwnedUrbanPropertyDetail
+          building={selectedBuilding as OwnedBuilding}
+          onBack={handleBackToList}
+          onMaintenance={() => {
+            performMaintenance(selectedBuildingId);
+          }}
+          onMaintenanceToggle={(enabled) => handleToggleMaintenance(selectedBuildingId, enabled)}
+          onAssignSlaves={(count) => assignSlavesToBuilding(selectedBuildingId, count)}
+          onCollectIncome={() => {
+            collectIncome(selectedBuildingId);
+          }}
+          onSell={() => sellBuilding(selectedBuildingId)}
+          onRename={(newName) => renameBuilding(selectedBuildingId, newName)}
+          estimatedValue={getEstimatedValue(selectedBuildingId)}
+          efficiency={getEfficiency(selectedBuildingId)}
+        />
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {buildings.map((building) => {
-            const value = estimatedValue(building);
-            
-            return (
-              <PropertyCard
-                key={building.id}
-                building={building}
-                buildingDetails={null}
-                onToggleMaintenance={() => {}}
-                onPerformMaintenance={() => false}
-                onAssignSlaves={() => {}}
-                onSell={(id) => handleSell(id)}
-                balance={0}
-                totalAvailableSlaves={0}
-                buildingValue={value}
-              />
-            );
-          })}
-        </div>
+        <>
+          <UrbanBuildingFilter
+            onFilterChange={setFilterText}
+            onLocationFilter={setLocationFilter}
+            onStatusFilter={setStatusFilter}
+            filterValue={filterText}
+            locationFilter={locationFilter}
+            statusFilter={statusFilter}
+          />
+          <OwnedUrbanPropertyList
+            buildings={filteredBuildings}
+            onSelectBuilding={handleBuildingSelect}
+          />
+        </>
       )}
     </div>
   );

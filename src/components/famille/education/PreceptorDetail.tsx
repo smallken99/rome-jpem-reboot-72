@@ -1,144 +1,185 @@
 
-import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { Card, CardContent } from '@/components/ui/card';
+import React, { useState } from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { preceptorDatabase } from './data/preceptorDatabase';
-import { EducationType, Preceptor } from './types/educationTypes';
-import { useEducation } from './context/EducationContext';
-import { PreceptorDetailHeader } from './components/PreceptorDetailHeader';
-import { PreceptorStats } from './components/PreceptorStats';
 import { PreceptorActions } from './components/PreceptorActions';
-import { PreceptorAssignmentPanel } from './components/PreceptorAssignmentPanel';
+import { PreceptorStats } from './components/PreceptorStats';
+import { useEducation } from './context/EducationContext';
+import { useEconomy } from '@/hooks/useEconomy';
 import { toast } from 'sonner';
+import { ArrowLeft, Scroll } from 'lucide-react';
+import { RomanCard } from '@/components/ui-custom/RomanCard';
 
-interface PreceptorDetailProps {
-  preceptorId: string;
-}
-
-export const PreceptorDetail: React.FC<PreceptorDetailProps> = ({ preceptorId }) => {
+export const PreceptorDetail: React.FC = () => {
+  const { preceptorId } = useParams<{ preceptorId: string }>();
   const navigate = useNavigate();
-  const { children, hirePreceptor, firePreceptor, assignPreceptorToChild, getPreceptorById } = useEducation();
+  const { getPreceptorById, hirePreceptor, firePreceptor } = useEducation();
+  const { balance, deductCost, hasEnoughFunds } = useEconomy();
+  const [isLoading, setIsLoading] = useState(false);
   
-  const [preceptor, setPreceptor] = useState<Preceptor | null>(null);
-  const [isHiring, setIsHiring] = useState(false);
-  const [isFiring, setIsFiring] = useState(false);
-  const [showAssignPanel, setShowAssignPanel] = useState(false);
-  
-  useEffect(() => {
-    // Recherche du précepteur par ID
-    const foundPreceptor = getPreceptorById ? 
-      getPreceptorById(preceptorId) : 
-      preceptorDatabase.getPreceptors().find(p => p.id === preceptorId);
-    
-    if (foundPreceptor) {
-      setPreceptor(foundPreceptor);
-    } else {
-      toast.error("Précepteur non trouvé");
-      navigate('/famille/education/preceptors');
-    }
-  }, [preceptorId, navigate, getPreceptorById]);
+  const preceptor = preceptorId ? getPreceptorById(preceptorId) : null;
   
   if (!preceptor) {
-    return <div className="p-6 text-center">Chargement des détails du précepteur...</div>;
+    return (
+      <div className="p-4 text-center">
+        <p>Précepteur non trouvé.</p>
+        <Button onClick={() => navigate('/famille/education/preceptors')} className="mt-4">
+          Retour à la liste
+        </Button>
+      </div>
+    );
   }
   
+  const isHired = preceptor.status === 'hired' || preceptor.status === 'assigned';
+  const isAssigned = preceptor.status === 'assigned';
+  const cost = preceptor.cost || 2000;
+  
   const handleHire = () => {
-    setIsHiring(true);
+    if (!preceptorId) return;
+    
+    if (!hasEnoughFunds(cost)) {
+      toast.error(`Fonds insuffisants pour engager ce précepteur (${cost} As)`);
+      return;
+    }
+    
+    setIsLoading(true);
+    
+    // Simuler un délai pour l'engagement
     setTimeout(() => {
       const success = hirePreceptor(preceptorId);
+      
       if (success) {
-        toast.success(`${preceptor.name} a été engagé avec succès!`);
-        setShowAssignPanel(true);
+        deductCost(cost, 'Recrutement d\'un précepteur');
+        toast.success(`Vous avez engagé ${preceptor.name} comme précepteur`);
       } else {
-        toast.error("Impossible d'engager ce précepteur pour le moment.");
+        toast.error(`Impossible d'engager ce précepteur`);
       }
-      setIsHiring(false);
+      
+      setIsLoading(false);
     }, 1000);
   };
   
   const handleFire = () => {
-    setIsFiring(true);
+    if (!preceptorId) return;
+    
+    if (isAssigned) {
+      toast.error(`Ce précepteur est actuellement assigné à un enfant. Veuillez d'abord le désassigner.`);
+      return;
+    }
+    
+    setIsLoading(true);
+    
+    // Simuler un délai pour le licenciement
     setTimeout(() => {
       firePreceptor(preceptorId);
-      toast.success(`${preceptor.name} a été renvoyé.`);
-      setIsFiring(false);
-      navigate('/famille/education/preceptors');
+      toast.success(`Vous avez renvoyé ${preceptor.name}`);
+      setIsLoading(false);
     }, 1000);
   };
   
-  const handleAssign = (childId: string) => {
-    assignPreceptorToChild(childId, preceptorId);
-    toast.success(`${preceptor.name} a été assigné à l'éducation de l'enfant.`);
-    navigate(`/famille/education/child/${childId}`);
-  };
-  
-  // Filtrer les enfants éligibles pour ce précepteur
-  const eligibleChildren = children.filter(child => 
-    child.educationType && 
-    (child.educationType as EducationType) === preceptor.specialty && 
-    !child.preceptorId
-  );
-  
-  const isAssigned = preceptor.assigned || false;
-  const assignedChild = children.find(child => child.preceptorId === preceptorId);
-  
   return (
     <div className="space-y-6">
-      <PreceptorDetailHeader 
-        preceptor={preceptor} 
-        isAssigned={isAssigned}
-        assignedTo={assignedChild?.name}
-      />
+      <div className="flex items-center justify-between">
+        <h2 className="text-2xl font-bold">Profil du Précepteur</h2>
+        <Button variant="outline" onClick={() => navigate('/famille/education/preceptors')}>
+          <ArrowLeft className="mr-2 h-4 w-4" />
+          Retour à la liste
+        </Button>
+      </div>
       
-      <Card>
-        <CardContent className="p-6 space-y-6">
-          <PreceptorStats preceptor={preceptor} />
-          
-          {showAssignPanel && !isAssigned && eligibleChildren.length > 0 && (
-            <PreceptorAssignmentPanel 
-              children={eligibleChildren}
-              onAssign={handleAssign}
-              specialty={preceptor.specialty as EducationType}
-            />
-          )}
-          
-          <PreceptorActions
-            onHire={handleHire}
-            isAvailable={!isAssigned}
-            isLoading={isHiring || isFiring}
-            onCancel={() => navigate('/famille/education/preceptors')}
-            onFire={handleFire}
-            isHired={isAssigned}
-            cost={preceptor.price || preceptor.cost}
-          />
-        </CardContent>
-      </Card>
-      
-      {isAssigned && assignedChild && (
-        <Card>
-          <CardContent className="p-6">
-            <h3 className="font-semibold text-lg mb-4">Assigné à</h3>
-            <div className="flex justify-between items-center">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <Card className="md:col-span-2">
+          <CardHeader>
+            <CardTitle>{preceptor.name}</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-4">
               <div>
-                <p className="font-medium">{assignedChild.name}</p>
-                <p className="text-sm text-muted-foreground">
-                  {assignedChild.educationType === 'military' && 'Éducation Militaire'}
-                  {assignedChild.educationType === 'rhetoric' && 'Éducation Rhétorique'}
-                  {assignedChild.educationType === 'religious' && 'Éducation Religieuse'}
-                  {assignedChild.educationType === 'academic' && 'Éducation Académique'}
-                </p>
+                <p className="text-sm text-muted-foreground">Spécialité</p>
+                <p className="font-medium">{preceptor.specialty || preceptor.speciality}</p>
               </div>
-              <Button 
-                variant="outline" 
-                onClick={() => navigate(`/famille/education/child/${assignedChild.id}`)}
-              >
-                Voir détails
-              </Button>
+              
+              <div>
+                <p className="text-sm text-muted-foreground">Niveau</p>
+                <p className="font-medium">{preceptor.level || "Débutant"}</p>
+              </div>
+              
+              <div>
+                <p className="text-sm text-muted-foreground">Coût</p>
+                <p className="font-medium">{cost} As par an</p>
+              </div>
+              
+              <div>
+                <p className="text-sm text-muted-foreground">Statut</p>
+                <p className="font-medium">{
+                  isAssigned ? 'Assigné' : 
+                  isHired ? 'Engagé' : 
+                  'Disponible'
+                }</p>
+              </div>
+              
+              <div className="pt-4 flex gap-2">
+                <PreceptorActions
+                  preceptorId={preceptorId}
+                  isAssigned={isAssigned}
+                  onAssign={() => {}}
+                  onDismiss={() => {}}
+                  onViewDetails={() => {}}
+                  onPaySalary={() => {}}
+                  canAssign={!isHired && hasEnoughFunds(cost)}
+                  canDismiss={isHired && !isAssigned}
+                  canPaySalary={isHired}
+                />
+                
+                {!isHired && (
+                  <Button 
+                    onClick={handleHire} 
+                    disabled={isLoading}
+                    className="ml-auto"
+                  >
+                    Engager pour {cost} As
+                  </Button>
+                )}
+                
+                {isHired && !isAssigned && (
+                  <Button 
+                    onClick={handleFire} 
+                    disabled={isLoading}
+                    variant="destructive"
+                    className="ml-auto"
+                  >
+                    Renvoyer
+                  </Button>
+                )}
+              </div>
             </div>
           </CardContent>
         </Card>
-      )}
+        
+        <div className="space-y-6">
+          <RomanCard>
+            <RomanCard.Header>
+              <div className="flex items-center">
+                <Scroll className="h-5 w-5 mr-2" />
+                <h3 className="font-cinzel">Compétences</h3>
+              </div>
+            </RomanCard.Header>
+            <RomanCard.Content>
+              <PreceptorStats preceptor={preceptor} />
+            </RomanCard.Content>
+          </RomanCard>
+        </div>
+      </div>
+      
+      <Card>
+        <CardHeader>
+          <CardTitle>Philosophie d'enseignement</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <p>{preceptor.description || `${preceptor.name} est un précepteur spécialisé en ${preceptor.specialty || preceptor.speciality}. Il possède une bonne connaissance de sa matière et sait transmettre son savoir aux enfants.`}</p>
+        </CardContent>
+      </Card>
     </div>
   );
 };

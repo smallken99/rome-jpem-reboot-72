@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { ActionsGroup } from '@/components/ui-custom/ActionsGroup';
-import { UserCheck, UserX, BookOpen, Coin } from 'lucide-react';
+import { UserCheck, UserX, BookOpen, Coins } from 'lucide-react';
 
 interface PreceptorActionsProps {
   preceptorId: string;
@@ -51,7 +51,7 @@ export const PreceptorActions: React.FC<PreceptorActionsProps> = ({
       disabled: !canDismiss || !isAssigned
     },
     {
-      icon: <Coin className="h-4 w-4" />,
+      icon: <Coins className="h-4 w-4" />,
       label: "Payer",
       onClick: () => onPaySalary(preceptorId),
       variant: "outline" as const,

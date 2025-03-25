@@ -1,95 +1,88 @@
 
-import React, { useState } from 'react';
-import { Button } from '@/components/ui/button';
-import { PropertyCard } from '../PropertyCard';
-import { useBuildingSale } from '../../hooks/building/useBuildingSale';
-import { useBuildingMaintenance } from '../../hooks/building/useBuildingMaintenance';
-import { useSlaveAssignment } from '../../hooks/building/useSlaveAssignment';
-import { useBuildings } from '../../hooks/useBuildings';
-import { Plus, Filter } from 'lucide-react';
-import { SlavePurchaseButton } from '../slaves/SlavePurchaseButton';
-import { IncomeCollectionButton } from '../IncomeCollectionButton';
-import { usePatrimoine } from '@/hooks/usePatrimoine';
+import React from 'react';
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Building, Building2, Map, Landmark } from "lucide-react";
+import { OwnedBuilding } from "@/components/proprietes/hooks/building/types";
+import { formatCurrency } from "@/utils/formatters";
 
 interface UrbanPropertyListProps {
-  onAddNew: () => void;
-  onViewDetails: (buildingId: string | number) => void;
-  onAssignSlaves: (buildingId: string | number) => void;
-  buildingFilter?: string;
+  buildings: OwnedBuilding[];
+  onSelectBuilding: (id: string) => void;
 }
 
 export const UrbanPropertyList: React.FC<UrbanPropertyListProps> = ({
-  onAddNew,
-  onViewDetails,
-  onAssignSlaves,
-  buildingFilter = 'urban'
+  buildings,
+  onSelectBuilding
 }) => {
-  const { buildings } = useBuildings();
-  const { calculateBuildingValueById, sellBuilding } = useBuildingSale();
-  const { 
-    toggleMaintenance, 
-    performMaintenance, 
-    canPerformMaintenance 
-  } = useBuildingMaintenance();
-  const { balance } = usePatrimoine();
-  
-  // Filtrer les bâtiments urbains
-  const urbanBuildings = buildings.filter(b => 
-    b.buildingType === buildingFilter
-  );
-  
-  if (urbanBuildings.length === 0) {
+  if (buildings.length === 0) {
     return (
-      <div className="text-center py-10">
-        <h3 className="text-lg font-medium mb-2">Aucune propriété urbaine</h3>
-        <p className="text-muted-foreground mb-6">
-          Vous ne possédez actuellement aucune propriété urbaine. 
-          Commencez par en acquérir une pour développer votre patrimoine.
-        </p>
-        <Button onClick={onAddNew}>
-          <Plus className="h-4 w-4 mr-2" /> 
-          Acquérir une propriété
-        </Button>
-      </div>
+      <Card className="bg-background">
+        <CardContent className="pt-6 text-center">
+          <div className="flex flex-col items-center justify-center py-8">
+            <Building2 className="h-12 w-12 text-muted-foreground mb-4" />
+            <h3 className="text-lg font-semibold">Aucune propriété urbaine</h3>
+            <p className="text-muted-foreground mt-2">
+              Vous ne possédez pas encore de propriétés urbaines. 
+              Consultez le marché immobilier pour en acquérir.
+            </p>
+          </div>
+        </CardContent>
+      </Card>
     );
   }
-  
+
   return (
-    <div className="space-y-6">
-      <div className="flex flex-wrap gap-3 justify-between items-center">
-        <div className="flex flex-wrap gap-3">
-          <Button onClick={onAddNew}>
-            <Plus className="h-4 w-4 mr-2" /> 
-            Nouvelle propriété
-          </Button>
-          
-          <SlavePurchaseButton />
-          
-          <IncomeCollectionButton />
-        </div>
-        
-        <Button variant="ghost" size="sm">
-          <Filter className="h-4 w-4 mr-2" />
-          Filtrer
-        </Button>
-      </div>
-      
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {urbanBuildings.map(building => (
-          <PropertyCard
-            key={building.id}
-            building={building}
-            estimatedValue={calculateBuildingValueById(building.id)}
-            onViewDetails={() => onViewDetails(building.id)}
-            onPerformMaintenance={() => performMaintenance(building.id)}
-            onToggleMaintenance={(enabled) => toggleMaintenance(building.id, enabled)}
-            onAssignSlaves={() => onAssignSlaves(building.id)}
-            onSell={() => sellBuilding(building.id)}
-            maintenanceEnabled={building.maintenanceEnabled || false}
-            canPerformMaintenance={canPerformMaintenance(building.id)}
-          />
-        ))}
-      </div>
+    <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+      {buildings.map((building) => (
+        <Card key={building.id} className="overflow-hidden">
+          <CardHeader className="pb-2">
+            <div className="flex justify-between items-start">
+              <CardTitle className="text-xl flex items-center gap-2">
+                <Building2 className="h-5 w-5" />
+                {building.name}
+              </CardTitle>
+              <Badge variant={building.maintenanceEnabled ? "outline" : "destructive"}>
+                {building.maintenanceEnabled ? "Entretenue" : "Négligée"}
+              </Badge>
+            </div>
+            <CardDescription className="flex items-center mt-1">
+              <Map className="h-4 w-4 mr-1" />
+              {building.location}
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="pb-2">
+            <div className="grid grid-cols-2 gap-x-4 gap-y-2 text-sm">
+              <div>
+                <p className="text-muted-foreground">État</p>
+                <p className="font-medium">{building.condition}%</p>
+              </div>
+              <div>
+                <p className="text-muted-foreground">Esclaves</p>
+                <p className="font-medium">{building.slaves || 0}</p>
+              </div>
+              <div>
+                <p className="text-muted-foreground">Maintenance</p>
+                <p className="font-medium">{formatCurrency(building.maintenanceCost)} As/an</p>
+              </div>
+              <div>
+                <p className="text-muted-foreground">Revenus</p>
+                <p className="font-medium">{formatCurrency(building.income || 0)} As/an</p>
+              </div>
+            </div>
+          </CardContent>
+          <CardFooter className="pt-2">
+            <Button 
+              variant="outline" 
+              className="w-full"
+              onClick={() => onSelectBuilding(building.id.toString())}
+            >
+              Gérer cette propriété
+            </Button>
+          </CardFooter>
+        </Card>
+      ))}
     </div>
   );
 };
