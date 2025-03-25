@@ -1,91 +1,115 @@
 
 import React from 'react';
-import { Badge } from "@/components/ui/badge";
-import { Card, CardContent } from "@/components/ui/card";
+import { 
+  Timeline, 
+  TimelineItem, 
+  TimelineConnector, 
+  TimelineContent, 
+  TimelineIcon, 
+  TimelineSeparator 
+} from '@/components/ui/timeline';
+import { extractGameDateComponents, isGameDate } from './lois/utils/formatGameDate';
 import { PoliticalEvent } from '../types/equilibre';
-import { formatSeasonDisplay, GameDate } from '@/utils/timeSystem';
+import { Tooltip } from '@/components/ui/tooltip';
+import { LawIcon, MilitaryIcon, DiplomaticIcon, DisasterIcon, InfoIcon } from './icons';
 
-interface PoliticalEventsTimelineProps {
-  events: PoliticalEvent[];
-}
+export const PoliticalEventsTimeline: React.FC<{ events: PoliticalEvent[] }> = ({ events }) => {
+  const getYearRange = () => {
+    let minYear = 9999;
+    let maxYear = 0;
 
-export const PoliticalEventsTimeline: React.FC<PoliticalEventsTimelineProps> = ({ events }) => {
-  const sortedEvents = [...events].sort((a, b) => {
-    // If both events have date objects
-    if (a.date && b.date) {
-      // Compare years first
-      if (a.date.year !== b.date.year) {
-        return a.date.year - b.date.year;
+    events.forEach(event => {
+      if (event.date) {
+        const dateComponents = extractGameDateComponents(event.date);
+        if (dateComponents) {
+          minYear = Math.min(minYear, dateComponents.year);
+          maxYear = Math.max(maxYear, dateComponents.year);
+        }
       }
-      
-      // Then compare seasons
-      const seasons = ['Ver', 'Aestas', 'Autumnus', 'Hiems', 'SPRING', 'SUMMER', 'AUTUMN', 'WINTER'];
-      const aSeasonIndex = seasons.indexOf(a.date.season);
-      const bSeasonIndex = seasons.indexOf(b.date.season);
-      
-      return aSeasonIndex - bSeasonIndex;
-    }
-    
-    // Fallback to string comparison if date objects aren't available
-    return String(a.date).localeCompare(String(b.date));
-  });
+    });
 
-  const getEventBadgeColor = (event: PoliticalEvent) => {
-    const importanceValue = event.importance || "normale";
-    switch (importanceValue) {
-      case "majeure": return "destructive";
-      case "normale": return "secondary";
-      case "mineure": return "outline";
-      default: return "secondary";
+    return { minYear, maxYear };
+  };
+
+  const getSeasonsInYear = (year: number) => {
+    return events
+      .filter(event => {
+        const dateComponents = extractGameDateComponents(event.date);
+        return dateComponents && dateComponents.year === year;
+      })
+      .map(event => {
+        const dateComponents = extractGameDateComponents(event.date);
+        return dateComponents ? dateComponents.season : '';
+      })
+      .filter((season, index, self) => self.indexOf(season) === index);
+  };
+
+  const getEventIcon = (type: string) => {
+    switch (type.toLowerCase()) {
+      case 'politique':
+      case 'political':
+        return <LawIcon className="h-5 w-5" />;
+      case 'militaire':
+      case 'military':
+        return <MilitaryIcon className="h-5 w-5" />;
+      case 'diplomatique':
+      case 'diplomatic':
+        return <DiplomaticIcon className="h-5 w-5" />;
+      case 'catastrophe':
+      case 'disaster':
+        return <DisasterIcon className="h-5 w-5" />;
+      default:
+        return <InfoIcon className="h-5 w-5" />;
     }
   };
 
-  // Formater la date d'un événement pour l'affichage
-  const formatEventDate = (event: PoliticalEvent) => {
-    if (event.date && event.date.year && event.date.season) {
-      return `An ${event.date.year} - ${formatSeasonDisplay(event.date.season as any)}`;
-    }
-    
-    return String(event.date);
-  };
-
-  const getEventFaction = (event: PoliticalEvent): string => {
-    return event.faction || 'Neutre';
-  };
+  const { minYear, maxYear } = getYearRange();
+  const years = Array.from({ length: maxYear - minYear + 1 }, (_, i) => minYear + i);
 
   return (
-    <div className="space-y-4">
-      <h3 className="text-lg font-semibold">Chronologie des événements politiques</h3>
-      
-      {sortedEvents.length === 0 ? (
-        <Card>
-          <CardContent className="p-4 text-center text-muted-foreground">
-            Aucun événement politique enregistré
-          </CardContent>
-        </Card>
-      ) : (
-        <div className="space-y-3">
-          {sortedEvents.map(event => (
-            <Card key={event.id} className="relative overflow-hidden">
-              <div className={`absolute left-0 top-0 bottom-0 w-1 bg-${getEventFaction(event) === 'Populares' ? 'red' : getEventFaction(event) === 'Optimates' ? 'blue' : 'gray'}-500`} />
-              <CardContent className="p-4 pl-6">
-                <div className="flex justify-between items-start">
-                  <div>
-                    <h4 className="font-medium">{event.title}</h4>
-                    <p className="text-sm text-muted-foreground mt-1">{event.description}</p>
-                  </div>
-                  <div className="flex flex-col items-end">
-                    <Badge variant={getEventBadgeColor(event) as any}>{event.type}</Badge>
-                    <span className="text-xs text-muted-foreground mt-1">
-                      {formatEventDate(event)}
-                    </span>
-                  </div>
+    <Timeline>
+      {years.map(year => (
+        <React.Fragment key={year}>
+          <TimelineItem>
+            <TimelineSeparator>
+              <TimelineIcon />
+              <TimelineConnector />
+            </TimelineSeparator>
+            <TimelineContent>
+              <h3 className="text-lg font-bold">Année {year}</h3>
+              {getSeasonsInYear(year).map(season => (
+                <div key={`${year}-${season}`} className="ml-4 mt-2">
+                  <h4 className="text-md font-semibold text-muted-foreground">{season}</h4>
+                  <ul className="space-y-1 mt-1">
+                    {events
+                      .filter(event => {
+                        const dateComponents = extractGameDateComponents(event.date);
+                        return dateComponents && dateComponents.year === year && dateComponents.season === season;
+                      })
+                      .map(event => (
+                        <li key={event.id} className="flex items-start gap-2">
+                          <span className="mt-0.5 text-primary">
+                            {getEventIcon(event.type)}
+                          </span>
+                          <Tooltip content={event.description}>
+                            <span>
+                              <span className="font-medium">{event.title}</span>
+                              {event.faction && (
+                                <span className="text-xs ml-1 text-muted-foreground">
+                                  ({event.faction})
+                                </span>
+                              )}
+                            </span>
+                          </Tooltip>
+                        </li>
+                      ))}
+                  </ul>
                 </div>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
-      )}
-    </div>
+              ))}
+            </TimelineContent>
+          </TimelineItem>
+        </React.Fragment>
+      ))}
+    </Timeline>
   );
 };

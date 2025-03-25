@@ -1,4 +1,10 @@
 
+export interface BaseBuildingWorkers {
+  required: number;
+  optimal: number;
+  maxProfit: number;
+}
+
 export interface BuildingDescription {
   id: string;
   name: string;
@@ -11,21 +17,13 @@ export interface BuildingDescription {
   popularite?: number;
   reputation?: number;
   production?: number;
-  workers: {
-    required: number;
-    optimal: number;
-    maxProfit: number;
-  };
+  workers: BaseBuildingWorkers;
   subType?: string;
   requirements?: string[];
   maintenance?: number;
   security?: number;
   initialCost?: number;
-  slaves: {
-    required: number;
-    optimal: number;
-    maxProfit: number;
-  };
+  slaves: BaseBuildingWorkers;
   prestige?: number;
   advantages?: string[];
 }

@@ -3,13 +3,13 @@ import React from 'react';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Eye, ThumbsUp, ThumbsDown, MinusCircle } from 'lucide-react';
 import { Loi } from '@/components/maitrejeu/types/lois';
+import { formatGameDateForRender } from '@/components/maitrejeu/components/lois/utils/formatGameDate';
+import { Eye, ThumbsUp, ThumbsDown, Minus } from 'lucide-react';
 
 interface LoiProposeesProps {
   lois: Loi[];
   onViewLoi: (loi: Loi) => void;
-  formatSeason: (season: string) => string;
   onVoterPour?: (loiId: string) => void;
   onVoterContre?: (loiId: string) => void;
   onVoterAbstention?: (loiId: string) => void;
@@ -18,110 +18,94 @@ interface LoiProposeesProps {
 export const LoiProposees: React.FC<LoiProposeesProps> = ({ 
   lois, 
   onViewLoi, 
-  formatSeason, 
-  onVoterPour,
-  onVoterContre,
-  onVoterAbstention
+  onVoterPour, 
+  onVoterContre, 
+  onVoterAbstention 
 }) => {
-  // Format date function
-  const formatDate = (date: any): string => {
-    if (!date) return "-";
-    if (typeof date === 'string') return date;
-    if (typeof date === 'object' && 'year' in date && 'season' in date) {
-      return `${formatSeason(date.season)} ${date.year}`;
-    }
-    return "-";
-  };
-  
+  const proposedLois = lois.filter(
+    loi => loi.état === 'Proposée' || loi.état === 'En discussion' || 
+          loi.statut === 'proposée' || loi.status === 'proposed' || 
+          loi.statut === 'En délibération'
+  );
+
+  if (proposedLois.length === 0) {
+    return (
+      <div className="p-8 text-center">
+        <Eye className="h-12 w-12 mx-auto text-muted-foreground" />
+        <h3 className="mt-4 text-lg font-medium">Aucune loi proposée</h3>
+        <p className="text-muted-foreground">Les nouvelles propositions de loi apparaîtront ici.</p>
+      </div>
+    );
+  }
+
   return (
-    <div className="space-y-4">
-      {lois.length === 0 ? (
-        <div className="text-center py-8 text-muted-foreground">
-          Aucune loi proposée dans la période actuelle
-        </div>
-      ) : (
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>Loi</TableHead>
-              <TableHead>Proposeur</TableHead>
-              <TableHead>Date de proposition</TableHead>
-              <TableHead>Catégorie</TableHead>
-              <TableHead className="text-right">Actions</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {lois.map((loi) => (
-              <TableRow key={loi.id}>
-                <TableCell className="font-medium">
-                  {loi.titre || loi.title || loi.name}
-                  <Badge variant="secondary" className="ml-2">
-                    Proposée
-                  </Badge>
-                </TableCell>
-                <TableCell>{loi.proposeur || loi.auteur || loi.proposedBy}</TableCell>
-                <TableCell>
-                  {formatDate(loi.dateProposition || loi.date)}
-                </TableCell>
-                <TableCell>
-                  <Badge variant="outline">{loi.catégorie || loi.category || loi.catégorieId}</Badge>
-                </TableCell>
-                <TableCell className="text-right flex items-center justify-end gap-1">
-                  {onVoterPour && (
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => onVoterPour(loi.id)}
-                      title="Voter pour"
-                      className="h-8 w-8 p-0 text-green-600 hover:text-green-700 hover:bg-green-50"
-                    >
-                      <ThumbsUp className="h-4 w-4" />
-                      <span className="sr-only">Pour</span>
-                    </Button>
-                  )}
-                  
-                  {onVoterContre && (
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => onVoterContre(loi.id)}
-                      title="Voter contre"
-                      className="h-8 w-8 p-0 text-red-600 hover:text-red-700 hover:bg-red-50"
-                    >
-                      <ThumbsDown className="h-4 w-4" />
-                      <span className="sr-only">Contre</span>
-                    </Button>
-                  )}
-                  
-                  {onVoterAbstention && (
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => onVoterAbstention(loi.id)}
-                      title="S'abstenir"
-                      className="h-8 w-8 p-0 text-gray-600 hover:text-gray-700 hover:bg-gray-50"
-                    >
-                      <MinusCircle className="h-4 w-4" />
-                      <span className="sr-only">Abstention</span>
-                    </Button>
-                  )}
-                  
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => onViewLoi(loi)}
-                    title="Voir les détails"
-                    className="h-8 w-8 p-0"
-                  >
-                    <Eye className="h-4 w-4" />
-                    <span className="sr-only">Voir</span>
-                  </Button>
-                </TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      )}
-    </div>
+    <Table>
+      <TableHeader>
+        <TableRow>
+          <TableHead>Titre</TableHead>
+          <TableHead>Proposée par</TableHead>
+          <TableHead>Date</TableHead>
+          <TableHead>Catégorie</TableHead>
+          <TableHead className="text-right">Actions</TableHead>
+        </TableRow>
+      </TableHeader>
+      <TableBody>
+        {proposedLois.map(loi => (
+          <TableRow key={loi.id}>
+            <TableCell className="font-medium">{loi.titre || loi.title}</TableCell>
+            <TableCell>{loi.proposeur || loi.auteur || loi.proposedBy}</TableCell>
+            <TableCell>{formatGameDateForRender(loi.date)}</TableCell>
+            <TableCell>
+              <Badge variant="outline">
+                {loi.catégorie || loi.category || loi.type || "Politique"}
+              </Badge>
+            </TableCell>
+            <TableCell className="text-right space-x-1">
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => onViewLoi(loi)}
+                title="Voir détails"
+              >
+                <Eye className="h-4 w-4" />
+              </Button>
+              {onVoterPour && (
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => onVoterPour(loi.id)}
+                  title="Voter pour"
+                  className="text-green-600"
+                >
+                  <ThumbsUp className="h-4 w-4" />
+                </Button>
+              )}
+              {onVoterContre && (
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => onVoterContre(loi.id)}
+                  title="Voter contre"
+                  className="text-destructive"
+                >
+                  <ThumbsDown className="h-4 w-4" />
+                </Button>
+              )}
+              {onVoterAbstention && (
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => onVoterAbstention(loi.id)}
+                  title="S'abstenir"
+                  className="text-muted-foreground"
+                >
+                  <Minus className="h-4 w-4" />
+                </Button>
+              )}
+            </TableCell>
+          </TableRow>
+        ))}
+      </TableBody>
+    </Table>
   );
 };

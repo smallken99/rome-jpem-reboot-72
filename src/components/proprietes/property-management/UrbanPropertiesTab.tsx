@@ -5,7 +5,7 @@ import { Plus, Building2 } from "lucide-react";
 import { OwnedUrbanPropertiesSection } from './urban/owned/OwnedUrbanPropertiesSection';
 import { BuildingPurchaseDialog } from './modals/BuildingPurchaseDialog';
 import { usePatrimoine } from '@/hooks/usePatrimoine';
-import { BaseBuildingDescription } from '@/types/buildings';
+import { BuildingDescription } from '@/components/proprietes/hooks/building/types';
 import { useBuildingPurchase } from '../hooks/building/useBuildingPurchase';
 import { useOwnedBuildings } from '../hooks/building/useOwnedBuildings';
 

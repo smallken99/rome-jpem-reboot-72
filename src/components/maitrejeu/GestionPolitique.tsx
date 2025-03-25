@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
 import { useMaitreJeu } from './context';
-import { Loi } from './types/lois';
+import { LoiType, ImportanceType, Loi } from './types/lois';
 import { LoisList } from './components/lois/LoisList';
 import { LoiForm } from './components/lois/LoiForm';
 import { ElectionPlanner } from './components/elections/ElectionPlanner';
@@ -14,9 +14,9 @@ interface LoiFormData {
   titre: string;
   description: string;
   proposeur: string;
-  type?: string;
+  type?: LoiType;
   catégorie?: string;
-  importance?: 'faible' | 'normale' | 'haute' | 'critique' | 'mineure' | 'majeure';
+  importance?: ImportanceType;
 }
 
 export const GestionPolitique = () => {
@@ -51,6 +51,9 @@ export const GestionPolitique = () => {
         contre: 0,
         abstention: 0
       },
+      votesPositifs: 0,
+      votesNégatifs: 0,
+      votesAbstention: 0,
       importance: newLoi.importance || 'normale'
     };
     
@@ -71,7 +74,13 @@ export const GestionPolitique = () => {
   };
   
   const handleSelectChange = (value: string, field: keyof LoiFormData) => {
-    setNewLoi({ ...newLoi, [field]: value });
+    if (field === 'type') {
+      setNewLoi({ ...newLoi, [field]: value as LoiType });
+    } else if (field === 'importance') {
+      setNewLoi({ ...newLoi, [field]: value as ImportanceType });
+    } else {
+      setNewLoi({ ...newLoi, [field]: value });
+    }
   };
   
   const handleViewLoi = (loi?: Loi) => {

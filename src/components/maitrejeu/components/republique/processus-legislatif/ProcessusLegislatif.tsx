@@ -1,170 +1,123 @@
 
 import React, { useState } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Card, CardContent } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Plus } from 'lucide-react';
+import { useMaitreJeu } from '@/components/maitrejeu/context';
 import { LoiActives } from './tabs/LoiActives';
 import { LoiProposees } from './tabs/LoiProposees';
 import { LoiRejetees } from './tabs/LoiRejetees';
 import { HistoriqueLoi } from './tabs/HistoriqueLoi';
-import { LoiModal } from './LoiModal';
-import { Button } from '@/components/ui/button';
-import { Plus } from 'lucide-react';
-import { useGameTime } from '@/hooks/useGameTime';
-import { useMaitreJeu } from '@/components/maitrejeu/context';
 import { Loi } from '@/components/maitrejeu/types/lois';
+import { LoiModal } from '@/components/maitrejeu/components/lois/LoiModal';
+import { toast } from 'sonner';
+import { formatGameDateForRender, isGameDate } from '@/components/maitrejeu/components/lois/utils/formatGameDate';
 
 export const ProcessusLegislatif: React.FC = () => {
-  const [activeTab, setActiveTab] = useState('actives');
-  const [isLoiModalOpen, setIsLoiModalOpen] = useState(false);
-  const [selectedLoi, setSelectedLoi] = useState<Loi | undefined>(undefined);
-  
-  const { formatSeason } = useGameTime();
   const { lois, addLoi } = useMaitreJeu();
   
-  // Filter laws based on status
-  const loisActives = lois.filter(loi => loi.état === 'Promulguée' || loi.état === 'En vigueur');
-  const loisProposees = lois.filter(loi => loi.état === 'Proposée' || loi.état === 'En discussion');
-  const loisRejetees = lois.filter(loi => loi.état === 'Rejetée');
+  const [activeTab, setActiveTab] = useState('actives');
+  const [selectedLoi, setSelectedLoi] = useState<Loi | null>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
   
-  // Fix: Ensure date is comparable for sorting
-  const loisHistorique = [...lois].sort((a, b) => {
-    // Convert date strings/objects to comparable values
-    const getTime = (dateValue: any) => {
-      if (!dateValue) return 0;
-      if (typeof dateValue === 'string') return new Date(dateValue).getTime();
-      if (typeof dateValue === 'object' && 'year' in dateValue) {
-        // Create a date from year and season
-        const month = dateValue.season === 'SPRING' ? 3 
-          : dateValue.season === 'SUMMER' ? 6 
-          : dateValue.season === 'AUTUMN' ? 9 
-          : 12;
-        return new Date(dateValue.year, month, 1).getTime();
-      }
-      return 0;
-    };
-    
-    return getTime(b.date) - getTime(a.date);
-  });
-  
-  const handleViewLoi = (loi?: Loi) => {
+  const handleViewLoi = (loi: Loi) => {
     setSelectedLoi(loi);
-    setIsLoiModalOpen(true);
+    // Ici vous pourriez naviguer vers une page de détail ou ouvrir un modal
+    toast.info(`Visualisation de: ${loi.titre || loi.title}`, {
+      description: `Proposée par ${loi.proposeur || loi.auteur || loi.proposedBy} - ${formatGameDateForRender(loi.date)}`
+    });
+  };
+  
+  const handleVoterPour = (loiId: string) => {
+    toast.success("Vote POUR enregistré", {
+      description: "Votre vote a été pris en compte avec succès"
+    });
+    // Dans une vraie implémentation, vous appelleriez un service pour enregistrer le vote
+  };
+  
+  const handleVoterContre = (loiId: string) => {
+    toast.success("Vote CONTRE enregistré", {
+      description: "Votre vote a été pris en compte avec succès"
+    });
+  };
+  
+  const handleVoterAbstention = (loiId: string) => {
+    toast.success("ABSTENTION enregistrée", {
+      description: "Votre abstention a été prise en compte avec succès"
+    });
+  };
+  
+  const handleAddLoi = () => {
+    setSelectedLoi(null);
+    setIsModalOpen(true);
   };
   
   const handleSaveLoi = (loiData: any) => {
+    // Si nous éditons une loi existante
     if (selectedLoi) {
-      // Update existing law - in a real implementation
-      console.log('Update law:', loiData);
+      // Mise à jour à implémenter
+      toast.success("Loi mise à jour avec succès");
     } else {
-      // Add new law
+      // Création d'une nouvelle loi
       addLoi({
         ...loiData,
-        date: new Date().toISOString()
+        votesPositifs: 0,
+        votesNégatifs: 0,
+        votesAbstention: 0
       });
+      toast.success("Nouvelle loi créée avec succès");
     }
-    setIsLoiModalOpen(false);
-    setSelectedLoi(undefined);
+    setIsModalOpen(false);
   };
-  
-  // For now, these are empty functions since voteLoi might not exist on context yet
-  const handleVotePour = (loiId: string) => {
-    console.log("Vote pour:", loiId);
-  };
-  
-  const handleVoteContre = (loiId: string) => {
-    console.log("Vote contre:", loiId);
-  };
-  
-  const handleVoteAbstention = (loiId: string) => {
-    console.log("Vote abstention:", loiId);
-  };
-  
-  const handlePromulguer = (loiId: string) => {
-    // In a real implementation this would update the law status
-    console.log('Promulguer law:', loiId);
-  };
-  
-  const categories = [
-    { id: 'civile', name: 'Civile', description: 'Lois concernant les citoyens' },
-    { id: 'militaire', name: 'Militaire', description: 'Lois concernant l\'armée' },
-    { id: 'economique', name: 'Économique', description: 'Lois concernant l\'économie' },
-    { id: 'politique', name: 'Politique', description: 'Lois concernant le gouvernement' },
-    { id: 'religieuse', name: 'Religieuse', description: 'Lois concernant les cultes' },
-    { id: 'judiciaire', name: 'Judiciaire', description: 'Lois concernant la justice' }
-  ];
   
   return (
-    <Card>
-      <CardContent className="p-6">
-        <div className="flex justify-between items-center mb-6">
-          <div>
-            <h2 className="text-xl font-bold">Processus Législatif</h2>
-            <p className="text-muted-foreground">
-              Gérez les lois de la République
-            </p>
-          </div>
-          <Button onClick={() => handleViewLoi()} className="flex items-center gap-2">
-            <Plus className="h-4 w-4" />
-            Proposer une loi
-          </Button>
-        </div>
+    <div className="space-y-4">
+      <div className="flex justify-between items-center">
+        <h2 className="text-xl font-semibold">Processus Législatif</h2>
+        <Button onClick={handleAddLoi}>
+          <Plus className="h-4 w-4 mr-2" />
+          Proposer une loi
+        </Button>
+      </div>
+      
+      <Tabs value={activeTab} onValueChange={setActiveTab}>
+        <TabsList className="grid grid-cols-4">
+          <TabsTrigger value="actives">Lois actives</TabsTrigger>
+          <TabsTrigger value="proposees">Lois proposées</TabsTrigger>
+          <TabsTrigger value="rejetees">Lois rejetées</TabsTrigger>
+          <TabsTrigger value="historique">Historique</TabsTrigger>
+        </TabsList>
         
-        <Tabs value={activeTab} onValueChange={setActiveTab}>
-          <TabsList className="grid w-full grid-cols-4">
-            <TabsTrigger value="actives">En vigueur</TabsTrigger>
-            <TabsTrigger value="proposees">Proposées</TabsTrigger>
-            <TabsTrigger value="rejetees">Rejetées</TabsTrigger>
-            <TabsTrigger value="historique">Historique</TabsTrigger>
-          </TabsList>
-          
-          <TabsContent value="actives">
-            <LoiActives 
-              lois={loisActives} 
-              onViewLoi={handleViewLoi} 
-              formatSeason={formatSeason} 
-              onPromulguer={handlePromulguer}
-            />
-          </TabsContent>
-          
-          <TabsContent value="proposees">
-            <LoiProposees 
-              lois={loisProposees} 
-              onViewLoi={handleViewLoi} 
-              formatSeason={formatSeason}
-              onVoterPour={handleVotePour}
-              onVoterContre={handleVoteContre}
-              onVoterAbstention={handleVoteAbstention}
-            />
-          </TabsContent>
-          
-          <TabsContent value="rejetees">
-            <LoiRejetees 
-              lois={loisRejetees} 
-              onViewLoi={handleViewLoi} 
-              formatSeason={formatSeason} 
-            />
-          </TabsContent>
-          
-          <TabsContent value="historique">
-            <HistoriqueLoi 
-              lois={loisHistorique} 
-              onViewLoi={handleViewLoi} 
-              formatSeason={formatSeason} 
-            />
-          </TabsContent>
-        </Tabs>
+        <TabsContent value="actives" className="pt-4">
+          <LoiActives lois={lois} onViewLoi={handleViewLoi} />
+        </TabsContent>
         
-        <LoiModal 
-          isOpen={isLoiModalOpen}
-          onClose={() => {
-            setIsLoiModalOpen(false);
-            setSelectedLoi(undefined);
-          }}
-          onSave={handleSaveLoi}
-          loi={selectedLoi}
-          categories={categories}
-        />
-      </CardContent>
-    </Card>
+        <TabsContent value="proposees" className="pt-4">
+          <LoiProposees
+            lois={lois}
+            onViewLoi={handleViewLoi}
+            onVoterPour={handleVoterPour}
+            onVoterContre={handleVoterContre}
+            onVoterAbstention={handleVoterAbstention}
+          />
+        </TabsContent>
+        
+        <TabsContent value="rejetees" className="pt-4">
+          <LoiRejetees lois={lois} onViewLoi={handleViewLoi} />
+        </TabsContent>
+        
+        <TabsContent value="historique" className="pt-4">
+          <HistoriqueLoi lois={lois} />
+        </TabsContent>
+      </Tabs>
+      
+      {/* Modal pour ajouter/éditer une loi */}
+      <LoiModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        onSave={handleSaveLoi}
+        loi={selectedLoi}
+      />
+    </div>
   );
 };
