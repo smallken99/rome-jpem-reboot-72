@@ -3,47 +3,20 @@ import { EducationPath } from '../../types/educationTypes';
 
 export const religiousPath: EducationPath = {
   id: 'religious',
-  type: 'religious',
   name: 'Éducation Religieuse',
-  description: 'Étude des cultes et rituels romains',
-  benefits: [
-    'Connaissance des rites et cérémonies',
-    'Interprétation des présages',
-    'Influence spirituelle'
-  ],
-  duration: 3,
-  requiredAttributes: {
-    wisdom: 7,
-    charisma: 5
-  },
+  type: 'religious',
+  description: 'Formation aux rites, cérémonies et traditions religieuses romaines',
+  minAge: 10,
+  maxAge: 18,
+  duration: 4,
+  cost: 2500,
+  relatedStat: 'piety',
   outcomes: {
-    skills: [
-      'Rituels sacrés',
-      'Divination',
-      'Connaissance théologique'
-    ],
+    skills: ['Rituels', 'Auspices', 'Présages', 'Traditions'],
     bonuses: {
-      piety: 25,
-      influence: 5
+      piety: 35,
+      popularity: 10
     }
   },
-  specialties: [
-    'Rituels sacrés',
-    'Interprétation des présages',
-    'Droit pontifical',
-    'Mythologie',
-    'Tradition ancestrale',
-    'Cérémonies officielles',
-    'Culte de Vesta',
-    'Mystères d\'Eleusis',
-    'Lecture des entrailles'
-  ],
-  relatedStat: 'piety',
-  minAge: 8,
-  maxAge: 16,
-  cost: 4500,
-  suitableFor: {
-    gender: 'both',
-    status: ['patricien', 'plébéien']
-  }
+  suitableFor: ['male', 'female']
 };

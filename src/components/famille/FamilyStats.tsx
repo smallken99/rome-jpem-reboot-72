@@ -1,85 +1,66 @@
 
 import React from 'react';
-import { 
-  Users, 
-  UserCircle, 
-  Coins,
-  Trophy,
-  Calendar
-} from 'lucide-react';
+import { Card, CardContent } from '@/components/ui/card';
+import { Users, User, Baby, Heart } from 'lucide-react';
 
 interface FamilyStatsProps {
   membersCount: number;
   adultsCount: number;
   childrenCount: number;
-  familyFunds?: number;
-  familyPrestige?: number;
-  familyAge?: number;
+  healthStatus?: 'good' | 'fair' | 'poor';
 }
 
 export const FamilyStats: React.FC<FamilyStatsProps> = ({
   membersCount,
   adultsCount,
   childrenCount,
-  familyFunds = 0,
-  familyPrestige = 0,
-  familyAge = 0
+  healthStatus = 'good'
 }) => {
+  // Determine the health color
+  const getHealthColor = () => {
+    switch (healthStatus) {
+      case 'good': return 'text-green-500';
+      case 'fair': return 'text-amber-500';
+      case 'poor': return 'text-red-500';
+      default: return 'text-green-500';
+    }
+  };
+
   return (
-    <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-      <div className="flex items-center space-x-2">
-        <Users className="h-5 w-5 text-muted-foreground" />
-        <div>
-          <p className="text-sm font-medium">Membres</p>
-          <p className="text-2xl">{membersCount}</p>
-        </div>
-      </div>
+    <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+      <Card>
+        <CardContent className="p-4 flex flex-col items-center justify-center space-y-2">
+          <Users className="h-8 w-8 text-blue-500" />
+          <h3 className="font-medium">Membres</h3>
+          <p className="text-2xl font-bold">{membersCount}</p>
+        </CardContent>
+      </Card>
       
-      <div className="flex items-center space-x-2">
-        <UserCircle className="h-5 w-5 text-muted-foreground" />
-        <div>
-          <p className="text-sm font-medium">Adultes</p>
-          <p className="text-2xl">{adultsCount}</p>
-        </div>
-      </div>
+      <Card>
+        <CardContent className="p-4 flex flex-col items-center justify-center space-y-2">
+          <User className="h-8 w-8 text-indigo-500" />
+          <h3 className="font-medium">Adultes</h3>
+          <p className="text-2xl font-bold">{adultsCount}</p>
+        </CardContent>
+      </Card>
       
-      <div className="flex items-center space-x-2">
-        <Users className="h-5 w-5 text-muted-foreground" />
-        <div>
-          <p className="text-sm font-medium">Enfants</p>
-          <p className="text-2xl">{childrenCount}</p>
-        </div>
-      </div>
+      <Card>
+        <CardContent className="p-4 flex flex-col items-center justify-center space-y-2">
+          <Baby className="h-8 w-8 text-pink-500" />
+          <h3 className="font-medium">Enfants</h3>
+          <p className="text-2xl font-bold">{childrenCount}</p>
+        </CardContent>
+      </Card>
       
-      {familyFunds > 0 && (
-        <div className="flex items-center space-x-2">
-          <Coins className="h-5 w-5 text-muted-foreground" />
-          <div>
-            <p className="text-sm font-medium">Fortune</p>
-            <p className="text-2xl">{familyFunds.toLocaleString()} <span className="text-sm">as</span></p>
-          </div>
-        </div>
-      )}
-      
-      {familyPrestige > 0 && (
-        <div className="flex items-center space-x-2">
-          <Trophy className="h-5 w-5 text-muted-foreground" />
-          <div>
-            <p className="text-sm font-medium">Prestige</p>
-            <p className="text-2xl">{familyPrestige}</p>
-          </div>
-        </div>
-      )}
-      
-      {familyAge > 0 && (
-        <div className="flex items-center space-x-2">
-          <Calendar className="h-5 w-5 text-muted-foreground" />
-          <div>
-            <p className="text-sm font-medium">Âge de la famille</p>
-            <p className="text-2xl">{familyAge} <span className="text-sm">ans</span></p>
-          </div>
-        </div>
-      )}
+      <Card>
+        <CardContent className="p-4 flex flex-col items-center justify-center space-y-2">
+          <Heart className={`h-8 w-8 ${getHealthColor()}`} />
+          <h3 className="font-medium">Santé Familiale</h3>
+          <p className={`text-lg font-bold ${getHealthColor()}`}>
+            {healthStatus === 'good' ? 'Bonne' : healthStatus === 'fair' ? 'Moyenne' : 'Préoccupante'}
+          </p>
+        </CardContent>
+      </Card>
     </div>
   );
 };

@@ -6,29 +6,33 @@ export interface Character {
   lastName?: string;
   age: number;
   gender: 'male' | 'female';
-  // Added missing properties
+  // Family relationship properties
   relation?: string;
-  traits?: string[];
-  health?: number;
   isHeadOfFamily?: boolean;
   parentIds?: string[];
   spouseId?: string;
   childrenIds?: string[];
+  // Character traits and stats
+  traits?: string[];
+  health?: number;
+  status?: 'alive' | 'deceased' | 'exiled';
   specialty?: string;
   testamentaryWishes?: string;
-  status?: 'alive' | 'deceased' | 'exiled';
+  // Visual and metadata
   isPlayer?: boolean;
   portrait?: string;
   title?: string;
   role?: string;
   marriageStatus?: string;
   lastChildBirthYear?: number;
+  // Stats
   stats: {
     popularity: number | CharacterStat;
     oratory: number | CharacterStat;
     piety: number | CharacterStat;
     martialEducation: number | CharacterStat;
   };
+  // Education information
   education?: {
     type: string;
     specialties: string[];
@@ -45,6 +49,7 @@ export interface Character {
     yearsCompleted?: number;
     totalYears?: number;
     statBonus?: number;
+    speciality?: string;
   };
 }
 

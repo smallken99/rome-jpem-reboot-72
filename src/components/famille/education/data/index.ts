@@ -1,22 +1,19 @@
 
-import { militaryPath } from './paths/militaryPath';
-import { religiousPath } from './paths/religiousPath';
-import { rhetoricPath } from './paths/rhetoricPath';
 import { EducationPath } from '../types/educationTypes';
+import { educationPaths, getEducationPathById, getAllEducationPaths } from './educationPaths';
+import { getAllPreceptors, getPreceptorById, getPreceptorsForType, generatePreceptor } from './preceptors';
 
-export const educationPaths = [militaryPath, religiousPath, rhetoricPath];
-
+// Main function to get education path by type
 export const getEducationPath = (type: string): EducationPath | undefined => {
-  switch (type) {
-    case 'military':
-      return militaryPath;
-    case 'religious':
-      return religiousPath;
-    case 'rhetoric':
-      return rhetoricPath;
-    default:
-      return undefined;
-  }
+  return educationPaths.find(path => path.type === type);
 };
 
-export { militaryPath, religiousPath, rhetoricPath };
+export {
+  educationPaths,
+  getEducationPathById,
+  getAllEducationPaths,
+  getAllPreceptors,
+  getPreceptorById,
+  getPreceptorsForType,
+  generatePreceptor
+};

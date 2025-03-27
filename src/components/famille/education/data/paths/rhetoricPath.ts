@@ -3,47 +3,20 @@ import { EducationPath } from '../../types/educationTypes';
 
 export const rhetoricPath: EducationPath = {
   id: 'rhetoric',
-  type: 'rhetoric',
   name: 'Éducation Rhétorique',
-  description: 'Maîtrise de l\'art oratoire, essentiel pour la vie publique',
-  benefits: [
-    'Éloquence publique',
-    'Capacité de persuasion',
-    'Arguments logiques'
-  ],
-  duration: 3,
-  requiredAttributes: {
-    intelligence: 6,
-    charisma: 7
-  },
+  type: 'rhetoric',
+  description: 'Formation à l\'art oratoire, l\'éloquence et la persuasion',
+  minAge: 13,
+  maxAge: 21,
+  duration: 4,
+  cost: 3000,
+  relatedStat: 'oratory',
   outcomes: {
-    skills: [
-      'Art du discours',
-      'Débat public',
-      'Négociation politique'
-    ],
+    skills: ['Éloquence', 'Débat', 'Persuasion', 'Composition'],
     bonuses: {
-      oratory: 25,
-      popularity: 10
+      oratory: 35,
+      popularity: 15
     }
   },
-  specialties: [
-    'Rhétorique grecque',
-    'Débat public',
-    'Composition littéraire',
-    'Art de la mémoire',
-    'Droit romain',
-    'Éloquence civique',
-    'Histoire politique',
-    'Diplomatie',
-    'Grec ancien'
-  ],
-  relatedStat: 'oratory',
-  minAge: 10,
-  maxAge: 18,
-  cost: 4000,
-  suitableFor: {
-    gender: 'both',
-    status: ['patricien', 'plébéien']
-  }
+  suitableFor: ['male', 'female']
 };

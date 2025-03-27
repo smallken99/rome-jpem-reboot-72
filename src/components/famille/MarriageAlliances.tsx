@@ -4,6 +4,7 @@ import Layout from '@/components/layout/Layout';
 import { PageHeader } from '@/components/ui-custom/PageHeader';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { useCharacters } from './hooks/useCharacters';
+import { Character } from '@/types/character';
 
 interface MarriageAlliancesProps {
   characters: Character[];
