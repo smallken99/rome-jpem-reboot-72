@@ -1,14 +1,14 @@
 
 import React, { createContext, useContext, useState, ReactNode } from 'react';
 import { Character } from '@/types/character';
-import { Child, Preceptor } from '../types/educationTypes';
+import { Child, Preceptor, EducationType } from '../types/educationTypes';
 import { getAllPreceptors, getPreceptorById, getPreceptorsForType } from '../data/preceptors';
 import { toast } from '@/components/ui-custom/toast';
-import { getAllEducationPaths, findEducationPathById } from '../data/educationPaths';
+import { getAllEducationPaths, getEducationPathById } from '../data/educationPaths';
 
 interface EducationContextType {
   characters: Character[];
-  children: Child[]; // Added this property
+  children: Child[]; 
   educatingChildren: string[];
   isEducating: Record<string, boolean>;
   preceptors: Preceptor[];
@@ -52,7 +52,7 @@ export const EducationProvider: React.FC<EducationProviderProps> = ({
       name: char.name,
       age: char.age,
       gender: char.gender,
-      educationType: char.education?.type as any || 'none',
+      educationType: (char.education?.type as EducationType) || 'none',
       progress: 0,
       specialties: char.education?.specialties || [],
       traits: char.traits || []
@@ -165,7 +165,7 @@ export const EducationProvider: React.FC<EducationProviderProps> = ({
       cancelEducation,
       onCharacterUpdate,
       getAllEducationPaths,
-      findEducationPathById
+      findEducationPathById: getEducationPathById // Using getEducationPathById as findEducationPathById
     }}>
       {providerChildren}
     </EducationContext.Provider>

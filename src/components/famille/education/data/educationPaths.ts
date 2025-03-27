@@ -1,232 +1,129 @@
 
-import { EducationPath, EducationType } from '../types/educationTypes';
+import { EducationType } from '../types/educationTypes';
 
-// Education paths data
-export const educationPaths: EducationPath[] = [
+export interface EducationPath {
+  id: string;
+  name: string;
+  type: EducationType;
+  description: string;
+  duration: number;
+  minAge: number;
+  maxAge: number;
+  genderRestriction?: 'male' | 'female';
+  requirements?: string[];
+  relatedStat?: string;
+  outcomes: {
+    skills: string[];
+    bonuses: {
+      [key: string]: number;
+    };
+  };
+  careers: string[];
+}
+
+const educationPathsList: EducationPath[] = [
   {
     id: 'military',
-    type: 'military',
     name: 'Éducation Militaire',
-    description: 'Formation aux arts de la guerre, à la stratégie militaire et au commandement.',
-    benefits: [
-      'Aptitude au commandement militaire',
-      'Respect des légions',
-      'Carrière dans l\'armée'
-    ],
+    type: 'military',
+    description: 'Formation aux arts de la guerre et à la stratégie militaire',
     duration: 5,
-    minAge: 14,
-    maxAge: 25,
-    cost: 15000,
+    minAge: 12,
+    maxAge: 18,
+    genderRestriction: 'male',
     relatedStat: 'martialEducation',
-    statBonus: 50,
-    specialties: [
-      'Tactique de légion',
-      'Combat à l\'épée',
-      'Stratégie navale',
-      'Commandement de cavalerie'
-    ],
-    requirements: {
-      gender: 'male',
-      age: 14
-    },
     outcomes: {
-      skills: [
-        'Commandement de légion',
-        'Maniement des armes',
-        'Tactique militaire'
-      ],
+      skills: ['Combat à l\'épée', 'Tactique', 'Commandement'],
       bonuses: {
-        martialEducation: 50,
-        popularity: 10
+        martialEducation: 35,
+        popularity: 10,
+        oratory: 5
       }
     },
-    suitableFor: {
-      gender: 'male',
-      status: ['Patricien', 'Plébéien']
-    }
-  },
-  {
-    id: 'rhetoric',
-    type: 'rhetoric',
-    name: 'Rhétorique',
-    description: 'Art de l\'éloquence, de la persuasion et du débat public.',
-    benefits: [
-      'Excellence dans les débats politiques',
-      'Persuasion efficace',
-      'Carrière d\'avocat ou de politique'
-    ],
-    duration: 4,
-    minAge: 12,
-    maxAge: 25,
-    cost: 12000,
-    relatedStat: 'oratory',
-    statBonus: 50,
-    specialties: [
-      'Éloquence politique',
-      'Argumentation juridique',
-      'Art oratoire',
-      'Composition littéraire'
-    ],
-    requirements: {
-      age: 12
-    },
-    outcomes: {
-      skills: [
-        'Discours persuasif',
-        'Débat politique',
-        'Composition de plaidoiries'
-      ],
-      bonuses: {
-        oratory: 50,
-        popularity: 20
-      }
-    },
-    suitableFor: {
-      gender: 'all',
-      status: ['Patricien', 'Plébéien']
-    }
-  },
-  {
-    id: 'religious',
-    type: 'religious',
-    name: 'Formation Religieuse',
-    description: 'Étude des rituels, des textes sacrés et des pratiques religieuses romaines.',
-    benefits: [
-      'Respect des institutions religieuses',
-      'Connaissance des présages et augures',
-      'Carrière dans les collèges sacerdotaux'
-    ],
-    duration: 3,
-    minAge: 10,
-    maxAge: 30,
-    cost: 10000,
-    relatedStat: 'piety',
-    statBonus: 50,
-    specialties: [
-      'Rituel pontifical',
-      'Interprétation des augures',
-      'Liturgie romaine',
-      'Vestales'
-    ],
-    requirements: {
-      age: 10
-    },
-    outcomes: {
-      skills: [
-        'Interprétation des présages',
-        'Conduite de rituels',
-        'Connaissance des divinités'
-      ],
-      bonuses: {
-        piety: 50,
-        popularity: 15
-      }
-    },
-    suitableFor: {
-      gender: 'all',
-      status: ['Patricien', 'Plébéien']
-    }
-  },
-  {
-    id: 'academic',
-    type: 'academic',
-    name: 'Études Académiques',
-    description: 'Formation approfondie en philosophie, mathématiques, histoire et littérature.',
-    benefits: [
-      'Sagesse et culture générale',
-      'Respect des intellectuels',
-      'Carrière d\'enseignant ou de conseiller'
-    ],
-    duration: 6,
-    minAge: 12,
-    maxAge: 25,
-    cost: 18000,
-    relatedStat: 'oratory',
-    statBonus: 40,
-    specialties: [
-      'Philosophie grecque',
-      'Mathématiques',
-      'Histoire romaine',
-      'Littérature'
-    ],
-    requirements: {
-      age: 12
-    },
-    outcomes: {
-      skills: [
-        'Raisonnement philosophique',
-        'Érudition historique',
-        'Analyse littéraire'
-      ],
-      bonuses: {
-        oratory: 40,
-        piety: 10
-      }
-    },
-    suitableFor: {
-      gender: 'all',
-      status: ['Patricien']
-    }
+    careers: ['Légat', 'Tribun Militaire', 'Centurion']
   },
   {
     id: 'political',
+    name: 'Éducation Politique',
     type: 'political',
-    name: 'Formation Politique',
-    description: 'Apprentissage des rouages de la politique romaine, des institutions et du droit.',
-    benefits: [
-      'Compréhension des institutions',
-      'Réseau politique',
-      'Carrière sénatoriale'
-    ],
-    duration: 5,
-    minAge: 16,
-    maxAge: 30,
-    cost: 20000,
-    relatedStat: 'popularity',
-    statBonus: 40,
-    specialties: [
-      'Droit romain',
-      'Administration provinciale',
-      'Diplomatie',
-      'Finances publiques'
-    ],
-    requirements: {
-      age: 16
-    },
+    description: 'Formation au droit romain et à l\'art oratoire',
+    duration: 4,
+    minAge: 10,
+    maxAge: 20,
+    relatedStat: 'oratory',
     outcomes: {
-      skills: [
-        'Négociation politique',
-        'Connaissance juridique',
-        'Administration publique'
-      ],
+      skills: ['Rhétorique', 'Droit romain', 'Débat'],
       bonuses: {
-        popularity: 40,
-        oratory: 20
+        oratory: 35,
+        popularity: 20,
+        piety: 5
       }
     },
-    suitableFor: {
-      gender: 'male',
-      status: ['Patricien']
-    }
+    careers: ['Sénateur', 'Avocat', 'Questeur']
+  },
+  {
+    id: 'religious',
+    name: 'Éducation Religieuse',
+    type: 'religious',
+    description: 'Formation aux rites religieux et aux traditions romaines',
+    duration: 3,
+    minAge: 8,
+    maxAge: 20,
+    relatedStat: 'piety',
+    outcomes: {
+      skills: ['Rituels', 'Connaissance des divinités', 'Divination'],
+      bonuses: {
+        piety: 40,
+        popularity: 15,
+        oratory: 5
+      }
+    },
+    careers: ['Prêtre', 'Augure', 'Vestale']
+  },
+  {
+    id: 'philosophical',
+    name: 'Éducation Philosophique',
+    type: 'philosophical',
+    description: 'Étude des grands philosophes et de la sagesse antique',
+    duration: 4,
+    minAge: 12,
+    maxAge: 22,
+    relatedStat: 'oratory',
+    outcomes: {
+      skills: ['Logique', 'Éthique', 'Métaphysique'],
+      bonuses: {
+        oratory: 25,
+        piety: 20,
+        popularity: 5
+      }
+    },
+    careers: ['Philosophe', 'Tuteur', 'Conseiller']
+  },
+  {
+    id: 'artistic',
+    name: 'Éducation Artistique',
+    type: 'artistic',
+    description: 'Formation aux arts, à la poésie et à la musique',
+    duration: 3,
+    minAge: 8,
+    maxAge: 18,
+    relatedStat: 'popularity',
+    outcomes: {
+      skills: ['Poésie', 'Musique', 'Sculpture'],
+      bonuses: {
+        popularity: 30,
+        oratory: 15,
+        piety: 10
+      }
+    },
+    careers: ['Poète', 'Sculpteur', 'Musicien']
   }
 ];
 
-// Helper function to get an education path by id
-export const getEducationPathById = (id: string): EducationPath | undefined => {
-  return educationPaths.find(path => path.id === id);
-};
-
-// Helper function to get an education path by type
-export const getEducationPath = (type: string): EducationPath | undefined => {
-  return educationPaths.find(path => path.type === type);
-};
-
-// Get all education paths
 export const getAllEducationPaths = (): EducationPath[] => {
-  return educationPaths;
+  return educationPathsList;
 };
 
-// Helper function to find education path by ID
-export const findEducationPathById = (id: string): EducationPath | undefined => {
-  return educationPaths.find(path => path.id === id);
+export const getEducationPathById = (id: string): EducationPath | undefined => {
+  return educationPathsList.find(p => p.id === id);
 };

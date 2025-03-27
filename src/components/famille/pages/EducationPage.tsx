@@ -2,19 +2,24 @@
 import React from 'react';
 import Layout from '@/components/layout/Layout';
 import { PageHeader } from '@/components/ui-custom/PageHeader';
-import { Education } from '@/components/famille/Education';
-import { characters } from '@/data/characters';
+import { FamilyEducation } from '../education/FamilyEducation';
+import { Character } from '@/types/character';
 
-export const EducationPage: React.FC = () => {
+interface EducationPageProps {
+  characters: Character[];
+}
+
+const EducationPage: React.FC<EducationPageProps> = ({ characters }) => {
   return (
     <Layout>
       <PageHeader 
-        title="Éducation des Enfants"
-        subtitle="Formez la prochaine génération pour perpétuer l'héritage familial"
+        title="Éducation Familiale" 
+        subtitle="Formez la prochaine génération de votre famille"
       />
-      <div className="roman-card">
-        <Education characters={characters} />
-      </div>
+      
+      <FamilyEducation />
     </Layout>
   );
 };
+
+export default EducationPage;

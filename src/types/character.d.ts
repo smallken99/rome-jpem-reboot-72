@@ -6,6 +6,7 @@ export interface Character {
   lastName?: string;
   age: number;
   gender: 'male' | 'female';
+  // Added missing properties
   relation?: string;
   traits?: string[];
   health?: number;
@@ -13,15 +14,6 @@ export interface Character {
   parentIds?: string[];
   spouseId?: string;
   childrenIds?: string[];
-  education?: {
-    type: string;
-    specialties: string[];
-    mentor: string | null;
-    completed?: boolean;
-    completedAt?: string;
-  };
-  educationType?: string;
-  specialties?: string[];
   specialty?: string;
   testamentaryWishes?: string;
   status?: 'alive' | 'deceased' | 'exiled';
@@ -36,6 +28,13 @@ export interface Character {
     oratory: number | CharacterStat;
     piety: number | CharacterStat;
     martialEducation: number | CharacterStat;
+  };
+  education?: {
+    type: string;
+    specialties: string[];
+    mentor: string | null;
+    completed?: boolean;
+    completedAt?: string;
   };
   currentEducation?: {
     type: string;
