@@ -27,6 +27,15 @@ export interface SocialStabilityCardProps {
   onUpdate: (patriciens: number, plebéiens: number) => void;
 }
 
+export interface EconomicStabilityCardProps {
+  economie: number;
+  onUpdate: (economie: number) => void;
+}
+
+export interface EquilibreChartProps {
+  data: any;
+}
+
 export interface RecentEventsTableProps {
   events: PoliticalEvent[];
   formatDate: (date: string) => string;

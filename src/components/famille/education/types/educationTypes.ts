@@ -81,6 +81,8 @@ export interface EducationPath {
   relatedStat?: string;
   minAge?: number;
   maxAge?: number;
+  skills?: string[];
+  bonuses?: any;
 }
 
 export interface ChildEducation {
@@ -108,6 +110,7 @@ export interface EducationRecord {
   pathType?: string;
   status?: string;
   startYear?: number;
+  preceptorId?: string;
 }
 
 export interface EducationHistory {
@@ -129,6 +132,7 @@ export interface EducationFormData {
   type?: string;
   preceptorId?: string;
   specialties?: string[];
+  pathType?: string;
 }
 
 export interface PreceptorsByType {

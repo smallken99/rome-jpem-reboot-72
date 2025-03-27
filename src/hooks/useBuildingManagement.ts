@@ -1,19 +1,8 @@
-import { useState } from 'react';
-import { v4 as uuidv4 } from 'uuid';
-import { PropertyType, PropertyUpgrade } from '@/types/proprietes';
 
-export interface Building {
-  id: string;
-  type: string;
-  name: string;
-  location: string;
-  value: number;
-  maintenance: number;
-  condition: number;
-  workers?: number;
-  securityLevel?: number;
-  maintenanceLevel?: number;
-}
+import { useState, useCallback } from 'react';
+import { v4 as uuidv4 } from 'uuid';
+import { Property, PropertyUpgrade, Building } from '@/types/proprietes';
+import { toast } from '@/components/ui-custom/toast';
 
 export interface PropertyStats {
   totalProperties: number;
@@ -24,112 +13,111 @@ export interface PropertyStats {
   ruralProperties: number;
   commercialProperties: number;
   yearlyIncome?: number;
+  yearlyMaintenance?: number;
 }
 
-export const useBuildingManagement = (initialBuildings: Building[] = []) => {
-  const [buildings, setBuildings] = useState<Building[]>(initialBuildings);
-  const [selectedBuilding, setSelectedBuilding] = useState<Building>(buildings[0] || {
-    id: 'default',
-    name: '',
-    type: 'domus',
-    size: 0,
-    cost: 0,
-    value: 0,
-    income: 0,
-    maintenance: 0,
-    status: 'good',
-    description: '',
-    location: ''
-  });
-
-  const stats: PropertyStats = {
-    totalValue: buildings.reduce((sum, bldg) => sum + bldg.value, 0),
-    yearlyIncome: buildings.reduce((sum, bldg) => sum + bldg.income, 0),
-    yearlyMaintenance: buildings.reduce((sum, bldg) => sum + bldg.maintenance, 0),
-    netYearlyProfit: buildings.reduce((sum, bldg) => sum + bldg.income - bldg.maintenance, 0),
-    propertyCount: buildings.length,
-    buildingCount: buildings.length,
-    upgradePotential: 0
-  };
-
-  const addBuilding = (newBuilding: Omit<Building, 'id'>) => {
-    const id = `building-${uuidv4()}`;
-    const building = { ...newBuilding, id };
-    setBuildings(prev => [...prev, building]);
-    toast.success(`${building.name} ajouté avec succès`);
-    return id;
-  };
-
-  const sellBuilding = (buildingId: string) => {
+export const useBuildingManagement = () => {
+  const [buildings, setBuildings] = useState<Building[]>([]);
+  const [selectedBuilding, setSelectedBuilding] = useState<Building>({} as Building);
+  
+  // Calculate property statistics
+  const calculateStats = useCallback((): PropertyStats => {
+    return {
+      totalProperties: buildings.length,
+      totalValue: buildings.reduce((sum, b) => sum + b.value, 0),
+      totalIncome: buildings.reduce((sum, b) => sum + (b.income || 0), 0),
+      totalMaintenance: buildings.reduce((sum, b) => sum + b.maintenance, 0),
+      urbanProperties: buildings.filter(b => b.type === 'urban' || b.type === 'domus' || b.type === 'insula').length,
+      ruralProperties: buildings.filter(b => b.type === 'rural' || b.type === 'villa').length,
+      commercialProperties: buildings.filter(b => b.type === 'commercial').length,
+      yearlyIncome: buildings.reduce((sum, b) => sum + (b.income || 0) * 12, 0)
+    };
+  }, [buildings]);
+  
+  // Add a new building
+  const addBuilding = useCallback((newBuilding: Omit<Building, 'id'>): string => {
+    const buildingWithId = {
+      ...newBuilding,
+      id: uuidv4()
+    };
+    
+    setBuildings(prev => [...prev, buildingWithId as Building]);
+    return buildingWithId.id;
+  }, []);
+  
+  // Sell an existing building
+  const sellBuilding = useCallback((buildingId: string): number => {
     const building = buildings.find(b => b.id === buildingId);
     if (!building) return 0;
     
+    const sellValue = Math.floor(building.value * 0.7); // 70% of value
     setBuildings(prev => prev.filter(b => b.id !== buildingId));
-    toast.success(`${building.name} vendu avec succès`);
-    return building.value;
-  };
-
-  const maintainBuilding = (buildingId: string, amount: number) => {
-    const buildingIndex = buildings.findIndex(b => b.id === buildingId);
-    if (buildingIndex === -1) return false;
     
-    setBuildings(prev => {
-      const updated = [...prev];
-      const building = { ...updated[buildingIndex] };
-      building.status = 'good';
-      updated[buildingIndex] = building;
-      return updated;
-    });
+    toast.success(`Bâtiment vendu pour ${sellValue} deniers`);
+    return sellValue;
+  }, [buildings]);
+  
+  // Maintain a building
+  const maintainBuilding = useCallback((buildingId: string, amount: number): boolean => {
+    const building = buildings.find(b => b.id === buildingId);
+    if (!building) return false;
     
-    toast.success(`Entretien effectué avec succès`);
-    return true;
-  };
-
-  const installUpgrade = (buildingId: string, upgradeId: string) => {
-    const buildingIndex = buildings.findIndex(b => b.id === buildingId);
-    if (buildingIndex === -1) return false;
+    // Maintenance improves condition by 10% per 1000 deniers
+    const conditionImprovement = Math.min(10, Math.floor(amount / 1000) * 10);
+    const newCondition = Math.min(100, building.condition + conditionImprovement);
     
-    setBuildings(prev => {
-      const updated = [...prev];
-      const building = { ...updated[buildingIndex] };
-      
-      if (!building.upgrades) building.upgrades = [];
-      
-      building.upgrades = building.upgrades.map(upgrade => 
-        upgrade.id === upgradeId ? { ...upgrade, installed: true } : upgrade
-      );
-      
-      updated[buildingIndex] = building;
-      return updated;
-    });
+    setBuildings(prev => prev.map(b => {
+      if (b.id === buildingId) {
+        return {
+          ...b,
+          condition: newCondition,
+          status: newCondition > 80 ? 'excellent' : 
+                 newCondition > 60 ? 'good' : 
+                 newCondition > 40 ? 'fair' : 
+                 newCondition > 20 ? 'poor' : 'dilapidated'
+        };
+      }
+      return b;
+    }));
     
-    toast.success(`Amélioration installée avec succès`);
+    toast.success(`Bâtiment entretenu, condition améliorée à ${newCondition}%`);
     return true;
-  };
-
-  const updateMaintenanceEnabled = (buildingId: string, enabled: boolean) => {
+  }, [buildings]);
+  
+  // Install upgrade on building
+  const installUpgrade = useCallback((buildingId: string, upgradeId: string): boolean => {
+    const building = buildings.find(b => b.id === buildingId);
+    if (!building) return false;
+    
+    const upgrades = building.upgrades || [];
+    const upgradeExists = upgrades.some(u => u.id === upgradeId);
+    if (upgradeExists) {
+      upgrades.forEach(u => {
+        if (u.id === upgradeId) u.installed = true;
+      });
+    }
+    
+    setBuildings(prev => prev.map(b => {
+      if (b.id === buildingId) {
+        return { ...b, upgrades };
+      }
+      return b;
+    }));
+    
+    toast.success('Amélioration installée avec succès');
     return true;
-  };
-
-  const updateBuildingCondition = (buildingId: string, condition: number) => {
-    return true;
-  };
-
-  const assignSlaves = (buildingId: string, count: number) => {
-    return true;
-  };
-
+  }, [buildings]);
+  
   return {
     buildings,
     selectedBuilding,
     setSelectedBuilding,
-    stats,
+    stats: calculateStats(),
     addBuilding,
     sellBuilding,
     maintainBuilding,
-    installUpgrade,
-    updateMaintenanceEnabled,
-    updateBuildingCondition,
-    assignSlaves
+    installUpgrade
   };
 };
+
+export default useBuildingManagement;
