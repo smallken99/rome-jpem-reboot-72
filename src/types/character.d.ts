@@ -21,8 +21,8 @@ export interface Character {
     completedAt?: string;
   };
   educationType?: string;
-  specialty?: string;
   specialties?: string[];
+  specialty?: string;
   testamentaryWishes?: string;
   status?: 'alive' | 'deceased' | 'exiled';
   isPlayer?: boolean;

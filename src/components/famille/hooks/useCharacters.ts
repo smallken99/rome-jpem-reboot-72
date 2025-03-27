@@ -1,3 +1,4 @@
+
 import { useState, useEffect, useCallback } from 'react';
 import { Character } from '@/types/character';
 import { generateRomanName } from '../utils/naming/romanNameGenerator';
@@ -69,7 +70,8 @@ const initialCharacters: Character[] = [
     stats: {
       popularity: { value: 45, name: 'Popularité', maxValue: 100, icon: 'popularity', description: 'Votre réputation parmi le peuple', color: 'gold' },
       oratory: { value: 55, name: 'Éloquence', maxValue: 100, icon: 'oratory', description: 'Votre capacité à persuader', color: 'terracotta' },
-      piety: { value: 70, name: 'Piété', maxValue: 100, icon: 'piety', description: 'Votre dévotion aux dieux', color: 'navy' }
+      piety: { value: 70, name: 'Piété', maxValue: 100, icon: 'piety', description: 'Votre dévotion aux dieux', color: 'navy' },
+      martialEducation: { value: 0, name: 'Éducation Martiale', maxValue: 100, icon: 'martialEducation', description: 'Votre formation militaire', color: 'red' }
     }
   }
 ];

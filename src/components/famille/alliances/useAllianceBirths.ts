@@ -14,7 +14,7 @@ export const useAllianceBirths = (
   // Trouver les couples mariés
   const marriedCouples = characters.filter(c => 
     c.gender === 'female' && 
-    (c.relation?.includes('Épouse') || c.spouseId)
+    ((c.relation && c.relation.includes('Épouse')) || c.spouseId)
   ).map(wife => {
     const husband = characters.find(h => 
       (h.id === wife.spouseId) || 
@@ -47,7 +47,7 @@ export const useAllianceBirths = (
   
   // Filtrer les alliances actives
   const activeAlliances = characters
-    .filter(c => c.gender === 'female' && c.relation?.includes('Épouse'))
+    .filter(c => c.gender === 'female' && c.relation && c.relation.includes('Épouse'))
     .map(c => c.name.split(' ')[1])
     .filter(Boolean);
   

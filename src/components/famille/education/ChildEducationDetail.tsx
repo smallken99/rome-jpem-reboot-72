@@ -21,19 +21,22 @@ export const ChildEducationDetail: React.FC = () => {
   const child = localCharacters.find(c => c.id === childId);
   
   const [selectedEducationType, setSelectedEducationType] = useState<string>(
-    child?.educationType || 'none'
+    child?.education?.type || 'none'
   );
   
   const [selectedSpecialties, setSelectedSpecialties] = useState<string[]>(
-    child?.specialties || []
+    child?.education?.specialties || []
   );
   
   const handleSaveEducation = () => {
     if (!childId || !child) return;
     
     updateCharacter(childId, {
-      educationType: selectedEducationType,
-      specialties: selectedSpecialties
+      education: {
+        type: selectedEducationType,
+        specialties: selectedSpecialties,
+        mentor: null
+      }
     });
     
     toast.success("Éducation mise à jour avec succès");

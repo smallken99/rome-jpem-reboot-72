@@ -1,0 +1,75 @@
+
+import React from 'react';
+import { useNavigate } from 'react-router-dom';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { 
+  Users, 
+  BookOpen, 
+  HeartHandshake, 
+  Scroll, 
+  GraduationCap, 
+  TreePine, 
+  Crown
+} from 'lucide-react';
+import { ActionButton } from '@/components/ui-custom/ActionButton';
+
+export const FamilyActions: React.FC = () => {
+  const navigate = useNavigate();
+  
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle className="font-cinzel">Actions Familiales</CardTitle>
+        <CardDescription>
+          Gérez votre famille et prenez des décisions importantes pour son avenir
+        </CardDescription>
+      </CardHeader>
+      <CardContent>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          <ActionButton
+            icon={<TreePine className="h-5 w-5" />}
+            label="Arbre Généalogique"
+            description="Visualisez l'histoire de votre famille"
+            onClick={() => navigate('/famille/tree')}
+          />
+          
+          <ActionButton
+            icon={<HeartHandshake className="h-5 w-5" />}
+            label="Alliances Matrimoniales"
+            description="Établissez des alliances par le mariage"
+            onClick={() => navigate('/famille/alliances')}
+          />
+          
+          <ActionButton
+            icon={<GraduationCap className="h-5 w-5" />}
+            label="Éducation"
+            description="Formez la prochaine génération"
+            onClick={() => navigate('/famille/education')}
+          />
+          
+          <ActionButton
+            icon={<Scroll className="h-5 w-5" />}
+            label="Héritage"
+            description="Planifiez votre succession"
+            onClick={() => navigate('/famille/inheritance')}
+          />
+          
+          <ActionButton
+            icon={<Crown className="h-5 w-5" />}
+            label="Réputation"
+            description="Suivez la réputation de votre famille"
+            onClick={() => navigate('/famille/reputation')}
+          />
+          
+          <ActionButton
+            icon={<Users className="h-5 w-5" />}
+            label="Relations"
+            description="Gérez les relations avec d'autres familles"
+            onClick={() => navigate('/famille/relations')}
+          />
+        </div>
+      </CardContent>
+    </Card>
+  );
+};

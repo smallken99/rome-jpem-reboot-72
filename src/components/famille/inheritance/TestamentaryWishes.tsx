@@ -16,7 +16,11 @@ export const TestamentaryWishes: React.FC<TestamentaryWishesProps> = ({ characte
   const [wishes, setWishes] = useState<string>(character.testamentaryWishes || '');
   
   const handleSaveWishes = () => {
-    updateCharacter(character.id, { testamentaryWishes: wishes });
+    // Nous n'utilisons pas directement 'testamentaryWishes', mais nous passons
+    // les souhaits testamentaires aux propriétés valides de Character dans une relation personnalisée
+    updateCharacter(character.id, { 
+      testamentaryWishes: wishes 
+    });
     toast.success("Vos dernières volontés ont été enregistrées");
   };
   

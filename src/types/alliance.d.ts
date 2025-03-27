@@ -1,6 +1,6 @@
 
 export type AllianceType = 'matrimoniale' | 'politique' | 'militaire' | 'commerciale';
-export type AllianceStatus = 'active' | 'pending' | 'broken' | 'en négociation' | 'inactive' | 'rompue';
+export type AllianceStatus = 'active' | 'pending' | 'broken' | 'en négociation' | 'inactive' | 'rompue' | 'En délibération' | 'promulguée' | 'adoptée' | 'proposée' | 'rejetée';
 
 export interface Alliance {
   id: string;

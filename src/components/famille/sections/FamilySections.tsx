@@ -1,68 +1,101 @@
 
 import React from 'react';
-import { RomanCard } from '@/components/ui-custom/RomanCard';
-import { MarriageAlliances } from '@/components/famille/MarriageAlliances';
-import { Inheritance } from '@/components/famille/Inheritance';
-import { Education } from '@/components/famille/Education';
-import { FamilyTree } from '@/components/famille/FamilyTree';
+import { Button } from '@/components/ui/button';
+import { useNavigate } from 'react-router-dom';
+import { ChevronRight } from 'lucide-react';
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import { FamilyTree } from '../FamilyTree';
+import { MarriageAlliances } from '../MarriageAlliances';
+import { Education } from '../Education';
+import { Inheritance } from '../Inheritance';
+import { useCharacters } from '../hooks/useCharacters';
 import { Character } from '@/types/character';
 
-interface FamilySectionsProps {
-  characters?: Character[];
-  onChildBirth?: (child: Character) => void;
-  onNameChange?: (characterId: string, newName: string) => void;
-}
-
-export const FamilySections: React.FC<FamilySectionsProps> = ({ 
-  characters = [], 
-  onChildBirth,
-  onNameChange
-}) => {
+export const FamilySections: React.FC = () => {
+  const navigate = useNavigate();
+  const { localCharacters, handleChildBirth, handleNameChange, updateCharacter } = useCharacters();
+  
+  // Adaptateur pour le callback d'onChildBirth
+  const handleOnChildBirth = (parentIds?: string[]) => {
+    return handleChildBirth(parentIds);
+  };
+  
   return (
-    <>
-      <RomanCard className="mb-6">
-        <RomanCard.Header>
-          <h3 className="font-cinzel text-lg text-rome-navy">Arbre Généalogique</h3>
-        </RomanCard.Header>
-        <RomanCard.Content>
-          <FamilyTree characters={characters} />
-        </RomanCard.Content>
-      </RomanCard>
-    
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-        <RomanCard className="h-full">
-          <RomanCard.Header>
-            <h3 className="font-cinzel text-lg text-rome-navy">Mariages et Alliances</h3>
-          </RomanCard.Header>
-          <RomanCard.Content>
+    <div className="space-y-10">
+      <section>
+        <Card>
+          <CardHeader>
+            <CardTitle>Arbre Généalogique</CardTitle>
+            <CardDescription>Visualisez les liens familiaux et l'histoire de votre lignée</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <FamilyTree characters={localCharacters} />
+          </CardContent>
+          <CardFooter>
+            <Button variant="secondary" className="w-full" onClick={() => navigate('/famille/tree')}>
+              Voir en détail <ChevronRight className="h-4 w-4 ml-2" />
+            </Button>
+          </CardFooter>
+        </Card>
+      </section>
+      
+      <section>
+        <Card>
+          <CardHeader>
+            <CardTitle>Alliances Matrimoniales</CardTitle>
+            <CardDescription>Établissez des liens avec d'autres familles de Rome</CardDescription>
+          </CardHeader>
+          <CardContent>
             <MarriageAlliances 
-              characters={characters}
-              onChildBirth={onChildBirth}
+              characters={localCharacters}
+              onChildBirth={handleOnChildBirth}
             />
-          </RomanCard.Content>
-        </RomanCard>
-        
-        <RomanCard className="h-full">
-          <RomanCard.Header>
-            <h3 className="font-cinzel text-lg text-rome-navy">Héritage Familial</h3>
-          </RomanCard.Header>
-          <RomanCard.Content>
+          </CardContent>
+          <CardFooter>
+            <Button variant="secondary" className="w-full" onClick={() => navigate('/famille/alliances')}>
+              Gérer les alliances <ChevronRight className="h-4 w-4 ml-2" />
+            </Button>
+          </CardFooter>
+        </Card>
+      </section>
+      
+      <section>
+        <Card>
+          <CardHeader>
+            <CardTitle>Éducation</CardTitle>
+            <CardDescription>Formez la prochaine génération selon vos valeurs</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <Education 
+              characters={localCharacters}
+              onNameChange={handleNameChange}
+              onCharacterUpdate={updateCharacter}
+            />
+          </CardContent>
+          <CardFooter>
+            <Button variant="secondary" className="w-full" onClick={() => navigate('/famille/education')}>
+              Gérer l'éducation <ChevronRight className="h-4 w-4 ml-2" />
+            </Button>
+          </CardFooter>
+        </Card>
+      </section>
+      
+      <section>
+        <Card>
+          <CardHeader>
+            <CardTitle>Héritage</CardTitle>
+            <CardDescription>Planifiez votre succession et l'avenir de votre lignée</CardDescription>
+          </CardHeader>
+          <CardContent>
             <Inheritance />
-          </RomanCard.Content>
-        </RomanCard>
-      </div>
-
-      <RomanCard className="mb-6">
-        <RomanCard.Header>
-          <h3 className="font-cinzel text-lg text-rome-navy">Éducation des Enfants</h3>
-        </RomanCard.Header>
-        <RomanCard.Content>
-          <Education 
-            characters={characters}
-            onNameChange={onNameChange}
-          />
-        </RomanCard.Content>
-      </RomanCard>
-    </>
+          </CardContent>
+          <CardFooter>
+            <Button variant="secondary" className="w-full" onClick={() => navigate('/famille/inheritance')}>
+              Gérer l'héritage <ChevronRight className="h-4 w-4 ml-2" />
+            </Button>
+          </CardFooter>
+        </Card>
+      </section>
+    </div>
   );
 };

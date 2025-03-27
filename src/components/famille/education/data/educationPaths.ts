@@ -1,123 +1,189 @@
 
-// Education paths data
-export interface EducationPath {
-  id: string;
-  type: string;
-  name: string;
-  description: string;
-  benefits: string[];
-  duration: number;
-  minAge: number;
-  maxAge: number;
-  cost: number;
-  relatedStat: string;
-  statBonus?: number;
-  specialties: string[];
-  requirements?: any;
-  outcomes: {
-    skills: string[];
-    bonuses: Record<string, number>;
-  };
-  suitableFor: {
-    gender: string;
-    status: string[];
-  };
-}
+import { EducationPath } from '../types/educationTypes';
 
-const educationPaths: EducationPath[] = [
+export const educationPaths: EducationPath[] = [
   {
     id: 'military',
     type: 'military',
     name: 'Éducation Militaire',
-    description: 'Formation aux arts de la guerre et du commandement',
+    description: 'Formation aux arts de la guerre et aux stratégies militaires.',
     benefits: [
-      'Capacité à diriger des légions',
-      'Compétences en stratégie militaire',
-      'Respect des soldats'
+      'Améliore l\'éducation martiale',
+      'Ouvre l\'accès aux carrières militaires',
+      'Développe les compétences de commandement'
     ],
-    duration: 4,
+    duration: 3,
     minAge: 12,
     maxAge: 18,
-    cost: 5000,
+    cost: 500,
     relatedStat: 'martialEducation',
     statBonus: 15,
-    specialties: ['Combat à l\'épée', 'Tactique de bataille', 'Commandement de légion'],
+    specialties: ['Tactique', 'Combat rapproché', 'Leadership militaire', 'Stratégie'],
+    requirements: {
+      age: 12,
+      gender: 'male',
+      cost: 500,
+      duration: '3 ans'
+    },
     outcomes: {
-      skills: ['Tactique militaire', 'Commandement', 'Discipline'],
+      skills: ['Commandement de légion', 'Tactique de siège', 'Combat à l\'épée'],
       bonuses: {
         martialEducation: 15,
-        popularity: 5
+        leadership: 10
       }
     },
     suitableFor: {
       gender: 'male',
-      status: ['citizen', 'patrician']
+      status: ['patrician', 'equestrian']
     }
   },
   {
     id: 'rhetoric',
     type: 'rhetoric',
-    name: 'Rhétorique et Éloquence',
-    description: 'Maîtrise de l\'art de la persuasion et du discours public',
+    name: 'Rhétorique',
+    description: 'Maîtrise de l\'art oratoire et de la persuasion.',
     benefits: [
-      'Excellence dans les débats au Sénat',
-      'Capacité à persuader les assemblées populaires',
-      'Compétences dans les négociations'
+      'Améliore l\'éloquence',
+      'Développe les compétences de débat',
+      'Prépare aux carrières politiques'
     ],
     duration: 3,
-    minAge: 10,
+    minAge: 12,
     maxAge: 18,
-    cost: 4000,
+    cost: 450,
     relatedStat: 'oratory',
     statBonus: 15,
-    specialties: ['Discours publics', 'Argumentation juridique', 'Éloquence politique'],
+    specialties: ['Éloquence', 'Débat politique', 'Droit romain', 'Négociation'],
+    requirements: {
+      age: 12,
+      cost: 450,
+      duration: '3 ans'
+    },
     outcomes: {
-      skills: ['Persuasion', 'Débat', 'Composition de discours'],
+      skills: ['Discours public', 'Argumentaire juridique', 'Négociation politique'],
       bonuses: {
         oratory: 15,
-        popularity: 8
+        popularity: 10
       }
     },
     suitableFor: {
       gender: 'both',
-      status: ['citizen', 'patrician']
+      status: ['patrician', 'equestrian', 'plebeian']
+    }
+  },
+  {
+    id: 'academic',
+    type: 'academic',
+    name: 'Académique',
+    description: 'Étude des arts, de la philosophie et des sciences.',
+    benefits: [
+      'Développe l\'érudition',
+      'Améliore les connaissances générales',
+      'Prépare aux carrières intellectuelles'
+    ],
+    duration: 3,
+    minAge: 12,
+    maxAge: 20,
+    cost: 400,
+    relatedStat: 'oratory',
+    statBonus: 10,
+    specialties: ['Littérature', 'Philosophie', 'Histoire', 'Mathématiques'],
+    requirements: {
+      age: 12,
+      cost: 400,
+      duration: '3 ans'
+    },
+    outcomes: {
+      skills: ['Écriture', 'Philosophie stoïcienne', 'Connaissance historique'],
+      bonuses: {
+        oratory: 10,
+        piety: 5
+      }
+    },
+    suitableFor: {
+      gender: 'both',
+      status: ['patrician', 'equestrian', 'plebeian']
     }
   },
   {
     id: 'religious',
     type: 'religious',
-    name: 'Éducation Religieuse',
-    description: 'Formation aux traditions sacrées et aux rites religieux romains',
+    name: 'Religieuse',
+    description: 'Formation aux rites, traditions et pratiques religieuses romaines.',
     benefits: [
-      'Connaissance des rites et cérémonies',
-      'Interprétation des présages',
-      'Respect du clergé'
+      'Améliore la piété',
+      'Développe la connaissance des rites',
+      'Prépare aux carrières religieuses'
     ],
     duration: 3,
-    minAge: 8,
-    maxAge: 16,
-    cost: 3000,
+    minAge: 10,
+    maxAge: 18,
+    cost: 350,
     relatedStat: 'piety',
-    statBonus: 20,
-    specialties: ['Rites et cérémonies', 'Divination', 'Connaissance des cultes'],
+    statBonus: 15,
+    specialties: ['Rituel', 'Augure', 'Théologie', 'Divination'],
+    requirements: {
+      age: 10,
+      cost: 350,
+      duration: '3 ans'
+    },
     outcomes: {
-      skills: ['Rituel religieux', 'Divination', 'Connaissance théologique'],
+      skills: ['Présage divin', 'Rituel sacré', 'Interprétation des augures'],
       bonuses: {
-        piety: 20,
-        popularity: 3
+        piety: 15,
+        oratory: 5
       }
     },
     suitableFor: {
       gender: 'both',
-      status: ['citizen', 'patrician']
+      status: ['patrician', 'equestrian', 'plebeian']
+    }
+  },
+  {
+    id: 'political',
+    type: 'political',
+    name: 'Politique',
+    description: 'Formation aux rouages du système politique romain.',
+    benefits: [
+      'Améliore la compréhension politique',
+      'Développe les réseaux d\'influence',
+      'Prépare au cursus honorum'
+    ],
+    duration: 3,
+    minAge: 14,
+    maxAge: 20,
+    cost: 500,
+    relatedStat: 'popularity',
+    statBonus: 15,
+    specialties: ['Administration', 'Diplomatie', 'Droit public', 'Gouvernance'],
+    requirements: {
+      age: 14,
+      gender: 'male',
+      cost: 500,
+      duration: '3 ans'
+    },
+    outcomes: {
+      skills: ['Administration publique', 'Négociation diplomatique', 'Droit constitutionnel'],
+      bonuses: {
+        popularity: 15,
+        oratory: 10
+      }
+    },
+    suitableFor: {
+      gender: 'male',
+      status: ['patrician', 'equestrian']
     }
   }
 ];
 
-export const getAllEducationPaths = (): EducationPath[] => {
-  return educationPaths;
-};
+export function getEducationPath(type: string): EducationPath | undefined {
+  return educationPaths.find(path => path.type === type);
+}
 
-export const findEducationPathById = (id: string): EducationPath | undefined => {
-  return educationPaths.find(path => path.id === id || path.type === id);
-};
+export function getAllEducationPaths(): EducationPath[] {
+  return educationPaths;
+}
+
+export function getEducationPathById(id: string): EducationPath | undefined {
+  return educationPaths.find(path => path.id === id);
+}
