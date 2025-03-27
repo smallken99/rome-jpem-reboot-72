@@ -1,5 +1,51 @@
+import { ImportanceType, Loi, LoiState, GameDate } from '@/components/maitrejeu/types/lois';
 
-import { Loi, LoiState, LoiType, ImportanceType } from '@/components/maitrejeu/types/lois';
+// Function to convert string-based effects to array if needed
+export function ensureArrayFormat(value: string | string[] | undefined): string[] {
+  if (!value) return [];
+  if (Array.isArray(value)) return value;
+  if (typeof value === 'string') {
+    if (value.trim() === '') return [];
+    // Try to detect if it's a JSON array format
+    if (value.startsWith('[') && value.endsWith(']')) {
+      try {
+        const parsed = JSON.parse(value);
+        if (Array.isArray(parsed)) return parsed;
+      } catch (e) {
+        // If parsing fails, treat as single item
+      }
+    }
+    // Return as single item array
+    return [value];
+  }
+  return [];
+}
+
+// Function to safely handle GameDate conversion
+export function ensureGameDateFormat(date: string | GameDate | undefined): GameDate {
+  if (!date) return { year: new Date().getFullYear(), season: 'Spring' };
+  
+  if (typeof date === 'string') {
+    try {
+      // Try to parse as JSON
+      const parsed = JSON.parse(date);
+      if (parsed && typeof parsed === 'object' && 'year' in parsed && 'season' in parsed) {
+        return { year: parsed.year, season: parsed.season };
+      }
+    } catch (e) {
+      // If parsing fails, create a new GameDate
+      return { year: new Date().getFullYear(), season: 'Spring' };
+    }
+  }
+  
+  // If it's already a GameDate, return it
+  if (typeof date === 'object' && 'year' in date && 'season' in date) {
+    return date;
+  }
+  
+  // Default fallback
+  return { year: new Date().getFullYear(), season: 'Spring' };
+}
 
 // Interface pour les données du formulaire de loi
 interface LoiFormData {
@@ -181,3 +227,30 @@ export const convertMJArrayToRepublique = (lois: Loi[]): any[] => {
 export const convertRepubliqueArrayToMJ = (lois: any[]): Loi[] => {
   return lois.map(convertRepubliqueToMJ);
 };
+
+// Function to normalize Loi properties
+export function normalizeLoi(loi: Partial<Loi>): Loi {
+  return {
+    id: loi.id || crypto.randomUUID(),
+    titre: loi.titre || loi.title || '',
+    description: loi.description || '',
+    proposeur: loi.proposeur || loi.proposedBy || loi.auteur || '',
+    catégorie: loi.catégorie || loi.category || '',
+    date: loi.date || { year: new Date().getFullYear(), season: 'Spring' },
+    état: loi.état || loi.status || loi.statut || 'proposée',
+    importance: loi.importance || 'normale',
+    votesPositifs: loi.votesPositifs || loi.votesFor || 0,
+    votesNégatifs: loi.votesNégatifs || loi.votesAgainst || 0,
+    abstentions: loi.abstentions || loi.votesAbstention || 0,
+    type: loi.type || '',
+    effets: ensureArrayFormat(loi.effets),
+    clauses: ensureArrayFormat(loi.clauses),
+    commentaires: ensureArrayFormat(loi.commentaires),
+    tags: ensureArrayFormat(loi.tags),
+    conditions: loi.conditions || {},
+    pénalités: loi.pénalités || {},
+    dateProposition: loi.dateProposition || loi.date,
+    soutiens: loi.soutiens || [],
+    opposants: loi.opposants || []
+  } as Loi;
+}

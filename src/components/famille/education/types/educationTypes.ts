@@ -49,7 +49,7 @@ export interface Child {
   specialty?: string;
   traits: string[];
   status?: string;
-  skills?: string[];
+  skills?: string[] | Record<string, number>;
   currentEducation?: ChildEducation;
   preceptorId?: string;
   mentor?: string;
@@ -63,6 +63,8 @@ export interface EducationPath {
   statBoost: string;
   icon: string;
   specialties: string[];
+  skills?: string[];
+  bonuses?: any;
   requirements: {
     age: number;
     gender: Gender | 'both' | Gender[];
@@ -82,8 +84,6 @@ export interface EducationPath {
   relatedStat?: string;
   minAge?: number;
   maxAge?: number;
-  skills?: string[];
-  bonuses?: any;
 }
 
 export interface ChildEducation {

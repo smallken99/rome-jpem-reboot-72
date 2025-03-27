@@ -84,6 +84,20 @@ export const LoiDetail: React.FC<LoiDetailProps> = ({ loi, onEdit, onClose }) =>
     return loi.catégorie || loi.category || loi.categorieId || '';
   };
 
+  const renderClausesOrCommentaires = (items: string | string[] | undefined) => {
+    if (!items) return null;
+    
+    const itemsArray = Array.isArray(items) ? items : [items];
+    
+    return (
+      <ul className="list-disc list-inside space-y-1">
+        {itemsArray.map((item, index) => (
+          <li key={index} className="text-sm">{item}</li>
+        ))}
+      </ul>
+    );
+  };
+
   return (
     <Card className="mt-6">
       <CardHeader>
@@ -132,13 +146,7 @@ export const LoiDetail: React.FC<LoiDetailProps> = ({ loi, onEdit, onClose }) =>
               {loi.clauses && loi.clauses.length > 0 && (
                 <div>
                   <h3 className="text-md font-medium mb-2">Clauses principales</h3>
-                  <ul className="list-disc pl-5 space-y-2">
-                    {loi.clauses.map((clause, index) => (
-                      <li key={index} className="text-sm">
-                        {typeof clause === 'string' ? clause : clause.texte}
-                      </li>
-                    ))}
-                  </ul>
+                  {renderClausesOrCommentaires(loi.clauses)}
                 </div>
               )}
             </div>

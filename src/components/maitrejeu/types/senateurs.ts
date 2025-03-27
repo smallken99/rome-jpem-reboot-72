@@ -10,7 +10,7 @@ export interface SenateurJouable {
   appartenance?: string;
   magistrature?: string;
   playerId?: string;
-  joueur?: string;
+  joueur?: string | boolean;
   popularite?: number;
   militaire?: number;
   piete?: number;

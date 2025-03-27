@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -10,6 +9,7 @@ import { PropertyHeader } from './PropertyHeader';
 import { useBuildingManagement } from '@/hooks/useBuildingManagement';
 import { OwnedBuilding, BuildingType } from '@/types/buildings';
 import { toast } from 'sonner';
+import { v4 as uuidv4 } from 'uuid';
 
 export const PropertyManagement: React.FC = () => {
   const [activeTab, setActiveTab] = useState('overview');
@@ -21,7 +21,9 @@ export const PropertyManagement: React.FC = () => {
     updateMaintenanceEnabled,
     updateBuildingCondition,
     assignSlaves,
-    sellBuilding
+    sellBuilding,
+    addBuilding,
+    setSelectedBuilding
   } = useBuildingManagement();
   
   const buildingWithType = buildings.find(b => b.id === (buildingId || "building-1"));
@@ -73,6 +75,29 @@ export const PropertyManagement: React.FC = () => {
 
   const handleToggleMaintenance = (enabled: boolean) => {
     updateMaintenanceEnabled(building.id, enabled);
+  };
+
+  const addNewBuilding = (newBuilding: Omit<Building, 'id'>) => {
+    const buildingWithId = {
+      ...newBuilding,
+      id: uuidv4(),
+    };
+    
+    const ownedBuilding: OwnedBuilding = {
+      ...buildingWithId,
+      buildingId: buildingWithId.id,
+    };
+    
+    addBuilding(ownedBuilding);
+    setSelectedBuilding(ownedBuilding);
+  };
+
+  const handleBuildingSelection = (building: Building) => {
+    const ownedBuilding: OwnedBuilding = {
+      ...building,
+      buildingId: building.id,
+    };
+    setSelectedBuilding(ownedBuilding);
   };
 
   return (

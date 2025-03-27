@@ -20,7 +20,7 @@ export interface Character {
   specialties?: string[];
   educationType?: string;
   testamentaryWishes?: string;
-  skills?: string[];
+  skills?: string[] | Record<string, number>;
   // Visual and metadata
   isPlayer?: boolean;
   portrait?: string;

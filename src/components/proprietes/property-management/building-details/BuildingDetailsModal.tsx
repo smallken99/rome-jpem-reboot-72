@@ -1,148 +1,108 @@
-
-import React, { useState } from 'react';
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import React, { useState, useEffect } from 'react';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
+} from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
-import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
-import { Separator } from '@/components/ui/separator';
-import { formatCurrency } from '@/utils/currencyUtils';
-import { Property } from '@/types/proprietes';
-import { 
-  Building, 
-  Users, 
-  BarChart, 
-  PiggyBank, 
-  Wrench,
-  Hammer
-} from 'lucide-react';
-import { PropertyStats } from '../PropertyStats';
-import { MaintenanceCostsPanel } from './MaintenanceCostsPanel';
-import { PropertyUpgradePanel } from './PropertyUpgradePanel';
+import { Building, Property, PropertyUpgrade } from '@/types/proprietes';
+import { UpgradeList } from '../UpgradeList';
+import { useToast } from '@/components/ui/use-toast';
+import { useProperties } from '../../hooks/useProperties';
 
 interface BuildingDetailsModalProps {
-  property: Property | null;
   isOpen: boolean;
   onClose: () => void;
-  onRepair?: (property: Property) => void;
-  onUpgrade?: (property: Property, upgrade: string) => void;
+  building: Building | null;
 }
 
 export const BuildingDetailsModal: React.FC<BuildingDetailsModalProps> = ({
-  property,
   isOpen,
   onClose,
-  onRepair,
-  onUpgrade
+  building,
 }) => {
-  const [activeTab, setActiveTab] = useState('overview');
-  
-  if (!property) return null;
-  
-  const getConditionColor = (condition: number) => {
-    if (condition >= 90) return 'text-green-600';
-    if (condition >= 70) return 'text-lime-600';
-    if (condition >= 50) return 'text-yellow-600';
-    if (condition >= 30) return 'text-orange-600';
-    return 'text-red-600';
+  const { toast } = useToast();
+  const { installUpgrade } = useProperties();
+  const [selectedUpgrade, setSelectedUpgrade] = useState<PropertyUpgrade | null>(null);
+
+  useEffect(() => {
+    if (isOpen) {
+      setSelectedUpgrade(null);
+    }
+  }, [isOpen]);
+
+  if (!building) {
+    return null;
+  }
+
+  const stats = {
+    totalIncome: 0,
+    totalMaintenance: 0,
+    totalValue: 0
   };
-  
-  const getConditionText = (condition: number) => {
-    if (condition >= 90) return 'Excellente';
-    if (condition >= 70) return 'Bonne';
-    if (condition >= 50) return 'Correcte';
-    if (condition >= 30) return 'Mauvaise';
-    return 'Critique';
+
+  const handleInstallUpgrade = (property: Property, upgradeId: string) => {
+    installUpgrade(property.id, upgradeId);
   };
-  
+
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-3xl">
+      <DialogContent className="max-w-2xl">
         <DialogHeader>
-          <DialogTitle className="flex items-center gap-2">
-            <Building className="h-5 w-5" />
-            {property.name}
-          </DialogTitle>
+          <DialogTitle>{building.name}</DialogTitle>
           <DialogDescription>
-            {property.location} - Valeur estimée: {formatCurrency(property.value)}
+            Détails et améliorations du bâtiment
           </DialogDescription>
         </DialogHeader>
-        
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="mt-2">
-          <TabsList className="grid grid-cols-3">
-            <TabsTrigger value="overview">Vue d'ensemble</TabsTrigger>
-            <TabsTrigger value="maintenance">Entretien</TabsTrigger>
-            <TabsTrigger value="upgrades">Améliorations</TabsTrigger>
-          </TabsList>
-          
-          <TabsContent value="overview" className="py-4">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div>
-                <h3 className="text-lg font-medium mb-2">Informations</h3>
-                <div className="space-y-3">
-                  <div>
-                    <div className="text-sm text-muted-foreground">Type de propriété</div>
-                    <div className="font-medium">{property.type === 'villa' ? 'Villa Rustica' : property.type === 'domus' ? 'Domus' : 'Insula'}</div>
-                  </div>
-                  
-                  <div>
-                    <div className="text-sm text-muted-foreground">Localisation</div>
-                    <div className="font-medium">{property.location}</div>
-                  </div>
-                  
-                  <div>
-                    <div className="text-sm text-muted-foreground">Date d'acquisition</div>
-                    <div className="font-medium">{new Date(property.acquired).toLocaleDateString('fr-FR', { year: 'numeric', month: 'long' })}</div>
-                  </div>
-                  
-                  <div>
-                    <div className="text-sm text-muted-foreground">État général</div>
-                    <div className={`font-medium ${getConditionColor(property.condition)}`}>
-                      {getConditionText(property.condition)} ({property.condition}%)
-                    </div>
-                  </div>
-                </div>
-              </div>
-              
-              <div>
-                <h3 className="text-lg font-medium mb-2">Finances</h3>
-                <PropertyStats property={property} />
-                
-                <div className="mt-4">
-                  <Button 
-                    variant="outline" 
-                    className="w-full"
-                    onClick={() => onRepair && onRepair(property)}
-                    disabled={property.condition >= 95}
-                  >
-                    <Wrench className="h-4 w-4 mr-2" />
-                    Réparer ({formatCurrency((100 - property.condition) * 100)})
-                  </Button>
-                </div>
-              </div>
-            </div>
-          </TabsContent>
-          
-          <TabsContent value="maintenance" className="py-4">
-            <MaintenanceCostsPanel property={property} />
-          </TabsContent>
-          
-          <TabsContent value="upgrades" className="py-4">
-            <PropertyUpgradePanel 
-              property={property} 
-              onUpgrade={onUpgrade}
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 py-4">
+          <div>
+            <h3 className="text-lg font-semibold mb-2">Informations</h3>
+            <p>Type: {building.type}</p>
+            <p>Localisation: {building.location}</p>
+            <p>Valeur: {building.value}</p>
+            <p>Maintenance: {building.maintenance}</p>
+            <p>Condition: {building.condition}</p>
+            {building.workers && <p>Travailleurs: {building.workers}</p>}
+            {building.securityLevel && <p>Niveau de sécurité: {building.securityLevel}</p>}
+            {building.maintenanceLevel && <p>Niveau de maintenance: {building.maintenanceLevel}</p>}
+            {building.status && <p>Statut: {building.status}</p>}
+            {building.income && <p>Revenu: {building.income}</p>}
+          </div>
+
+          <div>
+            <h3 className="text-lg font-semibold mb-2">Améliorations</h3>
+            <UpgradeList
+              upgrades={building.upgrades || []}
+              onSelectUpgrade={setSelectedUpgrade}
+              selectedUpgrade={selectedUpgrade}
             />
-          </TabsContent>
-        </Tabs>
-        
-        <Separator />
-        
+          </div>
+        </div>
+
         <DialogFooter>
-          <Button variant="outline" onClick={onClose}>
+          <Button type="button" variant="secondary" onClick={onClose}>
             Fermer
           </Button>
+          {selectedUpgrade && (
+            <Button onClick={() => {
+              if (building) {
+                handleInstallUpgrade(building, selectedUpgrade.id);
+                toast({
+                  title: "Amélioration installée",
+                  description: "L'amélioration a été installée avec succès.",
+                });
+                onClose();
+              }
+            }}>
+              Installer Amélioration
+            </Button>
+          )}
         </DialogFooter>
       </DialogContent>
     </Dialog>
   );
 };
-
-export default BuildingDetailsModal;
