@@ -1,34 +1,35 @@
 
 import React from 'react';
-import { RomanCard } from '@/components/ui-custom/RomanCard';
-import { AllianceItem } from '@/components/features/AllianceItem';
-import { familyAlliances } from '@/data/alliances';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Alliance, AllianceType, AllianceStatus } from '@/types/alliance';
+import { Badge } from '@/components/ui/badge';
 
-export const AlliancesCard: React.FC = () => {
-  // Only get matrimonial alliances
-  const marriageAlliances = familyAlliances.filter(alliance => alliance.type === 'matrimoniale');
+interface AlliancesCardProps {
+  alliances: Alliance[];
+}
 
+export const AlliancesCard: React.FC<AlliancesCardProps> = ({ alliances }) => {
+  const activeAlliances = alliances.filter(a => a.status === 'active' || a.status === 'pending');
+  
   return (
-    <RomanCard className="bg-white/90 backdrop-blur-sm border border-rome-gold/30 hover:border-rome-gold/50 transition-all duration-300">
-      <RomanCard.Header className="bg-gradient-to-r from-rome-gold/20 via-rome-gold/10 to-transparent border-b border-rome-gold/30">
-        <h3 className="font-cinzel text-lg text-rome-navy">Alliances matrimoniales de la Gens</h3>
-      </RomanCard.Header>
-      <RomanCard.Content>
-        <div className="space-y-2">
-          {marriageAlliances.map((alliance, index) => (
-            <AllianceItem 
-              key={alliance.id || index}
-              name={alliance.name}
-              type={alliance.type}
-              status={alliance.status}
-              benefits={alliance.benefits}
-            />
-          ))}
-        </div>
-        <div className="mt-6 text-center">
-          <button className="roman-btn-outline text-sm hover:bg-rome-terracotta/10 transition-colors">Gérer les alliances</button>
-        </div>
-      </RomanCard.Content>
-    </RomanCard>
+    <Card>
+      <CardHeader>
+        <CardTitle>Alliances</CardTitle>
+      </CardHeader>
+      <CardContent>
+        {activeAlliances.length === 0 ? (
+          <p className="text-muted-foreground">Aucune alliance active</p>
+        ) : (
+          <ul className="space-y-2">
+            {activeAlliances.map((alliance) => (
+              <li key={alliance.id} className="flex justify-between items-center">
+                <span>{alliance.name || `Alliance ${alliance.id.slice(0, 6)}`}</span>
+                <Badge>{alliance.type as AllianceType}</Badge>
+              </li>
+            ))}
+          </ul>
+        )}
+      </CardContent>
+    </Card>
   );
 };

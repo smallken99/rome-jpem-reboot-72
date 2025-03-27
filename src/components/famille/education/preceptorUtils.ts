@@ -1,117 +1,41 @@
 
-import { romanNames, romanNamePrefixes, romanNameSuffixes } from './data/romanNames';
-import { educationSpecialties } from './data/specialties';
+import { v4 as uuidv4 } from 'uuid';
+import { generateRomanName } from '../utils/naming/romanNameGenerator';
+import { Preceptor } from './types/educationTypes';
 
-/**
- * Safely checks if an object is an array with elements
- * @param obj The object to check
- * @returns True if the object is an array with at least one element
- */
-export const isNonEmptyArray = (obj: any): boolean => {
-  return Array.isArray(obj) && obj.length > 0;
-};
+// Roman name prefixes and suffixes for preceptor generation
+const romanNamePrefixes = ['Magister', 'Praeceptor', 'Doctor', 'Educator'];
+const romanNameSuffixes = ['Sapiens', 'Doctus', 'Eruditus', 'Magnus'];
 
-/**
- * Safely gets an array length, returning 0 for non-arrays
- * @param obj The object to check
- * @returns The length of the array or 0 if not an array
- */
-export const safeArrayLength = (obj: any): number => {
-  return Array.isArray(obj) ? obj.length : 0;
-};
-
-/**
- * Generates a random Roman name for a preceptor
- * @returns A Roman name
- */
-export const generateRomanName = (): string => {
-  const nameIndex = Math.floor(Math.random() * romanNames.length);
-  const usePrefix = Math.random() > 0.7;
-  const useSuffix = Math.random() > 0.7;
+export const generatePreceptor = (specialty: string, quality: number = 3): Preceptor => {
+  const id = uuidv4();
+  const randomPrefix = romanNamePrefixes[Math.floor(Math.random() * romanNamePrefixes.length)];
+  const randomSuffix = romanNameSuffixes[Math.floor(Math.random() * romanNameSuffixes.length)];
   
-  let name = romanNames[nameIndex];
+  // Generate a roman name for the base
+  const baseName = generateRomanName('male');
+  const name = `${randomPrefix} ${baseName} ${randomSuffix}`;
   
-  if (usePrefix) {
-    const prefixIndex = Math.floor(Math.random() * romanNamePrefixes.length);
-    name = `${romanNamePrefixes[prefixIndex]} ${name}`;
-  }
+  // Calculate price based on quality
+  const basePrice = 2000;
+  const price = basePrice + (quality * 500);
   
-  if (useSuffix) {
-    const suffixIndex = Math.floor(Math.random() * romanNameSuffixes.length);
-    name = `${name} ${romanNameSuffixes[suffixIndex]}`;
-  }
+  // Calculate experience based on quality
+  const experience = 5 + (quality * 3);
   
-  return name;
-};
-
-/**
- * Generates a random speciality for a preceptor
- * @returns A speciality
- */
-export const generateSpeciality = (): string => {
-  // Get a random education type
-  const educationTypes = Object.keys(educationSpecialties);
-  const randomType = educationTypes[Math.floor(Math.random() * educationTypes.length)];
-  
-  if (!educationSpecialties[randomType]) {
-    return "Général";
-  }
-  
-  const specialtyIndex = Math.floor(Math.random() * educationSpecialties[randomType].length);
-  return educationSpecialties[randomType][specialtyIndex];
-};
-
-/**
- * Generates a random reputation for a preceptor
- * @returns A reputation string
- */
-export const generateReputation = (): "Excellent" | "Bon" | "Moyen" => {
-  const rand = Math.random();
-  if (rand > 0.7) return "Excellent";
-  if (rand > 0.4) return "Bon";
-  return "Moyen";
-};
-
-/**
- * Generates a random fee based on reputation
- * @returns A fee amount
- */
-export const generateFee = (): number => {
-  const reputation = generateReputation();
-  switch (reputation) {
-    case "Excellent": return 8000 + Math.floor(Math.random() * 4000);
-    case "Bon": return 5000 + Math.floor(Math.random() * 3000);
-    case "Moyen": return 2000 + Math.floor(Math.random() * 3000);
-    default: return 3000;
-  }
-};
-
-/**
- * Generates a title for a preceptor
- * @returns A title
- */
-export const generateTitle = (): string => {
-  const reputation = generateReputation();
-  switch (reputation) {
-    case "Excellent": return "le Sage";
-    case "Bon": return "l'Érudit";
-    case "Moyen": return "";
-    default: return "";
-  }
-};
-
-/**
- * Generates a stat bonus for education
- * @returns A stat bonus number
- */
-export const generateStatBonus = (): number => {
-  return Math.floor(Math.random() * 5) + 1;
-};
-
-/**
- * Generates a random gender
- * @returns Either 'male' or 'female'
- */
-export const generateGender = (): 'male' | 'female' => {
-  return Math.random() > 0.7 ? 'female' : 'male';
+  return {
+    id,
+    name,
+    specialty: specialty as any,
+    quality,
+    price,
+    experience,
+    skill: 50 + (quality * 10),
+    expertise: quality * 2,
+    available: true,
+    description: `Un précepteur spécialisé en ${specialty}.`,
+    teachingStyle: quality > 4 ? 'Exigeant' : 'Pédagogue',
+    reputation: 60 + (quality * 8),
+    specialties: []
+  };
 };

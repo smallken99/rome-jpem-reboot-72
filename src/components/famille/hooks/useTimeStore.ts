@@ -1,17 +1,21 @@
 
-// Create a compatibility wrapper for components that rely on useTimeStore
 import { useGameTime } from '@/hooks/useGameTime';
+import { Season } from '@/utils/timeSystem';
 
 export const useTimeStore = () => {
-  const { year, season, advanceTime } = useGameTime();
+  const { year, season, advanceSeason, setYear, setSeason } = useGameTime();
+  
+  // Add compatibility method (alias for advanceSeason)
+  const advanceTime = () => {
+    advanceSeason();
+  };
   
   return {
     year,
     season,
-    getYear: () => year,
-    getSeason: () => season,
-    advanceTime
+    advanceSeason,
+    advanceTime,
+    setYear,
+    setSeason
   };
 };
-
-export default useTimeStore;

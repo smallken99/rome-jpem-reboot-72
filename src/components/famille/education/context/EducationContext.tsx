@@ -1,11 +1,14 @@
+
 import React, { createContext, useContext, useState, ReactNode } from 'react';
 import { Character } from '@/types/character';
 import { Child, Preceptor } from '../types/educationTypes';
 import { getAllPreceptors, getPreceptorById, getPreceptorsForType } from '../data/preceptors';
 import { toast } from '@/components/ui-custom/toast';
+import { getAllEducationPaths, findEducationPathById } from '../data/educationPaths';
 
 interface EducationContextType {
   characters: Character[];
+  children: Child[]; // Added this property
   educatingChildren: string[];
   isEducating: Record<string, boolean>;
   preceptors: Preceptor[];
@@ -19,6 +22,8 @@ interface EducationContextType {
   completeEducation: (childId: string) => void;
   cancelEducation: (childId: string) => void;
   onCharacterUpdate?: (characterId: string, updates: Partial<Character>) => void;
+  getAllEducationPaths: () => any[];
+  findEducationPathById: (id: string) => any;
 }
 
 const EducationContext = createContext<EducationContextType>({} as EducationContextType);
@@ -32,12 +37,26 @@ interface EducationProviderProps {
 }
 
 export const EducationProvider: React.FC<EducationProviderProps> = ({ 
-  children, 
+  children: providerChildren, 
   characters,
   onCharacterUpdate 
 }) => {
   const [educatingChildren, setEducatingChildren] = useState<string[]>([]);
   const [isEducating, setIsEducating] = useState<Record<string, boolean>>({});
+  
+  // Transform characters into Child objects for the education system
+  const childrenData: Child[] = characters
+    .filter(char => char.age < 18)
+    .map(char => ({
+      id: char.id,
+      name: char.name,
+      age: char.age,
+      gender: char.gender,
+      educationType: char.education?.type as any || 'none',
+      progress: 0,
+      specialties: char.education?.specialties || [],
+      traits: char.traits || []
+    }));
   
   // Gérer l'avancement de l'éducation d'un enfant
   const advanceEducationYear = (childId: string) => {
@@ -49,7 +68,10 @@ export const EducationProvider: React.FC<EducationProviderProps> = ({
         const child = characters.find(c => c.id === childId);
         if (child) {
           onCharacterUpdate(childId, {
-            // Mettre à jour la progression ici
+            education: {
+              ...child.education,
+              // Additional updates here
+            }
           });
         }
       }
@@ -69,7 +91,11 @@ export const EducationProvider: React.FC<EducationProviderProps> = ({
         const child = characters.find(c => c.id === childId);
         if (child) {
           onCharacterUpdate(childId, {
-            // Mettre à jour le statut d'éducation
+            education: {
+              ...child.education,
+              completed: true,
+              completedAt: new Date().toISOString()
+            }
           });
         }
       }
@@ -86,8 +112,11 @@ export const EducationProvider: React.FC<EducationProviderProps> = ({
     
     if (onCharacterUpdate) {
       onCharacterUpdate(childId, {
-        educationType: 'none',
-        specialties: []
+        education: {
+          type: 'none',
+          specialties: [],
+          mentor: null
+        }
       });
     }
     
@@ -121,6 +150,7 @@ export const EducationProvider: React.FC<EducationProviderProps> = ({
   return (
     <EducationContext.Provider value={{
       characters,
+      children: childrenData,
       educatingChildren,
       isEducating,
       preceptors: getAllPreceptors(),
@@ -133,9 +163,11 @@ export const EducationProvider: React.FC<EducationProviderProps> = ({
       advanceEducationYear,
       completeEducation,
       cancelEducation,
-      onCharacterUpdate
+      onCharacterUpdate,
+      getAllEducationPaths,
+      findEducationPathById
     }}>
-      {children}
+      {providerChildren}
     </EducationContext.Provider>
   );
 };

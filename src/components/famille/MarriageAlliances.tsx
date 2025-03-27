@@ -10,7 +10,7 @@ import { familyAlliances } from '@/data/alliances';
 
 interface MarriageAlliancesProps {
   characters: Character[];
-  onChildBirth?: (child: Character) => void;
+  onChildBirth?: (parentIds?: string[]) => void;
 }
 
 export const MarriageAlliances: React.FC<MarriageAlliancesProps> = ({ 

@@ -1,28 +1,60 @@
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Character } from '@/types/character';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { ArrowRight, Heart, Skull, Crown } from 'lucide-react';
+import { useCharacters } from '../hooks/useCharacters';
+import { getEligibleHeirs } from './inheritanceUtils';
 
 interface InheritanceDetailsProps {
-  character: Character;
-  heirs: Character[];
+  character?: Character;
+  heirs?: Character[];
+  heirId?: string;
 }
 
 export const InheritanceDetails: React.FC<InheritanceDetailsProps> = ({ 
-  character,
-  heirs
+  character: propCharacter,
+  heirs: propHeirs,
+  heirId
 }) => {
+  const { localCharacters } = useCharacters();
+  const [character, setCharacter] = useState<Character | undefined>(propCharacter);
+  const [heirs, setHeirs] = useState<Character[]>(propHeirs || []);
+
+  useEffect(() => {
+    // If we have an heirId, find that character
+    if (heirId) {
+      const selectedHeir = localCharacters.find(c => c.id === heirId);
+      if (selectedHeir) {
+        setCharacter(selectedHeir);
+      }
+    } 
+    // If we have neither character nor heirId, use head of family
+    else if (!propCharacter) {
+      const headOfFamily = localCharacters.find(c => c.isHeadOfFamily) || localCharacters[0];
+      setCharacter(headOfFamily);
+
+      // If heirs weren't provided, calculate them
+      if (!propHeirs) {
+        setHeirs(getEligibleHeirs(headOfFamily, localCharacters).slice(0, 5));
+      }
+    }
+  }, [heirId, localCharacters, propCharacter, propHeirs]);
+
+  if (!character) {
+    return <div>Aucun personnage sélectionné</div>;
+  }
+
   return (
     <div className="space-y-6">
       <Card>
         <CardHeader className="pb-3">
           <CardTitle className="text-xl">Testament de {character.name}</CardTitle>
           <CardDescription>
-            Chef de famille, {character.age} ans, {character.health}% de santé
+            Chef de famille, {character.age} ans, {character.health || 100}% de santé
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -30,7 +62,7 @@ export const InheritanceDetails: React.FC<InheritanceDetailsProps> = ({
             <div className="flex items-center justify-between">
               <div>
                 <h3 className="font-medium">Statut Patriarcal</h3>
-                <p className="text-sm text-muted-foreground">{character.relation}</p>
+                <p className="text-sm text-muted-foreground">{character.relation || "Chef de famille"}</p>
               </div>
               <Badge variant="outline" className="flex items-center gap-1">
                 <Crown className="h-3.5 w-3.5" />
@@ -46,11 +78,11 @@ export const InheritanceDetails: React.FC<InheritanceDetailsProps> = ({
                 <div className="w-full bg-gray-200 rounded-full h-2.5">
                   <div 
                     className="bg-green-500 h-2.5 rounded-full" 
-                    style={{ width: `${character.health}%` }}
+                    style={{ width: `${character.health || 100}%` }}
                   ></div>
                 </div>
                 <span className="text-sm font-medium">
-                  {Math.floor(80 * (character.health / 100) - character.age)} ans
+                  {Math.floor(80 * ((character.health || 100) / 100) - character.age)} ans
                 </span>
               </div>
               <p className="text-xs text-muted-foreground mt-1">
@@ -94,15 +126,15 @@ export const InheritanceDetails: React.FC<InheritanceDetailsProps> = ({
                             )}
                           </div>
                           <p className="text-sm text-muted-foreground">
-                            {heir.relation}, {heir.age} ans
+                            {heir.relation || "Membre de la famille"}, {heir.age} ans
                           </p>
                         </div>
                         <div className="flex items-center space-x-2">
                           <span className="text-sm font-medium flex items-center">
                             <Heart className="h-4 w-4 text-red-500 mr-1" />
-                            {heir.health}%
+                            {heir.health || 100}%
                           </span>
-                          {heir.status === 'alive' ? (
+                          {(!heir.status || heir.status === 'alive') ? (
                             <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">
                               Vivant
                             </Badge>

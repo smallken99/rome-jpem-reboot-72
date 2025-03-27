@@ -18,11 +18,11 @@ export const ChildList: React.FC<ChildListProps> = ({ children }) => {
     name: c.name,
     age: c.age,
     gender: c.gender,
-    educationType: c.educationType || 'none',
+    educationType: c.educationType || c.education?.type || 'none',
     progress: 0, // À améliorer avec un vrai suivi de progression
-    specialties: c.specialties || [],
+    specialties: c.specialties || c.education?.specialties || [],
     specialty: c.specialty,
-    traits: c.traits
+    traits: c.traits || []
   }));
   
   return (
