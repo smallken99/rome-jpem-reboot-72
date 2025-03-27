@@ -1,192 +1,199 @@
 
 import { useState, useCallback } from 'react';
-import { OwnedBuilding, BuildingType } from '@/types/buildings';
+import { Building, PropertyStats, PropertyUpgrade } from '@/types/proprietes';
 import { toast } from 'sonner';
+import { v4 as uuidv4 } from 'uuid';
 
-// Données de test pour les bâtiments
-const initialBuildings: OwnedBuilding[] = [
-  {
-    id: 'building-1',
-    buildingId: 'domus-1',
-    name: 'Domus Palatina',
-    buildingType: 'urban',
-    type: 'domus',
-    location: 'Rome',
-    condition: 85,
-    maintenanceLevel: 2,
-    income: 0,
-    workers: 5,
-    slaves: 5,
-    securityLevel: 2,
-    description: 'Une magnifique maison patricienne située près du forum',
-    maintenanceCost: 500,
-    maintenanceEnabled: true,
-    purchaseDate: new Date('2023-01-15')
-  },
-  {
-    id: 'building-2',
-    buildingId: 'insula-1',
-    name: 'Insula de la Via Sacra',
-    buildingType: 'urban',
-    type: 'insula',
-    location: 'Rome',
-    condition: 70,
-    maintenanceLevel: 1,
-    income: 3000,
-    workers: 2,
-    slaves: 2,
-    securityLevel: 1,
-    description: 'Un immeuble locatif de trois étages avec plusieurs appartements et boutiques',
-    maintenanceCost: 800,
-    maintenanceEnabled: true,
-    purchaseDate: new Date('2022-08-10')
-  },
-  {
-    id: 'building-3',
-    buildingId: 'villa-1',
-    name: 'Villa Rustica',
-    buildingType: 'rural',
-    type: 'villa',
-    location: 'Campanie',
-    condition: 90,
-    maintenanceLevel: 3,
-    income: 5000,
-    workers: 25,
-    slaves: 25,
-    securityLevel: 2,
-    description: 'Une vaste propriété rurale produisant du vin et de l\'huile d\'olive',
-    maintenanceCost: 1200,
-    maintenanceEnabled: true,
-    purchaseDate: new Date('2023-03-22')
-  }
-];
+export const useBuildingManagement = (initialBuildings: Building[] = []) => {
+  const [buildings, setBuildings] = useState<Building[]>(initialBuildings);
+  const [selectedBuilding, setSelectedBuilding] = useState<Building | null>(null);
 
-export const useBuildings = (initialState = initialBuildings) => {
-  const [buildings, setBuildings] = useState<OwnedBuilding[]>(initialState);
-  
-  // Trouver un bâtiment par son ID
-  const findBuildingById = useCallback((id: string): OwnedBuilding | undefined => {
-    return buildings.find(building => building.id === id);
+  // Calculate property statistics
+  const calculateStats = useCallback((): PropertyStats => {
+    const totalValue = buildings.reduce((sum, building) => sum + building.value, 0);
+    const yearlyIncome = buildings.reduce((sum, building) => sum + building.income, 0);
+    const yearlyMaintenance = buildings.reduce((sum, building) => sum + building.maintenance, 0);
+    const netYearlyProfit = yearlyIncome - yearlyMaintenance;
+    
+    // Calculate potential upgrades (as a percentage of current value)
+    const upgradePotential = buildings.length > 0 ? 
+      Math.floor((buildings.filter(b => b.status !== 'excellent').length / buildings.length) * 100) : 0;
+
+    return {
+      totalValue,
+      yearlyIncome,
+      yearlyMaintenance,
+      netYearlyProfit,
+      propertyCount: buildings.length,
+      buildingCount: buildings.length,
+      upgradePotential
+    };
   }, [buildings]);
-  
-  // Ajouter un nouveau bâtiment
-  const addBuilding = useCallback((building: Omit<OwnedBuilding, 'id'>) => {
-    const newId = `building-${buildings.length + 1}`;
-    const newBuilding: OwnedBuilding = {
-      ...building,
-      id: newId
+
+  // Add a new building
+  const addBuilding = useCallback((newBuilding: Omit<Building, 'id'>): string => {
+    const buildingWithId = {
+      ...newBuilding,
+      id: uuidv4()
     };
     
-    setBuildings(prev => [...prev, newBuilding]);
-    toast.success(`${building.name} a été ajouté à vos propriétés`);
+    setBuildings(prev => [...prev, buildingWithId as Building]);
+    toast.success(`Propriété "${newBuilding.name}" acquise avec succès`);
+    return buildingWithId.id;
+  }, []);
+
+  // Sell a building
+  const sellBuilding = useCallback((buildingId: string): number => {
+    const building = buildings.find(b => b.id === buildingId);
+    if (!building) {
+      toast.error("Propriété non trouvée");
+      return 0;
+    }
+
+    // Calculate sell value (80-90% of actual value depending on status)
+    const statusMultiplier = {
+      'excellent': 0.9,
+      'good': 0.85,
+      'fair': 0.8,
+      'poor': 0.7,
+      'dilapidated': 0.6,
+    };
     
-    return newId;
-  }, [buildings]);
-  
-  // Mettre à jour un bâtiment existant
-  const updateBuilding = useCallback((id: string, updates: Partial<OwnedBuilding>) => {
+    const sellPrice = Math.floor(building.value * (statusMultiplier[building.status] || 0.8));
+
+    setBuildings(prev => prev.filter(b => b.id !== buildingId));
+    
+    if (selectedBuilding?.id === buildingId) {
+      setSelectedBuilding(null);
+    }
+    
+    toast.success(`Propriété "${building.name}" vendue pour ${sellPrice.toLocaleString()} as`);
+    return sellPrice;
+  }, [buildings, selectedBuilding]);
+
+  // Perform maintenance on a building
+  const maintainBuilding = useCallback((buildingId: string, amount: number): boolean => {
+    const building = buildings.find(b => b.id === buildingId);
+    if (!building) {
+      toast.error("Propriété non trouvée");
+      return false;
+    }
+
+    // Determine new status based on current status and maintenance amount
+    const calculateNewStatus = (currentStatus: string, maintenance: number, value: number): Building['status'] => {
+      const maintenanceRatio = maintenance / value;
+      
+      // Extensive maintenance (>10% of value)
+      if (maintenanceRatio >= 0.1) {
+        return 'excellent';
+      }
+      
+      // Good maintenance (5-10% of value)
+      if (maintenanceRatio >= 0.05) {
+        if (currentStatus === 'dilapidated') return 'poor';
+        if (currentStatus === 'poor') return 'fair';
+        if (currentStatus === 'fair') return 'good';
+        return 'excellent';
+      }
+      
+      // Minimal maintenance (2-5% of value)
+      if (maintenanceRatio >= 0.02) {
+        if (currentStatus === 'dilapidated') return 'dilapidated';
+        if (currentStatus === 'poor') return 'poor';
+        if (currentStatus === 'fair') return 'fair';
+        if (currentStatus === 'good') return 'good';
+        return 'good';
+      }
+      
+      // Inadequate maintenance
+      return currentStatus as Building['status'];
+    };
+
+    const newStatus = calculateNewStatus(building.status, amount, building.value);
+    
     setBuildings(prev => 
-      prev.map(building => 
-        building.id === id ? { ...building, ...updates } : building
+      prev.map(b => 
+        b.id === buildingId 
+          ? { ...b, status: newStatus } 
+          : b
       )
     );
-  }, []);
-  
-  // Vendre un bâtiment
-  const sellBuilding = useCallback((id: string): boolean => {
-    const building = findBuildingById(id);
-    if (!building) return false;
     
-    setBuildings(prev => prev.filter(b => b.id !== id));
-    toast.success(`${building.name} a été vendu avec succès`);
+    if (selectedBuilding?.id === buildingId) {
+      setSelectedBuilding(prev => prev ? { ...prev, status: newStatus } : null);
+    }
     
+    toast.success(`Maintenance effectuée sur "${building.name}"`);
     return true;
-  }, [findBuildingById]);
-  
-  // Mettre à jour le niveau d'entretien
-  const updateMaintenanceLevel = useCallback((id: string, level: number) => {
-    updateBuilding(id, { maintenanceLevel: level });
-    toast.success("Niveau d'entretien mis à jour");
-  }, [updateBuilding]);
-  
-  // Mettre à jour le niveau de sécurité
-  const updateSecurityLevel = useCallback((id: string, level: number) => {
-    updateBuilding(id, { securityLevel: level });
-    toast.success("Niveau de sécurité mis à jour");
-  }, [updateBuilding]);
-  
-  // Activer/désactiver la maintenance
-  const updateMaintenanceEnabled = useCallback((id: string, enabled: boolean) => {
-    updateBuilding(id, { maintenanceEnabled: enabled });
-    toast.success(enabled ? "Maintenance activée" : "Maintenance désactivée");
-  }, [updateBuilding]);
-  
-  // Mettre à jour l'état du bâtiment
-  const updateBuildingCondition = useCallback((id: string, condition: number) => {
-    updateBuilding(id, { condition: Math.min(100, Math.max(0, condition)) });
-  }, [updateBuilding]);
-  
-  // Rénover complètement un bâtiment
-  const renovateBuilding = useCallback((id: string) => {
-    updateBuilding(id, { condition: 100 });
-    toast.success("Bâtiment entièrement rénové");
-  }, [updateBuilding]);
-  
-  // Assigner des esclaves à un bâtiment
-  const assignSlaves = useCallback((id: string, count: number) => {
-    updateBuilding(id, { slaves: count, workers: count });
-    toast.success(`${count} esclaves assignés`);
+  }, [buildings, selectedBuilding]);
+
+  // Install an upgrade
+  const installUpgrade = useCallback((buildingId: string, upgradeId: string): boolean => {
+    const building = buildings.find(b => b.id === buildingId);
+    if (!building || !building.upgrades) {
+      toast.error("Propriété ou amélioration non trouvée");
+      return false;
+    }
+
+    const upgrade = building.upgrades.find(u => u.id === upgradeId);
+    if (!upgrade) {
+      toast.error("Amélioration non trouvée");
+      return false;
+    }
+
+    if (upgrade.installed) {
+      toast.info("Cette amélioration est déjà installée");
+      return false;
+    }
+
+    // Apply the upgrade effects
+    const newValue = building.value + (upgrade.valueBonus || 0);
+    const newIncome = building.income + (upgrade.incomeBonus || 0);
+
+    // Mark upgrade as installed and update building stats
+    setBuildings(prev => 
+      prev.map(b => {
+        if (b.id === buildingId) {
+          return {
+            ...b,
+            value: newValue,
+            income: newIncome,
+            upgrades: b.upgrades?.map(u => 
+              u.id === upgradeId ? { ...u, installed: true } : u
+            )
+          };
+        }
+        return b;
+      })
+    );
+    
+    if (selectedBuilding?.id === buildingId) {
+      setSelectedBuilding(prev => {
+        if (!prev) return null;
+        
+        return {
+          ...prev,
+          value: newValue,
+          income: newIncome,
+          upgrades: prev.upgrades?.map(u => 
+            u.id === upgradeId ? { ...u, installed: true } : u
+          )
+        };
+      });
+    }
+    
+    toast.success(`Amélioration "${upgrade.name}" installée avec succès`);
     return true;
-  }, [updateBuilding]);
-  
-  // Mettre à jour le nombre de travailleurs
-  const updateWorkers = useCallback((id: string, workers: number) => {
-    updateBuilding(id, { workers });
-    toast.success(`${workers} travailleurs assignés`);
-  }, [updateBuilding]);
-  
-  // Calculer le revenu mensuel d'un bâtiment
-  const calculateMonthlyIncome = useCallback((id: string): number => {
-    const building = findBuildingById(id);
-    if (!building) return 0;
-    
-    // Facteur basé sur l'état du bâtiment
-    const conditionFactor = building.condition / 100;
-    
-    // Facteur basé sur les travailleurs (simplifié)
-    const workerFactor = building.workers 
-      ? Math.min(1.5, (building.workers / 10) + 0.5) 
-      : 0.5;
-    
-    const baseIncome = building.income || 0;
-    return Math.round(baseIncome * conditionFactor * workerFactor);
-  }, [findBuildingById]);
-  
-  // Calculer le coût de maintenance mensuel
-  const calculateMaintenanceCost = useCallback((id: string): number => {
-    const building = findBuildingById(id);
-    if (!building || !building.maintenanceEnabled) return 0;
-    
-    const baseCost = building.maintenanceCost || 0;
-    const maintenanceLevelFactor = (building.maintenanceLevel || 1) * 0.3 + 0.7;
-    
-    return Math.round(baseCost * maintenanceLevelFactor);
-  }, [findBuildingById]);
-  
+  }, [buildings, selectedBuilding]);
+
   return {
     buildings,
-    findBuildingById,
+    selectedBuilding,
+    setSelectedBuilding,
+    stats: calculateStats(),
     addBuilding,
-    updateBuilding,
     sellBuilding,
-    updateMaintenanceLevel,
-    updateSecurityLevel,
-    updateMaintenanceEnabled,
-    updateBuildingCondition,
-    renovateBuilding,
-    assignSlaves,
-    updateWorkers,
-    calculateMonthlyIncome,
-    calculateMaintenanceCost
+    maintainBuilding,
+    installUpgrade
   };
 };

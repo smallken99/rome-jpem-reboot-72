@@ -1,119 +1,118 @@
 
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 import { toast } from 'sonner';
-import { usePatrimoine } from '@/hooks/usePatrimoine';
-import { useEconomy } from '@/hooks/useEconomy';
-import { SlaveAssignment } from '../slaves/SlaveAssignments';
 
-export const useSlaveManagement = (initialSlaves: number = 25) => {
-  const [totalSlaves, setTotalSlaves] = useState(initialSlaves);
-  const [slavePrice, setSlavePrice] = useState(800);
-  const [slaveAssignments, setSlaveAssignments] = useState<SlaveAssignment[]>([]);
-  const { balance } = usePatrimoine();
-  const economy = useEconomy();
-  
-  // Calculer le nombre total d'esclaves assignés
-  const assignedSlaves = slaveAssignments.reduce(
-    (total, assignment) => total + assignment.count, 
-    0
-  );
-  
-  // Simuler l'achat d'esclaves
-  const purchaseSlaves = (amount: number) => {
-    const totalCost = amount * slavePrice;
-    
-    if (!economy.canAfford(totalCost)) {
-      toast.error(`Fonds insuffisants pour acheter ${amount} esclaves (coût: ${totalCost.toLocaleString()} As)`);
+// Define types
+interface Slave {
+  id: string;
+  name: string;
+  age: number;
+  price: number;
+  skills: string[];
+  health: number;
+  loyalty: number;
+  assignedTo: string | null;
+}
+
+export const useSlaveManagement = () => {
+  const [slaves, setSlaves] = useState<Slave[]>([]);
+  const [loading, setLoading] = useState(false);
+
+  // Purchase a new slave
+  const purchaseSlave = useCallback((slave: Slave, amount: number): boolean => {
+    // Check if we have enough money
+    if (amount < slave.price) {
+      toast.error("Fonds insuffisants pour acheter cet esclave");
       return false;
     }
+
+    // Add the slave to our collection
+    setSlaves(prev => [...prev, slave]);
+    toast.success(`Esclave ${slave.name} acheté avec succès`);
+    return true;
+  }, []);
+
+  // Sell a slave
+  const sellSlave = useCallback((slaveId: string): number => {
+    const slave = slaves.find(s => s.id === slaveId);
+    if (!slave) {
+      toast.error("Esclave introuvable");
+      return 0;
+    }
+
+    // Calculate sell price (lower than purchase price)
+    const sellPrice = Math.floor(slave.price * 0.75);
+
+    // Remove from collection
+    setSlaves(prev => prev.filter(s => s.id !== slaveId));
+    toast.success(`Esclave ${slave.name} vendu pour ${sellPrice} as`);
+
+    return sellPrice;
+  }, [slaves]);
+
+  // Assign a slave to a property or task
+  const assignSlave = useCallback((slaveId: string, assignmentId: string | null): boolean => {
+    const slaveExists = slaves.some(s => s.id === slaveId);
     
-    // Effectuer la transaction via le système économique
-    const success = economy.makePayment(
-      totalCost,
-      "Marchand d'esclaves",
-      "Personnel"
+    if (!slaveExists) {
+      toast.error("Esclave introuvable");
+      return false;
+    }
+
+    setSlaves(prev => 
+      prev.map(slave => 
+        slave.id === slaveId 
+          ? { ...slave, assignedTo: assignmentId } 
+          : slave
+      )
     );
-    
-    if (success) {
-      setTotalSlaves(prev => prev + amount);
-      toast.success(`Acquisition de ${amount} esclaves pour ${totalCost.toLocaleString()} As`);
-    }
-    
-    return success;
-  };
-  
-  // Vente d'esclaves
-  const sellSlaves = (amount: number) => {
-    if (amount > totalSlaves - assignedSlaves) {
-      toast.error(`Vous ne pouvez pas vendre des esclaves assignés à des propriétés`);
-      return false;
-    }
-    
-    const totalProfit = amount * Math.floor(slavePrice * 0.7); // 70% du prix d'achat
-    
-    // Enregistrer la transaction via le système économique
-    const success = economy.receivePayment(
-      totalProfit,
-      "Marché aux esclaves",
-      "Vente de personnel"
-    );
-    
-    if (success) {
-      setTotalSlaves(prev => prev - amount);
-      toast.success(`Vente de ${amount} esclaves pour ${totalProfit.toLocaleString()} As`);
-    }
-    
-    return success;
-  };
-  
-  // Assigner des esclaves à une propriété
-  const assignSlavesToProperty = (propertyId: string, propertyName: string, amount: number) => {
-    // Vérifier si on a assez d'esclaves disponibles
-    if (amount > (totalSlaves - assignedSlaves)) {
-      toast.error(`Pas assez d'esclaves disponibles`);
-      return false;
-    }
-    
-    // Vérifier si la propriété existe déjà dans les affectations
-    const existingAssignment = slaveAssignments.find(a => a.propertyId === propertyId);
-    
-    if (existingAssignment) {
-      // Mettre à jour l'affectation existante
-      setSlaveAssignments(prev => 
-        prev.map(a => 
-          a.propertyId === propertyId 
-            ? { ...a, count: amount }
-            : a
-        )
-      );
+
+    if (assignmentId) {
+      toast.success("Esclave assigné avec succès");
     } else {
-      // Créer une nouvelle affectation
-      setSlaveAssignments(prev => [
-        ...prev,
-        { propertyId, propertyName, count: amount }
-      ]);
+      toast.success("Esclave retiré de son assignation");
     }
     
-    toast.success(`${amount} esclaves assignés à ${propertyName}`);
     return true;
-  };
-  
-  // Retirer des esclaves d'une propriété
-  const removeSlaveAssignment = (propertyId: string) => {
-    setSlaveAssignments(prev => prev.filter(a => a.propertyId !== propertyId));
-    toast.success(`Esclaves retirés de la propriété`);
+  }, [slaves]);
+
+  // Train a slave to improve skills
+  const trainSlave = useCallback((slaveId: string, skill: string): boolean => {
+    const slaveExists = slaves.some(s => s.id === slaveId);
+    
+    if (!slaveExists) {
+      toast.error("Esclave introuvable");
+      return false;
+    }
+
+    // Training logic
+    setSlaves(prev => 
+      prev.map(slave => {
+        if (slave.id === slaveId) {
+          // Add skill if not present
+          const updatedSkills = slave.skills.includes(skill) 
+            ? slave.skills 
+            : [...slave.skills, skill];
+            
+          return { 
+            ...slave, 
+            skills: updatedSkills
+          };
+        }
+        return slave;
+      })
+    );
+    
+    toast.success("Entraînement commencé");
     return true;
-  };
-  
+  }, [slaves]);
+
   return {
-    totalSlaves,
-    slavePrice,
-    assignedSlaves,
-    slaveAssignments,
-    purchaseSlaves,
-    sellSlaves,
-    assignSlavesToProperty,
-    removeSlaveAssignment,
-    balance // Fournir la balance pour l'UI
+    slaves,
+    loading,
+    purchaseSlave,
+    sellSlave,
+    assignSlave,
+    trainSlave
   };
 };

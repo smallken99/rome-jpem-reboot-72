@@ -1,86 +1,118 @@
 
 import React from 'react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { EducationPath } from './types/educationTypes';
-import { getOutcomeBonuses } from './utils/educationUtils';
+import { 
+  Award, 
+  GraduationCap, 
+  Clock, 
+  Coins, 
+  User, 
+  Users, 
+  BookOpen, 
+  Sword, 
+  Shield,
+  Heart 
+} from 'lucide-react';
+import { EducationPath, EducationType } from './types/educationTypes';
+
+// Icons for different education types
+const typeIcons: Record<string, React.ReactElement> = {
+  military: <Sword className="h-4 w-4" />,
+  political: <Shield className="h-4 w-4" />,
+  religious: <Heart className="h-4 w-4" />,
+  artistic: <BookOpen className="h-4 w-4" />,
+  philosophical: <BookOpen className="h-4 w-4" />,
+  rhetoric: <Users className="h-4 w-4" />,
+  academic: <GraduationCap className="h-4 w-4" />,
+  none: <User className="h-4 w-4" />
+};
 
 interface EducationPathCardProps {
   path: EducationPath;
-  onSelect?: () => void;
   isSelected?: boolean;
-  showSelectButton?: boolean;
+  onSelect?: () => void;
 }
 
-const EducationPathCard: React.FC<EducationPathCardProps> = ({
-  path,
-  onSelect,
+const EducationPathCard: React.FC<EducationPathCardProps> = ({ 
+  path, 
   isSelected = false,
-  showSelectButton = true
+  onSelect
 }) => {
-  // Get the stat bonuses from the path
-  const popularityBonus = getOutcomeBonuses(path, 'popularity');
-  const oratoryBonus = getOutcomeBonuses(path, 'oratory');
-  const pietyBonus = getOutcomeBonuses(path, 'piety');
-  const militaryBonus = getOutcomeBonuses(path, 'martialEducation');
+  // Determine the icon based on education type
+  const icon = typeIcons[path.type as string] || <GraduationCap className="h-4 w-4" />;
+  
+  // Handle click event
+  const handleClick = () => {
+    if (onSelect) {
+      onSelect();
+    }
+  };
 
-  // Determine which stat is most emphasized
-  const mainStat = [
-    { name: 'Popularité', value: popularityBonus },
-    { name: 'Éloquence', value: oratoryBonus },
-    { name: 'Piété', value: pietyBonus },
-    { name: 'Éducation Martiale', value: militaryBonus }
-  ].sort((a, b) => b.value - a.value)[0];
+  // Check if the education is for males, females, or both
+  const getGenderBadge = () => {
+    if (Array.isArray(path.suitableFor)) {
+      // Handle older format where suitableFor is Gender[]
+      if (path.suitableFor.includes('male') && path.suitableFor.includes('female')) {
+        return <Badge variant="outline">Tous genres</Badge>;
+      } else if (path.suitableFor.includes('male')) {
+        return <Badge variant="outline">Hommes uniquement</Badge>;
+      } else if (path.suitableFor.includes('female')) {
+        return <Badge variant="outline">Femmes uniquement</Badge>;
+      }
+    } else if (path.suitableFor && typeof path.suitableFor === 'object') {
+      // Handle newer format where suitableFor is {gender: string}
+      if (path.suitableFor.gender === 'both') {
+        return <Badge variant="outline">Tous genres</Badge>;
+      } else if (path.suitableFor.gender === 'male') {
+        return <Badge variant="outline">Hommes uniquement</Badge>;
+      } else if (path.suitableFor.gender === 'female') {
+        return <Badge variant="outline">Femmes uniquement</Badge>;
+      }
+    }
+    return null;
+  };
 
   return (
-    <Card className={`border ${isSelected ? 'border-blue-500 bg-blue-50' : ''}`}>
+    <Card 
+      className={`cursor-pointer hover:shadow-md transition-shadow ${isSelected ? 'border-blue-500 shadow-blue-100' : ''}`}
+      onClick={handleClick}
+    >
       <CardHeader className="pb-2">
         <div className="flex justify-between items-start">
-          <CardTitle className="text-lg font-semibold">{path.name}</CardTitle>
-          <Badge variant={isSelected ? "default" : "outline"}>
-            {path.type.charAt(0).toUpperCase() + path.type.slice(1)}
-          </Badge>
+          <CardTitle className="text-lg flex items-center gap-2">
+            {icon}
+            {path.name}
+          </CardTitle>
+          {getGenderBadge()}
         </div>
       </CardHeader>
-      <CardContent className="pt-0">
+      <CardContent>
         <p className="text-sm text-gray-600 mb-4">{path.description}</p>
         
-        <div className="space-y-2">
-          <div className="flex justify-between text-sm">
-            <span className="text-gray-500">Âge recommandé:</span>
-            <span>{path.minAge} - {path.maxAge} ans</span>
+        <div className="grid grid-cols-2 gap-2 mb-4">
+          <div className="flex items-center gap-1">
+            <Clock className="h-4 w-4 text-gray-500" />
+            <span className="text-sm">{path.duration} ans</span>
           </div>
-          
-          <div className="flex justify-between text-sm">
-            <span className="text-gray-500">Durée:</span>
-            <span>{path.duration} années</span>
+          <div className="flex items-center gap-1">
+            <Coins className="h-4 w-4 text-gray-500" />
+            <span className="text-sm">{path.cost} as/an</span>
           </div>
-          
-          <div className="flex justify-between text-sm">
-            <span className="text-gray-500">Coût:</span>
-            <span>{path.cost} deniers/an</span>
+          <div className="flex items-center gap-1">
+            <User className="h-4 w-4 text-gray-500" />
+            <span className="text-sm">{path.minAge}-{path.maxAge} ans</span>
           </div>
-          
-          <div className="flex justify-between text-sm">
-            <span className="text-gray-500">Stat principale:</span>
-            <span className="font-medium">{mainStat.name} +{mainStat.value}</span>
-          </div>
-          
-          <div className="flex justify-between text-sm">
-            <span className="text-gray-500">Convient pour:</span>
-            <span>
-              {path.suitableFor.length === 2 ? 'Tous les genres' : 
-                path.suitableFor[0] === 'male' ? 'Garçons uniquement' : 
-                'Filles uniquement'}
-            </span>
+          <div className="flex items-center gap-1">
+            <Award className="h-4 w-4 text-gray-500" />
+            <span className="text-sm">{path.relatedStat}</span>
           </div>
         </div>
         
-        {path.benefits && path.benefits.length > 0 && (
-          <div className="mt-4">
-            <h4 className="text-sm font-medium mb-1">Avantages:</h4>
-            <ul className="text-xs space-y-1 list-disc pl-4">
+        {path.benefits && Array.isArray(path.benefits) && path.benefits.length > 0 && (
+          <div className="mt-2">
+            <h4 className="text-sm font-medium mb-1">Bénéfices</h4>
+            <ul className="text-xs list-disc pl-4 space-y-1">
               {path.benefits.map((benefit, index) => (
                 <li key={index}>{benefit}</li>
               ))}
@@ -88,18 +120,6 @@ const EducationPathCard: React.FC<EducationPathCardProps> = ({
           </div>
         )}
       </CardContent>
-      
-      {showSelectButton && (
-        <CardFooter className="pt-0">
-          <Button 
-            onClick={onSelect} 
-            variant={isSelected ? "default" : "outline"} 
-            className="w-full mt-2"
-          >
-            {isSelected ? 'Sélectionné' : 'Sélectionner ce parcours'}
-          </Button>
-        </CardFooter>
-      )}
     </Card>
   );
 };

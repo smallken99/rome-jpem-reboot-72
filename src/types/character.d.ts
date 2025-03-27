@@ -17,6 +17,7 @@ export interface Character {
   health?: number;
   status?: 'alive' | 'deceased' | 'exiled';
   specialty?: string;
+  educationType?: string;
   testamentaryWishes?: string;
   // Visual and metadata
   isPlayer?: boolean;
@@ -51,7 +52,6 @@ export interface Character {
     statBonus?: number;
     speciality?: string;
   };
-  educationType?: string;
 }
 
 export interface CharacterStat {

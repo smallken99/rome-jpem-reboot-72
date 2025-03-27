@@ -41,7 +41,7 @@ const generatePreceptorName = (): string => {
  * Get a suitable specialty based on education type
  */
 const getSpecialtyForType = (type: EducationType): string => {
-  const specialties: Record<EducationType, string[]> = {
+  const specialties: Record<string, string[]> = {
     military: ["Stratégie militaire", "Combat à l'épée", "Commandement", "Tactiques de siège"],
     political: ["Rhétorique politique", "Droit romain", "Administration"],
     religious: ["Rites et cérémonies", "Augures et divination", "Droit sacré"],
@@ -52,6 +52,7 @@ const getSpecialtyForType = (type: EducationType): string => {
     none: ["Éducation générale"]
   };
   
-  const options = specialties[type] || specialties.academic;
+  const typeKey = type as string;
+  const options = specialties[typeKey] || specialties.academic;
   return options[Math.floor(Math.random() * options.length)];
 };

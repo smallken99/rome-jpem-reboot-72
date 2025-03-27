@@ -2,7 +2,7 @@
 import React from 'react';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Label } from '@/components/ui/label';
-import { EducationPathCard } from '../EducationPathCard';
+import EducationPathCard from '../EducationPathCard';
 import { useEducation } from '../context/EducationContext';
 import { EducationType, Gender } from '../types/educationTypes';
 
@@ -31,8 +31,12 @@ export const EducationPathSelector: React.FC<EducationPathSelectorProps> = ({
     const ageOk = childAge >= pathData.minAge && childAge <= pathData.maxAge;
     
     // Check gender suitability
-    const genderOk = pathData.suitableFor.gender === 'both' || 
-                     pathData.suitableFor.gender === childGender;
+    let genderOk = false;
+    if (Array.isArray(pathData.suitableFor)) {
+      genderOk = pathData.suitableFor.includes(childGender);
+    } else if (pathData.suitableFor && typeof pathData.suitableFor === 'object') {
+      genderOk = pathData.suitableFor.gender === 'both' || pathData.suitableFor.gender === childGender;
+    }
     
     return ageOk && genderOk;
   });

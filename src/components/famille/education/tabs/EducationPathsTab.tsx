@@ -20,17 +20,22 @@ export const EducationPathsTab: React.FC<EducationPathsTabProps> = ({
   const allPaths = getAllEducationPaths();
   
   // Filter paths by gender suitability
-  const filteredPaths = allPaths.filter(path => 
-    path.suitableFor.includes(gender as any)
-  );
+  const filteredPaths = allPaths.filter(path => {
+    if (Array.isArray(path.suitableFor)) {
+      return path.suitableFor.includes(gender as any);
+    } else if (path.suitableFor && typeof path.suitableFor === 'object') {
+      return path.suitableFor.gender === 'both' || path.suitableFor.gender === gender;
+    }
+    return true; // Default to showing if suitability is not specified
+  });
   
   // Group paths by education type
   const pathsByType: Record<string, EducationPath[]> = {};
   filteredPaths.forEach(path => {
-    if (!pathsByType[path.type]) {
-      pathsByType[path.type] = [];
+    if (!pathsByType[path.type as string]) {
+      pathsByType[path.type as string] = [];
     }
-    pathsByType[path.type].push(path);
+    pathsByType[path.type as string].push(path);
   });
   
   // Get all unique types

@@ -5,7 +5,7 @@ import { EducationType } from '../types/educationTypes';
 import CheckboxGroup from './CheckboxGroup';
 
 interface EducationSpecialtySelectorProps {
-  educationType: EducationType | string;
+  educationType: EducationType;
   selectedSpecialties: string[];
   onChange: (specialties: string[]) => void;
   availableSpecialties?: string[];
@@ -72,13 +72,8 @@ export const EducationSpecialtySelector: React.FC<EducationSpecialtySelectorProp
 
   // Get specialties for the selected education type
   const specialties = availableSpecialties || 
-    specialtiesByType[educationType] || 
+    specialtiesByType[educationType as string] || 
     specialtiesByType.academic;
-
-  // Handle specialty selection
-  const handleSpecialtyChange = (newSelectedSpecialties: string[]) => {
-    onChange(newSelectedSpecialties);
-  };
 
   return (
     <Card>
@@ -94,7 +89,7 @@ export const EducationSpecialtySelector: React.FC<EducationSpecialtySelectorProp
         <CheckboxGroup
           options={specialties}
           selectedOptions={selectedSpecialties}
-          onChange={handleSpecialtyChange}
+          onChange={onChange}
           className="mt-2"
         />
       </CardContent>

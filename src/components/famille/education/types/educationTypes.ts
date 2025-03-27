@@ -1,6 +1,6 @@
 
 // Basic education types
-export type EducationType = 'military' | 'political' | 'religious' | 'artistic' | 'philosophical' | 'rhetoric' | 'academic' | 'none';
+export type EducationType = string | 'military' | 'political' | 'religious' | 'artistic' | 'philosophical' | 'rhetoric' | 'academic' | 'none';
 export type Gender = 'male' | 'female';
 
 // Child data structure for education system
@@ -10,7 +10,7 @@ export interface Child {
   age: number;
   gender: Gender;
   status?: string;
-  educationType: EducationType | string;
+  educationType: EducationType;
   progress: number;
   specialties: string[];
   specialty?: string;
@@ -23,7 +23,7 @@ export interface Child {
 
 // Current education status for a child
 export interface ChildEducation {
-  type: EducationType | string;
+  type: EducationType;
   mentor: string | null;
   progress: number;
   skills: string[];
@@ -36,7 +36,7 @@ export interface ChildEducation {
 
 // Education record - completed education
 export interface EducationHistory {
-  type: EducationType | string;
+  type: EducationType;
   mentor: string;
   speciality?: string;
   completedAt: number;
@@ -51,7 +51,7 @@ export interface EducationHistory {
 export interface Preceptor {
   id: string;
   name: string;
-  specialization: EducationType | string;
+  specialization: EducationType;
   skill: number;
   cost: number;
   background: string;
@@ -86,7 +86,7 @@ export interface PreceptorsByType {
 export interface EducationPath {
   id: string;
   name: string;
-  type: EducationType | string;
+  type: EducationType;
   description: string;
   minAge: number;
   maxAge: number;
@@ -98,7 +98,7 @@ export interface EducationPath {
     skills?: string[];
     bonuses?: { [key: string]: number };
   } | string[];
-  suitableFor: Gender[];
+  suitableFor: { gender: Gender | 'both' } | Gender[];
   benefits?: string[];
 }
 
@@ -106,19 +106,19 @@ export interface EducationPath {
 export interface EducationObjectivesProps {
   childId: string;
   path?: EducationPath;
-  educationType?: EducationType | string;
+  educationType?: EducationType;
 }
 
 export interface EducationTypeSelectorProps {
-  selectedType: EducationType | string;
-  onChange: (type: EducationType | string) => void;
+  selectedType: EducationType;
+  onChange: (type: EducationType) => void;
   gender: Gender;
   childGender?: Gender;
   age?: number;
 }
 
 export interface EducationSpecialtySelectorProps {
-  educationType: EducationType | string;
+  educationType: EducationType;
   selectedSpecialties: string[];
   onChange: (specialties: string[]) => void;
   availableSpecialties?: string[];
@@ -126,25 +126,25 @@ export interface EducationSpecialtySelectorProps {
 
 // Form data for education
 export interface EducationFormData {
-  type: EducationType | string;
+  type: EducationType;
   specialties: string[];
   preceptorId: string | null;
   childId?: string;
-  pathType?: EducationType | string;
+  pathType?: EducationType;
   mentor?: string | null;
   startYear?: number;
   currentYear?: number;
   totalYears?: number;
   status?: "not_started" | "in_progress" | "completed" | "failed" | "canceled";
   skills?: { [key: string]: number };
-  educationType?: EducationType | string;
+  educationType?: EducationType;
 }
 
 // Education record
 export interface EducationRecord {
   id: string;
   childId: string;
-  pathType: EducationType | string;
+  pathType: EducationType;
   preceptorId: string | null;
   startYear: number;
   currentYear: number;
