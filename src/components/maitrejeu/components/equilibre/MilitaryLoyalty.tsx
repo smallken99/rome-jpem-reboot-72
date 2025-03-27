@@ -1,256 +1,212 @@
 
-import React from 'react';
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
+import React, { useState } from 'react';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Slider } from "@/components/ui/slider";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ResponsiveContainer, LineChart, XAxis, YAxis, CartesianGrid, Tooltip, Legend, Line } from 'recharts';
-import { Button } from '@/components/ui/button';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Equilibre } from '../../types/equilibre';
+import { AlertCircle } from 'lucide-react';
+import { toast } from 'sonner';
+import { Equilibre } from '@/components/maitrejeu/types';
 
-interface MilitaryLoyaltyProps {
-  equilibreData: Equilibre;
-  onMilitaryAction: (action: string) => void;
+export interface MilitaryLoyaltyProps {
+  equilibre: Equilibre;
+  onUpdate: (armée: number, loyauté: number, morale: number) => void;
 }
 
-// Générer des données factices pour les graphiques historiques
-const generateHistoricalData = (dataPoints: number, startValue: number, variability: number) => {
-  const result = [];
-  let currentValue = startValue;
-  
-  for (let i = 0; i < dataPoints; i++) {
-    const change = (Math.random() - 0.5) * variability;
-    currentValue = Math.max(10, Math.min(95, currentValue + change));
-    
-    result.push({
-      month: i,
-      value: Math.round(currentValue)
-    });
-  }
-  
-  return result;
-};
+const historyData = [
+  { year: 1, armée: 65, loyauté: 70, morale: 55 },
+  { year: 2, armée: 70, loyauté: 68, morale: 60 },
+  { year: 3, armée: 62, loyauté: 72, morale: 58 },
+  { year: 4, armée: 75, loyauté: 75, morale: 62 },
+  { year: 5, armée: 68, loyauté: 80, morale: 65 },
+  { year: 6, armée: 72, loyauté: 78, morale: 70 }
+];
 
-const historicalArmyLoyalty = generateHistoricalData(12, 75, 8);
-const historicalArmyMorale = generateHistoricalData(12, 68, 12);
-const historicalArmyReadiness = generateHistoricalData(12, 82, 5);
+export const MilitaryLoyalty: React.FC<MilitaryLoyaltyProps> = ({ equilibre, onUpdate }) => {
+  const [activeTab, setActiveTab] = useState("ajuster");
+  const [armée, setArmée] = useState(equilibre.armée || 70);
+  const [loyauté, setLoyauté] = useState(equilibre.loyauté || 75);
+  const [morale, setMorale] = useState(equilibre.morale || 60);
+  const [hasChanges, setHasChanges] = useState(false);
 
-// Fonction utilitaire pour déterminer le statut basé sur une valeur
-const getStatusInfo = (value: number) => {
-  if (value >= 80) {
-    return { label: 'Excellent', color: 'bg-green-500' };
-  } else if (value >= 65) {
-    return { label: 'Bon', color: 'bg-emerald-500' };
-  } else if (value >= 50) {
-    return { label: 'Moyen', color: 'bg-yellow-500' };
-  } else if (value >= 35) {
-    return { label: 'Faible', color: 'bg-orange-500' };
-  } else {
-    return { label: 'Critique', color: 'bg-red-500' };
-  }
-};
+  const handleArméeChange = (value: number[]) => {
+    setArmée(value[0]);
+    setHasChanges(true);
+  };
 
-export const MilitaryLoyalty: React.FC<MilitaryLoyaltyProps> = ({ equilibreData, onMilitaryAction }) => {
-  const armyValue = equilibreData.armée || equilibreData.facteurMilitaire || 50;
-  const moraleValue = equilibreData.morale || 50;
-  const loyaltyValue = equilibreData.loyauté || 50;
-  
-  const armyStatus = getStatusInfo(armyValue);
-  const moraleStatus = getStatusInfo(moraleValue);
-  const loyaltyStatus = getStatusInfo(loyaltyValue);
-  
-  // Textes descriptifs selon les valeurs actuelles
-  const getMilitaryDescription = () => {
-    if (armyValue >= 75) {
-      return "Les légions romaines sont dans un état exemplaire, équipées et prêtes au combat.";
-    } else if (armyValue >= 50) {
-      return "L'armée romaine est en condition acceptable, mais certaines unités manquent d'équipement ou d'entraînement.";
-    } else {
-      return "Les légions sont en mauvais état, manquant cruellement d'équipement et de discipline.";
-    }
+  const handleLoyautéChange = (value: number[]) => {
+    setLoyauté(value[0]);
+    setHasChanges(true);
   };
-  
-  const getMoraleDescription = () => {
-    if (moraleValue >= 75) {
-      return "Le moral des troupes est élevé. Les légionnaires sont fiers de servir Rome.";
-    } else if (moraleValue >= 50) {
-      return "Le moral des troupes est correct, mais pourrait être amélioré.";
-    } else {
-      return "Le moral des troupes est au plus bas. Des désertions sont à craindre.";
-    }
+
+  const handleMoraleChange = (value: number[]) => {
+    setMorale(value[0]);
+    setHasChanges(true);
   };
-  
-  const getLoyaltyDescription = () => {
-    if (loyaltyValue >= 75) {
-      return "Les légions sont fidèles à la République et au Sénat.";
-    } else if (loyaltyValue >= 50) {
-      return "La loyauté des légions est fragile. Certains généraux pourraient l'emporter sur le Sénat.";
-    } else {
-      return "La loyauté des légions est envers leurs généraux, pas envers Rome. La République est en danger.";
-    }
-  };
-  
-  // Actions possibles selon l'état actuel
-  const getPossibleActions = () => {
-    const actions = [];
-    
-    if (armyValue < 70) {
-      actions.push({
-        id: "increase_funding",
-        label: "Augmenter le financement militaire",
-        description: "Allouer plus de fonds aux légions (+10 à l'état de l'armée)"
-      });
-    }
-    
-    if (moraleValue < 70) {
-      actions.push({
-        id: "victory_parade",
-        label: "Organiser un triomphe",
-        description: "Célébrer les victoires récentes pour remonter le moral (+15 au moral)"
-      });
-    }
-    
-    if (loyaltyValue < 70) {
-      actions.push({
-        id: "oath_senate",
-        label: "Faire prêter serment au Sénat",
-        description: "Exiger un nouveau serment d'allégeance au Sénat (+10 à la loyauté)"
-      });
-    }
-    
-    // Toujours disponibles
-    actions.push({
-      id: "training_program",
-      label: "Programme d'entraînement",
-      description: "Améliorer l'entraînement des légions (+5 à l'état de l'armée, +5 au moral)"
+
+  const handleUpdate = () => {
+    onUpdate(armée, loyauté, morale);
+    setHasChanges(false);
+    toast.success("Valeurs militaires mises à jour", {
+      description: "Les nouvelles valeurs ont été enregistrées avec succès"
     });
-    
-    actions.push({
-      id: "rotate_commanders",
-      label: "Rotation des commandements",
-      description: "Eviter les liens trop forts entre légions et généraux (+8 à la loyauté, -3 au moral)"
-    });
-    
-    return actions;
   };
-  
+
+  const getLabelForValue = (value: number): string => {
+    if (value >= 90) return "Exceptionnelle";
+    if (value >= 80) return "Excellente";
+    if (value >= 70) return "Très bonne";
+    if (value >= 60) return "Bonne";
+    if (value >= 50) return "Moyenne";
+    if (value >= 40) return "Médiocre";
+    if (value >= 30) return "Mauvaise";
+    if (value >= 20) return "Très mauvaise";
+    return "Catastrophique";
+  };
+
+  const getColorForValue = (value: number): string => {
+    if (value >= 80) return "text-green-600";
+    if (value >= 60) return "text-emerald-500";
+    if (value >= 40) return "text-amber-500";
+    if (value >= 20) return "text-orange-500";
+    return "text-red-600";
+  };
+
   return (
-    <Card className="shadow-md">
+    <Card className="col-span-12 lg:col-span-6">
       <CardHeader>
-        <CardTitle>Forces Militaires</CardTitle>
+        <CardTitle>Forces Militaires et Loyauté</CardTitle>
         <CardDescription>
-          État, moral et loyauté des légions romaines
+          Gérez la puissance militaire et la loyauté des troupes romaines
         </CardDescription>
       </CardHeader>
-      
-      <Tabs defaultValue="summary">
-        <TabsList className="mx-6 mb-2">
-          <TabsTrigger value="summary">Résumé</TabsTrigger>
-          <TabsTrigger value="trends">Tendances</TabsTrigger>
-          <TabsTrigger value="actions">Actions</TabsTrigger>
-        </TabsList>
-        
-        <TabsContent value="summary" className="px-6 pb-6">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div className="bg-muted p-4 rounded-lg">
-              <div className="flex justify-between items-center">
-                <h3 className="font-medium">État des légions</h3>
-                <Badge className={armyStatus.color}>{armyStatus.label}</Badge>
+      <CardContent>
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
+          <TabsList className="grid w-full grid-cols-2">
+            <TabsTrigger value="ajuster">Ajuster les valeurs</TabsTrigger>
+            <TabsTrigger value="historique">Historique</TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="ajuster" className="space-y-6">
+            <div className="space-y-6">
+              <div className="space-y-2">
+                <div className="flex justify-between items-center">
+                  <span className="font-medium text-sm">Puissance Armée</span>
+                  <span className={`font-medium ${getColorForValue(armée)}`}>
+                    {armée}/100 ({getLabelForValue(armée)})
+                  </span>
+                </div>
+                <Slider
+                  defaultValue={[armée]}
+                  max={100}
+                  step={1}
+                  onValueChange={handleArméeChange}
+                />
+                <p className="text-sm text-muted-foreground">
+                  Représente la force brute des légions romaines, leur équipement et leur nombre
+                </p>
               </div>
-              <div className="mt-2 text-2xl font-bold">{armyValue}%</div>
-              <p className="text-sm text-muted-foreground mt-2">{getMilitaryDescription()}</p>
-            </div>
-            
-            <div className="bg-muted p-4 rounded-lg">
-              <div className="flex justify-between items-center">
-                <h3 className="font-medium">Moral des troupes</h3>
-                <Badge className={moraleStatus.color}>{moraleStatus.label}</Badge>
+
+              <div className="space-y-2">
+                <div className="flex justify-between items-center">
+                  <span className="font-medium text-sm">Loyauté</span>
+                  <span className={`font-medium ${getColorForValue(loyauté)}`}>
+                    {loyauté}/100 ({getLabelForValue(loyauté)})
+                  </span>
+                </div>
+                <Slider
+                  defaultValue={[loyauté]}
+                  max={100}
+                  step={1}
+                  onValueChange={handleLoyautéChange}
+                />
+                <p className="text-sm text-muted-foreground">
+                  Représente la fidélité des troupes envers le Sénat plutôt qu'envers leurs généraux
+                </p>
               </div>
-              <div className="mt-2 text-2xl font-bold">{moraleValue}%</div>
-              <p className="text-sm text-muted-foreground mt-2">{getMoraleDescription()}</p>
-            </div>
-            
-            <div className="bg-muted p-4 rounded-lg">
-              <div className="flex justify-between items-center">
-                <h3 className="font-medium">Loyauté envers Rome</h3>
-                <Badge className={loyaltyStatus.color}>{loyaltyStatus.label}</Badge>
+
+              <div className="space-y-2">
+                <div className="flex justify-between items-center">
+                  <span className="font-medium text-sm">Morale</span>
+                  <span className={`font-medium ${getColorForValue(morale)}`}>
+                    {morale}/100 ({getLabelForValue(morale)})
+                  </span>
+                </div>
+                <Slider
+                  defaultValue={[morale]}
+                  max={100}
+                  step={1}
+                  onValueChange={handleMoraleChange}
+                />
+                <p className="text-sm text-muted-foreground">
+                  Représente le moral et la motivation des troupes romaines
+                </p>
               </div>
-              <div className="mt-2 text-2xl font-bold">{loyaltyValue}%</div>
-              <p className="text-sm text-muted-foreground mt-2">{getLoyaltyDescription()}</p>
+
+              {hasChanges && (
+                <div className="flex items-center p-3 bg-amber-50 border border-amber-200 rounded-md">
+                  <AlertCircle className="h-5 w-5 text-amber-500 mr-2" />
+                  <span className="text-sm text-amber-800">
+                    N'oubliez pas d'enregistrer vos modifications
+                  </span>
+                </div>
+              )}
+
+              <Button onClick={handleUpdate} disabled={!hasChanges}>
+                Enregistrer les modifications
+              </Button>
             </div>
-          </div>
-        </TabsContent>
-        
-        <TabsContent value="trends" className="px-6 pb-6">
-          <div className="space-y-6">
-            <div>
-              <h3 className="font-medium mb-3">État des légions (12 derniers mois)</h3>
-              <div className="h-64">
-                <ResponsiveContainer width="100%" height="100%">
-                  <LineChart data={historicalArmyReadiness}>
-                    <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis dataKey="month" />
-                    <YAxis domain={[0, 100]} />
-                    <Tooltip />
-                    <Legend />
-                    <Line type="monotone" dataKey="value" name="État" stroke="#3b82f6" activeDot={{ r: 8 }} />
-                  </LineChart>
-                </ResponsiveContainer>
-              </div>
-            </div>
-            
-            <div>
-              <h3 className="font-medium mb-3">Moral des troupes (12 derniers mois)</h3>
-              <div className="h-64">
-                <ResponsiveContainer width="100%" height="100%">
-                  <LineChart data={historicalArmyMorale}>
-                    <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis dataKey="month" />
-                    <YAxis domain={[0, 100]} />
-                    <Tooltip />
-                    <Legend />
-                    <Line type="monotone" dataKey="value" name="Moral" stroke="#10b981" activeDot={{ r: 8 }} />
-                  </LineChart>
-                </ResponsiveContainer>
-              </div>
-            </div>
-            
-            <div>
-              <h3 className="font-medium mb-3">Loyauté envers Rome (12 derniers mois)</h3>
-              <div className="h-64">
-                <ResponsiveContainer width="100%" height="100%">
-                  <LineChart data={historicalArmyLoyalty}>
-                    <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis dataKey="month" />
-                    <YAxis domain={[0, 100]} />
-                    <Tooltip />
-                    <Legend />
-                    <Line type="monotone" dataKey="value" name="Loyauté" stroke="#f59e0b" activeDot={{ r: 8 }} />
-                  </LineChart>
-                </ResponsiveContainer>
-              </div>
-            </div>
-          </div>
-        </TabsContent>
-        
-        <TabsContent value="actions" className="px-6 pb-6">
-          <div className="space-y-4">
-            {getPossibleActions().map(action => (
-              <div key={action.id} className="border rounded-lg p-4">
-                <h3 className="font-medium">{action.label}</h3>
-                <p className="text-sm text-muted-foreground mt-1">{action.description}</p>
-                <Button 
-                  variant="outline" 
-                  size="sm" 
-                  onClick={() => onMilitaryAction(action.id)}
-                  className="mt-3"
+          </TabsContent>
+
+          <TabsContent value="historique">
+            <div className="h-[300px]">
+              <ResponsiveContainer width="100%" height="100%">
+                <LineChart
+                  data={historyData}
+                  margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
                 >
-                  Exécuter
-                </Button>
-              </div>
-            ))}
-          </div>
-        </TabsContent>
-      </Tabs>
+                  <CartesianGrid strokeDasharray="3 3" />
+                  <XAxis 
+                    dataKey="year" 
+                    label={{ value: 'Année', position: 'insideBottomRight', offset: -5 }} 
+                  />
+                  <YAxis
+                    domain={[0, 100]}
+                    label={{ value: 'Valeur', angle: -90, position: 'insideLeft' }}
+                  />
+                  <Tooltip />
+                  <Legend />
+                  <Line
+                    type="monotone"
+                    dataKey="armée"
+                    stroke="#3b82f6"
+                    activeDot={{ r: 8 }}
+                    name="Puissance Armée"
+                  />
+                  <Line
+                    type="monotone"
+                    dataKey="loyauté"
+                    stroke="#10b981"
+                    name="Loyauté"
+                  />
+                  <Line
+                    type="monotone"
+                    dataKey="morale"
+                    stroke="#f59e0b"
+                    name="Morale"
+                  />
+                </LineChart>
+              </ResponsiveContainer>
+            </div>
+            <div className="mt-4">
+              <p className="text-sm text-muted-foreground">
+                Évolution des valeurs militaires au cours des dernières années
+              </p>
+            </div>
+          </TabsContent>
+        </Tabs>
+      </CardContent>
     </Card>
   );
 };

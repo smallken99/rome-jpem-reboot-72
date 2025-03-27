@@ -1,170 +1,346 @@
 
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { EquilibreOverview } from './components/equilibre/EquilibreOverview';
-import { PoliticalFactions } from './components/equilibre/PoliticalFactions';
-import { SocialTensions } from './components/equilibre/SocialTensions';
-import { MilitaryLoyalty } from './components/equilibre/MilitaryLoyalty';
 import { Button } from '@/components/ui/button';
-import { RefreshCw, Save, AlertTriangle } from 'lucide-react';
-import { useRepublicData } from '@/hooks/useRepublicData';
-import { useGameTime } from '@/hooks/useGameTime';
-import { PoliticalEvent } from './types/equilibre';
-import { Equilibre } from './types/equilibre';
+import { Separator } from '@/components/ui/separator';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { ChevronsUp, Bookmark, History, BarChart3, AlertTriangle } from 'lucide-react';
+import { useMaitreJeu } from './context';
+import { PoliticalEventsTimeline } from './components/PoliticalEventsTimeline';
+import { RiskFactorsList } from './components/RiskFactorsList';
+import { PoliticalBalanceCard } from './components/equilibre/PoliticalBalanceCard';
+import { SocialStabilityCard } from './components/equilibre/SocialStabilityCard';
+import { EconomicStabilityCard } from './components/equilibre/EconomicStabilityCard';
+import { MilitaryLoyalty } from './components/equilibre/MilitaryLoyalty';
+import { RecentEventsTable } from './components/equilibre/RecentEventsTable';
+import { EquilibreChart } from './components/equilibre/EquilibreChart';
+import { ThreatAssessment } from './components/equilibre/ThreatAssessment';
+import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
+import { PoliticalEvent } from './types';
+import { toast } from 'sonner';
+import { Equilibre } from './types';
 
 export const GestionEquilibre = () => {
+  const { equilibre, updateEquilibre, updateFactionBalance } = useMaitreJeu();
   const [activeTab, setActiveTab] = useState('apercu');
-  const { equiplibre, updateFactionBalance, updateRepublicFactor } = useRepublicData();
-  const { formatDate } = useGameTime();
   
-  // Assurons-nous que equiplibre contient bien tous les champs requis
-  const equilibreWithDefaults: Equilibre = {
-    ...equiplibre,
-    population: equiplibre.population || 750000, // Valeur par défaut
-    populaires: equiplibre.populaires || equiplibre.populares || 33, // Valeur par défaut
-    optimates: equiplibre.optimates || 33,
-    moderates: equiplibre.moderates || 34
-  };
-  
-  // Événements récents qui ont influencé l'équilibre
-  const recentEvents: PoliticalEvent[] = [
+  // Données fictives pour démonstration
+  const politicalEvents: PoliticalEvent[] = [
     {
       id: '1',
-      title: 'Discours de Gracchus au Sénat',
-      name: 'Discours de Gracchus au Sénat',
-      description: 'Un discours enflammé qui a rallié le peuple',
+      title: 'Réforme agraire de Tiberius Gracchus',
+      description: 'Distribution de terres publiques aux citoyens sans terre',
       type: 'politique',
-      importance: 'majeure',
-      date: { year: 2023, season: 'SPRING' },
-      impact: { populares: 5, optimates: -3, armée: 0, morale: 2 }
+      date: { year: 621, season: 'Aestas' },
+      importance: 'haute',
+      impact: {
+        populares: 15,
+        optimates: -10,
+        plébéiens: 20,
+        patriciens: -5
+      }
     },
     {
       id: '2',
-      title: 'Proposition de loi agraire',
-      name: 'Proposition de loi agraire',
-      description: 'Une nouvelle distribution des terres aux plébéiens',
-      type: 'législation',
-      importance: 'critique',
-      date: { year: 2023, season: 'WINTER' },
-      impact: { populares: 8, optimates: -6, morale: -2, plébéiens: 10 }
+      title: 'Victoire en Hispanie',
+      description: 'Défaite décisive des forces de Viriathe en Lusitanie',
+      type: 'militaire',
+      date: { year: 622, season: 'Ver' },
+      importance: 'normale',
+      impact: {
+        armée: 10,
+        morale: 15,
+        loyauté: 5
+      }
     },
     {
       id: '3',
-      title: 'Bataille contre les Gaulois',
-      name: 'Bataille contre les Gaulois',
-      description: 'Une victoire éclatante pour Rome',
-      type: 'militaire',
-      importance: 'majeure',
-      date: { year: 2023, season: 'AUTUMN' },
-      impact: { armée: 5, patriciens: 2, morale: 3 }
+      title: 'Traité avec Pergame',
+      description: 'Le roi Attale III lègue son royaume à Rome',
+      type: 'diplomatique',
+      date: { year: 621, season: 'Hiems' },
+      importance: 'haute',
+      impact: {
+        économie: 15,
+        populares: 5,
+        optimates: 10
+      }
+    },
+    {
+      id: '4',
+      title: 'Émeutes frumentaires à Rome',
+      description: 'Protestations violentes liées à la pénurie de blé',
+      type: 'sociale',
+      date: { year: 623, season: 'Aestas' },
+      importance: 'normale',
+      impact: {
+        plébéiens: -15,
+        populares: 10,
+        économie: -5
+      }
+    },
+    {
+      id: '5',
+      title: 'Réforme judiciaire',
+      description: 'Expansion des tribunaux permanents',
+      type: 'politique',
+      date: { year: 623, season: 'Autumnus' },
+      importance: 'normale',
+      impact: {
+        optimates: 5,
+        patriciens: 10
+      }
     }
   ];
   
-  // Menaces actuelles à l'équilibre
-  const currentThreats: { id: string; name: string; severity: 'low' | 'medium' | 'high'; description: string; }[] = [
+  const riskFactors = [
     {
       id: '1',
-      name: 'Insatisfaction de la plèbe',
+      name: 'Pénurie alimentaire',
       severity: 'high',
-      description: 'Les plébéiens sont mécontents des prix élevés du grain.'
+      description: 'Les réserves de grain sont dangereusement basses'
     },
     {
       id: '2',
-      name: 'Rivalité entre consuls',
+      name: 'Mécontentement militaire',
       severity: 'medium',
-      description: 'Les deux consuls sont en désaccord sur la politique militaire.'
+      description: 'Plusieurs légions attendent leur solde'
     },
     {
       id: '3',
-      name: 'Corruption au Sénat',
-      severity: 'medium',
-      description: 'Plusieurs sénateurs ont été accusés d\'accepter des pots-de-vin.'
+      name: 'Tensions avec Carthage',
+      severity: 'low',
+      description: 'Incidents frontaliers mineurs signalés'
     }
   ];
   
-  const handleUpdateFactions = (populares: number, optimates: number, moderates: number) => {
+  // Handlers pour les mises à jour d'équilibre
+  const handleFactionUpdate = (populares: number, optimates: number, moderates: number) => {
     updateFactionBalance(populares, optimates, moderates);
+    toast.success("Équilibre des factions mis à jour", {
+      description: `Populares: ${populares}, Optimates: ${optimates}, Modérés: ${moderates}`
+    });
   };
   
-  const handleUpdateSocialFactors = (patriciens: number, plébéiens: number, économie: number) => {
-    updateRepublicFactor('patriciens', patriciens);
-    updateRepublicFactor('plébéiens', plébéiens);
-    updateRepublicFactor('économie', économie);
+  const handleSocialUpdate = (patriciens: number, plébéiens: number) => {
+    const updatedEquilibre: Partial<Equilibre> = {
+      patriciens,
+      plébéiens,
+      facteurPatriciens: patriciens,
+      facteurPlebs: plébéiens
+    };
+    updateEquilibre(updatedEquilibre);
+    toast.success("Facteurs sociaux mis à jour");
   };
   
-  const handleUpdateMilitaryFactors = (armée: number, loyauté: number, morale: number) => {
-    updateRepublicFactor('armée', armée);
-    updateRepublicFactor('loyauté', loyauté);
-    updateRepublicFactor('morale', morale);
+  const handleEconomicUpdate = (economie: number) => {
+    const updatedEquilibre: Partial<Equilibre> = {
+      économie: economie,
+      economicStability: economie
+    };
+    updateEquilibre(updatedEquilibre);
+    toast.success("Facteur économique mis à jour");
   };
   
+  const handleMilitaryUpdate = (armée: number, loyauté: number, morale: number) => {
+    const updatedEquilibre: Partial<Equilibre> = {
+      armée,
+      loyauté,
+      morale,
+      facteurMilitaire: armée
+    };
+    updateEquilibre(updatedEquilibre);
+    toast.success("Facteurs militaires mis à jour");
+  };
+
   return (
     <div className="p-6 space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold">Équilibre des Pouvoirs</h1>
+          <h1 className="text-3xl font-bold">Équilibre de la République</h1>
           <p className="text-muted-foreground">
-            Surveillez et influencez l'équilibre politique et social de Rome
+            Surveillez et ajustez les forces politiques et sociales de Rome
           </p>
         </div>
+        
         <div className="flex gap-2">
-          <Button variant="outline" size="sm" className="flex items-center gap-1">
-            <RefreshCw className="h-4 w-4" />
-            Actualiser
+          <Button variant="outline" className="gap-2">
+            <Bookmark className="h-4 w-4" />
+            <span>Sauvegarder l'état actuel</span>
           </Button>
-          <Button size="sm" className="flex items-center gap-1">
-            <Save className="h-4 w-4" />
-            Sauvegarder
+          <Button variant="outline" className="gap-2">
+            <History className="h-4 w-4" />
+            <span>Historique des changements</span>
+          </Button>
+          <Button className="gap-2">
+            <ChevronsUp className="h-4 w-4" />
+            <span>Calculer l'impact</span>
           </Button>
         </div>
       </div>
       
-      <Card className="border-amber-200 bg-amber-50">
-        <CardContent className="p-4 flex items-center gap-3">
-          <AlertTriangle className="h-5 w-5 text-amber-600" />
-          <p className="text-amber-800 text-sm">
-            Une instabilité politique est détectée. La faction des Populaires gagne en influence auprès de la plèbe.
-          </p>
-        </CardContent>
-      </Card>
+      <Alert>
+        <AlertTriangle className="h-4 w-4" />
+        <AlertTitle>Attention</AlertTitle>
+        <AlertDescription>
+          Les modifications de l'équilibre peuvent avoir des conséquences importantes sur le jeu et déclencher des événements.
+        </AlertDescription>
+      </Alert>
       
       <Tabs value={activeTab} onValueChange={setActiveTab}>
-        <TabsList className="grid grid-cols-4 w-full">
-          <TabsTrigger value="apercu">Aperçu général</TabsTrigger>
-          <TabsTrigger value="factions">Factions politiques</TabsTrigger>
-          <TabsTrigger value="social">Tensions sociales</TabsTrigger>
-          <TabsTrigger value="armee">Loyauté militaire</TabsTrigger>
+        <TabsList className="grid w-full grid-cols-4">
+          <TabsTrigger value="apercu">Aperçu</TabsTrigger>
+          <TabsTrigger value="politique">Politique</TabsTrigger>
+          <TabsTrigger value="social">Social et Économique</TabsTrigger>
+          <TabsTrigger value="militaire">Militaire</TabsTrigger>
         </TabsList>
         
-        <TabsContent value="apercu">
-          <EquilibreOverview 
-            equilibre={equilibreWithDefaults}
-            recentEvents={recentEvents}
-            currentThreats={currentThreats}
-            formatDate={formatDate}
-          />
+        <TabsContent value="apercu" className="pt-6">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+            <Card>
+              <CardHeader className="pb-2">
+                <CardTitle className="text-lg font-medium">Équilibre des Factions</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="font-medium text-5xl text-center mb-4 text-blue-600">
+                  {equilibre.optimates}%
+                </div>
+                <div className="relative h-3 w-full bg-muted rounded-full overflow-hidden">
+                  <div
+                    className="absolute h-full bg-blue-600 left-0"
+                    style={{ width: `${equilibre.optimates}%` }}
+                  />
+                  <div
+                    className="absolute h-full bg-green-500 left-0"
+                    style={{ width: `${equilibre.moderates}%`, marginLeft: `${equilibre.optimates}%` }}
+                  />
+                  <div
+                    className="absolute h-full bg-red-500 right-0"
+                    style={{ width: `${equilibre.populaires || equilibre.populares}%` }}
+                  />
+                </div>
+                <div className="flex justify-between text-xs text-muted-foreground mt-1">
+                  <span>Optimates</span>
+                  <span>Modérés</span>
+                  <span>Populares</span>
+                </div>
+              </CardContent>
+            </Card>
+            
+            <Card>
+              <CardHeader className="pb-2">
+                <CardTitle className="text-lg font-medium">Stabilité Sociale</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <span className="text-muted-foreground text-sm">Patriciens</span>
+                    <div className="font-medium text-3xl text-indigo-600">
+                      {equilibre.patriciens}%
+                    </div>
+                  </div>
+                  <div>
+                    <span className="text-muted-foreground text-sm">Plébéiens</span>
+                    <div className="font-medium text-3xl text-amber-600">
+                      {equilibre.plébéiens}%
+                    </div>
+                  </div>
+                </div>
+                <Separator className="my-4" />
+                <div>
+                  <span className="text-muted-foreground text-sm">Stabilité Économique</span>
+                  <div className="font-medium text-3xl text-emerald-600">
+                    {equilibre.économie}%
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+            
+            <Card>
+              <CardHeader className="pb-2">
+                <CardTitle className="text-lg font-medium">Forces Militaires</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <span className="text-muted-foreground text-sm">Puissance</span>
+                    <div className="font-medium text-3xl text-red-600">
+                      {equilibre.armée}%
+                    </div>
+                  </div>
+                  <div>
+                    <span className="text-muted-foreground text-sm">Loyauté</span>
+                    <div className="font-medium text-3xl text-purple-600">
+                      {equilibre.loyauté}%
+                    </div>
+                  </div>
+                </div>
+                <Separator className="my-4" />
+                <div>
+                  <span className="text-muted-foreground text-sm">Morale</span>
+                  <div className="font-medium text-3xl text-cyan-600">
+                    {equilibre.morale}%
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+            <Card>
+              <CardHeader>
+                <CardTitle>Évolution des facteurs</CardTitle>
+                <CardDescription>
+                  Visualisation des changements d'équilibre au fil du temps
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="h-[300px] relative">
+                <EquilibreChart />
+              </CardContent>
+            </Card>
+            
+            <PoliticalEventsTimeline events={politicalEvents} />
+          </div>
+          
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div className="md:col-span-2">
+              <RecentEventsTable events={politicalEvents} />
+            </div>
+            
+            <RiskFactorsList factors={riskFactors} />
+          </div>
         </TabsContent>
         
-        <TabsContent value="factions">
-          <PoliticalFactions 
-            equilibre={equilibreWithDefaults}
-            onUpdate={handleUpdateFactions}
-          />
+        <TabsContent value="politique" className="pt-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <PoliticalBalanceCard 
+              equilibre={equilibre} 
+              onUpdate={handleFactionUpdate} 
+            />
+            <ThreatAssessment />
+          </div>
         </TabsContent>
         
-        <TabsContent value="social">
-          <SocialTensions 
-            equilibre={equilibreWithDefaults}
-            onUpdate={handleUpdateSocialFactors}
-          />
+        <TabsContent value="social" className="pt-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <SocialStabilityCard 
+              equilibre={equilibre} 
+              onUpdate={handleSocialUpdate} 
+            />
+            <EconomicStabilityCard 
+              equilibre={equilibre} 
+              onUpdate={handleEconomicUpdate} 
+            />
+          </div>
         </TabsContent>
         
-        <TabsContent value="armee">
-          <MilitaryLoyalty 
-            equilibre={equilibreWithDefaults}
-            onUpdate={handleUpdateMilitaryFactors}
-          />
+        <TabsContent value="militaire" className="pt-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <MilitaryLoyalty 
+              equilibre={equilibre}
+              onUpdate={handleMilitaryUpdate}
+            />
+          </div>
         </TabsContent>
       </Tabs>
     </div>

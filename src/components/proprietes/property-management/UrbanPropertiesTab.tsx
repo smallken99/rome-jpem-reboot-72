@@ -1,162 +1,276 @@
-import React, { useState } from 'react';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Button } from "@/components/ui/button";
-import { Plus, Building2 } from "lucide-react";
-import { OwnedUrbanPropertiesSection } from './urban/owned/OwnedUrbanPropertiesSection';
-import { BuildingPurchaseDialog } from './modals/BuildingPurchaseDialog';
-import { usePatrimoine } from '@/hooks/usePatrimoine';
-import { BuildingDescription } from '@/components/proprietes/hooks/building/types';
-import { useBuildingPurchase } from '../hooks/building/useBuildingPurchase';
-import { useOwnedBuildings } from '../hooks/building/useOwnedBuildings';
 
-export const urbanBuildingData: BuildingDescription[] = [
+import React, { useState } from 'react';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Building, Plus, Coins, Home } from 'lucide-react';
+import { useUrbanPropertiesTab } from './urban/hooks/useUrbanPropertiesTab';
+import { formatCurrency } from '@/utils/formatters';
+import { UrbanBuildingCard } from './urban/UrbanBuildingCard';
+import { BuildingDetailsModal } from '../building-details/BuildingDetailsModal';
+import { useUserProfile } from '@/hooks/useUserProfile';
+import { BuildingDescription } from '@/components/proprietes/hooks/building/types';
+
+const URBAN_BUILDING_TYPES = [
   {
     id: 'domus',
     name: 'Domus',
-    type: 'urban',
-    description: 'Une maison patricienne de luxe, idéale pour une famille noble de Rome.',
-    initialCost: 50000,
-    maintenanceCost: 5000,
-    prestige: 5,
-    advantages: ['Prestige élevé', 'Confort luxueux', 'Position sociale avantageuse'],
+    description: 'Une maison de ville pour une famille patricienne',
+    cost: 15000,
+    maintenanceCost: 500,
+    income: 0,
+    prestige: 10,
+    workers: {
+      required: 2,
+      optimal: 5,
+      maxProfit: 0
+    },
     slaves: {
       required: 3,
-      optimal: 10
+      optimal: 8,
+      maxProfit: 0
     }
   },
   {
     id: 'insula',
     name: 'Insula',
-    type: 'housing',
-    description: 'Appartements de location pour les classes populaires',
-    cost: 5000,
-    maintenanceCost: 200,
-    income: 500,
+    description: 'Un immeuble à appartements locatifs',
+    cost: 25000,
+    maintenanceCost: 1000,
+    income: 2500,
     workers: {
-      required: 2,
-      optimal: 4,
-      maxProfit: 500
+      required: 1,
+      optimal: 3,
+      maxProfit: 0
     },
     slaves: {
-      required: 0,
-      optimal: 2,
-      maxProfit: 600
+      required: 2,
+      optimal: 6,
+      maxProfit: 0
     }
   },
   {
     id: 'taberna',
     name: 'Taberna',
-    type: 'urban',
-    description: 'Un local commercial situé au rez-de-chaussée qui peut servir de boutique ou d\'atelier.',
-    initialCost: 20000,
-    maintenanceCost: 2000,
-    prestige: 1,
-    advantages: ['Revenus commerciaux', 'Emplacement stratégique', 'Possibilité d\'expansion'],
+    description: 'Une boutique ou atelier pour le commerce',
+    cost: 10000,
+    maintenanceCost: 400,
+    income: 1500,
+    workers: {
+      required: 2,
+      optimal: 5,
+      maxProfit: 0
+    },
     slaves: {
       required: 1,
-      optimal: 3
+      optimal: 3,
+      maxProfit: 0
+    }
+  },
+  {
+    id: 'horreum',
+    name: 'Horreum',
+    description: 'Un entrepôt pour stocker des marchandises',
+    cost: 20000,
+    maintenanceCost: 800,
+    income: 1200,
+    workers: {
+      required: 3,
+      optimal: 8,
+      maxProfit: 0
+    },
+    slaves: {
+      required: 5,
+      optimal: 12,
+      maxProfit: 0
+    }
+  },
+  {
+    id: 'balnea',
+    name: 'Balnea',
+    description: 'Des bains privés',
+    cost: 30000,
+    maintenanceCost: 1500,
+    income: 3000,
+    prestige: 15,
+    workers: {
+      required: 4,
+      optimal: 10,
+      maxProfit: 0
+    },
+    slaves: {
+      required: 8,
+      optimal: 20,
+      maxProfit: 0
     }
   }
 ];
 
-export function UrbanPropertiesTab() {
-  const [activeTab, setActiveTab] = useState("owned");
-  const [isPurchaseDialogOpen, setPurchaseDialogOpen] = useState(false);
-  const [selectedPropertyType, setSelectedPropertyType] = useState<BaseBuildingDescription | null>(null);
-  
-  const { balance } = usePatrimoine();
-  const { purchaseBuilding } = useBuildingPurchase();
-  
-  const handleOpenPurchaseDialog = (property: BaseBuildingDescription) => {
-    setSelectedPropertyType(property);
-    setPurchaseDialogOpen(true);
+export const UrbanPropertiesTab = () => {
+  const { profile } = useUserProfile();
+  const {
+    urbanBuildings,
+    isModalOpen,
+    selectedBuilding,
+    setIsModalOpen,
+    handleBuildingSelect,
+    handlePurchaseProperty,
+    handleMaintenanceLevelChange,
+    handleSecurityLevelChange,
+    handleSellProperty,
+    calculateMonthlyIncome,
+    calculateMaintenanceCost,
+  } = useUrbanPropertiesTab();
+
+  const [urbanBuildingTypeFilter, setUrbanBuildingTypeFilter] = useState<string | null>(null);
+
+  const filteredBuildings = urbanBuildingTypeFilter
+    ? urbanBuildings.filter(building => building.buildingType === urbanBuildingTypeFilter)
+    : urbanBuildings;
+
+  const totalMonthlyIncome = urbanBuildings.reduce(
+    (sum, building) => sum + (calculateMonthlyIncome(building) || 0),
+    0
+  );
+
+  const totalMonthlyCost = urbanBuildings.reduce(
+    (sum, building) => sum + (calculateMaintenanceCost(building) || 0),
+    0
+  );
+
+  const netMonthlyIncome = totalMonthlyIncome - totalMonthlyCost;
+
+  const handlePurchaseBuilding = (buildingDescription: BuildingDescription) => {
+    handlePurchaseProperty({
+      buildingId: buildingDescription.id,
+      type: "urban",
+      name: buildingDescription.name,
+      location: "Rome",
+      initialCost: buildingDescription.cost,
+      maintenanceCost: buildingDescription.maintenanceCost,
+      buildingType: buildingDescription.id
+    });
   };
-  
-  const locations = ['Rome - Palatin', 'Rome - Aventin', 'Rome - Forum', 'Rome - Via Sacra', 'Rome - Subure'];
-  
+
   return (
     <div className="space-y-6">
-      <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-        <div className="flex justify-between items-center mb-4">
-          <TabsList>
-            <TabsTrigger value="owned">Mes propriétés</TabsTrigger>
-            <TabsTrigger value="available">Acheter une propriété</TabsTrigger>
-          </TabsList>
-          
-          {activeTab === "owned" && (
-            <Button 
-              onClick={() => setActiveTab("available")} 
-              className="gap-2"
-            >
-              <Plus className="h-4 w-4" />
-              Nouvelle propriété
-            </Button>
-          )}
-        </div>
-        
-        <TabsContent value="owned" className="space-y-6">
-          <OwnedUrbanPropertiesSection />
-        </TabsContent>
-        
-        <TabsContent value="available" className="space-y-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {urbanBuildingData.map((property) => (
-              <div 
-                key={property.id} 
-                className="border rounded-lg p-6 hover:border-primary/50 transition-colors cursor-pointer"
-                onClick={() => handleOpenPurchaseDialog(property)}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Building className="h-5 w-5" />
+            Propriétés Urbaines
+          </CardTitle>
+          <CardDescription>
+            Gérez vos propriétés dans la ville de Rome
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="flex flex-col sm:flex-row justify-between gap-4 mb-6">
+            <div className="flex flex-wrap gap-2">
+              <Button
+                variant={urbanBuildingTypeFilter === null ? "default" : "outline"}
+                size="sm"
+                onClick={() => setUrbanBuildingTypeFilter(null)}
               >
-                <div className="flex items-center justify-between mb-4">
-                  <h3 className="text-xl font-medium">{property.name}</h3>
-                  <span className="font-bold">{property.cost.toLocaleString()} As</span>
-                </div>
-                
-                <p className="text-muted-foreground mb-4">{property.description}</p>
-                
-                <div className="grid grid-cols-2 gap-y-2 text-sm mb-4">
-                  <div>
-                    <span className="text-muted-foreground">Entretien annuel:</span>
-                    <span className="ml-2">{property.maintenanceCost.toLocaleString()} As</span>
-                  </div>
-                  <div>
-                    <span className="text-muted-foreground">Prestige:</span>
-                    <span className="ml-2">+{property.prestige}</span>
-                  </div>
-                  <div>
-                    <span className="text-muted-foreground">Esclaves requis:</span>
-                    <span className="ml-2">{property.slaves.required}</span>
-                  </div>
-                  <div>
-                    <span className="text-muted-foreground">Esclaves optimaux:</span>
-                    <span className="ml-2">{property.slaves.optimal}</span>
-                  </div>
-                </div>
-                
-                <Button 
-                  variant="outline" 
-                  className="w-full mt-2"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    handleOpenPurchaseDialog(property);
-                  }}
+                Tous
+              </Button>
+              {URBAN_BUILDING_TYPES.map((type) => (
+                <Button
+                  key={type.id}
+                  variant={urbanBuildingTypeFilter === type.id ? "default" : "outline"}
+                  size="sm"
+                  onClick={() => setUrbanBuildingTypeFilter(type.id)}
                 >
-                  <Building2 className="mr-2 h-4 w-4" />
-                  Acheter cette propriété
+                  {type.name}
                 </Button>
+              ))}
+            </div>
+            <div className="flex items-center gap-4">
+              <div className="text-sm">
+                <span className="text-muted-foreground">Balance: </span>
+                <span className={netMonthlyIncome >= 0 ? "text-green-600" : "text-red-600"}>
+                  {formatCurrency(netMonthlyIncome)} / mois
+                </span>
               </div>
-            ))}
+              <Button variant="outline" size="sm" className="gap-1">
+                <Coins className="h-4 w-4" />
+                <span>Percevoir les loyers</span>
+              </Button>
+            </div>
           </div>
-        </TabsContent>
-      </Tabs>
-      
-      <BuildingPurchaseDialog
-        building={selectedPropertyType}
-        isOpen={isPurchaseDialogOpen}
-        onClose={() => setPurchaseDialogOpen(false)}
-        onPurchase={purchaseBuilding}
-        balance={balance}
-        locations={locations}
-      />
+
+          {filteredBuildings.length > 0 ? (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+              {filteredBuildings.map((building) => (
+                <UrbanBuildingCard
+                  key={building.id}
+                  building={building}
+                  onSelect={() => handleBuildingSelect(building.id.toString())}
+                  income={calculateMonthlyIncome(building)}
+                  cost={calculateMaintenanceCost(building)}
+                />
+              ))}
+            </div>
+          ) : (
+            <div className="text-center py-8 border border-dashed rounded-lg">
+              <Home className="h-8 w-8 text-muted-foreground mx-auto mb-2" />
+              <h3 className="text-lg font-medium mb-1">Aucune propriété urbaine</h3>
+              <p className="text-sm text-muted-foreground max-w-md mx-auto mb-4">
+                Vous ne possédez pas encore de propriétés urbaines. Achetez votre première propriété pour commencer à générer des revenus.
+              </p>
+            </div>
+          )}
+
+          <div className="mt-6">
+            <h3 className="font-medium mb-3">Acheter une propriété</h3>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+              {URBAN_BUILDING_TYPES.map((buildingType) => (
+                <Card key={buildingType.id} className="overflow-hidden">
+                  <CardHeader className="pb-2 pt-4">
+                    <CardTitle className="text-base flex justify-between items-center">
+                      {buildingType.name}
+                      <Badge variant="outline">{formatCurrency(buildingType.cost)}</Badge>
+                    </CardTitle>
+                    <CardDescription className="text-xs">{buildingType.description}</CardDescription>
+                  </CardHeader>
+                  <CardContent className="pb-4 pt-0">
+                    <div className="text-sm mb-3">
+                      <div className="flex justify-between text-xs mb-1">
+                        <span>Revenu mensuel:</span>
+                        <span className="text-green-600">{formatCurrency(buildingType.income || 0)}</span>
+                      </div>
+                      <div className="flex justify-between text-xs">
+                        <span>Coût d'entretien:</span>
+                        <span className="text-red-600">{formatCurrency(buildingType.maintenanceCost)}</span>
+                      </div>
+                    </div>
+                    <Button
+                      className="w-full text-xs"
+                      size="sm"
+                      onClick={() => handlePurchaseBuilding(buildingType as BuildingDescription)}
+                      disabled={(profile?.wealth || 0) < buildingType.cost}
+                    >
+                      <Plus className="h-3 w-3 mr-1" />
+                      Acheter
+                    </Button>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      {selectedBuilding && (
+        <BuildingDetailsModal
+          isOpen={isModalOpen}
+          onClose={() => setIsModalOpen(false)}
+          building={selectedBuilding}
+          onMaintenanceLevelChange={handleMaintenanceLevelChange}
+          onSecurityLevelChange={handleSecurityLevelChange}
+          onSell={handleSellProperty}
+        />
+      )}
     </div>
   );
-}
+};

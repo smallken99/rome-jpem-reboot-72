@@ -1,55 +1,74 @@
 
-import React from 'react';
+import React from "react";
+import { cn } from "@/lib/utils";
 
 export interface TimelineItemProps {
-  title: string;
-  description?: string;
-  date?: string;
+  title: React.ReactNode;
+  content: React.ReactNode;
   icon?: React.ReactNode;
-  badge?: React.ReactNode;
+  iconBackground?: string;
+  className?: string;
 }
 
 export interface TimelineProps {
   items: TimelineItemProps[];
+  className?: string;
 }
 
-export const TimelineItem: React.FC<TimelineItemProps> = ({
+const TimelineItem = ({
   title,
-  description,
-  date,
+  content,
   icon,
-  badge
-}) => {
+  iconBackground = "bg-primary",
+  className,
+}: TimelineItemProps) => {
   return (
-    <div className="relative pl-8 pb-8 last:pb-0">
-      {/* Timeline connector */}
-      <div className="absolute left-0 top-0 bottom-0 w-0.5 bg-muted-foreground/20"></div>
-      
-      {/* Timeline marker */}
-      <div className="absolute left-[-8px] top-1 w-4 h-4 rounded-full border bg-background flex items-center justify-center">
-        {icon || <div className="w-1.5 h-1.5 rounded-full bg-primary"></div>}
-      </div>
-      
-      <div className="space-y-2">
-        <div className="flex items-center justify-between">
-          <h4 className="text-sm font-medium">{title}</h4>
-          {badge && <div>{badge}</div>}
+    <div className={cn("flex gap-4", className)}>
+      <div className="flex flex-col items-center">
+        <div className={cn("rounded-full p-2 text-white", iconBackground)}>
+          {icon}
         </div>
-        
-        {description && <p className="text-sm text-muted-foreground">{description}</p>}
-        
-        {date && <time className="text-xs text-muted-foreground">{date}</time>}
+        <div className="w-px grow bg-border"></div>
+      </div>
+      <div className="pb-8 pt-1">
+        <div className="font-medium">{title}</div>
+        <div className="text-muted-foreground">{content}</div>
       </div>
     </div>
   );
 };
 
-export const Timeline: React.FC<TimelineProps> = ({ items }) => {
+export const Timeline = ({ items, className }: TimelineProps) => {
   return (
-    <div className="space-y-4">
+    <div className={cn("space-y-0", className)}>
       {items.map((item, index) => (
-        <TimelineItem key={index} {...item} />
+        <TimelineItem
+          key={index}
+          title={item.title}
+          content={item.content}
+          icon={item.icon}
+          iconBackground={item.iconBackground}
+        />
       ))}
     </div>
   );
 };
+
+export const TimelineConnector = () => <div className="w-px grow bg-border"></div>;
+export const TimelineContent = ({ children }: { children: React.ReactNode }) => (
+  <div className="pb-8 pt-1">{children}</div>
+);
+export const TimelineIcon = ({ 
+  children, 
+  className 
+}: { 
+  children: React.ReactNode;
+  className?: string;
+}) => (
+  <div className={cn("rounded-full p-2 text-white bg-primary", className)}>
+    {children}
+  </div>
+);
+export const TimelineSeparator = ({ children }: { children: React.ReactNode }) => (
+  <div className="flex flex-col items-center">{children}</div>
+);

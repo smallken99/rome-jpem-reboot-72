@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
 import { useMaitreJeu } from './context';
-import { LoiType, ImportanceType, Loi } from './types/lois';
+import { Loi } from './types/lois';
 import { LoisList } from './components/lois/LoisList';
 import { LoiForm } from './components/lois/LoiForm';
 import { ElectionPlanner } from './components/elections/ElectionPlanner';
@@ -14,9 +14,9 @@ interface LoiFormData {
   titre: string;
   description: string;
   proposeur: string;
-  type?: LoiType;
+  type?: string;
   catégorie?: string;
-  importance?: ImportanceType;
+  importance?: "mineure" | "normale" | "majeure";
 }
 
 export const GestionPolitique = () => {
@@ -41,8 +41,8 @@ export const GestionPolitique = () => {
       titre: newLoi.titre,
       description: newLoi.description,
       proposeur: newLoi.proposeur,
-      catégorie: newLoi.catégorie,
-      type: newLoi.type,
+      catégorie: newLoi.catégorie || 'Politique',
+      type: newLoi.type || 'Politique',
       date: { year: currentYear, season: currentSeason },
       dateProposition: { year: currentYear, season: currentSeason },
       état: "Proposée",
@@ -54,7 +54,10 @@ export const GestionPolitique = () => {
       votesPositifs: 0,
       votesNégatifs: 0,
       votesAbstention: 0,
-      importance: newLoi.importance || 'normale'
+      importance: newLoi.importance || 'normale',
+      clauses: [],
+      commentaires: [],
+      tags: []
     };
     
     addLoi(loiWithId);
@@ -74,10 +77,8 @@ export const GestionPolitique = () => {
   };
   
   const handleSelectChange = (value: string, field: keyof LoiFormData) => {
-    if (field === 'type') {
-      setNewLoi({ ...newLoi, [field]: value as LoiType });
-    } else if (field === 'importance') {
-      setNewLoi({ ...newLoi, [field]: value as ImportanceType });
+    if (field === 'importance') {
+      setNewLoi({ ...newLoi, [field]: value as "mineure" | "normale" | "majeure" });
     } else {
       setNewLoi({ ...newLoi, [field]: value });
     }

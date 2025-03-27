@@ -1,115 +1,135 @@
 
 import React from 'react';
-import { 
-  Timeline, 
-  TimelineItem, 
-  TimelineConnector, 
-  TimelineContent, 
-  TimelineIcon, 
-  TimelineSeparator 
-} from '@/components/ui/timeline';
-import { extractGameDateComponents, isGameDate } from './lois/utils/formatGameDate';
-import { PoliticalEvent } from '../types/equilibre';
-import { Tooltip } from '@/components/ui/tooltip';
-import { LawIcon, MilitaryIcon, DiplomaticIcon, DisasterIcon, InfoIcon } from './icons';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Timeline } from '@/components/ui/timeline';
+import { Badge } from '@/components/ui/badge';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { formatSeasonDisplay } from '@/utils/timeSystem';
+import { PoliticalEvent } from '@/components/maitrejeu/types';
+import { LawIcon, MilitaryIcon, DiplomaticIcon, InfoIcon } from '@/components/maitrejeu/components/icons';
 
-export const PoliticalEventsTimeline: React.FC<{ events: PoliticalEvent[] }> = ({ events }) => {
-  const getYearRange = () => {
-    let minYear = 9999;
-    let maxYear = 0;
+interface PoliticalEventsTimelineProps {
+  events: PoliticalEvent[];
+  title?: string;
+  limit?: number;
+}
 
-    events.forEach(event => {
-      if (event.date) {
-        const dateComponents = extractGameDateComponents(event.date);
-        if (dateComponents) {
-          minYear = Math.min(minYear, dateComponents.year);
-          maxYear = Math.max(maxYear, dateComponents.year);
-        }
-      }
-    });
+const sortEvents = (a: PoliticalEvent, b: PoliticalEvent) => {
+  // Gérer les dates au format { year, season } ou Date
+  const aYear = a.date && typeof a.date === 'object' && 'year' in a.date ? a.date.year : new Date(a.date as Date).getFullYear();
+  const bYear = b.date && typeof b.date === 'object' && 'year' in b.date ? b.date.year : new Date(b.date as Date).getFullYear();
+  
+  if (aYear !== bYear) {
+    return bYear - aYear; // Plus récent en premier
+  }
+  
+  // Si même année, comparer les saisons
+  const aSeason = a.date && typeof a.date === 'object' && 'season' in a.date ? a.date.season : '';
+  const bSeason = b.date && typeof b.date === 'object' && 'season' in b.date ? b.date.season : '';
+  
+  // Ordre des saisons: Hiems, Autumnus, Aestas, Ver (hiver, automne, été, printemps)
+  const seasonOrder = { 'Ver': 0, 'Aestas': 1, 'Autumnus': 2, 'Hiems': 3 };
+  return (seasonOrder[bSeason as keyof typeof seasonOrder] || 0) - (seasonOrder[aSeason as keyof typeof seasonOrder] || 0);
+};
 
-    return { minYear, maxYear };
-  };
+const getEventIcon = (type: string) => {
+  switch (type?.toLowerCase()) {
+    case 'law':
+    case 'politique':
+      return <LawIcon className="h-4 w-4" />;
+    case 'military':
+    case 'militaire':
+      return <MilitaryIcon className="h-4 w-4" />;
+    case 'diplomatic':
+    case 'diplomatique':
+      return <DiplomaticIcon className="h-4 w-4" />;
+    default:
+      return <InfoIcon className="h-4 w-4" />;
+  }
+};
 
-  const getSeasonsInYear = (year: number) => {
-    return events
-      .filter(event => {
-        const dateComponents = extractGameDateComponents(event.date);
-        return dateComponents && dateComponents.year === year;
-      })
-      .map(event => {
-        const dateComponents = extractGameDateComponents(event.date);
-        return dateComponents ? dateComponents.season : '';
-      })
-      .filter((season, index, self) => self.indexOf(season) === index);
-  };
+const getEventColor = (event: PoliticalEvent) => {
+  switch (event.type?.toLowerCase()) {
+    case 'law':
+    case 'politique':
+      return 'bg-blue-500';
+    case 'military':
+    case 'militaire':
+      return 'bg-red-500';
+    case 'diplomatic':
+    case 'diplomatique':
+      return 'bg-green-500';
+    default:
+      return 'bg-gray-500';
+  }
+};
 
-  const getEventIcon = (type: string) => {
-    switch (type.toLowerCase()) {
-      case 'politique':
-      case 'political':
-        return <LawIcon className="h-5 w-5" />;
-      case 'militaire':
-      case 'military':
-        return <MilitaryIcon className="h-5 w-5" />;
-      case 'diplomatique':
-      case 'diplomatic':
-        return <DiplomaticIcon className="h-5 w-5" />;
-      case 'catastrophe':
-      case 'disaster':
-        return <DisasterIcon className="h-5 w-5" />;
-      default:
-        return <InfoIcon className="h-5 w-5" />;
+export const PoliticalEventsTimeline: React.FC<PoliticalEventsTimelineProps> = ({
+  events,
+  title = "Événements Politiques Récents",
+  limit = 5
+}) => {
+  // Trier et limiter les événements
+  const timelineEvents = [...events].sort(sortEvents).slice(0, limit);
+  
+  const renderDate = (event: PoliticalEvent) => {
+    if (typeof event.date === 'object' && 'year' in event.date && 'season' in event.date) {
+      return `${event.date.year} AUC - ${formatSeasonDisplay(event.date.season as string)}`;
     }
+    return new Date(event.date as Date).toLocaleDateString();
   };
 
-  const { minYear, maxYear } = getYearRange();
-  const years = Array.from({ length: maxYear - minYear + 1 }, (_, i) => minYear + i);
+  const renderFaction = (event: PoliticalEvent) => {
+    if (!event.title) return null;
+    
+    return (
+      <TooltipProvider>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Badge variant="outline" className="ml-2">
+              {event.title.substring(0, 15)}
+              {event.title.length > 15 ? '...' : ''}
+            </Badge>
+          </TooltipTrigger>
+          <TooltipContent>
+            {event.title}
+          </TooltipContent>
+        </Tooltip>
+      </TooltipProvider>
+    );
+  };
+
+  const timelineItems = timelineEvents.map(event => ({
+    title: (
+      <div className="flex items-center gap-2">
+        <span>{event.title}</span>
+        {renderFaction(event)}
+      </div>
+    ),
+    content: (
+      <div>
+        <p>{event.description}</p>
+        <div className="mt-1 text-xs text-muted-foreground">{renderDate(event)}</div>
+      </div>
+    ),
+    icon: getEventIcon(event.type),
+    iconBackground: getEventColor(event),
+  }));
 
   return (
-    <Timeline>
-      {years.map(year => (
-        <React.Fragment key={year}>
-          <TimelineItem>
-            <TimelineSeparator>
-              <TimelineIcon />
-              <TimelineConnector />
-            </TimelineSeparator>
-            <TimelineContent>
-              <h3 className="text-lg font-bold">Année {year}</h3>
-              {getSeasonsInYear(year).map(season => (
-                <div key={`${year}-${season}`} className="ml-4 mt-2">
-                  <h4 className="text-md font-semibold text-muted-foreground">{season}</h4>
-                  <ul className="space-y-1 mt-1">
-                    {events
-                      .filter(event => {
-                        const dateComponents = extractGameDateComponents(event.date);
-                        return dateComponents && dateComponents.year === year && dateComponents.season === season;
-                      })
-                      .map(event => (
-                        <li key={event.id} className="flex items-start gap-2">
-                          <span className="mt-0.5 text-primary">
-                            {getEventIcon(event.type)}
-                          </span>
-                          <Tooltip content={event.description}>
-                            <span>
-                              <span className="font-medium">{event.title}</span>
-                              {event.faction && (
-                                <span className="text-xs ml-1 text-muted-foreground">
-                                  ({event.faction})
-                                </span>
-                              )}
-                            </span>
-                          </Tooltip>
-                        </li>
-                      ))}
-                  </ul>
-                </div>
-              ))}
-            </TimelineContent>
-          </TimelineItem>
-        </React.Fragment>
-      ))}
-    </Timeline>
+    <Card>
+      <CardHeader>
+        <CardTitle>{title}</CardTitle>
+      </CardHeader>
+      <CardContent>
+        {timelineEvents.length > 0 ? (
+          <Timeline items={timelineItems} />
+        ) : (
+          <p className="text-muted-foreground text-center py-4">
+            Aucun événement récent à afficher
+          </p>
+        )}
+      </CardContent>
+    </Card>
   );
 };
