@@ -31,4 +31,7 @@ export interface LoiModalProps {
 
 export interface HistoriqueLoiTabProps {
   loi: Loi;
+  lois?: Loi[];
+  onViewLoi?: (loi: Loi) => void;
+  formatSeason?: (season: string) => string;
 }

@@ -1,22 +1,19 @@
 
-export type PropertyType = 'urban' | 'rural' | 'commercial' | 'villa' | 'other' | 'domus' | 'insula' | 'taberna' | 'horreum' | 'officina' | 'balneum' | 'villa_urbana' | 'villa_rustica' | 'temple';
-
-export type PropertyStatus = 'excellent' | 'good' | 'fair' | 'poor' | 'dilapidated' | 'ruins';
+export type PropertyType = 'commercial' | 'urban' | 'rural' | 'other';
+export type PropertyStatus = 'excellent' | 'good' | 'fair' | 'ruins' | 'poor' | 'dilapidated';
 
 export interface Property {
   id: string;
   type: PropertyType;
+  name: string;
   location: string;
   value: number;
-  acquired?: string;
-  income?: number;
+  maintenance: number;
+  condition: number;
   incomePerYear: number;
-  maintenance?: number;
   maintenanceCost: number;
   status: PropertyStatus;
-  condition?: number;
-  upgrades?: PropertyUpgrade[];
-  name?: string;
+  income?: number;
 }
 
 export interface Building {
@@ -30,35 +27,19 @@ export interface Building {
   workers?: number;
   securityLevel?: number;
   maintenanceLevel?: number;
-  income?: number;
   status?: string;
   upgrades?: PropertyUpgrade[];
-}
-
-export interface OwnedBuilding extends Building {
-  buildingId: string;
+  income?: number;
 }
 
 export interface PropertyUpgrade {
   id: string;
-  name: string;
-  cost: number;
-  description: string;
-  installed: boolean;
-  type: string;
-  effect: {
-    income?: number;
-    value?: number;
-    maintenance?: number;
-  };
-  prerequisiteUpgradeId?: string;
+  name?: string;
+  cost?: number;
+  effect?: string;
+  description?: string;
+  prerequisites?: string[];
+  type?: string;
   benefitDescription?: string;
-}
-
-export interface PropertyStats {
-  totalValue: number;
-  totalIncome: number;
-  totalMaintenance: number;
-  yearlyIncome?: number;
-  yearlyMaintenance?: number;
+  prerequisiteUpgradeId?: string;
 }

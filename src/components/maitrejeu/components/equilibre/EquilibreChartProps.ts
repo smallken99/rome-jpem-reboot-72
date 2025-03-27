@@ -11,17 +11,20 @@ export interface PoliticalBalanceCardProps {
   populares: number;
   optimates: number;
   moderates: number;
+  equilibre?: any;
   onUpdate: (populares: number, optimates: number, moderates: number) => void;
 }
 
 export interface SocialStabilityCardProps {
   patriciens: number;
   plebéiens: number;
+  equilibre?: any;
   onUpdate: (patriciens: number, plebéiens: number) => void;
 }
 
 export interface EconomicStabilityCardProps {
   economie: number;
+  equilibre?: any;
   onUpdate: (economie: number) => void;
 }
 
