@@ -1,8 +1,9 @@
 
 import { useState, useCallback, useRef } from 'react';
-import { Child, Preceptor, ChildEducation } from '../types/educationTypes';
+import { Child, Preceptor, ChildEducation, EducationType } from '../types/educationTypes';
 import { Character } from '@/types/character';
 import { getEducationPath } from '../data';
+import { getOutcomeBonuses, getOutcomeSkills } from '../utils/educationUtils';
 
 export const useEducationManagement = (
   children: Child[],
@@ -18,7 +19,7 @@ export const useEducationManagement = (
   // Start education for a child
   const startChildEducation = useCallback((
     childId: string, 
-    educationType: string,
+    educationType: string | EducationType,
     mentorId: string | null
   ) => {
     // Find the mentor if provided
@@ -76,16 +77,13 @@ export const useEducationManagement = (
         
         // Calculate new skills gained
         const newSkills = [...education.skills];
-        if (educationPath && educationPath.outcomes) {
-          // Handle array of strings or outcomes object
-          if (Array.isArray(educationPath.outcomes)) {
-            const skillIndex = yearsCompleted - 1;
-            if (skillIndex < educationPath.outcomes.length) {
-              newSkills.push(educationPath.outcomes[skillIndex]);
-            }
-          } else if (educationPath.outcomes.skills && yearsCompleted === totalYears) {
-            // Add all skills at completion
-            newSkills.push(...educationPath.outcomes.skills);
+        if (educationPath) {
+          // Get skills using the utility function
+          const pathSkills = getOutcomeSkills(educationPath);
+          const skillIndex = yearsCompleted - 1;
+          
+          if (skillIndex < pathSkills.length) {
+            newSkills.push(pathSkills[skillIndex]);
           }
         }
         
@@ -118,15 +116,14 @@ export const useEducationManagement = (
           // Calculate final stat bonus
           let statBonus = 0;
           if (educationPath) {
-            if (typeof educationPath.outcomes === 'object' && educationPath.outcomes.bonuses) {
-              // Use mentor quality if available
-              const mentor = education.mentorId ? hiredPreceptors.find(p => p.id === education.mentorId) : null;
-              const mentorBonus = mentor ? Math.floor(mentor.skill / 10) : 0;
-              
-              // Get base bonus for relevant stat
-              const statKey = educationPath.relatedStat || '';
-              statBonus = (educationPath.outcomes.bonuses[statKey] || 0) + mentorBonus;
-            }
+            // Use mentor quality if available
+            const mentor = education.mentorId ? hiredPreceptors.find(p => p.id === education.mentorId) : null;
+            const mentorBonus = mentor ? Math.floor((mentor.quality || 0) / 10) : 0;
+            
+            // Get base bonus for relevant stat using the utility function
+            const statKey = educationPath.relatedStat || '';
+            const pathBonus = getOutcomeBonuses(educationPath, statKey);
+            statBonus = pathBonus + mentorBonus;
           }
           
           // Create updated child with completed education
@@ -144,42 +141,29 @@ export const useEducationManagement = (
       return updated;
     });
     
-    // Update related character if needed
-    if (updatedChild && onCharacterUpdate) {
+    // Remove from educating children list
+    educatingChildrenRef.current = educatingChildrenRef.current.filter(id => id !== childId);
+    setEducatingChildren(educatingChildrenRef.current);
+    
+    // If we have a Character update callback, use it
+    if (onCharacterUpdate && updatedChild) {
+      // Find the matching character
       const character = characters.find(c => c.id === childId);
       if (character) {
-        const education = character.currentEducation;
-        if (education) {
-          // Free the mentor if assigned
-          if (education.mentorId) {
-            setHiredPreceptors(prev => prev.map(p => 
-              p.id === education.mentorId ? { ...p, status: 'hired', childId: null } : p
-            ));
-          }
-          
-          // Update the character with completed education
-          onCharacterUpdate(childId, {
-            age: updatedChild.age,
-            education: {
-              ...character.education,
-              completed: true,
-              completedAt: new Date().toISOString()
-            }
-          });
-        }
+        onCharacterUpdate(childId, {
+          currentEducation: undefined
+        });
       }
     }
     
-    // Remove from educating list using ref
-    educatingChildrenRef.current = educatingChildrenRef.current.filter(id => id !== childId);
-    setEducatingChildren(educatingChildrenRef.current);
-  }, [setChildren, hiredPreceptors, characters, onCharacterUpdate]);
+    return updatedChild;
+  }, [characters, hiredPreceptors, onCharacterUpdate, setChildren]);
 
   return {
     educatingChildren,
     startChildEducation,
     advanceEducationYear,
     completeEducation,
-    setHiredPreceptors
+    hiredPreceptors
   };
 };

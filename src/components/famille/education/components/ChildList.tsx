@@ -21,7 +21,7 @@ export const ChildList: React.FC<ChildListProps> = ({ children }) => {
       educationType: educationType as any, // Type cast to satisfy EducationType
       progress: character.currentEducation?.progress || 0,
       specialties: character.education?.specialties || [],
-      specialty: character.specialty,
+      specialty: character.specialty || undefined,
       traits: character.traits || []
     };
   });

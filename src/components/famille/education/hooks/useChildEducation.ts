@@ -1,272 +1,246 @@
 
-import { useState, useEffect } from 'react';
-import { Child, EducationRecord, Preceptor, EducationFormData } from '../types/educationTypes';
-import { toast } from 'sonner';
+import { useState, useCallback } from 'react';
+import { Child, Preceptor, EducationType, EducationRecord, EducationFormData } from '../types/educationTypes';
 
-// Données mockées
-const mockChildren: Record<string, Child> = {
-  "child1": {
-    id: "child1",
-    name: "Marcus Julianus",
-    gender: "male",
-    age: 12,
-    status: "child",
-    educationType: "military",
-    progress: 35,
-    skills: {
-      rhetoric: 2,
-      politics: 1,
-      strategy: 3,
-      diplomacy: 2,
-      combat: 4,
-      leadership: 3,
-      riding: 4,
-      tactics: 2
-    },
-    traits: ["Intelligent", "Ambitieux", "Têtu"]
-  },
-  "child2": {
-    id: "child2",
-    name: "Livia Julia",
-    gender: "female",
+// Sample child data for development
+const sampleChildren: Child[] = [
+  {
+    id: 'child-1',
+    name: 'Marcus Aurelius',
+    gender: 'male',
     age: 14,
-    status: "child",
-    educationType: "rhetoric",
-    progress: 30,
+    status: 'studying',
+    educationType: 'military',
+    progress: 60,
+    specialties: ['Tactics', 'Combat'],
     skills: {
-      rhetoric: 4,
-      politics: 3,
-      strategy: 1,
-      diplomacy: 4,
-      combat: 1,
-      leadership: 2,
-      riding: 2,
-      tactics: 1
+      rhetoric: 20,
+      politics: 15,
+      strategy: 40,
+      diplomacy: 25,
+      combat: 45,
+      leadership: 35,
+      riding: 30,
+      tactics: 50
     },
-    traits: ["Éloquente", "Charmante", "Prudente"]
-  }
-};
-
-const mockEducations: Record<string, EducationRecord> = {
-  "edu1": {
-    id: "edu1",
-    childId: "child1",
-    pathType: "military",
-    preceptorId: "preceptor1",
-    startYear: 745,
-    currentYear: 2,
-    totalYears: 10,
-    status: "in_progress",
-    skills: {
-      combat: 4,
-      leadership: 3,
-      tactics: 2,
-      riding: 3
-    },
-    specialties: ["Combat au glaive"]
-  }
-};
-
-const mockPreceptors: Preceptor[] = [
-  {
-    id: "preceptor1",
-    name: "Gaius Marius",
-    specialty: "military",
-    quality: 4,
-    price: 2000,
-    cost: 2000,
-    experience: 10,
-    available: true,
-    skill: 80,
-    specialties: ["Combat", "Tactique", "Histoire militaire"],
-    background: "Ancien centurion des légions"
+    traits: ['Disciplined', 'Brave']
   },
   {
-    id: "preceptor2",
-    name: "Marcus Tullius",
-    specialty: "rhetoric",
-    quality: 5,
-    price: 2500,
-    cost: 2500,
-    experience: 15,
-    available: true,
-    skill: 90,
-    specialties: ["Éloquence", "Philosophie", "Grec ancien"],
-    background: "Orateur renommé du forum"
-  },
-  {
-    id: "preceptor3",
-    name: "Lucius Flamen",
-    specialty: "religious",
-    quality: 3,
-    price: 1800,
-    cost: 1800,
-    experience: 8,
-    available: true,
-    skill: 75,
-    specialties: ["Rituels", "Auspices", "Traditions"],
-    background: "Ancien assistant d'un pontife"
+    id: 'child-2',
+    name: 'Julia Aurelia',
+    gender: 'female',
+    age: 12,
+    status: 'studying',
+    educationType: 'rhetoric',
+    progress: 40,
+    specialties: ['Debate', 'Persuasion'],
+    skills: {
+      rhetoric: 45,
+      politics: 30,
+      strategy: 15,
+      diplomacy: 40,
+      combat: 10,
+      leadership: 25,
+      riding: 20,
+      tactics: 15
+    },
+    traits: ['Eloquent', 'Perceptive']
   }
 ];
 
-export const useChildEducation = (childId: string) => {
-  const [child, setChild] = useState<Child | null>(null);
-  const [education, setEducation] = useState<EducationRecord | null>(null);
-  const [loading, setLoading] = useState(true);
+// Sample preceptors data for development
+const samplePreceptors: Preceptor[] = [
+  {
+    id: 'prec-1',
+    name: 'Quintus Fabius',
+    specialization: 'military',
+    specialty: 'military',
+    quality: 4,
+    price: 3500,
+    cost: 3500,
+    experience: 15,
+    available: true,
+    skill: 80,
+    specialties: ['Tactics', 'Combat', 'Strategy'],
+    background: 'Former general and tactician',
+    traits: ['Disciplined', 'Veteran'],
+    status: 'available'
+  },
+  {
+    id: 'prec-2',
+    name: 'Marcus Tullius',
+    specialization: 'rhetoric',
+    specialty: 'rhetoric',
+    quality: 5,
+    price: 4500,
+    cost: 4500,
+    experience: 20,
+    available: true,
+    skill: 90,
+    specialties: ['Oratory', 'Debate', 'Persuasion'],
+    background: 'Renowned orator and statesman',
+    traits: ['Eloquent', 'Wise'],
+    status: 'available'
+  },
+  {
+    id: 'prec-3',
+    name: 'Livia Scribonia',
+    specialization: 'religious',
+    specialty: 'religious',
+    quality: 3,
+    price: 3000,
+    cost: 3000,
+    experience: 12,
+    available: true,
+    skill: 75,
+    specialties: ['Rituals', 'Divination', 'Religious Law'],
+    background: 'Former priestess of Vesta',
+    traits: ['Pious', 'Devoted'],
+    status: 'available'
+  }
+];
 
-  useEffect(() => {
-    // Simuler une requête API
-    const loadData = async () => {
-      try {
-        setLoading(true);
-        
-        // Attendre pour simuler un chargement
-        await new Promise(resolve => setTimeout(resolve, 500));
-        
-        // Récupérer l'enfant
-        const foundChild = mockChildren[childId];
-        if (foundChild) {
-          setChild(foundChild);
-          
-          // Trouver l'éducation associée
-          const foundEducation = Object.values(mockEducations).find(
-            edu => edu.childId === childId
-          );
-          
-          if (foundEducation) {
-            setEducation(foundEducation);
-          }
-        }
-      } catch (error) {
-        console.error("Erreur lors du chargement des données:", error);
-        toast.error("Erreur lors du chargement des données");
-      } finally {
-        setLoading(false);
-      }
+// Sample education record
+const sampleEducationRecord: EducationRecord = {
+  id: 'ed-1',
+  childId: 'child-1',
+  pathType: 'military',
+  preceptorId: 'prec-1',
+  startYear: 752,
+  currentYear: 754,
+  totalYears: 4,
+  status: 'in_progress',
+  skills: {
+    combat: 45,
+    tactics: 50,
+    strategy: 40,
+    leadership: 35
+  },
+  specialties: ['Tactics', 'Combat']
+};
+
+export const useChildEducation = () => {
+  const [children, setChildren] = useState<Child[]>(sampleChildren);
+  const [preceptors, setPreceptors] = useState<Preceptor[]>(samplePreceptors);
+  const [educationRecord, setEducationRecord] = useState<EducationRecord>(sampleEducationRecord);
+  
+  // Get a child by ID
+  const getChild = useCallback((id: string) => {
+    return children.find(child => child.id === id);
+  }, [children]);
+  
+  // Get a preceptor by ID
+  const getPreceptor = useCallback((id: string) => {
+    return preceptors.find(preceptor => preceptor.id === id);
+  }, [preceptors]);
+  
+  // Update a child's education
+  const updateChildEducation = useCallback((childId: string, educationType: EducationType | string) => {
+    setChildren(prev => prev.map(child => 
+      child.id === childId ? { ...child, educationType } : child
+    ));
+  }, []);
+  
+  // Start education for a child
+  const startEducation = useCallback((formData: EducationFormData) => {
+    const { childId, type, preceptorId, specialties } = formData;
+    
+    if (!childId) return false;
+    
+    // Update the child's education type
+    updateChildEducation(childId, type);
+    
+    // Create a new education record
+    const newRecord: EducationRecord = {
+      id: `ed-${Date.now()}`,
+      childId,
+      pathType: type,
+      preceptorId,
+      startYear: new Date().getFullYear(),
+      currentYear: new Date().getFullYear(),
+      totalYears: 4, // Default to 4 years
+      status: 'in_progress',
+      skills: {},
+      specialties
     };
     
-    loadData();
-  }, [childId]);
+    setEducationRecord(newRecord);
+    
+    // If there's a preceptor, update their status
+    if (preceptorId) {
+      setPreceptors(prev => prev.map(p => 
+        p.id === preceptorId ? { ...p, status: 'assigned', childId } : p
+      ));
+    }
+    
+    return true;
+  }, [updateChildEducation]);
   
-  const updateEducation = (educationId: string, updates: Partial<EducationRecord>) => {
-    setEducation(prev => {
-      if (!prev || prev.id !== educationId) return prev;
-      return { ...prev, ...updates };
+  // Cancel education
+  const cancelEducation = useCallback((childId: string) => {
+    // Update the child's education type to 'none'
+    updateChildEducation(childId, 'none');
+    
+    // Update the education record
+    setEducationRecord(prev => {
+      if (prev.childId === childId) {
+        return {
+          ...prev,
+          status: 'failed' as any // Using "failed" instead of "canceled" to match the allowed types
+        };
+      }
+      return prev;
     });
     
-    toast.success("Éducation mise à jour avec succès");
-  };
+    // Free up any assigned preceptor
+    setPreceptors(prev => prev.map(p => 
+      p.childId === childId ? { ...p, status: 'available', childId: undefined } : p
+    ));
+  }, [updateChildEducation]);
   
-  const advanceEducation = (educationId: string) => {
-    setEducation(prev => {
-      if (!prev || prev.id !== educationId) return prev;
-      
-      // Avancer d'une année
-      const newYear = prev.currentYear + 1;
-      const isComplete = newYear >= prev.totalYears;
-      
-      // Générer des progrès aléatoires pour les compétences
-      const updatedSkills = { ...prev.skills };
-      Object.keys(updatedSkills).forEach(skill => {
-        // Ajouter entre 0 et 2 points par an selon la qualité du précepteur
-        const preceptor = mockPreceptors.find(p => p.id === prev.preceptorId);
-        const qualityBonus = (preceptor?.quality || 3) / 5; // 0.6 à 1.0
-        const increase = Math.floor(Math.random() * 3 * qualityBonus);
-        
-        updatedSkills[skill] = Math.min((updatedSkills[skill] || 0) + increase, 10);
-      });
-      
-      // Possibilité d'acquérir une nouvelle spécialité
-      let updatedSpecialties = [...prev.specialties];
-      if (Math.random() > 0.7 && newYear > 2) {
-        // Exemple basique, en réalité vous auriez une liste basée sur le type d'éducation
-        const potentialSpecialties = [
-          "Commandement de cavalerie",
-          "Stratégie défensive",
-          "Entraînement des recrues",
-          "Navigation",
-          "Siège"
-        ];
-        
-        const newSpecialty = potentialSpecialties[Math.floor(Math.random() * potentialSpecialties.length)];
-        if (!updatedSpecialties.includes(newSpecialty)) {
-          updatedSpecialties.push(newSpecialty);
-        }
+  // Complete education
+  const completeEducation = useCallback((childId: string) => {
+    // Update the education record
+    setEducationRecord(prev => {
+      if (prev.childId === childId) {
+        return {
+          ...prev,
+          status: 'completed'
+        };
       }
-      
-      const newStatus = isComplete ? "completed" as const : "in_progress" as const;
-      
-      const result = {
-        ...prev,
-        currentYear: newYear,
-        status: newStatus,
-        skills: updatedSkills,
-        specialties: updatedSpecialties
-      };
-      
-      if (isComplete) {
-        toast.success("L'éducation est terminée avec succès!");
-      } else {
-        toast.success(`Année ${newYear} terminée.`);
-      }
-      
-      return result;
+      return prev;
     });
-  };
+  }, []);
   
-  const cancelEducation = (educationId: string) => {
-    setEducation(prev => {
-      if (!prev || prev.id !== educationId) return prev;
-      
-      toast.info("Éducation abandonnée");
-      
+  // Create a new education form
+  const createEducationForm = useCallback(
+    (
+      childId: string, 
+      pathType: EducationType | string, 
+      preceptorId: string | null, 
+      specialties: string[] = []
+    ): EducationFormData => {
       return {
-        ...prev,
-        status: "canceled" as const
+        childId,
+        type: pathType,
+        pathType,
+        preceptorId,
+        specialties,
+        status: 'not_started'
       };
-    });
-  };
-  
-  const completeEducation = (educationId: string) => {
-    setEducation(prev => {
-      if (!prev || prev.id !== educationId) return prev;
-      
-      toast.success("Éducation terminée avec succès!");
-      
-      return {
-        ...prev,
-        status: "completed" as const
-      };
-    });
-  };
-  
-  const startNewEducation = (formData: EducationFormData) => {
-    const newEducation: EducationRecord = {
-      id: `edu${Date.now()}`,
-      childId: formData.childId || childId,
-      pathType: formData.pathType || formData.educationType,
-      preceptorId: formData.preceptorId || formData.mentor,
-      startYear: formData.startYear || new Date().getFullYear(),
-      currentYear: formData.currentYear || 1,
-      totalYears: formData.totalYears || 10,
-      status: (formData.status as 'not_started' | 'in_progress' | 'completed' | 'canceled') || 'in_progress',
-      skills: formData.skills || {},
-      specialties: formData.specialties || []
-    };
-    
-    setEducation(newEducation);
-    toast.success("Nouvelle éducation commencée");
-  };
+    },
+  []);
   
   return {
-    child,
-    education,
-    loading,
-    preceptors: mockPreceptors,
-    updateEducation,
-    advanceEducation,
+    children,
+    preceptors,
+    educationRecord,
+    getChild,
+    getPreceptor,
+    updateChildEducation,
+    startEducation,
     cancelEducation,
     completeEducation,
-    startNewEducation
+    createEducationForm
   };
 };

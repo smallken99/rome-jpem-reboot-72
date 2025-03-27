@@ -1,93 +1,83 @@
 
-import { useState, useEffect } from 'react';
-import { Child, EducationPath, Preceptor, EducationPathType } from '../types/educationTypes';
-import { educationPaths as educationPathsData } from '../data/educationPaths';
+import { useState, useCallback } from 'react';
+import { EducationPath, EducationType, Preceptor } from '../types/educationTypes';
+import { getAllEducationPaths, getEducationPathById } from '../data/educationPaths';
 
 export const useEducationSystem = () => {
-  const [educationPaths, setEducationPaths] = useState<EducationPath[]>(educationPathsData);
-  const [availablePreceptors, setAvailablePreceptors] = useState<Preceptor[]>([]);
-
-  // Fonction de recherche de précepteurs
-  const searchPreceptors = (type: string, minQuality?: number): Preceptor[] => {
-    // Simulation de la recherche de précepteurs
-    return [
+  const [selectedPathId, setSelectedPathId] = useState<string | null>(null);
+  
+  // Get all available education paths
+  const getEducationPaths = useCallback(() => {
+    return getAllEducationPaths();
+  }, []);
+  
+  // Get a specific education path by ID
+  const getEducationPathById = useCallback((id: string) => {
+    return getEducationPathById(id);
+  }, []);
+  
+  // Generate sample preceptors for a type
+  const generatePreceptorsForType = useCallback((type: EducationType | string): Preceptor[] => {
+    const preceptors: Preceptor[] = [
       {
-        id: `preceptor-${Date.now()}`,
-        name: `Précepteur de ${type}`,
-        specialty: type as EducationPathType,
-        price: 2000 + (minQuality || 0) * 50,
-        quality: minQuality ? minQuality + 10 : 60,
-        experience: 5,
-        assigned: false,
+        id: `${type}-preceptor-1`,
+        name: `Master of ${type}`,
+        specialization: type as EducationType,
+        skill: 80,
+        cost: 4000,
+        background: `Expert in ${type} education`,
+        traits: ['Knowledgeable', 'Patient'],
+        status: 'available',
+        specialty: type,
+        speciality: type,
+        experience: 15,
+        price: 4000,
+        quality: 4,
+        expertise: 80,
         available: true,
-        specialties: [type],
-        speciality: type
+        specialties: [`${type} basics`, `${type} advanced`]
       }
     ];
-  };
-
-  // Fonction qui vérifie si un enfant peut suivre un certain chemin d'éducation
-  const canFollowPath = (child: Child, pathId: string): { eligible: boolean; reason?: string } => {
-    const path = educationPaths.find(p => p.id === pathId);
-    if (!path) return { eligible: false, reason: 'Chemin d\'éducation non trouvé' };
-
-    // Vérifier l'âge
-    if (child.age < path.minAge) {
-      return { eligible: false, reason: `L'enfant est trop jeune. Âge minimum: ${path.minAge}` };
-    }
-    if (child.age > path.maxAge) {
-      return { eligible: false, reason: `L'enfant est trop âgé. Âge maximum: ${path.maxAge}` };
-    }
-
-    // Vérifier les prérequis spécifiques si nécessaire
-    if (path.requiredAttributes) {
-      // Handle required attributes check
-    }
-
-    return { eligible: true };
-  };
-
-  // Fonction pour calculer le coût d'éducation
-  const calculateEducationCost = (pathId: string, preceptorId?: string): number => {
-    const path = educationPaths.find(p => p.id === pathId);
-    const baseCost = path ? path.cost : 0;
     
-    // Ajouter le coût du précepteur si applicable
-    let preceptorCost = 0;
-    if (preceptorId) {
-      const preceptor = availablePreceptors.find(p => p.id === preceptorId);
-      preceptorCost = preceptor ? preceptor.price : 0;
-    }
-    
-    return baseCost + preceptorCost;
-  };
-
-  // Fonction pour trouver un chemin d'éducation par type
-  const findPathByType = (type: EducationPathType): EducationPath | undefined => {
-    return educationPaths.find(path => path.type === type);
-  };
-
-  // Fonctions pour l'initialisation et la mise à jour des données
-  const refreshPreceptors = () => {
-    setAvailablePreceptors(prev => [
-      ...prev,
-      ...searchPreceptors('military'),
-      ...searchPreceptors('religious'),
-      ...searchPreceptors('rhetoric')
-    ]);
-  };
-
-  useEffect(() => {
-    refreshPreceptors();
+    return preceptors;
   }, []);
-
+  
+  // Filter paths by gender and age
+  const filterPathsByEligibility = useCallback((paths: EducationPath[], gender: 'male' | 'female', age: number) => {
+    return paths.filter(path => {
+      // Check gender eligibility
+      const genderEligible = !path.suitableFor || path.suitableFor.includes(gender);
+      
+      // Check age eligibility
+      const ageEligible = age >= path.minAge && (!path.maxAge || age <= path.maxAge);
+      
+      return genderEligible && ageEligible;
+    });
+  }, []);
+  
+  // Get preceptor cost for type
+  const getPreceptorCostForType = useCallback((type: string, quality: number = 3) => {
+    const baseCost = {
+      military: 2500,
+      religious: 2200,
+      rhetoric: 3000,
+      political: 3500,
+      artistic: 2000,
+      philosophical: 2800,
+      academic: 3200
+    };
+    
+    const baseValue = (baseCost as any)[type] || 2500;
+    return baseValue + (quality * 500);
+  }, []);
+  
   return {
-    educationPaths,
-    availablePreceptors,
-    canFollowPath,
-    calculateEducationCost,
-    findPathByType,
-    refreshPreceptors,
-    searchPreceptors
+    selectedPathId,
+    setSelectedPathId,
+    getEducationPaths,
+    getEducationPathById,
+    generatePreceptorsForType,
+    filterPathsByEligibility,
+    getPreceptorCostForType
   };
 };

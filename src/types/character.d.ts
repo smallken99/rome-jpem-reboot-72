@@ -51,6 +51,7 @@ export interface Character {
     statBonus?: number;
     speciality?: string;
   };
+  educationType?: string;
 }
 
 export interface CharacterStat {

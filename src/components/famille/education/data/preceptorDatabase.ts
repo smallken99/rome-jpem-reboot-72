@@ -1,3 +1,4 @@
+
 import { Preceptor } from '../types/educationTypes';
 
 // Précepteurs disponibles par type d'éducation
@@ -5,6 +6,7 @@ const militaryPreceptors: Preceptor[] = [
   {
     id: 'mil-1',
     name: 'Quintus Fabius',
+    specialization: 'military',
     specialty: 'military',
     skill: 80,
     price: 4500,
@@ -17,11 +19,13 @@ const militaryPreceptors: Preceptor[] = [
     cost: 4500,
     available: true,
     speciality: 'military',
-    specialties: ['military', 'strategy']
+    specialties: ['military', 'strategy'],
+    traits: ['Vétéran', 'Discipliné']
   },
   {
     id: 'mil-2',
     name: 'Lucius Aemilius',
+    specialization: 'military',
     specialty: 'military',
     skill: 70,
     price: 3500,
@@ -34,11 +38,13 @@ const militaryPreceptors: Preceptor[] = [
     cost: 3500,
     available: true,
     speciality: 'military',
-    specialties: ['military', 'discipline']
+    specialties: ['military', 'discipline'],
+    traits: ['Tacticien', 'Autoritaire']
   },
   {
     id: 'mil-3',
     name: 'Gnaeus Pompeius',
+    specialization: 'military',
     specialty: 'military',
     skill: 60,
     price: 2500,
@@ -51,7 +57,8 @@ const militaryPreceptors: Preceptor[] = [
     cost: 2500,
     available: true,
     speciality: 'military',
-    specialties: ['military', 'endurance']
+    specialties: ['military', 'endurance'],
+    traits: ['Endurant', 'Rigoureux']
   }
 ];
 
@@ -59,6 +66,7 @@ const religiousPreceptors: Preceptor[] = [
   {
     id: 'rel-1',
     name: 'Publius Cornelius',
+    specialization: 'religious',
     specialty: 'religious',
     skill: 85,
     price: 5000,
@@ -71,11 +79,13 @@ const religiousPreceptors: Preceptor[] = [
     cost: 5000,
     available: true,
     speciality: 'religious',
-    specialties: ['religious', 'traditions']
+    specialties: ['religious', 'traditions'],
+    traits: ['Pieux', 'Érudit']
   },
   {
     id: 'rel-2',
     name: 'Titus Sempronius',
+    specialization: 'religious',
     specialty: 'religious',
     skill: 75,
     price: 3800,
@@ -88,11 +98,13 @@ const religiousPreceptors: Preceptor[] = [
     cost: 3800,
     available: true,
     speciality: 'religious',
-    specialties: ['religious', 'rituals']
+    specialties: ['religious', 'rituals'],
+    traits: ['Observateur', 'Mystique']
   },
   {
     id: 'rel-3',
     name: 'Marcus Valerius',
+    specialization: 'religious',
     specialty: 'religious',
     skill: 60,
     price: 2700,
@@ -105,7 +117,8 @@ const religiousPreceptors: Preceptor[] = [
     cost: 2700,
     available: true,
     speciality: 'religious',
-    specialties: ['religious', 'ceremonies']
+    specialties: ['religious', 'ceremonies'],
+    traits: ['Traditionaliste', 'Patient']
   }
 ];
 
@@ -113,6 +126,7 @@ const rhetoricPreceptors: Preceptor[] = [
   {
     id: 'rhe-1',
     name: 'Marcus Tullius',
+    specialization: 'rhetoric',
     specialty: 'rhetoric',
     skill: 90,
     price: 6000,
@@ -125,11 +139,13 @@ const rhetoricPreceptors: Preceptor[] = [
     cost: 6000,
     available: true,
     speciality: 'rhetoric',
-    specialties: ['rhetoric', 'eloquence']
+    specialties: ['rhetoric', 'eloquence'],
+    traits: ['Éloquent', 'Charismatique']
   },
   {
     id: 'rhe-2',
     name: 'Gaius Julius',
+    specialization: 'rhetoric',
     specialty: 'rhetoric',
     skill: 80,
     price: 4200,
@@ -142,11 +158,13 @@ const rhetoricPreceptors: Preceptor[] = [
     cost: 4200,
     available: true,
     speciality: 'rhetoric',
-    specialties: ['rhetoric', 'persuasion']
+    specialties: ['rhetoric', 'persuasion'],
+    traits: ['Philosophe', 'Logique']
   },
   {
     id: 'rhe-3',
     name: 'Servius Sulpicius',
+    specialization: 'rhetoric',
     specialty: 'rhetoric',
     skill: 65,
     price: 3000,
@@ -159,7 +177,8 @@ const rhetoricPreceptors: Preceptor[] = [
     cost: 3000,
     available: true,
     speciality: 'rhetoric',
-    specialties: ['rhetoric', 'law']
+    specialties: ['rhetoric', 'law'],
+    traits: ['Méthodique', 'Précis']
   }
 ];
 

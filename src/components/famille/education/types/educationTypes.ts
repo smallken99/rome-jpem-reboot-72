@@ -10,7 +10,7 @@ export interface Child {
   age: number;
   gender: Gender;
   status?: string;
-  educationType: EducationType;
+  educationType: EducationType | string;
   progress: number;
   specialties: string[];
   specialty?: string;
@@ -23,7 +23,7 @@ export interface Child {
 
 // Current education status for a child
 export interface ChildEducation {
-  type: EducationType;
+  type: EducationType | string;
   mentor: string | null;
   progress: number;
   skills: string[];
@@ -36,7 +36,7 @@ export interface ChildEducation {
 
 // Education record - completed education
 export interface EducationHistory {
-  type: EducationType;
+  type: EducationType | string;
   mentor: string;
   speciality?: string;
   completedAt: number;
@@ -51,7 +51,7 @@ export interface EducationHistory {
 export interface Preceptor {
   id: string;
   name: string;
-  specialization: EducationType;
+  specialization: EducationType | string;
   skill: number;
   cost: number;
   background: string;
@@ -86,7 +86,7 @@ export interface PreceptorsByType {
 export interface EducationPath {
   id: string;
   name: string;
-  type: EducationType;
+  type: EducationType | string;
   description: string;
   minAge: number;
   maxAge: number;
@@ -106,19 +106,19 @@ export interface EducationPath {
 export interface EducationObjectivesProps {
   childId: string;
   path?: EducationPath;
-  educationType?: EducationType;
+  educationType?: EducationType | string;
 }
 
 export interface EducationTypeSelectorProps {
-  selectedType: EducationType;
-  onChange: (type: EducationType) => void;
+  selectedType: EducationType | string;
+  onChange: (type: EducationType | string) => void;
   gender: Gender;
   childGender?: Gender;
   age?: number;
 }
 
 export interface EducationSpecialtySelectorProps {
-  educationType: EducationType;
+  educationType: EducationType | string;
   selectedSpecialties: string[];
   onChange: (specialties: string[]) => void;
   availableSpecialties?: string[];
@@ -126,30 +126,30 @@ export interface EducationSpecialtySelectorProps {
 
 // Form data for education
 export interface EducationFormData {
-  type: EducationType;
+  type: EducationType | string;
   specialties: string[];
   preceptorId: string | null;
   childId?: string;
-  pathType?: EducationType;
+  pathType?: EducationType | string;
   mentor?: string | null;
   startYear?: number;
   currentYear?: number;
   totalYears?: number;
   status?: "not_started" | "in_progress" | "completed" | "failed" | "canceled";
   skills?: { [key: string]: number };
-  educationType?: EducationType;
+  educationType?: EducationType | string;
 }
 
 // Education record
 export interface EducationRecord {
   id: string;
   childId: string;
-  pathType: EducationType;
+  pathType: EducationType | string;
   preceptorId: string | null;
   startYear: number;
   currentYear: number;
   totalYears: number;
-  status: "not_started" | "in_progress" | "completed" | "failed";
+  status: "not_started" | "in_progress" | "completed" | "failed" | "canceled";
   skills: { [key: string]: number };
   specialties: string[];
 }
