@@ -74,7 +74,9 @@ export interface EducationPath {
   };
   duration: number;
   type?: string;
-  outcomes?: string[];
+  outcomes?: {
+    skills?: string[];
+  } | string[];
   suitableFor?: {
     gender?: Gender | 'both';
     minAge?: number;

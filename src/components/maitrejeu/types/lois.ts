@@ -1,52 +1,45 @@
-
-import { SenateurJouable } from './senateurs';
-
-export type LoiState = 'proposée' | 'en délibération' | 'promulguée' | 'rejetée' | 'abrogée' | 'Proposée' | 'En délibération' | 'Promulguée' | 'Rejetée' | 'active' | 'rejected' | 'proposed' | 'expired' | 'En discussion' | 'adoptée' | 'En vigueur';
-export type ImportanceType = 'mineure' | 'normale' | 'majeure' | 'critique' | 'haute';
-export type LoiType = string;
-
-export interface GameDate {
-  year: number;
-  season: string;
+export enum LoiType {
+  ADMINISTRATIVE = "administrative",
+  ECONOMIC = "economic",
+  RELIGIOUS = "religious",
+  MILITARY = "military",
+  JUDICIAL = "judicial",
+  SOCIAL = "social",
+  POLITICAL = "political"
 }
 
 export interface Loi {
   id: string;
   titre: string;
-  title?: string;
   description: string;
   proposeur: string;
   catégorie: string;
-  catégorieId?: string;
-  categorieId?: string;
   type: string;
-  date: GameDate | string;
-  dateProposition?: GameDate;
-  état: LoiState;
-  importance: ImportanceType;
+  date: {
+    year: number;
+    season: string;
+  };
+  dateProposition: {
+    year: number;
+    season: string;
+  };
+  état: string;
+  importance: string;
   votesPositifs: number;
   votesNégatifs: number;
   abstentions: number;
-  votesAbstention?: number;
-  votes?: any;
-  votesFor?: number;
-  votesAgainst?: number;
-  clauses?: string[] | string;
-  commentaires?: string[] | string;
+  commentaires: string;
+  impacts: any[];
+  conditions?: any[];
+  pénalités?: any[];
+  effets: string[];
+  clauses?: any[];
   tags?: string[];
-  conditions?: any;
-  effets?: string[];
-  pénalités?: any;
-  soutiens?: SenateurJouable[];
-  opposants?: SenateurJouable[];
-  texte?: string;
-  notes?: string;
-  contenu?: string;
+  // Compatibility properties
+  category?: string;
   status?: string;
   statut?: string;
-  auteur?: string;
   proposedBy?: string;
-  category?: string;
-  implementationDate?: GameDate;
-  name?: string;
+  auteur?: string;
+  implementationDate?: any;
 }

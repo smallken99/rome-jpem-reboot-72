@@ -24,4 +24,5 @@ export interface SenateurJouable {
   famille: string;
   statut: string;
   actif: boolean | string;
+  roles?: string[];
 }
