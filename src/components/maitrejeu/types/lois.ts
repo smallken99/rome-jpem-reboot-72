@@ -3,7 +3,8 @@ export type LoiType = "standard" | "constitutionnelle" | "judiciaire" | "adminis
 
 export type LoiState = 
   "pending" | "debated" | "approved" | "rejected" | "active" | "expired" | 
-  "proposée" | "En délibération" | "adoptée" | "rejetée" | "promulguée";
+  "proposée" | "En délibération" | "adoptée" | "rejetée" | "promulguée" |
+  "Proposée" | "En discussion" | "Rejetée" | "Promulguée" | "En vigueur";
 
 export type ImportanceType = "mineure" | "normale" | "majeure" | "critique" | "haute";
 
@@ -51,6 +52,24 @@ export interface Loi {
   };
   type?: string;
   name?: string; // Pour la compatibilité avec certains composants
+  
+  // Propriétés alternatives pour compatibilité
+  title?: string;
+  proposedBy?: string;
+  category?: string;
+  auteur?: string;
+  categorieId?: string;
+  dateProposition?: string | { year: number; season: string };
+  implementationDate?: { year: number; season: string };
+  votesFor?: number;
+  votesAgainst?: number;
+  votesAbstention?: number;
+  status?: string;
+  statut?: string;
+  clauses?: any[];
+  commentaires?: string[];
+  tags?: string[];
+  effets?: Record<string, any>;
 }
 
 export interface TimelineItemProps {

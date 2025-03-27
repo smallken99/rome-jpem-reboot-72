@@ -15,22 +15,9 @@ export interface Loi {
   importance: ImportanceType;
   votesPositifs: number;
   votesNégatifs: number;
-  votesAbstention: number;
-  effets: Record<string, any>;
-  
-  // Propriétés requises par LoiModal et loisAdapter
-  type: LoiType;
-  clauses: any[];
-  commentaires: string[];
-  tags: string[];
+  abstentions: number;
   
   // Propriétés alternatives pour compatibilité
-  statut?: string;
-  votes?: {
-    pour: number;
-    contre: number;
-    abstention: number;
-  };
   title?: string;
   proposedBy?: string;
   category?: string;
@@ -42,11 +29,25 @@ export interface Loi {
   expirationDate?: { year: number; season: string };
   votesFor?: number;
   votesAgainst?: number;
+  votesAbstention?: number;
   status?: string;
+  statut?: string;
   nom?: string;
   name?: string;
   contenu?: string;
   conditions?: any;
   pénalités?: any;
   notes?: any;
+  type?: LoiType;
+  clauses?: any[];
+  commentaires?: string[];
+  tags?: string[];
+  effets?: Record<string, any>;
+  
+  // Propriétés requises par les composants
+  votes?: {
+    pour: number;
+    contre: number;
+    abstention: number;
+  };
 }
