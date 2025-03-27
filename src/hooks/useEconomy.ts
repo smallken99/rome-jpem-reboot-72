@@ -4,116 +4,100 @@ import { toast } from 'sonner';
 
 export interface Transaction {
   id: string;
+  date: Date;
   amount: number;
-  source: string;
+  type: 'income' | 'expense';
   category: string;
   description: string;
-  date: Date;
-  type: 'income' | 'expense';
+  source?: string;
 }
 
 export const useEconomy = (initialBalance = 100000) => {
   const [balance, setBalance] = useState(initialBalance);
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   
-  /**
-   * Vérifie si l'utilisateur a assez de fonds pour une dépense
-   */
+  // Vérifie si les fonds sont suffisants
   const canAfford = useCallback((amount: number): boolean => {
     return balance >= amount;
   }, [balance]);
   
-  /**
-   * Effectue un paiement (dépense)
-   */
+  // Effectuer un paiement (dépense)
   const makePayment = useCallback((amount: number, recipient: string, category: string, description?: string): boolean => {
     if (!canAfford(amount)) {
-      toast.error(`Fonds insuffisants pour effectuer ce paiement de ${amount.toLocaleString()} As`);
+      toast.error(`Fonds insuffisants pour ce paiement (${amount.toLocaleString()} As)`);
       return false;
     }
     
-    // Générer un ID unique
-    const id = `trans-${Date.now()}-${Math.floor(Math.random() * 1000)}`;
-    
-    // Créer la transaction
     const transaction: Transaction = {
-      id,
-      amount: -amount, // Montant négatif pour une dépense
-      source: recipient, // Le destinataire devient la source de la transaction
+      id: `t-${Date.now()}`,
+      date: new Date(),
+      amount: amount,
+      type: 'expense',
       category,
       description: description || `Paiement à ${recipient}`,
-      date: new Date(),
-      type: 'expense'
+      source: recipient
     };
     
-    // Ajouter la transaction
     setTransactions(prev => [transaction, ...prev]);
-    
-    // Mettre à jour le solde
     setBalance(prev => prev - amount);
     
     return true;
   }, [canAfford]);
   
-  /**
-   * Reçoit un paiement (revenu)
-   */
-  const receivePayment = useCallback((amount: number, source: string, category: string, description?: string): boolean => {
-    // Générer un ID unique
-    const id = `trans-${Date.now()}-${Math.floor(Math.random() * 1000)}`;
-    
-    // Créer la transaction
+  // Recevoir un paiement (revenu)
+  const receivePayment = useCallback((amount: number, source: string, category: string, description?: string): void => {
     const transaction: Transaction = {
-      id,
-      amount,
-      source,
+      id: `t-${Date.now()}`,
+      date: new Date(),
+      amount: amount,
+      type: 'income',
       category,
       description: description || `Paiement reçu de ${source}`,
-      date: new Date(),
-      type: 'income'
+      source
     };
     
-    // Ajouter la transaction
     setTransactions(prev => [transaction, ...prev]);
-    
-    // Mettre à jour le solde
     setBalance(prev => prev + amount);
-    
-    return true;
   }, []);
   
-  /**
-   * Calculer les statistiques financières
-   */
+  // Obtenir les transactions récentes
+  const getRecentTransactions = useCallback((limit = 10): Transaction[] => {
+    return transactions.slice(0, limit);
+  }, [transactions]);
+  
+  // Obtenir le solde
+  const getBalance = useCallback((): number => {
+    return balance;
+  }, [balance]);
+  
+  // Calculer les statistiques financières
   const getFinancialStats = useCallback(() => {
-    const now = new Date();
-    const oneMonthAgo = new Date();
-    oneMonthAgo.setMonth(now.getMonth() - 1);
+    // Filtre pour les 30 derniers jours
+    const thirtyDaysAgo = new Date();
+    thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
     
-    // Filtrer les transactions du dernier mois
-    const recentTransactions = transactions.filter(t => t.date >= oneMonthAgo);
+    const recentTransactions = transactions.filter(t => t.date >= thirtyDaysAgo);
     
-    // Calculer les revenus et dépenses
     const monthlyIncome = recentTransactions
       .filter(t => t.type === 'income')
       .reduce((sum, t) => sum + t.amount, 0);
-    
+      
     const monthlyExpenses = recentTransactions
       .filter(t => t.type === 'expense')
-      .reduce((sum, t) => sum + Math.abs(t.amount), 0);
+      .reduce((sum, t) => sum + t.amount, 0);
     
-    // Calculer par catégorie
+    // Catégories
     const incomeByCategory = transactions
       .filter(t => t.type === 'income')
       .reduce((acc, t) => {
         acc[t.category] = (acc[t.category] || 0) + t.amount;
         return acc;
       }, {} as Record<string, number>);
-    
+      
     const expensesByCategory = transactions
       .filter(t => t.type === 'expense')
       .reduce((acc, t) => {
-        acc[t.category] = (acc[t.category] || 0) + Math.abs(t.amount);
+        acc[t.category] = (acc[t.category] || 0) + t.amount;
         return acc;
       }, {} as Record<string, number>);
     
@@ -133,6 +117,8 @@ export const useEconomy = (initialBalance = 100000) => {
     canAfford,
     makePayment,
     receivePayment,
+    getRecentTransactions,
+    getBalance,
     getFinancialStats
   };
 };

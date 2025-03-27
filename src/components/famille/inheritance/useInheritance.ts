@@ -1,62 +1,148 @@
 
 import { useState, useEffect } from 'react';
-import { useMaitreJeu } from '@/components/maitrejeu/context';
-import { usePatrimoine } from '@/hooks/usePatrimoine';
-import { MembreFamille } from '@/components/maitrejeu/types/familles';
-import { toast } from 'sonner';
+import { Property } from '@/types/patrimoine';
 
-export const useInheritance = (familleId?: string) => {
-  const { membres, getFamilleOfMembre, updateMembreFamille, updateFamille } = useMaitreJeu();
-  const { properties } = usePatrimoine();
+export interface FamilyMember {
+  id: string;
+  nom: string;
+  prenom: string;
+  genre: 'male' | 'female';
+  age: number;
+  role?: string;
+  traits?: string[];
+  relation: 'self' | 'son' | 'daughter' | 'wife' | 'brother' | 'sister' | 'other';
+  isAdult: boolean;
+}
+
+export const useInheritance = (familyId: string) => {
   const [selectedHeirId, setSelectedHeirId] = useState<string | null>(null);
-  const [potentialHeirs, setPotentialHeirs] = useState<MembreFamille[]>([]);
+  const [familyMembers, setFamilyMembers] = useState<FamilyMember[]>([]);
+  const [properties, setProperties] = useState<Property[]>([]);
   
-  // Récupérer tous les membres masculins de la famille
+  // Simuler le chargement des membres de la famille
   useEffect(() => {
-    if (!familleId) return;
+    // Données fictives pour les membres de la famille
+    const mockFamilyMembers: FamilyMember[] = [
+      {
+        id: 'fm-1',
+        nom: 'Aurelius',
+        prenom: 'Marcus',
+        genre: 'male',
+        age: 45,
+        role: 'Pater Familias',
+        relation: 'self',
+        isAdult: true,
+        traits: ['Éloquent', 'Pragmatique', 'Stoïque']
+      },
+      {
+        id: 'fm-2',
+        nom: 'Aurelius',
+        prenom: 'Lucius',
+        genre: 'male',
+        age: 19,
+        role: 'Fils aîné',
+        relation: 'son',
+        isAdult: true,
+        traits: ['Ambitieux', 'Impulsif']
+      },
+      {
+        id: 'fm-3',
+        nom: 'Aurelius',
+        prenom: 'Gaius',
+        genre: 'male',
+        age: 15,
+        role: 'Fils cadet',
+        relation: 'son',
+        isAdult: false,
+        traits: ['Intelligent', 'Réservé']
+      },
+      {
+        id: 'fm-4',
+        nom: 'Aurelia',
+        prenom: 'Julia',
+        genre: 'female',
+        age: 17,
+        role: 'Fille',
+        relation: 'daughter',
+        isAdult: false,
+        traits: ['Cultivée', 'Pieuse']
+      }
+    ];
     
-    const eligibleMembers = membres.filter(membre => 
-      membre.familleId === familleId && 
-      membre.genre === 'male' && 
-      membre.age >= 16
+    setFamilyMembers(mockFamilyMembers);
+    
+    // Par défaut, le fils aîné est l'héritier désigné
+    const eldestSon = mockFamilyMembers.find(member => 
+      member.genre === 'male' && 
+      member.relation === 'son' && 
+      member.isAdult
     );
     
-    setPotentialHeirs(eligibleMembers);
-    
-    // Définir l'héritier actuel s'il existe
-    const famille = eligibleMembers.length > 0 ? getFamilleOfMembre(eligibleMembers[0].id) : undefined;
-    if (famille?.chefId) {
-      setSelectedHeirId(famille.chefId);
-    } else if (eligibleMembers.length > 0) {
-      // Sélectionner par défaut le plus âgé
-      const oldestMember = eligibleMembers.reduce((prev, current) => 
-        prev.age > current.age ? prev : current
-      );
-      setSelectedHeirId(oldestMember.id);
+    if (eldestSon) {
+      setSelectedHeirId(eldestSon.id);
     }
-  }, [familleId, membres, getFamilleOfMembre]);
+    
+    // Données fictives pour les propriétés
+    const mockProperties: Property[] = [
+      {
+        id: 'prop-1',
+        name: 'Domus du Palatin',
+        type: 'domus',
+        location: 'Rome - Palatin',
+        value: 150000,
+        income: 0,
+        maintenance: 3000,
+        condition: 85,
+        acquired: new Date().toISOString()
+      },
+      {
+        id: 'prop-2',
+        name: 'Villa Rustica',
+        type: 'villa',
+        location: 'Campanie',
+        value: 200000,
+        income: 12000,
+        maintenance: 5000,
+        condition: 90,
+        acquired: new Date().toISOString()
+      },
+      {
+        id: 'prop-3',
+        name: 'Insula de la Via Sacra',
+        type: 'insula',
+        location: 'Rome - Forum',
+        value: 80000,
+        income: 6000,
+        maintenance: 2000,
+        condition: 75,
+        acquired: new Date().toISOString()
+      }
+    ];
+    
+    setProperties(mockProperties);
+  }, [familyId]);
   
+  // Filtrer uniquement les héritiers potentiels (hommes adultes)
+  const potentialHeirs = familyMembers.filter(member => 
+    member.genre === 'male' && member.isAdult
+  );
+  
+  // Fonction pour sélectionner un héritier
   const selectHeir = (heirId: string) => {
-    const heir = membres.find(m => m.id === heirId);
-    if (!heir) return;
+    const heir = familyMembers.find(member => member.id === heirId);
     
-    const famille = getFamilleOfMembre(heir.id);
-    if (!famille) return;
+    if (heir && heir.genre === 'male' && heir.isAdult) {
+      setSelectedHeirId(heirId);
+      return true;
+    }
     
-    // Mettre à jour le rôle de l'héritier
-    updateMembreFamille(heirId, { role: 'Héritier' });
-    
-    // Marquer cet héritier comme futur chef de famille
-    // Note: On ne change pas le chef actuel, seulement l'héritier désigné
-    updateFamille(famille.id, { chefId: heirId });
-    
-    setSelectedHeirId(heirId);
-    toast.success(`${heir.prenom} ${heir.nom} a été désigné comme héritier principal de la famille`);
+    return false;
   };
   
   return {
-    selectedHeirId,
+    familyMembers,
     potentialHeirs,
+    selectedHeirId,
     selectHeir,
     properties
   };
