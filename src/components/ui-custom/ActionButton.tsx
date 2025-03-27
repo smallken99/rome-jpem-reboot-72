@@ -13,6 +13,7 @@ import { motion } from 'framer-motion';
 export interface ActionButtonProps extends ButtonProps {
   icon?: React.ReactNode;
   label: string;
+  description?: string; // Added description prop
   variant?: 'default' | 'outline' | 'destructive' | 'secondary' | 'ghost' | 'link';
   size?: 'default' | 'sm' | 'lg' | 'icon';
   to?: string; // Propriété pour le routage
@@ -28,6 +29,7 @@ export interface ActionButtonProps extends ButtonProps {
 export const ActionButton: React.FC<ActionButtonProps> = ({ 
   icon, 
   label, 
+  description, // Added description prop
   variant = 'default', 
   size = 'sm',
   className = '',
@@ -57,11 +59,18 @@ export const ActionButton: React.FC<ActionButtonProps> = ({
   };
   
   const buttonClass = getButtonClass();
+  
+  // Create button content with description if provided
   const buttonContent = (
-    <>
-      {icon && <span className={`${label ? 'mr-1.5' : ''}`}>{icon}</span>}
-      {label && <span>{label}</span>}
-    </>
+    <div className="flex flex-col items-start">
+      <div className="flex items-center gap-1.5">
+        {icon && <span>{icon}</span>}
+        <span className="font-medium">{label}</span>
+      </div>
+      {description && (
+        <span className="text-xs text-muted-foreground mt-0.5">{description}</span>
+      )}
+    </div>
   );
   
   const buttonElement = (

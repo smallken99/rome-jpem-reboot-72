@@ -1,38 +1,33 @@
 
 import React from 'react';
+import Layout from '@/components/layout/Layout';
+import { PageHeader } from '@/components/ui-custom/PageHeader';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Character } from '@/types/character';
-import { FamilyTreeIntro } from './tree/FamilyTreeIntro';
-import { FamilyTreeVisualization } from './tree/FamilyTreeVisualization';
-import { FamilyLegend } from './tree/FamilyLegend';
-import { FamilyInfoSidebar } from './tree/FamilyInfoSidebar';
-import { getFamilyMembers } from './tree/familyHelpers';
 
 interface FamilyTreeProps {
-  characters?: Character[];
+  characters: Character[];
 }
 
-export const FamilyTree: React.FC<FamilyTreeProps> = ({ characters = [] }) => {
-  const { paterFamilias, materFamilias, children } = getFamilyMembers(characters);
-  
+export const FamilyTree: React.FC<FamilyTreeProps> = ({ characters }) => {
   return (
-    <div className="family-tree-container">
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <div className="md:col-span-2">
-          <FamilyTreeIntro />
-          
-          <FamilyTreeVisualization 
-            paterFamilias={paterFamilias}
-            materFamilias={materFamilias}
-            children={children}
-          />
-          
-          <FamilyLegend />
-        </div>
-        
-        <div>
-          <FamilyInfoSidebar characters={characters} />
-        </div>
-      </div>
-    </div>
+    <Layout>
+      <PageHeader 
+        title="Arbre Généalogique"
+        subtitle="Visualisez l'histoire et les relations de votre famille"
+      />
+      
+      <Card className="mb-6">
+        <CardHeader>
+          <CardTitle>Votre Lignée</CardTitle>
+          <CardDescription>
+            Explorez les relations familiales à travers les générations
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <p>Fonctionnalité en cours de développement</p>
+        </CardContent>
+      </Card>
+    </Layout>
   );
 };

@@ -2,68 +2,54 @@
 import React from 'react';
 import Layout from '@/components/layout/Layout';
 import { PageHeader } from '@/components/ui-custom/PageHeader';
-import { useCharacters } from '../hooks/useCharacters';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { useNavigate } from 'react-router-dom';
+import { useCharacters } from '../hooks/useCharacters';
 import { ChildList } from './components/ChildList';
-import { EducationIntro } from './components/EducationIntro';
 import { EducationProvider } from './context/EducationContext';
 
 export const FamilyEducation: React.FC = () => {
-  const { localCharacters, updateCharacter } = useCharacters();
   const navigate = useNavigate();
+  const { localCharacters } = useCharacters();
   
-  // Filtrer les personnages qui sont enfants (fils ou fille)
+  // Filter children from the family
   const children = localCharacters.filter(c => 
-    c.relation.includes('Fils') || 
-    c.relation.includes('Fille')
+    (c.relation?.includes('Fils') || c.relation?.includes('Fille')) && 
+    c.age < 18
   );
-  
-  const handleCharacterUpdate = (characterId: string, updates: Partial<Character>) => {
-    updateCharacter(characterId, updates);
-  };
   
   return (
     <Layout>
       <PageHeader 
         title="Éducation Familiale"
-        subtitle="Formez la prochaine génération de votre famille"
+        subtitle="Formez la prochaine génération pour l'avenir de votre famille"
       />
       
       <div className="mb-6">
-        <div className="flex justify-end space-x-4">
-          <Button variant="outline" onClick={() => navigate('/famille')}>
+        <div className="flex justify-end">
+          <Button onClick={() => navigate('/famille')}>
             Retour au menu
           </Button>
         </div>
       </div>
       
-      <EducationProvider 
-        characters={localCharacters}
-        onCharacterUpdate={handleCharacterUpdate}
-      >
-        <EducationIntro />
-        
-        <div className="mt-8">
-          <h2 className="text-xl font-bold mb-4">Enfants à Éduquer</h2>
+      <Card className="mb-6">
+        <CardHeader>
+          <CardTitle>Éducation des Enfants</CardTitle>
+        </CardHeader>
+        <CardContent>
           {children.length > 0 ? (
-            <ChildList children={children} />
+            <EducationProvider characters={localCharacters}>
+              <ChildList children={children} />
+            </EducationProvider>
           ) : (
-            <div className="text-center p-8 bg-gray-50 rounded-lg border border-gray-200">
-              <p className="text-gray-600">
-                Aucun enfant n'est actuellement disponible pour l'éducation.
-              </p>
-              <Button 
-                variant="outline" 
-                className="mt-4" 
-                onClick={() => navigate('/famille/alliances')}
-              >
-                Établir une alliance matrimoniale
-              </Button>
+            <div className="text-center py-8 text-muted-foreground">
+              <p>Aucun enfant en âge d'être éduqué dans votre famille.</p>
             </div>
           )}
-        </div>
-      </EducationProvider>
+        </CardContent>
+      </Card>
     </Layout>
   );
 };

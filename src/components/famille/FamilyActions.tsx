@@ -2,7 +2,6 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
 import { 
   Users, 
   BookOpen, 
@@ -30,42 +29,42 @@ export const FamilyActions: React.FC = () => {
           <ActionButton
             icon={<TreePine className="h-5 w-5" />}
             label="Arbre Généalogique"
-            description="Visualisez l'histoire de votre famille"
+            title="Visualisez l'histoire de votre famille"
             onClick={() => navigate('/famille/tree')}
           />
           
           <ActionButton
             icon={<HeartHandshake className="h-5 w-5" />}
             label="Alliances Matrimoniales"
-            description="Établissez des alliances par le mariage"
+            title="Établissez des alliances par le mariage"
             onClick={() => navigate('/famille/alliances')}
           />
           
           <ActionButton
             icon={<GraduationCap className="h-5 w-5" />}
             label="Éducation"
-            description="Formez la prochaine génération"
+            title="Formez la prochaine génération"
             onClick={() => navigate('/famille/education')}
           />
           
           <ActionButton
             icon={<Scroll className="h-5 w-5" />}
             label="Héritage"
-            description="Planifiez votre succession"
+            title="Planifiez votre succession"
             onClick={() => navigate('/famille/inheritance')}
           />
           
           <ActionButton
             icon={<Crown className="h-5 w-5" />}
             label="Réputation"
-            description="Suivez la réputation de votre famille"
+            title="Suivez la réputation de votre famille"
             onClick={() => navigate('/famille/reputation')}
           />
           
           <ActionButton
             icon={<Users className="h-5 w-5" />}
             label="Relations"
-            description="Gérez les relations avec d'autres familles"
+            title="Gérez les relations avec d'autres familles"
             onClick={() => navigate('/famille/relations')}
           />
         </div>

@@ -1,55 +1,32 @@
 
-// Préfixes et suffixes de noms romains
-const maleFirstNames = [
-  'Marcus', 'Gaius', 'Lucius', 'Titus', 'Quintus', 
-  'Publius', 'Aulus', 'Servius', 'Decimus', 'Gnaeus',
-  'Tiberius', 'Appius', 'Spurius', 'Sextus', 'Manius'
-];
+export const generateRomanName = (gender: 'male' | 'female', familyName: string = ''): string => {
+  const maleFirstNames = [
+    'Marcus', 'Gaius', 'Lucius', 'Quintus', 'Publius', 'Titus', 'Aulus',
+    'Servius', 'Decimus', 'Gnaeus', 'Sextus', 'Tiberius', 'Spurius', 'Manius'
+  ];
 
-const femaleFirstNames = [
-  'Julia', 'Cornelia', 'Claudia', 'Valeria', 'Lucretia',
-  'Tullia', 'Livia', 'Aurelia', 'Antonia', 'Fulvia',
-  'Octavia', 'Caecilia', 'Camilla', 'Flavia', 'Calpurnia'
-];
+  const femaleFirstNames = [
+    'Julia', 'Cornelia', 'Claudia', 'Valeria', 'Flavia', 'Lucretia', 'Aurelia',
+    'Livia', 'Octavia', 'Antonia', 'Tullia', 'Caecilia', 'Marcia', 'Sempronia'
+  ];
 
-const familyNames = [
-  'Claudius', 'Julius', 'Cornelius', 'Aurelius', 'Valerius',
-  'Fabius', 'Tullius', 'Aemilius', 'Livius', 'Caecilius',
-  'Antonius', 'Sergius', 'Licinius', 'Cassius', 'Octavius'
-];
+  const romanFamilyNames = [
+    'Aurelius', 'Julius', 'Claudius', 'Cornelius', 'Valerius', 'Aemilius', 'Fabius',
+    'Domitius', 'Livius', 'Tullius', 'Sempronius', 'Caecilius', 'Antonius', 'Cassius'
+  ];
 
-/**
- * Génère un nom romain basé sur le genre
- * @param gender le genre ('male' ou 'female')
- * @param familyName le nom de famille, si déjà connu
- * @returns un nom complet au format romain
- */
-export function generateRomanName(gender: 'male' | 'female', familyName?: string): string {
-  const firstNamesList = gender === 'male' ? maleFirstNames : femaleFirstNames;
-  const firstName = firstNamesList[Math.floor(Math.random() * firstNamesList.length)];
+  const firstNames = gender === 'male' ? maleFirstNames : femaleFirstNames;
+  const firstName = firstNames[Math.floor(Math.random() * firstNames.length)];
   
-  // Si le nom de famille est fourni, l'utiliser; sinon en générer un
-  const lastName = familyName || familyNames[Math.floor(Math.random() * familyNames.length)];
+  // If family name is provided, use it, otherwise generate a random one
+  const lastName = familyName || romanFamilyNames[Math.floor(Math.random() * romanFamilyNames.length)];
   
-  // Pour les femmes, le nom de famille est généralement féminisé
-  const finalLastName = gender === 'female' && !familyName 
-    ? lastName.replace(/us$/, 'a') 
-    : lastName;
-  
-  return `${firstName} ${finalLastName}`;
-}
-
-/**
- * Extrait le prénom d'un nom romain complet
- */
-export function extractFirstName(fullName: string): string {
-  return fullName.split(' ')[0] || fullName;
-}
-
-/**
- * Extrait le nom de famille d'un nom romain complet
- */
-export function extractFamilyName(fullName: string): string {
-  const parts = fullName.split(' ');
-  return parts.length > 1 ? parts[1] : '';
-}
+  if (gender === 'male') {
+    return `${firstName} ${lastName}`;
+  } else {
+    // Female Roman names often used the feminine form of the family name
+    return lastName.endsWith('us') 
+      ? `${firstName} ${lastName.replace(/us$/, 'a')}` 
+      : `${firstName} ${lastName}`;
+  }
+};

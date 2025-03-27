@@ -1,35 +1,37 @@
 
 import React from 'react';
-import { Character } from '@/types/character';
-import { useGameTime } from '@/hooks/useGameTime';
-import { AllianceIntro } from './alliances/AllianceIntro';
-import { BirthIndicator } from './alliances/BirthIndicator';
-import { AllianceList } from './alliances/AllianceList';
-import { useAllianceBirths } from './alliances/useAllianceBirths';
-import { familyAlliances } from '@/data/alliances';
+import Layout from '@/components/layout/Layout';
+import { PageHeader } from '@/components/ui-custom/PageHeader';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { useCharacters } from './hooks/useCharacters';
 
 interface MarriageAlliancesProps {
   characters: Character[];
   onChildBirth?: (parentIds?: string[]) => void;
 }
 
-export const MarriageAlliances: React.FC<MarriageAlliancesProps> = ({ 
-  characters, 
-  onChildBirth 
+export const MarriageAlliances: React.FC<MarriageAlliancesProps> = ({
+  characters,
+  onChildBirth
 }) => {
-  const { year } = useGameTime();
-  const { lastBirthYear, activeAlliances } = useAllianceBirths(characters, onChildBirth);
-  
   return (
-    <div className="marriage-alliances">
-      <AllianceIntro />
-      
-      <BirthIndicator lastBirthYear={lastBirthYear} currentYear={year} />
-      
-      <AllianceList 
-        alliances={familyAlliances} 
-        showOnlyActive={true}
+    <Layout>
+      <PageHeader 
+        title="Alliances Matrimoniales"
+        subtitle="Établissez des alliances stratégiques pour renforcer votre influence"
       />
-    </div>
+      
+      <Card className="mb-6">
+        <CardHeader>
+          <CardTitle>Alliances Disponibles</CardTitle>
+          <CardDescription>
+            Explorez les possibilités d'alliances avec d'autres familles
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <p>Fonctionnalité en cours de développement</p>
+        </CardContent>
+      </Card>
+    </Layout>
   );
 };
