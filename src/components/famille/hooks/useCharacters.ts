@@ -16,7 +16,13 @@ const initialCharacters: Character[] = [
     isHeadOfFamily: true,
     traits: ['Eloquent', 'Ambitieux'],
     health: 85,
-    status: 'alive'
+    status: 'alive',
+    stats: {
+      popularity: { value: 60, name: 'Popularité', maxValue: 100, icon: 'popularity', description: 'Votre réputation parmi le peuple', color: 'gold' },
+      oratory: { value: 70, name: 'Éloquence', maxValue: 100, icon: 'oratory', description: 'Votre capacité à persuader', color: 'terracotta' },
+      piety: { value: 65, name: 'Piété', maxValue: 100, icon: 'piety', description: 'Votre dévotion aux dieux', color: 'navy' },
+      martialEducation: { value: 55, name: 'Éducation Martiale', maxValue: 100, icon: 'martialEducation', description: 'Votre formation militaire', color: 'red' }
+    }
   },
   {
     id: '2',
@@ -26,7 +32,12 @@ const initialCharacters: Character[] = [
     relation: 'Épouse',
     traits: ['Fidèle', 'Cultivée'],
     health: 90,
-    status: 'alive'
+    status: 'alive',
+    stats: {
+      popularity: { value: 50, name: 'Popularité', maxValue: 100, icon: 'popularity', description: 'Votre réputation parmi le peuple', color: 'gold' },
+      oratory: { value: 60, name: 'Éloquence', maxValue: 100, icon: 'oratory', description: 'Votre capacité à persuader', color: 'terracotta' },
+      piety: { value: 75, name: 'Piété', maxValue: 100, icon: 'piety', description: 'Votre dévotion aux dieux', color: 'navy' }
+    }
   },
   {
     id: '3',
@@ -37,7 +48,13 @@ const initialCharacters: Character[] = [
     traits: ['Vif', 'Impétueux'],
     health: 95,
     parentIds: ['1', '2'],
-    status: 'alive'
+    status: 'alive',
+    stats: {
+      popularity: { value: 40, name: 'Popularité', maxValue: 100, icon: 'popularity', description: 'Votre réputation parmi le peuple', color: 'gold' },
+      oratory: { value: 45, name: 'Éloquence', maxValue: 100, icon: 'oratory', description: 'Votre capacité à persuader', color: 'terracotta' },
+      piety: { value: 50, name: 'Piété', maxValue: 100, icon: 'piety', description: 'Votre dévotion aux dieux', color: 'navy' },
+      martialEducation: { value: 60, name: 'Éducation Martiale', maxValue: 100, icon: 'martialEducation', description: 'Votre formation militaire', color: 'red' }
+    }
   },
   {
     id: '4',
@@ -48,7 +65,12 @@ const initialCharacters: Character[] = [
     traits: ['Intelligente', 'Pieuse'],
     health: 92,
     parentIds: ['1', '2'],
-    status: 'alive'
+    status: 'alive',
+    stats: {
+      popularity: { value: 45, name: 'Popularité', maxValue: 100, icon: 'popularity', description: 'Votre réputation parmi le peuple', color: 'gold' },
+      oratory: { value: 55, name: 'Éloquence', maxValue: 100, icon: 'oratory', description: 'Votre capacité à persuader', color: 'terracotta' },
+      piety: { value: 70, name: 'Piété', maxValue: 100, icon: 'piety', description: 'Votre dévotion aux dieux', color: 'navy' }
+    }
   }
 ];
 
@@ -73,7 +95,12 @@ export const useCharacters = () => {
       traits: [],
       health: 85 + Math.floor(Math.random() * 15),
       parentIds,
-      status: 'alive'
+      status: 'alive',
+      stats: {
+        popularity: { value: 20, name: 'Popularité', maxValue: 100, icon: 'popularity', description: 'Influence naissante', color: 'gold' },
+        oratory: { value: 15, name: 'Éloquence', maxValue: 100, icon: 'oratory', description: 'Aptitude naturelle', color: 'terracotta' },
+        piety: { value: 25, name: 'Piété', maxValue: 100, icon: 'piety', description: 'Dévotion naturelle', color: 'navy' }
+      }
     };
     
     setLocalCharacters(prev => [...prev, newChild]);

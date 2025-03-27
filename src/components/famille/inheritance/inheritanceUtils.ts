@@ -1,111 +1,127 @@
 
 import { Character } from '@/types/character';
 
-interface InheritanceRules {
-  male: { [key: string]: number };
-  female: { [key: string]: number };
-  default: number;
-}
-
-// Simplified Roman inheritance rules
-const inheritanceRules: InheritanceRules = {
-  male: {
-    'Fils': 0.8, // Sons get most of the inheritance
-    'Frère': 0.1,
-    'Neveu': 0.05,
-    'Cousin': 0.02,
-  },
-  female: {
-    'Fille': 0.4, // Daughters get less than sons (historical accuracy)
-    'Épouse': 0.3,
-    'Sœur': 0.05,
-    'Nièce': 0.02,
-    'Cousine': 0.01,
-  },
-  default: 0.001 // Very small share for others
-};
-
 /**
- * Calculate inheritance shares for the heirs
- * @param heirs Array of characters who are heirs
- * @returns Array of normalized inheritance shares
+ * Calcule l'affinité entre deux caractères
  */
-export const calculateInheritance = (heirs: Character[]): number[] => {
-  if (!heirs.length) return [];
+export const calculateAffinity = (character1: Character, character2: Character): number => {
+  let affinity = 50; // Base affinity is neutral
   
-  // Calculate raw shares based on relation and gender
-  const rawShares = heirs.map(heir => {
-    const relationRules = inheritanceRules[heir.gender as 'male' | 'female'] || {};
-    return relationRules[heir.relation] || inheritanceRules.default;
-  });
-  
-  // If all heirs have 0 shares, give them equal shares
-  const totalRawShares = rawShares.reduce((sum, share) => sum + share, 0);
-  if (totalRawShares === 0) {
-    return heirs.map(() => 1 / heirs.length);
+  // Si même genre, légère affinité
+  if (character1.gender === character2.gender) {
+    affinity += 5;
   }
   
-  // Normalize shares so they sum to 1
-  return rawShares.map(share => share / totalRawShares);
-};
-
-/**
- * Calculate the total value of an inheritance
- * @param character Character whose inheritance is being calculated
- * @returns Total value of the inheritance
- */
-export const calculateTotalInheritance = (character: Character): number => {
-  // For now, we'll use a fictional formula
-  const baseValue = 1000000; // Base value for a patrician
-  const ageMultiplier = Math.min(2, character.age / 35); // Peak at age 70
-  const healthPenalty = character.health < 50 ? 0.7 : 1; // Penalty for poor health
+  // Si relation de parenté directe
+  if (character2.parentIds?.includes(character1.id)) {
+    affinity += 15; // Parent-enfant: forte affinité
+  }
   
-  // For fictional purposes only, a Senator's inheritance is worth more
-  const statusMultiplier = character.isHeadOfFamily ? 3 : 1;
+  // Si frères/soeurs (mêmes parents)
+  const hasSameParents = 
+    character1.parentIds && 
+    character2.parentIds && 
+    character1.parentIds.some(id => character2.parentIds?.includes(id));
   
-  return Math.round(baseValue * ageMultiplier * healthPenalty * statusMultiplier);
-};
-
-/**
- * Get eligible heirs for a character
- * @param character Main character
- * @param allCharacters All available characters
- * @returns Array of eligible heirs
- */
-export const getEligibleHeirs = (character: Character, allCharacters: Character[]): Character[] => {
-  // Filter out dead characters and the character themselves
-  const eligibleCharacters = allCharacters.filter(c => 
-    c.id !== character.id && c.status !== 'deceased'
+  if (hasSameParents) {
+    affinity += 10; // Fratrie: bonne affinité
+  }
+  
+  // Si traits compatibles
+  const commonTraits = character1.traits.filter(trait => 
+    character2.traits.includes(trait)
   );
   
-  // Sort by inheritance priority (males first in Roman tradition)
-  return eligibleCharacters.sort((a, b) => {
-    // Male heirs before female heirs
-    if (a.gender !== b.gender) {
-      return a.gender === 'male' ? -1 : 1;
-    }
-    
-    // Direct descendants before siblings
-    const aPriority = getPriorityByRelation(a.relation);
-    const bPriority = getPriorityByRelation(b.relation);
-    
-    return aPriority - bPriority;
-  });
+  affinity += commonTraits.length * 3; // Chaque trait commun augmente l'affinité
+  
+  // Influence de l'âge (les personnages aux âges proches ont plus d'affinité)
+  const ageDifference = Math.abs(character1.age - character2.age);
+  if (ageDifference < 5) {
+    affinity += 5;
+  } else if (ageDifference > 20) {
+    affinity -= 5;
+  }
+  
+  // Vérifier si la relation est explicitement mentionnée
+  if (character1.relation.includes('Père') && character2.relation.includes('Fils')) {
+    affinity += 10;
+  }
+  
+  if (character1.relation.includes('Mère') && character2.relation.includes('Fille')) {
+    affinity += 12;
+  }
+  
+  return Math.min(100, Math.max(0, affinity)); // Ensure affinity is between 0 and 100
 };
 
-// Helper function to determine priority by relation
-const getPriorityByRelation = (relation: string): number => {
-  const priorities: { [key: string]: number } = {
-    'Fils': 1,
-    'Fille': 2,
-    'Épouse': 3,
-    'Frère': 4,
-    'Sœur': 5,
-    'Neveu': 6,
-    'Nièce': 7,
-    'Cousin': 8,
-    'Cousine': 9
-  };
+/**
+ * Calculate heir score for inheritance
+ */
+export const calculateHeirScore = (character: Character, headOfFamily: Character): number => {
+  if (!character || !headOfFamily) return 0;
   
-  return priorities[relation] || 100; // Default low priority
+  let score = 0;
+  
+  // Hommes favorisés dans la société romaine
+  if (character.gender === 'male') {
+    score += 50;
+  }
+  
+  // Santé
+  score += character.health / 5;
+  
+  // L'âge est important (ni trop jeune ni trop vieux)
+  if (character.age >= 16 && character.age < 40) {
+    score += 20;
+  } else if (character.age >= 40 && character.age < 60) {
+    score += 10;
+  }
+  
+  // Héritier désigné
+  if (character.isHeadOfFamily) {
+    score += 100;
+  }
+  
+  // Statut (vivant > exilé > décédé)
+  if (character.status === 'alive') {
+    score += 30;
+  } else if (character.status === 'exiled') {
+    score -= 50;
+  } else if (character.status === 'deceased') {
+    score -= 100; // Les morts ne peuvent hériter
+  }
+  
+  // Lien de parenté (fils > frères > neveux)
+  if (character.relation.includes('Fils')) {
+    score += 30;
+  } else if (character.relation.includes('Frère')) {
+    score += 15;
+  }
+  
+  return score;
+};
+
+/**
+ * Get eligible heirs for inheritance
+ */
+export const getEligibleHeirs = (
+  headOfFamily: Character, 
+  allCharacters: Character[]
+): Character[] => {
+  if (!headOfFamily) return [];
+  
+  // Filtrer les personnages décédés
+  const livingCharacters = allCharacters.filter(c => c.status === 'alive');
+  
+  // Calculer le score pour chaque personnage
+  const scoredCharacters = livingCharacters.map(character => ({
+    character,
+    score: calculateHeirScore(character, headOfFamily)
+  }));
+  
+  // Trier par score décroissant
+  scoredCharacters.sort((a, b) => b.score - a.score);
+  
+  // Retourner uniquement les personnages
+  return scoredCharacters.map(sc => sc.character);
 };
