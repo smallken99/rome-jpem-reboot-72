@@ -1,176 +1,116 @@
 
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { Plus, Filter } from 'lucide-react';
-import { useBuildings } from '@/hooks/useBuildingManagement';
-import { OwnedBuilding } from '@/types/buildings';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { UrbanBuildingCard } from './urban/UrbanBuildingCard';
-import { BuildingDetailsModal } from './building-details/BuildingDetailsModal';
-import { useUserProfile } from '@/hooks/useUserProfile';
-import { BuildingPurchaseDialog } from './urban/BuildingPurchaseDialog';
-import { UnderDevelopmentSection } from '@/components/maitrejeu/components/UnderDevelopmentSection';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import { Building, Plus } from 'lucide-react';
+import PropertyCard from './PropertyCard';
+import BuildingDetailsModal from './building-details/BuildingDetailsModal';
+import BuildingPurchaseDialog from './urban/BuildingPurchaseDialog';
+import { Property } from '@/types/proprietes';
+import { toast } from '@/components/ui-custom/toast';
 
-export const UrbanPropertiesTab: React.FC = () => {
-  const [selectedBuildingId, setSelectedBuildingId] = useState<string>("");
-  const [isPurchaseDialogOpen, setIsPurchaseDialogOpen] = useState(false);
-  const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
+interface UrbanPropertiesTabProps {
+  properties: Property[];
+  onPurchaseProperty?: (property: Property) => void;
+  onRepairProperty?: (property: Property) => void;
+  onUpgradeProperty?: (property: Property, upgrade: string) => void;
+  balance?: number;
+}
+
+export const UrbanPropertiesTab: React.FC<UrbanPropertiesTabProps> = ({
+  properties,
+  onPurchaseProperty,
+  onRepairProperty,
+  onUpgradeProperty,
+  balance = 0
+}) => {
+  const [selectedProperty, setSelectedProperty] = useState<Property | null>(null);
+  const [detailsModalOpen, setDetailsModalOpen] = useState(false);
+  const [purchaseDialogOpen, setPurchaseDialogOpen] = useState(false);
   
-  const { 
-    buildings, 
-    updateMaintenanceLevel, 
-    updateSecurityLevel, 
-    updateWorkers,
-    renovateBuilding,
-    sellBuilding,
-    calculateMonthlyIncome,
-    calculateMaintenanceCost,
-    assignSlaves
-  } = useBuildings();
-  
-  const { profile, updateWealth } = useUserProfile();
-  
-  // Filtrer uniquement les bâtiments urbains
-  const urbanBuildings = buildings.filter(building => 
-    building.buildingType === 'urban'
+  // Filter urban properties (domus and insulae)
+  const urbanProperties = properties.filter(
+    p => p.type === 'domus' || p.type === 'insula'
   );
   
-  const selectedBuilding = selectedBuildingId ? 
-    buildings.find(b => b.id === selectedBuildingId) : null;
-  
-  const handleBuildingSelect = (buildingId: string) => {
-    setSelectedBuildingId(buildingId);
-    setIsDetailModalOpen(true);
+  const handleOpenPurchaseDialog = () => {
+    setPurchaseDialogOpen(true);
   };
   
-  const handleClosePurchaseDialog = () => {
-    setIsPurchaseDialogOpen(false);
-  };
-  
-  const handleCloseDetailModal = () => {
-    setIsDetailModalOpen(false);
-  };
-  
-  const handlePurchaseBuilding = (buildingType: string, cost: number) => {
-    // Logique d'achat - à implémenter
-    updateWealth(-cost);
-    toast.success(`Propriété achetée pour ${cost.toLocaleString()} As`);
-    setIsPurchaseDialogOpen(false);
-  };
-  
-  const handleMaintenanceLevelChange = (buildingId: string, level: number) => {
-    updateMaintenanceLevel(buildingId, level);
-  };
-  
-  const handleSecurityLevelChange = (buildingId: string, level: number) => {
-    updateSecurityLevel(buildingId, level);
-  };
-  
-  const handleSellProperty = (buildingId: string) => {
-    const building = buildings.find(b => b.id === buildingId);
-    if (building) {
-      const value = calculatePropertyValue(building);
-      updateWealth(value);
-      sellBuilding(buildingId);
+  const handlePurchaseProperty = (buildingOption: any) => {
+    if (onPurchaseProperty) {
+      const newProperty: Property = {
+        id: buildingOption.id,
+        name: buildingOption.name,
+        type: buildingOption.type,
+        location: buildingOption.location,
+        value: buildingOption.price,
+        income: buildingOption.income,
+        maintenance: buildingOption.maintenance,
+        condition: 100, // New building is in perfect condition
+        acquired: new Date().toISOString()
+      };
+      
+      onPurchaseProperty(newProperty);
+      toast.success("Propriété acquise avec succès");
+      setPurchaseDialogOpen(false);
     }
   };
   
-  const calculatePropertyValue = (building: OwnedBuilding): number => {
-    // Algorithme simplifié de calcul de valeur
-    const baseValue = 50000;
-    const conditionFactor = building.condition / 100;
-    const ageFactor = 1; // À implémenter avec l'âge du bâtiment
-    
-    return Math.round(baseValue * conditionFactor * ageFactor);
-  };
-  
-  const handleWorkerAssign = (buildingId: string, count: number) => {
-    assignSlaves(buildingId, count);
-  };
-  
-  // Si nous n'avons pas encore implémenté cette fonctionnalité
-  if (urbanBuildings.length === 0) {
-    return (
-      <UnderDevelopmentSection 
-        title="Propriétés Urbaines" 
-        description="La gestion des propriétés urbaines est en cours de développement."
-        estimatedRelease="Disponible prochainement"
-        features={[
-          "Achat de domus, insulae et autres propriétés urbaines",
-          "Gestion des loyers et des locataires",
-          "Maintenance et rénovation des bâtiments",
-          "Protection contre les incendies et autres désastres urbains",
-          "Amélioration et extension des propriétés"
-        ]}
-      />
-    );
-  }
-  
   return (
-    <div>
-      <div className="flex justify-between items-center mb-6">
-        <h2 className="text-xl font-semibold">Propriétés Urbaines</h2>
-        <div className="flex gap-2">
-          <Button variant="outline" className="flex items-center gap-2">
-            <Filter className="h-4 w-4" />
-            <span>Filtrer</span>
-          </Button>
-          <Button 
-            className="flex items-center gap-2"
-            onClick={() => setIsPurchaseDialogOpen(true)}
-          >
-            <Plus className="h-4 w-4" />
-            <span>Nouvelle propriété</span>
-          </Button>
-        </div>
+    <div className="space-y-4">
+      <div className="flex justify-between items-center">
+        <h2 className="text-xl font-semibold">Propriétés urbaines</h2>
+        <Button onClick={handleOpenPurchaseDialog}>
+          <Plus className="h-4 w-4 mr-2" />
+          Acquérir une propriété
+        </Button>
       </div>
       
-      {urbanBuildings.length === 0 ? (
-        <Card className="border-dashed">
-          <CardHeader>
-            <CardTitle>Aucune propriété urbaine</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-muted-foreground mb-4">
-              Vous ne possédez pas encore de propriété urbaine. Achetez votre première propriété pour commencer.
-            </p>
-            <Button onClick={() => setIsPurchaseDialogOpen(true)}>
-              Acheter une propriété
-            </Button>
-          </CardContent>
-        </Card>
-      ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {urbanBuildings.map(building => (
-            <UrbanBuildingCard
-              key={building.id}
-              building={building}
-              onSelect={handleBuildingSelect}
-            />
-          ))}
+      {urbanProperties.length === 0 ? (
+        <div className="text-center py-8 text-muted-foreground">
+          <Building className="h-12 w-12 mx-auto text-muted-foreground/50" />
+          <p className="mt-4">Vous ne possédez pas encore de propriétés urbaines.</p>
+          <Button variant="outline" className="mt-4" onClick={handleOpenPurchaseDialog}>
+            Acheter votre première propriété
+          </Button>
         </div>
+      ) : (
+        <ScrollArea className="h-[500px]">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            {urbanProperties.map(property => (
+              <PropertyCard
+                key={property.id}
+                property={property}
+                onSelect={(property) => {
+                  setSelectedProperty(property);
+                  setDetailsModalOpen(true);
+                }}
+                isSelected={selectedProperty?.id === property.id}
+              />
+            ))}
+          </div>
+        </ScrollArea>
       )}
       
-      {/* Détails du bâtiment */}
+      {/* Property Details Modal */}
       <BuildingDetailsModal
-        building={selectedBuilding}
-        isOpen={isDetailModalOpen}
-        onClose={handleCloseDetailModal}
-        onSell={handleSellProperty}
-        onMaintenanceLevelChange={handleMaintenanceLevelChange}
-        onSecurityLevelChange={handleSecurityLevelChange}
-        onWorkerAssign={handleWorkerAssign}
-        calculateMonthlyIncome={calculateMonthlyIncome}
-        calculateMaintenanceCost={calculateMaintenanceCost}
+        property={selectedProperty}
+        isOpen={detailsModalOpen}
+        onClose={() => setDetailsModalOpen(false)}
+        onRepair={onRepairProperty}
+        onUpgrade={onUpgradeProperty}
       />
       
-      {/* Dialog d'achat de propriété */}
+      {/* Building Purchase Dialog */}
       <BuildingPurchaseDialog
-        isOpen={isPurchaseDialogOpen}
-        onClose={handleClosePurchaseDialog}
-        onPurchase={handlePurchaseBuilding}
-        availableFunds={profile.wealth}
+        isOpen={purchaseDialogOpen}
+        onClose={() => setPurchaseDialogOpen(false)}
+        onPurchase={handlePurchaseProperty}
+        playerBalance={balance}
       />
     </div>
   );
 };
+
+export default UrbanPropertiesTab;

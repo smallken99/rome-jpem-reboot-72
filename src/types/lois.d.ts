@@ -35,6 +35,7 @@ export interface Loi {
   proposedBy?: string;
   category?: string;
   auteur?: string;
+  catégorieId?: string;
   categorieId?: string;
   dateProposition?: string | { year: number; season: string };
   implementationDate?: { year: number; season: string };
@@ -43,4 +44,9 @@ export interface Loi {
   votesAgainst?: number;
   status?: string;
   nom?: string;
+  name?: string;
+  contenu?: string;
+  conditions?: any;
+  pénalités?: any;
+  notes?: any;
 }

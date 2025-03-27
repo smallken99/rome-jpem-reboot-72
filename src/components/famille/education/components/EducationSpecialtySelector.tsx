@@ -1,101 +1,105 @@
 
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { CheckboxGroup } from './CheckboxGroup';
 import { EducationType } from '../types/educationTypes';
+import CheckboxGroup from './CheckboxGroup';
 
-export interface EducationSpecialtySelectorProps {
-  educationType: EducationType;
+interface EducationSpecialtySelectorProps {
+  educationType: EducationType | string;
   selectedSpecialties: string[];
   onChange: (specialties: string[]) => void;
   availableSpecialties?: string[];
 }
 
-export const EducationSpecialtySelector: React.FC<EducationSpecialtySelectorProps> = ({ 
-  educationType, 
-  selectedSpecialties, 
+export const EducationSpecialtySelector: React.FC<EducationSpecialtySelectorProps> = ({
+  educationType,
+  selectedSpecialties,
   onChange,
-  availableSpecialties 
+  availableSpecialties
 }) => {
   // Define specialties for each education type
-  const getSpecialtiesForType = (type: EducationType): string[] => {
-    if (availableSpecialties && availableSpecialties.length > 0) {
-      return availableSpecialties;
-    }
-    
-    switch (type) {
-      case 'military':
-        return [
-          'Combat à l\'épée', 
-          'Tactique de formation', 
-          'Commandement', 
-          'Cavalerie', 
-          'Fortifications'
-        ];
-      case 'rhetoric':
-        return [
-          'Éloquence publique', 
-          'Écriture', 
-          'Débat', 
-          'Philosophie', 
-          'Droit romain'
-        ];
-      case 'religious':
-        return [
-          'Rituel', 
-          'Oracle', 
-          'Présages', 
-          'Histoire sacrée', 
-          'Culte familial'
-        ];
-      case 'political':
-        return [
-          'Droit romain',
-          'Diplomatie',
-          'Administration',
-          'Finances publiques',
-          'Politique provinciale'
-        ];
-      default:
-        return [];
-    }
+  const specialtiesByType: Record<string, string[]> = {
+    military: [
+      'Stratégie militaire',
+      'Combat à l\'épée',
+      'Combat à cheval',
+      'Commandement de légion',
+      'Tactiques de siège'
+    ],
+    political: [
+      'Rhétorique politique',
+      'Droit romain',
+      'Administration provinciale',
+      'Diplomatie',
+      'Finances publiques'
+    ],
+    religious: [
+      'Rites et cérémonies',
+      'Augures et divination',
+      'Droit sacré',
+      'Mythologie',
+      'Administration des temples'
+    ],
+    artistic: [
+      'Poésie',
+      'Musique',
+      'Sculpture',
+      'Peinture',
+      'Architecture'
+    ],
+    philosophical: [
+      'Philosophie stoïcienne',
+      'Philosophie épicurienne',
+      'Logique',
+      'Éthique',
+      'Métaphysique'
+    ],
+    rhetoric: [
+      'Art oratoire',
+      'Éloquence judiciaire',
+      'Débat politique',
+      'Composition littéraire',
+      'Persuasion'
+    ],
+    academic: [
+      'Mathématiques',
+      'Astronomie',
+      'Médecine',
+      'Histoire',
+      'Langues étrangères'
+    ]
   };
 
-  const specialties = getSpecialtiesForType(educationType);
+  // Get specialties for the selected education type
+  const specialties = availableSpecialties || 
+    specialtiesByType[educationType] || 
+    specialtiesByType.academic;
 
-  const handleSpecialtyChange = (specialty: string, checked: boolean) => {
-    if (checked) {
-      // Add specialty if not already in the list
-      if (!selectedSpecialties.includes(specialty)) {
-        onChange([...selectedSpecialties, specialty]);
-      }
-    } else {
-      // Remove specialty
-      onChange(selectedSpecialties.filter(s => s !== specialty));
-    }
+  // Handle specialty selection
+  const handleSpecialtyChange = (newSelectedSpecialties: string[]) => {
+    onChange(newSelectedSpecialties);
   };
-
-  if (specialties.length === 0) {
-    return null;
-  }
 
   return (
     <Card>
-      <CardHeader>
+      <CardHeader className="pb-3">
         <CardTitle className="text-lg">Spécialités</CardTitle>
       </CardHeader>
       <CardContent>
-        <p className="text-sm text-muted-foreground mb-3">
-          Choisissez jusqu'à 2 spécialités dans lesquelles l'élève excellera
+        <p className="text-sm text-muted-foreground mb-4">
+          Choisissez les spécialités sur lesquelles l'éducation se concentrera.
+          Ces choix influenceront les compétences acquises.
         </p>
         
         <CheckboxGroup
-          items={specialties}
-          selectedItems={selectedSpecialties}
+          options={specialties}
+          selectedOptions={selectedSpecialties}
           onChange={handleSpecialtyChange}
-          maxSelections={2}
+          className="mt-2"
         />
       </CardContent>
     </Card>
   );
 };
+
+export default EducationSpecialtySelector;

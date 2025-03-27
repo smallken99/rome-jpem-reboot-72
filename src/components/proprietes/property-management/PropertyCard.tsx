@@ -1,134 +1,99 @@
 
 import React from 'react';
-import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Progress } from '@/components/ui/progress';
-import { OwnedBuilding } from '../hooks/building/types';
-import { Coins, Calendar, Map, Wrench, Users } from 'lucide-react'; 
-import { PropertyCardActions } from './card/PropertyCardActions';
-import { formatCurrency, formatCompactCurrency } from '@/utils/currencyUtils';
+import { 
+  Building, 
+  Home, 
+  MapPin, 
+  Calendar, 
+  DollarSign 
+} from 'lucide-react';
+import { formatCurrency } from '@/utils/currencyUtils';
+import { Property, PropertyType } from '@/types/proprietes';
 
 interface PropertyCardProps {
-  building: OwnedBuilding;
-  estimatedValue: number;
-  onViewDetails: () => void;
-  onPerformMaintenance: () => void;
-  onToggleMaintenance: (enabled: boolean) => void;
-  onAssignSlaves: () => void;
-  onSell: () => void;
-  maintenanceEnabled: boolean;
-  canPerformMaintenance: boolean;
+  property: Property;
+  onSelect?: (property: Property) => void;
+  isSelected?: boolean;
 }
 
 export const PropertyCard: React.FC<PropertyCardProps> = ({
-  building,
-  estimatedValue,
-  onViewDetails,
-  onPerformMaintenance,
-  onToggleMaintenance,
-  onAssignSlaves,
-  onSell,
-  maintenanceEnabled,
-  canPerformMaintenance
+  property,
+  onSelect,
+  isSelected = false
 }) => {
-  // Fonction pour obtenir la classe CSS de couleur en fonction de la condition
-  const getConditionColor = (condition: number) => {
-    if (condition >= 80) return "text-green-600";
-    if (condition >= 60) return "text-amber-600";
-    if (condition >= 40) return "text-orange-500";
-    return "text-red-600";
+  const handleClick = () => {
+    if (onSelect) {
+      onSelect(property);
+    }
   };
-  
-  // Fonction pour obtenir la classe CSS de couleur pour la barre de progression
-  const getProgressColor = (condition: number) => {
-    if (condition >= 80) return "bg-green-600";
-    if (condition >= 60) return "bg-amber-600";
-    if (condition >= 40) return "bg-orange-500";
-    return "bg-red-600";
+
+  const getTypeIcon = (type: PropertyType) => {
+    switch (type) {
+      case 'villa':
+        return <Home className="h-5 w-5 text-lime-600" />;
+      case 'domus':
+        return <Home className="h-5 w-5 text-indigo-600" />;
+      case 'insula':
+        return <Building className="h-5 w-5 text-amber-600" />;
+      default:
+        return <Building className="h-5 w-5 text-gray-600" />;
+    }
   };
-  
-  // Fonction pour formater la date
-  const formatDate = (date: Date) => {
-    return new Intl.DateTimeFormat('fr-FR', {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric'
-    }).format(date);
+
+  const getTypeLabel = (type: PropertyType): string => {
+    switch (type) {
+      case 'villa':
+        return 'Villa Rustica';
+      case 'domus':
+        return 'Domus';
+      case 'insula':
+        return 'Insula';
+      default:
+        return 'Propriété';
+    }
   };
-  
+
   return (
-    <Card className="h-full flex flex-col border-t-4 hover:shadow-md transition-shadow" 
-      style={{ borderTopColor: building.condition >= 60 ? '#22c55e' : '#f97316' }}>
-      <CardHeader className="pb-2">
-        <CardTitle className="font-cinzel text-lg">{building.name}</CardTitle>
-        <div className="flex justify-between items-center text-sm text-muted-foreground">
-          <div className="flex items-center">
-            <Map className="h-4 w-4 mr-1" />
-            <span>{building.location}</span>
-          </div>
+    <Card 
+      className={`cursor-pointer hover:border-blue-300 transition-all ${
+        isSelected ? 'border-blue-500 bg-blue-50' : ''
+      }`}
+      onClick={handleClick}
+    >
+      <CardContent className="p-4">
+        <div className="flex justify-between items-start mb-3">
+          <h3 className="font-medium">{property.name}</h3>
           <Badge variant="outline" className="capitalize">
-            {building.buildingType}
+            {getTypeLabel(property.type)}
           </Badge>
         </div>
-      </CardHeader>
-      
-      <CardContent className="pb-2 flex-grow">
-        <div className="space-y-3">
-          <div className="grid grid-cols-2 gap-3">
-            <div className="flex flex-col gap-1">
-              <span className="text-xs text-muted-foreground">Valeur estimée</span>
-              <span className="font-bold">
-                {formatCompactCurrency(estimatedValue)}
-              </span>
-            </div>
-            
-            <div className="flex flex-col gap-1">
-              <span className="text-xs text-muted-foreground">Maintenance</span>
-              <span className="font-bold">
-                {formatCompactCurrency(building.maintenanceCost)}
-              </span>
-            </div>
-            
-            <div className="flex flex-col gap-1">
-              <span className="text-xs text-muted-foreground">Esclaves</span>
-              <span className="font-bold flex items-center">
-                <Users className="h-3.5 w-3.5 mr-1 text-muted-foreground" />
-                {building.slaves}
-              </span>
-            </div>
-            
-            <div className="flex flex-col gap-1">
-              <span className="text-xs text-muted-foreground">Acquisition</span>
-              <span className="font-bold text-sm">
-                {formatDate(building.purchaseDate)}
-              </span>
-            </div>
+        
+        <div className="grid grid-cols-2 gap-2 text-sm">
+          <div className="flex items-center gap-1.5">
+            <MapPin className="h-4 w-4 text-gray-500" />
+            <span className="truncate">{property.location}</span>
           </div>
           
-          <div className="space-y-1">
-            <div className="flex justify-between items-center">
-              <span className="text-sm">État</span>
-              <span className={`text-sm font-bold ${getConditionColor(building.condition)}`}>
-                {building.condition}%
-              </span>
-            </div>
-            <Progress value={building.condition} className={getProgressColor(building.condition)} />
+          <div className="flex items-center gap-1.5 justify-end">
+            <Calendar className="h-4 w-4 text-gray-500" />
+            <span>Acquis en {new Date(property.acquired).getFullYear()}</span>
+          </div>
+          
+          <div className="flex items-center gap-1.5">
+            <DollarSign className="h-4 w-4 text-emerald-500" />
+            <span>{formatCurrency(property.income)} /an</span>
+          </div>
+          
+          <div className="flex items-center gap-1.5 justify-end">
+            <DollarSign className="h-4 w-4 text-red-500" />
+            <span>{formatCurrency(property.maintenance)} /an</span>
           </div>
         </div>
       </CardContent>
-      
-      <CardFooter className="pt-2">
-        <PropertyCardActions 
-          building={building}
-          onViewDetails={onViewDetails}
-          onPerformMaintenance={onPerformMaintenance}
-          onAssignSlaves={onAssignSlaves}
-          onToggleMaintenance={onToggleMaintenance}
-          onSell={onSell}
-          maintenanceEnabled={maintenanceEnabled}
-          canPerformMaintenance={canPerformMaintenance}
-        />
-      </CardFooter>
     </Card>
   );
 };
+
+export default PropertyCard;

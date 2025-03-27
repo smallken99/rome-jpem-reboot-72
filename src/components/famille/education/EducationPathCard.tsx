@@ -1,155 +1,105 @@
 
 import React from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { EducationPath, Gender } from './types/educationTypes';
-import { Book, Scroll, Sword, Heart, Users, MessageCircle } from 'lucide-react';
-import { getOutcomeBonuses, getOutcomeSkills } from './utils/educationUtils';
+import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { EducationPath } from './types/educationTypes';
+import { getOutcomeBonuses } from './utils/educationUtils';
 
 interface EducationPathCardProps {
   path: EducationPath;
-  onClick?: () => void;
-  selected?: boolean;
-  compact?: boolean;
-  gender?: Gender;
+  onSelect?: () => void;
+  isSelected?: boolean;
+  showSelectButton?: boolean;
 }
 
 const EducationPathCard: React.FC<EducationPathCardProps> = ({
   path,
-  onClick,
-  selected = false,
-  compact = false,
-  gender
+  onSelect,
+  isSelected = false,
+  showSelectButton = true
 }) => {
-  // Get the appropriate icon for the path type
-  const getPathIcon = (type: string) => {
-    switch (type) {
-      case 'military':
-        return <Sword className="h-5 w-5 text-red-500" />;
-      case 'religious':
-        return <Heart className="h-5 w-5 text-purple-500" />;
-      case 'political':
-        return <Users className="h-5 w-5 text-blue-500" />;
-      case 'rhetoric':
-        return <MessageCircle className="h-5 w-5 text-green-500" />;
-      default:
-        return <Book className="h-5 w-5 text-gray-500" />;
-    }
-  };
-
-  // Check if this education path is valid for the given gender
-  const isValidForGender = !gender || !path.suitableFor || path.suitableFor.includes(gender);
-
-  // Get stats bonuses
+  // Get the stat bonuses from the path
   const popularityBonus = getOutcomeBonuses(path, 'popularity');
   const oratoryBonus = getOutcomeBonuses(path, 'oratory');
   const pietyBonus = getOutcomeBonuses(path, 'piety');
-  const martialBonus = getOutcomeBonuses(path, 'martialEducation');
+  const militaryBonus = getOutcomeBonuses(path, 'martialEducation');
 
-  const cardClassName = `
-    border rounded-md overflow-hidden
-    ${selected ? 'border-blue-500 bg-blue-50' : 'border-gray-200'}
-    ${onClick ? 'cursor-pointer hover:border-blue-300 transition-colors' : ''}
-    ${compact ? 'h-full' : ''}
-  `;
+  // Determine which stat is most emphasized
+  const mainStat = [
+    { name: 'Popularité', value: popularityBonus },
+    { name: 'Éloquence', value: oratoryBonus },
+    { name: 'Piété', value: pietyBonus },
+    { name: 'Éducation Martiale', value: militaryBonus }
+  ].sort((a, b) => b.value - a.value)[0];
 
   return (
-    <Card
-      className={cardClassName}
-      onClick={onClick}
-    >
+    <Card className={`border ${isSelected ? 'border-blue-500 bg-blue-50' : ''}`}>
       <CardHeader className="pb-2">
-        <div className="flex justify-between items-center">
-          <div className="flex items-center space-x-2">
-            {getPathIcon(path.type)}
-            <CardTitle className={compact ? "text-lg" : "text-xl"}>
-              {path.name}
-            </CardTitle>
-          </div>
-          {!isValidForGender && (
-            <Badge variant="outline" className="text-red-500 border-red-300 bg-red-50">
-              Non disponible pour ce genre
-            </Badge>
-          )}
+        <div className="flex justify-between items-start">
+          <CardTitle className="text-lg font-semibold">{path.name}</CardTitle>
+          <Badge variant={isSelected ? "default" : "outline"}>
+            {path.type.charAt(0).toUpperCase() + path.type.slice(1)}
+          </Badge>
         </div>
       </CardHeader>
-      <CardContent>
-        <p className="text-sm text-gray-600 mb-3">
-          {path.description}
-        </p>
-
-        {!compact && (
-          <>
-            <div className="grid grid-cols-2 gap-2 mb-3">
-              <div>
-                <span className="text-xs text-gray-500">Âge minimum</span>
-                <p className="text-sm font-medium">{path.minAge} ans</p>
-              </div>
-              <div>
-                <span className="text-xs text-gray-500">Durée</span>
-                <p className="text-sm font-medium">{path.duration} ans</p>
-              </div>
-              <div>
-                <span className="text-xs text-gray-500">Coût</span>
-                <p className="text-sm font-medium">{path.cost} as</p>
-              </div>
-              <div>
-                <span className="text-xs text-gray-500">Stat clé</span>
-                <p className="text-sm font-medium">{path.relatedStat}</p>
-              </div>
-            </div>
-
-            <div className="mb-3">
-              <h4 className="text-sm font-medium mb-1">Bonifications de stats</h4>
-              <div className="grid grid-cols-2 gap-1">
-                {popularityBonus > 0 && (
-                  <span className="text-xs bg-gray-100 px-2 py-1 rounded">
-                    Popularité +{popularityBonus}
-                  </span>
-                )}
-                {oratoryBonus > 0 && (
-                  <span className="text-xs bg-gray-100 px-2 py-1 rounded">
-                    Éloquence +{oratoryBonus}
-                  </span>
-                )}
-                {pietyBonus > 0 && (
-                  <span className="text-xs bg-gray-100 px-2 py-1 rounded">
-                    Piété +{pietyBonus}
-                  </span>
-                )}
-                {martialBonus > 0 && (
-                  <span className="text-xs bg-gray-100 px-2 py-1 rounded">
-                    Éducation Martiale +{martialBonus}
-                  </span>
-                )}
-              </div>
-            </div>
-
-            <div>
-              <h4 className="text-sm font-medium mb-1">Compétences acquises</h4>
-              <div className="flex flex-wrap gap-1">
-                {getOutcomeSkills(path).map((skill, index) => (
-                  <Badge key={index} variant="secondary" className="text-xs">
-                    <Scroll className="h-3 w-3 mr-1" />
-                    {skill}
-                  </Badge>
-                ))}
-              </div>
-            </div>
-
-            {path.benefits && path.benefits.length > 0 && (
-              <div className="mt-3">
-                <h4 className="text-sm font-medium mb-1">Bénéfices additionnels</h4>
-                <ul className="text-xs text-gray-600 list-disc pl-5 space-y-1">
-                  {path.benefits.map((benefit, index) => (
-                    <li key={index}>{benefit}</li>
-                  ))}
-                </ul>
-              </div>
-            )}
-          </>
+      <CardContent className="pt-0">
+        <p className="text-sm text-gray-600 mb-4">{path.description}</p>
+        
+        <div className="space-y-2">
+          <div className="flex justify-between text-sm">
+            <span className="text-gray-500">Âge recommandé:</span>
+            <span>{path.minAge} - {path.maxAge} ans</span>
+          </div>
+          
+          <div className="flex justify-between text-sm">
+            <span className="text-gray-500">Durée:</span>
+            <span>{path.duration} années</span>
+          </div>
+          
+          <div className="flex justify-between text-sm">
+            <span className="text-gray-500">Coût:</span>
+            <span>{path.cost} deniers/an</span>
+          </div>
+          
+          <div className="flex justify-between text-sm">
+            <span className="text-gray-500">Stat principale:</span>
+            <span className="font-medium">{mainStat.name} +{mainStat.value}</span>
+          </div>
+          
+          <div className="flex justify-between text-sm">
+            <span className="text-gray-500">Convient pour:</span>
+            <span>
+              {path.suitableFor.length === 2 ? 'Tous les genres' : 
+                path.suitableFor[0] === 'male' ? 'Garçons uniquement' : 
+                'Filles uniquement'}
+            </span>
+          </div>
+        </div>
+        
+        {path.benefits && path.benefits.length > 0 && (
+          <div className="mt-4">
+            <h4 className="text-sm font-medium mb-1">Avantages:</h4>
+            <ul className="text-xs space-y-1 list-disc pl-4">
+              {path.benefits.map((benefit, index) => (
+                <li key={index}>{benefit}</li>
+              ))}
+            </ul>
+          </div>
         )}
       </CardContent>
+      
+      {showSelectButton && (
+        <CardFooter className="pt-0">
+          <Button 
+            onClick={onSelect} 
+            variant={isSelected ? "default" : "outline"} 
+            className="w-full mt-2"
+          >
+            {isSelected ? 'Sélectionné' : 'Sélectionner ce parcours'}
+          </Button>
+        </CardFooter>
+      )}
     </Card>
   );
 };
