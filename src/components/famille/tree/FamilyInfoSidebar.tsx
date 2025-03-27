@@ -1,170 +1,115 @@
 
 import React from 'react';
 import { Character } from '@/types/character';
-import { 
-  User,
-  UsersRound,
-  GraduationCap,
-  Heart,
-  Baby
-} from 'lucide-react';
-import { 
-  Alert,
-  AlertTitle,
-  AlertDescription
-} from '@/components/ui/alert';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 import { Badge } from '@/components/ui/badge';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { calculateAge, getMaritalStatus } from './familyHelpers';
-import { useGameTime } from '@/hooks/useGameTime';
+import { getFamilyMembers, findHeir, getFamilyLineage } from './familyHelpers';
 
 interface FamilyInfoSidebarProps {
   characters: Character[];
 }
 
 export const FamilyInfoSidebar: React.FC<FamilyInfoSidebarProps> = ({ characters }) => {
-  const { year } = useGameTime(); 
+  const { paterFamilias } = getFamilyMembers(characters);
+  const heir = findHeir(characters);
+  const familyLineage = getFamilyLineage(characters);
   
-  // Helper function to display full name with fallbacks
-  const displayFullName = (character: Character) => {
-    if (character.firstName && character.lastName) {
-      return `${character.firstName} ${character.lastName}`;
-    }
-    return character.name;
-  };
-  
-  // Check if characters data is valid
-  if (!characters || characters.length === 0) {
-    return (
-      <Alert variant="destructive">
-        <AlertTitle>Aucune donnée</AlertTitle>
-        <AlertDescription>
-          Aucune information familiale disponible.
-        </AlertDescription>
-      </Alert>
-    );
-  }
-  
-  // Find the head of family
-  const familyHead = characters.find(c => 
-    (c.role?.includes('Chef') || c.role?.includes('pater familias')) && c.gender === 'male'
-  );
-  
-  // Find the matriarch
-  const familyMatriarch = characters.find(c => 
-    (c.role?.includes('Épouse') || c.role?.includes('mater familias')) && c.gender === 'female'
-  );
-  
-  // Count children
-  const childrenCount = characters.filter(c => 
-    c.role?.includes('Fils') || 
-    c.role?.includes('Fille') || 
-    c.role?.includes('fils') || 
-    c.role?.includes('filia')
-  ).length;
-  
-  // Get family name
-  const familyName = familyHead?.lastName || characters[0]?.lastName || 'Famille'; 
+  const livingMembers = characters.filter(c => c.status === 'alive').length;
+  const maleMembers = characters.filter(c => c.gender === 'male' && c.status === 'alive').length;
   
   return (
-    <div className="family-sidebar space-y-4">
-      <Alert>
-        <User className="h-4 w-4" />
-        <AlertTitle>Famille {familyName}</AlertTitle>
-        <AlertDescription>
-          {childrenCount} membres dans la famille
-        </AlertDescription>
-      </Alert>
-      
-      {/* Chef de famille */}
-      {familyHead && (
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium flex items-center gap-2">
-              <User className="h-4 w-4 text-amber-600" />
-              Chef de Famille
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="flex items-center gap-3">
-              {familyHead.portrait ? (
-                <img 
-                  src={familyHead.portrait} 
-                  alt={displayFullName(familyHead)} 
-                  className="w-10 h-10 rounded-full object-cover border border-amber-200"
-                />
-              ) : (
-                <div className="w-10 h-10 bg-amber-100 rounded-full flex items-center justify-center">
-                  <User className="h-5 w-5 text-amber-800" />
-                </div>
-              )}
-              <div>
-                <p className="font-medium">{displayFullName(familyHead)}</p>
-                <div className="flex items-center text-xs text-muted-foreground">
-                  <span>{familyHead.age} ans</span>
-                  <span className="mx-1">•</span>
-                  <span>{familyHead.title || 'Citoyen'}</span>
-                </div>
-              </div>
-            </div>
-            
-            <div className="mt-2 text-xs">
-              <div className="flex justify-between">
-                <span>Statut Marital:</span>
-                <Badge variant="secondary">{getMaritalStatus(familyHead)}</Badge>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-      )}
-      
-      {/* Statistiques Familiales */}
+    <div className="space-y-4">
       <Card>
         <CardHeader className="pb-2">
-          <CardTitle className="text-sm font-medium flex items-center gap-2">
-            <UsersRound className="h-4 w-4 text-blue-600" />
-            Statistiques Familiales
-          </CardTitle>
+          <CardTitle className="text-lg">Informations Familiales</CardTitle>
         </CardHeader>
-        <CardContent className="space-y-3">
-          <div className="grid grid-cols-2 gap-2 text-xs">
-            <div className="flex items-center gap-1">
-              <User className="h-3 w-3" />
-              <span>Membres:</span>
+        <CardContent>
+          <dl className="space-y-2">
+            <div>
+              <dt className="text-sm text-gray-500">Lignée</dt>
+              <dd className="font-medium">{familyLineage}</dd>
             </div>
-            <span className="text-right font-medium">{characters.length}</span>
             
-            <div className="flex items-center gap-1">
-              <Baby className="h-3 w-3" />
-              <span>Enfants:</span>
+            <div>
+              <dt className="text-sm text-gray-500">Pater Familias</dt>
+              <dd className="font-medium">{paterFamilias?.name || 'Non défini'}</dd>
             </div>
-            <span className="text-right font-medium">{childrenCount}</span>
             
-            <div className="flex items-center gap-1">
-              <Heart className="h-3 w-3" />
-              <span>Mariages:</span>
+            <div>
+              <dt className="text-sm text-gray-500">Héritier présomptif</dt>
+              <dd className="font-medium">{heir?.name || 'Aucun héritier désigné'}</dd>
             </div>
-            <span className="text-right font-medium">
-              {characters.filter(c => c.marriageStatus === 'married').length}
-            </span>
             
-            <div className="flex items-center gap-1">
-              <GraduationCap className="h-3 w-3" />
-              <span>En éducation:</span>
+            <Separator className="my-3" />
+            
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <dt className="text-sm text-gray-500">Membres vivants</dt>
+                <dd className="font-medium">{livingMembers}</dd>
+              </div>
+              <div>
+                <dt className="text-sm text-gray-500">Membres masculins</dt>
+                <dd className="font-medium">{maleMembers}</dd>
+              </div>
             </div>
-            <span className="text-right font-medium">
-              {characters.filter(c => c.education && c.age < 16).length}
-            </span>
-          </div>
-          
-          <Separator />
-          
-          <div className="text-xs text-center text-muted-foreground">
-            Année actuelle: {year} AUC
+          </dl>
+        </CardContent>
+      </Card>
+      
+      <Card>
+        <CardHeader className="pb-2">
+          <CardTitle className="text-lg">Statut Successoral</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-4">
+            <StatusBadge 
+              status={heir ? 'secure' : 'atrisk'}
+              label={heir ? 'Succession assurée' : 'Lignée en danger'}
+            />
+            
+            <p className="text-sm text-gray-600">
+              {heir ? (
+                `Votre succession est actuellement assurée par ${heir.name}, qui est prêt à reprendre les affaires familiales.`
+              ) : (
+                `Votre famille n'a pas d'héritier mâle désigné. Vous devriez envisager de prendre des mesures pour assurer la continuation de votre lignée.`
+              )}
+            </p>
+            
+            {!heir && (
+              <div className="bg-amber-50 border border-amber-200 rounded p-3 text-xs text-amber-800">
+                <strong className="font-semibold">Recommandation:</strong> Envisagez un mariage pour produire un héritier, ou adoptez un jeune homme prometteur d'une autre famille.
+              </div>
+            )}
           </div>
         </CardContent>
       </Card>
     </div>
+  );
+};
+
+interface StatusBadgeProps {
+  status: 'secure' | 'atrisk' | 'endangered';
+  label: string;
+}
+
+const StatusBadge: React.FC<StatusBadgeProps> = ({ status, label }) => {
+  const getColors = () => {
+    switch (status) {
+      case 'secure':
+        return 'bg-green-100 text-green-800 hover:bg-green-100 border-green-300';
+      case 'atrisk':
+        return 'bg-amber-100 text-amber-800 hover:bg-amber-100 border-amber-300';
+      case 'endangered':
+        return 'bg-red-100 text-red-800 hover:bg-red-100 border-red-300';
+      default:
+        return 'bg-gray-100 text-gray-800 hover:bg-gray-100 border-gray-300';
+    }
+  };
+  
+  return (
+    <Badge variant="outline" className={`${getColors()} text-xs px-3 py-1`}>
+      {label}
+    </Badge>
   );
 };

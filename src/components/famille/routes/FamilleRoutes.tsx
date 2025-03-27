@@ -1,34 +1,23 @@
 
 import React from 'react';
-import { Route, Routes, Navigate } from 'react-router-dom';
-import Layout from '@/components/layout/Layout';
-import { PageHeader } from '@/components/ui-custom/PageHeader';
-import { FamilleWelcome } from '../welcome/FamilleWelcome';
-import { Inheritance } from '../Inheritance';
+import { Routes, Route, Navigate } from 'react-router-dom';
 import { FamilleMain } from '../pages/FamilleMain';
-import { Education } from '../Education';
-import { EducationProvider } from '../education/context/EducationContext';
+import { FamilyEducation } from '../education/FamilyEducation';
+import { ChildEducationDetail } from '../education/ChildEducationDetail';
+import { MarriagesAndAlliances } from '../alliances/MarriagesAndAlliances';
+import { FamilyTreePage } from '../tree/FamilyTreePage';
+import { InheritancePlanning } from '../inheritance/InheritancePlanning';
 
 export const FamilleRoutes: React.FC = () => {
   return (
-    <Layout>
-      <PageHeader 
-        title="Famille"
-        subtitle="Gérez les membres de votre famille, les alliances et l'héritage"
-      />
-      
-      <Routes>
-        <Route path="/" element={<FamilleWelcome />} />
-        <Route path="/arbre-genealogique" element={<FamilleMain />} />
-        <Route path="/heritage" element={<Inheritance />} />
-        <Route path="/education/*" element={
-          <EducationProvider>
-            <Education />
-          </EducationProvider>
-        } />
-        <Route path="/alliances" element={<FamilleMain />} />
-        <Route path="*" element={<Navigate to="/famille" replace />} />
-      </Routes>
-    </Layout>
+    <Routes>
+      <Route path="/" element={<FamilleMain />} />
+      <Route path="/education" element={<FamilyEducation />} />
+      <Route path="/education/child/:childId" element={<ChildEducationDetail />} />
+      <Route path="/alliances" element={<MarriagesAndAlliances />} />
+      <Route path="/tree" element={<FamilyTreePage />} />
+      <Route path="/inheritance" element={<InheritancePlanning />} />
+      <Route path="*" element={<Navigate to="/famille" replace />} />
+    </Routes>
   );
 };

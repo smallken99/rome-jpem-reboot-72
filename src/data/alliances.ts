@@ -1,50 +1,52 @@
 
-import { Alliance } from '@/components/famille/alliances/AllianceList';
+export interface FamilyAlliance {
+  id: string;
+  family: string;
+  type: 'matrimoniale' | 'politique' | 'commerciale' | 'militaire';
+  established: string;
+  status: 'active' | 'pending' | 'broken';
+  benefits: string[];
+  members?: string[];
+}
 
-// Données d'alliance partagées entre les pages
-export const familyAlliances: Alliance[] = [
+export const familyAlliances: FamilyAlliance[] = [
   {
     id: '1',
-    name: 'Gens Cornelia',
-    member: 'Marcus Aurelius Cotta',
-    spouse: 'Livia Aurelia',
+    family: 'Valerii',
     type: 'matrimoniale',
-    status: 'actif',
-    benefits: ['Stabilité familiale', 'Gestion du patrimoine'],
-    date: '705 AUC'
+    established: 'An 753',
+    status: 'active',
+    benefits: [
+      'Accès aux magistratures inférieures',
+      'Soutien dans les votes populaires',
+      'Coopération commerciale'
+    ]
   },
   {
     id: '2',
-    name: 'Gens Fabia',
-    member: 'Julia Aurelia',
-    spouse: 'Quintus Fabius',
+    family: 'Aemilii',
     type: 'matrimoniale',
-    status: 'en négociation',
-    benefits: ['Soutien militaire', 'Accès aux ports'],
-    date: '710 AUC (prévu)'
+    established: 'An 754',
+    status: 'active',
+    benefits: [
+      'Soutien militaire',
+      'Accès aux marchés provinciaux',
+      'Protection juridique mutuelle'
+    ]
   }
 ];
 
-// Alliances politiques distinctes des alliances matrimoniales
-export const politicalAlliances: Alliance[] = [
-  { 
+export const pendingAlliances: FamilyAlliance[] = [
+  {
     id: '3',
-    name: 'Gens Julia', 
-    type: 'politique', 
-    status: 'actif',
-    benefits: ['Influence au Sénat +2', 'Protection contre les rivalités politiques', 'Accès aux marchés d\'Asie']
-  },
-  { 
-    id: '4',
-    name: 'Gens Flavia', 
-    type: 'politique', 
-    status: 'rompu',
-    benefits: []
+    family: 'Cornelii',
+    type: 'matrimoniale',
+    established: 'An 755 (proposée)',
+    status: 'pending',
+    benefits: [
+      'Influence politique majeure',
+      'Accès aux magistratures supérieures',
+      'Opportunités commerciales lucratives'
+    ]
   }
 ];
-
-// Combine toutes les alliances pour l'affichage
-export const getAllAlliances = (): Alliance[] => {
-  // Retourne simplement toutes les alliances sans filtre pour être cohérent
-  return [...familyAlliances, ...politicalAlliances];
-};

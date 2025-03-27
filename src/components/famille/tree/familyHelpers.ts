@@ -1,80 +1,60 @@
 
 import { Character } from '@/types/character';
 
-export interface FamilyMembers {
-  paterFamilias?: Character;
-  materFamilias?: Character;
-  children: Character[];
-  otherRelatives: Character[];
-}
-
-export const getFamilyMembers = (characters: Character[]): FamilyMembers => {
-  if (!characters || !Array.isArray(characters) || characters.length === 0) {
-    return { 
-      children: [],
-      otherRelatives: []
-    };
-  }
-
-  // Trouver le pater familias (chef de famille masculin)
-  const paterFamilias = characters.find(
-    char => char.gender === 'male' && 
-    (char.role === 'pater familias' || char.role === 'Chef de la Gens' || 
-     char.role === 'Chef de famille' || char.role === 'Chef de la Gens Aurelia')
-  );
-
-  // Trouver la mater familias (épouse principale)
-  const materFamilias = characters.find(
-    char => char.gender === 'female' && 
-    (char.role === 'mater familias' || char.role === 'Épouse du Chef de la Gens' || 
-     char.role === 'Matrone' || char.role === 'Épouse du Chef')
-  );
-
-  // Identifier les enfants (fils et filles)
-  const children = characters.filter(
-    char => char.role === 'son' || char.role === 'daughter' || 
-    char.role === 'filius' || char.role === 'filia' || 
-    char.role === 'Fils aîné et héritier' || char.role === 'Fille cadette' ||
-    char.role === 'Fils' || char.role === 'Fille'
-  );
-
-  // Autres membres de la famille
-  const otherRelatives = characters.filter(
-    char => 
-      char !== paterFamilias && 
-      char !== materFamilias && 
-      !children.includes(char)
-  );
-
-  return {
-    paterFamilias,
-    materFamilias,
-    children,
-    otherRelatives
-  };
-};
-
-// Fonction pour calculer l'âge d'un personnage
-export const calculateAge = (birthYear: number, currentYear: number): number => {
-  return currentYear - birthYear;
-};
-
-// Fonction pour obtenir le statut marital
-export const getMaritalStatus = (character: Character): string => {
-  if (!character.marriageStatus) return 'Inconnu';
+export const getFamilyMembers = (characters: Character[]) => {
+  // Extraire le pater familias (chef de famille)
+  const paterFamilias = characters.find(c => c.isHeadOfFamily && c.gender === 'male') || 
+                         characters.find(c => c.gender === 'male' && c.relation.includes('Pater'));
   
-  switch(character.marriageStatus.toLowerCase()) {
-    case 'married':
-      return 'Marié(e)';
-    case 'widowed':
-      return 'Veuf/Veuve';
-    case 'divorced':
-      return 'Divorcé(e)';
-    case 'single':
-      return 'Célibataire';
-    case 'betrothed':
-      return 'Fiancé(e)';
-    default:
-      return character.marriageStatus;
+  // Extraire la mater familias (épouse du chef de famille)
+  const materFamilias = characters.find(c => c.gender === 'female' && 
+    (c.relation.includes('Épouse') || c.relation.includes('Mater')));
+  
+  // Extraire les enfants
+  const children = characters.filter(c => 
+    c.relation.includes('Fils') || 
+    c.relation.includes('Fille')
+  );
+  
+  return { paterFamilias, materFamilias, children };
+};
+
+export const sortChildrenByAge = (children: Character[]): Character[] => {
+  return [...children].sort((a, b) => b.age - a.age);
+};
+
+export const getFamilyLineage = (characters: Character[]): string => {
+  const paterFamilias = characters.find(c => c.isHeadOfFamily);
+  if (!paterFamilias) return "Famille inconnue";
+  
+  const familyName = paterFamilias.name.split(' ')[1] || paterFamilias.name;
+  return `Gens ${familyName}`;
+};
+
+export const findHeir = (characters: Character[]): Character | null => {
+  const { paterFamilias, children } = getFamilyMembers(characters);
+  
+  if (!paterFamilias) return null;
+  
+  // Fils par ordre d'âge
+  const sons = sortChildrenByAge(
+    children.filter(c => c.gender === 'male' && c.status === 'alive')
+  );
+  
+  if (sons.length > 0) {
+    return sons[0]; // Le fils aîné
   }
+  
+  // Si pas de fils, chercher les frères
+  const brothers = characters.filter(c => 
+    c.gender === 'male' && 
+    c.relation.includes('Frère') && 
+    c.status === 'alive'
+  );
+  
+  if (brothers.length > 0) {
+    return brothers.sort((a, b) => b.age - a.age)[0]; // Le frère aîné
+  }
+  
+  return null;
 };

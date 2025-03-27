@@ -1,98 +1,58 @@
 
-import { useState, useEffect } from 'react';
-import { useMaitreJeu } from '@/components/maitrejeu/context';
-import { GamePhase, Season, formatSeasonDisplay, formatGameDate, convertToStandardSeason } from '@/utils/timeSystem';
+import { useState, useCallback } from 'react';
+import { useLocalStorage } from './useLocalStorage';
+
+export type Season = 'Hiems' | 'Ver' | 'Aestas' | 'Autumnus';
+
+interface GameTime {
+  year: number;
+  season: Season;
+}
+
+const SEASONS: Season[] = ['Hiems', 'Ver', 'Aestas', 'Autumnus'];
 
 export const useGameTime = () => {
-  const { 
-    currentDate,
-    currentPhase,
-    currentYear,
-    currentSeason,
-    advanceTime,
-    changePhase
-  } = useMaitreJeu();
-
-  // Format a season for display
-  const formatSeason = (season: Season | string) => {
-    return formatSeasonDisplay(season);
-  };
-
-  // Format as Roman season
-  const formatRomanSeason = (season: Season) => {
-    switch (season) {
-      case 'Ver': return 'Ver (Printemps)';
-      case 'Aestas': return 'Aestas (Été)';
-      case 'Autumnus': return 'Autumnus (Automne)';
-      case 'Hiems': return 'Hiems (Hiver)';
-      default: return season;
+  const [gameTime, setGameTime] = useLocalStorage<GameTime>('roman-game-time', {
+    year: 755, // AUC - Ab Urbe Condita
+    season: 'Ver'
+  });
+  
+  const advanceSeason = useCallback(() => {
+    const currentSeasonIndex = SEASONS.indexOf(gameTime.season);
+    const nextSeasonIndex = (currentSeasonIndex + 1) % SEASONS.length;
+    
+    if (nextSeasonIndex === 0) {
+      // If we've cycled through all seasons, advance to the next year
+      setGameTime({
+        year: gameTime.year + 1,
+        season: SEASONS[0]
+      });
+    } else {
+      setGameTime({
+        ...gameTime,
+        season: SEASONS[nextSeasonIndex]
+      });
     }
-  };
-
-  // Format full date
-  const formatDate = () => {
-    // Ensure the season is correctly typed
-    const standardizedDate = {
-      year: currentDate.year,
-      season: convertToStandardSeason(currentDate.season as string)
-    };
-    return formatGameDate(standardizedDate);
-  };
-
-  // Translate phase name
-  const translatePhase = (phase: string): string => {
-    const phaseMap: Record<string, string> = {
-      'SENATE': 'Sénat',
-      'ECONOMY': 'Économie',
-      'ELECTION': 'Élections',
-      'DIPLOMACY': 'Diplomatie',
-      'MILITARY': 'Militaire',
-      'RELIGION': 'Religion',
-      'VOTE': 'Vote',
-      'ACTIONS': 'Actions',
-      'EVENTS': 'Événements'
-    };
-    return phaseMap[phase] || phase;
-  };
-
-  // Get phase description
-  const getPhaseDescription = (): string => {
-    const phase = currentPhase as string;
-    switch (phase) {
-      case 'SENATE': 
-        return "Phase de réunion du Sénat où les décisions importantes sont débattues.";
-      case 'ECONOMY': 
-        return "Gérez les finances et l'économie de la République.";
-      case 'ELECTION': 
-        return "Les citoyens élisent leurs magistrats pour l'année à venir.";
-      case 'DIPLOMACY': 
-        return "Négociez avec d'autres nations et établissez des relations diplomatiques.";
-      case 'MILITARY': 
-        return "Planifiez et exécutez des campagnes militaires.";
-      case 'RELIGION': 
-        return "Organisez des cérémonies religieuses et consultez les augures.";
-      case 'VOTE': 
-        return "Votez sur les propositions présentées au Sénat.";
-      case 'ACTIONS': 
-        return "Les joueurs peuvent effectuer des actions personnelles.";
-      case 'EVENTS': 
-        return "Résolution des événements aléatoires affectant la République.";
-      default:
-        return "Phase actuelle du jeu.";
-    }
-  };
-
+  }, [gameTime, setGameTime]);
+  
+  const setYear = useCallback((year: number) => {
+    setGameTime({
+      ...gameTime,
+      year
+    });
+  }, [gameTime, setGameTime]);
+  
+  const setSeason = useCallback((season: Season) => {
+    setGameTime({
+      ...gameTime,
+      season
+    });
+  }, [gameTime, setGameTime]);
+  
   return {
-    currentDate,
-    currentPhase,
-    advanceTime,
-    changePhase,
-    year: currentYear,
-    season: currentSeason,
-    formatSeason,
-    formatRomanSeason,
-    formatDate,
-    translatePhase,
-    getPhaseDescription
+    ...gameTime,
+    advanceSeason,
+    setYear,
+    setSeason
   };
 };

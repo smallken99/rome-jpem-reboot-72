@@ -3,7 +3,8 @@ import React from 'react';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { Coins } from 'lucide-react';
+import { Slider } from '@/components/ui/slider';
+import { formatCurrency } from '@/utils/formatters';
 
 interface DowryFormProps {
   dowryAmount: number;
@@ -25,48 +26,63 @@ export const DowryForm: React.FC<DowryFormProps> = ({
   currentYear
 }) => {
   return (
-    <div className="space-y-4">
+    <div className="space-y-4 border rounded-md p-4">
       <div className="space-y-2">
-        <Label htmlFor="dowry">Montant de la dot (en As)</Label>
-        <div className="flex items-center gap-2">
+        <Label htmlFor="dowry">Montant de la Dot</Label>
+        <div className="flex justify-between items-center">
+          <Slider
+            id="dowry-slider"
+            value={[dowryAmount]} 
+            min={10000}
+            max={200000}
+            step={5000}
+            onValueChange={(values) => setDowryAmount(values[0])}
+            className="w-3/4 mr-4"
+          />
           <Input
-            id="dowry"
             type="number"
             value={dowryAmount}
-            onChange={(e) => setDowryAmount(parseInt(e.target.value) || 0)}
-            min={1000}
-            className="flex-1"
+            onChange={(e) => setDowryAmount(Number(e.target.value))}
+            className="w-1/4"
           />
-          <Coins className="h-5 w-5 text-rome-gold" />
         </div>
-        <p className="text-xs text-muted-foreground">
-          La dot minimale recommandée est de 5,000 As pour une alliance respectable.
-        </p>
+        <div className="text-sm text-gray-500">
+          {formatCurrency(dowryAmount)}
+        </div>
       </div>
       
       <div className="space-y-2">
-        <Label htmlFor="year">Année de mariage prévue</Label>
-        <Input
-          id="year"
-          type="number"
-          value={marriageYear}
-          onChange={(e) => setMarriageYear(parseInt(e.target.value) || currentYear)}
-          min={currentYear}
-          max={currentYear + 5}
-        />
-        <p className="text-xs text-muted-foreground">
-          L'année actuelle est {currentYear} AUC. Le mariage peut être planifié jusqu'à 5 ans dans le futur.
-        </p>
+        <Label htmlFor="marriage-year">Année Prévue du Mariage</Label>
+        <div className="flex justify-between items-center">
+          <Slider
+            id="year-slider"
+            value={[marriageYear]} 
+            min={currentYear}
+            max={currentYear + 5}
+            step={1}
+            onValueChange={(values) => setMarriageYear(values[0])}
+            className="w-3/4 mr-4"
+          />
+          <Input
+            type="number"
+            value={marriageYear}
+            onChange={(e) => setMarriageYear(Number(e.target.value))}
+            className="w-1/4"
+          />
+        </div>
+        <div className="text-sm text-gray-500">
+          An {marriageYear} (dans {marriageYear - currentYear} an{marriageYear - currentYear > 1 ? 's' : ''})
+        </div>
       </div>
       
       <div className="space-y-2">
-        <Label htmlFor="terms">Termes de négociation additionnels</Label>
+        <Label htmlFor="terms">Termes de la Négociation</Label>
         <Textarea
           id="terms"
           value={negotiationTerms}
           onChange={(e) => setNegotiationTerms(e.target.value)}
-          placeholder="Conditions spéciales, préférences, ou demandes particulières..."
-          className="min-h-[120px]"
+          placeholder="Détaillez les conditions que vous souhaitez proposer pour cette alliance..."
+          rows={4}
         />
       </div>
     </div>

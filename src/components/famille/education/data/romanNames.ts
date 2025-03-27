@@ -1,12 +1,46 @@
 
-// Liste des noms romains pour les précepteurs
 export const romanNames = [
-  'Gaius Livius', 'Marcus Tullius', 'Quintus Fabius', 'Lucius Aemilius', 
-  'Titus Flavius', 'Publius Cornelius', 'Gnaeus Pompeius', 'Sextus Julius',
-  'Aulus Postumius', 'Decimus Valerius', 'Tiberius Claudius', 'Marcus Porcius',
-  'Servius Sulpicius', 'Manius Curius', 'Appius Claudius', 'Spurius Furius'
+  "Marcus Tullius",
+  "Gaius Julius",
+  "Publius Cornelius",
+  "Lucius Aemilius",
+  "Titus Flavius",
+  "Quintus Servilius",
+  "Gnaeus Pompeius",
+  "Sextus Pompeius",
+  "Decimus Junius",
+  "Aulus Postumius",
+  "Manius Acilius",
+  "Servius Sulpicius",
+  "Appius Claudius",
+  "Tiberius Claudius",
+  "Spurius Cassius",
+  "Numerius Fabius",
+  "Caeso Fabius",
+  "Mamercus Aemilius",
+  "Vibius Pansa",
+  "Hostus Hostilius",
 ];
 
-// Export en tant que préfixes et suffixes pour la compatibilité avec d'autres fichiers
-export const romanNamePrefixes = romanNames.map(name => name.split(' ')[0]);
-export const romanNameSuffixes = romanNames.map(name => name.split(' ')[1]);
+export const femaleRomanNames = [
+  "Cornelia",
+  "Julia",
+  "Claudia",
+  "Aemilia",
+  "Lucretia",
+  "Livia",
+  "Octavia",
+  "Antonia",
+  "Valeria",
+  "Domitia",
+  "Fulvia",
+  "Tullia",
+  "Servilia",
+  "Scribonia",
+  "Porcia",
+  "Caecilia",
+  "Terentia",
+  "Atia",
+  "Calpurnia",
+  "Marcia",
+];
