@@ -8,13 +8,14 @@ import { useNavigate } from 'react-router-dom';
 import { useCharacters } from '../hooks/useCharacters';
 import { ChildList } from './components/ChildList';
 import { EducationProvider } from './context/EducationContext';
+import { Character } from '@/types/character';
 
 export const FamilyEducation: React.FC = () => {
   const navigate = useNavigate();
   const { localCharacters } = useCharacters();
   
   // Filter children from the family
-  const children = localCharacters.filter(c => 
+  const children: Character[] = localCharacters.filter(c => 
     (c.relation?.includes('Fils') || c.relation?.includes('Fille')) && 
     c.age < 18
   );

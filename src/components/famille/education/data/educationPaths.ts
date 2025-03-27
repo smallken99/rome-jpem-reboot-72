@@ -1,17 +1,15 @@
 
 import { EducationPath } from '../types/educationTypes';
 import { militaryPath } from './paths/militaryPath';
-import { politicalPath } from './paths/politicalPath';
 import { religiousPath } from './paths/religiousPath';
 import { rhetoricPath } from './paths/rhetoricPath';
-import { academicPath } from './paths/academicPath';
+import { politicalPath } from './paths/politicalPath';
 
 export const educationPaths: EducationPath[] = [
   militaryPath,
-  politicalPath,
   religiousPath,
   rhetoricPath,
-  academicPath
+  politicalPath
 ];
 
 export const getEducationPathById = (id: string): EducationPath | undefined => {

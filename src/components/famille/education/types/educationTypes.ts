@@ -8,7 +8,7 @@ export interface Child {
   id: string;
   name: string;
   age: number;
-  gender: 'male' | 'female';
+  gender: Gender;
   status?: string;
   educationType: EducationType;
   progress: number;
@@ -18,6 +18,7 @@ export interface Child {
   mentor?: string;
   preceptorId?: string | null;
   currentEducation?: ChildEducation;
+  skills?: { [key: string]: number };
 }
 
 // Current education status for a child
@@ -69,9 +70,11 @@ export interface Preceptor {
   description?: string;
   teachingStyle?: string;
   specialties?: string[];
+  portrait?: string;
+  reputation?: number;
 }
 
-// Preceptors grouped by education type
+// Preceptors grouped by type
 export interface PreceptorsByType {
   military: Preceptor[];
   rhetoric: Preceptor[];
@@ -96,18 +99,21 @@ export interface EducationPath {
     bonuses?: { [key: string]: number };
   } | string[];
   suitableFor: Gender[];
+  benefits?: string[];
 }
 
 // Component props for education components
 export interface EducationObjectivesProps {
   childId: string;
-  path: EducationPath;
+  path?: EducationPath;
+  educationType?: EducationType;
 }
 
 export interface EducationTypeSelectorProps {
   selectedType: EducationType;
   onChange: (type: EducationType) => void;
   gender: Gender;
+  childGender?: Gender;
   age?: number;
 }
 
@@ -115,6 +121,7 @@ export interface EducationSpecialtySelectorProps {
   educationType: EducationType;
   selectedSpecialties: string[];
   onChange: (specialties: string[]) => void;
+  availableSpecialties?: string[];
 }
 
 // Form data for education
@@ -122,6 +129,15 @@ export interface EducationFormData {
   type: EducationType;
   specialties: string[];
   preceptorId: string | null;
+  childId?: string;
+  pathType?: EducationType;
+  mentor?: string | null;
+  startYear?: number;
+  currentYear?: number;
+  totalYears?: number;
+  status?: "not_started" | "in_progress" | "completed" | "failed" | "canceled";
+  skills?: { [key: string]: number };
+  educationType?: EducationType;
 }
 
 // Education record
@@ -133,7 +149,7 @@ export interface EducationRecord {
   startYear: number;
   currentYear: number;
   totalYears: number;
-  status: 'not_started' | 'in_progress' | 'completed' | 'failed';
+  status: "not_started" | "in_progress" | "completed" | "failed";
   skills: { [key: string]: number };
   specialties: string[];
 }

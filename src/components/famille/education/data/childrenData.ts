@@ -1,52 +1,57 @@
 
 import { Child } from '../types/educationTypes';
 
-// Mock children data for development and testing
-export const children: Child[] = [
+export const childrenData: Child[] = [
   {
     id: 'child-1',
-    name: 'Marcus',
-    age: 12,
+    name: 'Marcus Aurelius',
+    age: 14,
     gender: 'male',
-    status: 'child',
+    status: 'Studying',
     educationType: 'military',
-    progress: 35,
+    progress: 65,
+    specialties: ['Tactics', 'Combat'],
+    traits: ['Ambitious', 'Disciplined'],
     currentEducation: {
       type: 'military',
-      mentor: 'Gaius Livius le Sage',
-      skills: ['Tactique légionnaire', 'Équitation militaire'],
-      progress: 35,
-      yearsCompleted: 1,
-      totalYears: 2,
-      statBonus: 25
+      mentor: 'Centurion Maximus',
+      skills: ['Swordsmanship', 'Cavalry Tactics', 'Command'],
+      progress: 65,
+      yearsCompleted: 2,
+      totalYears: 4,
+      statBonus: 15
     }
   },
   {
     id: 'child-2',
-    name: 'Julia',
-    age: 10,
+    name: 'Livia Aurelia',
+    age: 12,
     gender: 'female',
-    status: 'child',
+    status: 'Studying',
     educationType: 'rhetoric',
-    progress: 20,
+    progress: 45,
+    specialties: ['Public Speaking', 'Persuasion'],
+    traits: ['Eloquent', 'Patient'],
     currentEducation: {
       type: 'rhetoric',
-      mentor: 'Publius Cornelius l\'Érudit',
-      skills: ['Rhétorique grecque', 'Composition littéraire'],
-      progress: 20,
-      yearsCompleted: 0,
+      mentor: 'Tullius Cicero',
+      skills: ['Oration', 'Debate', 'Writing'],
+      progress: 45,
+      yearsCompleted: 1,
       totalYears: 3,
-      statBonus: 20
+      statBonus: 10
     }
   },
   {
     id: 'child-3',
-    name: 'Lucius',
-    age: 15,
+    name: 'Gaius Brutus',
+    age: 10,
     gender: 'male',
-    status: 'child',
+    status: 'Undecided',
     educationType: 'none',
     progress: 0,
+    specialties: [],
+    traits: ['Curious', 'Energetic'],
     currentEducation: {
       type: 'none',
       mentor: null,
