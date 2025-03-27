@@ -4,7 +4,8 @@ export type LoiType = "standard" | "constitutionnelle" | "judiciaire" | "adminis
 export type LoiState = 
   "pending" | "debated" | "approved" | "rejected" | "active" | "expired" | 
   "proposée" | "En délibération" | "adoptée" | "rejetée" | "promulguée" |
-  "Proposée" | "En discussion" | "Rejetée" | "Promulguée" | "En vigueur";
+  "Proposée" | "En discussion" | "Rejetée" | "Promulguée" | "En vigueur" | 
+  "haute";
 
 export type ImportanceType = "mineure" | "normale" | "majeure" | "critique" | "haute";
 

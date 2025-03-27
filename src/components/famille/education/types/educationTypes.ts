@@ -19,23 +19,23 @@ export interface Preceptor {
   specialization: EducationType;
   skill: number;
   cost: number;
+  price: number;
   background: string;
   traits: string[];
   status: 'available' | 'hired' | 'unavailable' | 'assigned';
+  available: boolean;
+  assigned?: boolean;
   specialty: string;
+  speciality?: string;
   expertise: number;
   experience: number;
-  price: number;
-  available: boolean;
+  quality?: number;
+  childId?: string;
+  portrait?: string;
   description: string;
   teachingStyle: string;
   specialties: string[];
   reputation: number;
-  quality?: number;
-  childId?: string;
-  speciality?: string;
-  portrait?: string;
-  assigned?: boolean;
 }
 
 export interface Child {
@@ -49,6 +49,7 @@ export interface Child {
   specialty?: string;
   traits: string[];
   status?: string;
+  skills?: string[];
   currentEducation?: ChildEducation;
   preceptorId?: string;
   mentor?: string;
@@ -78,6 +79,8 @@ export interface EducationPath {
     maxAge?: number;
   };
   relatedStat?: string;
+  minAge?: number;
+  maxAge?: number;
 }
 
 export interface ChildEducation {
@@ -99,6 +102,12 @@ export interface EducationRecord {
   startDate: string;
   progress: number;
   completed: boolean;
+  id?: string;
+  currentYear?: number;
+  totalYears?: number;
+  pathType?: string;
+  status?: string;
+  startYear?: number;
 }
 
 export interface EducationHistory {
@@ -117,6 +126,9 @@ export interface EducationFormData {
   childId: string;
   pathId: string;
   mentorId?: string;
+  type?: string;
+  preceptorId?: string;
+  specialties?: string[];
 }
 
 export interface PreceptorsByType {

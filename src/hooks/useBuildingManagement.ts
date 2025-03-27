@@ -1,7 +1,30 @@
-
 import { useState } from 'react';
-import { Building, PropertyStats } from '@/types/proprietes';
-import { toast } from 'sonner';
+import { v4 as uuidv4 } from 'uuid';
+import { PropertyType, PropertyUpgrade } from '@/types/proprietes';
+
+export interface Building {
+  id: string;
+  type: string;
+  name: string;
+  location: string;
+  value: number;
+  maintenance: number;
+  condition: number;
+  workers?: number;
+  securityLevel?: number;
+  maintenanceLevel?: number;
+}
+
+export interface PropertyStats {
+  totalProperties: number;
+  totalValue: number;
+  totalIncome: number;
+  totalMaintenance: number;
+  urbanProperties: number;
+  ruralProperties: number;
+  commercialProperties: number;
+  yearlyIncome?: number;
+}
 
 export const useBuildingManagement = (initialBuildings: Building[] = []) => {
   const [buildings, setBuildings] = useState<Building[]>(initialBuildings);
@@ -19,7 +42,6 @@ export const useBuildingManagement = (initialBuildings: Building[] = []) => {
     location: ''
   });
 
-  // Calculer les statistiques globales des bâtiments
   const stats: PropertyStats = {
     totalValue: buildings.reduce((sum, bldg) => sum + bldg.value, 0),
     yearlyIncome: buildings.reduce((sum, bldg) => sum + bldg.income, 0),
@@ -27,19 +49,17 @@ export const useBuildingManagement = (initialBuildings: Building[] = []) => {
     netYearlyProfit: buildings.reduce((sum, bldg) => sum + bldg.income - bldg.maintenance, 0),
     propertyCount: buildings.length,
     buildingCount: buildings.length,
-    upgradePotential: 0 // À calculer si nécessaire
+    upgradePotential: 0
   };
 
-  // Ajouter un nouveau bâtiment
   const addBuilding = (newBuilding: Omit<Building, 'id'>) => {
-    const id = `building-${Date.now()}`;
+    const id = `building-${uuidv4()}`;
     const building = { ...newBuilding, id };
     setBuildings(prev => [...prev, building]);
     toast.success(`${building.name} ajouté avec succès`);
     return id;
   };
 
-  // Vendre un bâtiment
   const sellBuilding = (buildingId: string) => {
     const building = buildings.find(b => b.id === buildingId);
     if (!building) return 0;
@@ -49,7 +69,6 @@ export const useBuildingManagement = (initialBuildings: Building[] = []) => {
     return building.value;
   };
 
-  // Entretenir un bâtiment
   const maintainBuilding = (buildingId: string, amount: number) => {
     const buildingIndex = buildings.findIndex(b => b.id === buildingId);
     if (buildingIndex === -1) return false;
@@ -66,7 +85,6 @@ export const useBuildingManagement = (initialBuildings: Building[] = []) => {
     return true;
   };
 
-  // Installer une amélioration
   const installUpgrade = (buildingId: string, upgradeId: string) => {
     const buildingIndex = buildings.findIndex(b => b.id === buildingId);
     if (buildingIndex === -1) return false;
@@ -89,19 +107,15 @@ export const useBuildingManagement = (initialBuildings: Building[] = []) => {
     return true;
   };
 
-  // Fonctions pour la compatibilité
   const updateMaintenanceEnabled = (buildingId: string, enabled: boolean) => {
-    // Implémentation fictive pour compatibilité
     return true;
   };
 
   const updateBuildingCondition = (buildingId: string, condition: number) => {
-    // Implémentation fictive pour compatibilité
     return true;
   };
 
   const assignSlaves = (buildingId: string, count: number) => {
-    // Implémentation fictive pour compatibilité
     return true;
   };
 
@@ -114,7 +128,6 @@ export const useBuildingManagement = (initialBuildings: Building[] = []) => {
     sellBuilding,
     maintainBuilding,
     installUpgrade,
-    // Compatibilité
     updateMaintenanceEnabled,
     updateBuildingCondition,
     assignSlaves

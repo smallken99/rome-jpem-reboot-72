@@ -16,8 +16,8 @@ export interface Character {
   traits?: string[];
   health?: number;
   status?: 'alive' | 'deceased' | 'exiled';
-  specialties?: string[];
   specialty?: string;
+  specialties?: string[];
   educationType?: string;
   testamentaryWishes?: string;
   // Visual and metadata
