@@ -25,4 +25,3 @@ export interface SenateurJouable {
   statut: string;
   actif: boolean | string;
 }
-

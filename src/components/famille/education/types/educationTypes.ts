@@ -151,4 +151,3 @@ export interface EducationPathCardProps {
   isSelected?: boolean;
   onSelect?: () => void;
 }
-

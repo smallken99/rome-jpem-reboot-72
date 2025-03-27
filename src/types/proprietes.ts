@@ -44,6 +44,7 @@ export interface PropertyUpgrade {
   type?: string;
   benefitDescription?: string;
   prerequisiteUpgradeId?: string;
+  installed?: boolean;
 }
 
 export interface OwnedBuilding extends Building {
@@ -57,4 +58,3 @@ export interface PropertyStats {
   yearlyMaintenance?: number;
   totalProperties?: number;
 }
-

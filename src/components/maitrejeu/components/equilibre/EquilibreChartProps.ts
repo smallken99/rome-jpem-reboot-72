@@ -61,4 +61,3 @@ export interface Equilibre {
   plebéiens: number;
   economie: number;
 }
-
