@@ -1,34 +1,13 @@
 
-import { MagistratureType } from './magistratures';
-
-export interface Competences {
-  diplomatie: number;
-  guerre: number;
-  administration: number;
-  eloquence: number;
-}
-
 export interface SenateurJouable {
   id: string;
-  nom: string;
-  prenom: string;
-  gens: string;
-  statut: "Patricien" | "Plébéien";
+  name: string;
   age: number;
-  joueur: boolean;
-  roles: string[];
-  richesse: number;
+  faction: string;
   influence: number;
-  competences: Competences;
-  magistrature?: MagistratureType;
-  
-  // Propriétés additionnelles requises par les composants
-  famille?: string;
-  fonction?: string;
-  popularite?: number;
-  militaire?: number;
-  piete?: number;
-  eloquence?: number;
-  appartenance?: "Optimates" | "Populares" | "Neutral";
-  playerId?: string;
+  prestige: number;
+  richesse: number;
+  famille: string;
+  statut: string;
+  actif: boolean;
 }

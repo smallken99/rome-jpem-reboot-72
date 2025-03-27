@@ -77,6 +77,7 @@ export interface EducationPath {
     gender?: Gender | 'both';
     minAge?: number;
     maxAge?: number;
+    includes?: (gender: Gender) => boolean;
   };
   relatedStat?: string;
   minAge?: number;
@@ -111,6 +112,7 @@ export interface EducationRecord {
   status?: string;
   startYear?: number;
   preceptorId?: string;
+  skills?: string[];
 }
 
 export interface EducationHistory {
@@ -133,6 +135,7 @@ export interface EducationFormData {
   preceptorId?: string;
   specialties?: string[];
   pathType?: string;
+  status?: string;
 }
 
 export interface PreceptorsByType {

@@ -12,6 +12,7 @@ export interface Slave {
   assigned?: boolean;
   assignedTo?: string;
   productivity: number;
+  value?: number;
 }
 
 export interface SlaveAssignment {

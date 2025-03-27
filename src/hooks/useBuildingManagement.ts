@@ -1,7 +1,6 @@
-
-import { useState, useCallback } from 'react';
+import { useState, useEffect } from 'react';
+import { Building, PropertyStats, PropertyUpgrade, OwnedBuilding } from '@/types/proprietes';
 import { v4 as uuidv4 } from 'uuid';
-import { Property, PropertyUpgrade, Building } from '@/types/proprietes';
 import { toast } from '@/components/ui-custom/toast';
 
 export interface PropertyStats {

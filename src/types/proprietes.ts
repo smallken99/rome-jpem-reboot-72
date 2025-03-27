@@ -1,7 +1,7 @@
 
-export type PropertyType = 'urban' | 'rural' | 'commercial' | 'villa' | 'other' | 'domus' | 'insula';
+export type PropertyType = 'urban' | 'rural' | 'commercial' | 'villa' | 'other' | 'domus' | 'insula' | 'taberna' | 'horreum' | 'officina' | 'balneum' | 'villa_urbana' | 'villa_rustica' | 'temple';
 
-export type PropertyStatus = 'excellent' | 'good' | 'fair' | 'ruins' | 'dilapidated' | 'poor';
+export type PropertyStatus = 'excellent' | 'good' | 'fair' | 'poor' | 'dilapidated' | 'ruins';
 
 export interface Property {
   id: string;
@@ -37,7 +37,6 @@ export interface Building {
 
 export interface OwnedBuilding extends Building {
   buildingId: string;
-  condition: number;
 }
 
 export interface PropertyUpgrade {
@@ -54,4 +53,12 @@ export interface PropertyUpgrade {
   };
   prerequisiteUpgradeId?: string;
   benefitDescription?: string;
+}
+
+export interface PropertyStats {
+  totalValue: number;
+  totalIncome: number;
+  totalMaintenance: number;
+  yearlyIncome?: number;
+  yearlyMaintenance?: number;
 }

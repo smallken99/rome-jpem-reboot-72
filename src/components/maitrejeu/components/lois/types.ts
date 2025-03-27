@@ -11,6 +11,7 @@ export interface TimelineItemProps {
   description?: string;
   icon?: React.ReactNode;
   isActive?: boolean;
+  badge?: React.ReactNode;
 }
 
 export interface LoiDetailProps {
@@ -18,4 +19,16 @@ export interface LoiDetailProps {
   onEdit?: (loi: Loi) => void;
   onDelete?: (loiId: string) => void;
   readOnly?: boolean;
+}
+
+export interface LoiModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+  onSave: (loi: Loi) => void;
+  loi?: Loi;
+  categories?: Array<{ id: string, name: string, description: string }>;
+}
+
+export interface HistoriqueLoiTabProps {
+  loi: Loi;
 }
