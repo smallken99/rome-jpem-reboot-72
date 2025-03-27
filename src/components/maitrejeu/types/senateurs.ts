@@ -23,5 +23,6 @@ export interface SenateurJouable {
   richesse: number;
   famille: string;
   statut: string;
-  actif: boolean;
+  actif: boolean | string;
 }
+

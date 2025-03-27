@@ -145,3 +145,10 @@ export interface PreceptorsByType {
   academic: Preceptor[];
   [key: string]: Preceptor[];
 }
+
+export interface EducationPathCardProps {
+  path: EducationPath;
+  isSelected?: boolean;
+  onSelect?: () => void;
+}
+

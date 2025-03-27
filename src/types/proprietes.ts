@@ -1,5 +1,5 @@
 
-export type PropertyType = 'commercial' | 'urban' | 'rural' | 'other';
+export type PropertyType = 'commercial' | 'urban' | 'rural' | 'other' | 'villa' | 'domus' | 'insula';
 export type PropertyStatus = 'excellent' | 'good' | 'fair' | 'ruins' | 'poor' | 'dilapidated';
 
 export interface Property {
@@ -14,6 +14,8 @@ export interface Property {
   maintenanceCost: number;
   status: PropertyStatus;
   income?: number;
+  upgrades?: PropertyUpgrade[];
+  acquired?: string;
 }
 
 export interface Building {
@@ -43,3 +45,16 @@ export interface PropertyUpgrade {
   benefitDescription?: string;
   prerequisiteUpgradeId?: string;
 }
+
+export interface OwnedBuilding extends Building {
+  buildingId: string;
+}
+
+export interface PropertyStats {
+  totalIncome: number;
+  totalMaintenance: number;
+  totalValue: number;
+  yearlyMaintenance?: number;
+  totalProperties?: number;
+}
+

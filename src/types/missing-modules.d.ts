@@ -1,4 +1,5 @@
 
+
 // This file declares missing modules to fix TypeScript errors
 
 declare module '@/types/slaves' {
@@ -44,3 +45,4 @@ declare module '@/types/slaves' {
     balance: number;
   }
 }
+

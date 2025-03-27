@@ -1,7 +1,8 @@
 
-export type LoiState = 'proposée' | 'en délibération' | 'promulguée' | 'rejetée' | 'abrogée' | 'Proposée' | 'En délibération' | 'Promulguée' | 'Rejetée' | 'active' | 'rejected' | 'adoptée' | 'proposed' | 'expired' | 'En vigueur' | 'en_débat' | 'En discussion';
+import { SenateurJouable } from './senateurs';
+
+export type LoiState = 'proposée' | 'en délibération' | 'promulguée' | 'rejetée' | 'abrogée' | 'Proposée' | 'En délibération' | 'Promulguée' | 'Rejetée' | 'active' | 'rejected' | 'proposed' | 'expired' | 'En discussion' | 'adoptée' | 'En vigueur';
 export type ImportanceType = 'mineure' | 'normale' | 'majeure' | 'critique' | 'haute';
-export type LoiType = string;
 
 export interface GameDate {
   year: number;
@@ -12,42 +13,33 @@ export interface Loi {
   id: string;
   titre: string;
   title?: string;
-  nom?: string;
-  name?: string;
   description: string;
   proposeur: string;
-  auteur?: string;
-  proposedBy?: string;
   catégorie: string;
-  category?: string;
   catégorieId?: string;
   categorieId?: string;
-  date: GameDate;
+  type: string;
+  date: GameDate | string;
+  dateProposition?: GameDate;
   état: LoiState;
-  statut?: LoiState;
-  status?: LoiState;
   importance: ImportanceType;
   votesPositifs: number;
   votesNégatifs: number;
   abstentions: number;
+  votesAbstention?: number;
+  votes?: any;
   votesFor?: number;
   votesAgainst?: number;
-  votesAbstention?: number;
-  type: string;
-  dateProposition?: GameDate;
-  implementationDate?: GameDate;
-  expirationDate?: GameDate;
-  clauses?: any[];
-  effets?: any;
-  commentaires?: string[];
-  conditions?: any;
-  pénalités?: any;
+  clauses?: string[] | string;
+  commentaires?: string[] | string;
   tags?: string[];
-  notes?: any;
+  conditions?: any;
+  effets?: string[];
+  pénalités?: any;
+  soutiens?: SenateurJouable[];
+  opposants?: SenateurJouable[];
+  texte?: string;
+  notes?: string;
   contenu?: string;
-  votes?: {
-    pour: number;
-    contre: number;
-    abstention: number;
-  };
 }
+

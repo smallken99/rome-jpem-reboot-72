@@ -1,181 +1,105 @@
 
-import { useEffect, useState, useCallback } from 'react';
-import { Property, Building, PropertyUpgrade } from '@/types/proprietes';
+import { useState, useEffect, useCallback } from 'react';
+import { PropertyStats, Building, PropertyUpgrade } from '@/types/proprietes';
 import { toast } from '@/components/ui-custom/toast';
-import { v4 as uuidv4 } from 'uuid';
-
-export interface PropertyStats {
-  totalValue: number;
-  yearlyIncome: number;
-  yearlyMaintenance: number;
-  totalProperties: number;
-  netYearlyIncome: number;
-}
-
-export interface OwnedBuilding {
-  id: string;
-  buildingId: string;
-  type: string;
-  name: string;
-  location: string;
-  value: number;
-  maintenance: number;
-  condition: number;
-  workers?: number;
-  securityLevel?: number;
-  maintenanceLevel?: number;
-  status?: string;
-  upgrades?: PropertyUpgrade[];
-  income?: number;
-}
 
 export const useBuildingManagement = () => {
   const [buildings, setBuildings] = useState<Building[]>([]);
   const [selectedBuilding, setSelectedBuilding] = useState<Building | null>(null);
   
-  // Calculate property portfolio stats
-  const calculateStats = useCallback(() => {
-    const stats: PropertyStats = {
-      totalValue: 0,
-      yearlyIncome: 0,
-      yearlyMaintenance: 0,
-      totalProperties: buildings.length,
-      netYearlyIncome: 0
-    };
-    
-    buildings.forEach(building => {
-      stats.totalValue += building.value;
-      stats.yearlyIncome += building.income || 0;
-      stats.yearlyMaintenance += building.maintenance;
-    });
-    
-    stats.netYearlyIncome = stats.yearlyIncome - stats.yearlyMaintenance;
-    
-    return stats;
+  const [stats, setStats] = useState<PropertyStats>({
+    totalIncome: 0,
+    totalMaintenance: 0,
+    totalValue: 0,
+    totalProperties: 0,
+  });
+  
+  useEffect(() => {
+    // Calculate building stats
+    if (buildings.length > 0) {
+      const totalIncome = buildings.reduce((sum, b) => sum + (b.income || 0), 0);
+      const totalMaintenance = buildings.reduce((sum, b) => sum + b.maintenance, 0);
+      const totalValue = buildings.reduce((sum, b) => sum + b.value, 0);
+      
+      setStats({
+        totalIncome,
+        totalMaintenance,
+        totalValue,
+        totalProperties: buildings.length,
+        yearlyMaintenance: totalMaintenance * 4 // Quarterly
+      });
+    }
   }, [buildings]);
   
-  // Add a new building to the portfolio
   const addBuilding = useCallback((newBuilding: Omit<Building, 'id'>) => {
+    const buildingId = `building-${Date.now()}`;
     const building = {
       ...newBuilding,
-      id: uuidv4()
+      id: buildingId,
+      income: newBuilding.income || 0,
     };
     
     setBuildings(prev => [...prev, building as Building]);
-    toast.success(`${building.name} a été ajouté à votre portfolio immobilier`);
-    
-    return building.id;
+    toast.success(`Property acquired: ${building.name}`);
+    return buildingId;
   }, []);
   
-  // Sell a building and remove it from the portfolio
   const sellBuilding = useCallback((buildingId: string) => {
     const building = buildings.find(b => b.id === buildingId);
+    if (!building) return 0;
     
-    if (!building) {
-      toast.error("Propriété introuvable");
-      return 0;
-    }
+    const sellPrice = Math.floor(building.value * 0.85); // Sell at 85% of value
     
     setBuildings(prev => prev.filter(b => b.id !== buildingId));
-    toast.success(`${building.name} a été vendu avec succès`);
+    toast.success(`Property sold: ${building.name} for ${sellPrice} denarii`);
     
-    return building.value;
+    return sellPrice;
   }, [buildings]);
   
-  // Maintain a building to improve its condition
   const maintainBuilding = useCallback((buildingId: string, amount: number) => {
     const building = buildings.find(b => b.id === buildingId);
+    if (!building) return false;
     
-    if (!building) {
-      toast.error("Propriété introuvable");
-      return false;
-    }
+    const updatedBuilding = {
+      ...building, 
+      condition: Math.min(100, building.condition + amount),
+      status: "good"
+    };
     
     setBuildings(prev => 
-      prev.map(b => {
-        if (b.id === buildingId) {
-          return {
-            ...b,
-            condition: Math.min(100, b.condition + amount * 5)
-          };
-        }
-        return b;
-      })
+      prev.map(b => b.id === buildingId ? updatedBuilding : b)
     );
     
-    toast.success(`Maintenance effectuée sur ${building.name}`);
+    toast.success(`Maintenance performed on ${building.name}`);
     return true;
   }, [buildings]);
   
-  // Install an upgrade on a building
   const installUpgrade = useCallback((buildingId: string, upgradeId: string) => {
     const building = buildings.find(b => b.id === buildingId);
+    if (!building) return false;
     
-    if (!building) {
-      toast.error("Propriété introuvable");
+    // Check if building already has upgrades array
+    const existingUpgrades = building.upgrades || [];
+    
+    // Only install if not already installed
+    if (existingUpgrades.some(u => u.id === upgradeId)) {
       return false;
     }
     
-    // Check if upgrade already installed
-    const hasUpgrade = building.upgrades && building.upgrades.some(u => u.id === upgradeId);
+    // Add the upgrade
+    const upgrades = [
+      ...existingUpgrades,
+      { id: upgradeId } as PropertyUpgrade
+    ];
     
-    if (hasUpgrade) {
-      toast.error("Cette amélioration est déjà installée");
-      return false;
-    }
-    
-    // Implement upgrade installation
     setBuildings(prev => 
-      prev.map(b => {
-        if (b.id === buildingId) {
-          return {
-            ...b,
-            upgrades: [...(b.upgrades || []), { id: upgradeId }]
-          };
-        }
-        return b;
-      })
+      prev.map(b => b.id === buildingId ? { ...b, upgrades } : b)
     );
     
-    toast.success(`Amélioration installée sur ${building.name}`);
+    toast.success(`Upgrade installed on ${building.name}`);
     return true;
   }, [buildings]);
 
-  // Additional methods required by components
-  const updateMaintenanceEnabled = () => {};
-  const updateBuildingCondition = () => {};
-  const assignSlaves = () => {};
-
-  const stats = calculateStats();
-  
-  useEffect(() => {
-    // Initialize with example buildings
-    if (buildings.length === 0) {
-      setBuildings([
-        {
-          id: '1',
-          type: 'domus',
-          name: 'Domus du Palatin',
-          location: 'Quartier du Palatin',
-          value: 200000,
-          maintenance: 5000,
-          condition: 80,
-          income: 0
-        },
-        {
-          id: '2',
-          type: 'insula',
-          name: 'Insula de Subure',
-          location: 'Quartier de Subure',
-          value: 120000,
-          maintenance: 3000,
-          condition: 60,
-          income: 12000
-        }
-      ]);
-    }
-  }, [buildings.length]);
-  
   return {
     buildings,
     selectedBuilding,
@@ -184,9 +108,6 @@ export const useBuildingManagement = () => {
     addBuilding,
     sellBuilding,
     maintainBuilding,
-    installUpgrade,
-    updateMaintenanceEnabled,
-    updateBuildingCondition,
-    assignSlaves
+    installUpgrade
   };
 };

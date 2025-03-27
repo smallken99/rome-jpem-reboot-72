@@ -64,3 +64,4 @@ export interface CharacterStat {
   description: string;
   color: string;
 }
+

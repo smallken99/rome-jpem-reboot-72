@@ -35,3 +35,4 @@ export interface HistoriqueLoiTabProps {
   onViewLoi?: (loi: Loi) => void;
   formatSeason?: (season: string) => string;
 }
+
