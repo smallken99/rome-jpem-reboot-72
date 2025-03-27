@@ -11,7 +11,7 @@ export interface LoiBase {
   id: string;
   title: string;
   description: string;
-  proposer: string;
+  proposeur: string;
   category: string;
   date: {
     year: number;
@@ -22,6 +22,35 @@ export interface LoiBase {
   positiveVotes: number;
   negativeVotes: number;
   abstentionVotes: number;
+}
+
+export interface Loi {
+  id: string;
+  titre: string;
+  description: string;
+  proposeur: string;
+  catégorie: string;
+  catégorieId?: string;
+  date: {
+    year: number;
+    season: string;
+  };
+  état: LoiState;
+  importance: ImportanceType;
+  votesPositifs: number;
+  votesNégatifs: number;
+  abstentions: number;
+  contenu?: string;
+  pénalités?: string;
+  conditions?: string[];
+  notes?: string[];
+  votes?: {
+    pour: number;
+    contre: number;
+    abstention: number;
+  };
+  type?: string;
+  name?: string; // Pour la compatibilité avec certains composants
 }
 
 export interface TimelineItemProps {

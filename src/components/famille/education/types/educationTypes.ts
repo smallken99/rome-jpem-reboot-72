@@ -1,53 +1,17 @@
 
-// Basic education types
-export type EducationType = string | 'military' | 'political' | 'religious' | 'artistic' | 'philosophical' | 'rhetoric' | 'academic' | 'none';
+export type EducationType = 
+  'military' | 
+  'political' | 
+  'religious' | 
+  'artistic' | 
+  'philosophical' | 
+  'rhetoric' | 
+  'academic' | 
+  'none' | 
+  string;
+
 export type Gender = 'male' | 'female';
 
-// Child data structure for education system
-export interface Child {
-  id: string;
-  name: string;
-  age: number;
-  gender: Gender;
-  status?: string;
-  educationType: EducationType;
-  progress: number;
-  specialties: string[];
-  specialty?: string;
-  traits: string[];
-  mentor?: string;
-  preceptorId?: string | null;
-  currentEducation?: ChildEducation;
-  skills?: { [key: string]: number };
-}
-
-// Current education status for a child
-export interface ChildEducation {
-  type: EducationType;
-  mentor: string | null;
-  progress: number;
-  skills: string[];
-  yearsCompleted?: number;
-  totalYears?: number;
-  statBonus?: number;
-  mentorId?: string | null;
-  speciality?: string;
-}
-
-// Education record - completed education
-export interface EducationHistory {
-  type: EducationType;
-  mentor: string;
-  speciality?: string;
-  completedAt: number;
-  statBonus: number;
-  skills: string[];
-  startYear: number;
-  endYear: number;
-  completed: boolean;
-}
-
-// Preceptor (teacher/mentor) data
 export interface Preceptor {
   id: string;
   name: string;
@@ -56,100 +20,44 @@ export interface Preceptor {
   cost: number;
   background: string;
   traits: string[];
-  status: 'available' | 'hired' | 'assigned' | 'unavailable';
-  childId?: string | null;
-  // Additional properties used in various components
-  specialty?: string;
-  speciality?: string;
-  quality?: number;
-  expertise?: number;
-  price?: number;
-  experience?: number;
-  available?: boolean;
-  assigned?: boolean;
-  description?: string;
-  teachingStyle?: string;
-  specialties?: string[];
-  portrait?: string;
-  reputation?: number;
+  status: 'available' | 'hired' | 'unavailable';
+  specialty: string;
+  expertise: number;
+  experience: number;
+  price: number;
+  available: boolean;
+  description: string;
+  teachingStyle: string;
+  specialties: string[];
+  reputation: number;
 }
 
-// Preceptors grouped by type
-export interface PreceptorsByType {
-  military: Preceptor[];
-  rhetoric: Preceptor[];
-  religious: Preceptor[];
-  academic: Preceptor[];
-}
-
-// Education path definition
-export interface EducationPath {
+export interface Child {
   id: string;
   name: string;
-  type: EducationType;
-  description: string;
-  minAge: number;
-  maxAge: number;
-  duration: number;
-  cost: number;
-  relatedStat: string;
-  requiredAttributes?: { [key: string]: number };
-  outcomes: {
-    skills?: string[];
-    bonuses?: { [key: string]: number };
-  } | string[];
-  suitableFor: { gender: Gender | 'both' } | Gender[];
-  benefits?: string[];
-}
-
-// Component props for education components
-export interface EducationObjectivesProps {
-  childId: string;
-  path?: EducationPath;
-  educationType?: EducationType;
-}
-
-export interface EducationTypeSelectorProps {
-  selectedType: EducationType;
-  onChange: (type: EducationType) => void;
+  age: number;
   gender: Gender;
-  childGender?: Gender;
-  age?: number;
-}
-
-export interface EducationSpecialtySelectorProps {
   educationType: EducationType;
-  selectedSpecialties: string[];
-  onChange: (specialties: string[]) => void;
-  availableSpecialties?: string[];
+  progress: number;
+  specialties: string[];
+  specialty?: string;
+  traits: string[];
 }
 
-// Form data for education
-export interface EducationFormData {
-  type: EducationType;
+export interface EducationPath {
+  id: EducationType;
+  name: string;
+  description: string;
+  benefits: string[];
+  statBoost: string;
+  icon: string;
   specialties: string[];
-  preceptorId: string | null;
-  childId?: string;
-  pathType?: EducationType;
-  mentor?: string | null;
-  startYear?: number;
-  currentYear?: number;
-  totalYears?: number;
-  status?: "not_started" | "in_progress" | "completed" | "failed" | "canceled";
-  skills?: { [key: string]: number };
-  educationType?: EducationType;
-}
-
-// Education record
-export interface EducationRecord {
-  id: string;
-  childId: string;
-  pathType: EducationType;
-  preceptorId: string | null;
-  startYear: number;
-  currentYear: number;
-  totalYears: number;
-  status: "not_started" | "in_progress" | "completed" | "failed" | "canceled";
-  skills: { [key: string]: number };
-  specialties: string[];
+  requirements: {
+    age: number;
+    gender: Gender | 'both' | Gender[];
+    skills?: {
+      [key: string]: number;
+    };
+  };
+  duration: number;
 }

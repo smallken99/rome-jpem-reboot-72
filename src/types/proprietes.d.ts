@@ -13,9 +13,17 @@ export interface Property {
   upgrades?: PropertyUpgrade[];
   size?: number;
   buildings?: Building[];
+  // Propriétés pour la rétrocompatibilité
+  income?: number;
+  maintenance?: number;
+  condition?: number;
+  acquired?: string | Date;
+  maintenanceLevel?: number;
+  securityLevel?: number;
+  workers?: number;
 }
 
-export type PropertyType = 'urban' | 'rural' | 'villa' | 'commercial';
+export type PropertyType = 'urban' | 'rural' | 'villa' | 'commercial' | 'domus' | 'insula';
 
 export type PropertyStatus = 'excellent' | 'good' | 'fair' | 'poor' | 'dilapidated';
 
@@ -46,6 +54,11 @@ export interface Building {
   location: string;
   purchaseYear?: number;
   upgrades?: PropertyUpgrade[];
+  // Pour la compatibilité
+  maintenanceLevel?: number;
+  securityLevel?: number;
+  workers?: number;
+  condition?: number;
 }
 
 export type BuildingType = 
@@ -56,7 +69,29 @@ export type BuildingType =
   'officina' | 
   'balneum' | 
   'villa_urbana' | 
-  'villa_rustica';
+  'villa_rustica' |
+  'urban' |
+  'rural' |
+  'villa' |
+  'commercial' |
+  'other' |
+  'temple' |
+  'forum' |
+  'market' |
+  'warehouse' |
+  'farm' |
+  'vineyard' |
+  'olive_grove' |
+  'grain_field' |
+  'pasture' |
+  'mine' |
+  'port' |
+  'workshop' |
+  'school' |
+  'baths' |
+  'theater' |
+  'arena' |
+  'bridge';
 
 export interface PropertyStats {
   totalValue: number;
@@ -75,4 +110,12 @@ export interface PropertyFilter {
   minValue?: number;
   maxValue?: number;
   minProfit?: number;
+}
+
+// Pour la compatibilité avec le code existant
+export interface OwnedBuilding extends Building {
+  buildingId: string;
+  buildingType?: string;
+  condition: number;
+  purchaseDate?: Date;
 }

@@ -1,20 +1,20 @@
 
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Building } from '@/types/proprietes';
+import { Property } from '@/types/proprietes';
 import { Wrench, AlertTriangle, ArrowDown, ArrowUp } from 'lucide-react';
 
 interface MaintenanceCostsPanelProps {
-  building: Building;
+  property: Property;
   onMaintain?: (buildingId: string, amount: number) => void;
 }
 
 export const MaintenanceCostsPanel: React.FC<MaintenanceCostsPanelProps> = ({
-  building,
+  property,
   onMaintain
 }) => {
   const getStatusColor = () => {
-    switch (building.status) {
+    switch (property.status) {
       case 'excellent': return 'text-green-500';
       case 'good': return 'text-teal-500';
       case 'fair': return 'text-blue-500';
@@ -25,7 +25,7 @@ export const MaintenanceCostsPanel: React.FC<MaintenanceCostsPanelProps> = ({
   };
 
   const getStatusDescription = () => {
-    switch (building.status) {
+    switch (property.status) {
       case 'excellent': 
         return 'La propriété est en parfait état et génère un revenu maximal.';
       case 'good': 
@@ -44,12 +44,13 @@ export const MaintenanceCostsPanel: React.FC<MaintenanceCostsPanelProps> = ({
   const handleMaintain = () => {
     if (onMaintain) {
       // Calculate maintenance cost: 5% of building value for regular maintenance
-      const maintenanceCost = Math.floor(building.value * 0.05);
-      onMaintain(building.id, maintenanceCost);
+      const maintenanceCost = Math.floor(property.value * 0.05);
+      onMaintain(property.id, maintenanceCost);
     }
   };
 
-  const needsMajorRepairs = building.status === 'poor' || building.status === 'dilapidated';
+  const needsMajorRepairs = property.status === 'poor' || property.status === 'dilapidated';
+  const maintenance = property.maintenance || property.maintenanceCost || 0;
 
   return (
     <Card>
@@ -65,7 +66,7 @@ export const MaintenanceCostsPanel: React.FC<MaintenanceCostsPanelProps> = ({
             <div className="flex justify-between items-center mb-1">
               <span className="text-sm font-medium">État Actuel</span>
               <span className={`text-sm font-medium ${getStatusColor()}`}>
-                {building.status.charAt(0).toUpperCase() + building.status.slice(1)}
+                {property.status.charAt(0).toUpperCase() + property.status.slice(1)}
               </span>
             </div>
             <p className="text-xs text-muted-foreground">{getStatusDescription()}</p>
@@ -74,7 +75,7 @@ export const MaintenanceCostsPanel: React.FC<MaintenanceCostsPanelProps> = ({
           <div className="grid grid-cols-2 gap-3 pt-2">
             <div>
               <div className="text-sm font-medium mb-1">Coût Annuel</div>
-              <div className="text-xl font-bold">{building.maintenance.toLocaleString()} as</div>
+              <div className="text-xl font-bold">{maintenance.toLocaleString()} as</div>
               <p className="text-xs text-muted-foreground mt-1">Entretien régulier nécessaire</p>
             </div>
             <div>

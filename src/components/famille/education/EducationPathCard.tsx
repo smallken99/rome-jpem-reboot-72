@@ -1,124 +1,105 @@
 
 import React from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { 
-  Award, 
-  GraduationCap, 
-  Clock, 
-  Coins, 
-  User, 
-  Users, 
-  BookOpen, 
-  Sword, 
-  Shield,
-  Heart 
-} from 'lucide-react';
-import { EducationPath, EducationType } from './types/educationTypes';
-
-// Icons for different education types
-const typeIcons: Record<string, React.ReactElement> = {
-  military: <Sword className="h-4 w-4" />,
-  political: <Shield className="h-4 w-4" />,
-  religious: <Heart className="h-4 w-4" />,
-  artistic: <BookOpen className="h-4 w-4" />,
-  philosophical: <BookOpen className="h-4 w-4" />,
-  rhetoric: <Users className="h-4 w-4" />,
-  academic: <GraduationCap className="h-4 w-4" />,
-  none: <User className="h-4 w-4" />
-};
+import { Card, CardContent } from '@/components/ui/card';
+import { Check, LucideIcon } from 'lucide-react';
+import { cn } from '@/lib/utils';
 
 interface EducationPathCardProps {
-  path: EducationPath;
+  title: string;
+  description: string;
+  icon: LucideIcon;
+  benefits: string[];
   isSelected?: boolean;
-  onSelect?: () => void;
+  onClick?: () => void;
+  duration?: number;
+  requiredAge?: number;
+  gender?: 'male' | 'female' | 'both';
+  className?: string;
+  disabled?: boolean;
 }
 
-const EducationPathCard: React.FC<EducationPathCardProps> = ({ 
-  path, 
+const EducationPathCard: React.FC<EducationPathCardProps> = ({
+  title,
+  description,
+  icon: Icon,
+  benefits,
   isSelected = false,
-  onSelect
+  onClick,
+  duration = 4,
+  requiredAge = 8,
+  gender = 'both',
+  className,
+  disabled = false
 }) => {
-  // Determine the icon based on education type
-  const icon = typeIcons[path.type as string] || <GraduationCap className="h-4 w-4" />;
-  
-  // Handle click event
-  const handleClick = () => {
-    if (onSelect) {
-      onSelect();
-    }
-  };
-
-  // Check if the education is for males, females, or both
-  const getGenderBadge = () => {
-    if (Array.isArray(path.suitableFor)) {
-      // Handle older format where suitableFor is Gender[]
-      if (path.suitableFor.includes('male') && path.suitableFor.includes('female')) {
-        return <Badge variant="outline">Tous genres</Badge>;
-      } else if (path.suitableFor.includes('male')) {
-        return <Badge variant="outline">Hommes uniquement</Badge>;
-      } else if (path.suitableFor.includes('female')) {
-        return <Badge variant="outline">Femmes uniquement</Badge>;
-      }
-    } else if (path.suitableFor && typeof path.suitableFor === 'object') {
-      // Handle newer format where suitableFor is {gender: string}
-      if (path.suitableFor.gender === 'both') {
-        return <Badge variant="outline">Tous genres</Badge>;
-      } else if (path.suitableFor.gender === 'male') {
-        return <Badge variant="outline">Hommes uniquement</Badge>;
-      } else if (path.suitableFor.gender === 'female') {
-        return <Badge variant="outline">Femmes uniquement</Badge>;
-      }
-    }
-    return null;
-  };
-
   return (
     <Card 
-      className={`cursor-pointer hover:shadow-md transition-shadow ${isSelected ? 'border-blue-500 shadow-blue-100' : ''}`}
-      onClick={handleClick}
+      className={cn(
+        "border-2 cursor-pointer transition-all", 
+        isSelected 
+          ? "border-rome-gold bg-amber-50" 
+          : "border-gray-200 hover:border-gray-300 hover:bg-gray-50",
+        disabled && "opacity-60 cursor-not-allowed",
+        className
+      )}
+      onClick={disabled ? undefined : onClick}
     >
-      <CardHeader className="pb-2">
-        <div className="flex justify-between items-start">
-          <CardTitle className="text-lg flex items-center gap-2">
-            {icon}
-            {path.name}
-          </CardTitle>
-          {getGenderBadge()}
+      <CardContent className="p-4">
+        <div className="flex items-start gap-4">
+          <div className="flex-shrink-0 mt-1">
+            <div className={cn(
+              "p-2 rounded-full",
+              isSelected ? "bg-rome-gold text-white" : "bg-gray-100 text-gray-600"
+            )}>
+              <Icon className="h-6 w-6" />
+            </div>
+          </div>
+          
+          <div className="flex-grow">
+            <div className="flex justify-between items-start mb-1">
+              <h3 className="font-cinzel text-lg">{title}</h3>
+              {isSelected && (
+                <div className="flex-shrink-0 bg-green-100 p-1 rounded-full">
+                  <Check className="h-4 w-4 text-green-600" />
+                </div>
+              )}
+            </div>
+            
+            <p className="text-sm text-muted-foreground mb-3">{description}</p>
+            
+            <div className="flex flex-wrap gap-y-1 gap-x-4 text-xs text-gray-600 mb-3">
+              <div>
+                <span className="font-medium">Durée:</span> {duration} ans
+              </div>
+              <div>
+                <span className="font-medium">Âge requis:</span> {requiredAge}+ ans
+              </div>
+              <div>
+                <span className="font-medium">Genre:</span> {
+                  gender === 'male' 
+                    ? 'Garçons uniquement' 
+                    : gender === 'female' 
+                      ? 'Filles uniquement' 
+                      : 'Tous'
+                }
+              </div>
+            </div>
+            
+            <div className="space-y-1 mt-4">
+              <h4 className="text-sm font-medium mb-1">Bénéfices:</h4>
+              <ul className="text-xs space-y-1">
+                {benefits.map((benefit, index) => (
+                  <li key={index} className="flex items-center gap-1.5">
+                    <div className={cn(
+                      "h-1.5 w-1.5 rounded-full",
+                      isSelected ? "bg-rome-gold" : "bg-gray-400"
+                    )} />
+                    <span>{benefit}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </div>
         </div>
-      </CardHeader>
-      <CardContent>
-        <p className="text-sm text-gray-600 mb-4">{path.description}</p>
-        
-        <div className="grid grid-cols-2 gap-2 mb-4">
-          <div className="flex items-center gap-1">
-            <Clock className="h-4 w-4 text-gray-500" />
-            <span className="text-sm">{path.duration} ans</span>
-          </div>
-          <div className="flex items-center gap-1">
-            <Coins className="h-4 w-4 text-gray-500" />
-            <span className="text-sm">{path.cost} as/an</span>
-          </div>
-          <div className="flex items-center gap-1">
-            <User className="h-4 w-4 text-gray-500" />
-            <span className="text-sm">{path.minAge}-{path.maxAge} ans</span>
-          </div>
-          <div className="flex items-center gap-1">
-            <Award className="h-4 w-4 text-gray-500" />
-            <span className="text-sm">{path.relatedStat}</span>
-          </div>
-        </div>
-        
-        {path.benefits && Array.isArray(path.benefits) && path.benefits.length > 0 && (
-          <div className="mt-2">
-            <h4 className="text-sm font-medium mb-1">Bénéfices</h4>
-            <ul className="text-xs list-disc pl-4 space-y-1">
-              {path.benefits.map((benefit, index) => (
-                <li key={index}>{benefit}</li>
-              ))}
-            </ul>
-          </div>
-        )}
       </CardContent>
     </Card>
   );

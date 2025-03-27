@@ -2,24 +2,24 @@
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Building, PropertyUpgrade } from '@/types/proprietes';
+import { Property, PropertyUpgrade } from '@/types/proprietes';
 import { ArrowUpCircle, Check, Lock } from 'lucide-react';
 
 interface PropertyUpgradePanelProps {
-  building: Building;
-  onUpgrade?: (buildingId: string, upgradeId: string) => void;
+  property: Property;
+  onUpgrade?: (propertyId: string, upgradeId: string) => void;
 }
 
 export const PropertyUpgradePanel: React.FC<PropertyUpgradePanelProps> = ({
-  building,
+  property,
   onUpgrade
 }) => {
   // Use provided upgrades or default to empty array
-  const availableUpgrades = building.upgrades || [];
+  const availableUpgrades = property.upgrades || [];
 
   const handleUpgrade = (upgradeId: string) => {
     if (onUpgrade) {
-      onUpgrade(building.id, upgradeId);
+      onUpgrade(property.id, upgradeId);
     }
   };
 
