@@ -1,4 +1,4 @@
-import { ImportanceType, Loi, LoiState, GameDate } from '@/components/maitrejeu/types/lois';
+import { LoiType, LoiState, ImportanceType, Loi } from '@/components/maitrejeu/types/lois';
 
 // Function to convert string-based effects to array if needed
 export function ensureArrayFormat(value: string | string[] | undefined): string[] {
@@ -194,7 +194,9 @@ export const ensureLoiCompliance = (loi: any): Loi => {
     effets: loi.effets || {},
     conditions: loi.conditions || [],
     pénalités: loi.pénalités || [],
-    dateProposition: loi.dateProposition || { year: new Date().getFullYear() - 1800, season: 'VER' }
+    dateProposition: loi.dateProposition || loi.date,
+    soutiens: loi.soutiens || [],
+    opposants: loi.opposants || []
   };
   
   return compliantLoi;

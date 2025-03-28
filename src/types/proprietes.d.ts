@@ -60,6 +60,7 @@ export interface Building {
   status?: string;
   upgrades?: PropertyUpgrade[];
   buildingId?: string;
+  buildingType?: string;
 }
 
 export interface BuildingType {

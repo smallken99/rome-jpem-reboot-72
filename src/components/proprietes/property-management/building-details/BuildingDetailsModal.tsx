@@ -1,107 +1,128 @@
+
 import React, { useState } from 'react';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { 
-  Building, 
-  PropertyUpgrade 
-} from '@/types/proprietes';
-import { Card, CardContent } from '@/components/ui/card';
-import { 
-  HomeIcon, 
-  HistoryIcon, 
-  UpgradeIcon, 
-  CogIcon, 
-  CoinsIcon 
-} from 'lucide-react';
-import UpgradeList from "../UpgradeList";
-import BuildingStats from '../BuildingStats';
-import BuildingHistory from '../BuildingHistory';
+import { Label } from '@/components/ui/label';
+import { Input } from '@/components/ui/input';
+import { Badge } from '@/components/ui/badge';
+import { InfoIcon, Banknote, Settings, HistoryIcon, ArrowUpRight, Wrench } from 'lucide-react';
+import UpgradeList from '../UpgradeList';
+import { Property, Building } from '@/types/proprietes';
+import { cn } from '@/lib/utils';
+import { useToast } from '@/components/ui/use-toast';
+
+// Create placeholder components for the missing imports
+const BuildingStats: React.FC<{ building: Building }> = ({ building }) => (
+  <div>
+    <h3 className="text-lg font-medium mb-4">Building Stats</h3>
+    <div className="grid grid-cols-2 gap-4">
+      <div>
+        <Label>Type</Label>
+        <p className="text-sm">{building.type}</p>
+      </div>
+      <div>
+        <Label>Value</Label>
+        <p className="text-sm">{building.value} as</p>
+      </div>
+      <div>
+        <Label>Maintenance</Label>
+        <p className="text-sm">{building.maintenance} as/year</p>
+      </div>
+      <div>
+        <Label>Condition</Label>
+        <p className="text-sm">{building.condition}%</p>
+      </div>
+    </div>
+  </div>
+);
+
+const BuildingHistory: React.FC<{ building: Building }> = ({ building }) => (
+  <div>
+    <h3 className="text-lg font-medium mb-4">Building History</h3>
+    <p className="text-sm text-muted-foreground">
+      Historical events and logs related to this building will appear here.
+    </p>
+  </div>
+);
 
 interface BuildingDetailsModalProps {
-  isOpen: boolean;
-  onOpenChange: (open: boolean) => void;
   building: Building;
+  isOpen: boolean;
+  onClose: () => void;
+  onUpgradeInstall: (buildingId: string, upgradeId: string) => void;
 }
 
-const BuildingDetailsModal: React.FC<BuildingDetailsModalProps> = ({ isOpen, onOpenChange, building }) => {
-  const [activeTab, setActiveTab] = useState('stats');
-  
+const BuildingDetailsModal: React.FC<BuildingDetailsModalProps> = ({
+  building,
+  isOpen,
+  onClose,
+  onUpgradeInstall
+}) => {
+  const [activeTab, setActiveTab] = useState('overview');
+  const { toast } = useToast();
+
+  const handleUpgradeInstall = (upgradeId: string) => {
+    onUpgradeInstall(building.id, upgradeId);
+    toast({
+      title: 'Upgrade installed',
+      description: 'The upgrade has been successfully installed.',
+    });
+  };
+
   return (
-    <Dialog open={isOpen} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-4xl">
+    <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
+      <DialogContent className="max-w-3xl">
         <DialogHeader>
-          <DialogTitle className="flex items-center gap-2">
-            <HomeIcon className="h-5 w-5 mr-2" />
-            {building.name}
-          </DialogTitle>
+          <DialogTitle>{building.name}</DialogTitle>
+          <div className="flex items-center space-x-2 mt-1">
+            <Badge variant="outline" className="capitalize">{building.type}</Badge>
+            <Badge variant="outline" className={cn(
+              "capitalize",
+              building.condition > 75 ? "bg-green-50 text-green-700 border-green-200" :
+              building.condition > 50 ? "bg-yellow-50 text-yellow-700 border-yellow-200" :
+              "bg-red-50 text-red-700 border-red-200"
+            )}>
+              {building.condition}% condition
+            </Badge>
+          </div>
         </DialogHeader>
-        
+
         <Tabs value={activeTab} onValueChange={setActiveTab}>
-          <TabsList className="grid w-full grid-cols-4">
-            <TabsTrigger value="stats">
-              <CogIcon className="h-4 w-4 mr-1" />
-              Statistiques
-            </TabsTrigger>
-            <TabsTrigger value="history">
-              <HistoryIcon className="h-4 w-4 mr-1" />
-              Historique
-            </TabsTrigger>
-            <TabsTrigger value="upgrades">
-              <UpgradeIcon className="h-4 w-4 mr-1" />
-              Améliorations
-            </TabsTrigger>
-            <TabsTrigger value="finances">
-              <CoinsIcon className="h-4 w-4 mr-1" />
-              Finances
-            </TabsTrigger>
+          <TabsList className="grid grid-cols-3 mb-4">
+            <TabsTrigger value="overview">Overview</TabsTrigger>
+            <TabsTrigger value="upgrades">Upgrades</TabsTrigger>
+            <TabsTrigger value="history">History</TabsTrigger>
           </TabsList>
-          
-          <TabsContent value="stats">
-            <Card>
-              <CardContent>
-                <BuildingStats building={building} />
-              </CardContent>
-            </Card>
+
+          <TabsContent value="overview">
+            <BuildingStats building={building} />
           </TabsContent>
-          
-          <TabsContent value="history">
-            <Card>
-              <CardContent>
-                <BuildingHistory building={building} />
-              </CardContent>
-            </Card>
-          </TabsContent>
-          
+
           <TabsContent value="upgrades">
-            <Card>
-              <CardContent>
-                <UpgradeList 
-                  upgrades={[]}
-                  onInstall={() => {}}
-                  propertyValue={building.value}
-                  propertyCondition={building.condition}
-                  installedUpgrades={[]}
-                />
-              </CardContent>
-            </Card>
+            {building.upgrades && building.upgrades.length > 0 ? (
+              <UpgradeList
+                upgrades={building.upgrades}
+                onInstall={handleUpgradeInstall}
+                propertyValue={building.value}
+                propertyCondition={building.condition}
+                installedUpgrades={building.upgrades.filter(u => u.installed).map(u => u.id)}
+              />
+            ) : (
+              <p className="text-muted-foreground text-center p-6">
+                No upgrades available for this property.
+              </p>
+            )}
           </TabsContent>
-          
-          <TabsContent value="finances">
-            <Card>
-              <CardContent>
-                {/* Finances Content */}
-                <p>Contenu des finances</p>
-              </CardContent>
-            </Card>
+
+          <TabsContent value="history">
+            <BuildingHistory building={building} />
           </TabsContent>
         </Tabs>
-        
-        <div className="flex justify-end mt-4">
-          <Button variant="outline" onClick={() => onOpenChange(false)}>
-            Fermer
-          </Button>
-        </div>
+
+        <DialogFooter className="mt-4">
+          <Button variant="outline" onClick={onClose}>Close</Button>
+        </DialogFooter>
       </DialogContent>
     </Dialog>
   );
