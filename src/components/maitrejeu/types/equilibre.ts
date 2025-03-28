@@ -37,6 +37,7 @@ export interface Equilibre {
   facteurReligieux?: number;
   economicStability?: number;
   population?: number;
+  criminalityIndex?: number;
 }
 
 export interface PoliticalEvent {
@@ -63,9 +64,9 @@ export interface GameDate {
 export interface RiskFactor {
   id: string;
   name: string;
-  severity: string;
+  severity: 'low' | 'medium' | 'high' | 'critical';
   description: string;
-  level: number;
+  level: 'low' | 'medium' | 'high' | 'critical';
   type: string;
   impact: Record<string, number>;
   trend: 'increasing' | 'decreasing' | 'stable';
@@ -96,5 +97,5 @@ export interface EconomicStabilityCardProps {
 }
 
 export interface ThreatAssessmentProps {
-  threats: any[];
+  threats: RiskFactor[];
 }

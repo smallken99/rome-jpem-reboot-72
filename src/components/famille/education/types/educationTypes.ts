@@ -33,7 +33,7 @@ export interface Preceptor {
   childId?: string;
   portrait?: string;
   
-  // Required properties for type compatibility
+  // Added missing required properties
   description: string;
   teachingStyle: string;
   reputation: number;
@@ -61,19 +61,13 @@ export interface EducationPath {
   id: EducationType;
   name: string;
   description: string;
+  
+  // Added missing required properties
   benefits: string[];
   statBoost: string;
   icon: string;
   specialties: string[];
-  skills?: string[];
-  bonuses?: {
-    skills?: string[];
-    oratory?: number;
-    piety?: number;
-    popularity?: number;
-    martialEducation?: number;
-    [key: string]: any;
-  };
+  
   requirements: {
     age: number;
     gender: Gender | 'both' | Gender[];
@@ -91,6 +85,7 @@ export interface EducationPath {
   minAge?: number;
   maxAge?: number;
   cost?: number;
+  // Making sure we don't have duplicate properties
   suitableFor?: Gender[] | {
     gender?: Gender | 'both';
     minAge?: number;

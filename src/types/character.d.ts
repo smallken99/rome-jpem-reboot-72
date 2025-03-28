@@ -4,8 +4,13 @@ export interface Character {
   name: string;
   firstName?: string;
   lastName?: string;
-  age: number;
   gender: 'male' | 'female';
+  age: number;
+  isPlayer?: boolean;
+  portrait?: string;
+  title?: string;
+  role?: string;
+  marriageStatus?: string;
   
   // Family-related properties
   relation?: string;
@@ -18,21 +23,12 @@ export interface Character {
   // Health and status
   health?: number;
   status?: 'alive' | 'deceased' | 'exiled';
-  
+
   // Personal attributes
   traits?: string[];
   specialty?: string;
   educationType?: string;
   
-  // Family relationship properties
-  isPlayer?: boolean;
-  portrait?: string;
-  title?: string;
-  role?: string;
-  marriageStatus?: string;
-  lastChildBirthYear?: number;
-  
-  // Stats
   stats: {
     popularity: number | CharacterStat;
     oratory: number | CharacterStat;
@@ -40,14 +36,7 @@ export interface Character {
     martialEducation: number | CharacterStat;
   };
   
-  // Education information
-  education?: {
-    type: string;
-    specialties: string[];
-    mentor: string | null;
-    completed?: boolean;
-    completedAt?: string;
-  };
+  education?: EducationInfo;
   currentEducation?: {
     type: string;
     mentor: string | null;
@@ -60,13 +49,14 @@ export interface Character {
     speciality?: string;
   };
   
-  // Skills
-  skills?: string[] | Record<string, number>;
-  
-  // Additional properties used throughout the application
+  // Additional properties for diplomacy
   diplomatie?: Record<string, any>;
+  
+  // Last child birth tracking
+  lastChildBirthYear?: number;
 }
 
+// Type for character statistics
 export interface CharacterStat {
   name: string;
   value: number;
@@ -74,4 +64,13 @@ export interface CharacterStat {
   icon: string;
   description: string;
   color: string;
+}
+
+// Type for education information
+export interface EducationInfo {
+  type: string;
+  specialties: string[];
+  mentor: string | null;
+  completed?: boolean;
+  completedAt?: string;
 }
