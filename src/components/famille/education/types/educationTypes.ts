@@ -33,7 +33,7 @@ export interface Preceptor {
   childId?: string;
   portrait?: string;
   
-  // Added required properties
+  // Required properties
   description: string;
   teachingStyle: string;
   reputation: number;
@@ -88,17 +88,16 @@ export interface EducationPath {
     skills?: string[];
     bonuses?: Record<string, any>;
   } | string[];
-  suitableFor?: {
-    gender?: Gender | 'both';
-    minAge?: number;
-    maxAge?: number;
-    includes?: (gender: Gender) => boolean;
-  };
   relatedStat?: string;
   minAge?: number;
   maxAge?: number;
   cost?: number;
-  suitableFor?: string[];
+  suitableFor?: Gender[] | {
+    gender?: Gender | 'both';
+    minAge?: number;
+    maxAge?: number;
+    includes?: (gender: Gender) => boolean;
+  } | string[];
 }
 
 export interface ChildEducation {

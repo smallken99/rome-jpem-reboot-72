@@ -1,7 +1,7 @@
 
 import { useState, useCallback } from 'react';
-import { EducationPath, EducationType, Preceptor } from '../types/educationTypes';
-import { getAllEducationPaths, getEducationPathById } from '../data/educationPaths';
+import { EducationPath, EducationType, Preceptor, Gender } from '../types/educationTypes';
+import { getAllEducationPaths, getEducationPathById as fetchEducationPathById } from '../data/educationPaths';
 
 export const useEducationSystem = () => {
   const [selectedPathId, setSelectedPathId] = useState<string | null>(null);
@@ -13,7 +13,7 @@ export const useEducationSystem = () => {
   
   // Get a specific education path by ID
   const getEducationPathById = useCallback((id: string) => {
-    return getEducationPathById(id);
+    return fetchEducationPathById(id);
   }, []);
   
   // Generate sample preceptors for a type
@@ -25,17 +25,20 @@ export const useEducationSystem = () => {
         specialization: type as EducationType,
         skill: 80,
         cost: 4000,
+        price: 4000,
         background: `Expert in ${type} education`,
         traits: ['Knowledgeable', 'Patient'],
         status: 'available',
         specialty: type,
         speciality: type,
         experience: 15,
-        price: 4000,
-        quality: 4,
         expertise: 80,
         available: true,
-        specialties: [`${type} basics`, `${type} advanced`]
+        quality: 4,
+        specialties: [`${type} basics`, `${type} advanced`],
+        description: `A well-respected ${type} educator with years of experience`,
+        teachingStyle: 'Methodical and thorough',
+        reputation: 85
       }
     ];
     

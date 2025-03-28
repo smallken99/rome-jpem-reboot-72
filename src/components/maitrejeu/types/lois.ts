@@ -1,35 +1,5 @@
 
-export enum LoiType {
-  ADMINISTRATIVE = "administrative",
-  ECONOMIC = "economic",
-  RELIGIOUS = "religious",
-  MILITARY = "military",
-  JUDICIAL = "judicial",
-  SOCIAL = "social",
-  POLITICAL = "political"
-}
-
-export enum LoiState {
-  PROPOSED = "Proposée",
-  DELIBERATION = "En délibération",
-  APPROVED = "Approuvée",
-  REJECTED = "Rejetée",
-  IMPLEMENTED = "Mise en œuvre",
-  EXPIRED = "Expirée"
-}
-
-export enum ImportanceType {
-  MINOR = "mineure",
-  NORMAL = "normale",
-  MAJOR = "majeure",
-  CRITICAL = "critique",
-  HIGH = "haute"
-}
-
-export interface GameDate {
-  year: number;
-  season: string;
-}
+import { LoiType, LoiState, ImportanceType } from '@/components/maitrejeu/components/lois/types/loiTypes';
 
 export interface Loi {
   id: string;
@@ -37,50 +7,35 @@ export interface Loi {
   description: string;
   proposeur: string;
   catégorie: string;
-  type: string | LoiType;
-  date: {
-    year: number;
-    season: string;
-  };
-  dateProposition: {
-    year: number;
-    season: string;
-  };
-  état: string;
-  importance: string;
+  date: { year: number; season: string };
+  état: string | LoiState;
+  importance: string | ImportanceType;
   votesPositifs: number;
   votesNégatifs: number;
-  abstentions: number;
-  commentaires: string;
-  impacts: any[];
-  conditions?: any[];
-  pénalités?: any[];
+  impacts: Record<string, number>;
+  type: string | LoiType;
   effets: string[];
-  clauses?: any[];
-  tags?: string[];
+  clauses: string[];
+  commentaires: string[];
+  history: any[];
+  tags: string[];
+  supporters?: string[];
+  opposants?: string[];
   
-  // Compatibility properties
+  // Additional properties for compatibility
   title?: string;
-  category?: string;
-  auteur?: string;
   proposedBy?: string;
-  implementationDate?: any;
+  auteur?: string;
+  status?: string;
+  statut?: string;
+  category?: string;
   votesFor?: number;
   votesAgainst?: number;
+  abstentions?: number;
   votesAbstention?: number;
-  categorieId?: string;
-  catégorieId?: string;
-  statut?: string;
-  status?: string;
-  votes?: {
-    pour: number;
-    contre: number;
-    abstention: number;
-  };
+  dateProposition?: { year: number; season: string } | string;
+  votes?: any;
+  conditions?: string[];
+  pénalités?: string[];
   soutiens?: string[];
-  opposants?: string[];
-  contenu?: string;
-  notes?: string;
-  nom?: string;
-  name?: string;
 }

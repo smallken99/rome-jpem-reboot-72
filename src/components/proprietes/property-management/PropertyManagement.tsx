@@ -7,9 +7,21 @@ import { WorkersTab } from './WorkersTab';
 import { UpgradesTab } from './UpgradesTab';
 import { PropertyHeader } from './PropertyHeader';
 import { useBuildingManagement } from '@/hooks/useBuildingManagement';
-import { Building, OwnedBuilding, Property, PropertyUpgrade } from '@/types/proprietes';
+import { OwnedBuilding, PropertyUpgrade } from '@/types/property';
 import { toast } from 'sonner';
 import { v4 as uuidv4 } from 'uuid';
+
+// Define the BuildingType enum that was missing
+enum BuildingType {
+  VILLA = 'villa',
+  DOMUS = 'domus',
+  INSULA = 'insula',
+  SHOP = 'shop',
+  WORKSHOP = 'workshop',
+  WAREHOUSE = 'warehouse',
+  FARM = 'farm',
+  OTHER = 'other'
+}
 
 export const PropertyManagement: React.FC = () => {
   const [activeTab, setActiveTab] = useState('overview');
@@ -18,9 +30,9 @@ export const PropertyManagement: React.FC = () => {
   
   const { 
     buildings, 
-    updateMaintenanceEnabled,
+    updateMaintenanceLevel,
     updateBuildingCondition,
-    assignSlaves,
+    assignWorkers,
     sellBuilding,
     addBuilding,
     setSelectedBuilding
@@ -29,11 +41,12 @@ export const PropertyManagement: React.FC = () => {
   const buildingWithType = buildings.find(b => b.id === (buildingId || "building-1"));
   const building = buildingWithType ? {
     ...buildingWithType,
-    type: buildingWithType.type || 'other' as BuildingType,
+    type: buildingWithType.type || BuildingType.OTHER,
     maintenanceLevel: buildingWithType.maintenanceLevel || 1,
     income: buildingWithType.income || 0,
     workers: buildingWithType.workers || 0,
-    securityLevel: buildingWithType.securityLevel || 1
+    securityLevel: buildingWithType.securityLevel || 1,
+    buildingId: buildingWithType.id // ensure buildingId is set correctly
   } : null;
 
   if (!building) {
@@ -59,63 +72,18 @@ export const PropertyManagement: React.FC = () => {
     }
   };
 
-  const handleUpdateMaintenanceLevel = (buildingId: string, level: number) => {
-    updateBuildingCondition(buildingId, level);
+  const handleUpdateMaintenanceLevel = (level: number) => {
+    updateMaintenanceLevel(building.id);
     toast.success(`Niveau d'entretien mis à jour pour ${building.name}`);
   };
 
   const handleRenovateBuilding = () => {
-    updateBuildingCondition(building.id, 100);
+    updateBuildingCondition(building.id);
     toast.success(`${building.name} a été entièrement rénové`);
   };
 
-  const handleUpdateWorkers = (buildingId: string, count: number) => {
-    assignSlaves(buildingId, count);
-  };
-
-  const handleToggleMaintenance = (enabled: boolean) => {
-    updateMaintenanceEnabled(building.id, enabled);
-  };
-
-  const addNewBuilding = (newBuilding: Omit<Building, 'id'>) => {
-    const buildingWithId = {
-      ...newBuilding,
-      id: uuidv4(),
-    };
-    
-    const ownedBuilding: OwnedBuilding = {
-      ...buildingWithId,
-      buildingId: buildingWithId.id,
-    };
-    
-    addBuilding(ownedBuilding);
-    setSelectedBuilding(ownedBuilding);
-  };
-
-  const handleBuildingSelection = (building: Building) => {
-    const ownedBuilding: OwnedBuilding = {
-      ...building,
-      buildingId: building.id,
-    };
-    setSelectedBuilding(ownedBuilding);
-  };
-
-  const buildingFromOwned = (owned: OwnedBuilding): Building => {
-    return {
-      id: owned.id,
-      buildingId: owned.buildingId,
-      buildingType: owned.buildingType,
-      name: owned.name,
-      type: owned.type,
-      location: owned.location,
-      condition: owned.condition,
-      value: owned.value || 0,
-      maintenance: owned.maintenance || 0,
-      income: 0,
-      workers: 0,
-      securityLevel: 0,
-      maintenanceLevel: 0
-    };
+  const handleUpdateWorkers = (count: number) => {
+    assignWorkers(building.id);
   };
 
   return (
@@ -143,7 +111,7 @@ export const PropertyManagement: React.FC = () => {
             updateMaintenanceLevel={handleUpdateMaintenanceLevel}
             updateSecurityLevel={() => {}}
             renovateBuilding={handleRenovateBuilding}
-            toggleMaintenance={handleToggleMaintenance}
+            toggleMaintenance={() => {}}
           />
         </TabsContent>
         

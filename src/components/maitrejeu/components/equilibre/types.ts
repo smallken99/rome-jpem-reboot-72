@@ -24,16 +24,32 @@ export interface ThreatAssessmentProps {
 }
 
 export interface PoliticalBalanceCardProps {
-  equilibre: any;
+  populares: number;
+  optimates: number;
+  moderates: number;
   onUpdate: (populares: number, optimates: number, moderates: number) => void;
+  equilibre?: any;
 }
 
 export interface SocialStabilityCardProps {
-  equilibre: any;
-  onUpdate: (patriciens: number, plebéiens: number) => void;
+  patricians: number;
+  plebeians: number;
+  onUpdate: (patricians: number, plebeians: number) => void;
+  patriciens?: number;
+  plébéiens?: number;
+  equilibre?: any;
 }
 
 export interface EconomicStabilityCardProps {
-  equilibre: any;
-  onUpdate: (economie: number) => void;
+  economy: number;
+  onUpdate: (economy: number) => void;
+  economie?: number;
+  equilibre?: any;
+}
+
+export interface TimelineItemProps {
+  title: string;
+  date?: string | { year: number; season: string };
+  description?: string;
+  icon?: React.ReactNode;
 }
