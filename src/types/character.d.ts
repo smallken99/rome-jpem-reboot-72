@@ -62,6 +62,9 @@ export interface Character {
   
   // Skills
   skills?: string[] | Record<string, number>;
+  
+  // Additional properties used throughout the application
+  diplomatie?: string[] | Record<string, any>;
 }
 
 export interface CharacterStat {

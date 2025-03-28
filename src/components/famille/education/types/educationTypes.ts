@@ -82,6 +82,7 @@ export interface EducationPath {
   type?: string;
   outcomes?: {
     skills?: string[];
+    bonuses?: Record<string, any>;
   } | string[];
   suitableFor?: {
     gender?: Gender | 'both';

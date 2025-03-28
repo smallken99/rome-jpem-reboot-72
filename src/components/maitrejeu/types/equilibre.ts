@@ -61,6 +61,7 @@ export interface Equilibre {
   population?: number;
   criminalityIndex?: number;
   indiceCrime?: number;
+  foodSupply?: number;
 }
 
 export interface EquilibreChartProps {
@@ -76,20 +77,20 @@ export interface PoliticalBalanceCardProps {
   populares: number;
   optimates: number;
   moderates: number;
-  equilibre?: Equilibre;
+  equilibre: Equilibre;
   onUpdate: (populares: number, optimates: number, moderates: number) => void;
 }
 
 export interface SocialStabilityCardProps {
   patriciens: number;
   plebeiens: number;
-  equilibre?: Equilibre;
+  equilibre: Equilibre;
   onUpdate: (patriciens: number, plebeiens: number) => void;
 }
 
 export interface EconomicStabilityCardProps {
   economie: number;
-  equilibre?: Equilibre;
+  equilibre: Equilibre;
   onUpdate: (economie: number) => void;
 }
 
