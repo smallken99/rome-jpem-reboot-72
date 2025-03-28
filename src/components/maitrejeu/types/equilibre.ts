@@ -25,6 +25,7 @@ export interface PoliticalEvent {
   description: string;
   impact: string;
   type: string;
+  name?: string;
 }
 
 export interface Equilibre {
@@ -38,6 +39,23 @@ export interface Equilibre {
     plebeiens: number;
   };
   economic: number;
+  
+  // Additional properties used in code
+  populares: number;
+  populaires: number;
+  optimates: number;
+  moderates: number;
+  patriciens: number;
+  plébéiens: number;
+  économie: number;
+  armée: number;
+  loyauté: number;
+  morale: number;
+  facteurSenat?: number;
+  economicStability?: number;
+  facteurMilitaire?: number;
+  facteurPatriciens?: number;
+  facteurPlebs?: number;
 }
 
 export interface EquilibreChartProps {
@@ -53,17 +71,20 @@ export interface PoliticalBalanceCardProps {
   populares: number;
   optimates: number;
   moderates: number;
+  equilibre?: Equilibre;
   onUpdate: (populares: number, optimates: number, moderates: number) => void;
 }
 
 export interface SocialStabilityCardProps {
   patriciens: number;
   plebeiens: number;
+  equilibre?: Equilibre;
   onUpdate: (patriciens: number, plebeiens: number) => void;
 }
 
 export interface EconomicStabilityCardProps {
   economie: number;
+  equilibre?: Equilibre;
   onUpdate: (economie: number) => void;
 }
 

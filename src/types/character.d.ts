@@ -58,7 +58,6 @@ export interface Character {
   // Additional properties used in code
   educationType?: string;
   skills?: string[] | Record<string, number>;
-  testamentaryWishes?: string;
 }
 
 export interface CharacterStat {

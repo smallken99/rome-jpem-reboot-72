@@ -52,6 +52,10 @@ export interface PropertyUpgrade {
     upgrades?: string[];
   };
   installed?: boolean;
+  effect?: string;
+  benefitDescription?: string;
+  prerequisiteUpgradeId?: string;
+  type?: string;
 }
 
 export interface PropertyStats {

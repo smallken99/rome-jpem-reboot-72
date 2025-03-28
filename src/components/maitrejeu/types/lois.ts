@@ -64,9 +64,9 @@ export interface Loi {
   auteur?: string;
   proposedBy?: string;
   implementationDate?: any;
-  votesAbstention?: number;
   votesFor?: number;
   votesAgainst?: number;
+  votesAbstention?: number;
   categorieId?: string;
   catégorieId?: string;
   statut?: string;
