@@ -1,108 +1,110 @@
-import React, { useState, useEffect } from 'react';
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogDescription,
-  DialogFooter,
-} from '@/components/ui/dialog';
+import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { Building, Property, PropertyUpgrade } from '@/types/proprietes';
-import { UpgradeList } from '../UpgradeList';
-import { useToast } from '@/components/ui/use-toast';
-import { useProperties } from '../../hooks/useProperties';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { 
+  Building, 
+  PropertyUpgrade 
+} from '@/types/proprietes';
+import { Card, CardContent } from '@/components/ui/card';
+import { 
+  HomeIcon, 
+  HistoryIcon, 
+  UpgradeIcon, 
+  CogIcon, 
+  CoinsIcon 
+} from 'lucide-react';
+import UpgradeList from "../UpgradeList";
+import BuildingStats from '../BuildingStats';
+import BuildingHistory from '../BuildingHistory';
 
 interface BuildingDetailsModalProps {
   isOpen: boolean;
-  onClose: () => void;
-  building: Building | null;
+  onOpenChange: (open: boolean) => void;
+  building: Building;
 }
 
-export const BuildingDetailsModal: React.FC<BuildingDetailsModalProps> = ({
-  isOpen,
-  onClose,
-  building,
-}) => {
-  const { toast } = useToast();
-  const { installUpgrade } = useProperties();
-  const [selectedUpgrade, setSelectedUpgrade] = useState<PropertyUpgrade | null>(null);
-
-  useEffect(() => {
-    if (isOpen) {
-      setSelectedUpgrade(null);
-    }
-  }, [isOpen]);
-
-  if (!building) {
-    return null;
-  }
-
-  const stats = {
-    totalIncome: 0,
-    totalMaintenance: 0,
-    totalValue: 0
-  };
-
-  const handleInstallUpgrade = (property: Property, upgradeId: string) => {
-    installUpgrade(property.id, upgradeId);
-  };
-
+const BuildingDetailsModal: React.FC<BuildingDetailsModalProps> = ({ isOpen, onOpenChange, building }) => {
+  const [activeTab, setActiveTab] = useState('stats');
+  
   return (
-    <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-2xl">
+    <Dialog open={isOpen} onOpenChange={onOpenChange}>
+      <DialogContent className="max-w-4xl">
         <DialogHeader>
-          <DialogTitle>{building.name}</DialogTitle>
-          <DialogDescription>
-            Détails et améliorations du bâtiment
-          </DialogDescription>
+          <DialogTitle className="flex items-center gap-2">
+            <HomeIcon className="h-5 w-5 mr-2" />
+            {building.name}
+          </DialogTitle>
         </DialogHeader>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 py-4">
-          <div>
-            <h3 className="text-lg font-semibold mb-2">Informations</h3>
-            <p>Type: {building.type}</p>
-            <p>Localisation: {building.location}</p>
-            <p>Valeur: {building.value}</p>
-            <p>Maintenance: {building.maintenance}</p>
-            <p>Condition: {building.condition}</p>
-            {building.workers && <p>Travailleurs: {building.workers}</p>}
-            {building.securityLevel && <p>Niveau de sécurité: {building.securityLevel}</p>}
-            {building.maintenanceLevel && <p>Niveau de maintenance: {building.maintenanceLevel}</p>}
-            {building.status && <p>Statut: {building.status}</p>}
-            {building.income && <p>Revenu: {building.income}</p>}
-          </div>
-
-          <div>
-            <h3 className="text-lg font-semibold mb-2">Améliorations</h3>
-            <UpgradeList
-              upgrades={building.upgrades || []}
-              onSelectUpgrade={setSelectedUpgrade}
-              selectedUpgrade={selectedUpgrade}
-            />
-          </div>
-        </div>
-
-        <DialogFooter>
-          <Button type="button" variant="secondary" onClick={onClose}>
+        
+        <Tabs value={activeTab} onValueChange={setActiveTab}>
+          <TabsList className="grid w-full grid-cols-4">
+            <TabsTrigger value="stats">
+              <CogIcon className="h-4 w-4 mr-1" />
+              Statistiques
+            </TabsTrigger>
+            <TabsTrigger value="history">
+              <HistoryIcon className="h-4 w-4 mr-1" />
+              Historique
+            </TabsTrigger>
+            <TabsTrigger value="upgrades">
+              <UpgradeIcon className="h-4 w-4 mr-1" />
+              Améliorations
+            </TabsTrigger>
+            <TabsTrigger value="finances">
+              <CoinsIcon className="h-4 w-4 mr-1" />
+              Finances
+            </TabsTrigger>
+          </TabsList>
+          
+          <TabsContent value="stats">
+            <Card>
+              <CardContent>
+                <BuildingStats building={building} />
+              </CardContent>
+            </Card>
+          </TabsContent>
+          
+          <TabsContent value="history">
+            <Card>
+              <CardContent>
+                <BuildingHistory building={building} />
+              </CardContent>
+            </Card>
+          </TabsContent>
+          
+          <TabsContent value="upgrades">
+            <Card>
+              <CardContent>
+                <UpgradeList 
+                  upgrades={[]}
+                  onInstall={() => {}}
+                  propertyValue={building.value}
+                  propertyCondition={building.condition}
+                  installedUpgrades={[]}
+                />
+              </CardContent>
+            </Card>
+          </TabsContent>
+          
+          <TabsContent value="finances">
+            <Card>
+              <CardContent>
+                {/* Finances Content */}
+                <p>Contenu des finances</p>
+              </CardContent>
+            </Card>
+          </TabsContent>
+        </Tabs>
+        
+        <div className="flex justify-end mt-4">
+          <Button variant="outline" onClick={() => onOpenChange(false)}>
             Fermer
           </Button>
-          {selectedUpgrade && (
-            <Button onClick={() => {
-              if (building) {
-                handleInstallUpgrade(building, selectedUpgrade.id);
-                toast({
-                  title: "Amélioration installée",
-                  description: "L'amélioration a été installée avec succès.",
-                });
-                onClose();
-              }
-            }}>
-              Installer Amélioration
-            </Button>
-          )}
-        </DialogFooter>
+        </div>
       </DialogContent>
     </Dialog>
   );
 };
+
+export default BuildingDetailsModal;

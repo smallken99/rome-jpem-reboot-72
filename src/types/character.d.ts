@@ -7,17 +7,22 @@ export interface Character {
   age: number;
   gender: 'male' | 'female';
   
-  // Additional properties needed
+  // Family-related properties
   relation?: string;
   isHeadOfFamily?: boolean;
   parentIds?: string[];
   spouseId?: string;
   childrenIds?: string[];
+  testamentaryWishes?: string;
+  
+  // Health and status
   health?: number;
   status?: 'alive' | 'deceased' | 'exiled';
+  
+  // Personal attributes
   traits?: string[];
-  testamentaryWishes?: string;
   specialty?: string;
+  educationType?: string;
   
   // Family relationship properties
   isPlayer?: boolean;
@@ -55,8 +60,7 @@ export interface Character {
     speciality?: string;
   };
   
-  // Additional properties used in code
-  educationType?: string;
+  // Skills
   skills?: string[] | Record<string, number>;
 }
 

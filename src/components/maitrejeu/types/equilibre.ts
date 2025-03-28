@@ -21,11 +21,12 @@ export interface RiskFactor {
 export interface PoliticalEvent {
   id: string;
   title: string;
-  date: string;
+  date: string | { year: number; season: string };
   description: string;
-  impact: string;
+  impact: string | Record<string, number>;
   type: string;
   name?: string;
+  importance?: string;
 }
 
 export interface Equilibre {
@@ -57,6 +58,7 @@ export interface Equilibre {
   facteurPatriciens?: number;
   facteurPlebs?: number;
   facteurReligieux?: number;
+  population?: number;
 }
 
 export interface EquilibreChartProps {
@@ -65,7 +67,7 @@ export interface EquilibreChartProps {
 
 export interface RecentEventsTableProps {
   events: PoliticalEvent[];
-  formatDate: (date: string) => string;
+  formatDate: (date: string | { year: number; season: string }) => string;
 }
 
 export interface PoliticalBalanceCardProps {

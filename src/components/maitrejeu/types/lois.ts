@@ -37,7 +37,7 @@ export interface Loi {
   description: string;
   proposeur: string;
   catégorie: string;
-  type: string;
+  type: string | LoiType;
   date: {
     year: number;
     season: string;

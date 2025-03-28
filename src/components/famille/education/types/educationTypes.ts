@@ -68,6 +68,7 @@ export interface EducationPath {
   skills?: string[];
   bonuses?: {
     skills?: string[];
+    combat?: any;
     [key: string]: any;
   };
   requirements: {

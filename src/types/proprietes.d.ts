@@ -2,37 +2,14 @@
 export interface Property {
   id: string;
   name: string;
-  type: string;
   location: string;
+  type: string;
   value: number;
-  income: number;
-  maintenance: number;
+  incomePerYear: number;
+  maintenanceCost: number;
   condition: number;
   status?: string;
-  acquired?: string;
   upgrades?: PropertyUpgrade[];
-  incomePerYear?: number;
-  maintenanceCost?: number;
-}
-
-export interface Building extends Property {
-  workers?: number;
-  securityLevel?: number;
-  maintenanceLevel?: number;
-  buildingId?: string;
-  buildingType?: string;
-}
-
-export interface OwnedBuilding {
-  id: string;
-  buildingId: string;
-  buildingType: string;
-  type: string;
-  name: string;
-  location: string;
-  condition: number;
-  value?: number;
-  maintenance?: number;
 }
 
 export interface PropertyUpgrade {
@@ -40,26 +17,57 @@ export interface PropertyUpgrade {
   name: string;
   description: string;
   cost: number;
-  effects: {
+  effect?: string | Record<string, any>;
+  effects?: {
     income?: number;
     maintenance?: number;
     security?: number;
     condition?: number;
+    [key: string]: any;
   };
   requirements?: {
     value?: number;
     condition?: number;
     upgrades?: string[];
+    [key: string]: any;
   };
   installed?: boolean;
-  effect?: string;
-  benefitDescription?: string;
-  prerequisiteUpgradeId?: string;
-  type?: string;
+  category?: string;
+  tier?: number;
 }
 
-export interface PropertyStats {
-  totalValue: number;
-  totalIncome: number;
-  totalMaintenance: number;
+export interface OwnedBuilding {
+  id: string;
+  buildingId: string;
+  buildingType: string;
+  name: string;
+  type: string;
+  location: string;
+  value: number;
+  maintenance: number;
+  condition: number;
+  status?: string;
 }
+
+export interface Building {
+  id: string;
+  name: string;
+  location: string;
+  type: string;
+  value: number;
+  maintenance: number;
+  condition: number;
+  status?: string;
+  upgrades?: PropertyUpgrade[];
+  buildingId?: string;
+}
+
+export interface BuildingType {
+  id: string;
+  name: string;
+  description: string;
+  value: number;
+  category: string;
+}
+
+// Add any other missing property-related interfaces
