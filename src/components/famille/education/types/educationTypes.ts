@@ -33,7 +33,7 @@ export interface Preceptor {
   childId?: string;
   portrait?: string;
   
-  // Additional required properties
+  // Added required properties
   description: string;
   teachingStyle: string;
   reputation: number;
@@ -69,6 +69,10 @@ export interface EducationPath {
   bonuses?: {
     skills?: string[];
     combat?: any;
+    oratory?: number;
+    piety?: number;
+    popularity?: number;
+    martialEducation?: number;
     [key: string]: any;
   };
   requirements: {
@@ -93,7 +97,8 @@ export interface EducationPath {
   relatedStat?: string;
   minAge?: number;
   maxAge?: number;
-  cost?: number; // Added for academicPath
+  cost?: number;
+  suitableFor?: string[];
 }
 
 export interface ChildEducation {

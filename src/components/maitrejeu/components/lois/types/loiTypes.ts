@@ -50,4 +50,21 @@ export interface Loi {
   tags: string[];
   supporters?: string[];
   opposants?: string[];
+  
+  // Additional properties for compatibility
+  title?: string;
+  proposedBy?: string;
+  auteur?: string;
+  status?: string;
+  statut?: string;
+  category?: string;
+  votesFor?: number;
+  votesAgainst?: number;
+  abstentions?: number;
+  votesAbstention?: number;
+  dateProposition?: string;
+  votes?: any;
+  conditions?: string[];
+  pénalités?: string[];
+  soutiens?: string[];
 }
