@@ -62,6 +62,7 @@ export interface Equilibre {
   criminalityIndex?: number;
   indiceCrime?: number;
   foodSupply?: number;
+  publicOrder?: number;
 }
 
 export interface EquilibreChartProps {

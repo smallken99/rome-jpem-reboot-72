@@ -22,8 +22,8 @@ export interface SlaveHook {
   loading: boolean;
   totalSlaves: number;
   slavePrice: number;
-  assignedSlaves: Slave[];
-  slaveAssignments: Record<string, string>;
+  assignedSlaves: number | Slave[];
+  slaveAssignments: Record<string, string> | Record<string, string[]>;
   balance: number;
   purchaseSlave: (slave: Slave, amount: number) => boolean;
   purchaseSlaves: (count: number) => boolean;

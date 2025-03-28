@@ -93,6 +93,7 @@ export interface EducationPath {
   relatedStat?: string;
   minAge?: number;
   maxAge?: number;
+  cost?: number; // Added for academicPath
 }
 
 export interface ChildEducation {

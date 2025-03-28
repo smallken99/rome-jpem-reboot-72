@@ -1,4 +1,5 @@
-import { LoiType, LoiState, ImportanceType, Loi } from '@/components/maitrejeu/types/lois';
+import { Loi, LoiType, LoiState, ImportanceType } from '../types/loiTypes';
+import { GameDate } from '../types/gameDate';
 
 // Function to convert string-based effects to array if needed
 export function ensureArrayFormat(value: string | string[] | undefined): string[] {
@@ -207,7 +208,7 @@ export const convertMJToRepublique = (loi: Loi): any => {
   return {
     ...loi,
     auteur: loi.proposeur || loi.proposedBy || loi.auteur || '',
-    statut: loi.état || loi.status || '',
+    statut: loi.état || loi.status || loi.statut || '',
     categorieId: loi.catégorie || loi.category || ''
   };
 };
