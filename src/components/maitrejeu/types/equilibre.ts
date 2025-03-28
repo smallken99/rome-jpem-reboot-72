@@ -1,64 +1,72 @@
 
-// Types pour l'équilibre de la République
+export enum SeverityLevel {
+  MINOR = "mineure",
+  NORMAL = "normale",
+  MAJOR = "majeure",
+  CRITICAL = "critique",
+  HIGH = "haute"
+}
 
-export interface Equilibre {
-  // Propriétés pour l'équilibre politique
-  populaires: number;
-  populares?: number; // Alias pour compatibilité
-  optimates: number;
-  moderates: number;
-  neutrales?: number;
-  
-  // Facteurs d'équilibre
-  facteurSenat?: number;
-  facteurPlebs?: number;
-  facteurPatriciens?: number;
-  facteurMilitaire?: number;
-  facteurReligieux?: number;
-  
-  // Statut de la population
-  population: number;
-  criminalityIndex?: number;
-  indiceCrime?: number;
-  economicStability?: number;
-  foodSupply?: number;
-  publicOrder?: number;
-  
-  // Seuils de risque
-  unrestThreshold?: number;
-  rebellionThreshold?: number;
-  
-  // Historique des changements
-  historique?: any[];
-  
-  // Propriétés supplémentaires
-  armée?: number;
-  économie?: number;
-  morale?: number;
-  loyauté?: number;
-  patriciens?: number;
-  plébéiens?: number;
-  
-  // Nouveaux paramètres requis
-  stabilité?: number;
-  mécontentement?: number;
-  corruption?: number;
-  influence_extérieure?: number;
-  
-  // Notes
-  notes?: string;
+export interface RiskFactor {
+  id: string;
+  name: string;
+  severity: string;
+  description: string;
+  level: number;
+  type: string;
+  impact: number;
+  trend: 'up' | 'down' | 'stable';
 }
 
 export interface PoliticalEvent {
   id: string;
   title: string;
-  name?: string; // Pour compatibilité
+  date: string;
   description: string;
+  impact: string;
   type: string;
-  importance: 'mineure' | 'majeure' | 'critique' | 'normale';
-  date?: Date | { year: number; season: string };
-  effects?: Record<string, any>;
-  tags?: string[];
-  impact?: Record<string, number>; // Pour compatibilité
-  faction?: string; // Pour compatibilité
+}
+
+export interface Equilibre {
+  political: {
+    populares: number;
+    optimates: number;
+    moderates: number;
+  };
+  social: {
+    patriciens: number;
+    plebeiens: number;
+  };
+  economic: number;
+}
+
+export interface EquilibreChartProps {
+  data: any;
+}
+
+export interface RecentEventsTableProps {
+  events: PoliticalEvent[];
+  formatDate: (date: string) => string;
+}
+
+export interface PoliticalBalanceCardProps {
+  populares: number;
+  optimates: number;
+  moderates: number;
+  onUpdate: (populares: number, optimates: number, moderates: number) => void;
+}
+
+export interface SocialStabilityCardProps {
+  patriciens: number;
+  plebeiens: number;
+  onUpdate: (patriciens: number, plebeiens: number) => void;
+}
+
+export interface EconomicStabilityCardProps {
+  economie: number;
+  onUpdate: (economie: number) => void;
+}
+
+export interface ThreatAssessmentProps {
+  threats: RiskFactor[];
 }

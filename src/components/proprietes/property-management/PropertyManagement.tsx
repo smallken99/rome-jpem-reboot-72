@@ -7,7 +7,7 @@ import { WorkersTab } from './WorkersTab';
 import { UpgradesTab } from './UpgradesTab';
 import { PropertyHeader } from './PropertyHeader';
 import { useBuildingManagement } from '@/hooks/useBuildingManagement';
-import { OwnedBuilding, BuildingType } from '@/types/buildings';
+import { Building, OwnedBuilding, Property, PropertyUpgrade } from '@/types/proprietes';
 import { toast } from 'sonner';
 import { v4 as uuidv4 } from 'uuid';
 
@@ -98,6 +98,24 @@ export const PropertyManagement: React.FC = () => {
       buildingId: building.id,
     };
     setSelectedBuilding(ownedBuilding);
+  };
+
+  const buildingFromOwned = (owned: OwnedBuilding): Building => {
+    return {
+      id: owned.id,
+      buildingId: owned.buildingId,
+      buildingType: owned.buildingType,
+      name: owned.name,
+      type: owned.type,
+      location: owned.location,
+      condition: owned.condition,
+      value: owned.value || 0,
+      maintenance: owned.maintenance || 0,
+      income: 0,
+      workers: 0,
+      securityLevel: 0,
+      maintenanceLevel: 0
+    };
   };
 
   return (

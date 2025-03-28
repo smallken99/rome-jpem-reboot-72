@@ -1,3 +1,4 @@
+
 export enum LoiType {
   ADMINISTRATIVE = "administrative",
   ECONOMIC = "economic",
@@ -6,6 +7,27 @@ export enum LoiType {
   JUDICIAL = "judicial",
   SOCIAL = "social",
   POLITICAL = "political"
+}
+
+export enum LoiState {
+  PROPOSED = "Proposée",
+  DELIBERATION = "En délibération",
+  APPROVED = "Approuvée",
+  REJECTED = "Rejetée",
+  IMPLEMENTED = "Mise en œuvre",
+  EXPIRED = "Expirée"
+}
+
+export enum ImportanceType {
+  MINOR = "mineure",
+  NORMAL = "normale",
+  MAJOR = "majeure",
+  CRITICAL = "critique"
+}
+
+export interface GameDate {
+  year: number;
+  season: string;
 }
 
 export interface Loi {
@@ -35,11 +57,29 @@ export interface Loi {
   effets: string[];
   clauses?: any[];
   tags?: string[];
+  
   // Compatibility properties
+  title?: string;
   category?: string;
-  status?: string;
-  statut?: string;
-  proposedBy?: string;
   auteur?: string;
+  proposedBy?: string;
   implementationDate?: any;
+  votesAbstention?: number;
+  votesFor?: number;
+  votesAgainst?: number;
+  categorieId?: string;
+  catégorieId?: string;
+  statut?: string;
+  status?: string;
+  votes?: {
+    pour: number;
+    contre: number;
+    abstention: number;
+  };
+  soutiens?: string[];
+  opposants?: string[];
+  contenu?: string;
+  notes?: string;
+  nom?: string;
+  name?: string;
 }

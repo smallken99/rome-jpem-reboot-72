@@ -19,6 +19,8 @@ export interface Building extends Property {
   workers?: number;
   securityLevel?: number;
   maintenanceLevel?: number;
+  buildingId?: string;
+  buildingType?: string;
 }
 
 export interface OwnedBuilding {

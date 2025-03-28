@@ -32,10 +32,12 @@ export interface Preceptor {
   quality?: number;
   childId?: string;
   portrait?: string;
+  
+  // Additional required properties
   description: string;
   teachingStyle: string;
-  specialties: string[];
   reputation: number;
+  specialties: string[];
 }
 
 export interface Child {
@@ -64,7 +66,10 @@ export interface EducationPath {
   icon: string;
   specialties: string[];
   skills?: string[];
-  bonuses?: any;
+  bonuses?: {
+    skills?: string[];
+    [key: string]: any;
+  };
   requirements: {
     age: number;
     gender: Gender | 'both' | Gender[];

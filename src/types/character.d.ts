@@ -6,28 +6,27 @@ export interface Character {
   lastName?: string;
   age: number;
   gender: 'male' | 'female';
-  // Family relationship properties
+  
+  // Additional properties needed
   relation?: string;
   isHeadOfFamily?: boolean;
   parentIds?: string[];
   spouseId?: string;
   childrenIds?: string[];
-  // Character traits and stats
-  traits?: string[];
   health?: number;
   status?: 'alive' | 'deceased' | 'exiled';
-  specialty?: string;
-  specialties?: string[];
-  educationType?: string;
+  traits?: string[];
   testamentaryWishes?: string;
-  skills?: string[] | Record<string, number>;
-  // Visual and metadata
+  specialty?: string;
+  
+  // Family relationship properties
   isPlayer?: boolean;
   portrait?: string;
   title?: string;
   role?: string;
   marriageStatus?: string;
   lastChildBirthYear?: number;
+  
   // Stats
   stats: {
     popularity: number | CharacterStat;
@@ -35,6 +34,7 @@ export interface Character {
     piety: number | CharacterStat;
     martialEducation: number | CharacterStat;
   };
+  
   // Education information
   education?: {
     type: string;
@@ -54,6 +54,11 @@ export interface Character {
     statBonus?: number;
     speciality?: string;
   };
+  
+  // Additional properties used in code
+  educationType?: string;
+  skills?: string[] | Record<string, number>;
+  testamentaryWishes?: string;
 }
 
 export interface CharacterStat {

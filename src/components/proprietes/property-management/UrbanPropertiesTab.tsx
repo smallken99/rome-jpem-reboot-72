@@ -1,116 +1,99 @@
-
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { Building, Plus } from 'lucide-react';
-import PropertyCard from './PropertyCard';
-import BuildingDetailsModal from './building-details/BuildingDetailsModal';
-import BuildingPurchaseDialog from './urban/BuildingPurchaseDialog';
+import { ExternalLink, Pencil, DollarSign } from 'lucide-react';
+import { BuildingDetailsModal } from './building-details/BuildingDetailsModal';
 import { Property } from '@/types/proprietes';
-import { toast } from '@/components/ui-custom/toast';
 
 interface UrbanPropertiesTabProps {
   properties: Property[];
-  onPurchaseProperty?: (property: Property) => void;
-  onRepairProperty?: (property: Property) => void;
-  onUpgradeProperty?: (property: Property, upgrade: string) => void;
-  balance?: number;
+  onViewDetails: (propertyId: string) => void;
+  onSell: (propertyId: string) => void;
 }
 
-export const UrbanPropertiesTab: React.FC<UrbanPropertiesTabProps> = ({
-  properties,
-  onPurchaseProperty,
-  onRepairProperty,
-  onUpgradeProperty,
-  balance = 0
-}) => {
+export const UrbanPropertiesTab: React.FC<UrbanPropertiesTabProps> = ({ properties, onViewDetails, onSell }) => {
   const [selectedProperty, setSelectedProperty] = useState<Property | null>(null);
-  const [detailsModalOpen, setDetailsModalOpen] = useState(false);
-  const [purchaseDialogOpen, setPurchaseDialogOpen] = useState(false);
+  const [isModalOpen, setIsModalOpen] = useState(false);
   
-  // Filter urban properties (domus and insulae)
-  const urbanProperties = properties.filter(
-    p => p.type === 'domus' || p.type === 'insula'
-  );
-  
-  const handleOpenPurchaseDialog = () => {
-    setPurchaseDialogOpen(true);
+  const handleViewDetails = (property: Property) => {
+    setSelectedProperty(property);
+    setIsModalOpen(true);
+    onViewDetails(property.id);
   };
   
-  const handlePurchaseProperty = (buildingOption: any) => {
-    if (onPurchaseProperty) {
-      const newProperty: Property = {
-        id: buildingOption.id,
-        name: buildingOption.name,
-        type: buildingOption.type,
-        location: buildingOption.location,
-        value: buildingOption.price,
-        income: buildingOption.income,
-        maintenance: buildingOption.maintenance,
-        condition: 100, // New building is in perfect condition
-        acquired: new Date().toISOString()
-      };
-      
-      onPurchaseProperty(newProperty);
-      toast.success("Propriété acquise avec succès");
-      setPurchaseDialogOpen(false);
-    }
+  const handleCloseModal = () => {
+    setIsModalOpen(false);
+    setSelectedProperty(null);
   };
   
   return (
     <div className="space-y-4">
-      <div className="flex justify-between items-center">
-        <h2 className="text-xl font-semibold">Propriétés urbaines</h2>
-        <Button onClick={handleOpenPurchaseDialog}>
-          <Plus className="h-4 w-4 mr-2" />
-          Acquérir une propriété
-        </Button>
-      </div>
+      <Card>
+        <CardHeader>
+          <CardTitle>Propriétés Urbaines</CardTitle>
+          <CardDescription>
+            Gérez vos bâtiments et propriétés situés dans les villes de Rome
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <ScrollArea className="h-[400px] pr-4">
+            <div className="space-y-4">
+              {properties.map(property => (
+                <Card key={property.id} className="border">
+                  <CardContent className="p-4">
+                    <div className="flex justify-between items-start">
+                      <div>
+                        <h3 className="font-medium">{property.name}</h3>
+                        <p className="text-sm text-muted-foreground">
+                          {property.type}, {property.location}
+                        </p>
+                        <div className="mt-2 flex flex-wrap gap-2">
+                          <Badge variant="secondary">
+                            <DollarSign className="h-3 w-3 mr-1" />
+                            {property.income} / an
+                          </Badge>
+                          <Badge variant="outline">
+                            État: {property.condition}%
+                          </Badge>
+                        </div>
+                      </div>
+                      
+                      <div className="flex items-center space-x-2">
+                        <Button 
+                          variant="ghost" 
+                          size="sm"
+                          onClick={() => handleViewDetails(property)}
+                        >
+                          <Pencil className="h-4 w-4 mr-2" />
+                          Détails
+                        </Button>
+                        <Button 
+                          variant="destructive" 
+                          size="sm"
+                          onClick={() => onSell(property.id)}
+                        >
+                          <ExternalLink className="h-4 w-4 mr-2" />
+                          Vendre
+                        </Button>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          </ScrollArea>
+        </CardContent>
+      </Card>
       
-      {urbanProperties.length === 0 ? (
-        <div className="text-center py-8 text-muted-foreground">
-          <Building className="h-12 w-12 mx-auto text-muted-foreground/50" />
-          <p className="mt-4">Vous ne possédez pas encore de propriétés urbaines.</p>
-          <Button variant="outline" className="mt-4" onClick={handleOpenPurchaseDialog}>
-            Acheter votre première propriété
-          </Button>
-        </div>
-      ) : (
-        <ScrollArea className="h-[500px]">
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            {urbanProperties.map(property => (
-              <PropertyCard
-                key={property.id}
-                property={property}
-                onSelect={(property) => {
-                  setSelectedProperty(property);
-                  setDetailsModalOpen(true);
-                }}
-                isSelected={selectedProperty?.id === property.id}
-              />
-            ))}
-          </div>
-        </ScrollArea>
+      {selectedProperty && (
+        <BuildingDetailsModal 
+          isOpen={isModalOpen}
+          onClose={handleCloseModal}
+          building={selectedProperty}
+        />
       )}
-      
-      {/* Property Details Modal */}
-      <BuildingDetailsModal
-        property={selectedProperty}
-        isOpen={detailsModalOpen}
-        onClose={() => setDetailsModalOpen(false)}
-        onRepair={onRepairProperty}
-        onUpgrade={onUpgradeProperty}
-      />
-      
-      {/* Building Purchase Dialog */}
-      <BuildingPurchaseDialog
-        isOpen={purchaseDialogOpen}
-        onClose={() => setPurchaseDialogOpen(false)}
-        onPurchase={handlePurchaseProperty}
-        playerBalance={balance}
-      />
     </div>
   );
 };
-
-export default UrbanPropertiesTab;
