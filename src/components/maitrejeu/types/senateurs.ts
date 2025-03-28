@@ -26,4 +26,5 @@ export interface SenateurJouable {
   actif: boolean | string;
   roles?: string[];
   competences?: string[];
+  diplomatie?: string[];
 }

@@ -1,3 +1,4 @@
+
 export interface PublicBuilding {
   id: string;
   buildingTypeId: string;

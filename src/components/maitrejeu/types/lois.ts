@@ -22,7 +22,8 @@ export enum ImportanceType {
   MINOR = "mineure",
   NORMAL = "normale",
   MAJOR = "majeure",
-  CRITICAL = "critique"
+  CRITICAL = "critique",
+  HIGH = "haute"
 }
 
 export interface GameDate {

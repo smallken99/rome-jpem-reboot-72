@@ -56,6 +56,7 @@ export interface Equilibre {
   facteurMilitaire?: number;
   facteurPatriciens?: number;
   facteurPlebs?: number;
+  facteurReligieux?: number;
 }
 
 export interface EquilibreChartProps {

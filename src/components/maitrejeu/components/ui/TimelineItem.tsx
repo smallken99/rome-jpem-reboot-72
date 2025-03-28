@@ -9,6 +9,7 @@ export interface TimelineItemProps {
   status?: 'success' | 'danger' | 'warning' | 'info' | 'default';
   date?: string | { year: number; season: string };
   description?: string;
+  children?: React.ReactNode;
 }
 
 const TimelineItem: React.FC<TimelineItemProps> = ({
