@@ -1,17 +1,16 @@
+
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { Checkbox } from '@/components/ui/checkbox';
 import { Plus, Edit, Trash2, Search } from 'lucide-react';
 import { LoiCreationDialog } from './components/lois/LoiCreationDialog';
 import { LoiDetailDialog } from './components/lois/LoiDetailDialog';
 import { useMaitreJeu } from './context/MaitreJeuContext';
 import { LoiTimeline } from './components/lois/LoiTimeline';
 import { formatDate } from '@/utils/dateUtils';
-import { Loi } from './types/lois';
 
 export const GestionLois = () => {
   const { lois, setLois } = useMaitreJeu();
@@ -19,7 +18,7 @@ export const GestionLois = () => {
   const [categoryFilter, setCategoryFilter] = useState('');
   const [statusFilter, setStatusFilter] = useState('');
   const [showLoiModal, setShowLoiModal] = useState(false);
-  const [selectedLoi, setSelectedLoi] = useState<Loi | null>(null);
+  const [selectedLoi, setSelectedLoi] = useState(null);
   const [showLoiDetail, setShowLoiDetail] = useState(false);
   
   // Filtre les lois en fonction des critères de recherche et des filtres
@@ -34,11 +33,15 @@ export const GestionLois = () => {
   
   // Récupère les 5 lois les plus récentes
   const recentLois = [...lois]
-    .sort((a, b) => new Date(b.date.year, b.date.season).getTime() - new Date(a.date.year, a.date.season).getTime())
+    .sort((a, b) => {
+      const dateA = a.date ? (typeof a.date === 'object' ? a.date.year : 0) : 0;
+      const dateB = b.date ? (typeof b.date === 'object' ? b.date.year : 0) : 0;
+      return dateB - dateA;
+    })
     .slice(0, 5);
   
   // Ouvre le modal de détails de la loi
-  const handleOpenLoiDetail = (loi: Loi) => {
+  const handleOpenLoiDetail = (loi) => {
     setSelectedLoi(loi);
     setShowLoiDetail(true);
   };
@@ -50,13 +53,13 @@ export const GestionLois = () => {
   };
   
   // Ouvre le modal d'édition de la loi
-  const handleEditLoi = (loi: Loi) => {
+  const handleEditLoi = (loi) => {
     setSelectedLoi(loi);
     setShowLoiModal(true);
   };
   
   // Supprime une loi
-  const handleDeleteLoi = (id: string) => {
+  const handleDeleteLoi = (id) => {
     setLois(lois.filter(loi => loi.id !== id));
   };
   
@@ -70,6 +73,7 @@ export const GestionLois = () => {
           </p>
         </div>
         <Button onClick={() => setShowLoiModal(true)}>
+          <Plus className="h-4 w-4 mr-2" />
           Ajouter une loi
         </Button>
       </div>
