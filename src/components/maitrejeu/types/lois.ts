@@ -13,20 +13,20 @@ export interface Loi {
   category?: string;
   date: { year: number; season: string };
   dateProposition?: { year: number; season: string } | string;
-  implementationDate?: { year: number; season: string } | string;
+  implementationDate?: { year: number; season: string };
   état: string | LoiState;
   status?: string;
   statut?: string;
   importance: string | ImportanceType;
   votesPositifs: number;
   votesNégatifs: number;
+  abstentions?: number;
   votesFor?: number;
   votesAgainst?: number;
-  abstentions?: number;
   votesAbstention?: number;
   impacts: Record<string, number>;
-  type: string | LoiType;
   effets: string[];
+  type: string | LoiType;
   clauses: string[];
   conditions?: string[];
   pénalités?: string[];
@@ -41,6 +41,7 @@ export interface Loi {
   contenu?: string;
   categorieId?: string;
   catégorieId?: string;
+  name?: string;
 }
 
 // Export the enum types to make them available

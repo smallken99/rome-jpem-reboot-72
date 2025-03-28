@@ -10,6 +10,7 @@ export interface PropertyUpgrade {
     maintenance?: number;
     security?: number;
     capacity?: number;
+    condition?: number;
     [key: string]: any;
   };
   applied: boolean;
@@ -20,6 +21,9 @@ export interface PropertyUpgrade {
     minLevel?: number;
     minSize?: string;
     minIncome?: number;
+    value?: number;
+    condition?: number;
+    upgrades?: string[];
     [key: string]: any;
   };
 }

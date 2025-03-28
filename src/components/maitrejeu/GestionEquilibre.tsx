@@ -16,9 +16,8 @@ import { RecentEventsTable } from './components/equilibre/RecentEventsTable';
 import { EquilibreChart } from './components/equilibre/EquilibreChart';
 import { ThreatAssessment } from './components/equilibre/ThreatAssessment';
 import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
-import { PoliticalEvent } from './types';
+import { PoliticalEvent, RiskFactor, Equilibre } from './types/equilibre';
 import { toast } from 'sonner';
-import { Equilibre } from './types';
 
 export const GestionEquilibre = () => {
   const { equilibre, updateEquilibre, updateFactionBalance } = useMaitreJeu();
@@ -33,6 +32,7 @@ export const GestionEquilibre = () => {
       type: 'politique',
       date: { year: 621, season: 'Aestas' },
       importance: 'haute',
+      severity: 'high',
       impact: {
         populares: 15,
         optimates: -10,
@@ -47,6 +47,7 @@ export const GestionEquilibre = () => {
       type: 'militaire',
       date: { year: 622, season: 'Ver' },
       importance: 'normale',
+      severity: 'medium',
       impact: {
         armée: 10,
         morale: 15,
@@ -60,6 +61,7 @@ export const GestionEquilibre = () => {
       type: 'diplomatique',
       date: { year: 621, season: 'Hiems' },
       importance: 'haute',
+      severity: 'high',
       impact: {
         économie: 15,
         populares: 5,
@@ -73,6 +75,7 @@ export const GestionEquilibre = () => {
       type: 'sociale',
       date: { year: 623, season: 'Aestas' },
       importance: 'normale',
+      severity: 'medium',
       impact: {
         plébéiens: -15,
         populares: 10,
@@ -86,6 +89,7 @@ export const GestionEquilibre = () => {
       type: 'politique',
       date: { year: 623, season: 'Autumnus' },
       importance: 'normale',
+      severity: 'low',
       impact: {
         optimates: 5,
         patriciens: 10
@@ -93,24 +97,36 @@ export const GestionEquilibre = () => {
     }
   ];
   
-  const riskFactors = [
+  const riskFactors: RiskFactor[] = [
     {
       id: '1',
       name: 'Pénurie alimentaire',
       severity: 'high',
-      description: 'Les réserves de grain sont dangereusement basses'
+      description: 'Les réserves de grain sont dangereusement basses',
+      level: 75,
+      type: 'economic',
+      impact: { foodSupply: -20, publicOrder: -15 },
+      trend: 'increasing'
     },
     {
       id: '2',
       name: 'Mécontentement militaire',
       severity: 'medium',
-      description: 'Plusieurs légions attendent leur solde'
+      description: 'Plusieurs légions attendent leur solde',
+      level: 50,
+      type: 'military',
+      impact: { militaryStrength: -10, loyalty: -15 },
+      trend: 'stable'
     },
     {
       id: '3',
       name: 'Tensions avec Carthage',
       severity: 'low',
-      description: 'Incidents frontaliers mineurs signalés'
+      description: 'Incidents frontaliers mineurs signalés',
+      level: 25,
+      type: 'diplomatic',
+      impact: { stability: -5 },
+      trend: 'decreasing'
     }
   ];
   
@@ -124,6 +140,8 @@ export const GestionEquilibre = () => {
   
   const handleSocialUpdate = (patriciens: number, plébéiens: number) => {
     const updatedEquilibre: Partial<Equilibre> = {
+      patricians: patriciens,
+      plebeians: plébéiens,
       patriciens,
       plébéiens,
       facteurPatriciens: patriciens,
@@ -135,6 +153,7 @@ export const GestionEquilibre = () => {
   
   const handleEconomicUpdate = (economie: number) => {
     const updatedEquilibre: Partial<Equilibre> = {
+      economy: economie,
       économie: economie,
       economicStability: economie
     };
@@ -144,6 +163,7 @@ export const GestionEquilibre = () => {
   
   const handleMilitaryUpdate = (armée: number, loyauté: number, morale: number) => {
     const updatedEquilibre: Partial<Equilibre> = {
+      militaryStrength: armée,
       armée,
       loyauté,
       morale,
@@ -151,6 +171,13 @@ export const GestionEquilibre = () => {
     };
     updateEquilibre(updatedEquilibre);
     toast.success("Facteurs militaires mis à jour");
+  };
+
+  // Format date handler for RecentEventsTable
+  const formatDate = (date: any) => {
+    if (typeof date === 'string') return date;
+    if (date && date.year && date.season) return `${date.year} - ${date.season}`;
+    return '';
   };
 
   return (
@@ -236,13 +263,13 @@ export const GestionEquilibre = () => {
                   <div>
                     <span className="text-muted-foreground text-sm">Patriciens</span>
                     <div className="font-medium text-3xl text-indigo-600">
-                      {equilibre.patriciens}%
+                      {equilibre.patriciens || equilibre.patricians}%
                     </div>
                   </div>
                   <div>
                     <span className="text-muted-foreground text-sm">Plébéiens</span>
                     <div className="font-medium text-3xl text-amber-600">
-                      {equilibre.plébéiens}%
+                      {equilibre.plébéiens || equilibre.plebeians}%
                     </div>
                   </div>
                 </div>
@@ -250,7 +277,7 @@ export const GestionEquilibre = () => {
                 <div>
                   <span className="text-muted-foreground text-sm">Stabilité Économique</span>
                   <div className="font-medium text-3xl text-emerald-600">
-                    {equilibre.économie}%
+                    {equilibre.économie || equilibre.economy}%
                   </div>
                 </div>
               </CardContent>
@@ -265,7 +292,7 @@ export const GestionEquilibre = () => {
                   <div>
                     <span className="text-muted-foreground text-sm">Puissance</span>
                     <div className="font-medium text-3xl text-red-600">
-                      {equilibre.armée}%
+                      {equilibre.armée || equilibre.militaryStrength}%
                     </div>
                   </div>
                   <div>
@@ -295,7 +322,7 @@ export const GestionEquilibre = () => {
                 </CardDescription>
               </CardHeader>
               <CardContent className="h-[300px] relative">
-                <EquilibreChart />
+                <EquilibreChart data={[]} />
               </CardContent>
             </Card>
             
@@ -304,7 +331,7 @@ export const GestionEquilibre = () => {
           
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             <div className="md:col-span-2">
-              <RecentEventsTable events={politicalEvents} />
+              <RecentEventsTable events={politicalEvents} formatDate={formatDate} />
             </div>
             
             <RiskFactorsList factors={riskFactors} />
@@ -317,7 +344,7 @@ export const GestionEquilibre = () => {
               equilibre={equilibre} 
               onUpdate={handleFactionUpdate} 
             />
-            <ThreatAssessment />
+            <ThreatAssessment threats={[]} />
           </div>
         </TabsContent>
         

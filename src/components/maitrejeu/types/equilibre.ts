@@ -36,6 +36,7 @@ export interface Equilibre {
   facteurMilitaire?: number;
   facteurReligieux?: number;
   economicStability?: number;
+  population?: number;
 }
 
 export interface PoliticalEvent {
@@ -52,4 +53,48 @@ export interface PoliticalEvent {
   faction?: string;
   resolved?: boolean;
   relatedTo?: string[];
+}
+
+export interface GameDate {
+  year: number;
+  season: string;
+}
+
+export interface RiskFactor {
+  id: string;
+  name: string;
+  severity: string;
+  description: string;
+  level: number;
+  type: string;
+  impact: Record<string, number>;
+  trend: 'increasing' | 'decreasing' | 'stable';
+}
+
+export interface EquilibreChartProps {
+  data: any;
+}
+
+export interface RecentEventsTableProps {
+  events: PoliticalEvent[];
+  formatDate: (date: any) => string;
+}
+
+export interface PoliticalBalanceCardProps {
+  equilibre: Equilibre;
+  onUpdate: (populares: number, optimates: number, moderates: number) => void;
+}
+
+export interface SocialStabilityCardProps {
+  equilibre: Equilibre;
+  onUpdate: (patriciens: number, plébéiens: number) => void;
+}
+
+export interface EconomicStabilityCardProps {
+  equilibre: Equilibre;
+  onUpdate: (economie: number) => void;
+}
+
+export interface ThreatAssessmentProps {
+  threats: any[];
 }

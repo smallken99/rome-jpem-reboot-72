@@ -1,81 +1,106 @@
-
 import React from 'react';
-import { Timeline, TimelineItemProps } from '@/components/ui/timeline';
 import { Badge } from '@/components/ui/badge';
-import { GavelIcon, FileTextIcon, CheckIcon, XIcon } from 'lucide-react';
-import { Loi } from '../../types/lois';
-import { formatAnyGameDate, ensureGameDate } from './utils/dateHelpers';
+import { Separator } from '@/components/ui/separator';
+import { formatGameDate } from '@/utils/dateUtils';
+import { Loi } from '@/components/maitrejeu/types/lois';
 
-interface LoiTimelineProps {
-  lois: Loi[];
+// Define the TimelineItemProps interface
+interface TimelineItemProps {
+  title: string;
+  content: React.ReactNode;
+  date?: string | { year: number; season: string };
+  status?: string;
+  type?: string;
+  description?: string;
 }
 
-export const LoiTimeline: React.FC<LoiTimelineProps> = ({ lois }) => {
-  // Sort lois by date
-  const sortedLois = [...lois].sort((a, b) => {
-    const dateA = ensureGameDate(a.date);
-    const dateB = ensureGameDate(b.date);
-    
-    if (dateA.year !== dateB.year) {
-      return dateA.year - dateB.year;
-    }
-    
-    const seasons = ['SPRING', 'SUMMER', 'AUTUMN', 'WINTER', 'Ver', 'Aestas', 'Autumnus', 'Hiems'];
-    const seasonA = seasons.indexOf(dateA.season);
-    const seasonB = seasons.indexOf(dateB.season);
-    
-    return seasonA - seasonB;
-  });
-  
-  // Generate timeline items
-  const timelineItems: TimelineItemProps[] = [];
-  
-  sortedLois.forEach(loi => {
-    // Add law creation event
-    timelineItems.push({
-      title: `Proposition de loi : ${loi.titre || loi.title || ''}`,
-      description: loi.description ? (loi.description.substring(0, 100) + (loi.description.length > 100 ? '...' : '')) : '',
-      date: formatAnyGameDate(loi.dateProposition || loi.date),
-      icon: <FileTextIcon className="h-4 w-4" />,
-      badge: <Badge variant="outline">{loi.catégorie || loi.category || ''}</Badge>
-    });
-    
-    // If the law is active or rejected, add that event
-    const status = loi.status || loi.état || loi.statut || '';
-    
-    if (status === 'active' || status === 'Promulguée' || status === 'adoptée' || status === 'promulguée') {
-      timelineItems.push({
-        title: `Loi adoptée : ${loi.titre || loi.title || ''}`,
-        description: `Cette loi a été promulguée avec ${loi.votesPositifs || loi.votesFor || (loi.votes?.pour || 0)} voix pour et ${loi.votesNégatifs || loi.votesAgainst || (loi.votes?.contre || 0)} voix contre.`,
-        date: formatAnyGameDate(loi.implementationDate || loi.date),
-        icon: <CheckIcon className="h-4 w-4" />,
-        badge: <Badge variant="success">Promulguée</Badge>
-      });
-    } else if (status === 'rejected' || status === 'Rejetée' || status === 'rejetée') {
-      timelineItems.push({
-        title: `Loi rejetée : ${loi.titre || loi.title || ''}`,
-        description: `Cette loi a été rejetée avec ${loi.votesNégatifs || loi.votesAgainst || (loi.votes?.contre || 0)} voix contre et ${loi.votesPositifs || loi.votesFor || (loi.votes?.pour || 0)} voix pour.`,
-        date: formatAnyGameDate(loi.date),
-        icon: <XIcon className="h-4 w-4" />,
-        badge: <Badge variant="destructive">Rejetée</Badge>
-      });
-    }
-  });
-  
-  // Sort all timeline items by date
-  timelineItems.sort((a, b) => {
-    if (!a.date || !b.date) return 0;
-    return String(a.date).localeCompare(String(b.date));
-  });
-  
+const TimelineItem: React.FC<TimelineItemProps> = ({
+  title,
+  content,
+  date,
+  status,
+  type,
+}) => {
   return (
-    <div className="space-y-4">
-      {timelineItems.length > 0 ? (
-        <Timeline items={timelineItems} />
-      ) : (
-        <div className="text-center py-8 text-muted-foreground">
-          Aucun événement législatif à afficher
+    <div className="flex mb-6">
+      <div className="timeline-marker mr-4"></div>
+      <div className="flex-1">
+        <div className="flex items-center justify-between mb-2">
+          <h3 className="text-lg font-medium">{title}</h3>
+          {date && <span className="text-sm text-muted-foreground">
+            {typeof date === 'string' ? date : `${date.year} - ${date.season}`}
+          </span>}
         </div>
+        <div className="text-sm mb-2">{content}</div>
+        <Separator className="my-3" />
+      </div>
+    </div>
+  );
+};
+
+interface LoiTimelineProps {
+  loi: Loi;
+}
+
+export const LoiTimeline: React.FC<LoiTimelineProps> = ({ loi }) => {
+  return (
+    <div className="relative">
+      <div className="timeline-line absolute left-4 top-0 h-full w-px bg-gray-300"></div>
+      
+      <TimelineItem
+        title="Proposition"
+        content={
+          <>
+            La loi a été proposée au Sénat.
+            <br />
+            <Badge variant="secondary" className="mt-2">
+              {loi.catégorie}
+            </Badge>
+          </>
+        }
+        date={loi.dateProposition}
+        status="proposée"
+        type="proposition"
+        description={loi.description}
+      />
+      
+      {loi.statut === 'en_débat' && (
+        <TimelineItem
+          title="Débat"
+          content="La loi est actuellement en discussion au Sénat."
+          date={loi.dateProposition}
+          status="en_débat"
+          type="débat"
+          description={loi.description}
+        />
+      )}
+      
+      {loi.statut === 'votée' && (
+        <TimelineItem
+          title="Vote"
+          content={
+            <>
+              La loi a été soumise au vote du Sénat.
+              <br />
+              Résultat: Pour {loi.votesPositifs}, Contre {loi.votesNégatifs}, Abstention {loi.abstentions}
+            </>
+          }
+          date={loi.date}
+          status="votée"
+          type="vote"
+          description={loi.description}
+        />
+      )}
+      
+      {loi.statut === 'promulguée' && (
+        <TimelineItem
+          title="Promulgation"
+          content="La loi a été officiellement promulguée et est désormais en vigueur."
+          date={loi.date}
+          status="promulguée"
+          type="promulgation"
+          description={loi.description}
+        />
       )}
     </div>
   );

@@ -12,6 +12,23 @@ export interface Slave {
   specialization?: string;
   assignment?: string;
   propertyId?: string;
+  assigned?: boolean;
+  assignedTo?: string;
+  productivity?: number;
+  value?: number;
+  strength?: number;
+  intelligence?: number;
+  status?: string;
+  purchaseDate?: string;
+  type?: string;
+}
+
+export interface SlaveAssignment {
+  slaveId: string;
+  propertyId: string;
+  role: string;
+  startDate: string;
+  efficiency: number;
 }
 
 export interface SlaveManagementHook {
@@ -25,8 +42,8 @@ export interface SlaveManagementHook {
   // Additional properties needed for SlavesOverview component
   totalSlaves: number;
   slavePrice: number;
-  assignedSlaves: number;
-  slaveAssignments: Record<string, string[]>;
+  assignedSlaves: number | Slave[];
+  slaveAssignments: Record<string, string[]> | SlaveAssignment[];
   purchaseSlaves: (count: number, type: string) => boolean;
   sellSlaves: (slaveIds: string[]) => number;
   assignSlavesToProperty: (slaveIds: string[], propertyId: string) => boolean;

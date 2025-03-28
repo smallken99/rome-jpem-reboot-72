@@ -33,7 +33,7 @@ export interface Preceptor {
   childId?: string;
   portrait?: string;
   
-  // Required properties
+  // Required properties for type compatibility
   description: string;
   teachingStyle: string;
   reputation: number;
@@ -68,7 +68,6 @@ export interface EducationPath {
   skills?: string[];
   bonuses?: {
     skills?: string[];
-    combat?: any;
     oratory?: number;
     piety?: number;
     popularity?: number;
@@ -92,7 +91,6 @@ export interface EducationPath {
   minAge?: number;
   maxAge?: number;
   cost?: number;
-  // Fix duplicate suitableFor property by combining it into a single property
   suitableFor?: Gender[] | {
     gender?: Gender | 'both';
     minAge?: number;
