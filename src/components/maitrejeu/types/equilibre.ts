@@ -60,6 +60,7 @@ export interface Equilibre {
   facteurReligieux?: number;
   population?: number;
   criminalityIndex?: number;
+  indiceCrime?: number;
 }
 
 export interface EquilibreChartProps {
