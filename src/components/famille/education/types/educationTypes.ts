@@ -67,6 +67,7 @@ export interface EducationPath {
   statBoost: string;
   icon: string;
   specialties: string[];
+  bonuses?: Record<string, any>;
   
   requirements: {
     age: number;
@@ -85,7 +86,6 @@ export interface EducationPath {
   minAge?: number;
   maxAge?: number;
   cost?: number;
-  // Making sure we don't have duplicate properties
   suitableFor?: Gender[] | {
     gender?: Gender | 'both';
     minAge?: number;

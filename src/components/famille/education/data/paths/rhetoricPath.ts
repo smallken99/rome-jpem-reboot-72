@@ -18,5 +18,19 @@ export const rhetoricPath: EducationPath = {
       popularity: 15
     }
   },
-  suitableFor: ['male', 'female']
+  suitableFor: ['male', 'female'],
+  
+  // Add missing required properties
+  benefits: [
+    'Excellence dans l\'art de la parole',
+    'Capacité à persuader et influencer',
+    'Compétences en débat public'
+  ],
+  statBoost: 'oratory',
+  icon: '📣',
+  specialties: ['Éloquence', 'Débat', 'Persuasion', 'Composition'],
+  requirements: {
+    age: 13,
+    gender: 'both'
+  }
 };

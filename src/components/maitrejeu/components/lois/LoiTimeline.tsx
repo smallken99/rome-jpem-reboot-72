@@ -1,11 +1,11 @@
 
 import React from 'react';
-import { Timeline, TimelineItem } from '@/components/ui/timeline';
+import { Timeline } from '@/components/ui/timeline';
 import { formatDate } from '@/utils/dateUtils';
 import { Loi } from '@/components/maitrejeu/types/lois';
 
 export interface LoiTimelineProps {
-  loi: Loi;
+  loi?: Loi;
   lois?: Loi[];
 }
 
@@ -13,11 +13,9 @@ export interface TimelineItemProps {
   title: string;
   content?: React.ReactNode;
   date?: { year: number; season: string } | string;
-  description?: string;
 }
 
 export const LoiTimeline: React.FC<LoiTimelineProps> = ({ loi, lois }) => {
-  const items: TimelineItemProps[] = [];
   const loiItems = lois || (loi ? [loi] : []);
   
   if (loiItems.length === 0) {
@@ -25,7 +23,9 @@ export const LoiTimeline: React.FC<LoiTimelineProps> = ({ loi, lois }) => {
   }
   
   // Combine all timeline events from all laws
-  loiItems.forEach(currentLoi => {
+  const timelineItems = loiItems.flatMap(currentLoi => {
+    const items = [];
+    
     // Proposition event
     items.push({
       title: "Proposition",
@@ -34,8 +34,7 @@ export const LoiTimeline: React.FC<LoiTimelineProps> = ({ loi, lois }) => {
           <p className="text-sm">{currentLoi.description}</p>
           <p className="text-xs text-muted-foreground">Par: {currentLoi.proposeur}</p>
         </div>,
-      date: currentLoi.dateProposition || currentLoi.date,
-      description: `Loi proposée par ${currentLoi.proposeur}`
+      date: currentLoi.dateProposition || currentLoi.date
     });
     
     // Implementation event if implemented
@@ -43,8 +42,7 @@ export const LoiTimeline: React.FC<LoiTimelineProps> = ({ loi, lois }) => {
       items.push({
         title: "Mise en application",
         content: <p className="text-sm">La loi a été votée et mise en application</p>,
-        date: currentLoi.implementationDate || currentLoi.date,
-        description: "Loi mise en application"
+        date: currentLoi.implementationDate || currentLoi.date
       });
     }
     
@@ -53,14 +51,15 @@ export const LoiTimeline: React.FC<LoiTimelineProps> = ({ loi, lois }) => {
       items.push({
         title: "Rejet",
         content: <p className="text-sm">La loi a été rejetée par le Sénat</p>,
-        date: currentLoi.date,
-        description: "Loi rejetée"
+        date: currentLoi.date
       });
     }
+    
+    return items;
   });
   
   // Sort items by date
-  items.sort((a, b) => {
+  timelineItems.sort((a, b) => {
     if (!a.date || !b.date) return 0;
     if (typeof a.date === 'string' && typeof b.date === 'string') {
       return new Date(a.date).getTime() - new Date(b.date).getTime();
@@ -75,19 +74,16 @@ export const LoiTimeline: React.FC<LoiTimelineProps> = ({ loi, lois }) => {
   
   return (
     <Timeline>
-      {items.map((item, index) => (
-        <TimelineItem 
-          key={index}
-          title={item.title}
-          content={item.content}
-          date={
-            item.date 
-              ? (typeof item.date === 'string' 
-                  ? item.date 
-                  : `Année ${item.date.year}, ${item.date.season}`)
-              : undefined
-          }
-        />
+      {timelineItems.map((item, index) => (
+        <div key={index}>
+          <h4 className="font-medium">{item.title}</h4>
+          {item.content}
+          <p className="text-xs text-muted-foreground mt-1">
+            {typeof item.date === 'string' 
+              ? item.date 
+              : item.date ? `Année ${item.date.year}, ${item.date.season}` : ''}
+          </p>
+        </div>
       ))}
     </Timeline>
   );

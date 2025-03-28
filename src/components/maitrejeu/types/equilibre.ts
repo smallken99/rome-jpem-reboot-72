@@ -38,6 +38,7 @@ export interface Equilibre {
   economicStability?: number;
   population?: number;
   criminalityIndex?: number;
+  rebellionThreshold?: number;
 }
 
 export interface PoliticalEvent {
@@ -67,7 +68,7 @@ export interface RiskFactor {
   severity: 'low' | 'medium' | 'high' | 'critical';
   description: string;
   level: 'low' | 'medium' | 'high' | 'critical';
-  type: string;
+  type: 'military' | 'political' | 'economic' | 'social' | string;
   impact: Record<string, number>;
   trend: 'increasing' | 'decreasing' | 'stable';
 }
@@ -82,17 +83,20 @@ export interface RecentEventsTableProps {
 }
 
 export interface PoliticalBalanceCardProps {
-  equilibre: Equilibre;
+  populares: number;
+  optimates: number;
+  moderates: number;
   onUpdate: (populares: number, optimates: number, moderates: number) => void;
 }
 
 export interface SocialStabilityCardProps {
-  equilibre: Equilibre;
+  patriciens: number;
+  plébéiens: number;
   onUpdate: (patriciens: number, plébéiens: number) => void;
 }
 
 export interface EconomicStabilityCardProps {
-  equilibre: Equilibre;
+  economie: number;
   onUpdate: (economie: number) => void;
 }
 

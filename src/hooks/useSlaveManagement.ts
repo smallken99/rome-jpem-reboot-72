@@ -1,7 +1,7 @@
-
 import { useState, useEffect } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 
+// Slave interface
 export interface Slave {
   id: string;
   name: string;
@@ -9,27 +9,31 @@ export interface Slave {
   gender: 'male' | 'female';
   origin: string;
   price: number;
-  type: string; 
-  skills: any[];
+  type: string;
+  skills: string[];
   health: number;
   loyalty: number;
   strength: number;
   intelligence: number;
-  status: 'idle' | 'assigned' | 'training' | 'recovering';
+  status: 'idle' | 'assigned' | 'training' | 'ill' | 'escaped';
   purchaseDate: string;
+  assignment?: string;
+  assignmentId?: string;
 }
 
+// Slave Assignment interface
 export interface SlaveAssignment {
   id: string;
-  slaveId: string;
-  propertyId: string;
-  propertyName: string;
-  role: string;
-  startDate: string;
-  endDate?: string;
-  productivity: number;
+  name: string;
+  location: string;
+  type: string;
+  capacity: number;
+  assignedSlaves: string[];
+  efficiency: number;
+  description: string;
 }
 
+// Slave Management Hook interface
 export interface SlaveManagementHook {
   slaves: Slave[];
   loading: boolean;
@@ -38,13 +42,15 @@ export interface SlaveManagementHook {
   assignedSlaves: Slave[];
   slaveAssignments: SlaveAssignment[];
   balance: number;
+  
+  // Functions
   purchaseSlave: (slave: Slave, amount: number) => boolean;
   sellSlave: (slaveId: string) => number;
   assignSlave: (slaveId: string, assignmentId: string) => boolean;
   trainSlave: (slaveId: string, skill: string) => boolean;
   purchaseSlaves: (count: number, type: string) => boolean;
-  sellSlaves: (slaves: string[]) => number;
-  assignSlavesToProperty: (slaveIds: string[], propertyId: string, role: string) => boolean;
+  sellSlaves: (slaveIds: string[]) => number;
+  assignSlavesToProperty: (slaveIds: string[], propertyId: string) => boolean;
   removeSlaveAssignment: (slaveId: string) => boolean;
 }
 
@@ -126,7 +132,7 @@ export const useSlaveManagement = (): SlaveManagementHook => {
     return total;
   };
   
-  const assignSlavesToProperty = (slaveIds: string[], propertyId: string, role: string) => {
+  const assignSlavesToProperty = (slaveIds: string[], propertyId: string) => {
     slaveIds.forEach(id => {
       assignSlave(id, propertyId);
     });

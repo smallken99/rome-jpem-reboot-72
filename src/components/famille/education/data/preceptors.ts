@@ -20,7 +20,12 @@ const preceptorsData: Preceptor[] = [
     status: 'available',
     available: true,
     assigned: false,
-    specialties: ['Combat au glaive', 'Tactique de légion']
+    specialties: ['Combat au glaive', 'Tactique de légion'],
+    
+    // Add missing required properties
+    description: 'Un vétéran des campagnes militaires qui a servi sous différents généraux et peut enseigner toutes les facettes de l\'art de la guerre.',
+    teachingStyle: 'Rigoureux et exigeant, instille la discipline',
+    reputation: 80
   },
   {
     id: 'p2',
@@ -38,7 +43,12 @@ const preceptorsData: Preceptor[] = [
     status: 'available',
     available: true,
     assigned: false,
-    specialties: ['Discours public', 'Débat politique']
+    specialties: ['Discours public', 'Débat politique'],
+    
+    // Add missing required properties
+    description: 'Maître de la parole et de l\'argumentation, ayant étudié à Athènes et enseigné à de nombreux patriciens.',
+    teachingStyle: 'Dialogues socratiques et exercices pratiques',
+    reputation: 90
   },
   {
     id: 'p3',
@@ -56,7 +66,12 @@ const preceptorsData: Preceptor[] = [
     status: 'available',
     available: true,
     assigned: false,
-    specialties: ['Rites domestiques', 'Traditions familiales']
+    specialties: ['Rites domestiques', 'Traditions familiales'],
+    
+    // Add missing required properties
+    description: 'Versée dans tous les rituels religieux romains et connaissant parfaitement les traditions des cultes officiels.',
+    teachingStyle: 'Immersion dans les pratiques rituelles et apprentissage par observation',
+    reputation: 75
   },
   {
     id: 'p4',
@@ -74,7 +89,12 @@ const preceptorsData: Preceptor[] = [
     status: 'available',
     available: true,
     assigned: false,
-    specialties: ['Loi romaine', 'Administration publique']
+    specialties: ['Loi romaine', 'Administration publique'],
+    
+    // Add missing required properties
+    description: 'Connaisseur de tous les rouages politiques de Rome et du fonctionnement du Sénat, ayant servi comme conseiller aux plus hauts niveaux.',
+    teachingStyle: 'Études de cas et exercices pratiques de négociation',
+    reputation: 95
   },
   {
     id: 'p5',
@@ -92,7 +112,12 @@ const preceptorsData: Preceptor[] = [
     status: 'available',
     available: true,
     assigned: false,
-    specialties: ['Philosophie stoïcienne', 'Mathématiques']
+    specialties: ['Philosophie stoïcienne', 'Mathématiques'],
+    
+    // Add missing required properties
+    description: 'Érudit dans de nombreux domaines intellectuels, de la philosophie grecque aux mathématiques et à l\'astronomie.',
+    teachingStyle: 'Questions philosophiques et réflexion critique',
+    reputation: 85
   }
 ];
 
@@ -136,6 +161,11 @@ export const generatePreceptor = (type: EducationType, quality: number = 3): Pre
     status: 'available',
     available: true,
     assigned: false,
-    specialties: []
+    specialties: [],
+    
+    // Add missing required properties
+    description: `Précepteur spécialisé en ${type}, avec une expérience de ${5 + quality} ans d'enseignement.`,
+    teachingStyle: 'Adaptatif selon les besoins de l\'élève',
+    reputation: 50 + (quality * 10)
   };
 };

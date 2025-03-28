@@ -18,5 +18,19 @@ export const politicalPath: EducationPath = {
       popularity: 15
     }
   },
-  suitableFor: ['male', 'female']
+  suitableFor: ['male', 'female'],
+  
+  // Add missing required properties
+  benefits: [
+    'Compréhension du système politique',
+    'Réseau de contacts influents',
+    'Capacité à gouverner'
+  ],
+  statBoost: 'oratory',
+  icon: '🏛️',
+  specialties: ['Droit romain', 'Négociation', 'Réseautage', 'Administration'],
+  requirements: {
+    age: 14,
+    gender: 'both'
+  }
 };

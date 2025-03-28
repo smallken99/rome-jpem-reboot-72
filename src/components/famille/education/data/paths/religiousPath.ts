@@ -18,5 +18,19 @@ export const religiousPath: EducationPath = {
       popularity: 10
     }
   },
-  suitableFor: ['male', 'female']
+  suitableFor: ['male', 'female'],
+  
+  // Add missing required properties
+  benefits: [
+    'Faveur des dieux',
+    'Respect de la communauté',
+    'Accès aux positions religieuses'
+  ],
+  statBoost: 'piety',
+  icon: '🏺',
+  specialties: ['Rituels', 'Auspices', 'Présages', 'Traditions'],
+  requirements: {
+    age: 10,
+    gender: 'both'
+  }
 };

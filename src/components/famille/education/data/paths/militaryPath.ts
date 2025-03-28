@@ -18,5 +18,19 @@ export const militaryPath: EducationPath = {
       oratory: 10
     }
   },
-  suitableFor: ['male']
+  suitableFor: ['male'],
+  
+  // Add missing required properties
+  benefits: [
+    'Carrière dans l\'armée romaine',
+    'Respect des soldats',
+    'Compétences de leadership'
+  ],
+  statBoost: 'martialEducation',
+  icon: '⚔️',
+  specialties: ['Commandement', 'Tactique', 'Combat au glaive', 'Stratégie'],
+  requirements: {
+    age: 12,
+    gender: 'male'
+  }
 };

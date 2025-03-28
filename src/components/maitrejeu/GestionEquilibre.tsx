@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -23,7 +22,6 @@ export const GestionEquilibre = () => {
   const { equilibre, updateEquilibre, updateFactionBalance } = useMaitreJeu();
   const [activeTab, setActiveTab] = useState('apercu');
   
-  // Données fictives pour démonstration
   const politicalEvents: PoliticalEvent[] = [
     {
       id: '1',
@@ -97,40 +95,39 @@ export const GestionEquilibre = () => {
     }
   ];
   
-  const riskFactors: RiskFactor[] = [
+  const risks: RiskFactor[] = [
     {
-      id: '1',
-      name: 'Pénurie alimentaire',
-      severity: 'high',
-      description: 'Les réserves de grain sont dangereusement basses',
-      level: 75,
-      type: 'economic',
-      impact: { foodSupply: -20, publicOrder: -15 },
+      id: 'risk-1',
+      name: 'Mécontentement plébéien',
+      severity: 'medium',
+      level: 'medium',
+      description: 'Grogne populaire à cause des prix du grain',
+      type: 'social',
+      impact: { stability: -10, plébéiens: -15 },
       trend: 'increasing'
     },
     {
-      id: '2',
-      name: 'Mécontentement militaire',
-      severity: 'medium',
-      description: 'Plusieurs légions attendent leur solde',
-      level: 50,
-      type: 'military',
-      impact: { militaryStrength: -10, loyalty: -15 },
+      id: 'risk-2',
+      name: 'Tensions au Sénat',
+      severity: 'high',
+      level: 'high',
+      description: 'Les factions s\'opposent sur la politique étrangère',
+      type: 'political',
+      impact: { stability: -5, optimates: -10, populares: -10 },
       trend: 'stable'
     },
     {
-      id: '3',
-      name: 'Tensions avec Carthage',
-      severity: 'low',
-      description: 'Incidents frontaliers mineurs signalés',
-      level: 25,
-      type: 'diplomatic',
-      impact: { stability: -5 },
-      trend: 'decreasing'
+      id: 'risk-3',
+      name: 'Menace militaire',
+      severity: 'critical',
+      level: 'critical',
+      description: 'Mouvements ennemis signalés aux frontières',
+      type: 'military',
+      impact: { militaryStrength: -15, stability: -20 },
+      trend: 'increasing'
     }
   ];
   
-  // Handlers pour les mises à jour d'équilibre
   const handleFactionUpdate = (populares: number, optimates: number, moderates: number) => {
     updateFactionBalance(populares, optimates, moderates);
     toast.success("Équilibre des factions mis à jour", {
@@ -173,7 +170,6 @@ export const GestionEquilibre = () => {
     toast.success("Facteurs militaires mis à jour");
   };
 
-  // Format date handler for RecentEventsTable
   const formatDate = (date: any) => {
     if (typeof date === 'string') return date;
     if (date && date.year && date.season) return `${date.year} - ${date.season}`;
@@ -181,7 +177,7 @@ export const GestionEquilibre = () => {
   };
 
   return (
-    <div className="p-6 space-y-6">
+    <div className="space-y-6 p-6">
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold">Équilibre de la République</h1>
@@ -331,10 +327,13 @@ export const GestionEquilibre = () => {
           
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             <div className="md:col-span-2">
-              <RecentEventsTable events={politicalEvents} formatDate={formatDate} />
+              <RecentEventsTable 
+                events={politicalEvents}
+                formatDate={(date) => typeof date === 'string' ? date : `${date.year}, ${date.season}`}
+              />
             </div>
             
-            <RiskFactorsList factors={riskFactors} />
+            <RiskFactorsList factors={risks} />
           </div>
         </TabsContent>
         

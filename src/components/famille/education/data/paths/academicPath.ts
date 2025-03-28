@@ -19,5 +19,19 @@ export const academicPath: EducationPath = {
       popularity: 10
     }
   },
-  suitableFor: ['male', 'female']
+  suitableFor: ['male', 'female'],
+  
+  // Add missing required properties
+  benefits: [
+    'Meilleure compréhension du monde',
+    'Capacité à débattre sur des sujets complexes',
+    'Prestige intellectuel'
+  ],
+  statBoost: 'oratory',
+  icon: '📚',
+  specialties: ['Philosophie', 'Mathématiques', 'Astronomie', 'Littérature'],
+  requirements: {
+    age: 12,
+    gender: 'both'
+  }
 };
