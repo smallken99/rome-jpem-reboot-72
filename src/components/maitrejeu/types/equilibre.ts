@@ -34,15 +34,22 @@ export interface Equilibre {
   facteurPatriciens?: number;
   facteurPlebs?: number;
   facteurMilitaire?: number;
+  facteurReligieux?: number;
   economicStability?: number;
 }
 
 export interface PoliticalEvent {
   id: string;
   title: string;
+  name?: string;
   description: string;
   date: string | { year: number; season: string };
   type: string;
   impact: Record<string, number>;
   severity: 'low' | 'medium' | 'high' | 'critical';
+  importance?: string;
+  source?: string;
+  faction?: string;
+  resolved?: boolean;
+  relatedTo?: string[];
 }

@@ -4,38 +4,44 @@ import { LoiType, LoiState, ImportanceType } from '@/components/maitrejeu/compon
 export interface Loi {
   id: string;
   titre: string;
+  title?: string;
   description: string;
   proposeur: string;
+  proposedBy?: string;
+  auteur?: string;
   catégorie: string;
+  category?: string;
   date: { year: number; season: string };
+  dateProposition?: { year: number; season: string } | string;
+  implementationDate?: { year: number; season: string } | string;
   état: string | LoiState;
+  status?: string;
+  statut?: string;
   importance: string | ImportanceType;
   votesPositifs: number;
   votesNégatifs: number;
-  impacts: Record<string, number>;
-  type: string | LoiType;
-  effets: string[];
-  clauses: string[];
-  commentaires: string[];
-  history: any[];
-  tags: string[];
-  supporters?: string[];
-  opposants?: string[];
-  
-  // Additional properties for compatibility
-  title?: string;
-  proposedBy?: string;
-  auteur?: string;
-  status?: string;
-  statut?: string;
-  category?: string;
   votesFor?: number;
   votesAgainst?: number;
   abstentions?: number;
   votesAbstention?: number;
-  dateProposition?: { year: number; season: string } | string;
-  votes?: any;
+  impacts: Record<string, number>;
+  type: string | LoiType;
+  effets: string[];
+  clauses: string[];
   conditions?: string[];
   pénalités?: string[];
+  commentaires: string[];
+  history: any[];
+  tags: string[];
+  supporters?: string[];
   soutiens?: string[];
+  opposants?: string[];
+  votes?: any;
+  notes?: string;
+  contenu?: string;
+  categorieId?: string;
+  catégorieId?: string;
 }
+
+// Export the enum types to make them available
+export { LoiType, LoiState, ImportanceType };

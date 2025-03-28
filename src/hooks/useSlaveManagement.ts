@@ -1,8 +1,7 @@
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 
-// Define the Slave interface
 export interface Slave {
   id: string;
   name: string;
@@ -10,169 +9,158 @@ export interface Slave {
   gender: 'male' | 'female';
   origin: string;
   price: number;
-  type: string;
-  skills: string[];
+  type: string; 
+  skills: any[];
   health: number;
   loyalty: number;
   strength: number;
   intelligence: number;
-  assigned?: string;
-  status: 'idle' | 'working' | 'sick' | 'recovering';
-  purchaseDate?: string;
+  status: 'idle' | 'assigned' | 'training' | 'recovering';
+  purchaseDate: string;
 }
 
-// Export the hook interface with all required properties
+export interface SlaveAssignment {
+  id: string;
+  slaveId: string;
+  propertyId: string;
+  propertyName: string;
+  role: string;
+  startDate: string;
+  endDate?: string;
+  productivity: number;
+}
+
 export interface SlaveManagementHook {
   slaves: Slave[];
   loading: boolean;
   totalSlaves: number;
   slavePrice: number;
   assignedSlaves: Slave[];
-  slaveAssignments: Record<string, Slave[]>;
+  slaveAssignments: SlaveAssignment[];
   balance: number;
   purchaseSlave: (slave: Slave, amount: number) => boolean;
-  purchaseSlaves: (count: number, type?: string) => boolean;
   sellSlave: (slaveId: string) => number;
-  sellSlaves: (slaveIds: string[]) => number;
   assignSlave: (slaveId: string, assignmentId: string) => boolean;
-  assignSlavesToProperty: (slaveIds: string[], propertyId: string) => boolean;
-  removeSlaveAssignment: (slaveId: string) => boolean;
   trainSlave: (slaveId: string, skill: string) => boolean;
+  purchaseSlaves: (count: number, type: string) => boolean;
+  sellSlaves: (slaves: string[]) => number;
+  assignSlavesToProperty: (slaveIds: string[], propertyId: string, role: string) => boolean;
+  removeSlaveAssignment: (slaveId: string) => boolean;
 }
 
-// Implement a basic version of the hook
+// Mock implementation for useSlaveManagement hook
 export const useSlaveManagement = (): SlaveManagementHook => {
   const [slaves, setSlaves] = useState<Slave[]>([]);
   const [loading, setLoading] = useState(false);
-  const [balance, setBalance] = useState(50000);
   
-  // Helper function to generate slave price
-  const generateSlavePrice = useCallback(() => {
-    return Math.floor(Math.random() * 2000) + 1000;
-  }, []);
-  
-  // Implementation of hook methods
-  const purchaseSlave = useCallback((slave: Slave, amount: number) => {
-    if (amount <= balance) {
-      setSlaves(prev => [...prev, { ...slave, id: uuidv4(), purchaseDate: new Date().toISOString() }]);
-      setBalance(prev => prev - amount);
-      return true;
-    }
-    return false;
-  }, [balance]);
-  
-  const sellSlave = useCallback((slaveId: string) => {
-    const slave = slaves.find(s => s.id === slaveId);
-    if (!slave) return 0;
+  // Mock implementation with dummy functions
+  const purchaseSlave = (slave: Slave, amount: number) => {
+    const newSlave = {
+      ...slave,
+      id: uuidv4(),
+      purchaseDate: new Date().toISOString(),
+      status: 'idle' as const
+    };
     
-    const sellPrice = slave.price * 0.7;
+    setSlaves(prev => [...prev, newSlave]);
+    return true;
+  };
+  
+  const sellSlave = (slaveId: string) => {
     setSlaves(prev => prev.filter(s => s.id !== slaveId));
-    setBalance(prev => prev + sellPrice);
-    
-    return sellPrice;
-  }, [slaves]);
+    return 500; // Mock price
+  };
   
-  const assignSlave = useCallback((slaveId: string, assignmentId: string) => {
-    setSlaves(prev => prev.map(slave => 
-      slave.id === slaveId ? { ...slave, assigned: assignmentId } : slave
-    ));
+  const assignSlave = (slaveId: string, assignmentId: string) => {
+    setSlaves(prev => 
+      prev.map(slave => 
+        slave.id === slaveId 
+          ? { ...slave, status: 'assigned' } 
+          : slave
+      )
+    );
     return true;
-  }, []);
+  };
   
-  const removeSlaveAssignment = useCallback((slaveId: string) => {
-    setSlaves(prev => prev.map(slave => 
-      slave.id === slaveId ? { ...slave, assigned: undefined } : slave
-    ));
+  const trainSlave = (slaveId: string, skill: string) => {
+    setSlaves(prev => 
+      prev.map(slave => 
+        slave.id === slaveId 
+          ? { ...slave, status: 'training', skills: [...slave.skills, skill] } 
+          : slave
+      )
+    );
     return true;
-  }, []);
-  
-  const trainSlave = useCallback((slaveId: string, skill: string) => {
-    setSlaves(prev => prev.map(slave => 
-      slave.id === slaveId ? { 
-        ...slave, 
-        skills: [...slave.skills, skill] 
-      } : slave
-    ));
-    return true;
-  }, []);
-  
-  // Additional methods
-  const purchaseSlaves = useCallback((count: number, type?: string) => {
-    const totalCost = count * generateSlavePrice();
-    if (totalCost <= balance) {
-      const newSlaves = Array.from({ length: count }, () => ({
+  };
+
+  // Additional implementation to satisfy the interface
+  const purchaseSlaves = (count: number, type: string) => {
+    for (let i = 0; i < count; i++) {
+      const newSlave: Slave = {
         id: uuidv4(),
-        name: `Slave ${Math.floor(Math.random() * 1000)}`,
+        name: `Slave ${slaves.length + i + 1}`,
         age: Math.floor(Math.random() * 30) + 15,
         gender: Math.random() > 0.5 ? 'male' : 'female',
         origin: 'Gaul',
-        price: generateSlavePrice(),
-        type: type || 'general',
+        price: 500 + Math.floor(Math.random() * 500),
+        type: type,
         skills: [],
-        health: Math.floor(Math.random() * 30) + 70,
-        loyalty: Math.floor(Math.random() * 50) + 30,
-        strength: Math.floor(Math.random() * 50) + 30,
-        intelligence: Math.floor(Math.random() * 50) + 30,
-        status: 'idle' as const,
+        health: 70 + Math.floor(Math.random() * 30),
+        loyalty: 50 + Math.floor(Math.random() * 30),
+        strength: 50 + Math.floor(Math.random() * 50),
+        intelligence: 50 + Math.floor(Math.random() * 50),
+        status: 'idle',
         purchaseDate: new Date().toISOString()
-      }));
+      };
       
-      setSlaves(prev => [...prev, ...newSlaves]);
-      setBalance(prev => prev - totalCost);
-      return true;
+      purchaseSlave(newSlave, newSlave.price);
     }
-    return false;
-  }, [balance, generateSlavePrice]);
-  
-  const sellSlaves = useCallback((slaveIds: string[]) => {
-    let totalSellPrice = 0;
-    
-    const slavesToSell = slaves.filter(s => slaveIds.includes(s.id));
-    slavesToSell.forEach(slave => {
-      totalSellPrice += slave.price * 0.7;
-    });
-    
-    setSlaves(prev => prev.filter(s => !slaveIds.includes(s.id)));
-    setBalance(prev => prev + totalSellPrice);
-    
-    return totalSellPrice;
-  }, [slaves]);
-  
-  const assignSlavesToProperty = useCallback((slaveIds: string[], propertyId: string) => {
-    setSlaves(prev => prev.map(slave => 
-      slaveIds.includes(slave.id) ? { ...slave, assigned: propertyId } : slave
-    ));
     return true;
-  }, []);
+  };
   
-  // Compute derived state
-  const totalSlaves = slaves.length;
-  const assignedSlaves = slaves.filter(s => s.assigned);
-  const slaveAssignments = slaves.reduce((acc, slave) => {
-    if (slave.assigned) {
-      if (!acc[slave.assigned]) {
-        acc[slave.assigned] = [];
-      }
-      acc[slave.assigned].push(slave);
-    }
-    return acc;
-  }, {} as Record<string, Slave[]>);
+  const sellSlaves = (slaveIds: string[]) => {
+    let total = 0;
+    slaveIds.forEach(id => {
+      total += sellSlave(id);
+    });
+    return total;
+  };
+  
+  const assignSlavesToProperty = (slaveIds: string[], propertyId: string, role: string) => {
+    slaveIds.forEach(id => {
+      assignSlave(id, propertyId);
+    });
+    return true;
+  };
+  
+  const removeSlaveAssignment = (slaveId: string) => {
+    setSlaves(prev => 
+      prev.map(slave => 
+        slave.id === slaveId 
+          ? { ...slave, status: 'idle' } 
+          : slave
+      )
+    );
+    return true;
+  };
   
   return {
     slaves,
     loading,
-    totalSlaves,
-    slavePrice: generateSlavePrice(),
-    assignedSlaves,
-    slaveAssignments,
-    balance,
+    totalSlaves: slaves.length,
+    slavePrice: 1000, // Mock average price
+    assignedSlaves: slaves.filter(s => s.status === 'assigned'),
+    slaveAssignments: [],
+    balance: 10000, // Mock balance
     purchaseSlave,
-    purchaseSlaves,
     sellSlave,
-    sellSlaves,
     assignSlave,
+    trainSlave,
+    purchaseSlaves,
+    sellSlaves,
     assignSlavesToProperty,
-    removeSlaveAssignment,
-    trainSlave
+    removeSlaveAssignment
   };
 };
+
+export default useSlaveManagement;

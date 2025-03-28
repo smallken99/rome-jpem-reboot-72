@@ -92,12 +92,13 @@ export interface EducationPath {
   minAge?: number;
   maxAge?: number;
   cost?: number;
+  // Fix duplicate suitableFor property by combining it into a single property
   suitableFor?: Gender[] | {
     gender?: Gender | 'both';
     minAge?: number;
     maxAge?: number;
     includes?: (gender: Gender) => boolean;
-  } | string[];
+  };
 }
 
 export interface ChildEducation {

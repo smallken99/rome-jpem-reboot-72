@@ -1,3 +1,17 @@
+
+export enum BuildingType {
+  VILLA = 'villa',
+  FARM = 'farm',
+  WORKSHOP = 'workshop',
+  ESTATE = 'estate',
+  DOMUS = 'domus',
+  INSULA = 'insula',
+  SHOP = 'shop',
+  WAREHOUSE = 'warehouse',
+  TEMPLE = 'temple',
+  FORUM = 'forum'
+}
+
 export interface BuildingDescription {
   id: string;
   name: string;
