@@ -5,7 +5,7 @@ export interface PropertyUpgrade {
   description: string;
   cost: number;
   effect: string | Record<string, any>;
-  effects?: Record<string, any>; // Pour la compatibilité avec le code existant
+  effects?: Record<string, any>; // For compatibility with the code
   type: string;
   installed: boolean;
   requirements?: {

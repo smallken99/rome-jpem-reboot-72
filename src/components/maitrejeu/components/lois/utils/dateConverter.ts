@@ -1,72 +1,41 @@
 
-import { GameDate } from '@/components/maitrejeu/types/common';
+import { GameDate } from '@/types/game';
 
 export const gameOrJsDateToDate = (date: GameDate | Date): Date => {
-  if (date instanceof Date) {
-    return date;
-  }
+  if (date instanceof Date) return date;
   
-  // Convert GameDate to JavaScript Date
-  // Assuming winter is Dec, autumn is Sep, summer is Jun, spring is Mar
-  const month = date.season === 'winter' ? 11 : 
-               date.season === 'autumn' ? 8 : 
-               date.season === 'summer' ? 5 : 2;
-  
-  return new Date(date.year, month, 15); // 15th day of the corresponding month
-};
-
-export const formatGameDate = (date: GameDate): string => {
-  const seasonMap: Record<string, string> = {
-    'spring': 'Printemps',
-    'SPRING': 'Printemps',
-    'summer': 'Été',
-    'SUMMER': 'Été',
-    'autumn': 'Automne',
-    'AUTUMN': 'Automne',
-    'winter': 'Hiver',
-    'WINTER': 'Hiver'
+  // If it's a GameDate, convert to a JS Date
+  const seasonMonth: Record<string, number> = {
+    winter: 0, // January
+    spring: 3, // April
+    summer: 6, // July
+    fall: 9 // October
   };
   
-  return `${date.year} (${seasonMap[date.season] || date.season})`;
+  return new Date(date.year, seasonMonth[date.season] || 0, 1);
 };
 
-export const compareGameDates = (a: GameDate, b: GameDate): number => {
-  const seasonValue = (season: string): number => {
-    switch (season.toLowerCase()) {
-      case 'spring': return 0;
-      case 'summer': return 1;
-      case 'autumn': return 2;
-      case 'winter': return 3;
-      default: return 0;
-    }
-  };
-  
-  if (a.year !== b.year) {
-    return a.year - b.year;
-  }
-  
-  return seasonValue(a.season) - seasonValue(b.season);
-};
-
-// Additional utility functions needed
 export const gameDateToString = (date: GameDate): string => {
-  return formatGameDate(date);
+  const seasonName: Record<string, string> = {
+    winter: 'Hiver',
+    spring: 'Printemps',
+    summer: 'Été',
+    fall: 'Automne'
+  };
+  
+  return `${seasonName[date.season]} ${date.year}`;
 };
 
-export const gameDateToDate = (date: GameDate): Date => {
-  return gameOrJsDateToDate(date);
+export const extractLoiDateInfo = (loi: any): { year: number; season: string } => {
+  if (loi?.date?.year && loi?.date?.season) {
+    return { year: loi.date.year, season: loi.date.season };
+  }
+  return { year: new Date().getFullYear(), season: 'winter' };
 };
 
 export const gameDateToStringOrDate = (date: GameDate | Date): string => {
   if (date instanceof Date) {
     return date.toLocaleDateString();
   }
-  return formatGameDate(date);
-};
-
-export const extractLoiDateInfo = (date: GameDate): { year: number; season: string } => {
-  return {
-    year: date.year,
-    season: date.season
-  };
+  return gameDateToString(date as GameDate);
 };
