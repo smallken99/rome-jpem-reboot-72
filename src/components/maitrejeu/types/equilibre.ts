@@ -25,6 +25,10 @@ export interface Equilibre {
   plébéiens?: number;
   populaires?: number;
   
+  // Political factions
+  optimates?: number;
+  moderates?: number;
+  
   // Special factors
   facteurSenat?: number;
   facteurPatriciens?: number;
@@ -49,6 +53,7 @@ export interface HistoriqueEntry {
 export type RiskFactorLevel = 'low' | 'medium' | 'high' | 'critical';
 
 export interface RiskFactor {
+  id: string;
   name: string;
   level: RiskFactorLevel;
   type: 'military' | 'political' | 'economic' | 'social' | string;
@@ -89,6 +94,7 @@ export interface PoliticalEvent {
   name?: string;
   description: string;
   date: string | { year: number; season: string };
+  endDate?: string | { year: number; season: string };
   type: string;
   impact: Record<string, number>;
   severity: 'low' | 'medium' | 'high' | 'critical';
@@ -97,6 +103,9 @@ export interface PoliticalEvent {
   faction?: string;
   resolved?: boolean;
   relatedTo?: string[];
+  tags?: string[];
+  actions?: any[];
+  nom?: string;
 }
 
 export interface EquilibreChartProps {

@@ -34,7 +34,7 @@ export interface Preceptor {
   childId?: string;
   portrait?: string;
   
-  // Required properties that were missing
+  // Required properties
   description: string;
   teachingStyle: string;
   reputation: number;

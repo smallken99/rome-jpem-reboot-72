@@ -2,29 +2,33 @@
 import { GameDate } from './common';
 
 export type LoiType = 
-  | 'political' 
-  | 'economic' 
-  | 'social' 
-  | 'military' 
-  | 'religious' 
-  | 'constitutional' 
-  | 'judicial'
-  | string;
+  'social' | 
+  'economic' | 
+  'military' | 
+  'political' | 
+  'religious' | 
+  'administrative' | 
+  'judicial' | 
+  'constitutional' | 
+  string;
 
 export type LoiState = 
-  | 'proposed' 
-  | 'debated' 
-  | 'voted' 
-  | 'implemented' 
-  | 'rejected'
-  | 'proposée'
-  | 'débattue'
-  | 'votée'
-  | 'implémentée'
-  | 'promulguée'
-  | 'rejetée';
+  'proposed' | 
+  'in_review' | 
+  'to_vote' | 
+  'passed' | 
+  'enacted' | 
+  'rejected' | 
+  'repealed' | 
+  'draft' |
+  string;
 
-export type ImportanceType = 'low' | 'medium' | 'high' | 'critical';
+export type ImportanceType = 
+  'low' | 
+  'medium' | 
+  'high' | 
+  'critical' |
+  string;
 
 export interface Loi {
   id: string;
@@ -33,7 +37,6 @@ export interface Loi {
   proposeur: string;
   catégorie: string;
   date: GameDate;
-  dateProposition?: GameDate;
   état: LoiState;
   importance: ImportanceType;
   votesPositifs: number;
@@ -41,22 +44,64 @@ export interface Loi {
   votesAbstention: number;
   soutiens: string[];
   opposants: string[];
-  clauses?: string[];
-  commentaires?: string[];
+  commentaires: string[];
   type: LoiType;
   impacts: Record<string, number>;
   effets: string[];
-  history: LoiHistory[];
+  history: { date: GameDate; event: string; actor?: string }[];
+  
+  // Additional properties for backwards compatibility
+  title?: string;
+  clauses?: any;
   tags?: string[];
 }
 
-export interface LoiHistory {
+export interface LoiDetail extends Loi {
+  analysis?: string;
+  precedents?: string[];
+  consequences?: string[];
+}
+
+export interface LoiFormData {
+  titre: string;
+  description: string;
+  proposeur: string;
+  catégorie?: string;
+  type: LoiType;
+  importance: ImportanceType;
+  clauses?: string[];
+  impacts?: Record<string, number>;
+  effets?: string[];
+  tags?: string[];
+}
+
+export interface LoiVoteResult {
+  id: string;
+  loiId: string;
+  votesPositifs: number;
+  votesNégatifs: number;
+  votesAbstention: number;
   date: GameDate;
-  status: LoiState;
-  notes?: string;
+  passed: boolean;
+  participationRate: number;
 }
 
 export interface LoiTimelineProps {
   lois: Loi[];
-  loi?: Loi;
+  onSelectLoi?: (loi: Loi) => void;
+}
+
+export interface LoiFilterCriteria {
+  state?: LoiState[];
+  type?: LoiType[];
+  importance?: ImportanceType[];
+  proposeur?: string;
+  dateMin?: GameDate;
+  dateMax?: GameDate;
+  searchText?: string;
+}
+
+export interface LoiSortCriteria {
+  field: keyof Loi | 'votesTotal';
+  direction: 'asc' | 'desc';
 }
