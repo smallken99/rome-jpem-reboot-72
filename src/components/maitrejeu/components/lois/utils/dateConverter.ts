@@ -32,7 +32,7 @@ export const formatSeason = (season: string): string => {
   return seasonMap[season] || season;
 };
 
-// Convert game date to JavaScript Date object
+// Convert game date to JavaScript Date object (mock date)
 export const gameDateToDate = (date: { year: number; season: string }): Date => {
   // Map seasons to months (0-based)
   const seasonToMonth: Record<string, number> = {
@@ -48,6 +48,21 @@ export const gameDateToDate = (date: { year: number; season: string }): Date => 
   
   const month = seasonToMonth[date.season] || 0;
   return new Date(date.year, month, 1);
+};
+
+// Convert JavaScript Date to game date format
+export const dateToGameDate = (date: Date): { year: number; season: string } => {
+  const month = date.getMonth();
+  let season = 'Printemps';
+  
+  if (month >= 9) season = 'Hiver';
+  else if (month >= 6) season = 'Automne';
+  else if (month >= 3) season = 'Été';
+  
+  return {
+    year: date.getFullYear(),
+    season
+  };
 };
 
 // Extract year and season from a loi date object

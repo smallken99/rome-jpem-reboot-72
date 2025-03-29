@@ -33,7 +33,7 @@ export type RiskFactorLevel = 'low' | 'medium' | 'high' | 'critical';
 export interface RiskFactor {
   name: string;
   level: RiskFactorLevel;
-  type: 'military' | 'political' | 'economic' | 'social';
+  type: 'military' | 'political' | 'economic' | 'social' | string;
   description: string;
   threat: number;
 }
@@ -42,16 +42,19 @@ export interface PoliticalBalanceCardProps {
   populares: number;
   optimates: number;
   moderates: number;
+  equilibre?: Equilibre;
   onUpdate: (populares: number, optimates: number, moderates: number) => void;
 }
 
 export interface SocialStabilityCardProps {
   patriciens: number;
   plebeiens: number;
+  equilibre?: Equilibre;
   onUpdate: (patriciens: number, plebeiens: number) => void;
 }
 
 export interface EconomicStabilityCardProps {
   economy: number;
+  equilibre?: Equilibre;
   onUpdate: (economy: number) => void;
 }

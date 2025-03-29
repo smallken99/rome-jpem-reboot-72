@@ -195,7 +195,7 @@ export const LoiDetail: React.FC<LoiDetailProps> = ({
                   <CardTitle>Historique de la loi</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <LoiTimeline loi={loi} />
+                  <LoiTimeline lois={[loi]} />
                 </CardContent>
               </Card>
             </TabsContent>

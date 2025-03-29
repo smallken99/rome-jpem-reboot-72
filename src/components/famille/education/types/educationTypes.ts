@@ -26,6 +26,7 @@ export interface Preceptor {
   available: boolean;
   assigned?: boolean;
   specialty: string;
+  specialities?: string[];
   speciality?: string;
   expertise: number;
   experience: number;
@@ -33,7 +34,7 @@ export interface Preceptor {
   childId?: string;
   portrait?: string;
   
-  // Added required properties
+  // Required properties that were missing
   description: string;
   teachingStyle: string;
   reputation: number;
@@ -62,7 +63,7 @@ export interface EducationPath {
   name: string;
   description: string;
   
-  // Add required properties
+  // Required properties
   benefits: string[];
   statBoost: string;
   icon: string;

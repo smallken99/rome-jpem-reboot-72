@@ -8,7 +8,8 @@ export type LoiType =
   | 'military' 
   | 'religious' 
   | 'constitutional' 
-  | 'judicial';
+  | 'judicial'
+  | string;
 
 export type LoiState = 
   | 'proposed' 
@@ -57,4 +58,5 @@ export interface LoiHistory {
 
 export interface LoiTimelineProps {
   lois: Loi[];
+  loi?: Loi;
 }

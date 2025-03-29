@@ -1,7 +1,8 @@
 
+// We need to update all preceptor objects to include the required properties
 import { Preceptor } from '../types/educationTypes';
 
-// Précepteurs disponibles par type d'éducation
+// Military preceptors
 const militaryPreceptors: Preceptor[] = [
   {
     id: 'mil-1',
@@ -20,7 +21,10 @@ const militaryPreceptors: Preceptor[] = [
     available: true,
     speciality: 'military',
     specialties: ['military', 'strategy'],
-    traits: ['Vétéran', 'Discipliné']
+    traits: ['Vétéran', 'Discipliné'],
+    expertise: 80,
+    description: 'Un vétéran aguerri qui a servi dans de nombreuses campagnes et peut enseigner toutes les tactiques militaires romaines.',
+    teachingStyle: 'Formation rigoureuse et discipline stricte'
   },
   {
     id: 'mil-2',
@@ -39,7 +43,10 @@ const militaryPreceptors: Preceptor[] = [
     available: true,
     speciality: 'military',
     specialties: ['military', 'discipline'],
-    traits: ['Tacticien', 'Autoritaire']
+    traits: ['Tacticien', 'Autoritaire'],
+    expertise: 70,
+    description: 'Spécialiste du commandement de petites unités et de l\'entraînement de nouvelles recrues.',
+    teachingStyle: 'Enseignement par l\'exemple et exercices pratiques'
   },
   {
     id: 'mil-3',
@@ -58,10 +65,14 @@ const militaryPreceptors: Preceptor[] = [
     available: true,
     speciality: 'military',
     specialties: ['military', 'endurance'],
-    traits: ['Endurant', 'Rigoureux']
+    traits: ['Endurant', 'Rigoureux'],
+    expertise: 60,
+    description: 'Jeune mais talentueux formateur spécialisé dans le développement physique et l\'endurance.',
+    teachingStyle: 'Entraînement physique intensif et théorie militaire'
   }
 ];
 
+// Religious preceptors
 const religiousPreceptors: Preceptor[] = [
   {
     id: 'rel-1',
@@ -80,7 +91,10 @@ const religiousPreceptors: Preceptor[] = [
     available: true,
     speciality: 'religious',
     specialties: ['religious', 'traditions'],
-    traits: ['Pieux', 'Érudit']
+    traits: ['Pieux', 'Érudit'],
+    expertise: 85,
+    description: 'Expert dans tous les rites romains et la théologie traditionnelle.',
+    teachingStyle: 'Enseignement rigoureux des textes sacrés et pratique quotidienne des rites'
   },
   {
     id: 'rel-2',
@@ -99,7 +113,10 @@ const religiousPreceptors: Preceptor[] = [
     available: true,
     speciality: 'religious',
     specialties: ['religious', 'rituals'],
-    traits: ['Observateur', 'Mystique']
+    traits: ['Observateur', 'Mystique'],
+    expertise: 75,
+    description: 'Spécialiste de l\'interprétation des signes et des présages divins.',
+    teachingStyle: 'Observation et interprétation des signes divins'
   },
   {
     id: 'rel-3',
@@ -118,10 +135,14 @@ const religiousPreceptors: Preceptor[] = [
     available: true,
     speciality: 'religious',
     specialties: ['religious', 'ceremonies'],
-    traits: ['Traditionaliste', 'Patient']
+    traits: ['Traditionaliste', 'Patient'],
+    expertise: 60,
+    description: 'Conservateur des traditions étrusques et expert en purifications rituelles.',
+    teachingStyle: 'Apprentissage par immersion dans les cérémonies'
   }
 ];
 
+// Rhetoric preceptors
 const rhetoricPreceptors: Preceptor[] = [
   {
     id: 'rhe-1',
@@ -140,7 +161,10 @@ const rhetoricPreceptors: Preceptor[] = [
     available: true,
     speciality: 'rhetoric',
     specialties: ['rhetoric', 'eloquence'],
-    traits: ['Éloquent', 'Charismatique']
+    traits: ['Éloquent', 'Charismatique'],
+    expertise: 90,
+    description: 'L\'un des plus grands orateurs de Rome, connu pour sa maîtrise de tous les aspects de la rhétorique.',
+    teachingStyle: 'Méthode combinant théorie et pratique intensive des discours'
   },
   {
     id: 'rhe-2',
@@ -159,7 +183,10 @@ const rhetoricPreceptors: Preceptor[] = [
     available: true,
     speciality: 'rhetoric',
     specialties: ['rhetoric', 'persuasion'],
-    traits: ['Philosophe', 'Logique']
+    traits: ['Philosophe', 'Logique'],
+    expertise: 80,
+    description: 'Formé dans les écoles grecques, il apporte une approche philosophique à l\'enseignement de la rhétorique.',
+    teachingStyle: 'Méthode socratique et analyse des grands discours'
   },
   {
     id: 'rhe-3',
@@ -178,7 +205,10 @@ const rhetoricPreceptors: Preceptor[] = [
     available: true,
     speciality: 'rhetoric',
     specialties: ['rhetoric', 'law'],
-    traits: ['Méthodique', 'Précis']
+    traits: ['Méthodique', 'Précis'],
+    expertise: 65,
+    description: 'Spécialiste de l\'éloquence judiciaire et de l\'argumentation légale.',
+    teachingStyle: 'Études de cas et simulations de plaidoiries'
   }
 ];
 
