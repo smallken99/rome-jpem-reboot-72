@@ -1,5 +1,6 @@
 
 export interface EconomicStabilityCardProps {
-  economie: number;
-  onUpdate: (economie: number) => void;
+  economy: number;
+  onUpdate: (economy: number) => void;
+  equilibre?: any;
 }

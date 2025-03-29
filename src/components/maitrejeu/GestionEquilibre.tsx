@@ -83,7 +83,7 @@ export const GestionEquilibre = () => {
   const [newEvent, setNewEvent] = useState<Omit<HistoriqueEntry, 'date'>>({ event: '', impact: {} });
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(new Date());
   const [riskFactors, setRiskFactors] = useState<RiskFactor[]>(initialRiskFactors);
-  const [newRiskFactor, setNewRiskFactor] = useState<Omit<RiskFactor, 'threat'>>;
+  const [newRiskFactor, setNewRiskFactor] = useState<Omit<RiskFactor, 'threat'>>();
   const [editingRiskFactorId, setEditingRiskFactorId] = useState<string | null>(null);
   const [editedRiskFactor, setEditedRiskFactor] = useState<RiskFactor | null>(null);
   const { toast } = useToast();
@@ -239,6 +239,7 @@ export const GestionEquilibre = () => {
               optimates={equilibre.political.optimates}
               moderates={equilibre.political.moderates}
               onUpdate={handlePoliticalUpdate}
+              equilibre={equilibre}
             />
           </CardContent>
         </Card>
@@ -255,6 +256,7 @@ export const GestionEquilibre = () => {
               patriciens={equilibre.social.patriciens}
               plebeiens={equilibre.social.plebeiens}
               onUpdate={handleSocialUpdate}
+              equilibre={equilibre}
             />
           </CardContent>
         </Card>
@@ -270,6 +272,7 @@ export const GestionEquilibre = () => {
             <EconomicStabilityCardProps
               economy={equilibre.economy}
               onUpdate={handleEconomicUpdate}
+              equilibre={equilibre}
             />
           </CardContent>
         </Card>

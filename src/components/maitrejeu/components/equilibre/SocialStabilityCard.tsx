@@ -1,81 +1,66 @@
 
-import React from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Users } from 'lucide-react';
+import React, { useState } from 'react';
+import { Card, CardContent } from '@/components/ui/card';
+import { Slider } from '@/components/ui/slider';
+import { Progress } from '@/components/ui/progress';
+import { SocialStabilityCardProps } from '../../types/equilibre';
 
-interface SocialStabilityCardProps {
-  stability: number;
-  factors: {
-    name: string;
-    value: number;
-    impact: string;
-  }[];
-}
-
-export const SocialStabilityCard: React.FC<SocialStabilityCardProps> = ({
-  stability,
-  factors
+const SocialStabilityCard: React.FC<SocialStabilityCardProps> = ({
+  patriciens,
+  plebeiens,
+  onUpdate
 }) => {
-  const getStabilityColor = () => {
-    if (stability >= 75) return 'text-green-600';
-    if (stability >= 50) return 'text-yellow-600';
-    if (stability >= 25) return 'text-orange-600';
-    return 'text-red-600';
+  const [patriciensValue, setPatriciensValue] = useState(patriciens);
+  const [plebeiensValue, setPlebeiensValue] = useState(plebeiens);
+  
+  const handlePatriciensChange = (value: number[]) => {
+    setPatriciensValue(value[0]);
+    onUpdate(value[0], plebeiensValue);
   };
-
+  
+  const handlePlebeiensChange = (value: number[]) => {
+    setPlebeiensValue(value[0]);
+    onUpdate(patriciensValue, value[0]);
+  };
+  
   return (
-    <Card>
-      <CardHeader className="pb-2">
-        <CardTitle className="flex items-center gap-2">
-          <Users className="h-5 w-5" />
-          Stabilité Sociale
-        </CardTitle>
-      </CardHeader>
-      <CardContent>
-        <div className="space-y-4">
-          <div>
-            <div className="flex justify-between items-center mb-1">
-              <span className="text-sm font-medium">Indice de Stabilité</span>
-              <span className={`text-lg font-bold ${getStabilityColor()}`}>
-                {stability}%
-              </span>
-            </div>
-            <div className="h-2 bg-gray-200 rounded-full overflow-hidden">
-              <div 
-                className={`h-full ${
-                  stability >= 75 ? 'bg-green-500' : 
-                  stability >= 50 ? 'bg-yellow-500' : 
-                  stability >= 25 ? 'bg-orange-500' : 
-                  'bg-red-500'
-                }`}
-                style={{ width: `${stability}%` }}
-              />
-            </div>
-          </div>
-          
-          <div className="space-y-3">
-            <h3 className="text-sm font-medium">Facteurs Influents</h3>
-            {factors.map((factor, index) => (
-              <div key={index} className="flex justify-between items-center text-sm">
-                <span>{factor.name}</span>
-                <div className="flex items-center">
-                  <span 
-                    className={
-                      factor.value > 0 ? 'text-green-600' : 
-                      factor.value < 0 ? 'text-red-600' : 
-                      'text-gray-600'
-                    }
-                  >
-                    {factor.value > 0 ? '+' : ''}{factor.value}%
-                  </span>
-                  <span className="text-xs text-muted-foreground ml-2">({factor.impact})</span>
-                </div>
-              </div>
-            ))}
-          </div>
+    <div className="space-y-6">
+      <div className="space-y-2">
+        <div className="flex justify-between items-center">
+          <span className="text-sm font-medium">Patriciens</span>
+          <span className="text-sm font-bold">{patriciensValue}%</span>
         </div>
-      </CardContent>
-    </Card>
+        <Slider
+          defaultValue={[patriciensValue]}
+          max={100}
+          step={1}
+          onValueChange={handlePatriciensChange}
+        />
+        <Progress 
+          value={patriciensValue} 
+          className="h-2" 
+          indicatorClassName={patriciensValue > 70 ? "bg-green-500" : patriciensValue < 30 ? "bg-red-500" : "bg-amber-500"}
+        />
+      </div>
+      
+      <div className="space-y-2">
+        <div className="flex justify-between items-center">
+          <span className="text-sm font-medium">Plébéiens</span>
+          <span className="text-sm font-bold">{plebeiensValue}%</span>
+        </div>
+        <Slider
+          defaultValue={[plebeiensValue]}
+          max={100}
+          step={1}
+          onValueChange={handlePlebeiensChange}
+        />
+        <Progress 
+          value={plebeiensValue} 
+          className="h-2"
+          indicatorClassName={plebeiensValue > 70 ? "bg-green-500" : plebeiensValue < 30 ? "bg-red-500" : "bg-amber-500"}
+        />
+      </div>
+    </div>
   );
 };
 

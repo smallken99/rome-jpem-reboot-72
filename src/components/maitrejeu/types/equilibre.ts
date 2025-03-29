@@ -1,24 +1,20 @@
 
 export interface Equilibre {
-  // Base political factions
-  populares: number;
-  optimates: number;
-  moderates: number;
-  
-  // Social classes
-  patricians: number;
-  plebeians: number;
-  
-  // Economic factors  
+  id: string;
+  political: {
+    populares: number;
+    optimates: number;
+    moderates: number;
+  };
+  social: {
+    patriciens: number;
+    plebeiens: number;
+  };
   economy: number;
   stability: number;
-  militaryStrength: number;
-  publicOrder: number;
-  corruption: number;
-  inflation: number;
-  foodSupply: number;
-  unrestThreshold: number;
-  indiceCrime: number;
+  criminalityIndex?: number;
+  rebellionThreshold?: number;
+  historique?: HistoriqueEntry[];
   
   // Additional properties (French variants)
   économie?: number;
@@ -37,8 +33,54 @@ export interface Equilibre {
   facteurReligieux?: number;
   economicStability?: number;
   population?: number;
-  criminalityIndex?: number;
-  rebellionThreshold?: number;
+}
+
+export interface HistoriqueEntry {
+  date: Date | { year: number; season: string };
+  event: string;
+  impact: {
+    political?: number;
+    social?: number;
+    economic?: number;
+    stability?: number;
+  };
+}
+
+export type RiskFactorLevel = 'low' | 'medium' | 'high' | 'critical';
+
+export interface RiskFactor {
+  name: string;
+  level: RiskFactorLevel;
+  type: 'military' | 'political' | 'economic' | 'social' | string;
+  description: string;
+  threat: number;
+}
+
+export interface PoliticalBalanceCardProps {
+  populares: number;
+  optimates: number;
+  moderates: number;
+  equilibre?: Equilibre;
+  onUpdate: (populares: number, optimates: number, moderates: number) => void;
+}
+
+export interface SocialStabilityCardProps {
+  patriciens: number;
+  plebeiens: number;
+  equilibre?: Equilibre;
+  onUpdate: (patriciens: number, plebeiens: number) => void;
+}
+
+export interface EconomicStabilityCardProps {
+  economy: number;
+  equilibre?: Equilibre;
+  onUpdate: (economy: number) => void;
+}
+
+// Additional types
+export interface GameDate {
+  year: number;
+  season: string;
 }
 
 export interface PoliticalEvent {
@@ -57,22 +99,6 @@ export interface PoliticalEvent {
   relatedTo?: string[];
 }
 
-export interface GameDate {
-  year: number;
-  season: string;
-}
-
-export interface RiskFactor {
-  id: string;
-  name: string;
-  severity: 'low' | 'medium' | 'high' | 'critical';
-  description: string;
-  level: 'low' | 'medium' | 'high' | 'critical';
-  type: 'military' | 'political' | 'economic' | 'social' | string;
-  impact: Record<string, number>;
-  trend: 'increasing' | 'decreasing' | 'stable';
-}
-
 export interface EquilibreChartProps {
   data: any;
 }
@@ -80,24 +106,6 @@ export interface EquilibreChartProps {
 export interface RecentEventsTableProps {
   events: PoliticalEvent[];
   formatDate: (date: any) => string;
-}
-
-export interface PoliticalBalanceCardProps {
-  populares: number;
-  optimates: number;
-  moderates: number;
-  onUpdate: (populares: number, optimates: number, moderates: number) => void;
-}
-
-export interface SocialStabilityCardProps {
-  patriciens: number;
-  plébéiens: number;
-  onUpdate: (patriciens: number, plébéiens: number) => void;
-}
-
-export interface EconomicStabilityCardProps {
-  economie: number;
-  onUpdate: (economie: number) => void;
 }
 
 export interface ThreatAssessmentProps {
