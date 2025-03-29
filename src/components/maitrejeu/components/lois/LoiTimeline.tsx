@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { Card } from '@/components/ui/card';
-import { formatDate } from '@/utils/dateUtils';
+import { formatAnyGameDate } from './utils/dateHelpers';
 import { Loi } from '@/components/maitrejeu/types/lois';
 import { Badge } from '@/components/ui/badge';
 

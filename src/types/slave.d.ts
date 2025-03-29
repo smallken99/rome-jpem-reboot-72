@@ -3,34 +3,37 @@ export interface Slave {
   id: string;
   name: string;
   age: number;
-  gender: 'male' | 'female';
-  origin: string;
-  price: number;
-  skills: string[];
-  specialty?: string;
   health: number;
-  loyalty: number;
+  skills: string[];
+  value: number;
+  assigned: boolean;
   assignedTo?: string;
-  status: 'unassigned' | 'assigned' | 'sold' | 'escaped' | 'deceased';
-  purchaseDate?: string;
-  experience?: number;
-  description?: string;
+  origin: string;
+  status: 'active' | 'sick' | 'injured' | 'deceased';
 }
 
-export interface SlaveHook {
+export interface SlaveAssignment {
+  id: string;
+  buildingId: string;
+  buildingName: string;
+  count: number;
+  productivity: number;
+}
+
+export interface SlaveManagementHook {
   slaves: Slave[];
   loading: boolean;
   totalSlaves: number;
   slavePrice: number;
-  assignedSlaves: number | Slave[];
-  slaveAssignments: Record<string, string> | Record<string, string[]>;
+  assignedSlaves: number;
+  slaveAssignments: SlaveAssignment[];
   balance: number;
   purchaseSlave: (slave: Slave, amount: number) => boolean;
-  purchaseSlaves: (count: number) => boolean;
   sellSlave: (slaveId: string) => number;
-  sellSlaves: (ids: string[]) => number;
+  purchaseSlaves: (amount: number) => boolean;
+  sellSlaves: (amount: number) => boolean;
   assignSlave: (slaveId: string, assignmentId: string) => boolean;
-  assignSlavesToProperty: (slaveIds: string[], propertyId: string) => boolean;
-  removeSlaveAssignment: (slaveId: string) => boolean;
+  assignSlavesToProperty: (buildingId: string, count: number) => boolean;
+  removeSlaveAssignment: (buildingId: string) => boolean;
   trainSlave: (slaveId: string, skill: string) => boolean;
 }

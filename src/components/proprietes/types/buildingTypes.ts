@@ -1,45 +1,97 @@
 
 export enum BuildingType {
+  DOMUS = 'domus',
   VILLA = 'villa',
-  FARM = 'farm',
-  WORKSHOP = 'workshop',
-  MINE = 'mine',
-  VINEYARD = 'vineyard',
-  OLIVE_GROVE = 'olive_grove',
-  INSULAE = 'insulae',
   TEMPLE = 'temple',
-  MARKET = 'market',
-  DOCK = 'dock',
+  FORUM = 'forum',
   WAREHOUSE = 'warehouse',
+  SHOP = 'shop',
+  TAVERN = 'tavern',
+  BATH = 'bath',
+  THEATER = 'theater',
+  STADIUM = 'stadium',
+  FARM = 'farm',
+  MINE = 'mine',
+  URBAN = 'urban',
+  RURAL = 'rural',
+  RELIGIOUS = 'religious',
   OTHER = 'other'
+}
+
+export interface PropertyUpgrade {
+  id: string;
+  name: string;
+  description: string;
+  cost: number;
+  effect: {
+    income?: number;
+    popularity?: number;
+    security?: number;
+    maintenance?: number;
+    condition?: number;
+  };
+  effects?: {
+    income?: number;
+    popularity?: number;
+    security?: number;
+    maintenance?: number;
+    condition?: number;
+  };
+  installed: boolean;
+  buildingTypes: BuildingType[];
+  requirements?: {
+    minWorkers?: number;
+    minSecurity?: number;
+    minMaintenance?: number;
+    minIncome?: number;
+    minCondition?: number;
+  };
+}
+
+export interface BuildingDescription {
+  id?: string;
+  name: string;
+  type: BuildingType;
+  description: string;
+  size?: number;
+  cost?: number;
+  maintenanceCost?: number;
+  income?: number;
+  piete?: number;
+  popularite?: number;
+  reputation?: number;
+  production?: number;
+  workers?: {
+    min: number;
+    max: number;
+    optimal: number;
+  };
+  subType?: string;
+  requirements?: any;
+  maintenance?: any;
+  security?: any;
 }
 
 export interface OwnedBuilding {
   id: string;
+  buildingId: string;
   name: string;
   type: BuildingType;
+  buildingType: string;
   location: string;
   size: number;
   value: number;
-  income: number;
   maintenanceCost: number;
   condition: number;
-  upgrades: string[];
+  maintenanceLevel: number;
+  securityLevel: number;
+  income: number;
   workers: number;
   maxWorkers: number;
-  slaves?: string[];
-  description?: string;
-}
-
-export interface BuildingDescription {
-  type: BuildingType;
-  name: string;
+  upgrades: PropertyUpgrade[];
   description: string;
-  baseValue: number;
-  baseIncome: number;
-  baseMaintenance: number;
-  minSize: number;
-  maxSize: number;
-  workersPerUnit: number;
-  icon: string;
+  purchaseDate: Date;
+  buildingDescription?: BuildingDescription;
+  status?: string;
+  maintenance?: number;
 }

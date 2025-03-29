@@ -31,3 +31,42 @@ export const formatSeason = (season: string): string => {
   
   return seasonMap[season] || season;
 };
+
+// Convert game date to JavaScript Date object
+export const gameDateToDate = (date: { year: number; season: string }): Date => {
+  // Map seasons to months (0-based)
+  const seasonToMonth: Record<string, number> = {
+    'Printemps': 2, // March
+    'Été': 5, // June
+    'Automne': 8, // September
+    'Hiver': 11, // December
+    'Spring': 2,
+    'Summer': 5,
+    'Autumn': 8,
+    'Winter': 11
+  };
+  
+  const month = seasonToMonth[date.season] || 0;
+  return new Date(date.year, month, 1);
+};
+
+// Extract year and season from a loi date object
+export const extractLoiDateInfo = (date: any): { year: number; season: string } => {
+  if (!date) return { year: 0, season: 'Inconnue' };
+  
+  if (typeof date === 'object' && date.year !== undefined && date.season !== undefined) {
+    return { year: date.year, season: date.season };
+  }
+  
+  if (typeof date === 'string') {
+    const matches = date.match(/An (\d+),?\s+(.+)/);
+    if (matches && matches.length >= 3) {
+      return {
+        year: parseInt(matches[1], 10),
+        season: matches[2].trim()
+      };
+    }
+  }
+  
+  return { year: 0, season: 'Inconnue' };
+};
