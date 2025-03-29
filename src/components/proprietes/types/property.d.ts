@@ -38,6 +38,8 @@ export interface PropertyUpgrade {
   applied: boolean;
   buildingType: BuildingType[];
   duration?: number;
+  type?: string;
+  installed?: boolean;
   
   // Additional properties found in code
   effects?: Record<string, any>;
@@ -47,6 +49,10 @@ export interface PropertyUpgrade {
     minCondition?: number;
     specialBuilding?: string;
     minIncome?: number;
+    funds?: number;
+    workers?: number;
+    buildingCondition?: number;
+    maintenance?: number;
   };
 }
 

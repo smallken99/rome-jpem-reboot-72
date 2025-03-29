@@ -8,11 +8,9 @@ import { EconomicStabilityCardProps } from '@/components/maitrejeu/types/equilib
 export const EconomicStabilityCard: React.FC<EconomicStabilityCardProps> = ({ 
   economy, 
   onUpdate,
-  economie,
   equilibre
 }) => {
-  const initialValue = economy || economie || 50;
-  const [localEconomy, setLocalEconomy] = useState(initialValue);
+  const [localEconomy, setLocalEconomy] = useState(economy || 50);
   
   const handleSave = () => {
     onUpdate(localEconomy);
@@ -26,7 +24,7 @@ export const EconomicStabilityCard: React.FC<EconomicStabilityCardProps> = ({
       <CardContent className="space-y-6">
         <div>
           <div className="flex justify-between mb-2">
-            <span>Économie</span>
+            <span>Niveau économique</span>
             <span>{localEconomy}%</span>
           </div>
           <Slider

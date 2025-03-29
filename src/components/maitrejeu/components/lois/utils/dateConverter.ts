@@ -1,8 +1,5 @@
 
-export interface GameDate {
-  year: number;
-  season: string;
-}
+import { GameDate } from '@/components/maitrejeu/types/common';
 
 export const gameDateToString = (gameDate: GameDate): string => {
   return `An ${gameDate.year}, ${gameDate.season}`;

@@ -1,41 +1,50 @@
 
-import { OwnedBuilding } from '../../types/property';
+import { OwnedBuilding } from '@/components/proprietes/types/property';
 
 export const calculateMaintenanceCost = (building: OwnedBuilding): number => {
   const baseCost = building.maintenanceCost || 0;
-  const maintenanceLevel = building.maintenanceLevel || 0;
-  const sizeFactor = building.size || 1;
+  const maintenanceLevel = building.maintenanceLevel || 1;
   
-  // Higher maintenance level means higher costs
-  const levelFactor = maintenanceLevel / 100;
+  // Coût de maintenance augmente avec le niveau de maintenance
+  const maintenanceMultiplier = [0.5, 1, 1.5, 2, 2.5];
   
-  return Math.round(baseCost * sizeFactor * levelFactor);
+  // Ajustement basé sur la condition du bâtiment
+  const conditionFactor = Math.max(0.5, building.condition / 100);
+  
+  // Coût final
+  return Math.round(baseCost * maintenanceMultiplier[maintenanceLevel - 1] * conditionFactor);
 };
 
 export const calculateIncomeByMaintenance = (building: OwnedBuilding): number => {
   const baseIncome = building.income || 0;
-  const maintenanceLevel = building.maintenanceLevel || 0;
-  const condition = building.condition || 0;
+  const maintenanceLevel = building.maintenanceLevel || 1;
   
-  // Income is affected by both maintenance level and condition
-  const maintenanceFactor = maintenanceLevel / 100;
-  const conditionFactor = condition / 100;
+  // Revenus augmentent avec le niveau de maintenance
+  const incomeMultiplier = [0.7, 1, 1.2, 1.4, 1.5];
   
-  return Math.round(baseIncome * maintenanceFactor * conditionFactor);
+  // Ajustement basé sur la condition du bâtiment
+  const conditionFactor = Math.max(0.5, building.condition / 100);
+  
+  // Ajustement basé sur le nombre de travailleurs
+  const workerEfficiency = Math.min(1, (building.workers || 0) / (building.maxWorkers || 1));
+  
+  // Revenu final
+  return Math.round(baseIncome * incomeMultiplier[maintenanceLevel - 1] * conditionFactor * workerEfficiency);
 };
 
-export const calculateEfficiency = (building: OwnedBuilding): number => {
+export const calculateOptimalWorkers = (building: OwnedBuilding): number => {
+  const maxWorkers = building.maxWorkers || 0;
   const condition = building.condition || 0;
-  const maintenanceLevel = building.maintenanceLevel || 0;
   
-  return Math.min(100, Math.round((condition + maintenanceLevel) / 2));
+  // Le nombre optimal de travailleurs dépend de la condition du bâtiment
+  return Math.ceil(maxWorkers * (condition / 100));
 };
 
-export const calculateProfitMargin = (building: OwnedBuilding): number => {
-  const income = calculateIncomeByMaintenance(building);
-  const maintenanceCost = calculateMaintenanceCost(building);
+export const calculateConditionDecay = (building: OwnedBuilding): number => {
+  const maintenanceLevel = building.maintenanceLevel || 1;
   
-  if (maintenanceCost === 0) return 100;
+  // Taux de dégradation par an basé sur le niveau d'entretien
+  const decayRates = [5, 3, 1.5, 0.5, 0.1];
   
-  return Math.round((income - maintenanceCost) / income * 100);
+  return decayRates[maintenanceLevel - 1];
 };

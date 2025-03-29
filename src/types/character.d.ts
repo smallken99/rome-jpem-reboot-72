@@ -28,6 +28,7 @@ export interface Character {
   traits?: string[];
   specialty?: string;
   educationType?: string;
+  diplomatie?: Record<string, any>;
   
   stats: {
     popularity: number | CharacterStat;
@@ -48,9 +49,6 @@ export interface Character {
     statBonus?: number;
     speciality?: string;
   };
-  
-  // Additional properties for diplomacy
-  diplomatie?: Record<string, any>;
   
   // Last child birth tracking
   lastChildBirthYear?: number;
