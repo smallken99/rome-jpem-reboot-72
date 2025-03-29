@@ -4,40 +4,50 @@ export interface PropertyUpgrade {
   name: string;
   description: string;
   cost: number;
-  effect: Record<string, number>;
-  effects?: Record<string, number>; // Added for compatibility
-  type: string;
-  installed: boolean;
-  available: boolean;
-  requirements?: {
-    money?: number;
+  effect: {
+    income?: number;
+    maintenance?: number;
     condition?: number;
-    propertyType?: string[];
-    level?: number;
-    otherUpgrades?: string[];
+    security?: number;
+    value?: number;
+    productivity?: number;
+  };
+  installed: boolean;
+  type: string;
+  installDate?: Date;
+  requirements?: string[];
+  effects?: string[] | {
+    income?: number;
+    maintenance?: number;
+    condition?: number;
+    security?: number;
+    value?: number;
+    productivity?: number;
   };
 }
 
-export interface Building {
+export interface OwnedBuilding {
   id: string;
+  buildingId: string;
   name: string;
   type: string;
-  description: string;
-  cost: number;
-  maintenance: number;
-  income: number;
-  buildingId?: string; // For compatibility
-}
-
-export interface OwnedBuilding extends Building {
+  buildingType: string;
   location: string;
   condition: number;
-  value: number;
-  upgrades?: PropertyUpgrade[];
+  maintenanceLevel: number;
+  income: number;
+  workers: number;
+  securityLevel: number;
+  description: string;
+  maintenanceEnabled?: boolean;
+  maintenanceCost: number;
+  slaves?: number;
+  purchaseDate?: Date;
+  lastMaintenance?: Date;
+  size: string;
   status?: string;
-  buildingId: string;
-  buildingType?: string;
-  maintenanceLevel?: number;
-  securityLevel?: number;
-  workers?: number;
+  value: number;
+  maxWorkers: number;
+  maintenance?: number;
+  upgrades?: PropertyUpgrade[];
 }

@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Slider } from '@/components/ui/slider';
 
@@ -7,87 +7,85 @@ export interface PoliticalBalanceCardProps {
   populaires: number;
   optimates: number;
   moderates: number;
-  onUpdate: (values: { populaires: number; optimates: number; moderates: number; }) => void;
+  onUpdate: (values: { populaires: number; optimates: number; moderates: number }) => void;
 }
 
-export const PoliticalBalanceCard: React.FC<PoliticalBalanceCardProps> = ({
-  populaires,
-  optimates,
-  moderates,
-  onUpdate
-}) => {
-  const [internalValues, setInternalValues] = useState({
-    populaires,
-    optimates,
-    moderates
-  });
-  
-  const handleUpdate = (key: keyof typeof internalValues, value: number) => {
-    const newValues = { ...internalValues, [key]: value };
-    setInternalValues(newValues);
+export function PoliticalBalanceCard({ 
+  populaires, 
+  optimates, 
+  moderates, 
+  onUpdate 
+}: PoliticalBalanceCardProps) {
+  const handlePopulairesChange = (value: number[]) => {
+    onUpdate({ populaires: value[0], optimates, moderates });
   };
-  
-  const handleSave = () => {
-    onUpdate(internalValues);
+
+  const handleOptimatesChange = (value: number[]) => {
+    onUpdate({ populaires, optimates: value[0], moderates });
   };
-  
+
+  const handleModeratesChange = (value: number[]) => {
+    onUpdate({ populaires, optimates, moderates: value[0] });
+  };
+
   return (
     <Card>
       <CardHeader>
         <CardTitle>Équilibre Politique</CardTitle>
       </CardHeader>
-      <CardContent>
-        <div className="space-y-6">
-          <div className="space-y-3">
-            <div className="flex justify-between items-center">
-              <span className="text-sm font-medium">Populares</span>
-              <span className="text-sm">{internalValues.populaires}%</span>
-            </div>
-            <Slider
-              value={[internalValues.populaires]}
-              min={0}
-              max={100}
-              step={1}
-              onValueChange={(values) => handleUpdate('populaires', values[0])}
-            />
+      <CardContent className="space-y-4">
+        <div className="space-y-2">
+          <div className="flex justify-between items-center">
+            <span className="text-sm font-medium">Populaires</span>
+            <span className="text-sm">{populaires}</span>
           </div>
-          
-          <div className="space-y-3">
-            <div className="flex justify-between items-center">
-              <span className="text-sm font-medium">Optimates</span>
-              <span className="text-sm">{internalValues.optimates}%</span>
-            </div>
-            <Slider
-              value={[internalValues.optimates]}
-              min={0}
-              max={100}
-              step={1}
-              onValueChange={(values) => handleUpdate('optimates', values[0])}
-            />
+          <Slider 
+            value={[populaires]} 
+            min={0} 
+            max={100} 
+            step={1} 
+            onValueChange={handlePopulairesChange}
+            className="cursor-pointer"
+          />
+        </div>
+
+        <div className="space-y-2">
+          <div className="flex justify-between items-center">
+            <span className="text-sm font-medium">Optimates</span>
+            <span className="text-sm">{optimates}</span>
           </div>
-          
-          <div className="space-y-3">
-            <div className="flex justify-between items-center">
-              <span className="text-sm font-medium">Moderates</span>
-              <span className="text-sm">{internalValues.moderates}%</span>
-            </div>
-            <Slider
-              value={[internalValues.moderates]}
-              min={0}
-              max={100}
-              step={1}
-              onValueChange={(values) => handleUpdate('moderates', values[0])}
-            />
+          <Slider 
+            value={[optimates]} 
+            min={0} 
+            max={100} 
+            step={1} 
+            onValueChange={handleOptimatesChange}
+            className="cursor-pointer"
+          />
+        </div>
+
+        <div className="space-y-2">
+          <div className="flex justify-between items-center">
+            <span className="text-sm font-medium">Modérés</span>
+            <span className="text-sm">{moderates}</span>
           </div>
-          
-          <button
-            className="w-full py-2 px-4 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
-            onClick={handleSave}
-          >
-            Appliquer les changements
-          </button>
+          <Slider 
+            value={[moderates]} 
+            min={0} 
+            max={100} 
+            step={1} 
+            onValueChange={handleModeratesChange}
+            className="cursor-pointer"
+          />
+        </div>
+
+        <div className="pt-2">
+          <div className="flex justify-between text-sm text-muted-foreground">
+            <span>Équilibre: {(Math.abs(populaires - optimates) < 20) ? "Stable" : "Instable"}</span>
+            <span>Indice de tension: {Math.abs(populaires - optimates)}</span>
+          </div>
         </div>
       </CardContent>
     </Card>
   );
-};
+}

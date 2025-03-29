@@ -1,7 +1,8 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { useLocalStorage } from '@/hooks/useLocalStorage';
-import { Slave, SlaveAssignment } from '@/types/slave';
+import { Slave, SlaveAssignment as BaseSlaveAssignment } from '@/types/slave';
+import { SlaveAssignment, createSlaveAssignment, adaptSlaveAssignment } from './SlaveAssignments';
 import { useBalance } from '@/hooks/useBalance';
 import { toast } from 'sonner';
 import { v4 as uuidv4 } from 'uuid';
@@ -43,7 +44,9 @@ const generateRandomSlave = (id: string): Slave => {
     level,
     price: baseSlavePrice + (level * 200) + (Math.random() * 300),
     health: 80 + Math.floor(Math.random() * 20),
-    origin: origins[Math.floor(Math.random() * origins.length)]
+    origin: origins[Math.floor(Math.random() * origins.length)],
+    productivity: 80 + Math.floor(Math.random() * 20),
+    assigned: false
   };
 };
 
@@ -119,7 +122,7 @@ export const useSlaveManagement = () => {
   }, [totalSlaves, assignedSlaves, slaves, slavePrice, addBalance, setSlaves]);
   
   // Assigner des esclaves à une propriété
-  const assignSlavesToProperty = useCallback((buildingId: string, count: number) => {
+  const assignSlavesToProperty = useCallback((buildingId: string, propertyName: string, count: number) => {
     const availableSlaves = totalSlaves - assignedSlaves;
     
     if (count > availableSlaves) {
@@ -127,7 +130,7 @@ export const useSlaveManagement = () => {
       return false;
     }
     
-    // Vérifier si une assignation existe déjà pour ce bâtiment
+    // Créer une nouvelle assignation si elle n'existe pas, sinon mettre à jour l'existante
     const existingAssignment = assignments.find(a => a.buildingId === buildingId);
     
     if (existingAssignment) {
@@ -141,24 +144,26 @@ export const useSlaveManagement = () => {
       );
     } else {
       // Créer une nouvelle assignation
-      setAssignments(prev => [
-        ...prev,
-        {
-          buildingId,
-          buildingName: "Bâtiment", // À remplacer par le vrai nom du bâtiment
-          count,
-          efficiency: 100
-        }
-      ]);
+      const propertyId = `property-${uuidv4()}`; // Générer un ID temporaire si nécessaire
+      const newAssignment = createSlaveAssignment(
+        `slave-group-${uuidv4()}`, 
+        buildingId, 
+        propertyId, 
+        propertyName
+      );
+      
+      newAssignment.count = count;
+      
+      setAssignments(prev => [...prev, newAssignment]);
     }
     
     // Mettre à jour les esclaves non assignés
     let remainingToAssign = count;
     setSlaves(prev => {
       return prev.map(slave => {
-        if (!slave.buildingId && remainingToAssign > 0) {
+        if (!slave.buildingId && !slave.assigned && remainingToAssign > 0) {
           remainingToAssign--;
-          return { ...slave, buildingId, assignment: "Travail" };
+          return { ...slave, buildingId, assignment: "Travail", assigned: true };
         }
         return slave;
       });
@@ -169,7 +174,7 @@ export const useSlaveManagement = () => {
   }, [totalSlaves, assignedSlaves, assignments, setAssignments, setSlaves]);
   
   // Retirer des esclaves d'une propriété
-  const removeSlaveAssignment = useCallback((buildingId: string, count: number) => {
+  const removeSlaveAssignment = useCallback((buildingId: string, count: number = 0) => {
     // Trouver l'assignation pour ce bâtiment
     const assignment = assignments.find(a => a.buildingId === buildingId);
     
@@ -178,7 +183,9 @@ export const useSlaveManagement = () => {
       return false;
     }
     
-    if (count > assignment.count) {
+    const removeCount = count || assignment.count;
+    
+    if (removeCount > assignment.count) {
       toast.error(`Il n'y a que ${assignment.count} esclaves assignés à cette propriété`);
       return false;
     }
@@ -187,7 +194,7 @@ export const useSlaveManagement = () => {
     setAssignments(prev => {
       const updated = prev.map(a => {
         if (a.buildingId === buildingId) {
-          return { ...a, count: a.count - count };
+          return { ...a, count: a.count - removeCount };
         }
         return a;
       });
@@ -197,18 +204,18 @@ export const useSlaveManagement = () => {
     });
     
     // Libérer les esclaves
-    let remainingToFree = count;
+    let remainingToFree = removeCount;
     setSlaves(prev => {
       return prev.map(slave => {
         if (slave.buildingId === buildingId && remainingToFree > 0) {
           remainingToFree--;
-          return { ...slave, buildingId: undefined, assignment: undefined };
+          return { ...slave, buildingId: undefined, assignment: undefined, assigned: false };
         }
         return slave;
       });
     });
     
-    toast.success(`${count} esclave${count > 1 ? 's' : ''} retiré${count > 1 ? 's' : ''} de la propriété`);
+    toast.success(`${removeCount} esclave${removeCount > 1 ? 's' : ''} retiré${removeCount > 1 ? 's' : ''} de la propriété`);
     return true;
   }, [assignments, setAssignments, setSlaves]);
   

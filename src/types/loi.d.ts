@@ -1,6 +1,4 @@
 
-import { GameDate } from './game';
-
 export type LoiType = 'economic' | 'political' | 'military' | 'religious' | 'social' | string;
 export type LoiState = 'draft' | 'proposed' | 'approved' | 'rejected' | 'in_effect' | string;
 export type ImportanceType = 'low' | 'medium' | 'high' | 'critical' | string;
