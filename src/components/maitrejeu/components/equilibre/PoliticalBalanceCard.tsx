@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Slider } from '@/components/ui/slider';
 
 interface PoliticalBalanceCardProps {
-  political: {
+  politique: {
     populaires: number;
     optimates: number;
     moderates: number;
@@ -13,30 +13,30 @@ interface PoliticalBalanceCardProps {
 }
 
 export const PoliticalBalanceCard: React.FC<PoliticalBalanceCardProps> = ({
-  political,
+  politique,
   onUpdate
 }) => {
   // Gérer les changements individuels
   const handlePopulairesChange = (value: number[]) => {
     onUpdate({
       populaires: value[0],
-      optimates: political.optimates,
-      moderates: political.moderates
+      optimates: politique.optimates,
+      moderates: politique.moderates
     });
   };
 
   const handleOptimatesChange = (value: number[]) => {
     onUpdate({
-      populaires: political.populaires,
+      populaires: politique.populaires,
       optimates: value[0],
-      moderates: political.moderates
+      moderates: politique.moderates
     });
   };
 
   const handleModeratesChange = (value: number[]) => {
     onUpdate({
-      populaires: political.populaires,
-      optimates: political.optimates,
+      populaires: politique.populaires,
+      optimates: politique.optimates,
       moderates: value[0]
     });
   };
@@ -50,11 +50,11 @@ export const PoliticalBalanceCard: React.FC<PoliticalBalanceCardProps> = ({
         <div className="space-y-4">
           <div className="space-y-2">
             <div className="flex justify-between">
-              <label className="text-sm font-medium">Populares</label>
-              <span className="text-sm">{political.populaires}%</span>
+              <label className="text-sm font-medium">Populaires</label>
+              <span className="text-sm">{politique.populaires}%</span>
             </div>
             <Slider
-              defaultValue={[political.populaires]}
+              defaultValue={[politique.populaires]}
               max={100}
               min={0}
               step={1}
@@ -65,10 +65,10 @@ export const PoliticalBalanceCard: React.FC<PoliticalBalanceCardProps> = ({
           <div className="space-y-2">
             <div className="flex justify-between">
               <label className="text-sm font-medium">Optimates</label>
-              <span className="text-sm">{political.optimates}%</span>
+              <span className="text-sm">{politique.optimates}%</span>
             </div>
             <Slider
-              defaultValue={[political.optimates]}
+              defaultValue={[politique.optimates]}
               max={100}
               min={0}
               step={1}
@@ -79,10 +79,10 @@ export const PoliticalBalanceCard: React.FC<PoliticalBalanceCardProps> = ({
           <div className="space-y-2">
             <div className="flex justify-between">
               <label className="text-sm font-medium">Modérés</label>
-              <span className="text-sm">{political.moderates}%</span>
+              <span className="text-sm">{politique.moderates}%</span>
             </div>
             <Slider
-              defaultValue={[political.moderates]}
+              defaultValue={[politique.moderates]}
               max={100}
               min={0}
               step={1}

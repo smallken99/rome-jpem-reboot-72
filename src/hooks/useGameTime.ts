@@ -1,58 +1,35 @@
 
-import { useState, useCallback } from 'react';
-import { useLocalStorage } from './useLocalStorage';
-
-export type Season = 'Hiems' | 'Ver' | 'Aestas' | 'Autumnus';
-
-interface GameTime {
-  year: number;
-  season: Season;
-}
-
-const SEASONS: Season[] = ['Hiems', 'Ver', 'Aestas', 'Autumnus'];
+import { useState } from 'react';
+import { Season } from '@/types/game';
 
 export const useGameTime = () => {
-  const [gameTime, setGameTime] = useLocalStorage<GameTime>('roman-game-time', {
-    year: 755, // AUC - Ab Urbe Condita
-    season: 'Ver'
-  });
-  
-  const advanceSeason = useCallback(() => {
-    const currentSeasonIndex = SEASONS.indexOf(gameTime.season);
-    const nextSeasonIndex = (currentSeasonIndex + 1) % SEASONS.length;
+  const [year, setYear] = useState<number>(753); // Default to founding of Rome
+  const [season, setSeason] = useState<Season>('spring');
+
+  const advanceSeason = () => {
+    const seasons: Season[] = ['winter', 'spring', 'summer', 'fall'];
+    const currentSeasonIndex = seasons.indexOf(season);
+    const nextSeasonIndex = (currentSeasonIndex + 1) % 4;
     
-    if (nextSeasonIndex === 0) {
-      // If we've cycled through all seasons, advance to the next year
-      setGameTime({
-        year: gameTime.year + 1,
-        season: SEASONS[0]
-      });
-    } else {
-      setGameTime({
-        ...gameTime,
-        season: SEASONS[nextSeasonIndex]
-      });
+    if (nextSeasonIndex === 0) { // If we're moving from fall to winter
+      setYear(year + 1);
     }
-  }, [gameTime, setGameTime]);
+    
+    setSeason(seasons[nextSeasonIndex]);
+  };
   
-  const setYear = useCallback((year: number) => {
-    setGameTime({
-      ...gameTime,
-      year
-    });
-  }, [gameTime, setGameTime]);
-  
-  const setSeason = useCallback((season: Season) => {
-    setGameTime({
-      ...gameTime,
-      season
-    });
-  }, [gameTime, setGameTime]);
-  
+  // Create a currentDate getter that returns the current date in GameDate format
+  const currentDate = {
+    year,
+    season
+  };
+
   return {
-    ...gameTime,
-    advanceSeason,
+    year,
+    season,
     setYear,
-    setSeason
+    setSeason,
+    advanceSeason,
+    currentDate
   };
 };

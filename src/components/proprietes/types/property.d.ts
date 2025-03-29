@@ -28,6 +28,7 @@ export interface OwnedBuilding {
   status?: string;
   maintenance?: number;
   maintenanceEnabled?: boolean;
+  slaves?: number;
 }
 
 export interface PropertyUpgrade {
@@ -36,11 +37,17 @@ export interface PropertyUpgrade {
   description: string;
   cost: number;
   effect: string;
-  effects?: Record<string, any>;
+  effects?: {
+    income?: number;
+    maintenance?: number;
+    security?: number;
+    condition?: number;
+    [key: string]: any;
+  };
   applied?: boolean;
   installed?: boolean;
   type?: string;
-  buildingType: BuildingType[];
+  buildingType?: BuildingType[];
   duration?: number;
   
   // Additional properties found in code

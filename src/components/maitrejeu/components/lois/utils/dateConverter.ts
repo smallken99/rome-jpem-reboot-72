@@ -1,11 +1,11 @@
 
-import { GameDate } from '@/types/game';
+import { GameDate, Season } from '@/types/game';
 
 export const gameOrJsDateToDate = (date: GameDate | Date): Date => {
   if (date instanceof Date) return date;
   
   // If it's a GameDate, convert to a JS Date
-  const seasonMonth: Record<string, number> = {
+  const seasonMonth: Record<Season, number> = {
     winter: 0, // January
     spring: 3, // April
     summer: 6, // July
@@ -16,7 +16,7 @@ export const gameOrJsDateToDate = (date: GameDate | Date): Date => {
 };
 
 export const gameDateToString = (date: GameDate): string => {
-  const seasonName: Record<string, string> = {
+  const seasonName: Record<Season, string> = {
     winter: 'Hiver',
     spring: 'Printemps',
     summer: 'Été',
@@ -28,9 +28,9 @@ export const gameDateToString = (date: GameDate): string => {
 
 export const gameDateToDate = gameOrJsDateToDate;
 
-export const extractLoiDateInfo = (loi: any): { year: number; season: string } => {
+export const extractLoiDateInfo = (loi: any): GameDate => {
   if (loi?.date?.year && loi?.date?.season) {
-    return { year: loi.date.year, season: loi.date.season };
+    return { year: loi.date.year, season: loi.date.season as Season };
   }
   return { year: new Date().getFullYear(), season: 'winter' };
 };

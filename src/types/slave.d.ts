@@ -2,20 +2,20 @@
 export interface Slave {
   id: string;
   name: string;
-  gender: string;
-  age: number;
-  skills: string[];
-  level: number;
-  price: number;
-  health: number;
   origin: string;
-  assignment?: string;
-  buildingId?: string;
+  price: number;
+  skills: string[];
+  health: number;
+  productivity: number;
+  assigned: boolean;
+  assignedTo?: string;
 }
 
 export interface SlaveAssignment {
+  slaveId: string;
   buildingId: string;
-  buildingName: string;
-  count: number;
+  startDate: Date;
   efficiency: number;
+  propertyId: string;
+  propertyName: string;
 }
