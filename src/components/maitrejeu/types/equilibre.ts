@@ -29,6 +29,7 @@ export interface Equilibre {
   // Facteurs économiques et militaires
   economie: number;
   economy?: number; // Alias for economie
+  économie?: number; // Alternative spelling
   stability: number;
   armée: number;
   loyauté: number;
@@ -39,16 +40,20 @@ export interface Equilibre {
   facteurMilitaire?: number;
   facteurPatriciens?: number;
   facteurPlebs?: number;
+  facteurReligieux?: number;
+  facteurJuridique: number;
+  
+  // Alias pour la rétrocompatibilité
   patriciens?: number;
+  plébéiens?: number;
   populaires?: number;
   populares?: number; // Alias for populaires
   optimates?: number;
   moderates?: number;
-  économie?: number; // Alternative spelling
-
+  economicStability?: number; // Alias pour économie/economie
+  
   // Facteurs religieux et autres
   religion: number;
-  facteurJuridique: number;
   risques: RiskFactor[];
   historique: HistoriqueEntry[];
 }

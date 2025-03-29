@@ -22,7 +22,7 @@ export const SocialStabilityCard: React.FC<SocialStabilityCardProps> = ({
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Équilibre Social</CardTitle>
+        <CardTitle>Stabilité Sociale</CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
         <div className="space-y-2">
@@ -39,7 +39,7 @@ export const SocialStabilityCard: React.FC<SocialStabilityCardProps> = ({
             onValueChange={(value) => setLocalPatriciens(value[0])}
           />
           <p className="text-xs text-muted-foreground">
-            Satisfaction des classes patriciennes
+            Satisfaction des patriciens
           </p>
         </div>
         
@@ -57,12 +57,12 @@ export const SocialStabilityCard: React.FC<SocialStabilityCardProps> = ({
             onValueChange={(value) => setLocalPlebeiens(value[0])}
           />
           <p className="text-xs text-muted-foreground">
-            Satisfaction de la plèbe et des classes populaires
+            Satisfaction des plébéiens
           </p>
         </div>
         
         <Button className="w-full" onClick={handleSave}>
-          Mettre à jour l'équilibre social
+          Mettre à jour la stabilité sociale
         </Button>
       </CardContent>
     </Card>

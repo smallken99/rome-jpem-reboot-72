@@ -18,6 +18,9 @@ export interface PropertyUpgrade {
     minCondition?: number;
     specialBuilding?: string;
     minIncome?: number;
+    buildingType?: string[];
+    value?: number;
+    upgrades?: string[];
   };
   applied?: boolean;
   buildingType?: string[];

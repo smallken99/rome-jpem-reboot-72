@@ -18,9 +18,13 @@ export const gameOrJsDateToDate = (date: GameDate | Date): Date => {
 export const formatGameDate = (date: GameDate): string => {
   const seasonMap: Record<string, string> = {
     'spring': 'Printemps',
+    'SPRING': 'Printemps',
     'summer': 'Été',
+    'SUMMER': 'Été',
     'autumn': 'Automne',
-    'winter': 'Hiver'
+    'AUTUMN': 'Automne',
+    'winter': 'Hiver',
+    'WINTER': 'Hiver'
   };
   
   return `${date.year} (${seasonMap[date.season] || date.season})`;
@@ -28,7 +32,7 @@ export const formatGameDate = (date: GameDate): string => {
 
 export const compareGameDates = (a: GameDate, b: GameDate): number => {
   const seasonValue = (season: string): number => {
-    switch (season) {
+    switch (season.toLowerCase()) {
       case 'spring': return 0;
       case 'summer': return 1;
       case 'autumn': return 2;

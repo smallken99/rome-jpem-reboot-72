@@ -1,61 +1,55 @@
 
 import React from 'react';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { ScrollArea } from '@/components/ui/scroll-area';
-import { PoliticalEvent, RecentEventsTableProps } from '../../types/equilibre';
-import { formatGameDate } from '../../components/lois/utils/dateConverter';
+import { Badge } from '@/components/ui/badge';
+import { RecentEventsTableProps } from '../../types/equilibre';
+import { formatGameDate } from '../lois/utils/dateConverter';
 
 export const RecentEventsTable: React.FC<RecentEventsTableProps> = ({ events }) => {
   return (
-    <div className="border rounded-md">
-      <ScrollArea className="h-[300px]">
+    <div className="space-y-4">
+      <h3 className="text-lg font-semibold">Événements Récents</h3>
+      
+      <div className="rounded-md border">
         <Table>
           <TableHeader>
             <TableRow>
               <TableHead>Date</TableHead>
               <TableHead>Événement</TableHead>
               <TableHead>Type</TableHead>
-              <TableHead>Impact</TableHead>
+              <TableHead className="text-right">Impact</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {events.length > 0 ? (
-              events.map((event, index) => (
-                <TableRow key={event.id || index}>
-                  <TableCell>{formatGameDate(event.date)}</TableCell>
-                  <TableCell>{event.title || event.description}</TableCell>
-                  <TableCell>
-                    <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${
-                      event.type === 'positive' ? 'bg-green-100 text-green-800' :
-                      event.type === 'negative' ? 'bg-red-100 text-red-800' :
-                      'bg-blue-100 text-blue-800'
-                    }`}>
-                      {event.type}
-                    </span>
+              events.map((event) => (
+                <TableRow key={event.id}>
+                  <TableCell className="font-medium">
+                    {formatGameDate(event.date)}
                   </TableCell>
+                  <TableCell>{event.title}</TableCell>
                   <TableCell>
-                    <span className={`${
-                      event.impact > 0 ? 'text-green-600' :
-                      event.impact < 0 ? 'text-red-600' :
-                      'text-gray-600'
-                    }`}>
+                    <Badge variant="outline" className="capitalize">
+                      {event.type}
+                    </Badge>
+                  </TableCell>
+                  <TableCell className="text-right">
+                    <Badge className={`${event.impact > 0 ? 'bg-green-500' : event.impact < 0 ? 'bg-red-500' : 'bg-slate-500'}`}>
                       {event.impact > 0 ? '+' : ''}{event.impact}
-                    </span>
+                    </Badge>
                   </TableCell>
                 </TableRow>
               ))
             ) : (
               <TableRow>
                 <TableCell colSpan={4} className="text-center py-4 text-muted-foreground">
-                  Aucun événement récent à afficher
+                  Aucun événement récent
                 </TableCell>
               </TableRow>
             )}
           </TableBody>
         </Table>
-      </ScrollArea>
+      </div>
     </div>
   );
 };
-
-export default RecentEventsTable;

@@ -24,7 +24,7 @@ export const PoliticalBalanceCard: React.FC<PoliticalBalanceCardProps> = ({
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Équilibre des Factions Politiques</CardTitle>
+        <CardTitle>Équilibre Politique</CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
         <div className="space-y-2">
@@ -41,7 +41,7 @@ export const PoliticalBalanceCard: React.FC<PoliticalBalanceCardProps> = ({
             onValueChange={(value) => setLocalPopulaires(value[0])}
           />
           <p className="text-xs text-muted-foreground">
-            Influence des factions populaires au Sénat
+            Influence des factions populaires
           </p>
         </div>
         
@@ -59,7 +59,7 @@ export const PoliticalBalanceCard: React.FC<PoliticalBalanceCardProps> = ({
             onValueChange={(value) => setLocalOptimates(value[0])}
           />
           <p className="text-xs text-muted-foreground">
-            Influence des factions conservatrices au Sénat
+            Influence des factions optimates
           </p>
         </div>
         
@@ -77,7 +77,7 @@ export const PoliticalBalanceCard: React.FC<PoliticalBalanceCardProps> = ({
             onValueChange={(value) => setLocalModerates(value[0])}
           />
           <p className="text-xs text-muted-foreground">
-            Influence des factions modérées au Sénat
+            Influence des factions modérées
           </p>
         </div>
         
