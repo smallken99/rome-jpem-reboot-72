@@ -43,3 +43,26 @@ export const compareGameDates = (a: GameDate, b: GameDate): number => {
   
   return seasonValue(a.season) - seasonValue(b.season);
 };
+
+// Additional utility functions needed
+export const gameDateToString = (date: GameDate): string => {
+  return formatGameDate(date);
+};
+
+export const gameDateToDate = (date: GameDate): Date => {
+  return gameOrJsDateToDate(date);
+};
+
+export const gameDateToStringOrDate = (date: GameDate | Date): string => {
+  if (date instanceof Date) {
+    return date.toLocaleDateString();
+  }
+  return formatGameDate(date);
+};
+
+export const extractLoiDateInfo = (date: GameDate): { year: number; season: string } => {
+  return {
+    year: date.year,
+    season: date.season
+  };
+};

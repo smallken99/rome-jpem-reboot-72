@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -15,40 +16,45 @@ import {
   Equilibre,
   HistoriqueEntry,
   RiskFactor,
-  PoliticalBalanceCardProps,
-  SocialStabilityCardProps,
-  EconomicStabilityCardProps
 } from '@/components/maitrejeu/types/equilibre';
 import { useGameTime } from '@/hooks/useGameTime';
-import { gameDateToString } from './components/lois/utils/dateConverter';
+import { gameDateToString, gameDateToDate } from '@/components/maitrejeu/components/lois/utils/dateConverter';
 import { DatePicker } from '@/components/ui/date-picker';
 import { CalendarIcon } from '@radix-ui/react-icons';
 import { format } from 'date-fns';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { cn } from '@/lib/utils';
 import { Calendar } from '@/components/ui/calendar';
-import { RiskFactorLevel } from './types/equilibre';
-import { gameDateToDate } from './components/lois/utils/dateConverter';
+import { PoliticalBalanceCard } from './components/equilibre/PoliticalBalanceCard';
+import { SocialStabilityCard } from './components/equilibre/SocialStabilityCard';
+import { EconomicStabilityCard } from './components/equilibre/EconomicStabilityCard';
 
 const initialEquilibreState: Equilibre = {
   id: uuid(),
   political: {
-    populares: 50,
+    populaires: 50,
     optimates: 50,
     moderates: 50,
   },
   social: {
     patriciens: 50,
-    plebeiens: 50,
+    plébéiens: 50,
   },
+  economie: 50,
   economy: 50,
   stability: 50,
+  armée: 50,
+  loyauté: 50,
+  morale: 50,
+  religion: 50,
+  facteurJuridique: 50,
+  risques: [],
   historique: []
 };
 
 const initialRiskFactors: RiskFactor[] = [
   {
-    id: "1",
+    id: uuid(),
     name: "Corruption",
     level: "medium",
     type: "economic",
@@ -56,7 +62,7 @@ const initialRiskFactors: RiskFactor[] = [
     threat: 60
   },
   {
-    id: "2",
+    id: uuid(),
     name: "Tensions sociales",
     level: "high",
     type: "social",
@@ -64,7 +70,7 @@ const initialRiskFactors: RiskFactor[] = [
     threat: 75
   },
   {
-    id: "3",
+    id: uuid(),
     name: "Instabilité politique",
     level: "medium", 
     type: "political",
@@ -72,7 +78,7 @@ const initialRiskFactors: RiskFactor[] = [
     threat: 50
   },
   {
-    id: "4",
+    id: uuid(),
     name: "Menace militaire",
     level: "low",
     type: "military",
@@ -84,10 +90,10 @@ const initialRiskFactors: RiskFactor[] = [
 export const GestionEquilibre = () => {
   const [equilibre, setEquilibre] = useState<Equilibre>(initialEquilibreState);
   const [historicalEvents, setHistoricalEvents] = useState<HistoriqueEntry[]>([]);
-  const [newEvent, setNewEvent] = useState<Omit<HistoriqueEntry, 'date'>>({ event: '', impact: {} });
+  const [newEvent, setNewEvent] = useState<Partial<HistoriqueEntry>>({ event: '', impact: 0 });
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(new Date());
   const [riskFactors, setRiskFactors] = useState<RiskFactor[]>(initialRiskFactors);
-  const [newRiskFactor, setNewRiskFactor] = useState<Omit<RiskFactor, 'threat'>>();
+  const [newRiskFactor, setNewRiskFactor] = useState<Partial<RiskFactor>>({});
   const [editingRiskFactorId, setEditingRiskFactorId] = useState<string | null>(null);
   const [editedRiskFactor, setEditedRiskFactor] = useState<RiskFactor | null>(null);
   const { toast } = useToast();
@@ -98,24 +104,25 @@ export const GestionEquilibre = () => {
     // For now, we'll use the initial state
   }, []);
 
-  const handlePoliticalUpdate = (populares: number, optimates: number, moderates: number) => {
+  const handlePoliticalUpdate = (populaires: number, optimates: number, moderates: number) => {
     setEquilibre(prev => ({
       ...prev,
-      political: { populares, optimates, moderates }
+      political: { populaires, optimates, moderates }
     }));
   };
 
   const handleSocialUpdate = (patriciens: number, plebeiens: number) => {
     setEquilibre(prev => ({
       ...prev,
-      social: { patriciens, plebeiens }
+      social: { patriciens, plébéiens: plebeiens }
     }));
   };
 
   const handleEconomicUpdate = (economy: number) => {
     setEquilibre(prev => ({
       ...prev,
-      economy
+      economy,
+      economie: economy
     }));
   };
 
@@ -129,13 +136,15 @@ export const GestionEquilibre = () => {
     }
 
     const newHistoricalEvent: HistoriqueEntry = {
+      id: uuid(),
       date: selectedDate,
-      event: newEvent.event,
-      impact: newEvent.impact
+      event: newEvent.event || '',
+      impact: newEvent.impact || 0,
+      type: 'general'
     };
 
     setHistoricalEvents(prev => [...prev, newHistoricalEvent]);
-    setNewEvent({ event: '', impact: {} });
+    setNewEvent({ event: '', impact: 0 });
     setSelectedDate(undefined);
     toast({
       title: "Succès",
@@ -164,13 +173,17 @@ export const GestionEquilibre = () => {
       return;
     }
 
-    const newRiskFactorWithThreat: RiskFactor = {
-      ...newRiskFactor,
-      threat: 50 // Default threat level
+    const newRiskFactorWithId: RiskFactor = {
+      id: uuid(),
+      name: newRiskFactor.name || '',
+      level: newRiskFactor.level || 'medium',
+      type: newRiskFactor.type || '',
+      description: newRiskFactor.description || '',
+      threat: newRiskFactor.threat || 50
     };
 
-    setRiskFactors(prev => [...prev, newRiskFactorWithThreat]);
-    setNewRiskFactor(undefined);
+    setRiskFactors(prev => [...prev, newRiskFactorWithId]);
+    setNewRiskFactor({});
     toast({
       title: "Succès",
       description: "Facteur de risque ajouté avec succès.",
@@ -209,16 +222,10 @@ export const GestionEquilibre = () => {
     });
   };
 
+  // Sort events by date (newest first)
   const sortedEvents = [...historicalEvents].sort((a, b) => {
-    // Use our date conversion utility instead of direct Date constructor
-    const dateA = typeof a.date === 'string' ? new Date() : 
-      typeof a.date === 'object' && 'year' in a.date ? 
-      gameDateToDate(a.date) : new Date();
-    
-    const dateB = typeof b.date === 'string' ? new Date() : 
-      typeof b.date === 'object' && 'year' in b.date ? 
-      gameDateToDate(b.date) : new Date();
-    
+    const dateA = a.date instanceof Date ? a.date : new Date();
+    const dateB = b.date instanceof Date ? b.date : new Date();
     return dateB.getTime() - dateA.getTime();
   });
 
@@ -239,7 +246,7 @@ export const GestionEquilibre = () => {
           </CardHeader>
           <CardContent>
             <PoliticalBalanceCard
-              populares={equilibre.political?.populaires || 50}
+              populaires={equilibre.political?.populaires || 50}
               optimates={equilibre.political?.optimates || 50}
               moderates={equilibre.political?.moderates || 50}
               onUpdate={handlePoliticalUpdate}
@@ -258,7 +265,7 @@ export const GestionEquilibre = () => {
           <CardContent>
             <SocialStabilityCard
               patriciens={equilibre.social?.patriciens || 50}
-              plebeiens={equilibre.social?.plebeiens || 50}
+              plebeiens={equilibre.social?.plébéiens || 50}
               onUpdate={handleSocialUpdate}
               equilibre={equilibre}
             />
@@ -274,7 +281,7 @@ export const GestionEquilibre = () => {
           </CardHeader>
           <CardContent>
             <EconomicStabilityCard
-              economy={equilibre.economy || 50}
+              economy={equilibre.economy || equilibre.economie || 50}
               onUpdate={handleEconomicUpdate}
               equilibre={equilibre}
             />
@@ -326,9 +333,6 @@ export const GestionEquilibre = () => {
           </CardContent>
           <CardHeader>
             <CardTitle>Ajouter un facteur de risque</CardTitle>
-            <CardDescription>
-              Ajouter un facteur de risque
-            </CardDescription>
           </CardHeader>
           <CardContent>
             <div className="grid gap-4">
@@ -415,48 +419,18 @@ export const GestionEquilibre = () => {
                 <Label htmlFor="event">Événement</Label>
                 <Textarea
                   id="event"
-                  value={newEvent.event}
+                  value={newEvent.event || ""}
                   onChange={(e) => setNewEvent(prev => ({ ...prev, event: e.target.value }))}
                   className="col-span-2"
                 />
               </div>
               <div className="grid grid-cols-3 items-center gap-4">
-                <Label htmlFor="impact">Impact Politique</Label>
+                <Label htmlFor="impact">Impact</Label>
                 <Input
                   type="number"
                   id="impact"
-                  value={newEvent.impact.political || 0}
-                  onChange={(e) => setNewEvent(prev => ({ ...prev, impact: { ...prev.impact, political: Number(e.target.value) } }))}
-                  className="col-span-2"
-                />
-              </div>
-              <div className="grid grid-cols-3 items-center gap-4">
-                <Label htmlFor="impact">Impact Social</Label>
-                <Input
-                  type="number"
-                  id="impact"
-                  value={newEvent.impact.social || 0}
-                  onChange={(e) => setNewEvent(prev => ({ ...prev, impact: { ...prev.impact, social: Number(e.target.value) } }))}
-                  className="col-span-2"
-                />
-              </div>
-              <div className="grid grid-cols-3 items-center gap-4">
-                <Label htmlFor="impact">Impact Économique</Label>
-                <Input
-                  type="number"
-                  id="impact"
-                  value={newEvent.impact.economic || 0}
-                  onChange={(e) => setNewEvent(prev => ({ ...prev, impact: { ...prev.impact, economic: Number(e.target.value) } }))}
-                  className="col-span-2"
-                />
-              </div>
-              <div className="grid grid-cols-3 items-center gap-4">
-                <Label htmlFor="impact">Impact Stabilité</Label>
-                <Input
-                  type="number"
-                  id="impact"
-                  value={newEvent.impact.stability || 0}
-                  onChange={(e) => setNewEvent(prev => ({ ...prev, impact: { ...prev.impact, stability: Number(e.target.value) } }))}
+                  value={newEvent.impact || 0}
+                  onChange={(e) => setNewEvent(prev => ({ ...prev, impact: Number(e.target.value) }))}
                   className="col-span-2"
                 />
               </div>
@@ -482,21 +456,23 @@ export const GestionEquilibre = () => {
                     <div>
                       <h3 className="text-lg font-medium">{event.event}</h3>
                       <p className="text-sm text-muted-foreground">
-                        {typeof event.date === 'string' 
-                          ? event.date 
-                          : event.date instanceof Date 
-                            ? event.date.toLocaleDateString()
-                            : gameDateToString(event.date)
-                        }
+                        {event.date instanceof Date 
+                          ? event.date.toLocaleDateString()
+                          : "Date inconnue"}
                       </p>
                     </div>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      onClick={() => handleDeleteEvent(index)}
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
+                    <div className="flex items-center space-x-4">
+                      <span className={`font-medium ${Number(event.impact) > 0 ? 'text-green-600' : Number(event.impact) < 0 ? 'text-red-600' : 'text-gray-600'}`}>
+                        {Number(event.impact) > 0 ? '+' : ''}{event.impact}
+                      </span>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => handleDeleteEvent(index)}
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </div>
                   </div>
                 </div>
               ))}

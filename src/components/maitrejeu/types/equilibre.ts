@@ -3,9 +3,9 @@ import { GameDate } from './common';
 
 export interface HistoriqueEntry {
   id: string;
-  date: GameDate;
+  date: GameDate | Date;
   event: string;
-  impact: number;
+  impact: number | Record<string, number>;
   type: string;
   description?: string;
 }
@@ -28,11 +28,24 @@ export interface Equilibre {
   
   // Facteurs économiques et militaires
   economie: number;
+  economy?: number; // Alias for economie
   stability: number;
   armée: number;
   loyauté: number;
   morale: number;
   
+  // Facteurs structurels
+  facteurSenat?: number;
+  facteurMilitaire?: number;
+  facteurPatriciens?: number;
+  facteurPlebs?: number;
+  patriciens?: number;
+  populaires?: number;
+  populares?: number; // Alias for populaires
+  optimates?: number;
+  moderates?: number;
+  économie?: number; // Alternative spelling
+
   // Facteurs religieux et autres
   religion: number;
   facteurJuridique: number;
@@ -81,4 +94,8 @@ export interface EconomicStabilityCardProps {
   economy: number;
   onUpdate: (economy: number) => void;
   equilibre: Equilibre;
+}
+
+export interface RecentEventsTableProps {
+  events: PoliticalEvent[];
 }
