@@ -1,86 +1,96 @@
 
 import React from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Progress } from '@/components/ui/progress';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Slider } from '@/components/ui/slider';
-import { Button } from '@/components/ui/button';
-import { Equilibre } from '@/types/equilibre';
 
 interface PoliticalBalanceCardProps {
-  populaires: number;
-  optimates: number;
-  moderates: number;
+  political: {
+    populaires: number;
+    optimates: number;
+    moderates: number;
+  };
   onUpdate: (values: { populaires: number; optimates: number; moderates: number; }) => void;
-  equilibre: Equilibre;
 }
 
 export const PoliticalBalanceCard: React.FC<PoliticalBalanceCardProps> = ({
-  populaires,
-  optimates,
-  moderates,
-  onUpdate,
-  equilibre
+  political,
+  onUpdate
 }) => {
-  const handleUpdate = (type: 'populaires' | 'optimates' | 'moderates', value: number[]) => {
-    const newValues = {
-      populaires,
-      optimates,
-      moderates,
-      [type]: value[0]
-    };
-    
-    onUpdate(newValues);
+  // Gérer les changements individuels
+  const handlePopulairesChange = (value: number[]) => {
+    onUpdate({
+      populaires: value[0],
+      optimates: political.optimates,
+      moderates: political.moderates
+    });
   };
-  
+
+  const handleOptimatesChange = (value: number[]) => {
+    onUpdate({
+      populaires: political.populaires,
+      optimates: value[0],
+      moderates: political.moderates
+    });
+  };
+
+  const handleModeratesChange = (value: number[]) => {
+    onUpdate({
+      populaires: political.populaires,
+      optimates: political.optimates,
+      moderates: value[0]
+    });
+  };
+
   return (
-    <div className="space-y-6">
-      <div>
-        <div className="flex justify-between mb-1">
-          <span className="text-sm font-medium">Populares</span>
-          <span className="text-sm text-muted-foreground">{populaires}%</span>
+    <Card>
+      <CardHeader>
+        <CardTitle>Équilibre politique</CardTitle>
+      </CardHeader>
+      <CardContent>
+        <div className="space-y-4">
+          <div className="space-y-2">
+            <div className="flex justify-between">
+              <label className="text-sm font-medium">Populares</label>
+              <span className="text-sm">{political.populaires}%</span>
+            </div>
+            <Slider
+              defaultValue={[political.populaires]}
+              max={100}
+              min={0}
+              step={1}
+              onValueChange={handlePopulairesChange}
+            />
+          </div>
+
+          <div className="space-y-2">
+            <div className="flex justify-between">
+              <label className="text-sm font-medium">Optimates</label>
+              <span className="text-sm">{political.optimates}%</span>
+            </div>
+            <Slider
+              defaultValue={[political.optimates]}
+              max={100}
+              min={0}
+              step={1}
+              onValueChange={handleOptimatesChange}
+            />
+          </div>
+
+          <div className="space-y-2">
+            <div className="flex justify-between">
+              <label className="text-sm font-medium">Modérés</label>
+              <span className="text-sm">{political.moderates}%</span>
+            </div>
+            <Slider
+              defaultValue={[political.moderates]}
+              max={100}
+              min={0}
+              step={1}
+              onValueChange={handleModeratesChange}
+            />
+          </div>
         </div>
-        <Slider 
-          defaultValue={[populaires]} 
-          max={100} 
-          step={1}
-          onValueChange={(value) => handleUpdate('populaires', value)}
-        />
-        <Progress value={populaires} className="h-2 mt-1" />
-      </div>
-      
-      <div>
-        <div className="flex justify-between mb-1">
-          <span className="text-sm font-medium">Optimates</span>
-          <span className="text-sm text-muted-foreground">{optimates}%</span>
-        </div>
-        <Slider 
-          defaultValue={[optimates]} 
-          max={100} 
-          step={1}
-          onValueChange={(value) => handleUpdate('optimates', value)}
-        />
-        <Progress value={optimates} className="h-2 mt-1" />
-      </div>
-      
-      <div>
-        <div className="flex justify-between mb-1">
-          <span className="text-sm font-medium">Modérés</span>
-          <span className="text-sm text-muted-foreground">{moderates}%</span>
-        </div>
-        <Slider 
-          defaultValue={[moderates]} 
-          max={100} 
-          step={1}
-          onValueChange={(value) => handleUpdate('moderates', value)}
-        />
-        <Progress value={moderates} className="h-2 mt-1" />
-      </div>
-      
-      <div className="bg-muted p-3 rounded-md mt-4">
-        <p className="text-sm text-muted-foreground">
-          L'équilibre politique influence directement la stabilité du Sénat.
-        </p>
-      </div>
-    </div>
+      </CardContent>
+    </Card>
   );
 };

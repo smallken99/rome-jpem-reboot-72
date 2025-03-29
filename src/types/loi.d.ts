@@ -1,5 +1,5 @@
 
-export type LoiType = 'economie' | 'politique' | 'militaire' | 'judiciaire' | 'religieuse' | 'sociale';
+export type LoiType = 'economie' | 'politique' | 'militaire' | 'judiciaire' | 'religieuse' | 'sociale' | 'political';
 export type LoiState = 'proposée' | 'en_débat' | 'en_vote' | 'adoptée' | 'rejetée' | 'abrogée';
 export type ImportanceType = 'mineure' | 'moyenne' | 'majeure' | 'critique';
 

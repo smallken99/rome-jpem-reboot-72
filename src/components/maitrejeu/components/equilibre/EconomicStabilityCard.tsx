@@ -1,14 +1,13 @@
 
 import React from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Progress } from '@/components/ui/progress';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Slider } from '@/components/ui/slider';
 import { Equilibre } from '@/types/equilibre';
 
 interface EconomicStabilityCardProps {
   economie: number;
-  onUpdate?: (value: number) => void;
-  equilibre?: Equilibre;
+  onUpdate: (economie: number) => void;
+  equilibre: Equilibre;
 }
 
 export const EconomicStabilityCard: React.FC<EconomicStabilityCardProps> = ({
@@ -16,51 +15,42 @@ export const EconomicStabilityCard: React.FC<EconomicStabilityCardProps> = ({
   onUpdate,
   equilibre
 }) => {
-  // Determine economic health status
-  const getEconomicStatus = (value: number) => {
-    if (value >= 80) return { text: "Prospérité", color: "bg-green-600" };
-    if (value >= 60) return { text: "Stabilité", color: "bg-blue-600" };
-    if (value >= 40) return { text: "Fragile", color: "bg-yellow-600" };
-    if (value >= 20) return { text: "Crise", color: "bg-orange-600" };
-    return { text: "Effondrement", color: "bg-red-600" };
+  // Gérer les changements
+  const handleEconomyChange = (value: number[]) => {
+    onUpdate(value[0]);
   };
-  
-  const economicStatus = getEconomicStatus(economie);
-  
+
   return (
-    <div className="space-y-4">
-      <div>
-        <div className="flex justify-between mb-1">
-          <span className="text-sm font-medium">Indice économique</span>
-          <span className="text-sm text-muted-foreground">{economie}%</span>
+    <Card>
+      <CardHeader>
+        <CardTitle>Économie</CardTitle>
+      </CardHeader>
+      <CardContent>
+        <div className="space-y-4">
+          <div className="space-y-2">
+            <div className="flex justify-between">
+              <label className="text-sm font-medium">Stabilité économique</label>
+              <span className="text-sm">{economie}%</span>
+            </div>
+            <Slider
+              defaultValue={[economie]}
+              max={100}
+              min={0}
+              step={1}
+              onValueChange={handleEconomyChange}
+            />
+          </div>
+
+          <div className="mt-4 text-sm text-muted-foreground">
+            <p>Facteurs d'influence:</p>
+            <ul className="list-disc pl-5 mt-1 space-y-1">
+              <li>Trésor public: {equilibre.economie > 70 ? "Excédentaire" : (equilibre.economie > 40 ? "Stable" : "Déficitaire")}</li>
+              <li>Commerce: {equilibre.economie > 60 ? "Florissant" : (equilibre.economie > 30 ? "Normal" : "En difficulté")}</li>
+              <li>Récoltes: {equilibre.economie > 50 ? "Bonnes" : (equilibre.economie > 25 ? "Moyennes" : "Mauvaises")}</li>
+            </ul>
+          </div>
         </div>
-        {onUpdate ? (
-          <Slider 
-            defaultValue={[economie]} 
-            max={100} 
-            step={1}
-            onValueChange={(value) => onUpdate(value[0])}
-          />
-        ) : null}
-        <Progress 
-          value={economie} 
-          className="h-2 bg-stone-200" 
-          indicatorClassName={economicStatus.color} 
-        />
-      </div>
-      
-      <div className="flex items-center justify-between p-3 border rounded-md">
-        <span className="font-medium">Statut actuel:</span>
-        <span className={`px-2 py-1 rounded text-sm text-white ${economicStatus.color}`}>
-          {economicStatus.text}
-        </span>
-      </div>
-      
-      <div className="bg-muted p-3 rounded-md mt-4">
-        <p className="text-sm text-muted-foreground">
-          L'économie impacte directement les revenus fiscaux et le moral des citoyens.
-        </p>
-      </div>
-    </div>
+      </CardContent>
+    </Card>
   );
 };

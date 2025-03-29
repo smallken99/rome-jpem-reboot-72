@@ -1,485 +1,656 @@
 
 import React, { useState, useEffect } from 'react';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
+import Layout from '@/components/layout/Layout';
+import { PageHeader } from '@/components/ui-custom/PageHeader';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Separator } from '@/components/ui/separator';
-import { ScrollArea } from '@/components/ui/scroll-area';
 import { Badge } from '@/components/ui/badge';
-import { Plus, Minus, Save, Edit, Trash2, ArrowDown, ArrowUp } from 'lucide-react';
-import { useToast } from '@/components/ui/use-toast';
-import { v4 as uuid } from 'uuid';
-import {
-  Equilibre,
-  HistoriqueEntry,
-  RiskFactor,
-} from '@/components/maitrejeu/types/equilibre';
-import { useGameTime } from '@/hooks/useGameTime';
-import { gameDateToString, gameDateToDate } from '@/components/maitrejeu/components/lois/utils/dateConverter';
-import { DatePicker } from '@/components/ui/date-picker';
-import { CalendarIcon } from '@radix-ui/react-icons';
-import { format } from 'date-fns';
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { cn } from '@/lib/utils';
-import { Calendar } from '@/components/ui/calendar';
+import { useGameTime } from './hooks/useGameTime';
 import { PoliticalBalanceCard } from './components/equilibre/PoliticalBalanceCard';
 import { SocialStabilityCard } from './components/equilibre/SocialStabilityCard';
 import { EconomicStabilityCard } from './components/equilibre/EconomicStabilityCard';
+import { RecentEventsTable } from './components/equilibre/RecentEventsTable';
+import { Equilibre, PoliticalEvent } from '@/types/equilibre';
+import { gameOrJsDateToDate } from './components/lois/utils/dateConverter';
+import { toast } from 'sonner';
 
-const initialEquilibreState: Equilibre = {
-  id: uuid(),
+// État initial simulé
+const initialEquilibre: Equilibre = {
+  id: 'eq-001',
   political: {
-    populaires: 50,
-    optimates: 50,
-    moderates: 50,
+    populaires: 35,
+    optimates: 40,
+    moderates: 25
   },
   social: {
-    patriciens: 50,
-    plébéiens: 50,
+    patriciens: 30,
+    plébéiens: 70
   },
-  economie: 50,
-  economy: 50,
-  stability: 50,
-  armée: 50,
-  loyauté: 50,
-  morale: 50,
-  religion: 50,
-  facteurJuridique: 50,
-  risques: [],
-  historique: []
+  economie: 65,
+  economy: 65, // Alias pour compatibilité
+  stability: 70,
+  armée: 80,
+  loyauté: 75,
+  morale: 60,
+  religion: 85,
+  facteurJuridique: 65,
+  risques: [
+    {
+      id: 'risk-1',
+      name: 'Mécontentement plébéien',
+      level: 'Modéré',
+      type: 'social',
+      description: 'Grogne croissante chez les plébéiens face aux inégalités',
+      threat: 40
+    },
+    {
+      id: 'risk-2',
+      name: 'Corruption administrative',
+      level: 'Faible',
+      type: 'politique',
+      description: 'Détournements de fonds dans certaines provinces',
+      threat: 25
+    }
+  ],
+  historique: [
+    {
+      id: 'event-1',
+      date: new Date(43, 2, 15),
+      event: 'Révolte d\'esclaves en Sicile',
+      impact: -15,
+      type: 'social'
+    },
+    {
+      id: 'event-2',
+      date: new Date(43, 5, 10),
+      event: 'Victoire militaire en Gaule',
+      impact: 20,
+      type: 'militaire'
+    },
+    {
+      id: 'event-3',
+      date: new Date(43, 9, 5),
+      event: 'Nouvelle taxe commerciale',
+      impact: 5,
+      type: 'économique'
+    }
+  ],
+  population: 1000000 // Population totale estimée
 };
 
-const initialRiskFactors: RiskFactor[] = [
+const recentEvents: PoliticalEvent[] = [
   {
-    id: uuid(),
-    name: "Corruption",
-    level: "medium",
-    type: "economic",
-    description: "La corruption gangrène l'économie romaine.",
-    threat: 60
+    id: 'pol-event-1',
+    title: 'Discours de Caton au Sénat',
+    date: new Date(43, 11, 10),
+    description: 'Critique virulente des populares',
+    impact: -5,
+    type: 'politique'
   },
   {
-    id: uuid(),
-    name: "Tensions sociales",
-    level: "high",
-    type: "social",
-    description: "Les inégalités sociales provoquent des tensions.",
-    threat: 75
-  },
-  {
-    id: uuid(),
-    name: "Instabilité politique",
-    level: "medium", 
-    type: "political",
-    description: "Les luttes de pouvoir fragilisent la République.",
-    threat: 50
-  },
-  {
-    id: uuid(),
-    name: "Menace militaire",
-    level: "low",
-    type: "military",
-    description: "Les frontières sont menacées par des peuples barbares.",
-    threat: 30
+    id: 'pol-event-2',
+    title: 'Élection des consuls',
+    date: new Date(44, 0, 1),
+    description: 'Victoire des optimates',
+    impact: 10,
+    type: 'politique'
   }
 ];
 
-export const GestionEquilibre = () => {
-  const [equilibre, setEquilibre] = useState<Equilibre>(initialEquilibreState);
-  const [historicalEvents, setHistoricalEvents] = useState<HistoriqueEntry[]>([]);
-  const [newEvent, setNewEvent] = useState<Partial<HistoriqueEntry>>({ event: '', impact: 0 });
-  const [selectedDate, setSelectedDate] = useState<Date | undefined>(new Date());
-  const [riskFactors, setRiskFactors] = useState<RiskFactor[]>(initialRiskFactors);
-  const [newRiskFactor, setNewRiskFactor] = useState<Partial<RiskFactor>>({});
-  const [editingRiskFactorId, setEditingRiskFactorId] = useState<string | null>(null);
-  const [editedRiskFactor, setEditedRiskFactor] = useState<RiskFactor | null>(null);
-  const { toast } = useToast();
+export const GestionEquilibre: React.FC = () => {
+  const [activeTab, setActiveTab] = useState('apercu');
+  const [equilibre, setEquilibre] = useState<Equilibre>(initialEquilibre);
+  const [currentThreats, setCurrentThreats] = useState(equilibre.risques);
   const { year, season } = useGameTime();
-
+  
+  // Mise à jour de l'équilibre politique
+  const handleUpdatePolitical = (values: { populaires: number; optimates: number; moderates: number; }) => {
+    setEquilibre(prev => ({
+      ...prev,
+      political: {
+        populaires: values.populaires,
+        optimates: values.optimates,
+        moderates: values.moderates
+      }
+    }));
+    toast.success('Équilibre politique mis à jour');
+  };
+  
+  // Mise à jour de l'équilibre social
+  const handleUpdateSocial = (values: { patriciens: number; plébéiens: number; }) => {
+    setEquilibre(prev => ({
+      ...prev,
+      social: {
+        patriciens: values.patriciens,
+        plébéiens: values.plébéiens
+      }
+    }));
+    toast.success('Équilibre social mis à jour');
+  };
+  
+  // Mise à jour de l'économie
+  const handleUpdateEconomy = (economie: number) => {
+    setEquilibre(prev => ({
+      ...prev,
+      economie,
+      economy: economie // Mise à jour de l'alias également
+    }));
+    toast.success('Économie mise à jour');
+  };
+  
+  // Ajout d'un événement à l'historique
+  const handleAddEvent = (event: string, impact: number, type: string) => {
+    const newEvent = {
+      id: `event-${equilibre.historique.length + 1}`,
+      date: new Date(),
+      event,
+      impact,
+      type
+    };
+    
+    setEquilibre(prev => ({
+      ...prev,
+      historique: [newEvent, ...prev.historique.slice(0, 9)] // Garder les 10 derniers événements
+    }));
+    
+    toast.success('Événement ajouté à l\'historique');
+  };
+  
+  // Ajout d'un facteur de risque
+  const handleAddRisk = (name: string, level: string, type: string, description: string, threat: number) => {
+    const newRisk = {
+      id: `risk-${equilibre.risques.length + 1}`,
+      name,
+      level,
+      type,
+      description,
+      threat
+    };
+    
+    setEquilibre(prev => ({
+      ...prev,
+      risques: [...prev.risques, newRisk]
+    }));
+    
+    toast.success('Facteur de risque ajouté');
+  };
+  
+  // Calcul de la stabilité globale
+  const calculateGlobalStability = () => {
+    // Calcul simplifié pour l'exemple
+    const politicalBalance = 
+      equilibre.political.moderates * 0.8 + 
+      Math.min(equilibre.political.populaires, equilibre.political.optimates) * 0.4;
+    
+    const socialBalance = 
+      Math.min(equilibre.social.patriciens, equilibre.social.plébéiens) * 1.5;
+    
+    const riskFactor = equilibre.risques.reduce((sum, risk) => sum + risk.threat, 0) / 10;
+    
+    let stability = 
+      (politicalBalance + socialBalance + equilibre.economie * 1.2 + 
+       equilibre.armée * 0.7 + equilibre.loyauté * 0.8 + 
+       equilibre.religion * 0.5 + equilibre.facteurJuridique * 0.6) / 7;
+    
+    stability = Math.max(0, Math.min(100, stability - riskFactor));
+    
+    return Math.round(stability);
+  };
+  
+  // Mettre à jour la stabilité globale lors des changements
   useEffect(() => {
-    // Load data from local storage or an API here
-    // For now, we'll use the initial state
-  }, []);
-
-  const handlePoliticalUpdate = (populaires: number, optimates: number, moderates: number) => {
     setEquilibre(prev => ({
       ...prev,
-      political: { populaires, optimates, moderates }
+      stability: calculateGlobalStability()
     }));
-  };
-
-  const handleSocialUpdate = (patriciens: number, plebeiens: number) => {
-    setEquilibre(prev => ({
-      ...prev,
-      social: { patriciens, plébéiens: plebeiens }
-    }));
-  };
-
-  const handleEconomicUpdate = (economy: number) => {
-    setEquilibre(prev => ({
-      ...prev,
-      economy,
-      economie: economy
-    }));
-  };
-
-  const handleAddEvent = () => {
-    if (!selectedDate || !newEvent.event) {
-      toast({
-        title: "Erreur",
-        description: "Veuillez sélectionner une date et entrer un événement.",
-      });
-      return;
-    }
-
-    const newHistoricalEvent: HistoriqueEntry = {
-      id: uuid(),
-      date: selectedDate,
-      event: newEvent.event || '',
-      impact: newEvent.impact || 0,
-      type: 'general'
-    };
-
-    setHistoricalEvents(prev => [...prev, newHistoricalEvent]);
-    setNewEvent({ event: '', impact: 0 });
-    setSelectedDate(undefined);
-    toast({
-      title: "Succès",
-      description: "Événement ajouté avec succès.",
-    });
-  };
-
-  const handleDeleteEvent = (index: number) => {
-    setHistoricalEvents(prev => {
-      const newEvents = [...prev];
-      newEvents.splice(index, 1);
-      return newEvents;
-    });
-    toast({
-      title: "Succès",
-      description: "Événement supprimé avec succès.",
-    });
-  };
-
-  const handleAddRiskFactor = () => {
-    if (!newRiskFactor?.name || !newRiskFactor?.type || !newRiskFactor?.description) {
-      toast({
-        title: "Erreur",
-        description: "Veuillez remplir tous les champs du facteur de risque.",
-      });
-      return;
-    }
-
-    const newRiskFactorWithId: RiskFactor = {
-      id: uuid(),
-      name: newRiskFactor.name || '',
-      level: newRiskFactor.level || 'medium',
-      type: newRiskFactor.type || '',
-      description: newRiskFactor.description || '',
-      threat: newRiskFactor.threat || 50
-    };
-
-    setRiskFactors(prev => [...prev, newRiskFactorWithId]);
-    setNewRiskFactor({});
-    toast({
-      title: "Succès",
-      description: "Facteur de risque ajouté avec succès.",
-    });
-  };
-
-  const handleEditRiskFactor = (riskFactor: RiskFactor) => {
-    setEditingRiskFactorId(riskFactor.id);
-    setEditedRiskFactor({ ...riskFactor });
-  };
-
-  const handleCancelEditRiskFactor = () => {
-    setEditingRiskFactorId(null);
-    setEditedRiskFactor(null);
-  };
-
-  const handleUpdateRiskFactor = () => {
-    if (!editedRiskFactor) return;
-
-    setRiskFactors(prev =>
-      prev.map(rf => (rf.id === editedRiskFactor.id ? editedRiskFactor : rf))
-    );
-    setEditingRiskFactorId(null);
-    setEditedRiskFactor(null);
-    toast({
-      title: "Succès",
-      description: "Facteur de risque mis à jour avec succès.",
-    });
-  };
-
-  const handleDeleteRiskFactor = (riskFactorId: string) => {
-    setRiskFactors(prev => prev.filter(rf => rf.id !== riskFactorId));
-    toast({
-      title: "Succès",
-      description: "Facteur de risque supprimé avec succès.",
-    });
-  };
-
-  // Sort events by date (newest first)
-  const sortedEvents = [...historicalEvents].sort((a, b) => {
-    const dateA = a.date instanceof Date ? a.date : new Date();
-    const dateB = b.date instanceof Date ? b.date : new Date();
-    return dateB.getTime() - dateA.getTime();
-  });
-
+  }, [
+    equilibre.political, 
+    equilibre.social, 
+    equilibre.economie, 
+    equilibre.armée,
+    equilibre.loyauté,
+    equilibre.religion,
+    equilibre.facteurJuridique,
+    equilibre.risques
+  ]);
+  
   return (
-    <div className="space-y-6 p-6">
-      <h1 className="text-3xl font-bold">Gestion de l'Équilibre</h1>
-      <p className="text-muted-foreground">
-        Surveillez et ajustez les différents aspects de l'équilibre de Rome
-      </p>
-
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <Card className="md:col-span-1">
-          <CardHeader>
-            <CardTitle>Équilibre Politique</CardTitle>
-            <CardDescription>
-              Gérez l'influence des différentes factions politiques
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <PoliticalBalanceCard
-              populaires={equilibre.political?.populaires || 50}
-              optimates={equilibre.political?.optimates || 50}
-              moderates={equilibre.political?.moderates || 50}
-              onUpdate={handlePoliticalUpdate}
-              equilibre={equilibre}
-            />
-          </CardContent>
-        </Card>
-
-        <Card className="md:col-span-1">
-          <CardHeader>
-            <CardTitle>Stabilité Sociale</CardTitle>
-            <CardDescription>
-              Surveillez les tensions entre les différentes classes sociales
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <SocialStabilityCard
-              patriciens={equilibre.social?.patriciens || 50}
-              plebeiens={equilibre.social?.plébéiens || 50}
-              onUpdate={handleSocialUpdate}
-              equilibre={equilibre}
-            />
-          </CardContent>
-        </Card>
-
-        <Card className="md:col-span-1">
-          <CardHeader>
-            <CardTitle>Stabilité Économique</CardTitle>
-            <CardDescription>
-              Ajustez les paramètres économiques pour assurer la prospérité
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <EconomicStabilityCard
-              economy={equilibre.economy || equilibre.economie || 50}
-              onUpdate={handleEconomicUpdate}
-              equilibre={equilibre}
-            />
-          </CardContent>
-        </Card>
+    <Layout>
+      <PageHeader 
+        title="Gestion de l'Équilibre"
+        subtitle="Surveiller et ajuster l'équilibre politique, économique et social de Rome"
+      />
+      
+      <div className="mb-6">
+        <div className="flex justify-between items-center">
+          <Badge variant="outline" className="text-base py-1.5 px-3">
+            {season.charAt(0).toUpperCase() + season.slice(1)} {year} a.C.
+          </Badge>
+          <Button 
+            variant="default"
+            onClick={() => {
+              handleAddEvent(
+                'Mise à jour saisonnière des statistiques', 
+                Math.floor(Math.random() * 10) - 5, 
+                'administratif'
+              );
+            }}
+          >
+            Mise à jour saisonnière
+          </Button>
+        </div>
       </div>
-
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <Card>
-          <CardHeader>
-            <CardTitle>Facteurs de Risque</CardTitle>
-            <CardDescription>
-              Identifiez et gérez les menaces potentielles
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <ScrollArea className="h-[400px] pr-4">
-              <div className="space-y-4">
-                {riskFactors.map(riskFactor => (
-                  <div key={riskFactor.id} className="border rounded-md p-4">
-                    <div className="flex justify-between items-center">
-                      <div>
-                        <h3 className="text-lg font-medium">{riskFactor.name}</h3>
-                        <p className="text-sm text-muted-foreground">{riskFactor.description}</p>
-                        <Badge variant="secondary">{riskFactor.type}</Badge>
-                        <Badge>{riskFactor.level}</Badge>
-                      </div>
-                      <div className="flex space-x-2">
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          onClick={() => handleEditRiskFactor(riskFactor)}
-                        >
-                          <Edit className="h-4 w-4" />
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          onClick={() => handleDeleteRiskFactor(riskFactor.id)}
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
-                      </div>
+      
+      <Tabs value={activeTab} onValueChange={setActiveTab}>
+        <TabsList className="mb-6">
+          <TabsTrigger value="apercu">Aperçu</TabsTrigger>
+          <TabsTrigger value="politique">Politique</TabsTrigger>
+          <TabsTrigger value="social">Social</TabsTrigger>
+          <TabsTrigger value="economie">Économie</TabsTrigger>
+          <TabsTrigger value="historique">Historique</TabsTrigger>
+        </TabsList>
+        
+        <TabsContent value="apercu">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <Card>
+              <CardHeader>
+                <CardTitle>Stabilité Globale</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="text-center">
+                  <div className="relative w-36 h-36 mx-auto">
+                    <svg className="w-full h-full" viewBox="0 0 100 100">
+                      <circle 
+                        className="text-gray-200" 
+                        strokeWidth="8" 
+                        stroke="currentColor" 
+                        fill="transparent" 
+                        r="40" 
+                        cx="50" 
+                        cy="50" 
+                      />
+                      <circle 
+                        className={`${
+                          equilibre.stability > 70 
+                            ? 'text-green-500' 
+                            : equilibre.stability > 40 
+                              ? 'text-yellow-500' 
+                              : 'text-red-500'
+                        }`} 
+                        strokeWidth="8" 
+                        strokeDasharray={`${equilibre.stability * 2.5} 250`}
+                        strokeLinecap="round" 
+                        stroke="currentColor" 
+                        fill="transparent" 
+                        r="40" 
+                        cx="50" 
+                        cy="50" 
+                      />
+                    </svg>
+                    <div className="absolute inset-0 flex items-center justify-center">
+                      <span className="text-3xl font-bold">{equilibre.stability}%</span>
                     </div>
                   </div>
-                ))}
-              </div>
-            </ScrollArea>
-          </CardContent>
-          <CardHeader>
-            <CardTitle>Ajouter un facteur de risque</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="grid gap-4">
-              <div className="grid grid-cols-3 items-center gap-4">
-                <Label htmlFor="name">Nom</Label>
-                <Input
-                  type="text"
-                  id="name"
-                  value={newRiskFactor?.name || ""}
-                  onChange={(e) => setNewRiskFactor(prev => ({ ...prev, name: e.target.value }))}
-                  className="col-span-2"
-                />
-              </div>
-              <div className="grid grid-cols-3 items-center gap-4">
-                <Label htmlFor="type">Type</Label>
-                <Select onValueChange={(value) => setNewRiskFactor(prev => ({ ...prev, type: value }))}>
-                  <SelectTrigger className="col-span-2">
-                    <SelectValue placeholder="Sélectionner un type" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="political">Politique</SelectItem>
-                    <SelectItem value="economic">Économique</SelectItem>
-                    <SelectItem value="social">Social</SelectItem>
-                    <SelectItem value="military">Militaire</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="grid grid-cols-3 items-center gap-4">
-                <Label htmlFor="description">Description</Label>
-                <Textarea
-                  id="description"
-                  value={newRiskFactor?.description || ""}
-                  onChange={(e) => setNewRiskFactor(prev => ({ ...prev, description: e.target.value }))}
-                  className="col-span-2"
-                />
-              </div>
-              <Button onClick={handleAddRiskFactor}>Ajouter</Button>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader>
-            <CardTitle>Événements Historiques</CardTitle>
-            <CardDescription>
-              Enregistrez les événements marquants de l'histoire de Rome
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="grid gap-4">
-              <div className="grid grid-cols-3 items-center gap-4">
-                <Label htmlFor="date">Date</Label>
-                <Popover>
-                  <PopoverTrigger asChild>
-                    <Button
-                      variant={"outline"}
-                      className={cn(
-                        "w-[240px] pl-3 text-left font-normal",
-                        !selectedDate && "text-muted-foreground"
-                      )}
-                    >
-                      {selectedDate ? (
-                        format(selectedDate, "PPP")
-                      ) : (
-                        <span>Choisir une date</span>
-                      )}
-                      <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                    </Button>
-                  </PopoverTrigger>
-                  <PopoverContent className="w-auto p-0" align="start">
-                    <Calendar
-                      mode="single"
-                      selected={selectedDate}
-                      onSelect={setSelectedDate}
-                      disabled={(date) =>
-                        date > new Date() || date < new Date("1900-01-01")
-                      }
-                      initialFocus
-                    />
-                  </PopoverContent>
-                </Popover>
-              </div>
-              <div className="grid grid-cols-3 items-center gap-4">
-                <Label htmlFor="event">Événement</Label>
-                <Textarea
-                  id="event"
-                  value={newEvent.event || ""}
-                  onChange={(e) => setNewEvent(prev => ({ ...prev, event: e.target.value }))}
-                  className="col-span-2"
-                />
-              </div>
-              <div className="grid grid-cols-3 items-center gap-4">
-                <Label htmlFor="impact">Impact</Label>
-                <Input
-                  type="number"
-                  id="impact"
-                  value={newEvent.impact || 0}
-                  onChange={(e) => setNewEvent(prev => ({ ...prev, impact: Number(e.target.value) }))}
-                  className="col-span-2"
-                />
-              </div>
-              <Button onClick={handleAddEvent}>Ajouter</Button>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-
-      <Card>
-        <CardHeader>
-          <CardTitle>Chronologie des Événements</CardTitle>
-          <CardDescription>
-            Visualisez l'évolution de Rome à travers les événements historiques
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <ScrollArea className="h-[400px] pr-4">
-            <div className="space-y-4">
-              {sortedEvents.map((event, index) => (
-                <div key={index} className="border rounded-md p-4">
-                  <div className="flex justify-between items-center">
-                    <div>
-                      <h3 className="text-lg font-medium">{event.event}</h3>
-                      <p className="text-sm text-muted-foreground">
-                        {event.date instanceof Date 
-                          ? event.date.toLocaleDateString()
-                          : "Date inconnue"}
-                      </p>
-                    </div>
-                    <div className="flex items-center space-x-4">
-                      <span className={`font-medium ${Number(event.impact) > 0 ? 'text-green-600' : Number(event.impact) < 0 ? 'text-red-600' : 'text-gray-600'}`}>
-                        {Number(event.impact) > 0 ? '+' : ''}{event.impact}
+                  
+                  <h3 className="mt-4 text-lg font-medium">
+                    {equilibre.stability > 70 
+                      ? 'Stable' 
+                      : equilibre.stability > 40 
+                        ? 'Précaire' 
+                        : 'Critique'}
+                  </h3>
+                  
+                  <p className="text-sm text-muted-foreground mt-1">
+                    {equilibre.stability > 70 
+                      ? 'La République est stable, les institutions fonctionnent bien.' 
+                      : equilibre.stability > 40 
+                        ? 'Des tensions existent, mais la situation reste sous contrôle.' 
+                        : 'La République est au bord de la crise, des mesures drastiques sont nécessaires.'}
+                  </p>
+                </div>
+              </CardContent>
+            </Card>
+            
+            <Card>
+              <CardHeader>
+                <CardTitle>Facteurs d'influence</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  <div>
+                    <div className="flex justify-between items-center mb-1">
+                      <span className="text-sm">Équilibre politique</span>
+                      <span className="text-sm font-medium">
+                        {(equilibre.political.populaires + equilibre.political.optimates + equilibre.political.moderates) / 3}%
                       </span>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        onClick={() => handleDeleteEvent(index)}
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
+                    </div>
+                    <div className="w-full bg-gray-200 rounded-full h-2">
+                      <div 
+                        className="bg-blue-500 h-2 rounded-full" 
+                        style={{ width: `${(equilibre.political.populaires + equilibre.political.optimates + equilibre.political.moderates) / 3}%` }}
+                      ></div>
+                    </div>
+                  </div>
+                  
+                  <div>
+                    <div className="flex justify-between items-center mb-1">
+                      <span className="text-sm">Économie</span>
+                      <span className="text-sm font-medium">{equilibre.economie}%</span>
+                    </div>
+                    <div className="w-full bg-gray-200 rounded-full h-2">
+                      <div 
+                        className="bg-green-500 h-2 rounded-full" 
+                        style={{ width: `${equilibre.economie}%` }}
+                      ></div>
+                    </div>
+                  </div>
+                  
+                  <div>
+                    <div className="flex justify-between items-center mb-1">
+                      <span className="text-sm">Force militaire</span>
+                      <span className="text-sm font-medium">{equilibre.armée}%</span>
+                    </div>
+                    <div className="w-full bg-gray-200 rounded-full h-2">
+                      <div 
+                        className="bg-red-500 h-2 rounded-full" 
+                        style={{ width: `${equilibre.armée}%` }}
+                      ></div>
+                    </div>
+                  </div>
+                  
+                  <div>
+                    <div className="flex justify-between items-center mb-1">
+                      <span className="text-sm">Loyauté des provinces</span>
+                      <span className="text-sm font-medium">{equilibre.loyauté}%</span>
+                    </div>
+                    <div className="w-full bg-gray-200 rounded-full h-2">
+                      <div 
+                        className="bg-purple-500 h-2 rounded-full" 
+                        style={{ width: `${equilibre.loyauté}%` }}
+                      ></div>
+                    </div>
+                  </div>
+                  
+                  <div>
+                    <div className="flex justify-between items-center mb-1">
+                      <span className="text-sm">Religion et piété</span>
+                      <span className="text-sm font-medium">{equilibre.religion}%</span>
+                    </div>
+                    <div className="w-full bg-gray-200 rounded-full h-2">
+                      <div 
+                        className="bg-amber-500 h-2 rounded-full" 
+                        style={{ width: `${equilibre.religion}%` }}
+                      ></div>
                     </div>
                   </div>
                 </div>
-              ))}
-            </div>
-          </ScrollArea>
-        </CardContent>
-      </Card>
-    </div>
+              </CardContent>
+            </Card>
+          </div>
+          
+          <div className="mt-6">
+            <Card>
+              <CardHeader>
+                <CardTitle>Menaces actuelles</CardTitle>
+              </CardHeader>
+              <CardContent>
+                {currentThreats.length > 0 ? (
+                  <div className="space-y-4">
+                    {currentThreats.map(threat => (
+                      <div key={threat.id} className="border rounded-md p-4">
+                        <div className="flex justify-between items-start">
+                          <div>
+                            <h3 className="font-medium">{threat.name}</h3>
+                            <p className="text-sm text-muted-foreground">{threat.description}</p>
+                          </div>
+                          <div className="flex items-center space-x-2">
+                            <Badge variant="outline" className="capitalize">{threat.type}</Badge>
+                            <Badge 
+                              className={
+                                threat.threat > 60 
+                                  ? 'bg-red-100 text-red-800'
+                                  : threat.threat > 30
+                                    ? 'bg-yellow-100 text-yellow-800'
+                                    : 'bg-blue-100 text-blue-800'
+                              }
+                            >
+                              {threat.level}
+                            </Badge>
+                          </div>
+                        </div>
+                        <div className="mt-3">
+                          <div className="flex justify-between items-center mb-1">
+                            <span className="text-xs text-muted-foreground">Niveau de menace</span>
+                            <span className="text-xs font-medium">{threat.threat}%</span>
+                          </div>
+                          <div className="w-full bg-gray-200 rounded-full h-1.5">
+                            <div 
+                              className={`h-1.5 rounded-full ${
+                                threat.threat > 60 
+                                  ? 'bg-red-500'
+                                  : threat.threat > 30
+                                    ? 'bg-yellow-500'
+                                    : 'bg-blue-500'
+                              }`}
+                              style={{ width: `${threat.threat}%` }}
+                            ></div>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="text-center py-6 text-muted-foreground">
+                    <p>Aucune menace significative actuellement.</p>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </div>
+        </TabsContent>
+        
+        <TabsContent value="politique">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <PoliticalBalanceCard 
+              political={equilibre.political} 
+              onUpdate={handleUpdatePolitical}
+            />
+            
+            <Card>
+              <CardHeader>
+                <CardTitle>Événements politiques récents</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  {recentEvents.map((event) => (
+                    <div key={event.id} className="border rounded-md p-4">
+                      <div className="flex justify-between items-start">
+                        <div>
+                          <h3 className="font-medium">{event.title}</h3>
+                          <p className="text-sm text-muted-foreground">{event.description}</p>
+                        </div>
+                        <Badge 
+                          className={event.impact > 0 ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}
+                        >
+                          {event.impact > 0 ? `+${event.impact}` : event.impact}
+                        </Badge>
+                      </div>
+                      <p className="text-xs text-muted-foreground mt-3">
+                        {event.date.toLocaleDateString('fr-FR', {
+                          year: 'numeric',
+                          month: 'long',
+                          day: 'numeric'
+                        })}
+                      </p>
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        </TabsContent>
+        
+        <TabsContent value="social">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <SocialStabilityCard 
+              social={equilibre.social} 
+              onUpdate={handleUpdateSocial}
+            />
+            
+            <Card>
+              <CardHeader>
+                <CardTitle>Démographie</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  <div className="text-center mb-6">
+                    <span className="text-3xl font-bold">
+                      {(equilibre.population as number).toLocaleString()}
+                    </span>
+                    <p className="text-sm text-muted-foreground">Population estimée</p>
+                  </div>
+                  
+                  <Separator />
+                  
+                  <div className="grid grid-cols-2 gap-4 mt-4">
+                    <div className="text-center">
+                      <span className="text-xl font-medium">
+                        {Math.round(equilibre.social.patriciens / 100 * (equilibre.population as number)).toLocaleString()}
+                      </span>
+                      <p className="text-sm text-muted-foreground">Patriciens</p>
+                    </div>
+                    <div className="text-center">
+                      <span className="text-xl font-medium">
+                        {Math.round(equilibre.social.plébéiens / 100 * (equilibre.population as number)).toLocaleString()}
+                      </span>
+                      <p className="text-sm text-muted-foreground">Plébéiens</p>
+                    </div>
+                  </div>
+                  
+                  <Separator />
+                  
+                  <div className="space-y-3 mt-4">
+                    <h3 className="text-sm font-medium">Facteurs d'influence sociale</h3>
+                    <ul className="space-y-2 text-sm">
+                      <li className="flex justify-between">
+                        <span>Morale publique</span>
+                        <span>{equilibre.morale}%</span>
+                      </li>
+                      <li className="flex justify-between">
+                        <span>Respect de la loi</span>
+                        <span>{equilibre.facteurJuridique}%</span>
+                      </li>
+                      <li className="flex justify-between">
+                        <span>Tensions sociales</span>
+                        <span>
+                          {Math.abs(equilibre.social.patriciens - equilibre.social.plébéiens)}%
+                        </span>
+                      </li>
+                    </ul>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        </TabsContent>
+        
+        <TabsContent value="economie">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <EconomicStabilityCard 
+              economie={equilibre.economie} 
+              onUpdate={handleUpdateEconomy}
+              equilibre={equilibre}
+            />
+            
+            <Card>
+              <CardHeader>
+                <CardTitle>Indicateurs économiques</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  <div className="space-y-3">
+                    <h3 className="text-sm font-medium">Commerce maritime</h3>
+                    <div className="flex items-center">
+                      <div className="w-full bg-gray-200 rounded-full h-2.5 mr-2">
+                        <div 
+                          className="bg-blue-500 h-2.5 rounded-full" 
+                          style={{ width: `${70 + Math.floor(Math.random() * 20)}%` }}
+                        ></div>
+                      </div>
+                      <span className="text-sm">Fort</span>
+                    </div>
+                  </div>
+                  
+                  <div className="space-y-3">
+                    <h3 className="text-sm font-medium">Production agricole</h3>
+                    <div className="flex items-center">
+                      <div className="w-full bg-gray-200 rounded-full h-2.5 mr-2">
+                        <div 
+                          className="bg-green-500 h-2.5 rounded-full" 
+                          style={{ width: `${60 + Math.floor(Math.random() * 20)}%` }}
+                        ></div>
+                      </div>
+                      <span className="text-sm">Satisfaisante</span>
+                    </div>
+                  </div>
+                  
+                  <div className="space-y-3">
+                    <h3 className="text-sm font-medium">Artisanat et industrie</h3>
+                    <div className="flex items-center">
+                      <div className="w-full bg-gray-200 rounded-full h-2.5 mr-2">
+                        <div 
+                          className="bg-amber-500 h-2.5 rounded-full" 
+                          style={{ width: `${50 + Math.floor(Math.random() * 20)}%` }}
+                        ></div>
+                      </div>
+                      <span className="text-sm">Modérée</span>
+                    </div>
+                  </div>
+                  
+                  <div className="space-y-3">
+                    <h3 className="text-sm font-medium">Trésor public</h3>
+                    <div className="flex items-center">
+                      <div className="w-full bg-gray-200 rounded-full h-2.5 mr-2">
+                        <div 
+                          className="bg-purple-500 h-2.5 rounded-full" 
+                          style={{ width: `${45 + Math.floor(Math.random() * 25)}%` }}
+                        ></div>
+                      </div>
+                      <span className="text-sm">Stable</span>
+                    </div>
+                  </div>
+                  
+                  <div className="space-y-3">
+                    <h3 className="text-sm font-medium">Inflation</h3>
+                    <div className="flex items-center">
+                      <div className="w-full bg-gray-200 rounded-full h-2.5 mr-2">
+                        <div 
+                          className="bg-red-500 h-2.5 rounded-full" 
+                          style={{ width: `${20 + Math.floor(Math.random() * 15)}%` }}
+                        ></div>
+                      </div>
+                      <span className="text-sm">Faible</span>
+                    </div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        </TabsContent>
+        
+        <TabsContent value="historique">
+          <Card>
+            <CardHeader>
+              <CardTitle>Historique des événements</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <RecentEventsTable events={equilibre.historique.slice(0, 10)} />
+            </CardContent>
+          </Card>
+        </TabsContent>
+      </Tabs>
+    </Layout>
   );
 };

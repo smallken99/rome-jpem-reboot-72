@@ -26,6 +26,8 @@ export const gameDateToString = (date: GameDate): string => {
   return `${seasonName[date.season]} ${date.year}`;
 };
 
+export const gameDateToDate = gameOrJsDateToDate;
+
 export const extractLoiDateInfo = (loi: any): { year: number; season: string } => {
   if (loi?.date?.year && loi?.date?.season) {
     return { year: loi.date.year, season: loi.date.season };

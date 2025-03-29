@@ -11,7 +11,7 @@ export interface OwnedBuilding {
   condition: number;
   income: number;
   workers: number;
-  description: string;
+  description?: string;
   purchaseDate: Date;
   
   // Additional required properties
@@ -27,6 +27,7 @@ export interface OwnedBuilding {
   buildingDescription?: any;
   status?: string;
   maintenance?: number;
+  maintenanceEnabled?: boolean;
 }
 
 export interface PropertyUpgrade {
@@ -35,14 +36,14 @@ export interface PropertyUpgrade {
   description: string;
   cost: number;
   effect: string;
-  applied: boolean;
+  effects?: Record<string, any>;
+  applied?: boolean;
+  installed?: boolean;
+  type?: string;
   buildingType: BuildingType[];
   duration?: number;
-  type?: string;
-  installed?: boolean;
   
   // Additional properties found in code
-  effects?: Record<string, any>;
   requirements?: {
     buildingLevel?: number;
     previousUpgrade?: string;
@@ -53,6 +54,9 @@ export interface PropertyUpgrade {
     workers?: number;
     buildingCondition?: number;
     maintenance?: number;
+    value?: number;
+    upgrades?: string[];
+    condition?: number;
   };
 }
 
