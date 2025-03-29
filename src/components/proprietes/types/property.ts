@@ -4,8 +4,8 @@ export interface PropertyUpgrade {
   name: string;
   description: string;
   cost: number;
-  effect: string;
-  effects?: Record<string, any>; // Adding this to fix errors
+  effect: string | Record<string, any>;
+  effects?: Record<string, any>; // Pour la compatibilité avec le code existant
   type: string;
   installed: boolean;
   requirements?: {
@@ -26,7 +26,7 @@ export interface PropertyUpgrade {
 
 export interface OwnedBuilding {
   id: string;
-  buildingId?: string;
+  buildingId: string;
   name: string;
   buildingType: string;
   type: string;

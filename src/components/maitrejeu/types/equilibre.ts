@@ -15,7 +15,7 @@ export interface Equilibre {
   
   // Factions politiques
   political: {
-    populaires: number;  // Remplace populares
+    populaires: number;
     optimates: number; 
     moderates: number;
   };

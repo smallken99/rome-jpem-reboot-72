@@ -34,19 +34,19 @@ export interface SlaveAssignment {
 export interface SlaveManagementHook {
   slaves: Slave[];
   loading: boolean;
-  purchaseSlave: (slave: Slave, amount: number) => boolean;
-  sellSlave: (slaveId: string) => number;
-  assignSlave: (slaveId: string, assignmentId: string) => boolean;
-  trainSlave: (slaveId: string, skill: string) => boolean;
-  
-  // Additional properties needed for SlavesOverview component
   totalSlaves: number;
   slavePrice: number;
   assignedSlaves: number | Slave[];
   slaveAssignments: Record<string, string[]> | SlaveAssignment[];
+  balance: number;
+  
+  // Méthodes de gestion des esclaves
+  purchaseSlave: (slave: Slave, amount: number) => boolean;
+  sellSlave: (slaveId: string) => number;
+  assignSlave: (slaveId: string, assignmentId: string) => boolean;
+  trainSlave: (slaveId: string, skill: string) => boolean;
   purchaseSlaves: (count: number, type: string) => boolean;
   sellSlaves: (slaveIds: string[]) => number;
   assignSlavesToProperty: (slaveIds: string[], propertyId: string) => boolean;
   removeSlaveAssignment: (slaveId: string) => boolean;
-  balance: number;
 }

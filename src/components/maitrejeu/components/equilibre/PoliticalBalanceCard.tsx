@@ -16,51 +16,22 @@ export const PoliticalBalanceCard: React.FC<PoliticalBalanceCardProps> = ({
   const [localOptimates, setLocalOptimates] = useState(optimates || 33);
   const [localModerates, setLocalModerates] = useState(moderates || 34);
   
-  const handleAdjustValues = (type: 'populaires' | 'optimates' | 'moderates', newValue: number) => {
-    let newPopulaires = localPopulaires;
-    let newOptimates = localOptimates;
-    let newModerates = localModerates;
-    
-    const total = 100;
-    
-    if (type === 'populaires') {
-      newPopulaires = newValue;
-      // Adjust others proportionally
-      const remainingPercentage = total - newValue;
-      const ratio = localOptimates / (localOptimates + localModerates);
-      newOptimates = Math.round(remainingPercentage * ratio);
-      newModerates = total - newPopulaires - newOptimates;
-    } 
-    else if (type === 'optimates') {
-      newOptimates = newValue;
-      // Adjust others proportionally
-      const remainingPercentage = total - newValue;
-      const ratio = localPopulaires / (localPopulaires + localModerates);
-      newPopulaires = Math.round(remainingPercentage * ratio);
-      newModerates = total - newPopulaires - newOptimates;
-    }
-    else if (type === 'moderates') {
-      newModerates = newValue;
-      // Adjust others proportionally
-      const remainingPercentage = total - newValue;
-      const ratio = localPopulaires / (localPopulaires + localOptimates);
-      newPopulaires = Math.round(remainingPercentage * ratio);
-      newOptimates = total - newPopulaires - newModerates;
-    }
-    
-    setLocalPopulaires(newPopulaires);
-    setLocalOptimates(newOptimates);
-    setLocalModerates(newModerates);
-  };
+  const totalPercentage = localPopulaires + localOptimates + localModerates;
   
   const handleSave = () => {
-    onUpdate(localPopulaires, localOptimates, localModerates);
+    // Normalize to make sure total is 100%
+    const total = localPopulaires + localOptimates + localModerates;
+    const normalizedPopulaires = Math.round((localPopulaires / total) * 100);
+    const normalizedOptimates = Math.round((localOptimates / total) * 100);
+    const normalizedModerates = 100 - normalizedPopulaires - normalizedOptimates;
+    
+    onUpdate(normalizedPopulaires, normalizedOptimates, normalizedModerates);
   };
   
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Équilibre des Factions</CardTitle>
+        <CardTitle>Équilibre Politique</CardTitle>
       </CardHeader>
       <CardContent className="space-y-6">
         <div>
@@ -73,7 +44,10 @@ export const PoliticalBalanceCard: React.FC<PoliticalBalanceCardProps> = ({
             min={0}
             max={100}
             step={1}
-            onValueChange={(value) => handleAdjustValues('populaires', value[0])}
+            onValueChange={(value) => {
+              setLocalPopulaires(value[0]);
+              setLocalModerates(100 - value[0] - localOptimates);
+            }}
           />
         </div>
         
@@ -87,7 +61,10 @@ export const PoliticalBalanceCard: React.FC<PoliticalBalanceCardProps> = ({
             min={0}
             max={100}
             step={1}
-            onValueChange={(value) => handleAdjustValues('optimates', value[0])}
+            onValueChange={(value) => {
+              setLocalOptimates(value[0]);
+              setLocalModerates(100 - localPopulaires - value[0]);
+            }}
           />
         </div>
         
@@ -101,16 +78,20 @@ export const PoliticalBalanceCard: React.FC<PoliticalBalanceCardProps> = ({
             min={0}
             max={100}
             step={1}
-            onValueChange={(value) => handleAdjustValues('moderates', value[0])}
+            disabled
           />
         </div>
         
-        <div className="mt-2 text-xs text-muted-foreground">
-          Total: {localPopulaires + localOptimates + localModerates}%
+        <div className="text-sm text-muted-foreground">
+          {totalPercentage !== 100 && (
+            <p className="text-red-500">
+              Le total doit être égal à 100% (actuellement {totalPercentage}%)
+            </p>
+          )}
         </div>
         
-        <Button onClick={handleSave} className="w-full">
-          Mettre à jour l'équilibre des factions
+        <Button onClick={handleSave} className="w-full" disabled={totalPercentage !== 100}>
+          Mettre à jour l'équilibre politique
         </Button>
       </CardContent>
     </Card>

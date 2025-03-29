@@ -1,14 +1,11 @@
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
-import { Badge } from '@/components/ui/badge';
-import { Separator } from '@/components/ui/separator';
-import { AlertCircle, TrendingUp, TrendingDown, Minus, Flag, Users, Landmark, Swords, Scale, UserCheck } from 'lucide-react';
-import { EquilibreStatus } from './EquilibreStatus';
-import RecentEventsTable from "./RecentEventsTable";
-import { CurrentThreats } from './CurrentThreats';
-import { Equilibre, PoliticalEvent } from '@/components/maitrejeu/types/equilibre';
-import Chart from '@/components/ui/chart';
+import { useMaitreJeu } from '../../context';
+import { RiskFactor, HistoriqueEntry } from '../../types/equilibre';
+import RecentEventsTable from './RecentEventsTable';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { AlarmClock, AlertTriangle, BarChart, Crown, Scale, ShieldAlert, TrendingUp, Users } from 'lucide-react';
 
 interface EquilibreOverviewProps {
   equilibre: Equilibre;
