@@ -1,4 +1,29 @@
 
+export interface PropertyUpgrade {
+  id: string;
+  name: string;
+  description: string;
+  cost: number;
+  effect: string;
+  effects?: Record<string, any>; // Adding this to fix errors
+  type: string;
+  installed: boolean;
+  requirements?: {
+    funds?: number;
+    workers?: number;
+    buildingCondition?: number;
+    maintenance?: number;
+    buildingLevel?: number;
+    previousUpgrade?: string;
+    minCondition?: number;
+    specialBuilding?: string;
+    minIncome?: number;
+  };
+  applied?: boolean;
+  buildingType?: string[];
+  duration?: number;
+}
+
 export interface OwnedBuilding {
   id: string;
   buildingId?: string;
@@ -19,21 +44,5 @@ export interface OwnedBuilding {
   purchaseDate?: Date;
   status?: string;
   upgrades?: PropertyUpgrade[];
-}
-
-export interface PropertyUpgrade {
-  id: string;
-  name: string;
-  description: string;
-  cost: number;
-  effect: string;
-  effects?: string[];
-  installed: boolean;
-  type: string;
-  requirements?: {
-    funds?: number;
-    workers?: number;
-    buildingCondition?: number;
-    maintenance?: number;
-  };
+  maintenance?: number;
 }

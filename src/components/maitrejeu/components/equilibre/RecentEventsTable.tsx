@@ -1,13 +1,52 @@
 
 import React from 'react';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { HistoriqueEntry } from '@/components/maitrejeu/types/equilibre';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import { Badge } from '@/components/ui/badge';
+import { RecentEventsTableProps } from '@/components/maitrejeu/types/equilibre';
 
-interface RecentEventsTableProps {
-  events: HistoriqueEntry[];
-}
-
-const RecentEventsTable: React.FC<RecentEventsTableProps> = ({ events }) => {
+const RecentEventsTable: React.FC<RecentEventsTableProps> = ({ events, formatDate }) => {
+  if (!events || events.length === 0) {
+    return (
+      <div className="text-center py-8 text-muted-foreground">
+        <p>Aucun événement récent n'a été enregistré.</p>
+      </div>
+    );
+  }
+  
+  const getImpactType = (event: any) => {
+    const impact = event.impact || {};
+    
+    if (impact.political && impact.political > 0) return { type: 'Politique', value: impact.political };
+    if (impact.social && impact.social > 0) return { type: 'Social', value: impact.social };
+    if (impact.economic && impact.economic > 0) return { type: 'Économique', value: impact.economic };
+    if (impact.stability && impact.stability > 0) return { type: 'Stabilité', value: impact.stability };
+    
+    return { type: 'Divers', value: 0 };
+  };
+  
+  const getImpactBadge = (event: any) => {
+    const { type, value } = getImpactType(event);
+    
+    let variant = 'secondary';
+    if (type === 'Politique') variant = 'default';
+    if (type === 'Social') variant = 'outline';
+    if (type === 'Économique') variant = 'destructive';
+    if (type === 'Stabilité') variant = 'secondary';
+    
+    return (
+      <Badge variant={variant as any}>
+        {type} {value > 0 ? `+${value}` : value}
+      </Badge>
+    );
+  };
+  
   return (
     <Table>
       <TableHeader>
@@ -18,28 +57,13 @@ const RecentEventsTable: React.FC<RecentEventsTableProps> = ({ events }) => {
         </TableRow>
       </TableHeader>
       <TableBody>
-        {events.length > 0 ? (
-          events.map((event, index) => (
-            <TableRow key={index}>
-              <TableCell>{event.date.season} {event.date.year}</TableCell>
-              <TableCell>{event.event}</TableCell>
-              <TableCell 
-                className={
-                  event.impact > 0 ? 'text-green-600' : 
-                  event.impact < 0 ? 'text-red-600' : ''
-                }
-              >
-                {event.impact > 0 ? '+' : ''}{event.impact}
-              </TableCell>
-            </TableRow>
-          ))
-        ) : (
-          <TableRow>
-            <TableCell colSpan={3} className="text-center py-4 text-muted-foreground">
-              Aucun événement récent
-            </TableCell>
+        {events.map((event, index) => (
+          <TableRow key={index}>
+            <TableCell className="font-medium">{formatDate(event.date)}</TableCell>
+            <TableCell>{event.event}</TableCell>
+            <TableCell>{getImpactBadge(event)}</TableCell>
           </TableRow>
-        )}
+        ))}
       </TableBody>
     </Table>
   );

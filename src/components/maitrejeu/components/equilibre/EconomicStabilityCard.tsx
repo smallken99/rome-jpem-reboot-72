@@ -6,13 +6,16 @@ import { Button } from '@/components/ui/button';
 import { EconomicStabilityCardProps } from '@/components/maitrejeu/types/equilibre';
 
 export const EconomicStabilityCard: React.FC<EconomicStabilityCardProps> = ({ 
-  equilibre, 
-  onUpdate 
+  economy, 
+  onUpdate,
+  economie,
+  equilibre
 }) => {
-  const [economie, setEconomie] = useState(equilibre.economie);
+  const initialValue = economy || economie || 50;
+  const [localEconomy, setLocalEconomy] = useState(initialValue);
   
   const handleSave = () => {
-    onUpdate(economie);
+    onUpdate(localEconomy);
   };
   
   return (
@@ -24,14 +27,14 @@ export const EconomicStabilityCard: React.FC<EconomicStabilityCardProps> = ({
         <div>
           <div className="flex justify-between mb-2">
             <span>Économie</span>
-            <span>{economie}%</span>
+            <span>{localEconomy}%</span>
           </div>
           <Slider
-            value={[economie]}
+            value={[localEconomy]}
             min={0}
             max={100}
             step={1}
-            onValueChange={(value) => setEconomie(value[0])}
+            onValueChange={(value) => setLocalEconomy(value[0])}
           />
         </div>
         

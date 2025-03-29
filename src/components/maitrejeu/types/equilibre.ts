@@ -1,73 +1,110 @@
 
-export type EquilibreLevel = 'high' | 'medium' | 'low' | 'critical';
-export type RiskLevel = 'high' | 'medium' | 'low' | 'critical';
-export type RiskType = 'political' | 'military' | 'economic' | 'social' | string;
+export interface Equilibre {
+  id?: string;
+  economie: number;
+  populaires?: number;
+  optimates?: number;
+  moderates?: number;
+  patriciens: number;
+  plebeiens: number;
+  stability?: number;
+  historique?: HistoriqueEntry[];
+  
+  // Additional properties found in usage
+  armée?: number;
+  loyauté?: number;
+  morale?: number;
+  facteurPatriciens?: number;
+  facteurPlebs?: number;
+  facteurReligieux?: number;
+  facteurSenat?: number;
+  indiceCrime?: number;
+  facteurMilitaire?: number;
+  economicStability?: number;
+  
+  // Alternative naming for backward compatibility
+  populares?: number;
+  économie?: number;
+}
+
+export interface HistoriqueEntry {
+  date: Date | { year: number; season: string };
+  event: string;
+  impact: {
+    political?: number;
+    social?: number;
+    economic?: number;
+    stability?: number;
+  };
+}
 
 export interface RiskFactor {
   id: string;
   name: string;
-  level: RiskLevel;
-  type: RiskType;
+  level: string;
+  type: string;
   description: string;
   threat: number;
+  impact?: string;
+  trend?: string;
+  severity?: string;
 }
 
-export interface HistoriqueEntry {
-  date: { year: number; season: string };
-  event: string;
-  impact: number;
-}
+export type RiskFactorLevel = 'low' | 'medium' | 'high' | 'critical';
 
 export interface PoliticalEvent {
   id: string;
   title: string;
-  description: string;
   date: { year: number; season: string };
-  type: string;
-  impact: number;
-}
-
-export interface Equilibre {
-  id: string;
-  year: number;
-  season: string;
-  senat: number;
-  plebs: number;
-  populaires: number;
-  optimates: number;
-  moderates: number;
-  patriciens: number;
-  plébéiens: number;
-  economie: number;
-  économie?: number;
-  armée?: number;
-  loyauté?: number;
-  morale?: number;
-  facteurMilitaire?: number;
-  facteurPatriciens?: number;
-  facteurPlebs?: number;
-  facteurSenat?: number;
-  economicStability?: number;
-  risques: RiskFactor[];
-  evenements: string[];
-  historique?: HistoriqueEntry[];
-  indiceCrime?: number;
-  political?: any;
-  social?: any;
-  economy?: any;
-}
-
-export interface PoliticalBalanceCardProps {
-  equilibre: Equilibre;
-  onUpdate: (populaires: number, optimates: number, moderates: number) => void;
-}
-
-export interface SocialStabilityCardProps {
-  equilibre: Equilibre;
-  onUpdate: (patriciens: number, plébéiens: number) => void;
+  description: string;
+  impact: {
+    political?: number;
+    social?: number;
+    economic?: number;
+    stability?: number;
+  };
+  tags?: string[];
+  type?: string;
 }
 
 export interface EconomicStabilityCardProps {
-  equilibre: Equilibre;
-  onUpdate: (economie: number) => void;
+  economy?: number;
+  economie?: number;
+  onUpdate: (economy: number) => void;
+  equilibre?: Equilibre;
+}
+
+export interface PoliticalBalanceCardProps {
+  populares: number;
+  optimates: number;
+  moderates: number;
+  onUpdate: (populares: number, optimates: number, moderates: number) => void;
+  equilibre?: Equilibre;
+}
+
+export interface SocialStabilityCardProps {
+  patriciens: number;
+  plebeiens: number;
+  onUpdate: (patriciens: number, plebeiens: number) => void;
+  equilibre?: Equilibre;
+}
+
+export interface EquilibreChartProps {
+  data: any[];
+}
+
+export interface RecentEventsTableProps {
+  events: any[];
+  formatDate: (date: any) => string;
+}
+
+export interface ThreatAssessmentProps {
+  threats: RiskFactor[];
+}
+
+export interface TimelineItemProps {
+  title: string;
+  date?: string | { year: number; season: string };
+  description?: string;
+  icon?: React.ReactNode;
 }

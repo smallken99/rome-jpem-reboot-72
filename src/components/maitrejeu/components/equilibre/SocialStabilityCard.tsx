@@ -6,14 +6,16 @@ import { Button } from '@/components/ui/button';
 import { SocialStabilityCardProps } from '@/components/maitrejeu/types/equilibre';
 
 export const SocialStabilityCard: React.FC<SocialStabilityCardProps> = ({ 
-  equilibre, 
-  onUpdate 
+  patriciens,
+  plebeiens, 
+  onUpdate,
+  equilibre
 }) => {
-  const [patriciens, setPatriciens] = useState(equilibre.patriciens);
-  const [plébéiens, setPlébéiens] = useState(equilibre.plébéiens);
+  const [localPatriciens, setLocalPatriciens] = useState(patriciens);
+  const [localPlebeiens, setLocalPlebeiens] = useState(plebeiens);
   
   const handleSave = () => {
-    onUpdate(patriciens, plébéiens);
+    onUpdate(localPatriciens, localPlebeiens);
   };
   
   return (
@@ -22,34 +24,32 @@ export const SocialStabilityCard: React.FC<SocialStabilityCardProps> = ({
         <CardTitle>Stabilité Sociale</CardTitle>
       </CardHeader>
       <CardContent className="space-y-6">
-        <div className="space-y-4">
-          <div>
-            <div className="flex justify-between mb-2">
-              <span>Patriciens</span>
-              <span>{patriciens}%</span>
-            </div>
-            <Slider
-              value={[patriciens]}
-              min={0}
-              max={100}
-              step={1}
-              onValueChange={(value) => setPatriciens(value[0])}
-            />
+        <div>
+          <div className="flex justify-between mb-2">
+            <span>Patriciens</span>
+            <span>{localPatriciens}%</span>
           </div>
-          
-          <div>
-            <div className="flex justify-between mb-2">
-              <span>Plébéiens</span>
-              <span>{plébéiens}%</span>
-            </div>
-            <Slider
-              value={[plébéiens]}
-              min={0}
-              max={100}
-              step={1}
-              onValueChange={(value) => setPlébéiens(value[0])}
-            />
+          <Slider
+            value={[localPatriciens]}
+            min={0}
+            max={100}
+            step={1}
+            onValueChange={(value) => setLocalPatriciens(value[0])}
+          />
+        </div>
+        
+        <div>
+          <div className="flex justify-between mb-2">
+            <span>Plébéiens</span>
+            <span>{localPlebeiens}%</span>
           </div>
+          <Slider
+            value={[localPlebeiens]}
+            min={0}
+            max={100}
+            step={1}
+            onValueChange={(value) => setLocalPlebeiens(value[0])}
+          />
         </div>
         
         <Button onClick={handleSave} className="w-full">

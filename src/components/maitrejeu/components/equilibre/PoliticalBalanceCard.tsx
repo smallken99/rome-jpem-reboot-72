@@ -6,15 +6,18 @@ import { Button } from '@/components/ui/button';
 import { PoliticalBalanceCardProps } from '@/components/maitrejeu/types/equilibre';
 
 export const PoliticalBalanceCard: React.FC<PoliticalBalanceCardProps> = ({ 
-  equilibre, 
-  onUpdate 
+  populares, 
+  optimates, 
+  moderates, 
+  onUpdate,
+  equilibre
 }) => {
-  const [populaires, setPopulaires] = useState(equilibre.populaires);
-  const [optimates, setOptimates] = useState(equilibre.optimates);
-  const [moderates, setModerates] = useState(equilibre.moderates);
+  const [localPopulares, setLocalPopulares] = useState(populares);
+  const [localOptimates, setLocalOptimates] = useState(optimates);
+  const [localModerates, setLocalModerates] = useState(moderates);
   
   const handleSave = () => {
-    onUpdate(populaires, optimates, moderates);
+    onUpdate(localPopulares, localOptimates, localModerates);
   };
   
   return (
@@ -23,48 +26,46 @@ export const PoliticalBalanceCard: React.FC<PoliticalBalanceCardProps> = ({
         <CardTitle>Équilibre Politique</CardTitle>
       </CardHeader>
       <CardContent className="space-y-6">
-        <div className="space-y-4">
-          <div>
-            <div className="flex justify-between mb-2">
-              <span>Populaires</span>
-              <span>{populaires}%</span>
-            </div>
-            <Slider
-              value={[populaires]}
-              min={0}
-              max={100}
-              step={1}
-              onValueChange={(value) => setPopulaires(value[0])}
-            />
+        <div>
+          <div className="flex justify-between mb-2">
+            <span>Populares</span>
+            <span>{localPopulares}%</span>
           </div>
-          
-          <div>
-            <div className="flex justify-between mb-2">
-              <span>Optimates</span>
-              <span>{optimates}%</span>
-            </div>
-            <Slider
-              value={[optimates]}
-              min={0}
-              max={100}
-              step={1}
-              onValueChange={(value) => setOptimates(value[0])}
-            />
+          <Slider
+            value={[localPopulares]}
+            min={0}
+            max={100}
+            step={1}
+            onValueChange={(value) => setLocalPopulares(value[0])}
+          />
+        </div>
+        
+        <div>
+          <div className="flex justify-between mb-2">
+            <span>Optimates</span>
+            <span>{localOptimates}%</span>
           </div>
-          
-          <div>
-            <div className="flex justify-between mb-2">
-              <span>Modérés</span>
-              <span>{moderates}%</span>
-            </div>
-            <Slider
-              value={[moderates]}
-              min={0}
-              max={100}
-              step={1}
-              onValueChange={(value) => setModerates(value[0])}
-            />
+          <Slider
+            value={[localOptimates]}
+            min={0}
+            max={100}
+            step={1}
+            onValueChange={(value) => setLocalOptimates(value[0])}
+          />
+        </div>
+        
+        <div>
+          <div className="flex justify-between mb-2">
+            <span>Modérés</span>
+            <span>{localModerates}%</span>
           </div>
+          <Slider
+            value={[localModerates]}
+            min={0}
+            max={100}
+            step={1}
+            onValueChange={(value) => setLocalModerates(value[0])}
+          />
         </div>
         
         <Button onClick={handleSave} className="w-full">

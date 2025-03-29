@@ -23,3 +23,19 @@ export const calculateIncomeByMaintenance = (building: OwnedBuilding): number =>
   
   return Math.round(baseIncome * maintenanceFactor * conditionFactor);
 };
+
+export const calculateEfficiency = (building: OwnedBuilding): number => {
+  const condition = building.condition || 0;
+  const maintenanceLevel = building.maintenanceLevel || 0;
+  
+  return Math.min(100, Math.round((condition + maintenanceLevel) / 2));
+};
+
+export const calculateProfitMargin = (building: OwnedBuilding): number => {
+  const income = calculateIncomeByMaintenance(building);
+  const maintenanceCost = calculateMaintenanceCost(building);
+  
+  if (maintenanceCost === 0) return 100;
+  
+  return Math.round((income - maintenanceCost) / income * 100);
+};
