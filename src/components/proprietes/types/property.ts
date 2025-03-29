@@ -48,4 +48,6 @@ export interface OwnedBuilding {
   status?: string;
   upgrades?: PropertyUpgrade[];
   maintenance?: number;
+  maintenanceEnabled?: boolean;
+  slaves?: number;
 }

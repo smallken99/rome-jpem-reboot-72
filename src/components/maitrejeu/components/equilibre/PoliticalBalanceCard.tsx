@@ -1,89 +1,67 @@
 
-import React, { useState } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Slider } from '@/components/ui/slider';
-import { Label } from '@/components/ui/label';
-import { Button } from '@/components/ui/button';
-import { PoliticalBalanceCardProps } from '../../types/equilibre';
+import React from 'react';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Progress } from '@/components/ui/progress';
+
+interface PoliticalBalanceCardProps {
+  populaires: number;
+  optimates: number;
+  moderates: number;
+  onUpdate?: (values: { populaires: number; optimates: number; moderates: number }) => void;
+}
 
 export const PoliticalBalanceCard: React.FC<PoliticalBalanceCardProps> = ({
   populaires,
   optimates,
   moderates,
-  onUpdate,
-  equilibre
+  onUpdate
 }) => {
-  const [localPopulaires, setLocalPopulaires] = useState(populaires);
-  const [localOptimates, setLocalOptimates] = useState(optimates);
-  const [localModerates, setLocalModerates] = useState(moderates);
-  
-  const handleSave = () => {
-    onUpdate(localPopulaires, localOptimates, localModerates);
-  };
+  // Calculate percentages for visualization
+  const total = populaires + optimates + moderates;
+  const populairesPercent = Math.round((populaires / total) * 100);
+  const optimatesPercent = Math.round((optimates / total) * 100);
+  const moderatesPercent = Math.round((moderates / total) * 100);
 
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Équilibre Politique</CardTitle>
+        <CardTitle className="text-lg">Équilibre Politique</CardTitle>
+        <CardDescription>
+          Répartition du pouvoir entre les différentes factions politiques
+        </CardDescription>
       </CardHeader>
-      <CardContent className="space-y-4">
-        <div className="space-y-2">
-          <div className="flex justify-between items-center">
-            <Label htmlFor="populaires">Populaires</Label>
-            <span className="text-sm font-medium">{localPopulaires}%</span>
+      <CardContent>
+        <div className="space-y-4">
+          <div>
+            <div className="flex justify-between mb-1">
+              <span className="text-sm font-medium">Populares</span>
+              <span className="text-sm text-muted-foreground">{populaires} ({populairesPercent}%)</span>
+            </div>
+            <Progress value={populairesPercent} className="h-2 bg-stone-200" indicatorClassName="bg-red-600" />
           </div>
-          <Slider
-            id="populaires"
-            min={0}
-            max={100}
-            step={1}
-            value={[localPopulaires]}
-            onValueChange={(value) => setLocalPopulaires(value[0])}
-          />
-          <p className="text-xs text-muted-foreground">
-            Influence des factions populaires
-          </p>
-        </div>
-        
-        <div className="space-y-2">
-          <div className="flex justify-between items-center">
-            <Label htmlFor="optimates">Optimates</Label>
-            <span className="text-sm font-medium">{localOptimates}%</span>
+          
+          <div>
+            <div className="flex justify-between mb-1">
+              <span className="text-sm font-medium">Optimates</span>
+              <span className="text-sm text-muted-foreground">{optimates} ({optimatesPercent}%)</span>
+            </div>
+            <Progress value={optimatesPercent} className="h-2 bg-stone-200" indicatorClassName="bg-blue-600" />
           </div>
-          <Slider
-            id="optimates"
-            min={0}
-            max={100}
-            step={1}
-            value={[localOptimates]}
-            onValueChange={(value) => setLocalOptimates(value[0])}
-          />
-          <p className="text-xs text-muted-foreground">
-            Influence des factions optimates
-          </p>
-        </div>
-        
-        <div className="space-y-2">
-          <div className="flex justify-between items-center">
-            <Label htmlFor="moderates">Modérés</Label>
-            <span className="text-sm font-medium">{localModerates}%</span>
+          
+          <div>
+            <div className="flex justify-between mb-1">
+              <span className="text-sm font-medium">Modérés</span>
+              <span className="text-sm text-muted-foreground">{moderates} ({moderatesPercent}%)</span>
+            </div>
+            <Progress value={moderatesPercent} className="h-2 bg-stone-200" indicatorClassName="bg-green-600" />
           </div>
-          <Slider
-            id="moderates"
-            min={0}
-            max={100}
-            step={1}
-            value={[localModerates]}
-            onValueChange={(value) => setLocalModerates(value[0])}
-          />
-          <p className="text-xs text-muted-foreground">
-            Influence des factions modérées
-          </p>
+          
+          <div className="bg-muted p-3 rounded-md mt-4">
+            <p className="text-sm text-muted-foreground">
+              L'équilibre des pouvoirs au Sénat détermine quelles lois sont susceptibles d'être adoptées.
+            </p>
+          </div>
         </div>
-        
-        <Button className="w-full" onClick={handleSave}>
-          Mettre à jour l'équilibre politique
-        </Button>
       </CardContent>
     </Card>
   );
