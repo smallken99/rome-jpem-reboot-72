@@ -12,9 +12,9 @@ export const PoliticalBalanceCard: React.FC<PoliticalBalanceCardProps> = ({
   onUpdate,
   equilibre
 }) => {
-  const [localPopulares, setLocalPopulares] = useState(populares);
-  const [localOptimates, setLocalOptimates] = useState(optimates);
-  const [localModerates, setLocalModerates] = useState(moderates);
+  const [localPopulares, setLocalPopulares] = useState(populares || 50);
+  const [localOptimates, setLocalOptimates] = useState(optimates || 50);
+  const [localModerates, setLocalModerates] = useState(moderates || 50);
   
   const handleSave = () => {
     onUpdate(localPopulares, localOptimates, localModerates);

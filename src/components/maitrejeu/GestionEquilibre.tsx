@@ -48,6 +48,7 @@ const initialEquilibreState: Equilibre = {
 
 const initialRiskFactors: RiskFactor[] = [
   {
+    id: "1",
     name: "Corruption",
     level: "medium",
     type: "economic",
@@ -55,6 +56,7 @@ const initialRiskFactors: RiskFactor[] = [
     threat: 60
   },
   {
+    id: "2",
     name: "Tensions sociales",
     level: "high",
     type: "social",
@@ -62,13 +64,15 @@ const initialRiskFactors: RiskFactor[] = [
     threat: 75
   },
   {
+    id: "3",
     name: "Instabilité politique",
-    level: "medium",
+    level: "medium", 
     type: "political",
     description: "Les luttes de pouvoir fragilisent la République.",
     threat: 50
   },
   {
+    id: "4",
     name: "Menace militaire",
     level: "low",
     type: "military",
@@ -234,10 +238,10 @@ export const GestionEquilibre = () => {
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <PoliticalBalanceCardProps
-              populares={equilibre.political.populares}
-              optimates={equilibre.political.optimates}
-              moderates={equilibre.political.moderates}
+            <PoliticalBalanceCard
+              populares={equilibre.political?.populaires || 50}
+              optimates={equilibre.political?.optimates || 50}
+              moderates={equilibre.political?.moderates || 50}
               onUpdate={handlePoliticalUpdate}
               equilibre={equilibre}
             />
@@ -252,9 +256,9 @@ export const GestionEquilibre = () => {
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <SocialStabilityCardProps
-              patriciens={equilibre.social.patriciens}
-              plebeiens={equilibre.social.plebeiens}
+            <SocialStabilityCard
+              patriciens={equilibre.social?.patriciens || 50}
+              plebeiens={equilibre.social?.plebeiens || 50}
               onUpdate={handleSocialUpdate}
               equilibre={equilibre}
             />
@@ -269,8 +273,8 @@ export const GestionEquilibre = () => {
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <EconomicStabilityCardProps
-              economy={equilibre.economy}
+            <EconomicStabilityCard
+              economy={equilibre.economy || 50}
               onUpdate={handleEconomicUpdate}
               equilibre={equilibre}
             />
@@ -478,7 +482,12 @@ export const GestionEquilibre = () => {
                     <div>
                       <h3 className="text-lg font-medium">{event.event}</h3>
                       <p className="text-sm text-muted-foreground">
-                        {typeof event.date === 'string' ? event.date : gameDateToString({ year: new Date(event.date).getFullYear(), season: season })}
+                        {typeof event.date === 'string' 
+                          ? event.date 
+                          : event.date instanceof Date 
+                            ? event.date.toLocaleDateString()
+                            : gameDateToString(event.date)
+                        }
                       </p>
                     </div>
                     <Button

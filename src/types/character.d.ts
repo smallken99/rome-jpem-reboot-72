@@ -12,7 +12,7 @@ export interface Character {
   role?: string;
   marriageStatus?: string;
   
-  // Family-related properties (adding these to fix errors)
+  // Family-related properties
   relation?: string;
   isHeadOfFamily?: boolean;
   parentIds?: string[];
@@ -24,7 +24,7 @@ export interface Character {
   health?: number;
   status?: 'alive' | 'deceased' | 'exiled';
 
-  // Personal attributes (adding these to fix errors)
+  // Personal attributes
   traits?: string[];
   specialty?: string;
   educationType?: string;

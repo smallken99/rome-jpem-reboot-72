@@ -1,72 +1,77 @@
 
 import React from 'react';
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
-import { Badge } from '@/components/ui/badge';
-import { RecentEventsTableProps } from '@/components/maitrejeu/types/equilibre';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { HistoriqueEntry } from '@/components/maitrejeu/types/equilibre';
+import { format } from 'date-fns';
 
-const RecentEventsTable: React.FC<RecentEventsTableProps> = ({ events, formatDate }) => {
-  if (!events || events.length === 0) {
-    return (
-      <div className="text-center py-8 text-muted-foreground">
-        <p>Aucun événement récent n'a été enregistré.</p>
-      </div>
-    );
-  }
-  
-  const getImpactType = (event: any) => {
-    const impact = event.impact || {};
-    
-    if (impact.political && impact.political > 0) return { type: 'Politique', value: impact.political };
-    if (impact.social && impact.social > 0) return { type: 'Social', value: impact.social };
-    if (impact.economic && impact.economic > 0) return { type: 'Économique', value: impact.economic };
-    if (impact.stability && impact.stability > 0) return { type: 'Stabilité', value: impact.stability };
-    
-    return { type: 'Divers', value: 0 };
-  };
-  
-  const getImpactBadge = (event: any) => {
-    const { type, value } = getImpactType(event);
-    
-    let variant = 'secondary';
-    if (type === 'Politique') variant = 'default';
-    if (type === 'Social') variant = 'outline';
-    if (type === 'Économique') variant = 'destructive';
-    if (type === 'Stabilité') variant = 'secondary';
-    
-    return (
-      <Badge variant={variant as any}>
-        {type} {value > 0 ? `+${value}` : value}
-      </Badge>
-    );
-  };
-  
+interface RecentEventsTableProps {
+  events: HistoriqueEntry[];
+}
+
+export default function RecentEventsTable({ events }: RecentEventsTableProps) {
+  // Sort events by date (most recent first)
+  const sortedEvents = [...events].sort((a, b) => {
+    const dateA = a.date instanceof Date ? a.date : new Date();
+    const dateB = b.date instanceof Date ? b.date : new Date();
+    return dateB.getTime() - dateA.getTime();
+  });
+
   return (
-    <Table>
-      <TableHeader>
-        <TableRow>
-          <TableHead>Date</TableHead>
-          <TableHead>Événement</TableHead>
-          <TableHead>Impact</TableHead>
-        </TableRow>
-      </TableHeader>
-      <TableBody>
-        {events.map((event, index) => (
-          <TableRow key={index}>
-            <TableCell className="font-medium">{formatDate(event.date)}</TableCell>
-            <TableCell>{event.event}</TableCell>
-            <TableCell>{getImpactBadge(event)}</TableCell>
+    <div className="rounded-md border">
+      <Table>
+        <TableHeader>
+          <TableRow>
+            <TableHead>Date</TableHead>
+            <TableHead>Événement</TableHead>
+            <TableHead>Impact</TableHead>
           </TableRow>
-        ))}
-      </TableBody>
-    </Table>
+        </TableHeader>
+        <TableBody>
+          {sortedEvents.length > 0 ? (
+            sortedEvents.map((event, index) => (
+              <TableRow key={index}>
+                <TableCell>
+                  {event.date instanceof Date 
+                    ? format(event.date, 'dd/MM/yyyy')
+                    : `An ${event.date.year}, ${event.date.season}`
+                  }
+                </TableCell>
+                <TableCell>{event.event}</TableCell>
+                <TableCell>
+                  <div className="flex flex-wrap gap-2">
+                    {event.impact.political && (
+                      <span className="px-2 py-1 text-xs bg-blue-100 text-blue-800 rounded">
+                        Politique: {event.impact.political > 0 ? `+${event.impact.political}` : event.impact.political}
+                      </span>
+                    )}
+                    {event.impact.social && (
+                      <span className="px-2 py-1 text-xs bg-green-100 text-green-800 rounded">
+                        Social: {event.impact.social > 0 ? `+${event.impact.social}` : event.impact.social}
+                      </span>
+                    )}
+                    {event.impact.economic && (
+                      <span className="px-2 py-1 text-xs bg-yellow-100 text-yellow-800 rounded">
+                        Économie: {event.impact.economic > 0 ? `+${event.impact.economic}` : event.impact.economic}
+                      </span>
+                    )}
+                    {event.impact.stability && (
+                      <span className="px-2 py-1 text-xs bg-purple-100 text-purple-800 rounded">
+                        Stabilité: {event.impact.stability > 0 ? `+${event.impact.stability}` : event.impact.stability}
+                      </span>
+                    )}
+                  </div>
+                </TableCell>
+              </TableRow>
+            ))
+          ) : (
+            <TableRow>
+              <TableCell colSpan={3} className="text-center text-muted-foreground py-4">
+                Aucun événement récent
+              </TableCell>
+            </TableRow>
+          )}
+        </TableBody>
+      </Table>
+    </div>
   );
-};
-
-export default RecentEventsTable;
+}

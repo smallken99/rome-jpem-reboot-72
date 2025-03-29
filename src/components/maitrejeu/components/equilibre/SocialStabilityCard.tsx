@@ -6,13 +6,13 @@ import { Button } from '@/components/ui/button';
 import { SocialStabilityCardProps } from '@/components/maitrejeu/types/equilibre';
 
 export const SocialStabilityCard: React.FC<SocialStabilityCardProps> = ({ 
-  patriciens,
+  patriciens, 
   plebeiens, 
   onUpdate,
   equilibre
 }) => {
-  const [localPatriciens, setLocalPatriciens] = useState(patriciens);
-  const [localPlebeiens, setLocalPlebeiens] = useState(plebeiens);
+  const [localPatriciens, setLocalPatriciens] = useState(patriciens || 50);
+  const [localPlebeiens, setLocalPlebeiens] = useState(plebeiens || 50);
   
   const handleSave = () => {
     onUpdate(localPatriciens, localPlebeiens);

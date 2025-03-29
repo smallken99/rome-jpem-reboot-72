@@ -1,30 +1,35 @@
 
 export interface Equilibre {
-  id?: string;
-  economie: number;
-  populaires?: number;
-  optimates?: number;
-  moderates?: number;
-  patriciens: number;
-  plebeiens: number;
+  id: string;
+  political?: {
+    populaires: number;
+    optimates: number;
+    moderates: number;
+  };
+  social?: {
+    patriciens: number;
+    plébéiens: number;
+  };
+  economy?: number;
+  economie?: number; // Alternative spelling used in some components
   stability?: number;
-  historique?: HistoriqueEntry[];
   
-  // Additional properties found in usage
+  // Military factors
   armée?: number;
   loyauté?: number;
   morale?: number;
+  
+  // Additional properties used in various components
+  facteurReligieux?: number;
   facteurPatriciens?: number;
   facteurPlebs?: number;
-  facteurReligieux?: number;
   facteurSenat?: number;
-  indiceCrime?: number;
   facteurMilitaire?: number;
-  economicStability?: number;
+  population?: number;
+  indiceCrime?: number;
   
-  // Alternative naming for backward compatibility
-  populares?: number;
-  économie?: number;
+  // Historical tracking
+  historique?: HistoriqueEntry[];
 }
 
 export interface HistoriqueEntry {
@@ -45,9 +50,6 @@ export interface RiskFactor {
   type: string;
   description: string;
   threat: number;
-  impact?: string;
-  trend?: string;
-  severity?: string;
 }
 
 export type RiskFactorLevel = 'low' | 'medium' | 'high' | 'critical';
@@ -55,23 +57,10 @@ export type RiskFactorLevel = 'low' | 'medium' | 'high' | 'critical';
 export interface PoliticalEvent {
   id: string;
   title: string;
-  date: { year: number; season: string };
   description: string;
-  impact: {
-    political?: number;
-    social?: number;
-    economic?: number;
-    stability?: number;
-  };
-  tags?: string[];
-  type?: string;
-}
-
-export interface EconomicStabilityCardProps {
-  economy?: number;
-  economie?: number;
-  onUpdate: (economy: number) => void;
-  equilibre?: Equilibre;
+  date: Date | { year: number; season: string };
+  impact: Record<string, number>;
+  type: string;
 }
 
 export interface PoliticalBalanceCardProps {
@@ -89,22 +78,9 @@ export interface SocialStabilityCardProps {
   equilibre?: Equilibre;
 }
 
-export interface EquilibreChartProps {
-  data: any[];
-}
-
-export interface RecentEventsTableProps {
-  events: any[];
-  formatDate: (date: any) => string;
-}
-
-export interface ThreatAssessmentProps {
-  threats: RiskFactor[];
-}
-
-export interface TimelineItemProps {
-  title: string;
-  date?: string | { year: number; season: string };
-  description?: string;
-  icon?: React.ReactNode;
+export interface EconomicStabilityCardProps {
+  economy: number;
+  economie?: number;
+  onUpdate: (economy: number) => void;
+  equilibre?: Equilibre;
 }
