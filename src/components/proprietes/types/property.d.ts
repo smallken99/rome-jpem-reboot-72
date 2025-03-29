@@ -39,7 +39,7 @@ export interface PropertyUpgrade {
   buildingType: BuildingType[];
   duration?: number;
   
-  // Missing properties found in code
+  // Additional properties found in code
   effects?: Record<string, any>;
   requirements?: {
     buildingLevel?: number;

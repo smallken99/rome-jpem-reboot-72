@@ -38,7 +38,7 @@ export interface SlaveManagementHook {
   assignSlave: (slaveId: string, assignmentId: string) => boolean;
   trainSlave: (slaveId: string, skill: string) => boolean;
   
-  // Additional properties used in SlavesOverview
+  // Add properties used in SlavesOverview
   totalSlaves?: number;
   slavePrice?: number;
   assignedSlaves?: Slave[];

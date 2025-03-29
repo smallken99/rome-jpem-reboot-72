@@ -1,113 +1,81 @@
 
 import React from 'react';
-import {
-  Table,
-  TableBody,
-  TableCaption,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
+import { 
+  Table, 
+  TableBody, 
+  TableCaption, 
+  TableCell, 
+  TableHead, 
+  TableHeader, 
+  TableRow 
 } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import { Eye, Flag, AlertTriangle, Shield } from 'lucide-react';
-import { RecentEventsTableProps, GameDate } from '../../types/equilibre';
+import { Equilibre } from '../../types/equilibre';
+import { gameDateToString } from '../lois/utils/dateConverter';
 
-const getSeverityColor = (severity: string) => {
-  switch (severity.toLowerCase()) {
-    case 'low':
-      return 'bg-green-100 text-green-800 hover:bg-green-200';
-    case 'medium':
-      return 'bg-yellow-100 text-yellow-800 hover:bg-yellow-200';
-    case 'high':
-      return 'bg-orange-100 text-orange-800 hover:bg-orange-200';
-    case 'critical':
-      return 'bg-red-100 text-red-800 hover:bg-red-200';
-    default:
-      return 'bg-gray-100 text-gray-800 hover:bg-gray-200';
-  }
-};
+interface RecentEventsTableProps {
+  equilibre: Equilibre;
+}
 
-const getEventTypeIcon = (type: string) => {
-  switch (type.toLowerCase()) {
-    case 'political':
-      return <Flag className="h-4 w-4" />;
-    case 'military':
-      return <Shield className="h-4 w-4" />;
-    case 'disaster':
-      return <AlertTriangle className="h-4 w-4" />;
-    default:
-      return null;
-  }
-};
-
-const formatEventDate = (date: GameDate | string | Date): string => {
-  if (!date) return 'Unknown';
-  
-  if (typeof date === 'string') {
-    try {
-      return new Date(date).toLocaleDateString();
-    } catch (e) {
-      return date;
+export default function RecentEventsTable({ equilibre }: RecentEventsTableProps) {
+  // If the events aren't proper objects, create a default structure
+  const formattedEvents = equilibre.evenements.map((event, index) => {
+    if (typeof event === 'string') {
+      return {
+        id: `event-${index}`,
+        date: { year: equilibre.year, season: equilibre.season },
+        description: event,
+        impact: 'medium',
+        type: 'political'
+      };
     }
-  }
-  
-  if (date instanceof Date) {
-    return date.toLocaleDateString();
-  }
-  
-  return `${date.season}, Year ${date.year}`;
-};
+    return event;
+  });
 
-const RecentEventsTable: React.FC<RecentEventsTableProps> = ({ events, formatDate }) => {
   return (
     <Table>
-      <TableCaption>Événements récents affectant la République</TableCaption>
+      <TableCaption>Événements récents affectant l'équilibre de la République</TableCaption>
       <TableHeader>
         <TableRow>
-          <TableHead>Date</TableHead>
-          <TableHead>Événement</TableHead>
-          <TableHead>Sévérité</TableHead>
-          <TableHead className="text-right">Action</TableHead>
+          <TableHead className="w-[120px]">Date</TableHead>
+          <TableHead>Description</TableHead>
+          <TableHead className="w-[100px]">Impact</TableHead>
         </TableRow>
       </TableHeader>
       <TableBody>
-        {events.length > 0 ? (
-          events.map((event) => (
-            <TableRow key={event.id}>
+        {formattedEvents.length > 0 ? (
+          formattedEvents.map((event, index) => (
+            <TableRow key={`event-${index}`}>
               <TableCell className="font-medium">
-                {formatDate ? formatDate(event.date) : formatEventDate(event.date)}
+                {typeof event === 'string' ? 
+                  `${equilibre.season} ${equilibre.year}` : 
+                  gameDateToString(event.date || { year: equilibre.year, season: equilibre.season })}
               </TableCell>
+              <TableCell>{typeof event === 'string' ? event : event.description}</TableCell>
               <TableCell>
-                <div className="flex items-center space-x-2">
-                  {getEventTypeIcon(event.type)}
-                  <span>{event.title || event.description}</span>
-                </div>
-              </TableCell>
-              <TableCell>
-                <Badge className={getSeverityColor(event.severity)}>
-                  {event.severity}
+                <Badge 
+                  variant="outline" 
+                  className={
+                    typeof event === 'string' ? 'bg-yellow-100 text-yellow-800' :
+                    event.impact === 'high' ? 'bg-red-100 text-red-800' : 
+                    event.impact === 'medium' ? 'bg-yellow-100 text-yellow-800' : 
+                    'bg-green-100 text-green-800'
+                  }
+                >
+                  {typeof event === 'string' ? 'Medium' : 
+                   (event.impact || 'Medium')}
                 </Badge>
-              </TableCell>
-              <TableCell className="text-right">
-                <Button variant="ghost" size="sm">
-                  <Eye className="mr-2 h-4 w-4" />
-                  Détails
-                </Button>
               </TableCell>
             </TableRow>
           ))
         ) : (
           <TableRow>
-            <TableCell colSpan={4} className="text-center py-6 text-muted-foreground">
-              Aucun événement récent à afficher
+            <TableCell colSpan={3} className="text-center text-muted-foreground">
+              Aucun événement récent
             </TableCell>
           </TableRow>
         )}
       </TableBody>
     </Table>
   );
-};
-
-export default RecentEventsTable;
+}
