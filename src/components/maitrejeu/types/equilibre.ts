@@ -12,6 +12,21 @@ export interface RiskFactor {
   threat: number;
 }
 
+export interface HistoriqueEntry {
+  date: { year: number; season: string };
+  event: string;
+  impact: number;
+}
+
+export interface PoliticalEvent {
+  id: string;
+  title: string;
+  description: string;
+  date: { year: number; season: string };
+  type: string;
+  impact: number;
+}
+
 export interface Equilibre {
   id: string;
   year: number;
@@ -24,10 +39,22 @@ export interface Equilibre {
   patriciens: number;
   plébéiens: number;
   economie: number;
+  économie?: number;
+  armée?: number;
+  loyauté?: number;
+  morale?: number;
+  facteurMilitaire?: number;
+  facteurPatriciens?: number;
+  facteurPlebs?: number;
+  facteurSenat?: number;
+  economicStability?: number;
   risques: RiskFactor[];
   evenements: string[];
-  historique?: any[];
+  historique?: HistoriqueEntry[];
   indiceCrime?: number;
+  political?: any;
+  social?: any;
+  economy?: any;
 }
 
 export interface PoliticalBalanceCardProps {

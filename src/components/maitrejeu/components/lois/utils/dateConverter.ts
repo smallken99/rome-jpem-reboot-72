@@ -41,3 +41,10 @@ export const gameOrJsDateToDate = (date: GameDate | Date): Date => {
   const month = seasonMonths[date.season as keyof typeof seasonMonths] || 1;
   return new Date(date.year, month - 1, 1);
 };
+
+export const extractLoiDateInfo = (loi: any): GameDate => {
+  if (loi && loi.date && typeof loi.date === 'object' && 'year' in loi.date && 'season' in loi.date) {
+    return loi.date as GameDate;
+  }
+  return { year: 0, season: '' };
+};
