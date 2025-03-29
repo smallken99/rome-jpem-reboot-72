@@ -1,25 +1,30 @@
 
-export type LoiType = 'economie' | 'politique' | 'militaire' | 'judiciaire' | 'religieuse' | 'sociale' | 'political';
-export type LoiState = 'proposée' | 'en_débat' | 'en_vote' | 'adoptée' | 'rejetée' | 'abrogée';
-export type ImportanceType = 'mineure' | 'moyenne' | 'majeure' | 'critique';
+import { GameDate } from './game';
+
+export type LoiType = 'economic' | 'political' | 'military' | 'religious' | 'social' | string;
+export type LoiState = 'draft' | 'proposed' | 'approved' | 'rejected' | 'in_effect' | string;
+export type ImportanceType = 'low' | 'medium' | 'high' | 'critical' | string;
 
 export interface Loi {
   id: string;
   titre: string;
+  title?: string;
   description: string;
   proposeur: string;
   catégorie: string;
   date: GameDate;
   état: LoiState;
   importance: ImportanceType;
-  impacts?: string[];
-  history?: any[];
   votesPositifs: number;
   votesNégatifs: number;
-  votesAbstention: number;
-  soutiens: string[];
-  opposants: string[];
-  commentaires: string[];
-  effets: string[];
+  votesAbstention?: number;
+  soutiens?: string[];
+  opposants?: string[];
   type: LoiType;
+  effets: string[];
+  impacts?: any[];
+  history?: any[];
+  commentaires?: string[];
+  clauses?: any[];
+  tags?: string[];
 }

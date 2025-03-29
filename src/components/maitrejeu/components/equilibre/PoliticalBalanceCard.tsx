@@ -1,94 +1,91 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Slider } from '@/components/ui/slider';
 
-interface PoliticalBalanceCardProps {
-  politique: {
-    populaires: number;
-    optimates: number;
-    moderates: number;
-  };
+export interface PoliticalBalanceCardProps {
+  populaires: number;
+  optimates: number;
+  moderates: number;
   onUpdate: (values: { populaires: number; optimates: number; moderates: number; }) => void;
 }
 
 export const PoliticalBalanceCard: React.FC<PoliticalBalanceCardProps> = ({
-  politique,
+  populaires,
+  optimates,
+  moderates,
   onUpdate
 }) => {
-  // Gérer les changements individuels
-  const handlePopulairesChange = (value: number[]) => {
-    onUpdate({
-      populaires: value[0],
-      optimates: politique.optimates,
-      moderates: politique.moderates
-    });
+  const [internalValues, setInternalValues] = useState({
+    populaires,
+    optimates,
+    moderates
+  });
+  
+  const handleUpdate = (key: keyof typeof internalValues, value: number) => {
+    const newValues = { ...internalValues, [key]: value };
+    setInternalValues(newValues);
   };
-
-  const handleOptimatesChange = (value: number[]) => {
-    onUpdate({
-      populaires: politique.populaires,
-      optimates: value[0],
-      moderates: politique.moderates
-    });
+  
+  const handleSave = () => {
+    onUpdate(internalValues);
   };
-
-  const handleModeratesChange = (value: number[]) => {
-    onUpdate({
-      populaires: politique.populaires,
-      optimates: politique.optimates,
-      moderates: value[0]
-    });
-  };
-
+  
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Équilibre politique</CardTitle>
+        <CardTitle>Équilibre Politique</CardTitle>
       </CardHeader>
       <CardContent>
-        <div className="space-y-4">
-          <div className="space-y-2">
-            <div className="flex justify-between">
-              <label className="text-sm font-medium">Populaires</label>
-              <span className="text-sm">{politique.populaires}%</span>
+        <div className="space-y-6">
+          <div className="space-y-3">
+            <div className="flex justify-between items-center">
+              <span className="text-sm font-medium">Populares</span>
+              <span className="text-sm">{internalValues.populaires}%</span>
             </div>
             <Slider
-              defaultValue={[politique.populaires]}
-              max={100}
+              value={[internalValues.populaires]}
               min={0}
+              max={100}
               step={1}
-              onValueChange={handlePopulairesChange}
+              onValueChange={(values) => handleUpdate('populaires', values[0])}
             />
           </div>
-
-          <div className="space-y-2">
-            <div className="flex justify-between">
-              <label className="text-sm font-medium">Optimates</label>
-              <span className="text-sm">{politique.optimates}%</span>
+          
+          <div className="space-y-3">
+            <div className="flex justify-between items-center">
+              <span className="text-sm font-medium">Optimates</span>
+              <span className="text-sm">{internalValues.optimates}%</span>
             </div>
             <Slider
-              defaultValue={[politique.optimates]}
-              max={100}
+              value={[internalValues.optimates]}
               min={0}
+              max={100}
               step={1}
-              onValueChange={handleOptimatesChange}
+              onValueChange={(values) => handleUpdate('optimates', values[0])}
             />
           </div>
-
-          <div className="space-y-2">
-            <div className="flex justify-between">
-              <label className="text-sm font-medium">Modérés</label>
-              <span className="text-sm">{politique.moderates}%</span>
+          
+          <div className="space-y-3">
+            <div className="flex justify-between items-center">
+              <span className="text-sm font-medium">Moderates</span>
+              <span className="text-sm">{internalValues.moderates}%</span>
             </div>
             <Slider
-              defaultValue={[politique.moderates]}
-              max={100}
+              value={[internalValues.moderates]}
               min={0}
+              max={100}
               step={1}
-              onValueChange={handleModeratesChange}
+              onValueChange={(values) => handleUpdate('moderates', values[0])}
             />
           </div>
+          
+          <button
+            className="w-full py-2 px-4 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
+            onClick={handleSave}
+          >
+            Appliquer les changements
+          </button>
         </div>
       </CardContent>
     </Card>

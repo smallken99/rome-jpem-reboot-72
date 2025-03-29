@@ -20,6 +20,7 @@ export interface Evenement {
 }
 
 export interface Equilibre {
+  id?: string;
   economie: number;
   militaire: number;
   religion: number;
@@ -33,13 +34,29 @@ export interface Equilibre {
     plébéiens: number;
   };
   population?: number;
+  economy?: number;
+  stability?: number;
+  armée?: number;
+  loyauté?: number;
+  morale?: number;
+  facteurJuridique?: number;
+  risques?: any[];
+  historique?: HistoriqueEntry[];
+}
+
+export interface HistoriqueEntry {
+  id: string;
+  date: Date;
+  event: string;
+  impact: number;
+  type: string;
 }
 
 export interface PoliticalEvent {
   id: string;
   title: string;
   description: string;
-  date: GameDate;
+  date: GameDate | Date;
   impact: {
     economie?: number;
     militaire?: number;

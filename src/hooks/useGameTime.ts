@@ -1,6 +1,6 @@
 
 import { useState } from 'react';
-import { Season } from '@/types/game';
+import { Season, GameDate } from '@/types/game';
 
 export const useGameTime = () => {
   const [year, setYear] = useState<number>(753); // Default to founding of Rome
@@ -19,7 +19,7 @@ export const useGameTime = () => {
   };
   
   // Create a currentDate getter that returns the current date in GameDate format
-  const currentDate = {
+  const currentDate: GameDate = {
     year,
     season
   };

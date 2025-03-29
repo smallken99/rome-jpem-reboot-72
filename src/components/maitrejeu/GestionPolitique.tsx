@@ -1,227 +1,278 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
+import Layout from '@/components/layout/Layout';
+import { PageHeader } from '@/components/ui-custom/PageHeader';
+import { Button } from '@/components/ui/button';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { useGameTime } from '@/hooks/useGameTime';
+import { LoiType, Loi } from '@/types/loi'; // Importation correcte
 import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card';
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Button } from '@/components/ui/button';
-import {
-  Table,
-  TableBody,
-  TableCaption,
-  TableCell,
-  TableFooter,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table"
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select"
-import {
-  Form,
-  FormControl,
-  FormDescription,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form"
-import { Switch } from "@/components/ui/switch"
-import { Slider } from "@/components/ui/slider"
-import { Textarea } from "@/components/ui/textarea"
-import { Checkbox } from "@/components/ui/checkbox"
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover"
-import { Calendar } from "@/components/ui/calendar"
-import { cn } from "@/lib/utils"
-import { CalendarIcon } from "lucide-react"
-import { format } from "date-fns"
-import { DateRange } from "react-day-picker"
-import { useForm } from "react-hook-form"
-import { zodResolver } from "@hookform/resolvers/zod"
-import * as z from "zod"
-import { v4 as uuid } from 'uuid';
-import {
-  Loi,
-  LoiType,
-  LoiState,
-  ImportanceType
-} from './types/lois';
-import { useToast } from "@/components/ui/use-toast"
-import { useGameTime } from '@/hooks/useGameTime';
-import { gameDateToString } from './components/lois/utils/dateConverter';
-import { LoiTimeline } from './components/lois/LoiTimeline';
+import { Textarea } from '@/components/ui/textarea';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Calendar } from '@/components/ui/calendar';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { format } from 'date-fns';
+import { cn } from '@/lib/utils';
+import { CalendarIcon } from 'lucide-react';
+import { addDays } from 'date-fns';
+import { toast } from 'sonner';
+import { useMaitreJeu } from '../context';
+import { useGameData } from '@/hooks/useGameData';
 
-const formSchema = z.object({
-  title: z.string().min(2, {
-    message: "Title must be at least 2 characters.",
-  }),
-  description: z.string().min(10, {
-    message: "Description must be at least 10 characters.",
-  }),
-  type: z.enum(['political', 'economic', 'social', 'military', 'religious', 'constitutional', 'judicial'], {
-    required_error: "Please select law type.",
-  }),
-  importance: z.enum(['low', 'medium', 'high', 'critical'], {
-    required_error: "Please select importance.",
-  }),
-  clauses: z.string().array(),
-  commentaires: z.string().array(),
-  tags: z.string().array(),
-});
+const initialLoi = {
+  id: 'loi-001',
+  titre: 'Loi agraire',
+  description: 'Distribution des terres publiques aux citoyens',
+  proposeur: 'Tribun de la plèbe',
+  catégorie: 'social',
+  date: { year: 450, season: 'spring' },
+  état: 'proposed',
+  importance: 'high',
+  votesPositifs: 120,
+  votesNégatifs: 80,
+  type: 'political',
+  effets: ['Réduction des inégalités', 'Augmentation de la popularité'],
+};
 
-export const GestionPolitique = () => {
-  const [lois, setLois] = useState<Loi[]>([]);
-  const { toast } = useToast()
+export const GestionPolitique: React.FC = () => {
+  const [activeTab, setActiveTab] = useState('lois');
+  const [laws, setLaws] = useState([initialLoi]);
+  const [isNewLawModalOpen, setIsNewLawModalOpen] = useState(false);
+  const [newLaw, setNewLaw] = useState<Partial<Loi>>({});
   const { currentDate } = useGameTime();
+  const { addLoi } = useMaitreJeu();
+  const { lois } = useGameData();
+  const [category, setCategory] = useState<string>('political');
+  const [importance, setImportance] = useState<string>('medium');
+  const [etat, setEtat] = useState<string>('proposed');
+  const [selectedDate, setSelectedDate] = useState<Date | undefined>(new Date());
 
-  useEffect(() => {
-    // Charger les lois depuis le localStorage au montage du composant
-    const storedLois = localStorage.getItem('lois');
-    if (storedLois) {
-      setLois(JSON.parse(storedLois));
+  const handleOpenNewLawModal = () => {
+    setIsNewLawModalOpen(true);
+  };
+
+  const handleCloseNewLawModal = () => {
+    setIsNewLawModalOpen(false);
+  };
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    const { name, value } = e.target;
+    setNewLaw(prev => ({ ...prev, [name]: value }));
+  };
+
+  const handleNewLaw = () => {
+    if (!newLaw.titre || !newLaw.description || !category || !importance || !etat || !selectedDate) {
+      toast.error('Veuillez remplir tous les champs');
+      return;
     }
-  }, []);
 
-  useEffect(() => {
-    // Sauvegarder les lois dans le localStorage à chaque modification
-    localStorage.setItem('lois', JSON.stringify(lois));
-  }, [lois]);
+    // Utiliser LoiType comme type défini
+    const type: LoiType = category === 'economic'
+      ? 'economic'
+      : category === 'military'
+        ? 'military'
+        : category === 'religious'
+          ? 'religious'
+          : category === 'social'
+            ? 'social'
+            : 'political';
 
-  const form = useForm<z.infer<typeof formSchema>>({
-    resolver: zodResolver(formSchema),
-    defaultValues: {
-      title: "",
-      description: "",
-      type: "political",
-      importance: "medium",
-      clauses: [],
-      commentaires: [],
-      tags: [],
-    },
-  })
-
-  function onSubmit(values: z.infer<typeof formSchema>) {
-    toast({
-      title: "You submitted the following values:",
-      description: (
-        <pre className="mt-2 w-[340px] rounded-md bg-slate-950 p-4">
-          <code className="text-white">{JSON.stringify(values, null, 2)}</code>
-        </pre>
-      ),
-    })
-  }
-
-  const handleAjouterLoi = () => {
-    // Make sure to provide all required fields when creating a new Loi
-    const newLoi: Loi = {
-      id: uuid(),
-      titre: `Proposition du ${gameDateToString(currentDate)}`,
-      description: "Nouvelle proposition de loi",
-      proposeur: "Sénat",
-      catégorie: "Politique",
-      date: currentDate,
-      dateProposition: currentDate,
-      état: "proposée" as LoiState,
-      importance: "medium" as ImportanceType,
+    const newLoi = {
+      id: `loi-${laws.length + 1}`,
+      titre: newLaw.titre as string,
+      description: newLaw.description as string,
+      proposeur: newLaw.proposeur as string || 'Sénat',
+      catégorie: category,
+      date: { year: currentDate.year, season: currentDate.season },
+      état: etat,
+      importance: importance,
       votesPositifs: 0,
       votesNégatifs: 0,
-      votesAbstention: 0,
-      soutiens: [],
-      opposants: [],
-      clauses: [],
-      commentaires: [],
-      type: "political" as LoiType, // Use valid LoiType
-      impacts: {},
+      type: type,
       effets: [],
-      history: [
-        {
-          date: currentDate,
-          status: "proposée" as LoiState
-        }
-      ],
-      tags: []
     };
-    setLois([...lois, newLoi]);
+
+    addLoi(newLoi);
+    setLaws(prevLaws => [...prevLaws, newLoi]);
+    setIsNewLawModalOpen(false);
+    setNewLaw({});
+    toast.success('Nouvelle loi ajoutée');
   };
-
-  const handleSupprimerLoi = (id: string) => {
-    setLois(lois.filter(loi => loi.id !== id));
-  };
-
-  const handleModifierLoi = (id: string, updatedLoi: Loi) => {
-    setLois(lois.map(loi => {
-      if (loi.id === id) {
-        // Fix any other incorrect type usage
-        loi.type = validateLoiType(loi.type); // Ensure we have a valid type
-        return { ...loi, ...updatedLoi };
-      }
-      return loi;
-    }));
-  };
-
-  // Helper function to validate LoiType
-  function validateLoiType(type: string): LoiType {
-    const validTypes = [
-      'political', 'economic', 'social', 'military',
-      'religious', 'constitutional', 'judicial'
-    ];
-
-    return validTypes.includes(type) ? type as LoiType : 'political';
-  }
 
   return (
-    <div className="container mx-auto p-4">
-      <h1 className="text-2xl font-bold mb-4">Gestion des Lois</h1>
-      <Card>
-        <CardHeader>
-          <CardTitle>Liste des Lois</CardTitle>
-          <CardDescription>
-            Ajouter, supprimer et modifier les lois.
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead className="w-[100px]">Titre</TableHead>
-                <TableHead>Description</TableHead>
-                <TableHead>Type</TableHead>
-                <TableHead>Importance</TableHead>
-                <TableHead className="text-right">Actions</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {lois.map((loi) => (
-                <TableRow key={loi.id}>
-                  <TableCell className="font-medium">{loi.titre}</TableCell>
-                  <TableCell>{loi.description}</TableCell>
-                  <TableCell>{loi.type}</TableCell>
-                  <TableCell>{loi.importance}</TableCell>
-                  <TableCell className="text-right">
-                    <Button variant="secondary" size="sm" onClick={() => handleSupprimerLoi(loi.id)}>
-                      Supprimer
+    <Layout>
+      <PageHeader
+        title="Gestion Politique"
+        subtitle="Proposer et gérer les lois de la République"
+      />
+
+      <div className="mb-6">
+        <Button onClick={handleOpenNewLawModal}>Proposer une nouvelle loi</Button>
+      </div>
+
+      <Tabs value={activeTab} onValueChange={setActiveTab}>
+        <TabsList className="mb-6">
+          <TabsTrigger value="lois">Lois en vigueur</TabsTrigger>
+          <TabsTrigger value="propositions">Propositions</TabsTrigger>
+          <TabsTrigger value="archives">Archives</TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="lois">
+          <div>
+            {lois.map((law) => (
+              <div key={law.id} className="border rounded-md p-4 mb-4">
+                <h3 className="font-semibold">{law.titre}</h3>
+                <p className="text-sm">{law.description}</p>
+              </div>
+            ))}
+          </div>
+        </TabsContent>
+
+        <TabsContent value="propositions">
+          <div>
+            {/* Contenu pour les propositions de lois */}
+          </div>
+        </TabsContent>
+
+        <TabsContent value="archives">
+          <div>
+            {/* Contenu pour les archives des lois */}
+          </div>
+        </TabsContent>
+      </Tabs>
+
+      {/* Modal pour ajouter une nouvelle loi */}
+      {isNewLawModalOpen && (
+        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center">
+          <div className="bg-white p-8 rounded-md w-full max-w-md">
+            <h2 className="text-2xl font-semibold mb-4">Proposer une nouvelle loi</h2>
+
+            <div className="space-y-4">
+              <div>
+                <Label htmlFor="titre">Titre</Label>
+                <Input
+                  type="text"
+                  id="titre"
+                  name="titre"
+                  onChange={handleInputChange}
+                  className="w-full"
+                />
+              </div>
+
+              <div>
+                <Label htmlFor="description">Description</Label>
+                <Textarea
+                  id="description"
+                  name="description"
+                  onChange={handleInputChange}
+                  className="w-full"
+                />
+              </div>
+
+              <div>
+                <Label htmlFor="proposeur">Proposeur</Label>
+                <Input
+                  type="text"
+                  id="proposeur"
+                  name="proposeur"
+                  onChange={handleInputChange}
+                  className="w-full"
+                  defaultValue="Sénat"
+                />
+              </div>
+
+              <div>
+                <Label htmlFor="category">Catégorie</Label>
+                <Select onValueChange={(value) => setCategory(value)}>
+                  <SelectTrigger className="w-full">
+                    <SelectValue placeholder="Sélectionner une catégorie" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="political">Politique</SelectItem>
+                    <SelectItem value="economic">Économique</SelectItem>
+                    <SelectItem value="social">Social</SelectItem>
+                    <SelectItem value="military">Militaire</SelectItem>
+                    <SelectItem value="religious">Religieux</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div>
+                <Label htmlFor="importance">Importance</Label>
+                <Select onValueChange={(value) => setImportance(value)}>
+                  <SelectTrigger className="w-full">
+                    <SelectValue placeholder="Sélectionner l'importance" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="low">Faible</SelectItem>
+                    <SelectItem value="medium">Moyenne</SelectItem>
+                    <SelectItem value="high">Élevée</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div>
+                <Label htmlFor="etat">État</Label>
+                <Select onValueChange={(value) => setEtat(value)}>
+                  <SelectTrigger className="w-full">
+                    <SelectValue placeholder="Sélectionner l'état" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="draft">Brouillon</SelectItem>
+                    <SelectItem value="proposed">Proposée</SelectItem>
+                    <SelectItem value="approved">Approuvée</SelectItem>
+                    <SelectItem value="rejected">Rejetée</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div>
+                <Label>Date</Label>
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button
+                      variant={"outline"}
+                      className={cn(
+                        "w-full justify-start text-left font-normal",
+                        !selectedDate && "text-muted-foreground"
+                      )}
+                    >
+                      {selectedDate ? (
+                        format(selectedDate, "PPP")
+                      ) : (
+                        <span>Choisir une date</span>
+                      )}
+                      <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
                     </Button>
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-          <Button onClick={handleAjouterLoi}>Ajouter une loi</Button>
-        </CardContent>
-      </Card>
-    </div>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-0" align="start">
+                    <Calendar
+                      mode="single"
+                      selected={selectedDate}
+                      onSelect={setSelectedDate}
+                      disabled={(date) =>
+                        date > addDays(new Date(), 0)
+                      }
+                      initialFocus
+                    />
+                  </PopoverContent>
+                </Popover>
+              </div>
+
+              <div className="flex justify-end space-x-2">
+                <Button variant="secondary" onClick={handleCloseNewLawModal}>Annuler</Button>
+                <Button onClick={handleNewLaw}>Proposer</Button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+    </Layout>
   );
 };

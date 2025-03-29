@@ -12,7 +12,7 @@ export interface Character {
   role?: string;
   marriageStatus?: string;
   
-  // Family-related properties
+  // Propriétés familiales
   relation?: string;
   isHeadOfFamily?: boolean;
   parentIds?: string[];
@@ -20,11 +20,11 @@ export interface Character {
   childrenIds?: string[];
   testamentaryWishes?: string;
   
-  // Health and status
+  // Santé et statut
   health?: number;
   status?: 'alive' | 'deceased' | 'exiled';
 
-  // Personal attributes
+  // Attributs personnels
   traits?: string[];
   specialty?: string;
   educationType?: string;
@@ -50,11 +50,11 @@ export interface Character {
     speciality?: string;
   };
   
-  // Last child birth tracking
+  // Suivi des naissances
   lastChildBirthYear?: number;
 }
 
-// Type for character statistics
+// Type pour les statistiques de personnage
 export interface CharacterStat {
   name: string;
   value: number;
@@ -64,7 +64,7 @@ export interface CharacterStat {
   color: string;
 }
 
-// Type for education information
+// Type pour les informations d'éducation
 export interface EducationInfo {
   type: string;
   specialties: string[];

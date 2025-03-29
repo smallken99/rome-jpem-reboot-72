@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import Layout from '@/components/layout/Layout';
 import { PageHeader } from '@/components/ui-custom/PageHeader';
@@ -7,19 +6,20 @@ import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Separator } from '@/components/ui/separator';
 import { Badge } from '@/components/ui/badge';
-import { useGameTime } from './hooks/useGameTime';
+import { useGameTime } from '@/hooks/useGameTime';
 import { PoliticalBalanceCard } from './components/equilibre/PoliticalBalanceCard';
 import { SocialStabilityCard } from './components/equilibre/SocialStabilityCard';
 import { EconomicStabilityCard } from './components/equilibre/EconomicStabilityCard';
 import { RecentEventsTable } from './components/equilibre/RecentEventsTable';
-import { Equilibre, PoliticalEvent } from '@/types/equilibre';
-import { gameOrJsDateToDate } from './components/lois/utils/dateConverter';
+import { Equilibre, PoliticalEvent, HistoriqueEntry } from '@/types/game';
 import { toast } from 'sonner';
 
 // État initial simulé
 const initialEquilibre: Equilibre = {
-  id: 'eq-001',
-  political: {
+  economie: 65,
+  militaire: 80,
+  religion: 85,
+  politique: {
     populaires: 35,
     optimates: 40,
     moderates: 25
@@ -28,13 +28,11 @@ const initialEquilibre: Equilibre = {
     patriciens: 30,
     plébéiens: 70
   },
-  economie: 65,
-  economy: 65, // Alias pour compatibilité
+  population: 1000000, // Population totale estimée
   stability: 70,
   armée: 80,
   loyauté: 75,
   morale: 60,
-  religion: 85,
   facteurJuridique: 65,
   risques: [
     {
@@ -76,8 +74,7 @@ const initialEquilibre: Equilibre = {
       impact: 5,
       type: 'économique'
     }
-  ],
-  population: 1000000 // Population totale estimée
+  ]
 };
 
 const recentEvents: PoliticalEvent[] = [
@@ -86,30 +83,32 @@ const recentEvents: PoliticalEvent[] = [
     title: 'Discours de Caton au Sénat',
     date: new Date(43, 11, 10),
     description: 'Critique virulente des populares',
-    impact: -5,
-    type: 'politique'
+    impact: { politique: { populaires: -5 } },
+    type: 'politique',
+    importance: 'medium'
   },
   {
     id: 'pol-event-2',
     title: 'Élection des consuls',
     date: new Date(44, 0, 1),
     description: 'Victoire des optimates',
-    impact: 10,
-    type: 'politique'
+    impact: { politique: { optimates: 10 } },
+    type: 'politique',
+    importance: 'high'
   }
 ];
 
 export const GestionEquilibre: React.FC = () => {
   const [activeTab, setActiveTab] = useState('apercu');
   const [equilibre, setEquilibre] = useState<Equilibre>(initialEquilibre);
-  const [currentThreats, setCurrentThreats] = useState(equilibre.risques);
+  const [currentThreats, setCurrentThreats] = useState(equilibre.risques || []);
   const { year, season } = useGameTime();
   
   // Mise à jour de l'équilibre politique
   const handleUpdatePolitical = (values: { populaires: number; optimates: number; moderates: number; }) => {
     setEquilibre(prev => ({
       ...prev,
-      political: {
+      politique: {
         populaires: values.populaires,
         optimates: values.optimates,
         moderates: values.moderates
@@ -143,7 +142,7 @@ export const GestionEquilibre: React.FC = () => {
   // Ajout d'un événement à l'historique
   const handleAddEvent = (event: string, impact: number, type: string) => {
     const newEvent = {
-      id: `event-${equilibre.historique.length + 1}`,
+      id: `event-${equilibre.historique ? equilibre.historique.length + 1 : 1}`,
       date: new Date(),
       event,
       impact,
@@ -152,7 +151,7 @@ export const GestionEquilibre: React.FC = () => {
     
     setEquilibre(prev => ({
       ...prev,
-      historique: [newEvent, ...prev.historique.slice(0, 9)] // Garder les 10 derniers événements
+      historique: prev.historique ? [newEvent, ...prev.historique.slice(0, 9)] : [newEvent] // Garder les 10 derniers événements
     }));
     
     toast.success('Événement ajouté à l\'historique');
@@ -161,7 +160,7 @@ export const GestionEquilibre: React.FC = () => {
   // Ajout d'un facteur de risque
   const handleAddRisk = (name: string, level: string, type: string, description: string, threat: number) => {
     const newRisk = {
-      id: `risk-${equilibre.risques.length + 1}`,
+      id: `risk-${equilibre.risques ? equilibre.risques.length + 1 : 1}`,
       name,
       level,
       type,
@@ -171,7 +170,7 @@ export const GestionEquilibre: React.FC = () => {
     
     setEquilibre(prev => ({
       ...prev,
-      risques: [...prev.risques, newRisk]
+      risques: prev.risques ? [...prev.risques, newRisk] : [newRisk]
     }));
     
     toast.success('Facteur de risque ajouté');
@@ -181,18 +180,19 @@ export const GestionEquilibre: React.FC = () => {
   const calculateGlobalStability = () => {
     // Calcul simplifié pour l'exemple
     const politicalBalance = 
-      equilibre.political.moderates * 0.8 + 
-      Math.min(equilibre.political.populaires, equilibre.political.optimates) * 0.4;
+      equilibre.politique.moderates * 0.8 + 
+      Math.min(equilibre.politique.populaires, equilibre.politique.optimates) * 0.4;
     
     const socialBalance = 
       Math.min(equilibre.social.patriciens, equilibre.social.plébéiens) * 1.5;
     
-    const riskFactor = equilibre.risques.reduce((sum, risk) => sum + risk.threat, 0) / 10;
+    const riskFactor = equilibre.risques ? 
+      equilibre.risques.reduce((sum, risk) => sum + risk.threat, 0) / 10 : 0;
     
     let stability = 
       (politicalBalance + socialBalance + equilibre.economie * 1.2 + 
-       equilibre.armée * 0.7 + equilibre.loyauté * 0.8 + 
-       equilibre.religion * 0.5 + equilibre.facteurJuridique * 0.6) / 7;
+       (equilibre.armée || 0) * 0.7 + (equilibre.loyauté || 0) * 0.8 + 
+       equilibre.religion * 0.5 + (equilibre.facteurJuridique || 0) * 0.6) / 7;
     
     stability = Math.max(0, Math.min(100, stability - riskFactor));
     
@@ -206,7 +206,7 @@ export const GestionEquilibre: React.FC = () => {
       stability: calculateGlobalStability()
     }));
   }, [
-    equilibre.political, 
+    equilibre.politique, 
     equilibre.social, 
     equilibre.economie, 
     equilibre.armée,
@@ -323,13 +323,13 @@ export const GestionEquilibre: React.FC = () => {
                     <div className="flex justify-between items-center mb-1">
                       <span className="text-sm">Équilibre politique</span>
                       <span className="text-sm font-medium">
-                        {(equilibre.political.populaires + equilibre.political.optimates + equilibre.political.moderates) / 3}%
+                        {(equilibre.politique.populaires + equilibre.politique.optimates + equilibre.politique.moderates) / 3}%
                       </span>
                     </div>
                     <div className="w-full bg-gray-200 rounded-full h-2">
                       <div 
                         className="bg-blue-500 h-2 rounded-full" 
-                        style={{ width: `${(equilibre.political.populaires + equilibre.political.optimates + equilibre.political.moderates) / 3}%` }}
+                        style={{ width: `${(equilibre.politique.populaires + equilibre.politique.optimates + equilibre.politique.moderates) / 3}%` }}
                       ></div>
                     </div>
                   </div>
@@ -454,7 +454,9 @@ export const GestionEquilibre: React.FC = () => {
         <TabsContent value="politique">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <PoliticalBalanceCard 
-              political={equilibre.political} 
+              populaires={equilibre.politique.populaires}
+              optimates={equilibre.politique.optimates}
+              moderates={equilibre.politique.moderates}
               onUpdate={handleUpdatePolitical}
             />
             
@@ -472,9 +474,9 @@ export const GestionEquilibre: React.FC = () => {
                           <p className="text-sm text-muted-foreground">{event.description}</p>
                         </div>
                         <Badge 
-                          className={event.impact > 0 ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}
+                          className={event.impact.politique?.populaires > 0 ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}
                         >
-                          {event.impact > 0 ? `+${event.impact}` : event.impact}
+                          {event.impact.politique?.populaires > 0 ? `+${event.impact.politique?.populaires}` : event.impact.politique?.populaires}
                         </Badge>
                       </div>
                       <p className="text-xs text-muted-foreground mt-3">
@@ -646,7 +648,17 @@ export const GestionEquilibre: React.FC = () => {
               <CardTitle>Historique des événements</CardTitle>
             </CardHeader>
             <CardContent>
-              <RecentEventsTable events={equilibre.historique.slice(0, 10)} />
+              {equilibre.historique && (
+                <RecentEventsTable events={equilibre.historique.map(entry => ({
+                  id: entry.id,
+                  title: entry.event,
+                  description: entry.type,
+                  date: entry.date,
+                  impact: { [entry.type]: entry.impact },
+                  type: entry.type,
+                  importance: entry.impact > 0 ? 'high' : 'medium'
+                }))} />
+              )}
             </CardContent>
           </Card>
         </TabsContent>

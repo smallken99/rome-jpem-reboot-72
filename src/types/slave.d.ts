@@ -9,6 +9,11 @@ export interface Slave {
   productivity: number;
   assigned: boolean;
   assignedTo?: string;
+  buildingId?: string;
+  assignment?: string;
+  gender?: string;
+  age?: number;
+  level?: number;
 }
 
 export interface SlaveAssignment {
@@ -18,4 +23,6 @@ export interface SlaveAssignment {
   efficiency: number;
   propertyId: string;
   propertyName: string;
+  count?: number;
+  buildingName?: string;
 }

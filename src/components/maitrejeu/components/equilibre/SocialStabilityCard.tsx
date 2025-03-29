@@ -1,9 +1,9 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Slider } from '@/components/ui/slider';
 
-interface SocialStabilityCardProps {
+export interface SocialStabilityCardProps {
   social: {
     patriciens: number;
     plébéiens: number;
@@ -15,55 +15,72 @@ export const SocialStabilityCard: React.FC<SocialStabilityCardProps> = ({
   social,
   onUpdate
 }) => {
-  // Gérer les changements individuels
-  const handlePatriciensChange = (value: number[]) => {
-    onUpdate({
-      patriciens: value[0],
-      plébéiens: social.plébéiens
-    });
+  const [internalValues, setInternalValues] = useState({
+    patriciens: social.patriciens,
+    plébéiens: social.plébéiens
+  });
+  
+  const handleUpdate = (key: keyof typeof internalValues, value: number) => {
+    const newValues = { ...internalValues, [key]: value };
+    setInternalValues(newValues);
   };
-
-  const handlePlebiensChange = (value: number[]) => {
-    onUpdate({
-      patriciens: social.patriciens,
-      plébéiens: value[0]
-    });
+  
+  const handleSave = () => {
+    onUpdate(internalValues);
   };
-
+  
+  const socialTension = Math.abs(internalValues.patriciens - internalValues.plébéiens);
+  
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Équilibre social</CardTitle>
+        <CardTitle>Équilibre Social</CardTitle>
       </CardHeader>
       <CardContent>
-        <div className="space-y-4">
-          <div className="space-y-2">
-            <div className="flex justify-between">
-              <label className="text-sm font-medium">Patriciens</label>
-              <span className="text-sm">{social.patriciens}%</span>
+        <div className="space-y-6">
+          <div className="text-center mb-4">
+            <div className="text-2xl font-bold mb-1">
+              {socialTension > 50 ? 'Forte tension' : socialTension > 25 ? 'Tension modérée' : 'Équilibre'}
+            </div>
+            <div className="text-sm text-muted-foreground">
+              Écart de {socialTension}% entre patriciens et plébéiens
+            </div>
+          </div>
+          
+          <div className="space-y-3">
+            <div className="flex justify-between items-center">
+              <span className="text-sm font-medium">Patriciens</span>
+              <span className="text-sm">{internalValues.patriciens}%</span>
             </div>
             <Slider
-              defaultValue={[social.patriciens]}
-              max={100}
+              value={[internalValues.patriciens]}
               min={0}
+              max={100}
               step={1}
-              onValueChange={handlePatriciensChange}
+              onValueChange={(values) => handleUpdate('patriciens', values[0])}
             />
           </div>
-
-          <div className="space-y-2">
-            <div className="flex justify-between">
-              <label className="text-sm font-medium">Plébéiens</label>
-              <span className="text-sm">{social.plébéiens}%</span>
+          
+          <div className="space-y-3">
+            <div className="flex justify-between items-center">
+              <span className="text-sm font-medium">Plébéiens</span>
+              <span className="text-sm">{internalValues.plébéiens}%</span>
             </div>
             <Slider
-              defaultValue={[social.plébéiens]}
-              max={100}
+              value={[internalValues.plébéiens]}
               min={0}
+              max={100}
               step={1}
-              onValueChange={handlePlebiensChange}
+              onValueChange={(values) => handleUpdate('plébéiens', values[0])}
             />
           </div>
+          
+          <button
+            className="w-full py-2 px-4 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
+            onClick={handleSave}
+          >
+            Appliquer les changements
+          </button>
         </div>
       </CardContent>
     </Card>
