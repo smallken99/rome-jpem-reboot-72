@@ -1,5 +1,6 @@
 
 export interface Equilibre {
+  id?: string;
   politique: {
     populaires: number;
     optimates: number;
@@ -32,7 +33,19 @@ export interface Equilibre {
   population?: number;
   date?: Date;
   
-  // Additional fields needed by components
+  // For compatibility with different spellings
+  économie?: {
+    stabilite: number;
+    croissance: number;
+    commerce: number;
+    agriculture: number;
+  };
+  
+  // Additional properties for other components
+  economic?: any;
+  political?: any;
+  stability?: number;
+  loyauté?: number;
   economicStability?: number;
   facteurMilitaire?: number;
   armée?: any;
@@ -40,20 +53,13 @@ export interface Equilibre {
   facteurPatriciens?: number;
   facteurPlebs?: number;
   plébéiens?: number;
-  // Alias pour économie pour résoudre les problèmes de compatibilité
-  économie?: {
-    stabilite: number;
-    croissance: number;
-    commerce: number;
-    agriculture: number;
-  };
 }
 
 export interface PoliticalEvent {
   id: string;
   title: string;
   description: string;
-  date: Date;
+  date: Date | GameDate;
   type: string;
   importance: 'low' | 'medium' | 'high' | 'critical';
   impact?: Record<string, number>;
@@ -65,14 +71,14 @@ export interface HistoriqueEntry {
   event: string;
   title: string;
   description: string;
-  date: Date;
+  date: Date | GameDate;
   impact: Record<string, number>;
   type: string;
   importance: string;
 }
 
 export interface EconomieRecord {
-  date: Date;
+  date: Date | GameDate;
   treasury: number;
   income: number;
   expenses: number;

@@ -14,6 +14,10 @@ export interface Evenement {
   nom?: string;
   tags?: string[];
   actions?: any[];
+  
+  // Additional fields needed for compatibility
+  options?: any[];
+  titre?: string;
 }
 
 export type EvenementType = 'POLITIQUE' | 'ECONOMIE' | 'SOCIAL' | 'MILITAIRE' | 'RELIGION';

@@ -11,7 +11,7 @@ export interface Character {
   title?: string;
   role?: string;
   
-  // Propriétés familiales
+  // Family properties
   relation?: string;
   isHeadOfFamily?: boolean;
   parentIds?: string[];
@@ -20,11 +20,11 @@ export interface Character {
   testamentaryWishes?: string;
   marriageStatus?: string;
   
-  // Santé et statut
+  // Health and status
   health?: number;
   status?: 'alive' | 'deceased' | 'exiled';
 
-  // Attributs personnels
+  // Personal attributes
   traits?: string[];
   specialty?: string;
   educationType?: string;
@@ -50,7 +50,7 @@ export interface Character {
     speciality?: string;
   };
   
-  // Propriétés politiques
+  // Political properties
   appartenance?: string;
   fonction?: string;
   gens?: string;
@@ -65,11 +65,11 @@ export interface Character {
   nom?: string;
   prenom?: string;
   
-  // Suivi des naissances
+  // Birth tracking
   lastChildBirthYear?: number;
 }
 
-// Type pour les statistiques de personnage
+// Type for character stats
 export interface CharacterStat {
   name: string;
   value: number;
@@ -79,7 +79,7 @@ export interface CharacterStat {
   color: string;
 }
 
-// Type pour les informations d'éducation
+// Type for education information
 export interface EducationInfo {
   type: string;
   specialties: string[];
@@ -88,7 +88,7 @@ export interface EducationInfo {
   completedAt?: string;
 }
 
-// Interface pour les sénateurs jouables
+// Interface for playable senators
 export interface SenateurJouable extends Omit<Character, 'stats'> {
   faction: string;
   influence: number;
@@ -97,4 +97,11 @@ export interface SenateurJouable extends Omit<Character, 'stats'> {
   clientele: number;
   allies: string[];
   ennemis: string[];
+  gender: 'male' | 'female'; // Explicitly include gender to fix type errors
+  stats?: {
+    popularity: number | CharacterStat;
+    oratory: number | CharacterStat;
+    piety: number | CharacterStat;
+    martialEducation: number | CharacterStat;
+  };
 }
