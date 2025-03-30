@@ -13,7 +13,7 @@ export interface Evenement {
   endDate?: Date | GameDate;
   nom?: string;
   tags?: string[];
-  actions?: string[];
+  actions?: any[];
 }
 
 export type EvenementType = 'POLITIQUE' | 'ECONOMIE' | 'SOCIAL' | 'MILITAIRE' | 'RELIGION';
@@ -25,4 +25,5 @@ export interface EvenementAction {
   label: string;
   effets: Record<string, any>;
   consequence: string;
+  description?: string;
 }

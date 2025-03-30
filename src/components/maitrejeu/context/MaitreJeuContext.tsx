@@ -1,111 +1,48 @@
 
-import React, { createContext, useContext, useState, ReactNode, useEffect } from 'react';
-import { Character, SenateurJouable } from '@/types/character';
-import { Equilibre, PoliticalEvent, HistoriqueEntry, EconomieRecord } from '@/types/equilibre';
-import { GameDate, Season } from '@/utils/types/gameDate';
+import React, { createContext, useContext, useState, ReactNode } from 'react';
+import { Equilibre } from '@/types/equilibre';
+import { SenateurJouable } from '../types/senateurs';
 import { Evenement } from '../types/evenement';
-import { initialState } from './initialState';
+import { GameDate, Season } from '@/utils/types/gameDate';
+import { Loi } from '../types/lois';
+import { Province } from '../types/provinces';
+import { HistoireEntry } from '../types/histoire';
+import { Election } from '../types/elections';
+import { MaitreJeuContextType } from '../types/context';
+import { initialEquilibre, initialSenateurs, initialEvenements, initialDate } from './initialState';
 
-// Define the context type
-export interface MaitreJeuContextType {
-  // Base state properties
-  senateurs: Character[];
-  equilibre: Equilibre;
-  currentDate: GameDate;
-  currentPhase: string;
-  evenements: Evenement[];
-  lois: any[];
-  
-  // Additional properties used across components
-  provinces: any[];
-  familles: any[];
-  membres: any[];
-  alliances: any[];
-  mariages: any[];
-  relations: any[];
-  clients: any[];
-  economieRecords: any[];
-  treasury: number;
-  economicFactors: any;
-  
-  // Time management functions
-  advanceTime: () => void;
-  setDate: (date: GameDate) => void;
-  
-  // State update functions
-  setSenateurs: (senateurs: Character[]) => void;
-  setEquilibre: (equilibre: Equilibre) => void;
-  setLois: (lois: any[]) => void;
-  setEvenements: (evenements: Evenement[]) => void;
-  
-  // Client management functions
-  deleteClient: (id: string) => void;
-  assignClientToSenateur: (clientId: string, senateurId: string) => void;
-  changeClientStatus: (clientId: string, status: string) => void;
-  updateClient: (clientId: string, updates: any) => void;
-  addClient: (client: any) => string;
-  filterClients: (search: string, filter: any) => any[];
-  sortClients: (clients: any[], sortBy: string, sortOrder: string) => any[];
-  
-  // Special abilities management
-  updateSpecialAbilities: (clientId: string, abilities: any) => void;
-  adjustCompetencePoints: (clientId: string, competence: string, amount: number) => void;
-  
-  // Commonly used year/season
-  currentYear: number;
-  currentSeason: Season;
-  
-  // Treasury management
-  setTreasury: (amount: number) => void;
-  updateTreasury: (amount: number) => void;
-  setEconomieRecords: (records: EconomieRecord[]) => void;
-}
-
-// Create the context
 const MaitreJeuContext = createContext<MaitreJeuContextType | undefined>(undefined);
 
-// Create a provider component
-export const MaitreJeuProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
-  const [senateurs, setSenateurs] = useState<Character[]>(initialState.senateurs || []);
-  const [equilibre, setEquilibre] = useState<Equilibre>(initialState.equilibre || {
-    politique: { populaires: 50, optimates: 50, moderates: 50 },
-    economie: { stabilite: 50, croissance: 50, commerce: 50, agriculture: 50 },
-    social: { plebeiens: 50, patriciens: 50, esclaves: 50, cohesion: 50 },
-    militaire: { moral: 50, effectifs: 50, equipement: 50, discipline: 50 },
-    religion: { piete: 50, traditions: 50, superstition: 50 }
-  });
-  const [currentDate, setCurrentDate] = useState<GameDate>(initialState.currentDate || { year: 510, season: 'spring' });
-  const [currentPhase, setCurrentPhase] = useState<string>(initialState.currentPhase || 'SETUP');
-  const [evenements, setEvenements] = useState<Evenement[]>(initialState.evenements || []);
-  const [lois, setLois] = useState<any[]>(initialState.lois || []);
-  
-  // Additional state
-  const [provinces, setProvinces] = useState<any[]>(initialState.provinces || []);
-  const [familles, setFamilles] = useState<any[]>(initialState.familles || []);
-  const [membres, setMembres] = useState<any[]>(initialState.membres || []);
-  const [alliances, setAlliances] = useState<any[]>(initialState.alliances || []);
-  const [mariages, setMariages] = useState<any[]>(initialState.mariages || []);
-  const [relations, setRelations] = useState<any[]>(initialState.relations || []);
-  const [clients, setClients] = useState<any[]>(initialState.clients || []);
-  const [economieRecords, setEconomieRecords] = useState<EconomieRecord[]>(initialState.economieRecords || []);
-  const [treasury, setTreasury] = useState<number>(initialState.treasury || 0);
-  const [economicFactors, setEconomicFactors] = useState<any>(initialState.economicFactors || {});
+type GamePhase = 'normal' | 'election' | 'war' | 'crisis';
 
-  // Alias pour faciliter l'accès aux valeurs courantes
-  const currentYear = currentDate.year;
-  const currentSeason = currentDate.season;
+export const MaitreJeuProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
+  // État du jeu
+  const [year, setYear] = useState<number>(initialDate.year);
+  const [season, setSeason] = useState<Season>(initialDate.season);
+  const [phase, setPhase] = useState<GamePhase>('normal');
+  const [day, setDay] = useState<number>(1);
   
-  // Time management functions
+  // États des entités
+  const [equilibre, setEquilibre] = useState<Equilibre>(initialEquilibre);
+  const [senateurs, setSenateurs] = useState<SenateurJouable[]>(initialSenateurs);
+  const [evenements, setEvenements] = useState<Evenement[]>(initialEvenements);
+  const [lois, setLois] = useState<Loi[]>([]);
+  const [provinces, setProvinces] = useState<Province[]>([]);
+  const [histoireEntries, setHistoireEntries] = useState<HistoireEntry[]>([]);
+  const [elections, setElections] = useState<Election[]>([]);
+  const [factions, setFactions] = useState<any[]>([]);
+
+  // Actions
   const advanceTime = () => {
-    setCurrentDate(prev => {
-      let newSeason: Season;
-      let newYear = prev.year;
+    let newDay = day + 1;
+    let newSeason = season;
+    let newYear = year;
+    
+    if (newDay > 90) {
+      newDay = 1;
       
-      switch (prev.season) {
-        case 'winter':
-          newSeason = 'spring';
-          newYear += 1;
-          break;
+      // Avancer la saison
+      switch (season) {
         case 'spring':
           newSeason = 'summer';
           break;
@@ -115,174 +52,183 @@ export const MaitreJeuProvider: React.FC<{ children: ReactNode }> = ({ children 
         case 'fall':
           newSeason = 'winter';
           break;
+        case 'winter':
+          newSeason = 'spring';
+          newYear += 1;
+          break;
       }
-      
-      return { year: newYear, season: newSeason };
-    });
-  };
-  
-  const setDate = (date: GameDate) => {
-    setCurrentDate(date);
-  };
-  
-  // Client management functions
-  const deleteClient = (id: string) => {
-    setClients(prev => prev.filter(client => client.id !== id));
-  };
-  
-  const assignClientToSenateur = (clientId: string, senateurId: string) => {
-    setClients(prev => prev.map(client => 
-      client.id === clientId ? { ...client, senateurId } : client
-    ));
-  };
-  
-  const changeClientStatus = (clientId: string, status: string) => {
-    setClients(prev => prev.map(client => 
-      client.id === clientId ? { ...client, status } : client
-    ));
-  };
-  
-  const updateClient = (clientId: string, updates: any) => {
-    setClients(prev => prev.map(client => 
-      client.id === clientId ? { ...client, ...updates } : client
-    ));
-  };
-  
-  const addClient = (client: any) => {
-    const id = `client-${Date.now()}`;
-    const newClient = { ...client, id };
-    setClients(prev => [...prev, newClient]);
-    return id;
-  };
-  
-  const filterClients = (search: string, filters: any) => {
-    let filtered = [...clients];
-    
-    if (search) {
-      const searchLower = search.toLowerCase();
-      filtered = filtered.filter(client => 
-        client.name.toLowerCase().includes(searchLower) ||
-        client.description?.toLowerCase().includes(searchLower)
-      );
     }
     
-    if (filters?.status) {
-      filtered = filtered.filter(client => client.status === filters.status);
-    }
-    
-    if (filters?.senateurId) {
-      filtered = filtered.filter(client => client.senateurId === filters.senateurId);
-    }
-    
-    return filtered;
+    setDay(newDay);
+    setSeason(newSeason);
+    setYear(newYear);
   };
   
-  const sortClients = (clientsList: any[], sortBy: string, sortOrder: string) => {
-    return [...clientsList].sort((a, b) => {
-      let aValue = a[sortBy];
-      let bValue = b[sortBy];
-      
-      if (typeof aValue === 'string') {
-        aValue = aValue.toLowerCase();
-        bValue = bValue.toLowerCase();
+  const changePhase = (newPhase: GamePhase) => {
+    setPhase(newPhase);
+  };
+  
+  const updateEquilibre = (updates: Partial<Equilibre>) => {
+    setEquilibre(prev => ({ ...prev, ...updates }));
+  };
+  
+  const updateFactionBalance = (populaires: number, optimates: number, moderates: number) => {
+    setEquilibre(prev => ({
+      ...prev,
+      politique: {
+        ...prev.politique,
+        populaires,
+        optimates,
+        moderates,
+        total: populaires + optimates + moderates
       }
-      
-      if (aValue < bValue) return sortOrder === 'asc' ? -1 : 1;
-      if (aValue > bValue) return sortOrder === 'asc' ? 1 : -1;
-      return 0;
-    });
+    }));
+  };
+
+  // Gestion des lois
+  const addLoi = (loiData: Omit<Loi, "id">) => {
+    const newLoi = {
+      id: `loi-${Date.now()}`,
+      ...loiData
+    };
+    setLois(prev => [...prev, newLoi]);
   };
   
-  // Compétences management
-  const updateSpecialAbilities = (clientId: string, abilities: any) => {
-    setClients(prev => prev.map(client => 
-      client.id === clientId 
-        ? { ...client, specialAbilities: { ...(client.specialAbilities || {}), ...abilities } } 
-        : client
-    ));
+  const voteLoi = (id: string, vote: 'pour' | 'contre' | 'abstention', count: number = 1) => {
+    setLois(prev => prev.map(loi => {
+      if (loi.id === id) {
+        if (vote === 'pour') {
+          return { ...loi, votesPositifs: (loi.votesPositifs || 0) + count };
+        } else if (vote === 'contre') {
+          return { ...loi, votesNégatifs: (loi.votesNégatifs || 0) + count };
+        } else {
+          return { ...loi, votesAbstention: (loi.votesAbstention || 0) + count };
+        }
+      }
+      return loi;
+    }));
+  };
+
+  // Gestion des élections
+  const scheduleElection = (magistrature: string, year: number, season: Season) => {
+    const newElection: Election = {
+      id: `election-${Date.now()}`,
+      magistrature,
+      date: { year, season },
+      candidats: [],
+      resultat: null,
+      statut: 'scheduled'
+    };
+    
+    setElections(prev => [...prev, newElection]);
+    return newElection.id;
+  };
+
+  // Gestion des événements
+  const addEvenement = (evenementData: Omit<Evenement, "id">) => {
+    const newEvenement = {
+      id: `event-${Date.now()}`,
+      ...evenementData
+    };
+    setEvenements(prev => [...prev, newEvenement]);
   };
   
-  const adjustCompetencePoints = (clientId: string, competence: string, amount: number) => {
-    setClients(prev => prev.map(client => {
-      if (client.id !== clientId) return client;
-      
-      const competences = { ...(client.competences || {}) };
-      competences[competence] = (competences[competence] || 0) + amount;
-      
-      return { ...client, competences };
+  const resolveEvenement = (id: string, optionId: string) => {
+    setEvenements(prev => prev.map(event => {
+      if (event.id === id) {
+        return { ...event, resolved: true };
+      }
+      return event;
+    }));
+  };
+
+  // Gestion de l'historique
+  const addHistoireEntry = (entryData: Omit<HistoireEntry, "id">) => {
+    const newEntry = {
+      id: `history-${Date.now()}`,
+      ...entryData
+    };
+    setHistoireEntries(prev => [...prev, newEntry]);
+  };
+
+  // Gestion des provinces
+  const updateProvince = (id: string, updates: Partial<Province>) => {
+    setProvinces(prev => prev.map(province => {
+      if (province.id === id) {
+        return { ...province, ...updates };
+      }
+      return province;
+    }));
+  };
+
+  // Gestion des sénateurs
+  const updateSenateur = (id: string, updates: Partial<SenateurJouable>) => {
+    setSenateurs(prev => prev.map(senateur => {
+      if (senateur.id === id) {
+        return { ...senateur, ...updates };
+      }
+      return senateur;
     }));
   };
   
-  // Treasury management
-  const updateTreasury = (amount: number) => {
-    setTreasury(prev => prev + amount);
-  };
-  
-  // Ajouter un événement
-  const addEvenement = (evenement: Evenement) => {
-    setEvenements(prev => [...prev, { ...evenement }]);
+  const assignSenateurToPlayer = (senateurId: string, playerId: string) => {
+    setSenateurs(prev => prev.map(senateur => {
+      if (senateur.id === senateurId) {
+        return { 
+          ...senateur, 
+          playerId, 
+          joueur: Boolean(playerId) 
+        };
+      }
+      return senateur;
+    }));
   };
 
+  // Valeur de contexte
   const value: MaitreJeuContextType = {
-    // Base state
-    senateurs,
+    gameState: { year, season, phase, day },
+    currentYear: year,
+    currentSeason: season,
+    currentPhase: phase,
+    year,
+    season,
+    
     equilibre,
-    currentDate,
-    currentPhase,
-    evenements,
     lois,
-    
-    // Additional state
     provinces,
-    familles,
-    membres,
-    alliances,
-    mariages,
-    relations,
-    clients,
-    economieRecords,
-    treasury,
-    economicFactors,
+    senateurs,
+    evenements,
+    histoireEntries,
+    elections,
+    factions,
     
-    // Functions
     advanceTime,
-    setDate,
-    setSenateurs,
-    setEquilibre,
-    setLois,
-    setEvenements,
-    deleteClient,
-    assignClientToSenateur,
-    changeClientStatus,
-    updateClient,
-    addClient,
-    filterClients,
-    sortClients,
-    updateSpecialAbilities,
-    adjustCompetencePoints,
+    changePhase,
+    updateEquilibre,
+    updateFactionBalance,
     
-    // Commonly used values
-    currentYear,
-    currentSeason,
+    addLoi,
+    voteLoi,
+    scheduleElection,
     
-    // Treasury management
-    setTreasury,
-    updateTreasury,
-    setEconomieRecords
+    addEvenement,
+    resolveEvenement,
+    
+    addHistoireEntry,
+    
+    updateProvince,
+    
+    updateSenateur,
+    assignSenateurToPlayer
   };
 
-  return (
-    <MaitreJeuContext.Provider value={value}>
-      {children}
-    </MaitreJeuContext.Provider>
-  );
+  return <MaitreJeuContext.Provider value={value}>{children}</MaitreJeuContext.Provider>;
 };
 
-// Custom hook for using the context
 export const useMaitreJeu = () => {
   const context = useContext(MaitreJeuContext);
   if (context === undefined) {
-    throw new Error('useMaitreJeu must be used within a MaitreJeuProvider');
+    throw new Error('useMaitreJeu doit être utilisé à l\'intérieur d\'un MaitreJeuProvider');
   }
   return context;
 };

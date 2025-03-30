@@ -40,7 +40,7 @@ export interface Equilibre {
   facteurPatriciens?: number;
   facteurPlebs?: number;
   plébéiens?: number;
-  // Alias for économie to fix compatibility issues
+  // Alias pour économie pour résoudre les problèmes de compatibilité
   économie?: {
     stabilite: number;
     croissance: number;

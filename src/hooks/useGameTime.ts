@@ -6,6 +6,7 @@ export interface GameTime {
   year: number;
   season: Season;
   phase?: string;
+  currentDate?: GameDate;
   updateTime?: (newTime: Partial<GameTime>) => void;
   advanceSeason?: () => void;
   advanceYear?: () => void;
@@ -32,6 +33,7 @@ export const useGameTime = (): GameTime => {
       switch (prevTime.season) {
         case 'winter':
           newSeason = 'spring';
+          newYear += 1;
           break;
         case 'spring':
           newSeason = 'summer';
@@ -41,8 +43,9 @@ export const useGameTime = (): GameTime => {
           break;
         case 'fall':
           newSeason = 'winter';
-          newYear += 1;
           break;
+        default:
+          newSeason = 'spring';
       }
       
       return { ...prevTime, year: newYear, season: newSeason };
@@ -70,8 +73,15 @@ export const useGameTime = (): GameTime => {
     }));
   };
 
+  // Créer un objet currentDate basé sur l'année et la saison
+  const currentDate: GameDate = {
+    year: gameTime.year,
+    season: gameTime.season
+  };
+
   return {
     ...gameTime,
+    currentDate,
     updateTime,
     advanceSeason,
     advanceYear,
