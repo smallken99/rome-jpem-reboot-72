@@ -1,39 +1,50 @@
 
-import { SlaveAssignment as BaseSlaveAssignment } from '@/types/slave';
-import { SlaveAssignment } from './SlaveAssignments';
+export interface Slave {
+  id: string;
+  name: string;
+  gender: 'male' | 'female';
+  age: number;
+  health: number;
+  skill: number;
+  origin: string;
+  price: number;
+  traits?: string[];
+  specialization?: string;
+  assigned?: boolean;
+  assignedTo?: string;
+}
 
-export const adaptSlaveAssignment = (
-  assignment: BaseSlaveAssignment
-): SlaveAssignment => {
+export interface SlaveAssignment {
+  id: string;
+  slaveId: string;
+  buildingId: string;
+  efficiency: number;
+  role: string;
+  startDate: Date;
+}
+
+export const adaptSlaveAssignment = (assignment: Partial<SlaveAssignment>): SlaveAssignment => {
   return {
-    ...assignment,
-    count: assignment.count || 1,
-    propertyId: assignment.propertyId || assignment.buildingId,
-    propertyName: assignment.propertyName || 'Propriété inconnue'
+    id: assignment.id || `assignment-${Date.now()}`,
+    slaveId: assignment.slaveId || '',
+    buildingId: assignment.buildingId || '',
+    efficiency: assignment.efficiency || 1.0,
+    role: assignment.role || 'worker',
+    startDate: assignment.startDate || new Date()
   };
-};
-
-export const adaptSlaveAssignments = (
-  assignments: BaseSlaveAssignment[]
-): SlaveAssignment[] => {
-  return assignments.map(adaptSlaveAssignment);
 };
 
 export const createSlaveAssignment = (
   slaveId: string,
   buildingId: string,
-  propertyId: string,
-  propertyName: string,
-  buildingName?: string
+  role: string = 'worker'
 ): SlaveAssignment => {
   return {
+    id: `assignment-${Date.now()}-${slaveId.substring(0, 4)}`,
     slaveId,
     buildingId,
-    startDate: new Date(),
-    efficiency: 100,
-    propertyId,
-    propertyName,
-    buildingName,
-    count: 1
+    efficiency: 1.0,
+    role,
+    startDate: new Date()
   };
 };

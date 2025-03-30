@@ -1,12 +1,12 @@
 
 import { GameDate, Season } from '@/utils/types/gameDate';
 
-export const extractLoiDateInfo = (date: any): { year: number; season: string } => {
+export const extractLoiDateInfo = (date: any): { year: number; season: Season } => {
   if (typeof date === 'object' && date !== null) {
     if ('year' in date && 'season' in date) {
       return { 
         year: date.year, 
-        season: date.season 
+        season: date.season as Season 
       };
     }
   }

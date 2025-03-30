@@ -50,6 +50,19 @@ export interface Character {
     speciality?: string;
   };
   
+  // Propriétés politiques
+  appartenance?: string;
+  fonction?: string;
+  gens?: string;
+  magistrature?: string;
+  playerId?: string;
+  joueur?: string | boolean;
+  popularite?: number;
+  militaire?: number;
+  piete?: number;
+  eloquence?: number;
+  statut?: string;
+  
   // Suivi des naissances
   lastChildBirthYear?: number;
 }

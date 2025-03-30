@@ -40,6 +40,13 @@ export interface Equilibre {
   facteurPatriciens?: number;
   facteurPlebs?: number;
   plébéiens?: number;
+  // Alias for économie to fix compatibility issues
+  économie?: {
+    stabilite: number;
+    croissance: number;
+    commerce: number;
+    agriculture: number;
+  };
 }
 
 export interface PoliticalEvent {
