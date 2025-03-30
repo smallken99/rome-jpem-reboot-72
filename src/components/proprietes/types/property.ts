@@ -1,4 +1,6 @@
 
+export type BuildingType = 'domus' | 'villa' | 'insula' | 'farmland' | 'temple' | string;
+
 export interface PropertyUpgrade {
   id: string;
   name: string;
@@ -51,4 +53,11 @@ export interface OwnedBuilding {
   maintenance?: number;
   maintenanceEnabled?: boolean;
   slaves?: number;
+}
+
+export interface WorkerAssignment {
+  buildingId: string;
+  count: number;
+  efficiency: number;
+  cost: number;
 }

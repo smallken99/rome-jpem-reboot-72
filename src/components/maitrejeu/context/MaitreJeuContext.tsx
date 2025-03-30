@@ -1,208 +1,254 @@
 
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { Equilibre } from '@/types/equilibre';
-import { Loi } from '@/components/maitrejeu/types/lois';
+import { Character } from '@/types/character';
+import { Equilibre, PoliticalEvent, HistoriqueEntry } from '@/types/equilibre';
 import { Evenement } from '@/types/evenement';
-import { SenateurJouable } from '../types/senateurs';
-import { initialState } from './initialState';
-import { GamePhase, Season } from '../types/common';
+import { GameDate, Season } from '@/utils/types/gameDate';
 
-interface MaitreJeuContextType {
-  // État du jeu
-  currentYear: number;
-  currentSeason: Season;
-  currentPhase: GamePhase;
-  currentDate: { year: number; season: Season; day?: number };
-  
-  // Entités
+export interface MaitreJeuContextType {
+  currentDate: GameDate;
+  gameTime: GameTime;
+  characters: Character[];
   equilibre: Equilibre;
-  senateurs: SenateurJouable[];
-  provinces: any[];
   evenements: Evenement[];
-  lois: Loi[];
-  histoireEntries: any[];
+  historiqueEntries: HistoriqueEntry[];
   economieRecords: any[];
-  familles: any[];
-  membres: any[];
-  alliances: any[];
-  mariages: any[];
-  relations: any[];
-  clients: any[];
-  treasury: number;
-  economicFactors: any;
+  treasury: {
+    balance: number;
+    income: number;
+    expenses: number;
+    surplus: number;
+  };
   
-  // Actions
-  advanceTime: () => void;
-  changePhase: (phase: GamePhase) => void;
+  // Setters and updaters
+  setCharacters: (characters: Character[]) => void;
+  updateCharacter: (id: string, updates: Partial<Character>) => void;
+  setEvenements: (evenements: Evenement[]) => void;
+  addEvenement: (evenement: Evenement) => void;
+  removeEvenement: (id: string) => void;
+  setEquilibre: (equilibre: Equilibre) => void;
   updateEquilibre: (updates: Partial<Equilibre>) => void;
-  updateFactionBalance: (populaires: number, optimates: number, moderates: number) => void;
-  addEvenement: (evenement: Omit<Evenement, "id">) => void;
-  resolveEvenement: (id: string, optionId: string) => void;
-  addLoi: (loi: Omit<Loi, "id">) => void;
-  voteLoi: (id: string, vote: 'pour' | 'contre' | 'abstention', count?: number) => void;
-  updateSenateur: (id: string, updates: Partial<SenateurJouable>) => void;
-  assignSenateurToPlayer: (senateurId: string, playerId: string) => void;
-  updateProvince: (id: string, updates: any) => void;
-  addHistoireEntry: (entry: any) => void;
-  scheduleElection: (magistrature: string, year: number, season: Season) => string;
+  addHistoriqueEntry: (entry: HistoriqueEntry) => void;
+  setHistoriqueEntries: (entries: HistoriqueEntry[]) => void;
+  setEconomieRecords: (records: any[]) => void;
+  setTreasury: (treasury: any) => void;
+  
+  // Specialized handlers
+  updateSocialValues: (values: { plebeiens: number; patriciens: number; esclaves: number; cohesion: number; }) => void;
+  updateEconomieValues: (values: { stabilite: number; croissance: number; commerce: number; agriculture: number; }) => void;
+  updatePolitiqueValues: (values: { populaires: number; optimates: number; moderates: number; }) => void;
+  updateMilitaireValues: (values: { moral: number; effectifs: number; equipement: number; discipline: number; }) => void;
+  updateReligionValues: (values: { piete: number; traditions: number; superstition: number; }) => void;
+  
+  // Senateurs
+  senateurs: Character[];
+  setSenateurs: (senateurs: Character[]) => void;
+  
+  // Lois
+  lois: any[];
+  setLois: (lois: any[]) => void;
 }
+
+export interface GameTime {
+  year: number;
+  season: Season;
+  advanceSeason: () => void;
+  setYear: (year: number) => void;
+  setSeason: (season: Season) => void;
+}
+
+const initialDate: GameDate = {
+  year: 705,
+  season: 'spring'
+};
+
+const initialEquilibre: Equilibre = {
+  politique: {
+    populaires: 50,
+    optimates: 50,
+    moderates: 50
+  },
+  economie: {
+    stabilite: 50,
+    croissance: 50,
+    commerce: 50,
+    agriculture: 50
+  },
+  social: {
+    plebeiens: 50,
+    patriciens: 50,
+    esclaves: 50,
+    cohesion: 50
+  },
+  militaire: {
+    moral: 50,
+    effectifs: 50,
+    equipement: 50,
+    discipline: 50
+  },
+  religion: {
+    piete: 50,
+    traditions: 50,
+    superstition: 50
+  }
+};
 
 export const MaitreJeuContext = createContext<MaitreJeuContextType | null>(null);
 
 export const MaitreJeuProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [state, setState] = useState(initialState);
+  const [currentDate, setCurrentDate] = useState<GameDate>(initialDate);
+  const [characters, setCharacters] = useState<Character[]>([]);
+  const [senateurs, setSenateurs] = useState<Character[]>([]);
+  const [equilibre, setEquilibre] = useState<Equilibre>(initialEquilibre);
+  const [evenements, setEvenements] = useState<Evenement[]>([]);
+  const [historiqueEntries, setHistoriqueEntries] = useState<HistoriqueEntry[]>([]);
+  const [economieRecords, setEconomieRecords] = useState<any[]>([]);
+  const [lois, setLois] = useState<any[]>([]);
+  const [treasury, setTreasury] = useState({
+    balance: 1000000,
+    income: 150000,
+    expenses: 120000,
+    surplus: 30000
+  });
   
-  // Implémentation des méthodes
-  const advanceTime = () => {
-    setState((prev) => {
-      const nextSeason = getNextSeason(prev.currentSeason);
-      const nextYear = nextSeason === 'spring' ? prev.currentYear + 1 : prev.currentYear;
+  const gameTime: GameTime = {
+    year: currentDate.year,
+    season: currentDate.season,
+    advanceSeason: () => {
+      const seasons: Season[] = ['winter', 'spring', 'summer', 'fall'];
+      const currentIndex = seasons.indexOf(currentDate.season);
+      const nextIndex = (currentIndex + 1) % 4;
       
-      return {
-        ...prev,
-        currentYear: nextYear,
-        currentSeason: nextSeason,
-        currentDate: { year: nextYear, season: nextSeason }
-      };
-    });
+      if (nextIndex === 0) {
+        // If moving from fall to winter, increment the year
+        setCurrentDate({
+          year: currentDate.year + 1,
+          season: seasons[nextIndex]
+        });
+      } else {
+        setCurrentDate({
+          ...currentDate,
+          season: seasons[nextIndex]
+        });
+      }
+    },
+    setYear: (year: number) => {
+      setCurrentDate({
+        ...currentDate,
+        year
+      });
+    },
+    setSeason: (season: Season) => {
+      setCurrentDate({
+        ...currentDate,
+        season
+      });
+    }
   };
   
-  const changePhase = (phase: GamePhase) => {
-    setState((prev) => ({ ...prev, currentPhase: phase }));
+  const updateCharacter = (id: string, updates: Partial<Character>) => {
+    setCharacters(prev => 
+      prev.map(character => 
+        character.id === id ? { ...character, ...updates } : character
+      )
+    );
+  };
+  
+  const addEvenement = (evenement: Evenement) => {
+    setEvenements(prev => [...prev, evenement]);
+  };
+  
+  const removeEvenement = (id: string) => {
+    setEvenements(prev => prev.filter(evenement => evenement.id !== id));
   };
   
   const updateEquilibre = (updates: Partial<Equilibre>) => {
-    setState((prev) => ({
-      ...prev,
-      equilibre: { ...prev.equilibre, ...updates }
-    }));
+    setEquilibre(prev => ({ ...prev, ...updates }));
   };
   
-  const updateFactionBalance = (populaires: number, optimates: number, moderates: number) => {
-    setState((prev) => ({
+  const addHistoriqueEntry = (entry: HistoriqueEntry) => {
+    setHistoriqueEntries(prev => [...prev, entry]);
+  };
+  
+  const updateSocialValues = (values: { plebeiens: number; patriciens: number; esclaves: number; cohesion: number; }) => {
+    setEquilibre(prev => ({
       ...prev,
-      equilibre: {
-        ...prev.equilibre,
-        politique: { populaires, optimates, moderates, total: populaires + optimates + moderates }
+      social: {
+        ...prev.social,
+        ...values
       }
     }));
   };
   
-  const addEvenement = (evenement: Omit<Evenement, "id">) => {
-    const newEvenement = { ...evenement, id: `evt-${Date.now()}` } as Evenement;
-    setState((prev) => ({
+  const updateEconomieValues = (values: { stabilite: number; croissance: number; commerce: number; agriculture: number; }) => {
+    setEquilibre(prev => ({
       ...prev,
-      evenements: [...prev.evenements, newEvenement]
+      economie: {
+        ...prev.economie,
+        ...values
+      }
     }));
   };
   
-  const resolveEvenement = (id: string, optionId: string) => {
-    // Implémentation simplifiée
-    setState((prev) => ({
+  const updatePolitiqueValues = (values: { populaires: number; optimates: number; moderates: number; }) => {
+    setEquilibre(prev => ({
       ...prev,
-      evenements: prev.evenements.map(evt => 
-        evt.id === id ? { ...evt, resolved: true, selectedOption: optionId } : evt
-      )
+      politique: {
+        ...prev.politique,
+        ...values
+      }
     }));
   };
   
-  const addLoi = (loi: Omit<Loi, "id">) => {
-    const newLoi = { ...loi, id: `loi-${Date.now()}` } as Loi;
-    setState((prev) => ({
+  const updateMilitaireValues = (values: { moral: number; effectifs: number; equipement: number; discipline: number; }) => {
+    setEquilibre(prev => ({
       ...prev,
-      lois: [...prev.lois, newLoi]
+      militaire: {
+        ...prev.militaire,
+        ...values
+      }
     }));
   };
   
-  const voteLoi = (id: string, vote: 'pour' | 'contre' | 'abstention', count: number = 1) => {
-    setState((prev) => ({
+  const updateReligionValues = (values: { piete: number; traditions: number; superstition: number; }) => {
+    setEquilibre(prev => ({
       ...prev,
-      lois: prev.lois.map(loi => {
-        if (loi.id !== id) return loi;
-        
-        const votesUpdate = {
-          votesPositifs: vote === 'pour' ? loi.votesPositifs + count : loi.votesPositifs,
-          votesNégatifs: vote === 'contre' ? loi.votesNégatifs + count : loi.votesNégatifs,
-          votesAbstention: vote === 'abstention' ? loi.votesAbstention + count : loi.votesAbstention
-        };
-        
-        return { ...loi, ...votesUpdate };
-      })
+      religion: {
+        ...prev.religion,
+        ...values
+      }
     }));
-  };
-  
-  const updateSenateur = (id: string, updates: Partial<SenateurJouable>) => {
-    setState((prev) => ({
-      ...prev,
-      senateurs: prev.senateurs.map(sen => 
-        sen.id === id ? { ...sen, ...updates } : sen
-      )
-    }));
-  };
-  
-  const assignSenateurToPlayer = (senateurId: string, playerId: string) => {
-    updateSenateur(senateurId, { playerId, joueur: playerId });
-  };
-  
-  const updateProvince = (id: string, updates: any) => {
-    setState((prev) => ({
-      ...prev,
-      provinces: prev.provinces.map(prov => 
-        prov.id === id ? { ...prov, ...updates } : prov
-      )
-    }));
-  };
-  
-  const addHistoireEntry = (entry: any) => {
-    const newEntry = { ...entry, id: `hist-${Date.now()}` };
-    setState((prev) => ({
-      ...prev,
-      histoireEntries: [...prev.histoireEntries, newEntry]
-    }));
-  };
-  
-  const scheduleElection = (magistrature: string, year: number, season: Season) => {
-    const id = `election-${Date.now()}`;
-    setState((prev) => ({
-      ...prev,
-      elections: [...prev.elections, { id, magistrature, year, season, candidates: [] }]
-    }));
-    return id;
   };
   
   const value: MaitreJeuContextType = {
-    currentYear: state.currentYear,
-    currentSeason: state.currentSeason,
-    currentPhase: state.currentPhase,
-    currentDate: { year: state.currentYear, season: state.currentSeason },
-    equilibre: state.equilibre,
-    senateurs: state.senateurs,
-    provinces: state.provinces,
-    evenements: state.evenements,
-    lois: state.lois,
-    histoireEntries: state.histoireEntries,
-    economieRecords: state.economieRecords,
-    familles: state.familles,
-    membres: state.membres,
-    alliances: state.alliances,
-    mariages: state.mariages,
-    relations: state.relations,
-    clients: state.clients,
-    treasury: state.treasury,
-    economicFactors: state.economicFactors,
-    advanceTime,
-    changePhase,
+    currentDate,
+    gameTime,
+    characters,
+    setCharacters,
+    updateCharacter,
+    equilibre,
+    setEquilibre,
     updateEquilibre,
-    updateFactionBalance,
+    evenements,
+    setEvenements,
     addEvenement,
-    resolveEvenement,
-    addLoi,
-    voteLoi,
-    updateSenateur,
-    assignSenateurToPlayer,
-    updateProvince,
-    addHistoireEntry,
-    scheduleElection
+    removeEvenement,
+    historiqueEntries,
+    setHistoriqueEntries,
+    addHistoriqueEntry,
+    economieRecords,
+    setEconomieRecords,
+    treasury,
+    setTreasury,
+    updateSocialValues,
+    updateEconomieValues,
+    updatePolitiqueValues,
+    updateMilitaireValues,
+    updateReligionValues,
+    senateurs,
+    setSenateurs,
+    lois,
+    setLois
   };
   
   return (
@@ -212,22 +258,10 @@ export const MaitreJeuProvider: React.FC<{ children: React.ReactNode }> = ({ chi
   );
 };
 
-// Utilitaire pour obtenir la saison suivante
-const getNextSeason = (season: Season): Season => {
-  switch (season) {
-    case 'spring': return 'summer';
-    case 'summer': return 'autumn';
-    case 'autumn': return 'winter';
-    case 'winter': return 'spring';
-    default: return 'spring';
-  }
-};
-
-// Hook personnalisé pour utiliser le contexte
 export const useMaitreJeu = () => {
   const context = useContext(MaitreJeuContext);
   if (!context) {
-    throw new Error('useMaitreJeu doit être utilisé à l\'intérieur d\'un MaitreJeuProvider');
+    throw new Error('useMaitreJeu must be used within a MaitreJeuProvider');
   }
   return context;
 };

@@ -7,9 +7,14 @@ import { ActionButton } from '@/components/ui-custom/ActionButton';
 
 // Définition du type d'affectation d'esclaves
 export interface SlaveAssignment {
-  propertyId: string;
-  propertyName: string;
-  count: number;
+  slaveId: string;
+  buildingId: string;
+  startDate: Date;
+  efficiency: number;
+  count?: number;
+  propertyId?: string;
+  propertyName?: string;
+  buildingName?: string;
 }
 
 interface SlaveAssignmentsProps {
@@ -30,13 +35,15 @@ export const SlaveAssignments: React.FC<SlaveAssignmentsProps> = ({
   
   // Gérer le début de l'édition d'une affectation
   const handleStartEdit = (assignment: SlaveAssignment) => {
-    setEditingAssignmentId(assignment.propertyId);
-    setSlaveCount(assignment.count);
+    setEditingAssignmentId(assignment.propertyId || assignment.buildingId);
+    setSlaveCount(assignment.count || 1);
   };
   
   // Sauvegarder une modification d'affectation
   const handleSaveEdit = (assignment: SlaveAssignment) => {
-    onAssignSlaves(assignment.propertyId, assignment.propertyName, slaveCount);
+    if (assignment.propertyId && assignment.propertyName) {
+      onAssignSlaves(assignment.propertyId, assignment.propertyName, slaveCount);
+    }
     setEditingAssignmentId(null);
   };
   
@@ -76,26 +83,26 @@ export const SlaveAssignments: React.FC<SlaveAssignmentsProps> = ({
             </TableRow>
           ) : (
             slaveAssignments.map((assignment) => (
-              <TableRow key={assignment.propertyId}>
+              <TableRow key={assignment.buildingId}>
                 <TableCell className="font-medium">
-                  {assignment.propertyName}
+                  {assignment.propertyName || assignment.buildingName || "Propriété"}
                 </TableCell>
                 <TableCell className="text-right">
-                  {editingAssignmentId === assignment.propertyId ? (
+                  {editingAssignmentId === (assignment.propertyId || assignment.buildingId) ? (
                     <input 
                       type="number" 
                       value={slaveCount}
                       onChange={(e) => setSlaveCount(Math.max(0, parseInt(e.target.value) || 0))}
                       className="w-20 px-2 py-1 border rounded-md text-right"
                       min="0"
-                      max={assignment.count + availableSlaves}
+                      max={(assignment.count || 1) + availableSlaves}
                     />
                   ) : (
-                    <span>{assignment.count}</span>
+                    <span>{assignment.count || 1}</span>
                   )}
                 </TableCell>
                 <TableCell className="text-right">
-                  {editingAssignmentId === assignment.propertyId ? (
+                  {editingAssignmentId === (assignment.propertyId || assignment.buildingId) ? (
                     <div className="flex justify-end space-x-2">
                       <Button 
                         variant="outline" 
@@ -126,7 +133,7 @@ export const SlaveAssignments: React.FC<SlaveAssignmentsProps> = ({
                         label="Supprimer"
                         variant="ghost"
                         size="sm"
-                        onClick={() => onRemoveAssignment(assignment.propertyId)}
+                        onClick={() => onRemoveAssignment(assignment.propertyId || assignment.buildingId)}
                       />
                     </div>
                   )}

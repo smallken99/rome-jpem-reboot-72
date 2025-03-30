@@ -1,72 +1,82 @@
 
 import React from 'react';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { HistoriqueEntry } from '@/types/equilibre';
-import { formatDate } from '@/utils/dateFormatters';
+import { Badge } from '@/components/ui/badge';
 
 interface RecentEventsTableProps {
   events: HistoriqueEntry[];
-  limit?: number;
 }
 
-export const RecentEventsTable: React.FC<RecentEventsTableProps> = ({ 
-  events,
-  limit = 5
-}) => {
-  // Trions les événements par date (les plus récents d'abord)
-  const sortedEvents = [...events].sort((a, b) => {
-    const dateA = new Date(a.date);
-    const dateB = new Date(b.date);
-    return dateB.getTime() - dateA.getTime();
-  }).slice(0, limit);
+export const RecentEventsTable: React.FC<RecentEventsTableProps> = ({ events }) => {
+  const formatDate = (date: Date) => {
+    return date.toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' });
+  };
+
+  const getImpactColor = (impact: Record<string, number>) => {
+    const totalImpact = Object.values(impact).reduce((sum, value) => sum + value, 0);
+    if (totalImpact > 15) return "destructive";
+    if (totalImpact > 5) return "warning";
+    if (totalImpact > 0) return "default";
+    if (totalImpact < -15) return "destructive";
+    if (totalImpact < -5) return "warning";
+    return "secondary";
+  };
+
+  const getImportanceColor = (importance: string) => {
+    switch (importance.toLowerCase()) {
+      case 'high':
+      case 'critical':
+        return "destructive";
+      case 'medium':
+        return "warning";
+      default:
+        return "secondary";
+    }
+  };
 
   return (
-    <div className="overflow-x-auto">
-      <table className="min-w-full divide-y divide-gray-200">
-        <thead className="bg-gray-50">
-          <tr>
-            <th scope="col" className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-              Date
-            </th>
-            <th scope="col" className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-              Événement
-            </th>
-            <th scope="col" className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-              Impact
-            </th>
-          </tr>
-        </thead>
-        <tbody className="bg-white divide-y divide-gray-200">
-          {sortedEvents.length > 0 ? (
-            sortedEvents.map((event) => (
-              <tr key={event.id}>
-                <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-500">
-                  {formatDate(event.date)}
-                </td>
-                <td className="px-4 py-2 text-sm text-gray-900">
-                  <div className="font-medium">{event.title}</div>
-                  <div className="text-xs text-gray-500">{event.event}</div>
-                </td>
-                <td className="px-4 py-2 whitespace-nowrap text-sm">
-                  {Object.entries(event.impact).map(([key, value]) => (
-                    <div key={key} className="flex items-center space-x-1">
-                      <span className="text-xs">{key}:</span>
-                      <span className={`text-xs font-medium ${Number(value) > 0 ? 'text-green-600' : Number(value) < 0 ? 'text-red-600' : 'text-gray-500'}`}>
-                        {Number(value) > 0 ? `+${value}` : value}
-                      </span>
-                    </div>
-                  ))}
-                </td>
-              </tr>
-            ))
-          ) : (
-            <tr>
-              <td colSpan={3} className="px-4 py-4 text-sm text-center text-gray-500">
-                Aucun événement récent à afficher
-              </td>
-            </tr>
-          )}
-        </tbody>
-      </table>
-    </div>
+    <Card>
+      <CardHeader className="pb-3">
+        <CardTitle className="text-lg">Événements récents</CardTitle>
+      </CardHeader>
+      <CardContent className="p-0">
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead>Date</TableHead>
+              <TableHead>Événement</TableHead>
+              <TableHead>Type</TableHead>
+              <TableHead className="text-right">Importance</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {events.length === 0 ? (
+              <TableRow>
+                <TableCell colSpan={4} className="text-center py-6 text-muted-foreground">
+                  Aucun événement récent
+                </TableCell>
+              </TableRow>
+            ) : (
+              events.map((event) => (
+                <TableRow key={event.id}>
+                  <TableCell className="font-medium">
+                    {formatDate(event.date)}
+                  </TableCell>
+                  <TableCell>{event.title}</TableCell>
+                  <TableCell>{event.type}</TableCell>
+                  <TableCell className="text-right">
+                    <Badge variant={getImportanceColor(event.importance)}>
+                      {event.importance}
+                    </Badge>
+                  </TableCell>
+                </TableRow>
+              ))
+            )}
+          </TableBody>
+        </Table>
+      </CardContent>
+    </Card>
   );
 };

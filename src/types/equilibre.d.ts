@@ -31,6 +31,15 @@ export interface Equilibre {
   };
   population?: number;
   date?: Date;
+  
+  // Additional fields needed by components
+  economicStability?: number;
+  facteurMilitaire?: number;
+  armée?: any;
+  morale?: number;
+  facteurPatriciens?: number;
+  facteurPlebs?: number;
+  plébéiens?: number;
 }
 
 export interface PoliticalEvent {
@@ -41,6 +50,7 @@ export interface PoliticalEvent {
   type: string;
   importance: 'low' | 'medium' | 'high' | 'critical';
   impact?: Record<string, number>;
+  event?: string;
 }
 
 export interface HistoriqueEntry {

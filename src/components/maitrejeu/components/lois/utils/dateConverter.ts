@@ -1,90 +1,73 @@
 
 import { GameDate, Season } from '@/utils/types/gameDate';
 
-export const extractLoiDateInfo = (loi: any): { year: number; season: Season } => {
-  if (!loi || !loi.date) {
-    return { year: 0, season: 'spring' };
+export const extractLoiDateInfo = (date: any): { year: number; season: string } => {
+  if (typeof date === 'object' && date !== null) {
+    if ('year' in date && 'season' in date) {
+      return { 
+        year: date.year, 
+        season: date.season 
+      };
+    }
   }
-
-  if (typeof loi.date === 'object' && 'year' in loi.date && 'season' in loi.date) {
-    return {
-      year: loi.date.year,
-      season: normalizeSeason(loi.date.season)
-    };
-  }
-
-  // Fallback à la date actuelle
-  const now = new Date();
+  
+  // Fallback to current date if invalid
+  const currentDate = new Date();
   return {
-    year: now.getFullYear(),
-    season: getCurrentSeason()
+    year: currentDate.getFullYear(),
+    season: 'spring' // Default season
   };
 };
 
-export const gameDateToDate = (gameDate: GameDate | undefined): Date => {
-  if (!gameDate) {
-    return new Date();
+export const gameDateToStringOrDate = (date: GameDate | Date): string => {
+  if (date instanceof Date) {
+    return date.toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' });
   }
-
-  const year = gameDate.year;
-  let month = 0;
-
-  switch (gameDate.season) {
-    case 'spring': month = 2; break; // Mars
-    case 'summer': month = 5; break; // Juin
-    case 'autumn': month = 8; break; // Septembre
-    case 'winter': month = 11; break; // Décembre
+  
+  if (typeof date === 'object' && date !== null && 'year' in date && 'season' in date) {
+    return `${seasonToFrench(date.season)} ${date.year}`;
   }
-
-  return new Date(year, month, 15);
+  
+  return "Date inconnue";
 };
 
-export const gameOrJsDateToDate = (date: Date | GameDate): Date => {
-  if (date instanceof Date) {
-    return date;
-  }
-  return gameDateToDate(date);
-};
-
-export const gameDateToStringOrDate = (date: GameDate | Date | string): string => {
-  if (typeof date === 'string') {
-    return date;
-  }
-
-  if (date instanceof Date) {
-    return date.toLocaleDateString('fr-FR', {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric'
-    });
-  }
-
-  const seasonNames = {
+export const seasonToFrench = (season: Season): string => {
+  const translations: Record<Season, string> = {
+    winter: 'Hiver',
     spring: 'Printemps',
     summer: 'Été',
-    autumn: 'Automne',
-    winter: 'Hiver'
+    fall: 'Automne'
   };
-
-  return `${seasonNames[date.season]} ${date.year}`;
+  
+  return translations[season] || 'Saison inconnue';
 };
 
-const normalizeSeason = (season: string): Season => {
-  const normalized = season.toLowerCase();
+export const gameOrJsDateToDate = (date: GameDate | Date): Date => {
+  if (date instanceof Date) {
+    return date;
+  }
   
-  if (normalized.includes('print')) return 'spring';
-  if (normalized.includes('été') || normalized.includes('ete') || normalized.includes('summ')) return 'summer';
-  if (normalized.includes('automn') || normalized.includes('fall')) return 'autumn';
-  if (normalized.includes('hiver') || normalized.includes('wint')) return 'winter';
+  if (typeof date === 'object' && date !== null && 'year' in date && 'season' in date) {
+    const monthByseason: Record<Season, number> = {
+      winter: 0, // January
+      spring: 3, // April
+      summer: 6, // July
+      fall: 9   // October
+    };
+    
+    return new Date(date.year, monthByseason[date.season], 15);
+  }
   
-  return 'spring';
+  return new Date();
 };
 
-const getCurrentSeason = (): Season => {
-  const month = new Date().getMonth();
+export const gameDateToDate = (gameDate: GameDate): Date => {
+  const monthByseason: Record<Season, number> = {
+    winter: 0, // January
+    spring: 3, // April
+    summer: 6, // July
+    fall: 9   // October
+  };
   
-  if (month >= 2 && month <= 4) return 'spring';
-  if (month >= 5 && month <= 7) return 'summer';
-  if (month >= 8 && month <= 10) return 'autumn';
-  return 'winter';
+  return new Date(gameDate.year, monthByseason[gameDate.season], 15);
 };
