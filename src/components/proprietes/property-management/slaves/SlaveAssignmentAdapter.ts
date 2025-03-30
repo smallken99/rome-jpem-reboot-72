@@ -8,6 +8,8 @@ export const adaptSlaveAssignment = (
   return {
     ...assignment,
     count: assignment.count || 1,
+    propertyId: assignment.propertyId || assignment.buildingId,
+    propertyName: assignment.propertyName || 'Propriété inconnue'
   };
 };
 

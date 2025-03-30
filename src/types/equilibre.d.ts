@@ -1,50 +1,55 @@
 
 export interface Equilibre {
-  id: string;
-  political: {
+  politique: {
     populaires: number;
     optimates: number;
     moderates: number;
+    total?: number;
+  };
+  economie: {
+    stabilite: number;
+    croissance: number;
+    commerce: number;
+    agriculture: number;
   };
   social: {
+    plebeiens: number;
     patriciens: number;
-    plébéiens: number;
+    esclaves: number;
+    cohesion: number;
   };
-  economie: number;
-  economy?: number;
-  stability: number;
-  armée: number;
-  loyauté: number;
-  morale: number;
-  religion: number;
-  facteurJuridique: number;
-  risques: RiskFactor[];
-  historique: HistoriqueEntry[];
+  militaire: {
+    moral: number;
+    effectifs: number;
+    equipement: number;
+    discipline: number;
+  };
+  religion: {
+    piete: number;
+    traditions: number;
+    superstition: number;
+  };
   population?: number;
-}
-
-export interface RiskFactor {
-  id: string;
-  name: string;
-  level: string;
-  type: string;
-  description: string;
-  threat: number;
-}
-
-export interface HistoriqueEntry {
-  id: string;
-  date: Date;
-  event: string;
-  impact: number;
-  type: string;
+  date?: Date;
 }
 
 export interface PoliticalEvent {
   id: string;
   title: string;
-  date: Date;
   description: string;
-  impact: number;
+  date: Date;
   type: string;
+  importance: 'low' | 'medium' | 'high' | 'critical';
+  impact?: Record<string, number>;
+}
+
+export interface HistoriqueEntry {
+  event: string;
+  id: string;
+  title: string;
+  description: string;
+  date: Date;
+  impact: Record<string, number>;
+  type: string;
+  importance: string;
 }

@@ -1,16 +1,14 @@
 
+import { GameDate } from '@/utils/types/gameDate';
+
 export interface Evenement {
   id: string;
-  titre: string;
+  title: string;
   description: string;
-  date: Date;
-  endDate?: Date;
+  date: GameDate;
   type: string;
-  importance: string;
-  impact: number;
-  tags?: string[];
-  acteurs: string[];
-  actions?: string[];
-  lieu: string;
   nom?: string;
+  endDate?: GameDate;
+  tags?: string[];
+  actions?: string[];
 }

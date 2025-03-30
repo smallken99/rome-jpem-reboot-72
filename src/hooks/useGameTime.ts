@@ -1,29 +1,40 @@
 
 import { useState } from 'react';
-import { Season, GameDate } from '@/types/game';
+import { GameDate, Season } from '@/utils/types/gameDate';
 
-export const useGameTime = () => {
-  const [year, setYear] = useState<number>(753); // Default to founding of Rome
-  const [season, setSeason] = useState<Season>('spring');
-
+export const useGameTime = (initialYear = 264, initialSeason: Season = 'spring') => {
+  const [year, setYear] = useState<number>(initialYear);
+  const [season, setSeason] = useState<Season>(initialSeason);
+  
+  // Fonction pour avancer d'une saison
   const advanceSeason = () => {
-    const seasons: Season[] = ['winter', 'spring', 'summer', 'fall'];
-    const currentSeasonIndex = seasons.indexOf(season);
-    const nextSeasonIndex = (currentSeasonIndex + 1) % 4;
+    const seasons: Season[] = ['spring', 'summer', 'autumn', 'winter'];
+    const currentIndex = seasons.indexOf(season);
+    const nextIndex = (currentIndex + 1) % seasons.length;
     
-    if (nextSeasonIndex === 0) { // If we're moving from fall to winter
+    if (nextIndex === 0) {
+      // Si nous passons de l'hiver au printemps, avancer d'une année
       setYear(year + 1);
     }
     
-    setSeason(seasons[nextSeasonIndex]);
+    setSeason(seasons[nextIndex]);
   };
   
-  // Create a currentDate getter that returns the current date in GameDate format
+  // Construction de la date courante au format GameDate
   const currentDate: GameDate = {
     year,
-    season
+    season,
+    toLocaleDateString: () => {
+      const seasonNames = {
+        spring: 'Printemps',
+        summer: 'Été',
+        autumn: 'Automne',
+        winter: 'Hiver'
+      };
+      return `${seasonNames[season]} ${year}`;
+    }
   };
-
+  
   return {
     year,
     season,

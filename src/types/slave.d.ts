@@ -1,19 +1,19 @@
 
+import { GameDate } from '@/utils/types/gameDate';
+
 export interface Slave {
   id: string;
   name: string;
-  origin: string;
-  price: number;
-  skills: string[];
+  age: number;
   health: number;
-  productivity: number;
-  assigned: boolean;
-  assignedTo?: string;
+  skill: number;
+  specialty: string;
+  price: number;
+  origin: string;
+  status: string;
+  gender?: 'male' | 'female';
   buildingId?: string;
-  assignment?: string;
-  gender?: string;
-  age?: number;
-  level?: number;
+  propertyId?: string;
 }
 
 export interface SlaveAssignment {
@@ -21,8 +21,8 @@ export interface SlaveAssignment {
   buildingId: string;
   startDate: Date;
   efficiency: number;
-  propertyId: string;
-  propertyName: string;
   count?: number;
+  propertyId?: string;
+  propertyName?: string;
   buildingName?: string;
 }
