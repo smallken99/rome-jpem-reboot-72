@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useMemo } from 'react';
 import Layout from '@/components/layout/Layout';
 import { PageHeader } from '@/components/ui-custom/PageHeader';
@@ -22,7 +23,7 @@ import { cn } from '@/lib/utils';
 import { CalendarIcon } from 'lucide-react';
 import { addDays } from 'date-fns';
 import { toast } from 'sonner';
-import { useMaitreJeu } from '../context';
+import { useMaitreJeu } from '@/components/maitrejeu/context'; // Chemin modifié pour utiliser le chemin absolu
 import { useGameData } from '@/hooks/useGameData';
 
 const initialLoi = {
