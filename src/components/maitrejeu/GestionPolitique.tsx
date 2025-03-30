@@ -5,7 +5,7 @@ import { PageHeader } from '@/components/ui-custom/PageHeader';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useGameTime } from '@/hooks/useGameTime';
-import { LoiType, Loi } from '@/types/loi'; // Importation correcte
+import { LoiType, Loi } from '@/types/loi';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -20,11 +20,14 @@ import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
-import { CalendarIcon } from 'lucide-react';
+import { CalendarIcon, ChevronDown, Filter, ArrowUpDown, Check, Edit, Trash2, Plus, XCircle } from 'lucide-react';
 import { addDays } from 'date-fns';
 import { toast } from 'sonner';
-import { useMaitreJeu } from '@/components/maitrejeu/context'; // Chemin modifié pour utiliser le chemin absolu
+import { useMaitreJeu } from '@/components/maitrejeu/context';
 import { useGameData } from '@/hooks/useGameData';
+import { Badge } from '@/components/ui/badge';
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import { Separator } from '@/components/ui/separator';
 
 const initialLoi = {
   id: 'loi-001',
@@ -53,6 +56,8 @@ export const GestionPolitique: React.FC = () => {
   const [importance, setImportance] = useState<string>('medium');
   const [etat, setEtat] = useState<string>('proposed');
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(new Date());
+  const [searchTerm, setSearchTerm] = useState('');
+  const [statusFilter, setStatusFilter] = useState<string | null>(null);
 
   const handleOpenNewLawModal = () => {
     setIsNewLawModalOpen(true);
@@ -65,6 +70,38 @@ export const GestionPolitique: React.FC = () => {
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
     setNewLaw(prev => ({ ...prev, [name]: value }));
+  };
+
+  const filteredLois = useMemo(() => {
+    return lois.filter(loi => {
+      const matchesSearch = loi.titre.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                            loi.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                            loi.proposeur.toLowerCase().includes(searchTerm.toLowerCase());
+      
+      const matchesStatus = !statusFilter || loi.état === statusFilter;
+      
+      return matchesSearch && matchesStatus;
+    });
+  }, [lois, searchTerm, statusFilter]);
+
+  const formatEtat = (etat: string) => {
+    switch(etat) {
+      case 'draft': return 'Brouillon';
+      case 'proposed': return 'Proposée';
+      case 'approved': return 'Approuvée';
+      case 'rejected': return 'Rejetée';
+      default: return etat;
+    }
+  };
+
+  const getEtatBadgeVariant = (etat: string) => {
+    switch(etat) {
+      case 'draft': return 'secondary';
+      case 'proposed': return 'warning';
+      case 'approved': return 'success';
+      case 'rejected': return 'destructive';
+      default: return 'default';
+    }
   };
 
   const handleNewLaw = () => {
@@ -113,8 +150,54 @@ export const GestionPolitique: React.FC = () => {
         subtitle="Proposer et gérer les lois de la République"
       />
 
-      <div className="mb-6">
-        <Button onClick={handleOpenNewLawModal}>Proposer une nouvelle loi</Button>
+      <div className="flex justify-between items-center mb-6">
+        <div className="flex items-center gap-4">
+          <div className="relative">
+            <Input 
+              placeholder="Rechercher une loi..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="w-72 pl-8"
+            />
+            <Filter className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
+          </div>
+          
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="outline" className="flex items-center gap-2">
+                {statusFilter ? `Statut: ${formatEtat(statusFilter)}` : 'Tous les statuts'}
+                <ChevronDown className="h-4 w-4" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent>
+              <DropdownMenuItem onClick={() => setStatusFilter(null)}>
+                Tous les statuts
+                {!statusFilter && <Check className="ml-2 h-4 w-4" />}
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => setStatusFilter('draft')}>
+                Brouillon
+                {statusFilter === 'draft' && <Check className="ml-2 h-4 w-4" />}
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => setStatusFilter('proposed')}>
+                Proposée
+                {statusFilter === 'proposed' && <Check className="ml-2 h-4 w-4" />}
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => setStatusFilter('approved')}>
+                Approuvée
+                {statusFilter === 'approved' && <Check className="ml-2 h-4 w-4" />}
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => setStatusFilter('rejected')}>
+                Rejetée
+                {statusFilter === 'rejected' && <Check className="ml-2 h-4 w-4" />}
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
+
+        <Button onClick={handleOpenNewLawModal} className="gap-2">
+          <Plus className="h-4 w-4" />
+          Proposer une nouvelle loi
+        </Button>
       </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab}>
@@ -125,25 +208,135 @@ export const GestionPolitique: React.FC = () => {
         </TabsList>
 
         <TabsContent value="lois">
-          <div>
-            {lois.map((law) => (
-              <div key={law.id} className="border rounded-md p-4 mb-4">
-                <h3 className="font-semibold">{law.titre}</h3>
-                <p className="text-sm">{law.description}</p>
-              </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {filteredLois.filter(loi => loi.état === 'approved').map((law) => (
+              <Card key={law.id} className="relative overflow-hidden">
+                <Badge className="absolute top-4 right-4" variant={getEtatBadgeVariant(law.état)}>
+                  {formatEtat(law.état)}
+                </Badge>
+                <CardHeader>
+                  <CardTitle className="font-semibold">{law.titre}</CardTitle>
+                  <CardDescription className="text-sm text-muted-foreground">
+                    Proposé par: {law.proposeur} | Catégorie: {law.catégorie}
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-sm">{law.description}</p>
+                  {law.effets && law.effets.length > 0 && (
+                    <>
+                      <Separator className="my-3" />
+                      <div className="mt-2">
+                        <h4 className="text-xs font-medium mb-1">Effets:</h4>
+                        <ul className="list-disc pl-5 text-xs space-y-1">
+                          {law.effets.map((effet, index) => (
+                            <li key={index}>{effet}</li>
+                          ))}
+                        </ul>
+                      </div>
+                    </>
+                  )}
+                </CardContent>
+                <CardFooter className="flex justify-between text-xs text-muted-foreground">
+                  <span>Date: {law.date.season} {law.date.year}</span>
+                  <div className="flex items-center gap-2">
+                    <span>Votes: {law.votesPositifs} pour / {law.votesNégatifs} contre</span>
+                  </div>
+                </CardFooter>
+              </Card>
             ))}
+            {filteredLois.filter(loi => loi.état === 'approved').length === 0 && (
+              <div className="col-span-2 flex flex-col items-center justify-center p-8 text-center">
+                <XCircle className="h-12 w-12 text-muted-foreground/50 mb-2" />
+                <h3 className="text-lg font-medium">Aucune loi en vigueur</h3>
+                <p className="text-muted-foreground">Commencez par proposer des lois pour les faire adopter.</p>
+              </div>
+            )}
           </div>
         </TabsContent>
 
         <TabsContent value="propositions">
-          <div>
-            {/* Contenu pour les propositions de lois */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {filteredLois.filter(loi => loi.état === 'proposed' || loi.état === 'draft').map((law) => (
+              <Card key={law.id} className="relative overflow-hidden">
+                <Badge className="absolute top-4 right-4" variant={getEtatBadgeVariant(law.état)}>
+                  {formatEtat(law.état)}
+                </Badge>
+                <CardHeader>
+                  <CardTitle className="font-semibold">{law.titre}</CardTitle>
+                  <CardDescription className="text-sm text-muted-foreground">
+                    Proposé par: {law.proposeur} | Catégorie: {law.catégorie}
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-sm">{law.description}</p>
+                  {law.effets && law.effets.length > 0 && (
+                    <>
+                      <Separator className="my-3" />
+                      <div className="mt-2">
+                        <h4 className="text-xs font-medium mb-1">Effets:</h4>
+                        <ul className="list-disc pl-5 text-xs space-y-1">
+                          {law.effets.map((effet, index) => (
+                            <li key={index}>{effet}</li>
+                          ))}
+                        </ul>
+                      </div>
+                    </>
+                  )}
+                </CardContent>
+                <CardFooter className="flex justify-between text-xs text-muted-foreground">
+                  <span>Date: {law.date.season} {law.date.year}</span>
+                  <div className="flex items-center gap-2">
+                    <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+                      <Edit className="h-4 w-4" />
+                    </Button>
+                    <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  </div>
+                </CardFooter>
+              </Card>
+            ))}
+            {filteredLois.filter(loi => loi.état === 'proposed' || loi.état === 'draft').length === 0 && (
+              <div className="col-span-2 flex flex-col items-center justify-center p-8 text-center">
+                <XCircle className="h-12 w-12 text-muted-foreground/50 mb-2" />
+                <h3 className="text-lg font-medium">Aucune proposition en cours</h3>
+                <p className="text-muted-foreground">Aucune loi n'est actuellement proposée ou en brouillon.</p>
+              </div>
+            )}
           </div>
         </TabsContent>
 
         <TabsContent value="archives">
-          <div>
-            {/* Contenu pour les archives des lois */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {filteredLois.filter(loi => loi.état === 'rejected').map((law) => (
+              <Card key={law.id} className="relative overflow-hidden">
+                <Badge className="absolute top-4 right-4" variant={getEtatBadgeVariant(law.état)}>
+                  {formatEtat(law.état)}
+                </Badge>
+                <CardHeader>
+                  <CardTitle className="font-semibold">{law.titre}</CardTitle>
+                  <CardDescription className="text-sm text-muted-foreground">
+                    Proposé par: {law.proposeur} | Catégorie: {law.catégorie}
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-sm">{law.description}</p>
+                </CardContent>
+                <CardFooter className="flex justify-between text-xs text-muted-foreground">
+                  <span>Date: {law.date.season} {law.date.year}</span>
+                  <div className="flex items-center gap-2">
+                    <span>Votes: {law.votesPositifs} pour / {law.votesNégatifs} contre</span>
+                  </div>
+                </CardFooter>
+              </Card>
+            ))}
+            {filteredLois.filter(loi => loi.état === 'rejected').length === 0 && (
+              <div className="col-span-2 flex flex-col items-center justify-center p-8 text-center">
+                <XCircle className="h-12 w-12 text-muted-foreground/50 mb-2" />
+                <h3 className="text-lg font-medium">Archives vides</h3>
+                <p className="text-muted-foreground">Aucune loi rejetée n'est archivée pour le moment.</p>
+              </div>
+            )}
           </div>
         </TabsContent>
       </Tabs>
