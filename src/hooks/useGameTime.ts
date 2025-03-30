@@ -9,6 +9,8 @@ export interface GameTime {
   updateTime?: (newTime: Partial<GameTime>) => void;
   advanceSeason?: () => void;
   advanceYear?: () => void;
+  setYear?: (year: number) => void;
+  setSeason?: (season: Season) => void;
 }
 
 export const useGameTime = (): GameTime => {
@@ -53,11 +55,27 @@ export const useGameTime = (): GameTime => {
       year: prevTime.year + 1
     }));
   };
+  
+  const setYear = (year: number) => {
+    setGameTime(prevTime => ({
+      ...prevTime,
+      year
+    }));
+  };
+  
+  const setSeason = (season: Season) => {
+    setGameTime(prevTime => ({
+      ...prevTime,
+      season
+    }));
+  };
 
   return {
     ...gameTime,
     updateTime,
     advanceSeason,
-    advanceYear
+    advanceYear,
+    setYear,
+    setSeason
   };
 };

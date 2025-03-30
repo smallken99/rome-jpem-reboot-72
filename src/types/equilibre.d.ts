@@ -70,3 +70,12 @@ export interface HistoriqueEntry {
   type: string;
   importance: string;
 }
+
+export interface EconomieRecord {
+  date: Date;
+  treasury: number;
+  income: number;
+  expenses: number;
+  surplus: number;
+  balance: number;
+}

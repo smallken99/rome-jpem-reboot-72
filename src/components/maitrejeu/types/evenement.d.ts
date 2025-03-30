@@ -15,3 +15,14 @@ export interface Evenement {
   tags?: string[];
   actions?: string[];
 }
+
+export type EvenementType = 'POLITIQUE' | 'ECONOMIE' | 'SOCIAL' | 'MILITAIRE' | 'RELIGION';
+export type ImportanceType = 'faible' | 'normale' | 'haute' | 'critique';
+
+export interface EvenementAction {
+  id: string;
+  texte: string;
+  label: string;
+  effets: Record<string, any>;
+  consequence: string;
+}

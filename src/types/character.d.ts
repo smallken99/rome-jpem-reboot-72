@@ -62,6 +62,8 @@ export interface Character {
   piete?: number;
   eloquence?: number;
   statut?: string;
+  nom?: string;
+  prenom?: string;
   
   // Suivi des naissances
   lastChildBirthYear?: number;
@@ -84,4 +86,15 @@ export interface EducationInfo {
   mentor: string | null;
   completed?: boolean;
   completedAt?: string;
+}
+
+// Interface pour les sénateurs jouables
+export interface SenateurJouable extends Omit<Character, 'stats'> {
+  faction: string;
+  influence: number;
+  prestige: number;
+  richesse: number;
+  clientele: number;
+  allies: string[];
+  ennemis: string[];
 }

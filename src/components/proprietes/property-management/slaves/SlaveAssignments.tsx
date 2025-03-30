@@ -1,159 +1,89 @@
-
-import React from 'react';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import React, { useState } from 'react';
+import { SlaveAssignment } from './SlaveAssignment';
+import { Slave } from './SlaveAssignmentAdapter';
 import { Button } from '@/components/ui/button';
-import { Edit2, Trash, PlusCircle } from 'lucide-react';
-import { ActionButton } from '@/components/ui-custom/ActionButton';
-
-// Définition du type d'affectation d'esclaves
-export interface SlaveAssignment {
-  slaveId: string;
-  buildingId: string;
-  startDate: Date;
-  efficiency: number;
-  count?: number;
-  propertyId?: string;
-  propertyName?: string;
-  buildingName?: string;
-}
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Plus } from 'lucide-react';
 
 interface SlaveAssignmentsProps {
-  slaveAssignments: SlaveAssignment[];
-  availableSlaves: number;
-  onAssignSlaves: (propertyId: string, propertyName: string, slaveCount: number) => boolean;
-  onRemoveAssignment: (propertyId: string) => boolean;
+  buildingId: string;
+  buildingName: string;
+  slaves: Slave[];
+  assignedSlaves: Slave[];
+  onAssignSlave?: (slaveId: string, buildingId: string) => void;
+  onRemoveSlave?: (slaveId: string, buildingId: string) => void;
 }
 
 export const SlaveAssignments: React.FC<SlaveAssignmentsProps> = ({
-  slaveAssignments,
-  availableSlaves,
-  onAssignSlaves,
-  onRemoveAssignment
+  buildingId,
+  buildingName,
+  slaves,
+  assignedSlaves,
+  onAssignSlave,
+  onRemoveSlave
 }) => {
-  const [editingAssignmentId, setEditingAssignmentId] = React.useState<string | null>(null);
-  const [slaveCount, setSlaveCount] = React.useState<number>(0);
-  
-  // Gérer le début de l'édition d'une affectation
-  const handleStartEdit = (assignment: SlaveAssignment) => {
-    setEditingAssignmentId(assignment.propertyId || assignment.buildingId);
-    setSlaveCount(assignment.count || 1);
-  };
-  
-  // Sauvegarder une modification d'affectation
-  const handleSaveEdit = (assignment: SlaveAssignment) => {
-    if (assignment.propertyId && assignment.propertyName) {
-      onAssignSlaves(assignment.propertyId, assignment.propertyName, slaveCount);
+  const [showAssignModal, setShowAssignModal] = useState(false);
+
+  const availableSlaves = slaves.filter(slave => !slave.assigned);
+
+  const handleRemoveSlave = (slaveId: string) => {
+    if (onRemoveSlave) {
+      onRemoveSlave(slaveId, buildingId);
     }
-    setEditingAssignmentId(null);
   };
-  
-  // Annuler l'édition
-  const handleCancelEdit = () => {
-    setEditingAssignmentId(null);
-  };
-  
+
   return (
     <div className="space-y-4">
-      <div className="flex justify-between items-center">
-        <div>
-          <h3 className="text-lg font-medium">Affectation des esclaves</h3>
-          <p className="text-sm text-muted-foreground">
-            Gérez la répartition de vos esclaves entre vos propriétés
-          </p>
-        </div>
-        <div className="text-sm text-muted-foreground">
-          Esclaves disponibles: <span className="font-medium">{availableSlaves}</span>
-        </div>
-      </div>
-      
-      <Table>
-        <TableHeader>
-          <TableRow>
-            <TableHead>Propriété</TableHead>
-            <TableHead className="text-right">Nombre d'esclaves</TableHead>
-            <TableHead className="text-right">Actions</TableHead>
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {slaveAssignments.length === 0 ? (
-            <TableRow>
-              <TableCell colSpan={3} className="text-center py-6 text-muted-foreground">
-                Aucune affectation d'esclaves
-              </TableCell>
-            </TableRow>
+      <Card>
+        <CardHeader className="pb-3">
+          <CardTitle className="text-lg flex items-center justify-between">
+            <span>Esclaves Assignés à {buildingName}</span>
+            <Button 
+              variant="outline" 
+              size="sm" 
+              className="ml-auto"
+              onClick={() => setShowAssignModal(true)}
+              disabled={availableSlaves.length === 0}
+            >
+              <Plus className="h-4 w-4 mr-1" />
+              Assigner des esclaves
+            </Button>
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          {assignedSlaves.length === 0 ? (
+            <div className="text-center py-8 text-gray-500">
+              <p>Aucun esclave n'est assigné à cette propriété.</p>
+              <p className="text-sm">
+                Assignez des esclaves pour augmenter la productivité et l'efficacité de votre propriété.
+              </p>
+            </div>
           ) : (
-            slaveAssignments.map((assignment) => (
-              <TableRow key={assignment.buildingId}>
-                <TableCell className="font-medium">
-                  {assignment.propertyName || assignment.buildingName || "Propriété"}
-                </TableCell>
-                <TableCell className="text-right">
-                  {editingAssignmentId === (assignment.propertyId || assignment.buildingId) ? (
-                    <input 
-                      type="number" 
-                      value={slaveCount}
-                      onChange={(e) => setSlaveCount(Math.max(0, parseInt(e.target.value) || 0))}
-                      className="w-20 px-2 py-1 border rounded-md text-right"
-                      min="0"
-                      max={(assignment.count || 1) + availableSlaves}
-                    />
-                  ) : (
-                    <span>{assignment.count || 1}</span>
-                  )}
-                </TableCell>
-                <TableCell className="text-right">
-                  {editingAssignmentId === (assignment.propertyId || assignment.buildingId) ? (
-                    <div className="flex justify-end space-x-2">
-                      <Button 
-                        variant="outline" 
-                        size="sm"
-                        onClick={() => handleSaveEdit(assignment)}
-                      >
-                        Enregistrer
-                      </Button>
-                      <Button 
-                        variant="ghost" 
-                        size="sm"
-                        onClick={handleCancelEdit}
-                      >
-                        Annuler
-                      </Button>
-                    </div>
-                  ) : (
-                    <div className="flex justify-end space-x-2">
-                      <ActionButton
-                        icon={<Edit2 className="h-4 w-4" />}
-                        label="Modifier"
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => handleStartEdit(assignment)}
-                      />
-                      <ActionButton
-                        icon={<Trash className="h-4 w-4" />}
-                        label="Supprimer"
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => onRemoveAssignment(assignment.propertyId || assignment.buildingId)}
-                      />
-                    </div>
-                  )}
-                </TableCell>
-              </TableRow>
-            ))
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {assignedSlaves.map(slave => (
+                <SlaveAssignment
+                  key={slave.id}
+                  slave={slave}
+                  buildingName={buildingName}
+                  onRemove={() => handleRemoveSlave(slave.id)}
+                  efficiency={1.0} // Calculer dynamiquement en fonction des compétences et spécialisations
+                  role="worker"
+                />
+              ))}
+            </div>
           )}
-        </TableBody>
-      </Table>
-      
-      <div className="flex justify-end">
-        <ActionButton
-          icon={<PlusCircle className="h-4 w-4" />}
-          label="Nouvelle affectation"
-          variant="outline"
-          size="sm"
-          disabled={availableSlaves === 0}
-          title={availableSlaves === 0 ? "Aucun esclave disponible pour affectation" : undefined}
+        </CardContent>
+      </Card>
+
+      {/* Modal pour assigner des esclaves - Implémenté séparément */}
+      {/* {showAssignModal && (
+        <AssignSlaveModal
+          slaves={availableSlaves}
+          buildingId={buildingId}
+          onAssign={onAssignSlave}
+          onClose={() => setShowAssignModal(false)}
         />
-      </div>
+      )} */}
     </div>
   );
 };

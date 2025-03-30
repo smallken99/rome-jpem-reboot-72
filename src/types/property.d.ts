@@ -4,25 +4,32 @@ export interface PropertyUpgrade {
   name: string;
   description: string;
   cost: number;
-  effect: {
+  effect: string | Record<string, any>;
+  effects?: {
     income?: number;
     maintenance?: number;
-    condition?: number;
     security?: number;
-    value?: number;
-    productivity?: number;
+    condition?: number;
+    [key: string]: any;
   };
-  installed: boolean;
+  installed?: boolean;
+  category?: string;
+  tier?: number;
   type: string;
-  installDate?: Date;
-  requirements?: string[];
-  effects?: string[] | {
-    income?: number;
+  requirements?: {
+    buildingLevel?: number;
+    previousUpgrade?: string;
+    minCondition?: number;
+    specialBuilding?: string;
+    minIncome?: number;
+    funds?: number;
+    workers?: number;
+    buildingCondition?: number;
     maintenance?: number;
-    condition?: number;
-    security?: number;
     value?: number;
-    productivity?: number;
+    upgrades?: string[];
+    condition?: number;
+    buildingType?: string[];
   };
 }
 
@@ -30,24 +37,25 @@ export interface OwnedBuilding {
   id: string;
   buildingId: string;
   name: string;
-  type: string;
-  buildingType: string;
   location: string;
+  type: string;
+  value: number;
+  maintenance: number;
   condition: number;
-  maintenanceLevel: number;
+  status?: string;
+  upgrades?: PropertyUpgrade[];
+  buildingType: string;
+  size: number;
+  maintenanceCost: number;
   income: number;
   workers: number;
-  securityLevel: number;
-  description: string;
-  maintenanceEnabled?: boolean;
-  maintenanceCost: number;
-  slaves?: number;
-  purchaseDate?: Date;
-  lastMaintenance?: Date;
-  size: string;
-  status?: string;
-  value: number;
   maxWorkers: number;
-  maintenance?: number;
-  upgrades?: PropertyUpgrade[];
+  securityLevel: number;
+  maintenanceLevel: number;
+  maintenanceEnabled?: boolean;
+  slaves?: number;
+  description?: string;
+  purchaseDate?: Date;
 }
+
+// Add any other missing property-related interfaces

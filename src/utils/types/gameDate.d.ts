@@ -1,8 +1,11 @@
 
-export type Season = 'spring' | 'summer' | 'autumn' | 'winter';
+export type Season = 'spring' | 'summer' | 'fall' | 'winter';
 
 export interface GameDate {
   year: number;
   season: Season;
-  toLocaleDateString?: () => string;
+}
+
+export interface GameDateWithPhase extends GameDate {
+  phase?: string;
 }
