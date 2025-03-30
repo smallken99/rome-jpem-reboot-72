@@ -11,4 +11,5 @@ export interface Evenement {
   endDate?: GameDate;
   tags?: string[];
   actions?: string[];
+  importance?: string;
 }

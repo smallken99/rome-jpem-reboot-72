@@ -5,7 +5,7 @@ export interface PropertyUpgrade {
   description: string;
   cost: number;
   effect: string | Record<string, any>;
-  effects?: Record<string, any>; // For compatibility with the code
+  effects?: Record<string, any>; // Pour compatibilité avec le code existant
   type: string;
   installed: boolean;
   requirements?: {
@@ -21,6 +21,7 @@ export interface PropertyUpgrade {
     buildingType?: string[];
     value?: number;
     upgrades?: string[];
+    condition?: number;
   };
   applied?: boolean;
   buildingType?: string[];

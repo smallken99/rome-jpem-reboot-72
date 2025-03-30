@@ -10,7 +10,6 @@ export interface Character {
   portrait?: string;
   title?: string;
   role?: string;
-  marriageStatus?: string;
   
   // Propriétés familiales
   relation?: string;
@@ -19,6 +18,7 @@ export interface Character {
   spouseId?: string;
   childrenIds?: string[];
   testamentaryWishes?: string;
+  marriageStatus?: string;
   
   // Santé et statut
   health?: number;

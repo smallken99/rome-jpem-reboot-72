@@ -1,56 +1,90 @@
 
 import { GameDate, Season } from '@/utils/types/gameDate';
 
-export const formatGameDate = (date: GameDate): string => {
-  const { year, season } = date;
-  return `${getSeasonName(season)} ${year}`;
-};
-
-export const getSeasonName = (season: Season): string => {
-  switch (season) {
-    case 'spring': return 'Printemps';
-    case 'summer': return 'Été';
-    case 'autumn': return 'Automne';
-    case 'winter': return 'Hiver';
-    default: return 'Saison inconnue';
+export const extractLoiDateInfo = (loi: any): { year: number; season: Season } => {
+  if (!loi || !loi.date) {
+    return { year: 0, season: 'spring' };
   }
-};
 
-export const gameDateToDate = (gameDate: GameDate): Date => {
-  const { year, season } = gameDate;
-  const month = getMonthFromSeason(season);
-  return new Date(year, month, 15);
-};
-
-export const getMonthFromSeason = (season: Season): number => {
-  switch (season) {
-    case 'spring': return 2; // Mars
-    case 'summer': return 5; // Juin
-    case 'autumn': return 8; // Septembre
-    case 'winter': return 11; // Décembre
-    default: return 0;
+  if (typeof loi.date === 'object' && 'year' in loi.date && 'season' in loi.date) {
+    return {
+      year: loi.date.year,
+      season: normalizeSeason(loi.date.season)
+    };
   }
-};
 
-export const extractLoiDateInfo = (date: GameDate): { year: number; season: string } => {
+  // Fallback à la date actuelle
+  const now = new Date();
   return {
-    year: date.year,
-    season: date.season
+    year: now.getFullYear(),
+    season: getCurrentSeason()
   };
 };
 
-export const gameDateToStringOrDate = (date: GameDate | Date): string => {
-  if (date instanceof Date) {
-    return date.toLocaleDateString('fr-FR');
+export const gameDateToDate = (gameDate: GameDate | undefined): Date => {
+  if (!gameDate) {
+    return new Date();
   }
-  
-  return formatGameDate(date);
+
+  const year = gameDate.year;
+  let month = 0;
+
+  switch (gameDate.season) {
+    case 'spring': month = 2; break; // Mars
+    case 'summer': month = 5; break; // Juin
+    case 'autumn': month = 8; break; // Septembre
+    case 'winter': month = 11; break; // Décembre
+  }
+
+  return new Date(year, month, 15);
 };
 
-export const gameOrJsDateToDate = (date: GameDate | Date): Date => {
+export const gameOrJsDateToDate = (date: Date | GameDate): Date => {
   if (date instanceof Date) {
     return date;
   }
-  
   return gameDateToDate(date);
+};
+
+export const gameDateToStringOrDate = (date: GameDate | Date | string): string => {
+  if (typeof date === 'string') {
+    return date;
+  }
+
+  if (date instanceof Date) {
+    return date.toLocaleDateString('fr-FR', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric'
+    });
+  }
+
+  const seasonNames = {
+    spring: 'Printemps',
+    summer: 'Été',
+    autumn: 'Automne',
+    winter: 'Hiver'
+  };
+
+  return `${seasonNames[date.season]} ${date.year}`;
+};
+
+const normalizeSeason = (season: string): Season => {
+  const normalized = season.toLowerCase();
+  
+  if (normalized.includes('print')) return 'spring';
+  if (normalized.includes('été') || normalized.includes('ete') || normalized.includes('summ')) return 'summer';
+  if (normalized.includes('automn') || normalized.includes('fall')) return 'autumn';
+  if (normalized.includes('hiver') || normalized.includes('wint')) return 'winter';
+  
+  return 'spring';
+};
+
+const getCurrentSeason = (): Season => {
+  const month = new Date().getMonth();
+  
+  if (month >= 2 && month <= 4) return 'spring';
+  if (month >= 5 && month <= 7) return 'summer';
+  if (month >= 8 && month <= 10) return 'autumn';
+  return 'winter';
 };

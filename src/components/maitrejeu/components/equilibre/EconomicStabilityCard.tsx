@@ -1,89 +1,126 @@
 
-import React, { useState } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import React from 'react';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Slider } from '@/components/ui/slider';
-import { Equilibre } from '@/types/game';
+import { CoinsIcon, TrendingUp, ShoppingCart, Wheat } from 'lucide-react';
 
-export interface EconomicStabilityCardProps {
-  economie: number;
-  onUpdate: (economy: number) => void;
-  equilibre: Equilibre;
+interface EconomicStabilityCardProps {
+  stabilite: number;
+  croissance: number;
+  commerce: number;
+  agriculture: number;
+  onUpdate: (values: { stabilite: number; croissance: number; commerce: number; agriculture: number }) => void;
 }
 
 export const EconomicStabilityCard: React.FC<EconomicStabilityCardProps> = ({
-  economie,
-  onUpdate,
-  equilibre
+  stabilite,
+  croissance,
+  commerce,
+  agriculture,
+  onUpdate
 }) => {
-  const [internalValue, setInternalValue] = useState(economie);
-  
-  const handleSave = () => {
-    onUpdate(internalValue);
+  const handleStabiliteChange = (value: number[]) => {
+    onUpdate({ stabilite: value[0], croissance, commerce, agriculture });
   };
-  
+
+  const handleCroissanceChange = (value: number[]) => {
+    onUpdate({ stabilite, croissance: value[0], commerce, agriculture });
+  };
+
+  const handleCommerceChange = (value: number[]) => {
+    onUpdate({ stabilite, croissance, commerce: value[0], agriculture });
+  };
+
+  const handleAgricultureChange = (value: number[]) => {
+    onUpdate({ stabilite, croissance, commerce, agriculture: value[0] });
+  };
+
+  const economyAverage = Math.round((stabilite + croissance + commerce + agriculture) / 4);
+
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Stabilité Économique</CardTitle>
+        <CardTitle className="flex items-center">
+          <CoinsIcon className="h-5 w-5 mr-2 text-rome-gold" />
+          Économie
+        </CardTitle>
+        <CardDescription>
+          Niveau global: {economyAverage}%
+        </CardDescription>
       </CardHeader>
       <CardContent>
         <div className="space-y-6">
-          <div className="text-center">
-            <div className="relative inline-flex items-center justify-center w-32 h-32">
-              <svg className="w-full h-full" viewBox="0 0 100 100">
-                <circle 
-                  className="text-gray-200" 
-                  strokeWidth="8" 
-                  stroke="currentColor" 
-                  fill="transparent" 
-                  r="40" 
-                  cx="50" 
-                  cy="50" 
-                />
-                <circle 
-                  className={`${
-                    internalValue > 70 
-                      ? 'text-green-500' 
-                      : internalValue > 40 
-                        ? 'text-yellow-500' 
-                        : 'text-red-500'
-                  }`} 
-                  strokeWidth="8" 
-                  strokeDasharray={`${internalValue * 2.5} 250`}
-                  strokeLinecap="round" 
-                  stroke="currentColor" 
-                  fill="transparent" 
-                  r="40" 
-                  cx="50" 
-                  cy="50" 
-                />
-              </svg>
-              <div className="absolute inset-0 flex items-center justify-center">
-                <span className="text-3xl font-bold">{internalValue}%</span>
-              </div>
-            </div>
-          </div>
-          
           <div className="space-y-3">
-            <div className="flex justify-between items-center">
-              <span className="text-sm font-medium">Santé économique</span>
-              <span className="text-sm">{internalValue}%</span>
+            <div className="flex justify-between">
+              <span className="text-sm font-medium flex items-center">
+                <CoinsIcon className="h-4 w-4 mr-1 text-rome-gold" />
+                Stabilité
+              </span>
+              <span className="text-sm font-medium">{stabilite}%</span>
             </div>
             <Slider
-              value={[internalValue]}
+              value={[stabilite]}
               min={0}
               max={100}
               step={1}
-              onValueChange={(values) => setInternalValue(values[0])}
+              onValueChange={handleStabiliteChange}
+              className="cursor-pointer"
             />
           </div>
-          
-          <button
-            className="w-full py-2 px-4 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
-            onClick={handleSave}
-          >
-            Appliquer les changements
-          </button>
+
+          <div className="space-y-3">
+            <div className="flex justify-between">
+              <span className="text-sm font-medium flex items-center">
+                <TrendingUp className="h-4 w-4 mr-1 text-green-600" />
+                Croissance
+              </span>
+              <span className="text-sm font-medium">{croissance}%</span>
+            </div>
+            <Slider
+              value={[croissance]}
+              min={0}
+              max={100}
+              step={1}
+              onValueChange={handleCroissanceChange}
+              className="cursor-pointer"
+            />
+          </div>
+
+          <div className="space-y-3">
+            <div className="flex justify-between">
+              <span className="text-sm font-medium flex items-center">
+                <ShoppingCart className="h-4 w-4 mr-1 text-blue-600" />
+                Commerce
+              </span>
+              <span className="text-sm font-medium">{commerce}%</span>
+            </div>
+            <Slider
+              value={[commerce]}
+              min={0}
+              max={100}
+              step={1}
+              onValueChange={handleCommerceChange}
+              className="cursor-pointer"
+            />
+          </div>
+
+          <div className="space-y-3">
+            <div className="flex justify-between">
+              <span className="text-sm font-medium flex items-center">
+                <Wheat className="h-4 w-4 mr-1 text-amber-600" />
+                Agriculture
+              </span>
+              <span className="text-sm font-medium">{agriculture}%</span>
+            </div>
+            <Slider
+              value={[agriculture]}
+              min={0}
+              max={100}
+              step={1}
+              onValueChange={handleAgricultureChange}
+              className="cursor-pointer"
+            />
+          </div>
         </div>
       </CardContent>
     </Card>

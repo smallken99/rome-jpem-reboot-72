@@ -19,7 +19,7 @@ export const adaptSlaveAssignments = (
   return assignments.map(adaptSlaveAssignment);
 };
 
-export const createAssignment = (
+export const createSlaveAssignment = (
   slaveId: string,
   buildingId: string,
   propertyId: string,

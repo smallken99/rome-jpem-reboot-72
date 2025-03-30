@@ -1,21 +1,22 @@
 
 import React from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Slider } from '@/components/ui/slider';
+import { TrendingUp, TrendingDown, Flag } from 'lucide-react';
 
-export interface PoliticalBalanceCardProps {
+interface PoliticalBalanceCardProps {
   populaires: number;
   optimates: number;
   moderates: number;
   onUpdate: (values: { populaires: number; optimates: number; moderates: number }) => void;
 }
 
-export function PoliticalBalanceCard({ 
-  populaires, 
-  optimates, 
-  moderates, 
-  onUpdate 
-}: PoliticalBalanceCardProps) {
+export const PoliticalBalanceCard: React.FC<PoliticalBalanceCardProps> = ({
+  populaires,
+  optimates,
+  moderates,
+  onUpdate
+}) => {
   const handlePopulairesChange = (value: number[]) => {
     onUpdate({ populaires: value[0], optimates, moderates });
   };
@@ -28,64 +29,77 @@ export function PoliticalBalanceCard({
     onUpdate({ populaires, optimates, moderates: value[0] });
   };
 
+  const total = populaires + optimates + moderates;
+  const populairesPct = total > 0 ? Math.round((populaires / total) * 100) : 0;
+  const optimatesPct = total > 0 ? Math.round((optimates / total) * 100) : 0;
+  const moderatesPct = total > 0 ? Math.round((moderates / total) * 100) : 0;
+
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Équilibre Politique</CardTitle>
+        <CardTitle className="flex items-center">
+          <Flag className="h-5 w-5 mr-2 text-rome-red" />
+          Balance Politique
+        </CardTitle>
+        <CardDescription>
+          Répartition des factions au Sénat
+        </CardDescription>
       </CardHeader>
-      <CardContent className="space-y-4">
-        <div className="space-y-2">
-          <div className="flex justify-between items-center">
-            <span className="text-sm font-medium">Populaires</span>
-            <span className="text-sm">{populaires}</span>
+      <CardContent>
+        <div className="space-y-6">
+          <div className="space-y-3">
+            <div className="flex justify-between">
+              <span className="text-sm font-medium">Populares</span>
+              <span className="text-sm font-medium">{populaires} sénateurs ({populairesPct}%)</span>
+            </div>
+            <Slider
+              value={[populaires]}
+              min={0}
+              max={100}
+              step={1}
+              onValueChange={handlePopulairesChange}
+              className="cursor-pointer"
+            />
           </div>
-          <Slider 
-            value={[populaires]} 
-            min={0} 
-            max={100} 
-            step={1} 
-            onValueChange={handlePopulairesChange}
-            className="cursor-pointer"
-          />
-        </div>
 
-        <div className="space-y-2">
-          <div className="flex justify-between items-center">
-            <span className="text-sm font-medium">Optimates</span>
-            <span className="text-sm">{optimates}</span>
+          <div className="space-y-3">
+            <div className="flex justify-between">
+              <span className="text-sm font-medium">Optimates</span>
+              <span className="text-sm font-medium">{optimates} sénateurs ({optimatesPct}%)</span>
+            </div>
+            <Slider
+              value={[optimates]}
+              min={0}
+              max={100}
+              step={1}
+              onValueChange={handleOptimatesChange}
+              className="cursor-pointer"
+            />
           </div>
-          <Slider 
-            value={[optimates]} 
-            min={0} 
-            max={100} 
-            step={1} 
-            onValueChange={handleOptimatesChange}
-            className="cursor-pointer"
-          />
-        </div>
 
-        <div className="space-y-2">
-          <div className="flex justify-between items-center">
-            <span className="text-sm font-medium">Modérés</span>
-            <span className="text-sm">{moderates}</span>
+          <div className="space-y-3">
+            <div className="flex justify-between">
+              <span className="text-sm font-medium">Modérés</span>
+              <span className="text-sm font-medium">{moderates} sénateurs ({moderatesPct}%)</span>
+            </div>
+            <Slider
+              value={[moderates]}
+              min={0}
+              max={100}
+              step={1}
+              onValueChange={handleModeratesChange}
+              className="cursor-pointer"
+            />
           </div>
-          <Slider 
-            value={[moderates]} 
-            min={0} 
-            max={100} 
-            step={1} 
-            onValueChange={handleModeratesChange}
-            className="cursor-pointer"
-          />
-        </div>
 
-        <div className="pt-2">
-          <div className="flex justify-between text-sm text-muted-foreground">
-            <span>Équilibre: {(Math.abs(populaires - optimates) < 20) ? "Stable" : "Instable"}</span>
-            <span>Indice de tension: {Math.abs(populaires - optimates)}</span>
+          <div className="pt-4 border-t">
+            <div className="flex justify-between">
+              <span className="font-medium">Total</span>
+              <span className="font-medium">{total} sénateurs</span>
+            </div>
           </div>
         </div>
       </CardContent>
     </Card>
   );
-}
+};

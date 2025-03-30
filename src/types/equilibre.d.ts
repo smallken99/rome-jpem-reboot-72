@@ -44,8 +44,8 @@ export interface PoliticalEvent {
 }
 
 export interface HistoriqueEntry {
-  event: string;
   id: string;
+  event: string;
   title: string;
   description: string;
   date: Date;

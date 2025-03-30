@@ -1,86 +1,126 @@
 
-import React, { useState } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import React from 'react';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Slider } from '@/components/ui/slider';
+import { Users, Crown, Gavel, Lock } from 'lucide-react';
 
-export interface SocialStabilityCardProps {
-  social: {
-    patriciens: number;
-    plébéiens: number;
-  };
-  onUpdate: (values: { patriciens: number; plébéiens: number; }) => void;
+interface SocialStabilityCardProps {
+  plebeiens: number;
+  patriciens: number;
+  esclaves: number;
+  cohesion: number;
+  onUpdate: (values: { plebeiens: number; patriciens: number; esclaves: number; cohesion: number }) => void;
 }
 
 export const SocialStabilityCard: React.FC<SocialStabilityCardProps> = ({
-  social,
+  plebeiens,
+  patriciens,
+  esclaves,
+  cohesion,
   onUpdate
 }) => {
-  const [internalValues, setInternalValues] = useState({
-    patriciens: social.patriciens,
-    plébéiens: social.plébéiens
-  });
-  
-  const handleUpdate = (key: keyof typeof internalValues, value: number) => {
-    const newValues = { ...internalValues, [key]: value };
-    setInternalValues(newValues);
+  const handlePlebeiensChange = (value: number[]) => {
+    onUpdate({ plebeiens: value[0], patriciens, esclaves, cohesion });
   };
-  
-  const handleSave = () => {
-    onUpdate(internalValues);
+
+  const handlePatriciensChange = (value: number[]) => {
+    onUpdate({ plebeiens, patriciens: value[0], esclaves, cohesion });
   };
-  
-  const socialTension = Math.abs(internalValues.patriciens - internalValues.plébéiens);
-  
+
+  const handleEsclavesChange = (value: number[]) => {
+    onUpdate({ plebeiens, patriciens, esclaves: value[0], cohesion });
+  };
+
+  const handleCohesionChange = (value: number[]) => {
+    onUpdate({ plebeiens, patriciens, esclaves, cohesion: value[0] });
+  };
+
+  const socialAverage = Math.round((plebeiens + patriciens + esclaves + cohesion) / 4);
+
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Équilibre Social</CardTitle>
+        <CardTitle className="flex items-center">
+          <Users className="h-5 w-5 mr-2 text-blue-600" />
+          Social
+        </CardTitle>
+        <CardDescription>
+          Niveau global: {socialAverage}%
+        </CardDescription>
       </CardHeader>
       <CardContent>
         <div className="space-y-6">
-          <div className="text-center mb-4">
-            <div className="text-2xl font-bold mb-1">
-              {socialTension > 50 ? 'Forte tension' : socialTension > 25 ? 'Tension modérée' : 'Équilibre'}
-            </div>
-            <div className="text-sm text-muted-foreground">
-              Écart de {socialTension}% entre patriciens et plébéiens
-            </div>
-          </div>
-          
           <div className="space-y-3">
-            <div className="flex justify-between items-center">
-              <span className="text-sm font-medium">Patriciens</span>
-              <span className="text-sm">{internalValues.patriciens}%</span>
+            <div className="flex justify-between">
+              <span className="text-sm font-medium flex items-center">
+                <Users className="h-4 w-4 mr-1 text-blue-600" />
+                Plébéiens
+              </span>
+              <span className="text-sm font-medium">{plebeiens}%</span>
             </div>
             <Slider
-              value={[internalValues.patriciens]}
+              value={[plebeiens]}
               min={0}
               max={100}
               step={1}
-              onValueChange={(values) => handleUpdate('patriciens', values[0])}
+              onValueChange={handlePlebeiensChange}
+              className="cursor-pointer"
             />
           </div>
-          
+
           <div className="space-y-3">
-            <div className="flex justify-between items-center">
-              <span className="text-sm font-medium">Plébéiens</span>
-              <span className="text-sm">{internalValues.plébéiens}%</span>
+            <div className="flex justify-between">
+              <span className="text-sm font-medium flex items-center">
+                <Crown className="h-4 w-4 mr-1 text-rome-purple" />
+                Patriciens
+              </span>
+              <span className="text-sm font-medium">{patriciens}%</span>
             </div>
             <Slider
-              value={[internalValues.plébéiens]}
+              value={[patriciens]}
               min={0}
               max={100}
               step={1}
-              onValueChange={(values) => handleUpdate('plébéiens', values[0])}
+              onValueChange={handlePatriciensChange}
+              className="cursor-pointer"
             />
           </div>
-          
-          <button
-            className="w-full py-2 px-4 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
-            onClick={handleSave}
-          >
-            Appliquer les changements
-          </button>
+
+          <div className="space-y-3">
+            <div className="flex justify-between">
+              <span className="text-sm font-medium flex items-center">
+                <Lock className="h-4 w-4 mr-1 text-gray-600" />
+                Esclaves
+              </span>
+              <span className="text-sm font-medium">{esclaves}%</span>
+            </div>
+            <Slider
+              value={[esclaves]}
+              min={0}
+              max={100}
+              step={1}
+              onValueChange={handleEsclavesChange}
+              className="cursor-pointer"
+            />
+          </div>
+
+          <div className="space-y-3">
+            <div className="flex justify-between">
+              <span className="text-sm font-medium flex items-center">
+                <Gavel className="h-4 w-4 mr-1 text-rome-navy" />
+                Cohésion Sociale
+              </span>
+              <span className="text-sm font-medium">{cohesion}%</span>
+            </div>
+            <Slider
+              value={[cohesion]}
+              min={0}
+              max={100}
+              step={1}
+              onValueChange={handleCohesionChange}
+              className="cursor-pointer"
+            />
+          </div>
         </div>
       </CardContent>
     </Card>

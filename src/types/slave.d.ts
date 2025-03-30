@@ -14,6 +14,10 @@ export interface Slave {
   gender?: 'male' | 'female';
   buildingId?: string;
   propertyId?: string;
+  skills?: string[];
+  assigned?: boolean;
+  assignedTo?: string;
+  count?: number;
 }
 
 export interface SlaveAssignment {
