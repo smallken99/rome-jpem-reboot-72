@@ -50,8 +50,8 @@ export const EconomieFilters: React.FC<EconomieFiltersProps> = ({
         </div>
 
         <Select
-          value={filter.types || 'all'}
-          onValueChange={(value) => onFilterChange({ types: value as ECONOMIE_TYPES | 'all' })}
+          value={filter.types ? filter.types.toString() : 'all'}
+          onValueChange={(value) => onFilterChange({ types: value === 'all' ? undefined : value as ECONOMIE_TYPES })}
         >
           <SelectTrigger className="w-[180px]">
             <SelectValue placeholder="Type" />
@@ -81,7 +81,7 @@ export const EconomieFilters: React.FC<EconomieFiltersProps> = ({
               <div className="space-y-2">
                 <h4 className="font-medium">Catégories</h4>
                 <Select
-                  value={(filter.category && filter.category !== 'all') ? filter.category : 'all'}
+                  value={filter.category ? filter.category.toString() : 'all'}
                   onValueChange={(value) => {
                     if (value === 'all') {
                       onFilterChange({ category: undefined });

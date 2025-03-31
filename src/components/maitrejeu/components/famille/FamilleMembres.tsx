@@ -92,7 +92,7 @@ export const FamilleMembres: React.FC<FamilleMembresProps> = ({
                 <SelectValue placeholder="Tous les genres" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">Tous</SelectItem>
+                <SelectItem value="all">Tous</SelectItem>
                 <SelectItem value="male">Homme</SelectItem>
                 <SelectItem value="female">Femme</SelectItem>
               </SelectContent>
@@ -109,7 +109,7 @@ export const FamilleMembres: React.FC<FamilleMembresProps> = ({
                 <SelectValue placeholder="Tous les statuts" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">Tous</SelectItem>
+                <SelectItem value="all">Tous</SelectItem>
                 <SelectItem value="Célibataire">Célibataire</SelectItem>
                 <SelectItem value="Marié">Marié(e)</SelectItem>
                 <SelectItem value="Veuf">Veuf/Veuve</SelectItem>

@@ -6,7 +6,10 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { HistoireEntry } from '../../types/histoire';
-import { Season, ImportanceType } from '../../types/common';
+import { Season } from '../../types/common';
+
+// Define ImportanceType
+type ImportanceType = 'mineure' | 'normale' | 'majeure' | 'historique';
 
 interface HistoireEntryFormProps {
   year: number;
@@ -19,12 +22,12 @@ export const HistoireEntryForm: React.FC<HistoireEntryFormProps> = ({ year, seas
     titre: '',
     contenu: '',
     date: { year, season },
-    type: 'POLITIQUE', // Assurez-vous que type est défini
+    type: 'politique', // Using correct type format
     catégorie: 'POLITIQUE',
     importance: 'normale',
     auteur: 'Système',
     visible: true,
-    personnagesImpliqués: []
+    personnesImpliquées: []
   });
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
@@ -36,15 +39,15 @@ export const HistoireEntryForm: React.FC<HistoireEntryFormProps> = ({ year, seas
   };
 
   const handleSelectChange = (name: string, value: string) => {
-    if (name === 'personnagesImpliqués') {
+    if (name === 'personnesImpliquées') {
       setFormData(prev => ({
         ...prev,
-        personnagesImpliqués: [...(prev.personnagesImpliqués || []), value]
+        personnesImpliquées: [...(prev.personnesImpliquées || []), value]
       }));
     } else if (name === 'catégorie') {
       setFormData(prev => ({
         ...prev,
-        type: value, // Mettre à jour à la fois type et catégorie
+        type: value.toLowerCase() as 'politique' | 'militaire' | 'économique' | 'religieux' | 'social', // Convert to lowercase for type
         catégorie: value
       }));
     } else {
@@ -58,7 +61,7 @@ export const HistoireEntryForm: React.FC<HistoireEntryFormProps> = ({ year, seas
   const handlePersonnajeRemove = (index: number) => {
     setFormData(prev => ({
       ...prev,
-      personnagesImpliqués: prev.personnagesImpliqués?.filter((_, i) => i !== index) || []
+      personnesImpliquées: prev.personnesImpliquées?.filter((_, i) => i !== index) || []
     }));
   };
 
@@ -69,12 +72,12 @@ export const HistoireEntryForm: React.FC<HistoireEntryFormProps> = ({ year, seas
       titre: '',
       contenu: '',
       date: { year, season },
-      type: 'POLITIQUE', // S'assurer que le formulaire réinitialisé a un type
+      type: 'politique', // Using correct type format
       catégorie: 'POLITIQUE',
       importance: 'normale',
       auteur: 'Système',
       visible: true,
-      personnagesImpliqués: []
+      personnesImpliquées: []
     });
   };
 
@@ -156,7 +159,7 @@ export const HistoireEntryForm: React.FC<HistoireEntryFormProps> = ({ year, seas
                     e.preventDefault();
                     const input = e.target as HTMLInputElement;
                     if (input.value.trim()) {
-                      handleSelectChange('personnagesImpliqués', input.value.trim());
+                      handleSelectChange('personnesImpliquées', input.value.trim());
                       input.value = '';
                     }
                   }
@@ -168,7 +171,7 @@ export const HistoireEntryForm: React.FC<HistoireEntryFormProps> = ({ year, seas
                 onClick={(e) => {
                   const input = e.currentTarget.previousElementSibling as HTMLInputElement;
                   if (input && input.value.trim()) {
-                    handleSelectChange('personnagesImpliqués', input.value.trim());
+                    handleSelectChange('personnesImpliquées', input.value.trim());
                     input.value = '';
                   }
                 }}
@@ -177,9 +180,9 @@ export const HistoireEntryForm: React.FC<HistoireEntryFormProps> = ({ year, seas
               </Button>
             </div>
             
-            {formData.personnagesImpliqués && formData.personnagesImpliqués.length > 0 && (
+            {formData.personnesImpliquées && formData.personnesImpliquées.length > 0 && (
               <div className="mt-2 flex flex-wrap gap-2">
-                {formData.personnagesImpliqués.map((personnage, index) => (
+                {formData.personnesImpliquées.map((personnage, index) => (
                   <div key={index} className="bg-muted px-2 py-1 rounded-md text-sm flex items-center">
                     {personnage}
                     <button
