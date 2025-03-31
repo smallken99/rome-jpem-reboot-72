@@ -1,5 +1,5 @@
 
-import { Equilibre } from '../types/equilibre';
+import { Equilibre, Risk } from '../types/equilibre';
 import { Character } from '@/types/character';
 import { Slave, SlaveAssignment } from '@/types/slaves';
 import { OwnedBuilding, PropertyUpgrade } from '@/components/proprietes/types/property';
@@ -7,61 +7,65 @@ import { OwnedBuilding, PropertyUpgrade } from '@/components/proprietes/types/pr
 /**
  * Normalise le format d'équilibre pour garantir la cohérence
  */
-export function normalizeEquilibre(equilibre: Partial<Equilibre>): Equilibre {
+export function normalizeEquilibre(equilibreInput: Partial<Equilibre>): Equilibre {
   // Valeurs par défaut
   const defaultEquilibre: Equilibre = {
-    id: 'default',
-    political: {
+    politique: {
       populaires: 33,
       optimates: 33,
       moderates: 34
     },
-    social: {
-      patriciens: 50,
-      plébéiens: 50
+    populaires: 33,
+    populares: 33,
+    optimates: 33,
+    moderates: 34,
+    economie: {
+      stabilite: 50,
+      croissance: 50,
+      commerce: 50,
+      agriculture: 50
     },
-    economie: 50,
+    social: {
+      plebeiens: 50,
+      patriciens: 50,
+      esclaves: 0,
+      cohesion: 50
+    },
+    patriciens: 50,
+    plébéiens: 50,
+    militaire: {
+      moral: 50,
+      effectifs: 50,
+      equipement: 50,
+      discipline: 50
+    },
+    religion: {
+      piete: 50,
+      traditions: 50,
+      superstition: 50
+    },
     stability: 50,
     armée: 50,
     loyauté: 50,
     morale: 50,
-    religion: 50,
     facteurJuridique: 50,
-    risques: [],
-    historique: []
+    historique: [],
+    risques: {}
   };
 
   // Fusion avec les valeurs fournies
-  const result = { ...defaultEquilibre, ...equilibre };
+  const result = { ...defaultEquilibre, ...equilibreInput };
 
-  // Normalisation des valeurs sur 100
-  if (result.optimates && result.populaires && result.moderates) {
-    const total = result.optimates + result.populaires + result.moderates;
-    if (total !== 100) {
-      result.optimates = Math.round((result.optimates / total) * 100);
-      result.populaires = Math.round((result.populaires / total) * 100);
-      result.moderates = 100 - result.optimates - result.populaires;
-    }
-  }
-
-  // Mise à jour des alias pour la rétrocompatibilité
-  result.political.populaires = result.populaires || result.political.populaires;
-  result.political.optimates = result.optimates || result.political.optimates;
-  result.political.moderates = result.moderates || result.political.moderates;
-  
-  result.populaires = result.political.populaires;
-  result.populares = result.political.populaires;
-  result.optimates = result.political.optimates;
-  result.moderates = result.political.moderates;
+  // Make sure all fields are synchronized
+  result.populaires = result.politique.populaires;
+  result.populares = result.politique.populaires;
+  result.optimates = result.politique.optimates;
+  result.moderates = result.politique.moderates;
   
   result.patriciens = result.social.patriciens;
-  result.plébéiens = result.social.plébéiens;
-  
-  result.economy = result.economie;
-  result.économie = result.economie;
-  result.economicStability = result.economie;
+  result.plébéiens = result.social.plebeiens;
 
-  return result as Equilibre;
+  return result;
 }
 
 /**
@@ -155,11 +159,12 @@ export function convertSlaveAssignments(
   for (const propertyId in assignments) {
     assignments[propertyId].forEach(slaveId => {
       result.push({
+        id: `${slaveId}-${propertyId}`,
         slaveId,
-        propertyId,
+        buildingId: propertyId,
+        assignedAt: new Date(),
         role: 'worker',
-        startDate: new Date().toISOString(),
-        efficiency: 100
+        productivity: 100
       });
     });
   }

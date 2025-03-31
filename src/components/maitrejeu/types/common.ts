@@ -1,5 +1,5 @@
 
-export type Season = 'spring' | 'summer' | 'fall' | 'winter' | 'Ver' | 'Aestas' | 'Autumnus' | 'Hiems' | 'SPRING' | 'SUMMER' | 'AUTUMN' | 'WINTER';
+export type Season = 'spring' | 'summer' | 'fall' | 'winter' | 'Ver' | 'Aestas' | 'Autumnus' | 'Hiems' | 'SPRING' | 'SUMMER' | 'AUTUMN' | 'WINTER' | 'Spring' | 'Summer' | 'Winter' | 'Autumn';
 
 export interface GameDate {
   year: number;
@@ -64,7 +64,7 @@ export function dateToGameDate(date: Date): GameDate {
   };
 }
 
-// Add missing utility functions
+// Utility function to format any date (GameDate or regular Date)
 export function formatAnyDate(date: GameDate | Date): string {
   if (isGameDate(date)) {
     return `${date.year} (${date.season})`;
@@ -73,6 +73,7 @@ export function formatAnyDate(date: GameDate | Date): string {
   }
 }
 
+// Type guard to check if a value is a GameDate
 export function isGameDate(date: any): date is GameDate {
   return date && typeof date === 'object' && 
     typeof date.year === 'number' && 
@@ -85,4 +86,32 @@ export function parseStringToGameDate(dateString: string): GameDate {
   const season = parts[1].replace(/[()]/g, '') as Season;
   
   return { year, season };
+}
+
+// Function to normalize season values
+export function normalizeSeasonValue(season: string): Season {
+  const seasonMap: Record<string, Season> = {
+    'spring': 'spring',
+    'spring': 'spring',
+    'ver': 'spring',
+    'aestas': 'summer',
+    'summer': 'summer',
+    'summer': 'summer',
+    'autumn': 'fall',
+    'fall': 'fall',
+    'autumnus': 'fall',
+    'winter': 'winter',
+    'winter': 'winter',
+    'hiems': 'winter',
+    'SPRING': 'spring',
+    'SUMMER': 'summer',
+    'AUTUMN': 'fall',
+    'WINTER': 'winter',
+    'Spring': 'spring',
+    'Summer': 'summer',
+    'Autumn': 'fall',
+    'Winter': 'winter',
+  };
+  
+  return seasonMap[season.toLowerCase()] || 'spring';
 }

@@ -65,3 +65,13 @@ export interface PropertyTax {
   taxType: 'property' | 'luxury' | 'income' | 'other';
   period: string;
 }
+
+// Define the slave assignment interface for compatibility
+export interface SlaveAssignment {
+  id: string;
+  slaveId: string;
+  buildingId: string;
+  assignedAt: Date;
+  role: string;
+  productivity: number;
+}

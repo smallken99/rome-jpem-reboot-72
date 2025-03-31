@@ -4,8 +4,8 @@ export interface TreasuryStatus {
   balance: number;
   income: number;
   expenses: number;
-  totalIncome: number;
-  totalExpenses: number;
+  totalIncome?: number;
+  totalExpenses?: number;
   surplus?: number;
   debt?: number;
   taxRate?: number;
@@ -20,6 +20,15 @@ export interface EconomicFactors {
   corruption: number;
   inflation?: number;
   productivity?: number;
+  
+  // Additional factors needed by components
+  tradeRevenue?: number;
+  provinceRevenue?: number;
+  religiousCeremonyExpense?: number;
+  publicWorksExpense?: number;
+  warSpoilsRevenue?: number;
+  adminExpense?: number;
+  currentYear?: number;
 }
 
 // Props for the EconomieStats component
@@ -42,6 +51,10 @@ export interface EconomieRecord {
   recurringInterval?: 'weekly' | 'monthly' | 'seasonal' | 'yearly';
   tags?: string[];
   impact?: Record<string, number>;
+  
+  // Additional fields used in components
+  affectedSenateurId?: string;
+  affectedProvinceId?: string;
 }
 
 // Data for creating a new economy record
@@ -56,6 +69,10 @@ export interface EconomieCreationData {
   recurring?: boolean;
   recurringInterval?: 'weekly' | 'monthly' | 'seasonal' | 'yearly';
   tags?: string[];
+  
+  // Additional fields used in components
+  affectedSenateurId?: string;
+  affectedProvinceId?: string;
 }
 
 // Filters for economy records
@@ -67,6 +84,10 @@ export interface EconomieFilter {
   amount?: [number, number];
   affectedEntity?: string;
   approved?: boolean;
+  
+  // Additional fields used in components
+  minAmount?: number;
+  maxAmount?: number;
 }
 
 // Sort field for economy records
@@ -80,4 +101,23 @@ export enum EconomieType {
   ALL = 'all',
   INCOME = 'income',
   EXPENSE = 'expense',
+}
+
+// Economy categories enum
+export enum EconomieCategory {
+  TAX = 'tax',
+  TRADE = 'trade',
+  MILITARY = 'military',
+  ADMINISTRATION = 'administration',
+  CONSTRUCTION = 'construction',
+  RELIGION = 'religion',
+  OTHER = 'other'
+}
+
+// Economy source enum
+export enum EconomieSource {
+  SENATE = 'senate',
+  PROVINCE = 'province',
+  PERSONAL = 'personal',
+  OTHER = 'other'
 }

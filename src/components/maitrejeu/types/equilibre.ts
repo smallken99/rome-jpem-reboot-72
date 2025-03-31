@@ -1,60 +1,3 @@
-export interface Equilibre {
-  // Political equilibrium - both forms supported for compatibility
-  politique: {
-    populaires: number;
-    optimates: number;
-    moderates: number;
-  };
-  // Direct access properties (used in many components)
-  populaires: number;
-  populares: number; // alias
-  optimates: number;
-  moderates: number;
-  
-  // Economic equilibrium
-  economie: {
-    stabilite: number;
-    croissance: number;
-    commerce: number;
-    agriculture: number;
-  };
-  
-  // Social equilibrium
-  social: {
-    plebeiens: number;
-    patriciens: number;
-    esclaves: number;
-    cohesion: number;
-  };
-  plébéiens?: number; // Alias for backward compatibility
-  patriciens?: number; // Additional property for direct access
-  
-  // Military equilibrium
-  militaire: {
-    moral: number;
-    effectifs: number;
-    equipement: number;
-    discipline: number;
-  };
-  
-  // Religious equilibrium
-  religion: {
-    piete: number;
-    traditions: number;
-    superstition: number;
-  };
-  
-  // Other stability factors
-  stability?: number;
-  armée?: number;
-  loyauté?: number;
-  morale?: number;
-  facteurJuridique?: number;
-  
-  // History and risks
-  historique?: HistoriqueEntry[];
-  risques?: Record<string, Risk>;
-}
 
 export type RiskType = 'revolte' | 'guerre' | 'politique' | 'economique' | 'religieux' | 'military' | 'political' | 'economic' | 'social' | 'religious' | string;
 
@@ -84,4 +27,62 @@ export interface PoliticalEvent {
   importance: "high" | "low" | "medium" | "critical" | string;
   impact?: Record<string, number>;
   event?: string;
+}
+
+export interface Equilibre {
+  // Political equilibrium - both forms supported for compatibility
+  politique: {
+    populaires: number;
+    optimates: number;
+    moderates: number;
+  };
+  // Direct access properties (used in many components)
+  populaires: number;
+  populares: number; // alias
+  optimates: number;
+  moderates: number;
+  
+  // Economic equilibrium
+  economie: {
+    stabilite: number;
+    croissance: number;
+    commerce: number;
+    agriculture: number;
+  };
+  
+  // Social equilibrium
+  social: {
+    plebeiens: number;
+    patriciens: number;
+    esclaves: number;
+    cohesion: number;
+  };
+  plébéiens?: number; // Alias for backward compatibility with different spelling
+  patriciens?: number; // Additional property for direct access
+  
+  // Military equilibrium
+  militaire: {
+    moral: number;
+    effectifs: number;
+    equipement: number;
+    discipline: number;
+  };
+  
+  // Religious equilibrium
+  religion: {
+    piete: number;
+    traditions: number;
+    superstition: number;
+  };
+  
+  // Other stability factors
+  stability?: number;
+  armée?: number;
+  loyauté?: number;
+  morale?: number;
+  facteurJuridique?: number;
+  
+  // History and risks
+  historique?: HistoriqueEntry[];
+  risques?: Record<string, Risk>;
 }
