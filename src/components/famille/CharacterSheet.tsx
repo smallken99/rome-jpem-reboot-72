@@ -4,11 +4,23 @@ import { Character, CharacterStat } from '@/types/character';
 import { CharacterStats } from './CharacterStats';
 import { RomanCard } from '@/components/ui-custom/RomanCard';
 import { Badge } from '@/components/ui/badge';
-import { Calendar, Crown, ShieldX, Camera, Edit, Check, Scroll } from 'lucide-react';
+import { 
+  Calendar, 
+  Crown, 
+  ShieldX, 
+  Camera, 
+  Edit, 
+  Check, 
+  Scroll,
+  GraduationCap,
+  HeartPulse,
+  User
+} from 'lucide-react';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { EducationSpecialties } from './education/components/EducationSpecialties';
+import { cn } from '@/lib/utils';
 
 // Roman-style portraits for characters
 const romanPortraits = {
@@ -29,15 +41,19 @@ const romanPortraits = {
 interface CharacterSheetProps {
   character: Character;
   className?: string;
+  compact?: boolean;
   onEditPortrait?: (characterId: string) => void;
   onNameChange?: (characterId: string, newName: string) => void;
+  onClick?: () => void;
 }
 
 export const CharacterSheet: React.FC<CharacterSheetProps> = ({ 
   character, 
   className,
+  compact = false,
   onEditPortrait,
-  onNameChange
+  onNameChange,
+  onClick
 }) => {
   const [isEditingName, setIsEditingName] = useState(false);
   const [nameValue, setNameValue] = useState(character.name);
@@ -94,6 +110,80 @@ export const CharacterSheet: React.FC<CharacterSheetProps> = ({
       setIsEditingName(false);
     }
   };
+
+  // Define the card content based on whether it's compact or full
+  if (compact) {
+    return (
+      <RomanCard 
+        className={cn("hover:shadow-md transition-shadow cursor-pointer", className)}
+        onClick={onClick}
+      >
+        <RomanCard.Content className="p-4">
+          <div className="flex items-center gap-3">
+            <Avatar className="h-12 w-12 rounded-md">
+              <AvatarImage src={getRandomPortrait()} alt={character.name} className="object-cover" />
+              <AvatarFallback className={`${getFallbackColor()} text-lg font-cinzel`}>
+                {getInitials(character.name)}
+              </AvatarFallback>
+            </Avatar>
+            
+            <div className="flex-1 min-w-0">
+              <div className="flex items-center gap-2">
+                <h3 className="font-cinzel text-base text-rome-navy font-medium truncate">{character.name}</h3>
+                {character.isPlayer && (
+                  <Badge className="bg-rome-gold text-white border-none shrink-0">Principal</Badge>
+                )}
+              </div>
+              
+              <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-3 text-xs text-muted-foreground">
+                <span className="flex items-center">
+                  <Calendar className="h-3 w-3 mr-1" />
+                  {character.age} ans
+                </span>
+                
+                {character.title && (
+                  <span className="flex items-center">
+                    <Crown className="h-3 w-3 mr-1 text-rome-gold" />
+                    {character.title}
+                  </span>
+                )}
+              </div>
+            </div>
+          </div>
+          
+          <div className="mt-3 grid grid-cols-2 gap-1.5 text-xs">
+            <div className="flex items-center justify-between">
+              <span className="text-muted-foreground">Popularité</span>
+              <span className="font-medium">{typeof character.stats.popularity === 'number' 
+                ? character.stats.popularity 
+                : character.stats.popularity.value}/100</span>
+            </div>
+            
+            <div className="flex items-center justify-between">
+              <span className="text-muted-foreground">Éloquence</span>
+              <span className="font-medium">{typeof character.stats.oratory === 'number' 
+                ? character.stats.oratory 
+                : character.stats.oratory.value}/100</span>
+            </div>
+            
+            <div className="flex items-center justify-between">
+              <span className="text-muted-foreground">Piété</span>
+              <span className="font-medium">{typeof character.stats.piety === 'number' 
+                ? character.stats.piety 
+                : character.stats.piety.value}/100</span>
+            </div>
+            
+            <div className="flex items-center justify-between">
+              <span className="text-muted-foreground">Éducation Martiale</span>
+              <span className="font-medium">{isFemale ? "N/A" : (typeof character.stats.martialEducation === 'number' 
+                ? character.stats.martialEducation 
+                : character.stats.martialEducation.value)}/100</span>
+            </div>
+          </div>
+        </RomanCard.Content>
+      </RomanCard>
+    );
+  }
 
   return (
     <RomanCard className={className}>
@@ -174,8 +264,32 @@ export const CharacterSheet: React.FC<CharacterSheetProps> = ({
               )}
               
               {character.role && (
-                <div className="text-sm text-muted-foreground mt-1">
-                  {character.role}
+                <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                  <User className="h-4 w-4" />
+                  <span>{character.role}</span>
+                </div>
+              )}
+              
+              {/* Health Status if available */}
+              {character.health !== undefined && (
+                <div className="flex items-center gap-2 text-sm">
+                  <HeartPulse className={`h-4 w-4 ${character.health >= 75 ? 'text-green-500' : character.health >= 50 ? 'text-amber-500' : 'text-red-500'}`} />
+                  <div className="flex-1">
+                    <div className="flex justify-between text-xs mb-1">
+                      <span>Santé</span>
+                      <span>{character.health}%</span>
+                    </div>
+                    <div className="w-full bg-gray-200 h-1.5 rounded-full overflow-hidden">
+                      <div 
+                        className={`h-full rounded-full ${
+                          character.health >= 75 ? 'bg-green-500' : 
+                          character.health >= 50 ? 'bg-amber-500' : 
+                          'bg-red-500'
+                        }`} 
+                        style={{ width: `${character.health}%` }}
+                      />
+                    </div>
+                  </div>
                 </div>
               )}
               
@@ -195,6 +309,40 @@ export const CharacterSheet: React.FC<CharacterSheetProps> = ({
             )}
             
             <CharacterStats stats={statsArray} isFemale={isFemale} />
+            
+            {/* Display Traits if available */}
+            {character.traits && character.traits.length > 0 && (
+              <div className="mt-4">
+                <h4 className="font-cinzel text-base mb-2">Traits</h4>
+                <div className="flex flex-wrap gap-1.5">
+                  {character.traits.map((trait, idx) => (
+                    <Badge key={idx} variant="outline" className="bg-gray-50">
+                      {trait}
+                    </Badge>
+                  ))}
+                </div>
+              </div>
+            )}
+            
+            {/* Status information */}
+            {character.status && (
+              <div className="mt-4">
+                <h4 className="font-cinzel text-base mb-2">Statut</h4>
+                <Badge 
+                  className={cn(
+                    character.status === 'alive' ? 'bg-green-100 text-green-800 hover:bg-green-200' :
+                    character.status === 'deceased' ? 'bg-gray-100 text-gray-800 hover:bg-gray-200' :
+                    character.status === 'exiled' ? 'bg-amber-100 text-amber-800 hover:bg-amber-200' :
+                    'bg-blue-100 text-blue-800 hover:bg-blue-200'
+                  )}
+                >
+                  {character.status === 'alive' && 'Vivant'}
+                  {character.status === 'deceased' && 'Décédé'}
+                  {character.status === 'exiled' && 'Exilé'}
+                  {!['alive', 'deceased', 'exiled'].includes(character.status) && character.status}
+                </Badge>
+              </div>
+            )}
           </div>
         </div>
       </RomanCard.Content>

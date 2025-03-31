@@ -10,13 +10,33 @@ export interface Character {
   portrait?: string;
   title?: string;
   role?: string;
+  
+  // Family properties
+  relation?: string;
+  isHeadOfFamily?: boolean;
+  parentIds?: string[];
+  spouseId?: string;
+  childrenIds?: string[];
+  testamentaryWishes?: string;
   marriageStatus?: string;
+  
+  // Health and status
+  health?: number;
+  status?: 'alive' | 'deceased' | 'exiled';
+
+  // Personal attributes
+  traits?: string[];
+  specialty?: string;
+  educationType?: string;
+  diplomatie?: Record<string, any>;
+  
   stats: {
     popularity: number | CharacterStat;
     oratory: number | CharacterStat;
     piety: number | CharacterStat;
     martialEducation: number | CharacterStat;
   };
+  
   education?: EducationInfo;
   currentEducation?: {
     type: string;
@@ -27,9 +47,26 @@ export interface Character {
     yearsCompleted?: number;
     totalYears?: number;
     statBonus?: number;
+    speciality?: string;
   };
-  childrenIds?: string[]; // IDs des enfants
-  lastChildBirthYear?: number; // Année de la dernière naissance
+  
+  // Political properties
+  appartenance?: string;
+  fonction?: string;
+  gens?: string;
+  magistrature?: string;
+  playerId?: string;
+  joueur?: string | boolean;
+  popularite?: number;
+  militaire?: number;
+  piete?: number;
+  eloquence?: number;
+  statut?: string;
+  nom?: string;
+  prenom?: string;
+  
+  // Birth tracking
+  lastChildBirthYear?: number;
 }
 
 // Type pour les statistiques de personnage pour la rétrocompatibilité
@@ -49,4 +86,22 @@ export interface EducationInfo {
   mentor: string | null;
   completed?: boolean;
   completedAt?: string;
+}
+
+// Interface pour les sénateurs jouables
+export interface SenateurJouable extends Omit<Character, 'stats'> {
+  faction: string;
+  influence: number;
+  prestige: number;
+  richesse: number;
+  clientele: number;
+  allies: string[];
+  ennemis: string[];
+  gender: 'male' | 'female'; // Explicitly include gender to fix type errors
+  stats?: {
+    popularity: number | CharacterStat;
+    oratory: number | CharacterStat;
+    piety: number | CharacterStat;
+    martialEducation: number | CharacterStat;
+  };
 }
