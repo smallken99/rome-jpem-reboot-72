@@ -1,89 +1,74 @@
 
-// Game date types
-export type Season = 'VER' | 'AESTAS' | 'AUTUMNUS' | 'HIEMS' | 'SPRING' | 'SUMMER' | 'AUTUMN' | 'WINTER' | 'Ver' | 'Aestas' | 'Autumnus' | 'Hiems' | string;
+export enum Season {
+  SPRING = "SPRING",
+  SUMMER = "SUMMER",
+  AUTUMN = "AUTUMN",
+  WINTER = "WINTER",
+  // Latin names
+  VER = "Ver",
+  AESTAS = "Aestas",
+  AUTUMNUS = "Autumnus",
+  HIEMS = "Hiems",
+  // French names
+  PRINTEMPS = "Printemps",
+  ETE = "Été",
+  AUTOMNE = "Automne",
+  HIVER = "Hiver"
+}
 
-export interface GameDate {
+export type GameDate = {
   year: number;
-  season: Season;
+  season: string | Season;
+  day?: number;
+};
+
+export enum GamePhase {
+  SETUP = "SETUP",
+  POLITICS = "POLITICS",
+  MILITARY = "MILITARY",
+  ECONOMY = "ECONOMY",
+  RESOLUTION = "RESOLUTION",
+  // French phases
+  PREPARATION = "Préparation",
+  POLITIQUE = "Politique",
+  MILITAIRE = "Militaire",
+  ECONOMIE = "Économie",
+  RESOLUTION_FR = "Résolution"
 }
 
-// Game phase types
-export type GamePhase = 'normal' | 'crisis' | 'war' | 'civil_war' | 'election' | 'expansion' | 'reform' | 'prosperity' | 'decline' | 'ELECTION' | 'WAR' | 'CRISIS' | 'SENATE' | 'ECONOMY' | 'MILITARY' | 'RELIGION' | 'NORMAL' | string;
-
-export function formatGameDate(date: GameDate): string {
-  return `${date.season} ${date.year}`;
-}
-
-export function formatAnyDate(date: Date | GameDate | string): string {
-  if (typeof date === 'string') {
-    return date;
-  } else if ('year' in date && 'season' in date) {
-    return formatGameDate(date);
-  } else if (date instanceof Date) {
-    return date.toLocaleDateString();
+// Helper function to convert string to GameDate
+export function parseStringToGameDate(dateStr: string): GameDate {
+  // Example format: "750 AUC, Spring"
+  try {
+    const [yearPart, seasonPart] = dateStr.split(',').map(s => s.trim());
+    const year = parseInt(yearPart.replace(/\D/g, ''), 10);
+    
+    // Try to match a season
+    let season: Season | string = Season.SPRING;
+    
+    if (seasonPart) {
+      const normalizedSeason = seasonPart.toLowerCase();
+      if (normalizedSeason.includes('spring') || normalizedSeason.includes('ver') || normalizedSeason.includes('printemps')) {
+        season = Season.SPRING;
+      } else if (normalizedSeason.includes('summer') || normalizedSeason.includes('aestas') || normalizedSeason.includes('été')) {
+        season = Season.SUMMER;
+      } else if (normalizedSeason.includes('autumn') || normalizedSeason.includes('autumnus') || normalizedSeason.includes('automne')) {
+        season = Season.AUTUMN;
+      } else if (normalizedSeason.includes('winter') || normalizedSeason.includes('hiems') || normalizedSeason.includes('hiver')) {
+        season = Season.WINTER;
+      } else {
+        season = seasonPart; // Use as-is if no match
+      }
+    }
+    
+    return { year, season };
+  } catch (e) {
+    // Return a default date if parsing fails
+    return { year: 750, season: Season.SPRING };
   }
-  return String(date);
 }
 
-export function isGameDate(date: any): date is GameDate {
-  return date && typeof date === 'object' && 'year' in date && 'season' in date;
+// Helper to convert GameDate to string
+export function gameDateToString(date: GameDate): string {
+  return `${date.year} AUC, ${date.season}`;
 }
-
-export function dateToGameDate(date: Date): GameDate {
-  const month = date.getMonth();
-  let season: Season;
-  
-  if (month >= 2 && month <= 4) {
-    season = 'VER';
-  } else if (month >= 5 && month <= 7) {
-    season = 'AESTAS';
-  } else if (month >= 8 && month <= 10) {
-    season = 'AUTUMNUS';
-  } else {
-    season = 'HIEMS';
-  }
-  
-  // Adjust year (game years are from founding of Rome, approx 753 BCE)
-  const gameYear = date.getFullYear() + 753;
-  
-  return {
-    year: gameYear,
-    season
-  };
-}
-
-export function gameYearToDate(gameYear: number): Date {
-  // Convert from AUC (ab urbe condita) to CE
-  const ceYear = gameYear - 753;
-  return new Date(ceYear, 0, 1);
-}
-
-export function seasonToMonth(season: Season): number {
-  const seasonUpper = season.toUpperCase();
-  if (seasonUpper === 'VER' || seasonUpper === 'SPRING') return 3; // March
-  if (seasonUpper === 'AESTAS' || seasonUpper === 'SUMMER') return 6; // June
-  if (seasonUpper === 'AUTUMNUS' || seasonUpper === 'AUTUMN') return 9; // September
-  if (seasonUpper === 'HIEMS' || seasonUpper === 'WINTER') return 0; // January
-  return 0; // Default to January
-}
-
-export function parseStringToGameDate(dateStr: string): GameDate | null {
-  if (!dateStr) return null;
-  
-  const parts = dateStr.split(' ');
-  if (parts.length !== 2) return null;
-  
-  const season = parts[0] as Season;
-  const year = parseInt(parts[1], 10);
-  
-  if (isNaN(year)) return null;
-  
-  return { year, season };
-}
-
-export function generateId(): string {
-  return Math.random().toString(36).substring(2, 11);
-}
-
-// Re-exporting ImportanceType
-export type ImportanceType = 'mineure' | 'normale' | 'majeure' | 'critique' | 'low' | 'medium' | 'high' | 'critical' | string;

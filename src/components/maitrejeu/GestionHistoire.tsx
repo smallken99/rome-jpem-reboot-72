@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { useMaitreJeu } from './context';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -21,7 +22,7 @@ export const GestionHistoire: React.FC = () => {
   // Nouvelles entrées d'histoire
   const [newEntryTitle, setNewEntryTitle] = useState('');
   const [newEntryContent, setNewEntryContent] = useState('');
-  const [newEntryType, setNewEntryType] = useState<HistoireEntry['type']>('politique');
+  const [newEntryType, setNewEntryType] = useState<"politique" | "militaire" | "économique" | "religieux" | "social">('politique');
   
   // Filtrer les entrées d'histoire
   const filteredEntries = histoireEntries.filter(entry => 

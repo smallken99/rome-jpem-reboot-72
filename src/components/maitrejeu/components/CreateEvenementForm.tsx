@@ -1,213 +1,269 @@
+
 import React, { useState } from 'react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
+import { 
+  Dialog, 
+  DialogContent, 
+  DialogFooter, 
+  DialogHeader, 
+  DialogTitle 
+} from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
-import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Label } from '@/components/ui/label';
+import { 
+  Card, 
+  CardHeader, 
+  CardTitle, 
+  CardContent, 
+  CardFooter 
+} from '@/components/ui/card';
+import { 
+  Select, 
+  SelectContent, 
+  SelectItem, 
+  SelectTrigger, 
+  SelectValue 
+} from '@/components/ui/select';
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
+import { Trash, Plus } from 'lucide-react';
+import { 
+  EvenementType, 
+  ImportanceType, 
+  EvenementAction, 
+  Evenement,
+  EvenementFormProps
+} from '../types/evenements';
 import { v4 as uuidv4 } from 'uuid';
-import { EvenementAction, EvenementFormProps, EvenementType, ImportanceType } from '../types/evenements';
 import { useMaitreJeu } from '../context';
 
 export const CreateEvenementForm: React.FC<EvenementFormProps> = ({ 
-  onSubmit, 
+  onSubmit,
   currentDate,
-  isOpen = false, 
+  isOpen = false,
   onClose = () => {}
 }) => {
-  const { addEvenement } = useMaitreJeu();
+  const { currentDate: contextDate } = useMaitreJeu();
+  const eventDate = currentDate || contextDate;
+  
+  const [type, setType] = useState<EvenementType>('POLITIQUE');
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
-  const [type, setType] = useState<EvenementType>('POLITIQUE');
   const [importance, setImportance] = useState<ImportanceType>(ImportanceType.NORMALE);
-  const [options, setOptions] = useState<EvenementAction[]>([]);
-  const [newOption, setNewOption] = useState('');
-  const [newOptionConsequence, setNewOptionConsequence] = useState('');
-
-  const addOption = () => {
-    if (newOption && newOptionConsequence) {
-      const option: EvenementAction = {
-        id: uuidv4(),
-        texte: newOption,
-        label: newOption.substring(0, 20) + '...',
-        effets: {},
-        consequence: newOptionConsequence,
-        description: newOptionConsequence
-      };
-      setOptions([...options, option]);
-      setNewOption('');
-      setNewOptionConsequence('');
-    }
+  const [actions, setActions] = useState<EvenementAction[]>([]);
+  const [actionText, setActionText] = useState('');
+  const [actionEffects, setActionEffects] = useState('');
+  const [actionConsequence, setActionConsequence] = useState('');
+  
+  const handleAddAction = () => {
+    if (!actionText.trim()) return;
+    
+    const action: EvenementAction = {
+      id: uuidv4(),
+      texte: actionText,
+      effets: {},
+      label: actionText.substring(0, 20) + (actionText.length > 20 ? '...' : ''),
+      consequence: actionConsequence,
+      description: actionEffects
+    };
+    
+    setActions([...actions, action]);
+    setActionText('');
+    setActionEffects('');
+    setActionConsequence('');
   };
-
-  const removeOption = (id: string) => {
-    setOptions(options.filter(opt => opt.id !== id));
+  
+  const handleRemoveAction = (id: string) => {
+    setActions(actions.filter(action => action.id !== id));
   };
-
+  
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (title && description && options.length > 0) {
-      const date = currentDate || { year: 250, season: 'SPRING' };
-      
-      const evenement = {
-        id: uuidv4(),
-        title: title,
-        titre: title,
-        description,
-        type,
-        date,
-        importance,
-        options,
-        resolved: false
-      };
-      
-      addEvenement(evenement);
-      
-      setTitle('');
-      setDescription('');
-      setType('POLITIQUE');
-      setImportance(ImportanceType.NORMALE);
-      setOptions([]);
-      
-      if (onSubmit) {
-        onSubmit(evenement);
-      }
-      
-      if (onClose) {
-        onClose();
-      }
-    }
+    
+    if (!title.trim() || !description.trim() || actions.length === 0) return;
+    
+    const newEvent: Evenement = {
+      id: uuidv4(),
+      title: title,
+      description: description,
+      type: type,
+      date: eventDate,
+      importance: importance,
+      options: actions,
+      resolved: false,
+      titre: title, // French alias
+    };
+    
+    onSubmit(newEvent);
+    
+    // Reset form
+    setTitle('');
+    setDescription('');
+    setType('POLITIQUE');
+    setImportance(ImportanceType.NORMALE);
+    setActions([]);
+    
+    if (onClose) onClose();
   };
-
+  
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
+      <DialogContent className="max-w-3xl">
         <DialogHeader>
           <DialogTitle>Créer un nouvel événement</DialogTitle>
         </DialogHeader>
         
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="space-y-2">
-            <Label htmlFor="title">Titre</Label>
-            <Input 
-              id="title" 
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
-              placeholder="Titre de l'événement"
-            />
-          </div>
-          
-          <div className="space-y-2">
-            <Label htmlFor="description">Description</Label>
-            <Textarea 
-              id="description" 
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
-              placeholder="Description détaillée de l'événement"
-              rows={3}
-            />
-          </div>
-          
-          <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="type">Type</Label>
-              <Select 
-                value={type}
-                onValueChange={(value) => setType(value as EvenementType)}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Type d'événement" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="POLITIQUE">Politique</SelectItem>
-                  <SelectItem value="GUERRE">Guerre</SelectItem>
-                  <SelectItem value="ECONOMIQUE">Économique</SelectItem>
-                  <SelectItem value="RELIGION">Religion</SelectItem>
-                  <SelectItem value="DIPLOMATIQUE">Diplomatique</SelectItem>
-                  <SelectItem value="SOCIAL">Social</SelectItem>
-                  <SelectItem value="CRISE">Crise</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-            
-            <div className="space-y-2">
-              <Label>Importance</Label>
-              <RadioGroup 
-                value={importance} 
-                onValueChange={(value) => setImportance(value as ImportanceType)}
-                className="flex space-x-2"
-              >
-                <div className="flex items-center space-x-1">
-                  <RadioGroupItem value="mineure" id="mineure" />
-                  <Label htmlFor="mineure">Mineure</Label>
-                </div>
-                <div className="flex items-center space-x-1">
-                  <RadioGroupItem value="normale" id="normale" />
-                  <Label htmlFor="normale">Normale</Label>
-                </div>
-                <div className="flex items-center space-x-1">
-                  <RadioGroupItem value="majeure" id="majeure" />
-                  <Label htmlFor="majeure">Majeure</Label>
-                </div>
-              </RadioGroup>
-            </div>
-          </div>
-          
-          <div className="space-y-4 border-t pt-4">
-            <Label>Options de résolution</Label>
-            
-            {options.map((option) => (
-              <div key={option.id} className="flex items-start justify-between p-2 border rounded-md bg-slate-50">
-                <div>
-                  <p className="font-medium">{option.texte}</p>
-                  <p className="text-sm text-muted-foreground mt-1">{option.consequence}</p>
-                </div>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  onClick={() => removeOption(option.id)}
-                >
-                  <Trash className="h-4 w-4" />
-                </Button>
-              </div>
-            ))}
-            
-            <div className="space-y-2">
+        <form onSubmit={handleSubmit} className="space-y-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="space-y-4">
               <div>
-                <Label htmlFor="option-text">Texte de l'option</Label>
+                <Label htmlFor="title">Titre de l'événement</Label>
                 <Input 
-                  id="option-text" 
-                  value={newOption}
-                  onChange={(e) => setNewOption(e.target.value)}
-                  placeholder="Ex: Accepter le traité"
+                  id="title" 
+                  value={title} 
+                  onChange={(e) => setTitle(e.target.value)} 
+                  placeholder="Saisir un titre évocateur" 
+                  required
                 />
               </div>
+              
               <div>
-                <Label htmlFor="consequence">Conséquence</Label>
-                <Input 
-                  id="consequence" 
-                  value={newOptionConsequence}
-                  onChange={(e) => setNewOptionConsequence(e.target.value)}
-                  placeholder="Ex: +10 en diplomatie, -5 en richesse"
-                />
+                <Label htmlFor="type">Type d'événement</Label>
+                <Select value={type} onValueChange={(value) => setType(value as EvenementType)}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Sélectionner un type" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="POLITIQUE">Politique</SelectItem>
+                    <SelectItem value="MILITAIRE">Militaire</SelectItem>
+                    <SelectItem value="ECONOMIQUE">Économique</SelectItem>
+                    <SelectItem value="SOCIAL">Social</SelectItem>
+                    <SelectItem value="RELIGIEUX">Religieux</SelectItem>
+                    <SelectItem value="CATASTROPHE">Catastrophe</SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
-              <Button
-                type="button"
-                variant="outline"
-                className="w-full"
-                onClick={addOption}
-              >
-                <Plus className="h-4 w-4 mr-2" />
-                Ajouter cette option
+              
+              <div>
+                <Label>Importance</Label>
+                <RadioGroup defaultValue={importance} onValueChange={(value) => setImportance(value as ImportanceType)} className="flex flex-col space-y-1 mt-2">
+                  <div className="flex items-center space-x-2">
+                    <RadioGroupItem value={ImportanceType.MINEURE} id="mineure" />
+                    <Label htmlFor="mineure">Mineure</Label>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <RadioGroupItem value={ImportanceType.NORMALE} id="normale" />
+                    <Label htmlFor="normale">Normale</Label>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <RadioGroupItem value={ImportanceType.MAJEURE} id="majeure" />
+                    <Label htmlFor="majeure">Majeure</Label>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <RadioGroupItem value={ImportanceType.CRITIQUE} id="critique" />
+                    <Label htmlFor="critique">Critique</Label>
+                  </div>
+                </RadioGroup>
+              </div>
+            </div>
+            
+            <div>
+              <Label htmlFor="description">Description</Label>
+              <Textarea 
+                id="description" 
+                value={description} 
+                onChange={(e) => setDescription(e.target.value)} 
+                placeholder="Décrivez l'événement avec ses implications potentielles..." 
+                className="h-[210px]"
+                required
+              />
+            </div>
+          </div>
+          
+          <div className="space-y-4">
+            <div className="flex justify-between items-center">
+              <h3 className="text-lg font-medium">Actions possibles</h3>
+              <Button type="button" size="sm" variant="outline" onClick={handleAddAction} disabled={!actionText.trim()}>
+                <Plus className="h-4 w-4 mr-1" />
+                Ajouter
               </Button>
             </div>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <Label htmlFor="actionText">Texte de l'action</Label>
+                <Textarea 
+                  id="actionText" 
+                  value={actionText} 
+                  onChange={(e) => setActionText(e.target.value)} 
+                  placeholder="Que peut faire le joueur?" 
+                  className="h-24"
+                />
+              </div>
+              <div className="flex flex-col space-y-2">
+                <Label htmlFor="actionEffects">Effets de l'action</Label>
+                <Input 
+                  id="actionEffects" 
+                  value={actionEffects} 
+                  onChange={(e) => setActionEffects(e.target.value)} 
+                  placeholder="Description des effets" 
+                />
+                <Label htmlFor="actionConsequence">Conséquence de l'action</Label>
+                <Input 
+                  id="actionConsequence" 
+                  value={actionConsequence} 
+                  onChange={(e) => setActionConsequence(e.target.value)} 
+                  placeholder="Que se passe-t-il ensuite?" 
+                />
+              </div>
+            </div>
+            
+            <div className="space-y-2">
+              <h4 className="font-medium">Actions ajoutées:</h4>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {actions.map(action => (
+                  <Card key={action.id}>
+                    <CardHeader className="pb-2">
+                      <CardTitle className="text-sm flex justify-between">
+                        <span className="truncate">{action.label}</span>
+                        <Button 
+                          type="button" 
+                          size="icon" 
+                          variant="ghost" 
+                          className="h-6 w-6" 
+                          onClick={() => handleRemoveAction(action.id)}
+                        >
+                          <Trash className="h-4 w-4" />
+                        </Button>
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent className="text-sm pb-2">
+                      <p className="line-clamp-2">{action.texte}</p>
+                      {action.description && (
+                        <p className="text-muted-foreground mt-1 line-clamp-1">
+                          Effets: {action.description}
+                        </p>
+                      )}
+                    </CardContent>
+                  </Card>
+                ))}
+                
+                {actions.length === 0 && (
+                  <div className="col-span-2 py-4 text-center text-muted-foreground">
+                    Aucune action ajoutée. Ajoutez au moins une action possible.
+                  </div>
+                )}
+              </div>
+            </div>
           </div>
+          
+          <DialogFooter>
+            <Button type="button" variant="outline" onClick={onClose}>Annuler</Button>
+            <Button type="submit" disabled={!title || !description || actions.length === 0}>
+              Créer l'événement
+            </Button>
+          </DialogFooter>
         </form>
-        
-        <DialogFooter>
-          <Button variant="outline" onClick={onClose}>Annuler</Button>
-          <Button onClick={handleSubmit}>Créer l'événement</Button>
-        </DialogFooter>
       </DialogContent>
     </Dialog>
   );

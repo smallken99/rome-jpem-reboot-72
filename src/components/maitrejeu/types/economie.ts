@@ -1,91 +1,125 @@
 
 import { GameDate } from './common';
 
-// Types de base pour l'économie
-export type ECONOMIE_TYPES = 'income' | 'expense' | 'transfer' | 'loan' | 'investment' | 'tax' | 'trade' | 'military' | 'construction' | 'slaves' | 'other';
-export type ECONOMIE_CATEGORIES = 'military' | 'administration' | 'construction' | 'religion' | 'slaves' | 'entertainment' | 'tax' | 'trade' | 'diplomacy' | 'other';
-export type ECONOMIE_SOURCE = 'treasury' | 'province' | 'private' | 'foreign' | 'other';
+// Shared enums for economy system
+export enum ECONOMIE_TYPES {
+  INCOME = "income",
+  EXPENSE = "expense",
+  TAX = "tax",
+  COMMERCE = "commerce",
+  MILITARY = "military",
+  CONSTRUCTION = "construction"
+}
 
-// Type EconomieFilter pour le filtrage
+export enum ECONOMIE_CATEGORIES {
+  TAXES = "taxes",
+  TRIBUTE = "tribute",
+  COMMERCE = "commerce",
+  CONSTRUCTION = "construction",
+  MILITARY = "military",
+  ADMINISTRATIVE = "administrative",
+  RELIGIOUS = "religious",
+  OTHER = "other"
+}
+
+export enum ECONOMIE_SOURCE {
+  SENATE = "senate",
+  PROVINCE = "province",
+  CITIZEN = "citizen",
+  FOREIGN = "foreign",
+  GOVERNMENT = "government",
+  MANUAL = "manual_entry",
+  COLLECTE_FISCALE = "Collecte fiscale"
+}
+
+export const RECURRING_INTERVALS = [
+  "monthly",
+  "quarterly",
+  "biannually", 
+  "annually",
+  "special",
+  "seasonal"
+] as const;
+
+export type RecurringInterval = typeof RECURRING_INTERVALS[number];
+
+export interface EconomieRecord {
+  id: string;
+  amount: number;
+  description: string;
+  date: GameDate | Date;
+  category: ECONOMIE_CATEGORIES;
+  type: ECONOMIE_TYPES;
+  source: ECONOMIE_SOURCE;
+  recurring: boolean;
+  recurringInterval?: RecurringInterval;
+  approvedBy?: string;
+  affectedSenateurId?: string; 
+  affectedProvinceId?: string;
+  updatedAt?: string;
+}
+
+export interface EconomieCreationData {
+  amount: number;
+  description: string;
+  date: GameDate | Date;
+  category: ECONOMIE_CATEGORIES;
+  type: ECONOMIE_TYPES; 
+  source: ECONOMIE_SOURCE;
+  recurring: boolean;
+  recurringInterval?: RecurringInterval;
+  approvedBy?: string;
+  affectedSenateurId?: string;
+  affectedProvinceId?: string;
+}
+
 export interface EconomieFilter {
-  searchTerm?: string;
-  category?: ECONOMIE_CATEGORIES | 'all';
-  types?: ECONOMIE_TYPES | 'all';
-  affectedEntity?: 'all' | 'senateur' | 'province';
+  searchTerm: string;
+  types?: ECONOMIE_TYPES[];
+  category?: ECONOMIE_CATEGORIES[];
   minAmount?: number;
   maxAmount?: number;
   dateRange?: {
     start: GameDate;
     end: GameDate;
   };
+  approved?: boolean;
+  recurring?: boolean;
+  affectedEntity?: 'all' | 'senateur' | 'province';
+  showRecurring?: boolean;
+  showApproved?: boolean;
 }
 
-// Type pour le tri des données économiques
-export interface EconomieSort {
+export type EconomieSort = {
   field: keyof EconomieRecord;
   direction: 'asc' | 'desc';
-}
+} | string;
 
-// Type pour un enregistrement économique
-export interface EconomieRecord {
-  id: string;
-  amount: number;
-  category: ECONOMIE_CATEGORIES;
-  description: string;
-  type: ECONOMIE_TYPES;
-  source: ECONOMIE_SOURCE;
-  tags: string[];
-  approved: boolean;
-  date: GameDate | Date;
-  recurring: boolean;
-  recurringInterval?: 'monthly' | 'quarterly' | 'biannually' | 'annually' | 'special';
-  affectedSenateurId?: string;
-  affectedProvinceId?: string;
-}
-
-// Type pour la création d'un enregistrement économique
-export interface EconomieCreationData {
-  amount: number;
-  category: ECONOMIE_CATEGORIES;
-  description: string;
-  type: ECONOMIE_TYPES;
-  source: ECONOMIE_SOURCE;
-  tags: string[];
-  approved: boolean;
-  date: string | GameDate | Date;
-  recurring: boolean;
-  recurringInterval?: 'monthly' | 'quarterly' | 'biannually' | 'annually' | 'special';
-  affectedSenateurId?: string;
-  affectedProvinceId?: string;
-}
-
-// Type pour le statut du trésor
 export interface TreasuryStatus {
   balance: number;
   income: number;
   expenses: number;
-  debt: number;
+  surplus?: number;
+  debt?: number;
+  taxRate?: number;
   totalIncome?: number;
   totalExpenses?: number;
-  previousBalance?: number;
 }
 
-// Type pour les facteurs économiques
 export interface EconomicFactors {
-  taxCollection: number;
-  militaryExpense: number;
-  militaryExpenses?: number; // Alias pour compatibilité
-  tradeProfitability: number;
-  constructionCosts: number;
-  slavePrices: number;
-  inflationRate?: number;
-  growthRate?: number;
-  taxRates?: Record<string, number>;
-}
-
-// Props pour le composant EconomieStats
-export interface EconomieStatsProps {
-  treasury: TreasuryStatus;
-  economicFactors: EconomicFactors;
-  economieRecords?: EconomieRecord[];
+  taxRate: number;
+  militarySpending: number;
+  publicWorks: number;
+  commerce: number;
+  stability: number;
+  inflation: number;
+  growth: number;
+  tradeRevenue?: number;
+  provinceRevenue?: number;
+  religiousCeremonyExpense?: number;
+  publicWorksExpense?: number;
+  warSpoilsRevenue?: number;
+  adminExpense?: number;
+  militaryExpense?: number;
+  currentYear?: number;
 }

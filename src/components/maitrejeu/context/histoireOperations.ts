@@ -6,11 +6,11 @@ export const createHistoireOperations = (
   setHistoireEntries: React.Dispatch<React.SetStateAction<HistoireEntry[]>>
 ) => {
   const addHistoireEntry = (entry: Omit<HistoireEntry, "id">) => {
-    const newEntry = {
+    const newEntry: HistoireEntry = {
       ...entry,
       id: uuidv4()
     };
-    setHistoireEntries(prev => [...prev, newEntry as HistoireEntry]);
+    setHistoireEntries(prev => [...prev, newEntry]);
   };
 
   return {

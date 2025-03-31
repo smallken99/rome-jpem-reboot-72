@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { 
   Card, 
@@ -22,6 +23,7 @@ import {
 } from 'lucide-react';
 import { useMaitreJeu } from './context';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
+import { LoiState } from './types/loisTypes';
 
 export const MaitreJeuStats: React.FC = () => {
   const { 
@@ -125,7 +127,11 @@ export const MaitreJeuStats: React.FC = () => {
   const militaryPower = getMilitaryPower();
   
   // Calculer le nombre de projets de loi en attente
-  const pendingLaws = lois.filter(law => law.état === LoiState.PROPOSED || law.état === "proposed").length;
+  const pendingLaws = lois.filter(law => 
+    law.état === LoiState.PROPOSAL || 
+    law.état === LoiState.PROPOSEE || 
+    law.état === 'proposed' || 
+    law.état === 'proposée').length;
   
   // Calculer le nombre total de provinces
   const totalProvinces = provinces.length;
@@ -140,6 +146,33 @@ export const MaitreJeuStats: React.FC = () => {
       <span>{value}%</span>
     </div>
   );
+
+  // Helper function to safely access economie object fields
+  const getEconomieValue = (field: keyof typeof statisticsEquilibre.economie) => {
+    const economie = statisticsEquilibre.economie;
+    if (typeof economie === 'object' && economie !== null) {
+      return economie[field];
+    }
+    return 0;
+  };
+
+  // Helper function to safely access religion object fields
+  const getReligionValue = (field: keyof typeof statisticsEquilibre.religion) => {
+    const religion = statisticsEquilibre.religion;
+    if (typeof religion === 'object' && religion !== null) {
+      return religion[field];
+    }
+    return 0;
+  };
+
+  // Helper function to safely access militaire object fields
+  const getMilitaireValue = (field: keyof typeof statisticsEquilibre.militaire) => {
+    const militaire = statisticsEquilibre.militaire;
+    if (typeof militaire === 'object' && militaire !== null) {
+      return militaire[field];
+    }
+    return 0;
+  };
   
   return (
     <div className="space-y-6 p-6">
@@ -187,7 +220,7 @@ export const MaitreJeuStats: React.FC = () => {
               {militaryPower.text}
             </div>
             <p className="text-xs text-muted-foreground">
-              {Math.floor((statisticsEquilibre.militaire.puissance || 0) * 1000)} hommes
+              {Math.floor((getMilitaireValue('puissance')) * 1000)} hommes
             </p>
           </CardContent>
         </Card>
@@ -302,34 +335,34 @@ export const MaitreJeuStats: React.FC = () => {
             <div className="space-y-4">
               <div className="flex justify-between">
                 <div>Piété</div>
-                <div className="font-medium">{statisticsEquilibre.religion.piete.toFixed(1)}</div>
+                <div className="font-medium">{getReligionValue('piete').toFixed(1)}</div>
               </div>
               <div className="h-2 bg-gray-200 rounded">
                 <div 
                   className="h-full bg-purple-500 rounded" 
-                  style={{ width: `${(statisticsEquilibre.religion.piete / 10) * 100}%` }}
+                  style={{ width: `${(getReligionValue('piete') / 10) * 100}%` }}
                 />
               </div>
               
               <div className="flex justify-between">
                 <div>Traditions</div>
-                <div className="font-medium">{statisticsEquilibre.religion.traditions.toFixed(1)}</div>
+                <div className="font-medium">{getReligionValue('traditions').toFixed(1)}</div>
               </div>
               <div className="h-2 bg-gray-200 rounded">
                 <div 
                   className="h-full bg-amber-500 rounded" 
-                  style={{ width: `${(statisticsEquilibre.religion.traditions / 10) * 100}%` }}
+                  style={{ width: `${(getReligionValue('traditions') / 10) * 100}%` }}
                 />
               </div>
               
               <div className="flex justify-between">
                 <div>Superstition</div>
-                <div className="font-medium">{statisticsEquilibre.religion.superstition.toFixed(1)}</div>
+                <div className="font-medium">{getReligionValue('superstition').toFixed(1)}</div>
               </div>
               <div className="h-2 bg-gray-200 rounded">
                 <div 
                   className="h-full bg-indigo-500 rounded" 
-                  style={{ width: `${(statisticsEquilibre.religion.superstition / 10) * 100}%` }}
+                  style={{ width: `${(getReligionValue('superstition') / 10) * 100}%` }}
                 />
               </div>
             </div>

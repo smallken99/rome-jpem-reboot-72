@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardFooter, CardDescription } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Search, Plus, Edit, Trash, Star, Shield, Coin, Users, Flag, History, Map, Target } from 'lucide-react';
+import { Search, Plus, Edit, Trash, Star, Shield, Coins, Users, Flag, History, Map, Target } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Province } from '../../types/province';
 import { toast } from 'sonner';
@@ -84,8 +84,8 @@ export const GestionProvincesModule: React.FC = () => {
               <CardHeader className="pb-2">
                 <div className="flex justify-between items-start">
                   <CardTitle className="text-xl">{province.nom}</CardTitle>
-                  <Badge className={getStatusColor(province.statut)}>
-                    {province.statut}
+                  <Badge className={getStatusColor(province.status || province.statut)}>
+                    {province.status || province.statut}
                   </Badge>
                 </div>
                 <CardDescription>
@@ -110,7 +110,7 @@ export const GestionProvincesModule: React.FC = () => {
                   </div>
                   <div className="flex justify-between text-sm">
                     <span className="text-muted-foreground flex items-center">
-                      <Coin className="h-4 w-4 mr-1" />
+                      <Coins className="h-4 w-4 mr-1" />
                       Richesse:
                     </span>
                     <span className="font-medium">{province.richesse.toLocaleString()} As</span>

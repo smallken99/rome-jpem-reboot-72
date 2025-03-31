@@ -1,56 +1,73 @@
 
+import { GameDate } from './common';
+
 export interface Client {
   id: string;
-  name: string;
-  type: 'standard' | 'influent' | 'élite' | 'étranger' | 'militaire';
-  subType?: string;
+  nom: string;
+  type: string;
+  senateurId: string | null;
   location: string;
-  loyalty: 'faible' | 'moyenne' | 'forte' | 'indéfectible';
-  status?: 'active' | 'inactive' | 'probation';
-  activeStatus?: 'active' | 'inactive' | 'probation';
-  assignedToSenateurId?: string;
-  patronId?: string;
-  occupation?: string;
+  loyalty: string;
+  competences: string[];
+  specialites: string[];
+  influences: number;
+  statut: string;
+  dateAcquisition: GameDate;
+  
+  // Optional fields
   description?: string;
-  influences?: {
-    political: number;
-    popular: number;
-    religious: number;
-  };
-  competences?: Record<string, number>;
-  specialAbilities?: string[];
-  backstory?: string;
-  relationshipLevel?: number;
-  lastInteraction?: string;
-  age: number;
-  assignedTo?: string;
-  competencePoints?: number;
-  notes?: string;
+  origine?: string;
+  capaciteSpeciale?: string;
+  coût?: number;
+  revenuAnnuel?: number;
+  
+  // English aliases
+  name?: string;
+  senator?: string;
+  skills?: string[];
+  specialties?: string[];
+  status?: string;
+  acquisitionDate?: GameDate;
   origin?: string;
-  income?: number;
+  specialAbility?: string;
   cost?: number;
+  annualIncome?: number;
 }
 
-export type ClientCreationData = Omit<Client, 'id'>;
+export interface ClientCreationData {
+  nom: string;
+  type: string;
+  senateurId: string | null;
+  location: string;
+  loyalty: string;
+  competences: string[];
+  specialites: string[];
+  influences: number;
+  statut: string;
+  dateAcquisition: GameDate;
+  description?: string;
+  origine?: string;
+  capaciteSpeciale?: string;
+}
 
 export interface ClientFilter {
-  searchTerm?: string;
+  searchTerm: string;
   type?: string;
-  status?: string;
-  assignedTo?: string;
+  senateurId?: string | null;
+  assignedTo?: string | null;
   location?: string;
   loyalty?: string;
-  assignedOnly?: boolean;
   minInfluence?: number;
   minLoyalty?: number;
+  showUnassigned?: boolean;
 }
 
-export interface ClientSort {
+export type ClientSort = {
   field: keyof Client;
   direction: 'asc' | 'desc';
-}
+};
 
-// Constants for client dropdowns
+// Constants for client properties
 export const CLIENT_TYPES = ['standard', 'influent', 'élite', 'étranger', 'militaire'];
 export const CLIENT_LOCATIONS = ['Rome', 'Italie', 'Provinces', 'Étranger'];
 export const CLIENT_LOYALTIES = ['faible', 'moyenne', 'forte', 'indéfectible'];

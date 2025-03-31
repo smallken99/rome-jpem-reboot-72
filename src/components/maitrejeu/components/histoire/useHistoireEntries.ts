@@ -1,40 +1,60 @@
 
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect } from 'react';
 import { useMaitreJeu } from '../../context';
 import { HistoireEntry } from '../../types/histoire';
+import { toast } from 'sonner';
+import { v4 as uuidv4 } from 'uuid';
 
 export const useHistoireEntries = () => {
-  const { histoireEntries, addHistoireEntry, currentYear, currentSeason } = useMaitreJeu();
+  const { histoireEntries = [], addHistoireEntry, currentDate } = useMaitreJeu();
+  const [isModalOpen, setIsModalOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
-  const [categoryFilter, setCategoryFilter] = useState('ALL');
+  const [filterType, setFilterType] = useState<string | null>(null);
 
-  // Filter entries based on search term and category
-  const filteredEntries = useMemo(() => {
-    return histoireEntries.filter(entry => {
-      const matchesSearch = entry.titre.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                           (entry.contenu && entry.contenu.toLowerCase().includes(searchTerm.toLowerCase()));
-      
-      const matchesCategory = categoryFilter === 'ALL' || entry.catégorie === categoryFilter;
-      
-      return matchesSearch && matchesCategory;
-    });
-  }, [histoireEntries, searchTerm, categoryFilter]);
+  // Filtering histoire entries
+  const filteredEntries = histoireEntries.filter(entry => {
+    const matchesTerm = !searchTerm || 
+      entry.titre.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      entry.contenu.toLowerCase().includes(searchTerm.toLowerCase());
+    
+    const matchesType = !filterType || 
+      entry.type === filterType;
+    
+    return matchesTerm && matchesType;
+  });
 
-  // Alias for addHistoireEntry for better naming
-  const createHistoireEntry = (entry: Omit<HistoireEntry, "id">) => {
+  // Create a new histoire entry
+  const handleAddHistoireEntry = (entry: Omit<HistoireEntry, "id">) => {
+    const newEntry: HistoireEntry = {
+      ...entry,
+      id: uuidv4()
+    };
+    
     addHistoireEntry(entry);
+    setIsModalOpen(false);
+    toast.success("Nouvelle entrée historique ajoutée");
+  };
+
+  // Open modal for creating new entry
+  const openNewEntryModal = () => {
+    setIsModalOpen(true);
+  };
+
+  // Close modal
+  const closeModal = () => {
+    setIsModalOpen(false);
   };
 
   return {
-    histoireEntries,
-    filteredEntries,
+    histoireEntries: filteredEntries,
+    isModalOpen,
     searchTerm,
+    filterType,
+    currentDate,
     setSearchTerm,
-    categoryFilter,
-    setCategoryFilter,
-    addHistoireEntry,
-    createHistoireEntry,
-    currentYear,
-    currentSeason
+    setFilterType,
+    handleAddHistoireEntry,
+    openNewEntryModal,
+    closeModal
   };
 };
