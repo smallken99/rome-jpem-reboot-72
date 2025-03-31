@@ -1,11 +1,13 @@
+
 import React, { createContext, useState, useContext } from 'react';
 import { SenateurJouable, Province, Evenement, Loi, Election, HistoireEntry } from '../types';
 import { Equilibre } from '../types/equilibre';
 import { Client } from '../types/clients';
 import { EconomieRecord, TreasuryStatus, EconomicFactors } from '../types/economie';
-import { FamilleInfo } from '../types/familles';
-import { GameDate, GamePhase } from '../types/common';
+import { FamilleInfo, MembreFamille } from '../types/familles';
+import { GameDate, GamePhase, Season } from '../types/common';
 import { createEquilibreOperations } from './equilibreOperations';
+import { normalizeEquilibre } from '../utils/equilibreAdapter';
 
 export interface MaitreJeuContextType {
   senateurs: SenateurJouable[];
@@ -29,23 +31,24 @@ export interface MaitreJeuContextType {
   updateEconomieRecord: (record: EconomieRecord) => void;
   deleteEconomieRecord: (id: string) => void;
   familles: FamilleInfo[];
-  addFamille: (famille: FamilleInfo) => void;
+  membres: MembreFamille[];
+  alliances: any[];
+  mariages: any[];
+  relations: any[];
+  updateAlliance: (id: string, updates: any) => void;
   updateFamille: (famille: FamilleInfo) => void;
   deleteFamille: (id: string) => void;
-  elections: Election[];
-  addElection: (election: Election) => void;
-  updateElection: (election: Election) => void;
-  deleteElection: (id: string) => void;
-  histoire: HistoireEntry[];
+  histoireEntries: HistoireEntry[];
   addHistoireEntry: (entry: HistoireEntry) => void;
   updateHistoireEntry: (entry: HistoireEntry) => void;
   deleteHistoireEntry: (id: string) => void;
   currentYear: number;
   setCurrentYear: (year: number) => void;
-  currentSeason: string;
-  setCurrentSeason: (season: string) => void;
+  currentSeason: Season;
+  setCurrentSeason: (season: Season) => void;
   currentPhase: GamePhase;
   setCurrentPhase: (phase: GamePhase) => void;
+  currentDate: GameDate;
   treasury: TreasuryStatus;
   setTreasury: (treasury: TreasuryStatus) => void;
   economicFactors: EconomicFactors;
@@ -53,7 +56,14 @@ export interface MaitreJeuContextType {
   equilibre: Equilibre;
   setEquilibre: (equilibre: Equilibre) => void;
   updateEquilibre: (updates: Partial<Equilibre>) => void;
-  updateFactionBalance: (populares: number, optimates: number, moderates: number) => void;
+  updateFactionBalance: (populaires: number, optimates: number, moderates: number) => void;
+  advanceTime: (newSeason?: Season) => void;
+  changePhase: (phase: GamePhase) => void;
+  getFamille: (id: string) => FamilleInfo | undefined;
+  getMembre: (id: string) => MembreFamille | undefined;
+  getMembresByFamille: (familleId: string) => MembreFamille[];
+  getAlliances: () => any[];
+  updateProvince: (id: string, updates: Partial<Province>) => void;
 }
 
 export const MaitreJeuContext = createContext<MaitreJeuContextType>({
@@ -78,30 +88,31 @@ export const MaitreJeuContext = createContext<MaitreJeuContextType>({
   updateEconomieRecord: () => {},
   deleteEconomieRecord: () => {},
   familles: [],
-  addFamille: () => {},
+  membres: [],
+  alliances: [],
+  mariages: [],
+  relations: [],
+  updateAlliance: () => {},
   updateFamille: () => {},
   deleteFamille: () => {},
-  elections: [],
-  addElection: () => {},
-  updateElection: () => {},
-  deleteElection: () => {},
-  histoire: [],
+  histoireEntries: [],
   addHistoireEntry: () => {},
   updateHistoireEntry: () => {},
   deleteHistoireEntry: () => {},
   currentYear: 250,
   setCurrentYear: () => {},
-  currentSeason: 'Ver',
+  currentSeason: 'Ver' as Season,
   setCurrentSeason: () => {},
-  currentPhase: 'normal',
+  currentPhase: 'normal' as GamePhase,
   setCurrentPhase: () => {},
+  currentDate: { year: 250, season: 'Ver' as Season },
   treasury: { balance: 1000, income: 500, expenses: 300, surplus: 200 },
   setTreasury: () => {},
   economicFactors: { tradeRevenue: 100, provinceRevenue: 200, militaryExpense: 50, religiousCeremonyExpense: 20, publicWorksExpense: 30, adminExpense: 10, warSpoilsRevenue: 50 },
   setEconomicFactors: () => {},
-  equilibre: {
-    politique: { populares: 30, optimates: 40, moderates: 30 },
-    populares: 30,
+  equilibre: normalizeEquilibre({
+    politique: { populaires: 30, optimates: 40, moderates: 30 },
+    populaires: 30,
     populares: 30,
     optimates: 40,
     moderates: 30,
@@ -118,10 +129,17 @@ export const MaitreJeuContext = createContext<MaitreJeuContextType>({
     facteurJuridique: 85,
     historique: [],
     risques: {}
-  },
+  }),
   setEquilibre: () => {},
   updateEquilibre: () => {},
-  updateFactionBalance: () => {}
+  updateFactionBalance: () => {},
+  advanceTime: () => {},
+  changePhase: () => {},
+  getFamille: () => undefined,
+  getMembre: () => undefined,
+  getMembresByFamille: () => [],
+  getAlliances: () => [],
+  updateProvince: () => {}
 });
 
 export const MaitreJeuProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
@@ -132,17 +150,20 @@ export const MaitreJeuProvider: React.FC<{ children: React.ReactNode }> = ({ chi
   const [clients, setClients] = useState<Client[]>([]);
   const [economieRecords, setEconomieRecords] = useState<EconomieRecord[]>([]);
   const [familles, setFamilles] = useState<FamilleInfo[]>([]);
-  const [elections, setElections] = useState<Election[]>([]);
-  const [histoire, setHistoire] = useState<HistoireEntry[]>([]);
+  const [membres, setMembres] = useState<MembreFamille[]>([]);
+  const [alliances, setAlliances] = useState<any[]>([]);
+  const [mariages, setMariages] = useState<any[]>([]);
+  const [relations, setRelations] = useState<any[]>([]);
+  const [histoireEntries, setHistoireEntries] = useState<HistoireEntry[]>([]);
   const [currentYear, setCurrentYear] = useState<number>(250);
-  const [currentSeason, setCurrentSeason] = useState<string>('Ver');
+  const [currentSeason, setCurrentSeason] = useState<Season>('Ver');
   const [currentPhase, setCurrentPhase] = useState<GamePhase>('normal');
   const [treasury, setTreasury] = useState<TreasuryStatus>({ balance: 1000, income: 500, expenses: 300, surplus: 200 });
   const [economicFactors, setEconomicFactors] = useState<EconomicFactors>({ tradeRevenue: 100, provinceRevenue: 200, militaryExpense: 50, religiousCeremonyExpense: 20, publicWorksExpense: 30, adminExpense: 10, warSpoilsRevenue: 50 });
-  const [equilibre, setEquilibre] = useState<Equilibre>({
-    politique: { populares: 30, optimates: 40, moderates: 30 },
-    populares: 30,
-    populares: 30,
+  const [equilibre, setEquilibre] = useState<Equilibre>(normalizeEquilibre({
+    politique: { populaires: 30, optimates: 40, moderates: 30 },
+    populaires: 30,
+    populares: 30, 
     optimates: 40,
     moderates: 30,
     economie: { stabilite: 70, croissance: 60, commerce: 80, agriculture: 50 },
@@ -158,7 +179,10 @@ export const MaitreJeuProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     facteurJuridique: 85,
     historique: [],
     risques: {}
-  });
+  }));
+
+  // Current date as a GameDate object
+  const currentDate: GameDate = { year: currentYear, season: currentSeason };
 
   const addEvenement = (evenement: Evenement) => {
     setEvenements([...evenements, evenement]);
@@ -208,10 +232,6 @@ export const MaitreJeuProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     setEconomieRecords(economieRecords.filter(e => e.id !== id));
   };
 
-  const addFamille = (famille: FamilleInfo) => {
-    setFamilles([...familles, famille]);
-  };
-
   const updateFamille = (famille: FamilleInfo) => {
     setFamilles(familles.map(f => f.id === famille.id ? famille : f));
   };
@@ -220,34 +240,78 @@ export const MaitreJeuProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     setFamilles(familles.filter(f => f.id !== id));
   };
 
-  const addElection = (election: Election) => {
-    setElections([...elections, election]);
-  };
-
-  const updateElection = (election: Election) => {
-    setElections(elections.map(e => e.id === election.id ? election : e));
-  };
-
-  const deleteElection = (id: string) => {
-    setElections(elections.filter(e => e.id !== id));
-  };
-
   const addHistoireEntry = (entry: HistoireEntry) => {
-    setHistoire([...histoire, entry]);
+    setHistoireEntries([...histoireEntries, entry]);
   };
 
   const updateHistoireEntry = (entry: HistoireEntry) => {
-    setHistoire(histoire.map(h => h.id === entry.id ? entry : h));
+    setHistoireEntries(histoireEntries.map(h => h.id === entry.id ? entry : h));
   };
 
   const deleteHistoireEntry = (id: string) => {
-    setHistoire(histoire.filter(h => h.id !== id));
+    setHistoireEntries(histoireEntries.filter(h => h.id !== id));
   };
   
   // Import and use the equilibre operations
   const { updateEquilibre, updateFactionBalance } = createEquilibreOperations(setEquilibre);
   
-  // Add updateFactionBalance to the context value
+  // Time management functions
+  const advanceTime = (newSeason?: Season) => {
+    if (newSeason) {
+      setCurrentSeason(newSeason);
+    } else {
+      // Auto advance to next season
+      const seasons: Season[] = ['Ver', 'Aestas', 'Autumnus', 'Hiems'];
+      const currentIndex = seasons.indexOf(currentSeason);
+      const nextIndex = (currentIndex + 1) % seasons.length;
+      
+      // If we're completing a full year cycle
+      if (nextIndex === 0) {
+        setCurrentYear(currentYear + 1);
+      }
+      
+      setCurrentSeason(seasons[nextIndex]);
+    }
+  };
+  
+  const changePhase = (phase: GamePhase) => {
+    setCurrentPhase(phase);
+  };
+
+  const updateProvince = (id: string, updates: Partial<Province>) => {
+    setProvinces(prev => 
+      prev.map(province => 
+        province.id === id ? { ...province, ...updates } : province
+      )
+    );
+  };
+  
+  // Family-related utility functions
+  const getFamille = (id: string): FamilleInfo | undefined => {
+    return familles.find(f => f.id === id);
+  };
+  
+  const getMembre = (id: string): MembreFamille | undefined => {
+    return membres.find(m => m.id === id);
+  };
+  
+  const getMembresByFamille = (familleId: string): MembreFamille[] => {
+    return membres.filter(m => m.familleId === familleId);
+  };
+  
+  const getAlliances = () => {
+    return alliances;
+  };
+  
+  const updateAlliance = (id: string, updates: any) => {
+    setAlliances(prev => 
+      prev.map(alliance => 
+        alliance.id === id ? { ...alliance, ...updates } : alliance
+      )
+    );
+  };
+  
+  // Put together the context value
   const contextValue = {
     senateurs,
     setSenateurs,
@@ -270,14 +334,14 @@ export const MaitreJeuProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     updateEconomieRecord,
     deleteEconomieRecord,
     familles,
-    addFamille,
+    membres,
+    alliances,
+    mariages,
+    relations,
+    updateAlliance,
     updateFamille,
     deleteFamille,
-    elections,
-    addElection,
-    updateElection,
-    deleteElection,
-    histoire,
+    histoireEntries,
     addHistoireEntry,
     updateHistoireEntry,
     deleteHistoireEntry,
@@ -287,6 +351,7 @@ export const MaitreJeuProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     setCurrentSeason,
     currentPhase,
     setCurrentPhase,
+    currentDate,
     treasury,
     setTreasury,
     economicFactors,
@@ -294,7 +359,14 @@ export const MaitreJeuProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     equilibre,
     setEquilibre,
     updateEquilibre,
-    updateFactionBalance
+    updateFactionBalance,
+    advanceTime,
+    changePhase,
+    getFamille,
+    getMembre,
+    getMembresByFamille,
+    getAlliances,
+    updateProvince
   };
   
   return (

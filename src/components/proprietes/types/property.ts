@@ -24,11 +24,11 @@ export interface PropertyUpgrade {
 }
 
 export interface SlaveAssignment {
+  id?: string;
   slaveId: string;
   propertyId: string;
   startDate: Date;
   efficiency: number;
-  id?: string;
   buildingId?: string;
   assignedAt?: Date;
   role?: string;

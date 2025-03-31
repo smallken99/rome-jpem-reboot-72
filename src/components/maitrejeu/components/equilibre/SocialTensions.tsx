@@ -187,7 +187,7 @@ export const SocialTensions = () => {
                   <span>Populares:</span>
                   <div className="flex items-center">
                     <TrendingUp className="h-4 w-4 text-green-500" />
-                    <span className="ml-1">{equilibre.populaires || equilibre.populares}</span>
+                    <span className="ml-1">{equilibre.populares || equilibre.populaires}</span>
                   </div>
                 </li>
               </ul>
@@ -310,7 +310,7 @@ function calculateEsclaveTension(equilibre: any): number {
   
   // Military strength reduces slave tension
   const militaryStrength = 
-    (equilibre.militaire?.effectifs || 50) + (equilibre.militaire?.discipline || 50) / 2;
+    ((equilibre.militaire?.effectifs || 50) + (equilibre.militaire?.discipline || 50)) / 2;
   
   let tension = baseTension;
   

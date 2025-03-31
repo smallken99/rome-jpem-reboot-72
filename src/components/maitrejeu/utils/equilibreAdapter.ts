@@ -1,3 +1,4 @@
+
 import { Equilibre } from '../types/equilibre';
 
 /**
@@ -74,7 +75,7 @@ export function normalizeEquilibre(data: Partial<Equilibre>): Equilibre {
     if (data.social.plébéiens !== undefined) {
       result.social.plebeiens = data.social.plébéiens;
     } else if (data.social.plebeiens !== undefined) {
-      result.social.plebeiens = data.social.plebeiens;
+      result.social.plébéiens = data.social.plebeiens;
     }
     // Sync between nested and direct properties
     result.plébéiens = result.social.plebeiens;
@@ -197,4 +198,28 @@ export function updateFactionBalance(
       moderates
     }
   };
+}
+
+/**
+ * Utility functions for formatting dates
+ */
+export function formatAnyDate(date: string | Date | { year: number; season: string }): string {
+  if (typeof date === 'string') {
+    return date;
+  } else if (date instanceof Date) {
+    return date.toLocaleDateString();
+  } else {
+    return `${date.season} ${date.year}`;
+  }
+}
+
+/**
+ * Check if a value is a GameDate object
+ */
+export function isGameDate(date: any): boolean {
+  return date && 
+         typeof date === 'object' && 
+         !Array.isArray(date) && 
+         'year' in date && 
+         'season' in date;
 }

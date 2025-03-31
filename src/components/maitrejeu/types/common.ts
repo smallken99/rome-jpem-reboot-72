@@ -1,94 +1,53 @@
-// Common date types
-export type Season = 
-  // English variants
-  'spring' | 'summer' | 'fall' | 'winter' | 
-  'Spring' | 'Summer' | 'Fall' | 'Winter' |
-  // Latin variants
-  'Ver' | 'Aestas' | 'Autumnus' | 'Hiems' |
-  // All uppercase variants
-  'SPRING' | 'SUMMER' | 'AUTUMN' | 'WINTER' |
-  // French variants
-  'Printemps' | 'Été' | 'Automne' | 'Hiver' |
-  // Any string (for backward compatibility)
-  string;
 
-// Game phase types for state machine
-export type GamePhase = 
-  // Standard phases
-  'normal' | 'election' | 'crisis' | 'war' | 
-  // Economy phases
-  'ECONOMY' | 'EVENTS' | 'DIPLOMACY' | 'MILITARY' | 
-  // Political phases
-  'SENATE' | 'SENAT' | 'ELECTION' |
-  // French phases
-  'POLITIQUE' | 'ECONOMIE' | 'SOCIAL' | 'MILITAIRE' | 'RELIGION' |
-  // Other phases
-  'SETUP' | 'PLANNING' | 'ACTIONS' | 'ACTION' | 'EVENEMENT' | 'ADMINISTRATION' |
-  // Any string (for backward compatibility)
-  string;
+// Game date types
+export type Season = 'VER' | 'AESTAS' | 'AUTUMNUS' | 'HIEMS' | 'SPRING' | 'SUMMER' | 'AUTUMN' | 'WINTER' | 'Ver' | 'Aestas' | 'Autumnus' | 'Hiems' | string;
 
-// Common importance levels
-export type ImportanceType = 'low' | 'medium' | 'high' | 'critical' | 'normale' | 'faible' | 'haute' | string;
-
-// Common date object
 export interface GameDate {
   year: number;
   season: Season;
-  day?: number;
-  phase?: GamePhase;
 }
 
-// Utility functions for date formatting
-export function formatGameDate(date: GameDate | string): string {
-  if (typeof date === 'string') return date;
-  return `${date.year} ${date.season}`;
-}
+// Game phase types
+export type GamePhase = 'normal' | 'crisis' | 'war' | 'civil_war' | 'election' | 'expansion' | 'reform' | 'prosperity' | 'decline' | 'ELECTION' | 'WAR' | 'CRISIS' | 'SENATE' | 'ECONOMY' | 'MILITARY' | 'RELIGION' | 'NORMAL' | string;
 
-export function formatAnyDate(date: GameDate | Date | string): string {
-  if (typeof date === 'string') return date;
-  if (date instanceof Date) return date.toISOString();
-  return formatGameDate(date);
-}
-
-export function isGameDate(date: any): date is GameDate {
-  return (
-    date && 
-    typeof date === 'object' && 
-    typeof date.year === 'number' && 
-    typeof date.season === 'string'
-  );
-}
-
-// Function to generate a random ID with a prefix
-export function generateId(prefix: string = 'item'): string {
-  return `${prefix}-${Math.random().toString(36).substr(2, 9)}`;
-}
-
-// Convert string to GameDate
-export function parseStringToGameDate(dateStr: string): GameDate | undefined {
-  if (!dateStr) return undefined;
-  
-  const parts = dateStr.split(' ');
-  if (parts.length >= 2) {
-    const year = parseInt(parts[0], 10);
-    const season = parts[1] as Season;
-    
-    if (!isNaN(year)) {
-      return { year, season };
-    }
-  }
-  
-  return undefined;
+export function formatGameDate(date: GameDate): string {
+  return `${date.season} ${date.year}`;
 }
 
 export function dateToGameDate(date: Date): GameDate {
   const month = date.getMonth();
   let season: Season;
   
-  if (month >= 2 && month <= 4) season = 'Ver';
-  else if (month >= 5 && month <= 7) season = 'Aestas';
-  else if (month >= 8 && month <= 10) season = 'Autumnus';
-  else season = 'Hiems';
+  if (month >= 2 && month <= 4) {
+    season = 'VER';
+  } else if (month >= 5 && month <= 7) {
+    season = 'AESTAS';
+  } else if (month >= 8 && month <= 10) {
+    season = 'AUTUMNUS';
+  } else {
+    season = 'HIEMS';
+  }
   
-  return { year: date.getFullYear(), season };
+  // Adjust year (game years are from founding of Rome, approx 753 BCE)
+  const gameYear = date.getFullYear() + 753;
+  
+  return {
+    year: gameYear,
+    season
+  };
+}
+
+export function gameYearToDate(gameYear: number): Date {
+  // Convert from AUC (ab urbe condita) to CE
+  const ceYear = gameYear - 753;
+  return new Date(ceYear, 0, 1);
+}
+
+export function seasonToMonth(season: Season): number {
+  const seasonUpper = season.toUpperCase();
+  if (seasonUpper === 'VER' || seasonUpper === 'SPRING') return 3; // March
+  if (seasonUpper === 'AESTAS' || seasonUpper === 'SUMMER') return 6; // June
+  if (seasonUpper === 'AUTUMNUS' || seasonUpper === 'AUTUMN') return 9; // September
+  if (seasonUpper === 'HIEMS' || seasonUpper === 'WINTER') return 0; // January
+  return 0; // Default to January
 }

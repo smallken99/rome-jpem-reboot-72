@@ -1,4 +1,3 @@
-
 export type RiskType = 'revolte' | 'guerre' | 'politique' | 'economique' | 'religieux' | 'military' | 'political' | 'economic' | 'social' | 'religious' | string;
 
 export interface Risk {
