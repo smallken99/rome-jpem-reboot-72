@@ -1,4 +1,6 @@
 
+import { GameDate } from './common';
+
 export interface TreasuryStatus {
   balance: number;
   income: number;
@@ -26,65 +28,70 @@ export interface EconomicFactors {
   militaryExpenses?: number;
 }
 
-export interface EconomieStatsProps {
-  treasury: TreasuryStatus;
-  economicFactors: EconomicFactors;
-}
-
-export type RecurringInterval = 'weekly' | 'monthly' | 'seasonal' | 'yearly';
+export type RecurringInterval = 'once' | 'daily' | 'weekly' | 'monthly' | 'quarterly' | 'yearly' | string;
 
 export interface EconomieRecord {
   id: string;
+  date: GameDate | Date;
   amount: number;
+  description: string;
   type: 'income' | 'expense';
   category: string;
-  description: string;
-  date: Date | { year: number; season: string };
-  source?: string;
-  approved?: boolean;
   recurring?: boolean;
   recurringInterval?: RecurringInterval;
+  source?: string;
+  approved?: boolean;
   tags?: string[];
   affectedSenateurId?: string;
   affectedProvinceId?: string;
 }
 
 export interface EconomieCreationData {
+  date: GameDate | Date;
   amount: number;
+  description: string;
   type: 'income' | 'expense';
   category: string;
-  description: string;
-  date: Date | { year: number; season: string };
-  source?: string;
-  approved?: boolean;
   recurring?: boolean;
   recurringInterval?: RecurringInterval;
+  source?: string;
+  approved?: boolean;
   tags?: string[];
   affectedSenateurId?: string;
   affectedProvinceId?: string;
 }
 
 export interface EconomieFilter {
-  types?: string[];
-  category?: string;
   dateRange?: [string, string] | { start: string; end: string };
-  minAmount?: number;
-  maxAmount?: number;
-  searchTerm?: string;
-  tags?: string[];
-  affectedEntity?: string;
+  types?: string[];
+  type?: string;
+  category?: string;
+  categories?: string[];
+  amountRange?: [number, number];
+  sources?: string[];
   approved?: boolean;
   recurring?: boolean;
+  tags?: string[];
+  search?: string;
+  searchTerm?: string;
+  affectedEntity?: string;
 }
 
-export type EconomieSort = keyof EconomieRecord | {
+export type EconomieSort = string | {
   field: keyof EconomieRecord;
   direction: 'asc' | 'desc';
 };
 
-export interface EconomieSource {
-  id: string;
-  name: string;
-  type: string;
-  description?: string;
+export interface EconomieStatsProps {
+  treasury?: TreasuryStatus;
+  economicFactors?: EconomicFactors;
+  period?: string;
+  compareWithPrevious?: boolean;
 }
+
+export const ECONOMIE_TYPES = ['income', 'expense'];
+
+export const ECONOMIE_CATEGORIES = [
+  'tax', 'tribute', 'trade', 'military', 'building',
+  'public_works', 'ceremony', 'administrative', 'other'
+];

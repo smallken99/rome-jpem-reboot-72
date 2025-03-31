@@ -20,6 +20,7 @@ export interface PropertyUpgrade {
     upgrades?: string[];
   };
   type?: string;
+  buildingType?: string[];
 }
 
 export interface SlaveAssignment {

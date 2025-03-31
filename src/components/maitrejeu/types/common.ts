@@ -6,7 +6,11 @@ export type Season =
   // Latin variants
   'Ver' | 'Aestas' | 'Autumnus' | 'Hiems' |
   // All uppercase variants
-  'SPRING' | 'SUMMER' | 'AUTUMN' | 'WINTER';
+  'SPRING' | 'SUMMER' | 'AUTUMN' | 'WINTER' |
+  // French variants
+  'Printemps' | 'Été' | 'Automne' | 'Hiver' |
+  // Any string (for backward compatibility)
+  string;
 
 // Game phase types for state machine
 export type GamePhase = 
@@ -14,10 +18,14 @@ export type GamePhase =
   'normal' | 'election' | 'crisis' | 'war' | 
   // Economy phases
   'ECONOMY' | 'EVENTS' | 'DIPLOMACY' | 'MILITARY' | 
+  // Political phases
+  'SENATE' | 'SENAT' | 'ELECTION' |
   // French phases
   'POLITIQUE' | 'ECONOMIE' | 'SOCIAL' | 'MILITAIRE' | 'RELIGION' |
   // Other phases
-  'SETUP' | 'PLANNING' | 'ACTIONS' | 'ACTION' | 'EVENEMENT' | 'ADMINISTRATION';
+  'SETUP' | 'PLANNING' | 'ACTIONS' | 'ACTION' | 'EVENEMENT' | 'ADMINISTRATION' |
+  // Any string (for backward compatibility)
+  string;
 
 // Common importance levels
 export type ImportanceType = 'low' | 'medium' | 'high' | 'critical' | 'normale' | 'faible' | 'haute' | string;
@@ -28,6 +36,27 @@ export interface GameDate {
   season: Season;
   day?: number;
   phase?: GamePhase;
+}
+
+// Utility functions for date formatting
+export function formatGameDate(date: GameDate | string): string {
+  if (typeof date === 'string') return date;
+  return `${date.year} ${date.season}`;
+}
+
+export function formatAnyDate(date: GameDate | Date | string): string {
+  if (typeof date === 'string') return date;
+  if (date instanceof Date) return date.toISOString();
+  return formatGameDate(date);
+}
+
+export function isGameDate(date: any): date is GameDate {
+  return (
+    date && 
+    typeof date === 'object' && 
+    typeof date.year === 'number' && 
+    typeof date.season === 'string'
+  );
 }
 
 // Function to generate a random ID with a prefix
@@ -52,7 +81,14 @@ export function parseStringToGameDate(dateStr: string): GameDate | undefined {
   return undefined;
 }
 
-// Format GameDate to string
-export function formatGameDate(date: GameDate): string {
-  return `${date.year} ${date.season}${date.day ? ` jour ${date.day}` : ''}`;
+export function dateToGameDate(date: Date): GameDate {
+  const month = date.getMonth();
+  let season: Season;
+  
+  if (month >= 2 && month <= 4) season = 'Ver';
+  else if (month >= 5 && month <= 7) season = 'Aestas';
+  else if (month >= 8 && month <= 10) season = 'Autumnus';
+  else season = 'Hiems';
+  
+  return { year: date.getFullYear(), season };
 }

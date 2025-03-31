@@ -40,3 +40,44 @@ export interface SenateurJouable {
   roles?: string[];
   diplomatie?: Record<string, any>;
 }
+
+// Converter function to ensure a senateur object has all required properties
+export function normalizeSenateurJouable(senateur: Partial<SenateurJouable>): SenateurJouable {
+  return {
+    id: senateur.id || `sen-${Date.now()}`,
+    nom: senateur.nom || '',
+    prenom: senateur.prenom || '',
+    gens: senateur.gens || '',
+    name: senateur.name || `${senateur.prenom || ''} ${senateur.nom || ''}`,
+    gender: senateur.gender || 'male',
+    age: senateur.age || 30,
+    actif: senateur.actif !== undefined ? senateur.actif : true,
+    faction: senateur.faction || 'Inconnue',
+    clientele: senateur.clientele || 0,
+    influence: senateur.influence || 0,
+    prestige: senateur.prestige || 0,
+    richesse: senateur.richesse || 0,
+    fonction: senateur.fonction,
+    magistrature: senateur.magistrature,
+    appartenance: senateur.appartenance,
+    playerId: senateur.playerId,
+    allies: senateur.allies || [],
+    ennemis: senateur.ennemis || [],
+    competences: senateur.competences || {},
+    attributes: senateur.attributes || {},
+    background: senateur.background,
+    famille: senateur.famille || 'Inconnue',
+    dateNaissance: senateur.dateNaissance,
+    dateMort: senateur.dateMort,
+    portrait: senateur.portrait,
+    notes: senateur.notes,
+    popularite: senateur.popularite || 0,
+    militaire: senateur.militaire || 0,
+    piete: senateur.piete || 0,
+    eloquence: senateur.eloquence || 0,
+    joueur: senateur.joueur || false,
+    statut: senateur.statut || 'actif',
+    roles: senateur.roles || [],
+    diplomatie: senateur.diplomatie || {}
+  };
+}
