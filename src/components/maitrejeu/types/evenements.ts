@@ -19,12 +19,20 @@ export interface Evenement {
   titre?: string; // French alias
   description: string;
   type: EvenementType;
-  date: GameDate | { year: number; season: string };
+  date: GameDate;
   importance: ImportanceType;
   options: EvenementAction[];
   resolved: boolean;
   selectedOption?: string;
+  endDate?: GameDate;
+  tags?: string[];
+  actions?: EvenementAction[];
 }
 
-// Export the ImportanceType for reuse
-export { ImportanceType };
+export interface EvenementFormProps {
+  onSubmit: (evenement: Omit<Evenement, "id">) => void;
+  evenementInitial?: Partial<Evenement>;
+}
+
+// Export types for compatibility
+export { ImportanceType as ImportanceType };

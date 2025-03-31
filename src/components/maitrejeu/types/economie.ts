@@ -23,6 +23,7 @@ export interface TreasuryStatus {
   expenses: number;
   surplus: number;
   previousBalance?: number;
+  taxRate?: number;
 }
 
 export interface EconomicFactors {
@@ -36,6 +37,8 @@ export interface EconomicFactors {
   inflationRate?: number;
   growthRate?: number;
   taxRates?: Record<string, number>;
+  taxCollection?: number;
+  currentYear?: number;
 }
 
 export interface EconomieCreationData {
@@ -63,6 +66,7 @@ export interface EconomieFilter {
   showApproved?: boolean;
   minAmount?: number;
   maxAmount?: number;
+  affectedEntity?: string;
 }
 
 // Define sorting options
@@ -88,3 +92,9 @@ export const ECONOMIE_CATEGORIES = [
   'tribute',
   'other'
 ];
+
+export interface EconomieStatsProps {
+  economieRecords: EconomieRecord[];
+  treasury: TreasuryStatus;
+  economicFactors: EconomicFactors;
+}

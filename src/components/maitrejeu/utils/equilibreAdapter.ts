@@ -1,199 +1,130 @@
 
-import { Equilibre } from '../types/equilibre';
+import { Equilibre, Risk, HistoriqueEntry, PoliticalEvent, RiskType } from '../types/equilibre';
 
 /**
- * Gets a specific economic stability value from an equilibre object
+ * Normalise les données d'équilibre pour garantir une structure cohérente
  */
-export function getEconomicStability(equilibre: Equilibre): number {
-  if (!equilibre || !equilibre.economie) return 50;
-  
-  // If economie is already a number, return it
-  if (typeof equilibre.economie === 'number') {
-    return equilibre.economie;
+export function normalizeEquilibre(data: any): Equilibre {
+  // Extraire les données politiques
+  const populaires = data.populaires || data.populares || data.politique?.populaires || 30;
+  const optimates = data.optimates || data.politique?.optimates || 40;
+  const moderates = data.moderates || data.politique?.moderates || 30;
+
+  // Extraire les données économiques
+  let economie = 0;
+  if (typeof data.economie === 'number') {
+    economie = data.economie;
+  } else if (data.economie && typeof data.economie === 'object') {
+    // Si c'est un objet avec des sous-valeurs
+    const { stabilite = 70, croissance = 60, commerce = 80, agriculture = 50 } = data.economie;
+    economie = Math.round((stabilite + croissance + commerce + agriculture) / 4);
+  } else {
+    economie = data.economy || data.économie || data.economicStability || 70;
   }
-  
-  // Otherwise calculate average from economie object properties
-  const { stabilite, croissance, commerce, agriculture } = equilibre.economie;
-  return Math.round((stabilite + croissance + commerce + agriculture) / 4);
-}
 
-/**
- * Normalize an equilibre object to ensure it has all required properties
- */
-export function normalizeEquilibre(data: Partial<Equilibre>): Equilibre {
-  // Default values
-  const defaultEquilibre: Equilibre = {
-    politique: { populaires: 33, optimates: 33, moderates: 34 },
-    populaires: 33,
-    populares: 33, 
-    optimates: 33,
-    moderates: 34,
-    economie: { stabilite: 50, croissance: 50, commerce: 50, agriculture: 50 },
-    social: { plebeiens: 85, patriciens: 15, esclaves: 30, cohesion: 50, plébéiens: 85 },
-    plébéiens: 85,
-    patriciens: 15,
-    militaire: { moral: 50, effectifs: 50, equipement: 50, discipline: 50 },
-    religion: { piete: 50, traditions: 50, superstition: 50 },
-    stability: 50,
-    armée: 50,
-    loyauté: 50,
-    morale: 50,
-    facteurJuridique: 50,
-    historique: [],
-    risques: {}
+  // Créer l'économie détaillée
+  const economieDetailed = {
+    stabilite: data.economie?.stabilite || 70,
+    croissance: data.economie?.croissance || 60,
+    commerce: data.economie?.commerce || 80,
+    agriculture: data.economie?.agriculture || 50
   };
-  
-  // Create a new object with both data and default values
-  const result = { ...defaultEquilibre, ...data };
-  
-  // Handle special cases for nested objects with potential different property names
-  if (data.politique) {
-    result.politique = { ...defaultEquilibre.politique, ...data.politique };
-    // Sync between nested and direct properties
-    result.populaires = result.politique.populaires;
-    result.populares = result.politique.populaires;
-    result.optimates = result.politique.optimates;
-    result.moderates = result.politique.moderates;
+
+  // Extraire les données sociales
+  const plebeiens = data.plébéiens || data.plebeiens || data.social?.plebeiens || data.social?.plébéiens || 60;
+  const patriciens = data.patriciens || data.social?.patriciens || 40;
+  const esclaves = data.social?.esclaves || 20;
+  const cohesion = data.social?.cohesion || 70;
+
+  // Religion
+  let religion = 0;
+  if (typeof data.religion === 'number') {
+    religion = data.religion;
+  } else if (data.religion && typeof data.religion === 'object') {
+    const { piete = 70, traditions = 80, superstition = 50 } = data.religion;
+    religion = Math.round((piete + traditions + superstition) / 3);
   } else {
-    // If politique object is not provided, build it from direct properties
-    if (data.populaires) {
-      result.politique.populaires = data.populaires;
-      result.populares = data.populaires;
-    } else if (data.populares) {
-      result.politique.populaires = data.populares;
-      result.populaires = data.populares;
-    }
-    
-    if (data.optimates) result.politique.optimates = data.optimates;
-    if (data.moderates) result.politique.moderates = data.moderates;
+    religion = 70; // Valeur par défaut
   }
-  
-  // Handle social data sync
-  if (data.social) {
-    result.social = { ...defaultEquilibre.social, ...data.social };
-    // Check for alternate spelling and sync both ways
-    if (data.social.plébéiens !== undefined) {
-      result.social.plebeiens = data.social.plébéiens;
-    } else if (data.social.plebeiens !== undefined) {
-      result.social.plébéiens = data.social.plebeiens;
-    }
-    // Sync between nested and direct properties
-    result.plébéiens = result.social.plebeiens;
-    result.patriciens = result.social.patriciens;
-  } else {
-    // If social object is not provided, build it from direct properties
-    if (data.plébéiens !== undefined) {
-      result.social.plebeiens = data.plébéiens;
-      result.social.plébéiens = data.plébéiens;
-    }
-    if (data.patriciens !== undefined) result.social.patriciens = data.patriciens;
-  }
-  
-  // Handle economie data
-  if (data.economie) {
-    result.economie = { ...defaultEquilibre.economie, ...data.economie };
-  } else if (data.économie) {
-    result.economie = { ...defaultEquilibre.economie, ...data.économie };
-    result.économie = result.economie;
-  }
-  
-  return result;
-}
 
-/**
- * Get a specific value from the equilibre object by path
- */
-export function getEquilibreValue(equilibre: Equilibre, path: string, defaultValue: number = 0): number {
-  const parts = path.split('.');
-  let current: any = equilibre;
-  
-  for (const part of parts) {
-    if (current == null) return defaultValue;
-    current = current[part];
-  }
-  
-  if (typeof current === 'object' && current !== null) {
-    // If we end up with an object but want a number, try to average its values
-    if (Object.keys(current).length === 0) return defaultValue;
-    
-    const sum = Object.values(current).reduce((acc: number, val: any) => {
-      return acc + (typeof val === 'number' ? val : 0);
-    }, 0);
-    
-    return sum / Object.keys(current).length;
-  }
-  
-  return typeof current === 'number' ? current : defaultValue;
-}
+  // Créer la religion détaillée
+  const religionDetailed = {
+    piete: data.religion?.piete || 70,
+    traditions: data.religion?.traditions || 80,
+    superstition: data.religion?.superstition || 50
+  };
 
-/**
- * Update an equilibre object with new values
- */
-export function updateEquilibre(
-  currentEquilibre: Equilibre,
-  updates: Partial<Equilibre>
-): Equilibre {
-  // First normalize both objects
-  const normalizedCurrent = normalizeEquilibre(currentEquilibre);
-  const result = { ...normalizedCurrent };
-  
-  // Apply direct updates to the result
-  Object.entries(updates).forEach(([key, value]) => {
-    if (key in result) {
-      (result as any)[key] = value;
-    }
-  });
-  
-  // Specific handling for nested objects
-  if (updates.politique) {
-    result.politique = { ...result.politique, ...updates.politique };
-    // Sync direct access properties
-    result.populaires = result.politique.populaires;
-    result.populares = result.politique.populaires;
-    result.optimates = result.politique.optimates;
-    result.moderates = result.politique.moderates;
+  // Convertir les risques
+  let risques: Risk[] = [];
+  if (Array.isArray(data.risques)) {
+    risques = data.risques;
+  } else if (data.risques && typeof data.risques === 'object') {
+    risques = Object.values(data.risques);
   }
-  
-  if (updates.social) {
-    result.social = { ...result.social, ...updates.social };
-    // Handle alternate spelling
-    if ('plébéiens' in updates.social) {
-      result.social.plebeiens = updates.social.plébéiens as number;
-    }
-    // Sync direct access properties
-    result.plébéiens = result.social.plebeiens;
-    result.patriciens = result.social.patriciens;
-  }
-  
-  if (updates.economie) {
-    result.economie = { ...result.economie, ...updates.economie };
-    // If économie is used anywhere, sync it
-    result.économie = result.economie;
-  }
-  
-  return result;
-}
 
-/**
- * Function used to update faction balance specifically
- */
-export function updateFactionBalance(
-  currentEquilibre: Equilibre,
-  populares: number,
-  optimates: number,
-  moderates: number
-): Equilibre {
-  const normalizedCurrent = normalizeEquilibre(currentEquilibre);
-  
+  // Mettre en forme l'historique
+  const historique: HistoriqueEntry[] = Array.isArray(data.historique) 
+    ? data.historique 
+    : [];
+
+  // Structure finale normalisée
   return {
-    ...normalizedCurrent,
-    populares,
-    populaires: populares,
+    // Politique
+    politique: {
+      populaires,
+      optimates,
+      moderates
+    },
+    populaires,
+    populares: populaires,
     optimates,
     moderates,
-    politique: {
-      ...normalizedCurrent.politique,
-      populaires: populares,
+
+    // Économie
+    economie,
+    economy: economie,
+    économie: economie,
+    economicStability: economie,
+    economieDetailed,
+
+    // Social
+    social: {
+      plebeiens,
+      plébéiens: plebeiens,
+      patriciens,
+      esclaves,
+      cohesion
+    },
+    plebeiens,
+    plébéiens: plebeiens,
+    patriciens,
+
+    // Militaire
+    militaire: data.militaire || {
+      moral: data.moral || 80,
+      effectifs: data.effectifs || 70,
+      equipement: data.equipement || 60,
+      discipline: data.discipline || 90
+    },
+
+    // Religion
+    religion,
+    religionDetailed,
+
+    // Divers facteurs de stabilité
+    stability: data.stability || 75,
+    armée: data.armée || 80,
+    loyauté: data.loyauté || 70,
+    morale: data.morale || 60,
+    facteurJuridique: data.facteurJuridique || 85,
+
+    // Historique et risques
+    historique,
+    risques,
+
+    // Pour compatibilité
+    political: {
+      populares: populaires,
       optimates,
       moderates
     }
@@ -201,25 +132,53 @@ export function updateFactionBalance(
 }
 
 /**
- * Utility functions for formatting dates
+ * Calcule la stabilité économique basée sur les données
  */
-export function formatAnyDate(date: string | Date | { year: number; season: string }): string {
-  if (typeof date === 'string') {
-    return date;
-  } else if (date instanceof Date) {
-    return date.toLocaleDateString();
-  } else {
-    return `${date.season} ${date.year}`;
+export function getEconomicStability(data: any): number {
+  if (typeof data.economie === 'number') {
+    return data.economie;
+  } 
+  
+  if (data.economie && typeof data.economie === 'object') {
+    const { stabilite = 70, croissance = 60, commerce = 80, agriculture = 50 } = data.economie;
+    return Math.round((stabilite + croissance + commerce + agriculture) / 4);
   }
+  
+  return data.economy || data.économie || data.economicStability || 70;
 }
 
 /**
- * Check if a value is a GameDate object
+ * Calcule la stabilité religieuse basée sur les données
  */
-export function isGameDate(date: any): boolean {
-  return date && 
-         typeof date === 'object' && 
-         !Array.isArray(date) && 
-         'year' in date && 
-         'season' in date;
+export function getReligionStability(data: any): number {
+  if (typeof data.religion === 'number') {
+    return data.religion;
+  } 
+  
+  if (data.religion && typeof data.religion === 'object') {
+    const { piete = 70, traditions = 80, superstition = 50 } = data.religion;
+    return Math.round((piete + traditions + superstition) / 3);
+  }
+  
+  return 70; // Valeur par défaut
+}
+
+/**
+ * Extrait les événements politiques des données
+ */
+export function getPoliticalEvents(data: any): PoliticalEvent[] {
+  if (!data || !Array.isArray(data.evenements)) {
+    return [];
+  }
+  
+  return data.evenements
+    .filter((evt: any) => evt.type === 'POLITIQUE' || evt.type === 'POLITICAL')
+    .map((evt: any) => ({
+      id: evt.id,
+      title: evt.title || evt.titre,
+      description: evt.description,
+      date: evt.date,
+      type: evt.type,
+      importance: evt.importance
+    }));
 }

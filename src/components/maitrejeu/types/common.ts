@@ -14,6 +14,21 @@ export function formatGameDate(date: GameDate): string {
   return `${date.season} ${date.year}`;
 }
 
+export function formatAnyDate(date: Date | GameDate | string): string {
+  if (typeof date === 'string') {
+    return date;
+  } else if ('year' in date && 'season' in date) {
+    return formatGameDate(date);
+  } else if (date instanceof Date) {
+    return date.toLocaleDateString();
+  }
+  return String(date);
+}
+
+export function isGameDate(date: any): date is GameDate {
+  return date && typeof date === 'object' && 'year' in date && 'season' in date;
+}
+
 export function dateToGameDate(date: Date): GameDate {
   const month = date.getMonth();
   let season: Season;
@@ -51,3 +66,24 @@ export function seasonToMonth(season: Season): number {
   if (seasonUpper === 'HIEMS' || seasonUpper === 'WINTER') return 0; // January
   return 0; // Default to January
 }
+
+export function parseStringToGameDate(dateStr: string): GameDate | null {
+  if (!dateStr) return null;
+  
+  const parts = dateStr.split(' ');
+  if (parts.length !== 2) return null;
+  
+  const season = parts[0] as Season;
+  const year = parseInt(parts[1], 10);
+  
+  if (isNaN(year)) return null;
+  
+  return { year, season };
+}
+
+export function generateId(): string {
+  return Math.random().toString(36).substring(2, 11);
+}
+
+// Re-exporting ImportanceType
+export type ImportanceType = 'mineure' | 'normale' | 'majeure' | 'critique' | 'low' | 'medium' | 'high' | 'critical' | string;
