@@ -1,6 +1,6 @@
 
 import { v4 as uuidv4 } from 'uuid';
-import { formatGameDate, GameDate } from '../types/common';
+import { GameDate } from '../types/common';
 
 /**
  * Génère un identifiant unique
@@ -18,7 +18,7 @@ export function formatDate(date: Date | GameDate | string): string {
   }
   
   if ('year' in date && 'season' in date) {
-    return formatGameDate(date);
+    return `${date.year} AUC, ${date.season}`;
   }
   
   return date.toLocaleDateString();

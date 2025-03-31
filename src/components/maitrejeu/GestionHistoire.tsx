@@ -37,7 +37,7 @@ export const GestionHistoire: React.FC = () => {
       return;
     }
     
-    const newEntry: Omit<HistoireEntry, "id"> = {
+    const newEntryData: Omit<HistoireEntry, "id"> = {
       titre: newEntryTitle,
       contenu: newEntryContent,
       date: currentDate,
@@ -47,7 +47,7 @@ export const GestionHistoire: React.FC = () => {
       tags: []
     };
     
-    addHistoireEntry(newEntry);
+    addHistoireEntry(newEntryData);
     setIsModalOpen(false);
     
     // Réinitialiser les champs

@@ -1,5 +1,7 @@
+
 import { useState, useEffect } from 'react';
 import { useMaitreJeu } from '../context/MaitreJeuContext';
+import { v4 as uuidv4 } from 'uuid';
 import { 
   Building, 
   BuildingCreationData, 
@@ -10,7 +12,6 @@ import {
   PublicBuildingData
 } from '../types/batiments';
 import { useToast } from '@/components/ui/use-toast';
-import { v4 as uuidv4 } from 'uuid';
 import { ECONOMIE_CATEGORIES } from '../types/economie';
 
 export const useBatimentsManagement = () => {

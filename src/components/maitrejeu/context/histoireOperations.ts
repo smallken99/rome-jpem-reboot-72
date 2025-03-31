@@ -14,7 +14,19 @@ export const createHistoireOperations = (
     return newEntry; // Return the newly created entry
   };
 
+  const updateHistoireEntry = (id: string, updates: Partial<HistoireEntry>) => {
+    setHistoireEntries(prev => 
+      prev.map(entry => entry.id === id ? { ...entry, ...updates } : entry)
+    );
+  };
+
+  const deleteHistoireEntry = (id: string) => {
+    setHistoireEntries(prev => prev.filter(entry => entry.id !== id));
+  };
+
   return {
-    addHistoireEntry
+    addHistoireEntry,
+    updateHistoireEntry,
+    deleteHistoireEntry
   };
 };
