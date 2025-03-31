@@ -4,7 +4,7 @@ import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Label } from '@/components/ui/label';
 import { Slider } from '@/components/ui/slider';
-import { Client, CLIENT_TYPES, CLIENT_LOCATIONS, CLIENT_LOYALTIES, CLIENT_STATUSES } from '../../types/clients';
+import { CLIENT_TYPES, CLIENT_LOCATIONS, CLIENT_LOYALTIES, CLIENT_STATUSES, Client } from '../../types/clients';
 
 interface GeneralTabProps {
   formData: Partial<Client>;
@@ -37,7 +37,7 @@ export const GeneralTab: React.FC<GeneralTabProps> = ({
         <div>
           <Label htmlFor="type">Type</Label>
           <Select
-            value={formData.type || ''}
+            value={formData.type || 'standard'}
             onValueChange={(value) => handleSelectChange('type', value)}
           >
             <SelectTrigger>
@@ -69,7 +69,7 @@ export const GeneralTab: React.FC<GeneralTabProps> = ({
         <div>
           <Label htmlFor="location">Emplacement</Label>
           <Select
-            value={formData.location || ''}
+            value={formData.location || 'Forum'}
             onValueChange={(value) => handleSelectChange('location', value)}
           >
             <SelectTrigger>
@@ -88,7 +88,7 @@ export const GeneralTab: React.FC<GeneralTabProps> = ({
         <div>
           <Label htmlFor="loyalty">Loyauté</Label>
           <Select
-            value={formData.loyalty || ''}
+            value={String(formData.loyalty) || 'moyenne'}
             onValueChange={(value) => handleSelectChange('loyalty', value)}
           >
             <SelectTrigger>

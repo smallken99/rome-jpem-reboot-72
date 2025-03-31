@@ -3,13 +3,19 @@ import React from 'react';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Label } from '@/components/ui/label';
-import { CLIENT_TYPES, CLIENT_LOCATIONS, CLIENT_LOYALTIES, CLIENT_STATUSES, ClientCreationData } from '../../types/clients';
+import { 
+  CLIENT_TYPES, 
+  CLIENT_LOCATIONS, 
+  CLIENT_LOYALTIES, 
+  CLIENT_STATUSES, 
+  ClientCreationData 
+} from '../../types/clients';
 
 interface FormFieldsProps {
   formData: ClientCreationData;
   handleChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   handleSelectChange: (name: string, value: string) => void;
-  handleInfluenceChange: (type: keyof ClientCreationData['influences'], value: string) => void;
+  handleInfluenceChange: (type: 'political' | 'popular' | 'religious', value: string) => void;
 }
 
 export const FormFields: React.FC<FormFieldsProps> = ({
@@ -20,6 +26,7 @@ export const FormFields: React.FC<FormFieldsProps> = ({
 }) => {
   return (
     <div className="grid gap-4 py-4">
+      {/* Name field */}
       <div className="grid grid-cols-4 items-center gap-4">
         <Label htmlFor="name" className="text-right">
           Nom
@@ -33,6 +40,7 @@ export const FormFields: React.FC<FormFieldsProps> = ({
         />
       </div>
       
+      {/* Type field */}
       <div className="grid grid-cols-4 items-center gap-4">
         <Label htmlFor="type" className="text-right">
           Type
@@ -54,6 +62,7 @@ export const FormFields: React.FC<FormFieldsProps> = ({
         </Select>
       </div>
       
+      {/* SubType field */}
       <div className="grid grid-cols-4 items-center gap-4">
         <Label htmlFor="subType" className="text-right">
           Sous-type
@@ -61,19 +70,20 @@ export const FormFields: React.FC<FormFieldsProps> = ({
         <Input
           id="subType"
           name="subType"
-          value={formData.subType}
+          value={formData.subType || ''}
           onChange={handleChange}
           className="col-span-3"
           placeholder="Ex: Forgeron, Augure, etc."
         />
       </div>
       
+      {/* Location field */}
       <div className="grid grid-cols-4 items-center gap-4">
         <Label htmlFor="location" className="text-right">
           Lieu
         </Label>
         <Select
-          value={formData.location}
+          value={formData.location || 'Forum'}
           onValueChange={(value) => handleSelectChange('location', value)}
         >
           <SelectTrigger className="col-span-3">
@@ -89,12 +99,13 @@ export const FormFields: React.FC<FormFieldsProps> = ({
         </Select>
       </div>
       
+      {/* Loyalty field */}
       <div className="grid grid-cols-4 items-center gap-4">
         <Label htmlFor="loyalty" className="text-right">
           Loyauté
         </Label>
         <Select
-          value={formData.loyalty}
+          value={String(formData.loyalty) || 'moyenne'}
           onValueChange={(value) => handleSelectChange('loyalty', value)}
         >
           <SelectTrigger className="col-span-3">
@@ -110,43 +121,46 @@ export const FormFields: React.FC<FormFieldsProps> = ({
         </Select>
       </div>
       
+      {/* Political influence field */}
       <div className="grid grid-cols-4 items-center gap-4">
         <Label className="text-right">Influence politique</Label>
         <Input
           type="range"
           min="0"
           max="10"
-          value={formData.influences.political}
+          value={formData.influences?.political || 0}
           onChange={(e) => handleInfluenceChange('political', e.target.value)}
           className="col-span-2"
         />
-        <span>{formData.influences.political}</span>
+        <span>{formData.influences?.political || 0}</span>
       </div>
       
+      {/* Popular influence field */}
       <div className="grid grid-cols-4 items-center gap-4">
         <Label className="text-right">Influence populaire</Label>
         <Input
           type="range"
           min="0"
           max="10"
-          value={formData.influences.popular}
+          value={formData.influences?.popular || 0}
           onChange={(e) => handleInfluenceChange('popular', e.target.value)}
           className="col-span-2"
         />
-        <span>{formData.influences.popular}</span>
+        <span>{formData.influences?.popular || 0}</span>
       </div>
       
+      {/* Religious influence field */}
       <div className="grid grid-cols-4 items-center gap-4">
         <Label className="text-right">Influence religieuse</Label>
         <Input
           type="range"
           min="0"
           max="10"
-          value={formData.influences.religious}
+          value={formData.influences?.religious || 0}
           onChange={(e) => handleInfluenceChange('religious', e.target.value)}
           className="col-span-2"
         />
-        <span>{formData.influences.religious}</span>
+        <span>{formData.influences?.religious || 0}</span>
       </div>
     </div>
   );

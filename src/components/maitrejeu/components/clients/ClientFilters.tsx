@@ -36,7 +36,12 @@ export const ClientFilters: React.FC<ClientFiltersProps> = ({
   onAddAdvancedClient
 }) => {
   const resetFilters = () => {
-    setCurrentClientFilter({});
+    setCurrentClientFilter({
+      searchTerm: '',
+      type: 'all',
+      status: 'all',
+      assignedTo: 'all'
+    });
     setSearchTerm('');
   };
   
@@ -55,14 +60,14 @@ export const ClientFilters: React.FC<ClientFiltersProps> = ({
           </div>
           
           <Select 
-            value={currentClientFilter.type || ""} 
-            onValueChange={(value) => setCurrentClientFilter({...currentClientFilter, type: value || undefined})}
+            value={currentClientFilter.type || "all"} 
+            onValueChange={(value) => setCurrentClientFilter({...currentClientFilter, type: value as 'all' | 'standard' | 'premium' | 'exclusive'})}
           >
             <SelectTrigger className="w-[180px]">
               <SelectValue placeholder="Type de client" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="">Tous les types</SelectItem>
+              <SelectItem value="all">Tous les types</SelectItem>
               {CLIENT_TYPES.map(type => (
                 <SelectItem key={type} value={type}>
                   {type.charAt(0).toUpperCase() + type.slice(1).replace('_', ' ')}
@@ -73,7 +78,7 @@ export const ClientFilters: React.FC<ClientFiltersProps> = ({
           
           <Select 
             value={currentClientFilter.location || ""} 
-            onValueChange={(value) => setCurrentClientFilter({...currentClientFilter, location: value || undefined})}
+            onValueChange={(value) => setCurrentClientFilter({...currentClientFilter, location: value})}
           >
             <SelectTrigger className="w-[180px]">
               <SelectValue placeholder="Emplacement" />
@@ -109,7 +114,7 @@ export const ClientFilters: React.FC<ClientFiltersProps> = ({
         
         <Select 
           value={currentClientFilter.loyalty || ""} 
-          onValueChange={(value) => setCurrentClientFilter({...currentClientFilter, loyalty: value || undefined})}
+          onValueChange={(value) => setCurrentClientFilter({...currentClientFilter, loyalty: value})}
         >
           <SelectTrigger className="w-[150px]">
             <SelectValue placeholder="Loyauté" />
@@ -125,14 +130,14 @@ export const ClientFilters: React.FC<ClientFiltersProps> = ({
         </Select>
         
         <Select 
-          value={currentClientFilter.status || ""} 
-          onValueChange={(value) => setCurrentClientFilter({...currentClientFilter, status: value || undefined})}
+          value={currentClientFilter.status || "all"} 
+          onValueChange={(value) => setCurrentClientFilter({...currentClientFilter, status: value as "all" | "active" | "inactive" | "probation"})}
         >
           <SelectTrigger className="w-[150px]">
             <SelectValue placeholder="Statut" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="">Tous statuts</SelectItem>
+            <SelectItem value="all">Tous statuts</SelectItem>
             {CLIENT_STATUSES.map(status => (
               <SelectItem key={status} value={status}>
                 {status === 'active' ? 'Actif' : status === 'inactive' ? 'Inactif' : 'Probation'}
@@ -142,14 +147,13 @@ export const ClientFilters: React.FC<ClientFiltersProps> = ({
         </Select>
         
         <Select 
-          value={currentSort.field} 
+          value={currentSort.field as string} 
           onValueChange={(value) => setCurrentSort({...currentSort, field: value as keyof Client})}
         >
           <SelectTrigger className="w-[150px]">
             <SelectValue placeholder="Trier par" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="">Pas de tri</SelectItem>
             <SelectItem value="name">Nom</SelectItem>
             <SelectItem value="type">Type</SelectItem>
             <SelectItem value="location">Emplacement</SelectItem>

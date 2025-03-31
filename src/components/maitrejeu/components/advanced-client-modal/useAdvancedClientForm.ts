@@ -1,20 +1,19 @@
 
 import { useState } from 'react';
 import { Client } from '../../types/clients';
-import { ClientInfluence, ClientType } from '@/components/clientele/ClientCard';
 
 const defaultFormData: Partial<Client> = {
   name: '',
-  type: 'artisan_commercant',
+  type: 'standard',
   subType: '',
-  location: '',
+  location: 'Forum',
   loyalty: 'moyenne',
   influences: {
     political: 0,
     popular: 0,
     religious: 0
   },
-  competencePoints: 3,
+  competences: {},
   specialAbilities: [],
   backstory: '',
   activeStatus: 'active',
@@ -44,7 +43,20 @@ export const useAdvancedClientForm = (client: Client | null) => {
     }));
   };
   
-  const handleInfluenceChange = (type: keyof ClientInfluence, value: number) => {
+  const handleInfluenceChange = (type: keyof Client['influences'], value: number) => {
+    if (!formData.influences) {
+      setFormData(prev => ({
+        ...prev,
+        influences: {
+          political: 0,
+          popular: 0,
+          religious: 0,
+          [type]: value
+        }
+      }));
+      return;
+    }
+    
     setFormData(prev => ({
       ...prev,
       influences: {
