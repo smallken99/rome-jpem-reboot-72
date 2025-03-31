@@ -1,101 +1,63 @@
 
-export type Season = 
-  | 'SPRING' | 'SUMMER' | 'AUTUMN' | 'WINTER' 
-  | 'Ver' | 'Aestas' | 'Autumnus' | 'Hiems' 
-  | string;
+// Define Season as a union of possible values
+export type Season = 'SPRING' | 'SUMMER' | 'AUTUMN' | 'WINTER' | 'Ver' | 'Aestas' | 'Autumnus' | 'Hiems';
 
-export type PlayerSeason = 
-  | 'SPRING' | 'SUMMER' | 'AUTUMN' | 'WINTER'
-  | 'Ver' | 'Aestas' | 'Autumnus' | 'Hiems'
-  | string;
+// Define GamePhase as a union of possible values
+export type GamePhase = 'normal' | 'crisis' | 'war' | 'election' | 'senate' | 'assembly' | 'SENATE' | 'ELECTION' | 'CRISIS' | 'WAR';
 
+// Define GameDate interface
 export interface GameDate {
   year: number;
-  season: Season | PlayerSeason;
-  phase?: GamePhase;
+  season: Season;
   day?: number;
 }
 
-export type GamePhase = 
-  | 'EVENT' | 'ACTION' | 'RESOLUTION' | 'ELECTION' | 'VOTE'
-  | 'SENATE' | 'ACTIONS' | 'ECONOMY' | 'EVENTS' | 'DIPLOMACY' | 'MILITARY'
-  | 'POLITIQUE' | 'ECONOMIE' | 'MILITAIRE' | 'RELIGION' | 'SOCIAL' | 'SETUP'
-  | 'SENAT' | 'EVENEMENT' | 'ADMINISTRATION';
+// Parse a string to GameDate
+export function parseStringToGameDate(dateString: string): GameDate {
+  // Simple implementation - adjust based on your actual date format
+  const parts = dateString.split(' ');
+  return {
+    year: parseInt(parts[parts.length - 1]),
+    season: parts[0] as Season
+  };
+}
 
-export type ImportanceType = 'mineure' | 'normale' | 'majeure' | 'critique';
+// Function to format a GameDate for display
+export function formatGameDate(date: GameDate): string {
+  return `${date.season} ${date.year}`;
+}
 
-// Utility function to generate unique IDs
-export const generateId = (): string => {
-  return Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
-};
-
-// Utility function to format season display
-export const formatSeasonDisplay = (season: string): string => {
-  switch (season.toUpperCase()) {
-    case 'SPRING':
-    case 'VER':
-      return 'Printemps';
-    case 'SUMMER':
-    case 'AESTAS':
-      return 'Été';
-    case 'AUTUMN':
-    case 'FALL':
-    case 'AUTUMNUS':
-      return 'Automne';
-    case 'WINTER':
-    case 'HIEMS':
-      return 'Hiver';
-    default:
-      return season;
-  }
-};
-
-// Utility function to convert Date to GameDate
-export const dateToGameDate = (date: Date): GameDate => {
-  const year = date.getFullYear();
-  let season: Season;
-  const month = date.getMonth();
+// Function to convert string season to Season type
+export function normalizeSeason(season: string): Season {
+  const seasonMap: Record<string, Season> = {
+    'spring': 'SPRING',
+    'summer': 'SUMMER',
+    'autumn': 'AUTUMN',
+    'winter': 'WINTER',
+    'ver': 'Ver',
+    'aestas': 'Aestas',
+    'autumnus': 'Autumnus',
+    'hiems': 'Hiems',
+  };
   
-  if (month >= 2 && month <= 4) season = 'SPRING';
-  else if (month >= 5 && month <= 7) season = 'SUMMER';
-  else if (month >= 8 && month <= 10) season = 'AUTUMN';
-  else season = 'WINTER';
-  
-  return { year, season };
-};
+  return (seasonMap[season.toLowerCase()] || 'SPRING') as Season;
+}
 
-// Utility function to parse string dates to GameDate
-export const parseStringToGameDate = (dateString: string | Date | GameDate): GameDate => {
-  // If it's already a GameDate, return it
-  if (typeof dateString === 'object' && 'year' in dateString && 'season' in dateString) {
-    return dateString as GameDate;
+// Function to check if an object is a GameDate
+export function isGameDate(obj: any): obj is GameDate {
+  return obj && 
+         typeof obj === 'object' && 
+         'year' in obj && 
+         'season' in obj &&
+         typeof obj.year === 'number' &&
+         typeof obj.season === 'string';
+}
+
+// Helper function to format a Date or GameDate for display
+export function formatAnyDate(date: Date | GameDate): string {
+  if (isGameDate(date)) {
+    return formatGameDate(date);
+  } else {
+    return date.toLocaleDateString();
   }
-  
-  // If it's a Date object
-  if (dateString instanceof Date) {
-    return dateToGameDate(dateString);
-  }
-  
-  // If it's a string
-  try {
-    if (typeof dateString === 'string') {
-      if (dateString.includes('-')) {
-        // Format: YYYY-MM-DD
-        const date = new Date(dateString);
-        return dateToGameDate(date);
-      } else if (dateString.includes(' ')) {
-        // Format: "YEAR SEASON"
-        const parts = dateString.split(' ');
-        return {
-          year: parseInt(parts[0], 10),
-          season: parts[1] as Season
-        };
-      }
-    }
-    // Default
-    return { year: new Date().getFullYear(), season: 'SPRING' };
-  } catch (error) {
-    console.error("Error parsing date string:", error);
-    return { year: new Date().getFullYear(), season: 'SPRING' };
-  }
-};
+}

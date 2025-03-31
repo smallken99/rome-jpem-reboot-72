@@ -1,270 +1,269 @@
+
 import React from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { 
+  BarChart, 
+  Bar, 
+  XAxis, 
+  YAxis, 
+  CartesianGrid, 
+  Tooltip, 
+  Legend, 
+  ResponsiveContainer,
+  PieChart,
+  Pie,
+  Cell
+} from 'recharts';
 import { useMaitreJeu } from './context/MaitreJeuContext';
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { TreasuryStatus } from './types/economie';
 
 export const MaitreJeuStats: React.FC = () => {
-  const { 
-    equilibre, 
-    senateurs, 
-    provinces, 
-    lois, 
-    clients, 
-    economieRecords, 
-    treasury,
-    currentYear
-  } = useMaitreJeu();
+  const { currentYear, equilibre, treasury } = useMaitreJeu();
   
-  // Préparation des données pour les graphiques
-  const factionData = [
-    { name: 'Populaires', value: equilibre?.populaires || 0 },
-    { name: 'Optimates', value: equilibre?.optimates || 0 },
-    { name: 'Moderates', value: equilibre?.moderates || 0 }
+  // Format numbers as Roman currency
+  const formatAsCurrency = (value: number) => `${value.toLocaleString()} denarii`;
+
+  // Prepare data for political faction chart
+  const politicalData = [
+    { name: 'Populares', value: equilibre.political.populaires, color: '#ef4444' },
+    { name: 'Optimates', value: equilibre.political.optimates, color: '#3b82f6' },
+    { name: 'Modérés', value: equilibre.political.moderates, color: '#84cc16' }
   ];
   
-  const economicData = [
-    { name: 'Q1', revenus: treasury?.income || 0, depenses: treasury?.expenses || 0 },
-    { name: 'Q2', revenus: treasury?.income * 1.1 || 0, depenses: treasury?.expenses * 0.9 || 0 },
-    { name: 'Q3', revenus: treasury?.income * 0.8 || 0, depenses: treasury?.expenses * 1.2 || 0 },
-    { name: 'Q4', revenus: treasury?.income * 1.3 || 0, depenses: treasury?.expenses * 1.1 || 0 }
+  // Prepare quarterly financial data
+  const financialData = [
+    { name: 'Q1', income: treasury?.income || 0, expenses: treasury?.expenses || 0 },
+    { name: 'Q2', income: treasury?.income || 0, expenses: treasury?.expenses || 0 },
+    { name: 'Q3', income: treasury?.income || 0, expenses: treasury?.expenses || 0 },
+    { name: 'Q4', income: treasury?.income || 0, expenses: treasury?.expenses || 0 }
   ];
   
-  const senateursByFaction = senateurs.reduce((acc, sen) => {
-    const faction = sen.appartenance || 'Neutre';
-    acc[faction] = (acc[faction] || 0) + 1;
-    return acc;
-  }, {} as Record<string, number>);
+  // Prepare social stats data
+  const socialData = [
+    { name: 'Patriciens', value: equilibre.social.patriciens, color: '#8b5cf6' },
+    { name: 'Plébéiens', value: equilibre.social.plébéiens, color: '#f59e0b' }
+  ];
   
-  const senateurFactionData = Object.entries(senateursByFaction).map(([name, value]) => ({ name, value }));
+  // Prepare stability indicators data
+  const stabilityData = [
+    { name: 'Stabilité', value: equilibre.stability, color: '#3b82f6' },
+    { name: 'Armée', value: equilibre.armée, color: '#ef4444' },
+    { name: 'Loyauté', value: equilibre.loyauté, color: '#84cc16' },
+    { name: 'Morale', value: equilibre.morale, color: '#8b5cf6' },
+    { name: 'Religion', value: equilibre.religion, color: '#ec4899' },
+    { name: 'Juridique', value: equilibre.facteurJuridique, color: '#0ea5e9' }
+  ];
   
   return (
-    <div className="p-6 space-y-6">
-      <h1 className="text-3xl font-bold">Statistiques de la République</h1>
-      <p className="text-muted-foreground">
-        Aperçu global des statistiques de la République romaine
-      </p>
+    <div className="space-y-6 p-6">
+      <header>
+        <h2 className="text-3xl font-bold tracking-tight">Statistiques de la République</h2>
+        <p className="text-muted-foreground">
+          Vue d'ensemble des indicateurs clés de la République Romaine pour l'année {currentYear}.
+        </p>
+      </header>
       
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-4">
         <Card>
           <CardHeader className="pb-2">
-            <CardTitle>Sénateurs</CardTitle>
-            <CardDescription>Total: {senateurs.length}</CardDescription>
+            <CardTitle className="text-sm font-medium">Trésor public</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="space-y-2">
-              <div className="flex justify-between">
-                <span>Joueurs:</span>
-                <span>{senateurs.filter(s => s.joueur).length}</span>
-              </div>
-              <div className="flex justify-between">
-                <span>Patriciens:</span>
-                <span>{senateurs.filter(s => s.statut === 'Patricien').length}</span>
-              </div>
-              <div className="flex justify-between">
-                <span>Plébéiens:</span>
-                <span>{senateurs.filter(s => s.statut === 'Plébéien').length}</span>
-              </div>
-            </div>
+            <div className="text-2xl font-bold">{formatAsCurrency(treasury?.balance || 0)}</div>
+            <p className="text-xs text-muted-foreground">
+              {((treasury?.income || 0) > (treasury?.expenses || 0)) 
+                ? `Excédent: ${formatAsCurrency((treasury?.income || 0) - (treasury?.expenses || 0))}`
+                : `Déficit: ${formatAsCurrency((treasury?.expenses || 0) - (treasury?.income || 0))}`
+              }
+            </p>
           </CardContent>
         </Card>
         
         <Card>
           <CardHeader className="pb-2">
-            <CardTitle>Provinces</CardTitle>
-            <CardDescription>Total: {provinces.length}</CardDescription>
+            <CardTitle className="text-sm font-medium">Revenus annuels</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="space-y-2">
-              <div className="flex justify-between">
-                <span>Pacifiées:</span>
-                <span>{provinces.filter(p => p.stabilite >= 70).length}</span>
-              </div>
-              <div className="flex justify-between">
-                <span>Instables:</span>
-                <span>{provinces.filter(p => p.stabilite < 50).length}</span>
-              </div>
-              <div className="flex justify-between">
-                <span>Loyauté moyenne:</span>
-                <span>
-                  {provinces.length > 0 
-                    ? Math.round(provinces.reduce((acc, p) => acc + p.stabilite, 0) / provinces.length) 
-                    : 0}%
-                </span>
-              </div>
-            </div>
+            <div className="text-2xl font-bold">{formatAsCurrency(treasury?.income || 0)}</div>
+            <p className="text-xs text-muted-foreground">
+              Taxes, tributs et autres sources
+            </p>
           </CardContent>
         </Card>
         
         <Card>
           <CardHeader className="pb-2">
-            <CardTitle>Économie</CardTitle>
-            <CardDescription>Trésor: {treasury?.balance.toLocaleString()} As</CardDescription>
+            <CardTitle className="text-sm font-medium">Dépenses annuelles</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="space-y-2">
-              <div className="flex justify-between">
-                <span>Revenus:</span>
-                <span>{treasury?.income.toLocaleString()} As</span>
-              </div>
-              <div className="flex justify-between">
-                <span>Dépenses:</span>
-                <span>{treasury?.expenses.toLocaleString()} As</span>
-              </div>
-              <div className="flex justify-between">
-                <span>Solde:</span>
-                <span className={treasury?.surplus && treasury.surplus >= 0 ? "text-green-500" : "text-red-500"}>
-                  {treasury?.surplus ? treasury.surplus.toLocaleString() : 0} As
-                </span>
-              </div>
+            <div className="text-2xl font-bold">{formatAsCurrency(treasury?.expenses || 0)}</div>
+            <p className="text-xs text-muted-foreground">
+              Militaire, administration et jeux publics
+            </p>
+          </CardContent>
+        </Card>
+        
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm font-medium">Variation budgétaire</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className={`text-2xl font-bold ${(treasury?.surplus || 0) >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+              {(treasury?.surplus || 0) >= 0 ? '+' : ''}{formatAsCurrency(treasury?.surplus || 0)}
             </div>
+            <p className="text-xs text-muted-foreground">
+              {(treasury?.surplus || 0) >= 0 ? 'Excédent budgétaire' : 'Déficit budgétaire'}
+            </p>
           </CardContent>
         </Card>
       </div>
       
-      <Tabs defaultValue="factions" className="w-full mt-8">
-        <TabsList className="grid grid-cols-3 mb-6">
-          <TabsTrigger value="factions">Factions</TabsTrigger>
-          <TabsTrigger value="economie">Économie</TabsTrigger>
-          <TabsTrigger value="stabilite">Stabilité</TabsTrigger>
-        </TabsList>
+      <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+        <Card>
+          <CardHeader>
+            <CardTitle>Équilibre politique</CardTitle>
+          </CardHeader>
+          <CardContent className="pt-2">
+            <ResponsiveContainer width="100%" height={300}>
+              <PieChart>
+                <Pie
+                  data={politicalData}
+                  cx="50%"
+                  cy="50%"
+                  outerRadius={100}
+                  fill="#8884d8"
+                  dataKey="value"
+                  label={({ name, value }) => `${name}: ${value}%`}
+                >
+                  {politicalData.map((entry, index) => (
+                    <Cell key={`cell-${index}`} fill={entry.color} />
+                  ))}
+                </Pie>
+                <Tooltip formatter={(value) => `${value}%`} />
+                <Legend />
+              </PieChart>
+            </ResponsiveContainer>
+          </CardContent>
+        </Card>
         
-        <TabsContent value="factions">
-          <Card>
-            <CardHeader>
-              <CardTitle>Équilibre des Factions</CardTitle>
-              <CardDescription>
-                Répartition des forces politiques dans la République - Année {currentYear} AUC
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="h-[400px]">
-                <ResponsiveContainer width="100%" height="100%">
-                  <BarChart
-                    data={factionData}
-                    margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
-                  >
-                    <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis dataKey="name" />
-                    <YAxis domain={[0, 100]} />
-                    <Tooltip />
-                    <Legend />
-                    <Bar dataKey="value" name="Influence" fill="#8884d8" />
-                  </BarChart>
-                </ResponsiveContainer>
+        <Card>
+          <CardHeader>
+            <CardTitle>Finances trimestrielles</CardTitle>
+          </CardHeader>
+          <CardContent className="pt-2">
+            <ResponsiveContainer width="100%" height={300}>
+              <BarChart
+                data={financialData}
+                margin={{ top: 20, right: 30, left: 20, bottom: 5 }}
+              >
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis dataKey="name" />
+                <YAxis />
+                <Tooltip formatter={(value) => formatAsCurrency(value as number)} />
+                <Legend />
+                <Bar dataKey="income" name="Revenus" fill="#10b981" />
+                <Bar dataKey="expenses" name="Dépenses" fill="#ef4444" />
+              </BarChart>
+            </ResponsiveContainer>
+          </CardContent>
+        </Card>
+      </div>
+      
+      <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+        <Card>
+          <CardHeader>
+            <CardTitle>Économie</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="flex flex-col items-center justify-center">
+              <div className="relative w-40 h-40 flex items-center justify-center">
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <div className="text-5xl font-bold">{equilibre.economie}</div>
+                </div>
+                <svg viewBox="0 0 100 100" className="transform -rotate-90 w-full h-full">
+                  <circle
+                    cx="50"
+                    cy="50"
+                    r="45"
+                    fill="transparent"
+                    stroke="#e2e8f0"
+                    strokeWidth="10"
+                  />
+                  <circle
+                    cx="50"
+                    cy="50"
+                    r="45"
+                    fill="transparent"
+                    stroke={
+                      equilibre.economie >= 75 ? "#10b981" :
+                      equilibre.economie >= 50 ? "#f59e0b" :
+                      "#ef4444"
+                    }
+                    strokeWidth="10"
+                    strokeDasharray={`${2 * Math.PI * 45 * equilibre.economie / 100} ${2 * Math.PI * 45 * (1 - equilibre.economie / 100)}`}
+                  />
+                </svg>
               </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
+              <p className="mt-4 text-center text-muted-foreground">
+                Indice économique de la République
+              </p>
+            </div>
+          </CardContent>
+        </Card>
         
-        <TabsContent value="economie">
-          <Card>
-            <CardHeader>
-              <CardTitle>Finances de la République</CardTitle>
-              <CardDescription>
-                Revenus et dépenses par trimestre - Année {currentYear} AUC
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="h-[400px]">
-                <ResponsiveContainer width="100%" height="100%">
-                  <BarChart
-                    data={economicData}
-                    margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
-                  >
-                    <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis dataKey="name" />
-                    <YAxis />
-                    <Tooltip />
-                    <Legend />
-                    <Bar dataKey="revenus" name="Revenus" fill="#22c55e" />
-                    <Bar dataKey="depenses" name="Dépenses" fill="#ef4444" />
-                  </BarChart>
-                </ResponsiveContainer>
-              </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
-        
-        <TabsContent value="stabilite">
-          <Card>
-            <CardHeader>
-              <CardTitle>Facteurs de Stabilité</CardTitle>
-              <CardDescription>
-                Facteurs influençant la stabilité de la République
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                <div className="space-y-2">
-                  <div className="flex justify-between">
-                    <span>Stabilité Économique:</span>
-                    <span>{equilibre?.economicStability || equilibre?.économie || 0}%</span>
-                  </div>
-                  <div className="h-2 bg-gray-200 rounded">
-                    <div 
-                      className="h-full bg-blue-500 rounded" 
-                      style={{ width: `${equilibre?.economicStability || equilibre?.économie || 0}%` }}
-                    ></div>
-                  </div>
-                </div>
-                
-                <div className="space-y-2">
-                  <div className="flex justify-between">
-                    <span>Force Militaire:</span>
-                    <span>{equilibre?.facteurMilitaire || equilibre?.armée || 0}%</span>
-                  </div>
-                  <div className="h-2 bg-gray-200 rounded">
-                    <div 
-                      className="h-full bg-red-500 rounded" 
-                      style={{ width: `${equilibre?.facteurMilitaire || equilibre?.armée || 0}%` }}
-                    ></div>
-                  </div>
-                </div>
-                
-                <div className="space-y-2">
-                  <div className="flex justify-between">
-                    <span>Morale du Peuple:</span>
-                    <span>{equilibre?.morale || 0}%</span>
-                  </div>
-                  <div className="h-2 bg-gray-200 rounded">
-                    <div 
-                      className="h-full bg-green-500 rounded" 
-                      style={{ width: `${equilibre?.morale || 0}%` }}
-                    ></div>
-                  </div>
-                </div>
-                
-                <div className="space-y-2">
-                  <div className="flex justify-between">
-                    <span>Loyauté des Patriciens:</span>
-                    <span>{equilibre?.facteurPatriciens || equilibre?.patriciens || 0}%</span>
-                  </div>
-                  <div className="h-2 bg-gray-200 rounded">
-                    <div 
-                      className="h-full bg-purple-500 rounded" 
-                      style={{ width: `${equilibre?.facteurPatriciens || equilibre?.patriciens || 0}%` }}
-                    ></div>
-                  </div>
-                </div>
-                
-                <div className="space-y-2">
-                  <div className="flex justify-between">
-                    <span>Soutien Plébéien:</span>
-                    <span>{equilibre?.facteurPlebs || equilibre?.plébéiens || 0}%</span>
-                  </div>
-                  <div className="h-2 bg-gray-200 rounded">
-                    <div 
-                      className="h-full bg-yellow-500 rounded" 
-                      style={{ width: `${equilibre?.facteurPlebs || equilibre?.plébéiens || 0}%` }}
-                    ></div>
-                  </div>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
-      </Tabs>
+        <Card>
+          <CardHeader>
+            <CardTitle>Équilibre social</CardTitle>
+          </CardHeader>
+          <CardContent className="pt-2">
+            <ResponsiveContainer width="100%" height={300}>
+              <PieChart>
+                <Pie
+                  data={socialData}
+                  cx="50%"
+                  cy="50%"
+                  outerRadius={100}
+                  fill="#8884d8"
+                  dataKey="value"
+                  label={({ name, value }) => `${name}: ${value}%`}
+                >
+                  {socialData.map((entry, index) => (
+                    <Cell key={`cell-${index}`} fill={entry.color} />
+                  ))}
+                </Pie>
+                <Tooltip formatter={(value) => `${value}%`} />
+                <Legend />
+              </PieChart>
+            </ResponsiveContainer>
+          </CardContent>
+        </Card>
+      </div>
+      
+      <Card>
+        <CardHeader>
+          <CardTitle>Indicateurs de stabilité</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <ResponsiveContainer width="100%" height={300}>
+            <BarChart
+              data={stabilityData}
+              layout="vertical"
+              margin={{ top: 5, right: 30, left: 80, bottom: 5 }}
+            >
+              <CartesianGrid strokeDasharray="3 3" />
+              <XAxis type="number" domain={[0, 100]} />
+              <YAxis dataKey="name" type="category" width={80} />
+              <Tooltip formatter={(value) => `${value}/100`} />
+              <Legend />
+              <Bar dataKey="value" name="Indice" radius={[0, 10, 10, 0]}>
+                {stabilityData.map((entry, index) => (
+                  <Cell key={`cell-${index}`} fill={entry.color} />
+                ))}
+              </Bar>
+            </BarChart>
+          </ResponsiveContainer>
+        </CardContent>
+      </Card>
     </div>
   );
 };

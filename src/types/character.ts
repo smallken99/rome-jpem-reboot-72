@@ -91,6 +91,8 @@ export interface EducationInfo {
 // Interface pour les sénateurs jouables
 export interface SenateurJouable extends Omit<Character, 'stats'> {
   faction: string;
+  famille: string; // Made required to match the maitrejeu/types/senateurs.ts definition
+  actif: boolean | string; // Made required to match the maitrejeu/types/senateurs.ts definition
   influence: number;
   prestige: number;
   richesse: number;
@@ -106,6 +108,5 @@ export interface SenateurJouable extends Omit<Character, 'stats'> {
   };
   
   // Add properties for MaitreJeu compatibility
-  famille?: string;
-  actif?: boolean;
+  competences?: string[] | Record<string, any>;
 }

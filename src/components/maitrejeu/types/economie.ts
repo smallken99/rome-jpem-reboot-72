@@ -1,128 +1,96 @@
 
 import { GameDate } from './common';
 
-export type EconomieType = 'income' | 'expense' | 'tax' | 'trade' | 'military' | 'construction' | 'slaves' | 'other';
-export type EconomieCategory = 
-  'Impôts' | 'Armée' | 'Construction' | 'Administration' | 'Religion' | 'Commerce' | 'Agriculture' | 'Autre' |
-  'Esclaves' | 'Divertissement' | 'Diplomatie' | 'Maintenance' | 'Vente' | 'Tax' | 'Maintenance';
-export type RecurringInterval = 'daily' | 'weekly' | 'monthly' | 'seasonal' | 'yearly';
-export type EconomieSource = 'tax' | 'trade' | 'war' | 'donation' | 'fine' | 'sale' | 'purchase' | 'salary' | 'rent' | 'manual_entry' | 'other'; 
-
+// Types for economy records
 export interface EconomieRecord {
   id: string;
+  amount: number;
   date: GameDate | string;
-  source: string;
-  category: EconomieCategory;
-  amount: number;
+  type: 'income' | 'expense' | 'tax' | 'tribute' | 'gift' | 'other';
+  category: string;
   description: string;
-  type: EconomieType;
+  source?: string;
   affectedSenateurId?: string;
   affectedProvinceId?: string;
-  isRecurring: boolean;
-  recurringInterval?: RecurringInterval;
-  tags: string[];
+  affectedEntityName?: string;
   approved: boolean;
+  approvedBy?: string;
+  approvedDate?: string;
+  recurring?: boolean;
+  recurringPeriod?: 'monthly' | 'quarterly' | 'yearly';
+  nextRecurrenceDate?: string;
   createdAt: string;
-  updatedAt: string;
-  impactFactors?: Record<string, number>;
+  updatedAt?: string;
+  tags?: string[];
 }
 
+// Type for creating new economy records
 export interface EconomieCreationData {
-  date?: GameDate | string;
-  source: string;
-  category: EconomieCategory;
   amount: number;
+  date: GameDate | string;
+  type: 'income' | 'expense' | 'tax' | 'tribute' | 'gift' | 'other';
+  category: string;
   description: string;
-  type: EconomieType;
+  source?: string;
   affectedSenateurId?: string;
   affectedProvinceId?: string;
-  isRecurring?: boolean;
-  recurringInterval?: RecurringInterval;
-  tags?: string[];
+  affectedEntityName?: string;
   approved?: boolean;
-  impactFactors?: Record<string, number>;
+  approvedBy?: string;
+  approvedDate?: string;
+  recurring?: boolean;
+  recurringPeriod?: 'monthly' | 'quarterly' | 'yearly';
+  nextRecurrenceDate?: string;
+  tags?: string[];
 }
 
+// Filters for economy records
 export interface EconomieFilter {
-  searchTerm?: string;
-  type?: 'all' | EconomieType;
-  categories?: ('all' | EconomieCategory)[];
+  searchTerm: string;
+  categories?: string[];
+  type: 'all' | 'income' | 'expense' | 'tax' | 'tribute' | 'gift' | 'other';
+  affectedEntity?: 'all' | 'senateur' | 'province' | 'other';
   minAmount?: number;
   maxAmount?: number;
-  affectedEntity?: string;
   dateRange?: {
     start?: GameDate;
     end?: GameDate;
   };
 }
 
+// Sorting for economy records
 export interface EconomieSort {
-  field: 'date' | 'amount' | 'category' | 'source' | 'description' | keyof EconomieRecord;
+  field: keyof EconomieRecord;
   direction: 'asc' | 'desc';
 }
 
+// Type for treasury status
 export interface TreasuryStatus {
-  id: string;
   balance: number;
-  totalIncome: number;
-  totalExpenses: number;
-  surplus: number;
-  projectedBalance: number;
-  lastUpdated: GameDate;
-  inflationRate: number;
-  taxRate: number;
-  comments?: string;
-  previousBalance?: number;
   income: number;
   expenses: number;
-  debt: number;
+  surplus: number;
+  lastUpdated: string;
+  previousBalance?: number;
+  taxRate?: number;
+  projectedBalance?: number;
+  crisisThreshold?: number;
+  warFund?: number;
+  reserveRatio?: number;
+  debtLevel?: number;
+  creditRating?: 'excellent' | 'good' | 'fair' | 'poor' | 'terrible';
 }
 
+// Type for economic factors influencing the Republic
 export interface EconomicFactors {
-  tradeStability: number;
-  militaryExpense: number;
-  publicWorksExpense: number;
-  religiousCeremonyExpense: number;
-  adminExpense: number;
-  taxCollection: number;
-  provinceRevenue: number;
-  tradeRevenue: number;
-  warSpoilsRevenue: number;
-  loanInterestRate: number;
-  inflationRate: number;
-  growthRate: number;
-  taxRates: Record<string, number>;
-  currentYear: number;
-}
-
-// For tax management
-export interface TaxCollection {
-  totalCollected: number;
-  byType: Record<string, number>;
-}
-
-export interface TreasuryDataWithTax {
-  balance: number;
-  taxCollection: TaxCollection;
-}
-
-// Interface props pour les composants
-export interface EconomieModalProps {
-  isOpen: boolean;
-  onClose: () => void;
-  onSave: (data: EconomieCreationData) => void;
-  record?: EconomieRecord;
-}
-
-export interface EconomieStatsProps {
-  treasury: TreasuryStatus;
-  economicFactors: EconomicFactors;
-}
-
-export interface EconomieTableProps {
-  records: EconomieRecord[];
-  onEdit: (record: EconomieRecord) => void;
-  onDelete: (id: string) => void;
-  sort: EconomieSort;
-  onSortChange: (field: keyof EconomieRecord) => void;
+  taxRatePleb: number;
+  taxRatePatrician: number;
+  taxRateProvincial: number;
+  tradeEfficiency: number;
+  agricultureOutput: number;
+  inflation: number;
+  corruption: number;
+  publicWorks: number;
+  militaryExpenses: number;
+  generalProsperity: number;
 }

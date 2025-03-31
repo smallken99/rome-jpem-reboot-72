@@ -1,35 +1,30 @@
 
-export type BuildingType = 'domus' | 'villa' | 'insula' | 'farmland' | 'temple' | string;
-
+// Define the property upgrade interface
 export interface PropertyUpgrade {
   id: string;
   name: string;
   description: string;
   cost: number;
-  effect: string | Record<string, any>;
-  effects?: Record<string, any>; // Pour compatibilité avec le code existant
-  type: string;
-  installed: boolean;
-  requirements?: {
-    funds?: number;
-    workers?: number;
-    buildingCondition?: number;
-    maintenance?: number;
-    buildingLevel?: number;
-    previousUpgrade?: string;
-    minCondition?: number;
-    specialBuilding?: string;
-    minIncome?: number;
-    buildingType?: string[];
-    value?: number;
-    upgrades?: string[];
-    condition?: number;
+  type: string; // This is now required in both implementations
+  effect: {
+    [key: string]: number;
   };
-  applied?: boolean;
-  buildingType?: string[];
-  duration?: number;
+  requirements?: {
+    minBuildingSize?: number;
+    minBuildingValue?: number;
+    minOwnerPrestige?: number;
+    otherUpgrades?: string[];
+  };
+  installed: boolean;
+  installDate?: Date;
+  effects?: Array<{
+    type: string;
+    value: number;
+    description: string;
+  }>;
 }
 
+// Define the owned building interface
 export interface OwnedBuilding {
   id: string;
   buildingId: string;
@@ -42,22 +37,24 @@ export interface OwnedBuilding {
   condition: number;
   maintenanceLevel: number;
   maintenanceCost: number;
+  maintenance?: number; // For compatibility
   income: number;
   workers: number;
   maxWorkers: number;
   securityLevel: number;
-  description?: string;
-  purchaseDate?: Date;
+  description: string;
+  purchaseDate: Date;
   status?: string;
-  upgrades?: PropertyUpgrade[];
-  maintenance?: number;
-  maintenanceEnabled?: boolean;
-  slaves?: number;
+  upgrades: PropertyUpgrade[];
 }
 
-export interface WorkerAssignment {
+// Define property tax information
+export interface PropertyTax {
+  id: string;
   buildingId: string;
-  count: number;
-  efficiency: number;
-  cost: number;
+  amount: number;
+  paid: boolean;
+  dueDate: Date;
+  taxType: 'property' | 'luxury' | 'income' | 'other';
+  period: string;
 }

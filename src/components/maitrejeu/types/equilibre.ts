@@ -1,4 +1,3 @@
-
 import { GameDate } from './common';
 
 export interface HistoriqueEntry {
@@ -10,64 +9,71 @@ export interface HistoriqueEntry {
   description?: string;
 }
 
+export type RiskType = 'political' | 'economic' | 'military' | 'social' | 'religious';
+
+export interface Risk {
+  id: string;
+  type: RiskType;
+  name: string;
+  description: string;
+  severity: number; // 1-10
+  createdAt: string;
+  active: boolean;
+  impact: Record<string, number>; // e.g. { "populaires": -5, "optimates": +3 }
+}
+
+export interface EquilibreHistoryEntry {
+  date: string;
+  values: Record<string, number>;
+  event?: string;
+  description?: string;
+}
+
 export interface Equilibre {
   id: string;
   
-  // Factions politiques
+  // Political balance
   political: {
     populaires: number;
-    optimates: number; 
+    optimates: number;
     moderates: number;
   };
   
-  // Classes sociales
+  // These are aliases for the political values above for compatibility
+  populaires: number;
+  populares: number; // Another alias sometimes used
+  optimates: number;
+  moderates: number;
+  
+  // Social balance
   social: {
     patriciens: number;
     plébéiens: number;
   };
   
-  // Facteurs économiques et militaires
+  // These are aliases for the social values above for compatibility
+  patriciens: number;
+  plébéiens: number;
+  
+  // Economic stability (0-100)
   economie: number;
-  economy?: number; // Alias for economie
-  économie?: number; // Alternative spelling
+  economy: number; // Alias for compatibility
+  économie: number; // Alias with accent for compatibility
+  economicStability: number; // Another alias sometimes used
+  
+  // Other stability factors (0-100)
   stability: number;
   armée: number;
   loyauté: number;
   morale: number;
-  
-  // Facteurs structurels
-  facteurSenat?: number;
-  facteurMilitaire?: number;
-  facteurPatriciens?: number;
-  facteurPlebs?: number;
-  facteurReligieux?: number;
+  religion: number;
   facteurJuridique: number;
   
-  // Alias pour la rétrocompatibilité
-  patriciens?: number;
-  plébéiens?: number;
-  populaires?: number;
-  populares?: number; // Alias for populaires
-  optimates?: number;
-  moderates?: number;
-  economicStability?: number; // Alias pour économie/economie
+  // Risks affecting equilibrium
+  risques: Risk[];
   
-  // Facteurs religieux et autres
-  religion: number;
-  risques: RiskFactor[];
-  historique: HistoriqueEntry[];
-}
-
-export interface RiskFactor {
-  id: string;
-  name: string;
-  level: 'low' | 'medium' | 'high' | 'critical' | string;
-  type: string;
-  description: string;
-  threat: number;
-  active?: boolean;
-  createdAt?: string | Date;
-  resolvedAt?: string | Date;
+  // History of equilibrium changes
+  historique: EquilibreHistoryEntry[];
 }
 
 export interface PoliticalEvent {

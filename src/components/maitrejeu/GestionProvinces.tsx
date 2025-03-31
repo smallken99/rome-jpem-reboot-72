@@ -1,118 +1,111 @@
+
 import React, { useState } from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Search, Plus, MapPin } from 'lucide-react';
-import { Input } from '@/components/ui/input';
-import { ProvincesMap } from './components/ProvincesMap';
-import { ProvinceCard } from './components/ProvinceCard';
-import { ProvinceModal } from './components/ProvinceModal';
-import { useMaitreJeu } from './context';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Dialog, DialogContent } from '@/components/ui/dialog';
+import { ProvinceMap } from './components/provinces/ProvinceMap';
+import { ProvincesList } from './components/provinces/ProvincesList';
+import { ProvinceDetails } from './components/provinces/ProvinceDetails';
+import { NewProvinceForm } from './components/provinces/NewProvinceForm';
+import { useMaitreJeu } from './context/MaitreJeuContext';
+import { Plus } from 'lucide-react';
 import { Province } from './types/provinces';
 
-export const GestionProvinces = () => {
+export const GestionProvinces: React.FC = () => {
   const { provinces, updateProvince } = useMaitreJeu();
   
-  const [searchTerm, setSearchTerm] = useState('');
-  const [activeTab, setActiveTab] = useState('liste');
-  const [selectedProvince, setSelectedProvince] = useState<Province | null>(null);
-  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [activeTab, setActiveTab] = useState<string>('map');
+  const [selectedProvinceId, setSelectedProvinceId] = useState<string | null>(null);
+  const [isNewProvinceDialogOpen, setIsNewProvinceDialogOpen] = useState(false);
+  const [isDetailsOpen, setIsDetailsOpen] = useState(false);
   
-  const handleProvinceSelect = (provinceId: string) => {
-    const province = provinces.find(p => p.id === provinceId);
-    if (province) {
-      setSelectedProvince(province);
-      setIsModalOpen(true);
-    }
+  const selectedProvince = provinces.find(p => p.id === selectedProvinceId) || null;
+  
+  const handleSelectProvince = (provinceId: string) => {
+    setSelectedProvinceId(provinceId);
+    setIsDetailsOpen(true);
   };
   
-  const handleCloseModal = () => {
-    setIsModalOpen(false);
-    setSelectedProvince(null);
+  const handleUpdateProvince = (provinceId: string, updates: Partial<Province>) => {
+    updateProvince(provinceId, updates);
+    setIsDetailsOpen(false);
   };
   
-  const handleSaveProvince = (updatedProvince: Province) => {
-    updateProvince(updatedProvince);
-    handleCloseModal();
-  };
-  
-  // Filter provinces based on search
-  const filteredProvinces = provinces.filter(province => 
-    province.nom.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    province.région.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  const sortedProvinces = [...provinces].sort((a, b) => {
+    // Sort by status first (pacifiées first, then all others)
+    if (a.status === 'Pacifiée' && b.status !== 'Pacifiée') return -1;
+    if (a.status !== 'Pacifiée' && b.status === 'Pacifiée') return 1;
+    
+    // Then sort alphabetically by name
+    return a.name.localeCompare(b.name);
+  });
   
   return (
-    <div className="space-y-6">
-      <Card>
-        <CardHeader>
-          <CardTitle>Gestion des Provinces</CardTitle>
-          <CardDescription>
-            Gérez les provinces de la République et leurs ressources
-          </CardDescription>
-          
-          <Tabs value={activeTab} onValueChange={setActiveTab} className="mt-4">
-            <TabsList className="grid w-full grid-cols-2">
-              <TabsTrigger value="liste">Liste des Provinces</TabsTrigger>
-              <TabsTrigger value="carte">Carte de l'Empire</TabsTrigger>
-            </TabsList>
-          </Tabs>
-        </CardHeader>
-        
-        <CardContent>
-          <div className="flex gap-4 mb-6">
-            <div className="relative flex-1">
-              <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-              <Input
-                placeholder="Rechercher une province..."
-                className="pl-8"
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-              />
-            </div>
-            <Button>
-              <Plus className="h-4 w-4 mr-2" />
-              Nouvelle Province
-            </Button>
-          </div>
-          
-          <TabsContent value="liste" className="mt-0">
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {filteredProvinces.map((province) => (
-                <ProvinceCard 
-                  key={province.id} 
-                  province={province} 
-                  onSelect={() => handleProvinceSelect(province.id)}
-                />
-              ))}
-              
-              {filteredProvinces.length === 0 && (
-                <div className="col-span-full text-center py-10 text-muted-foreground">
-                  Aucune province ne correspond à votre recherche.
-                </div>
-              )}
-            </div>
-          </TabsContent>
-          
-          <TabsContent value="carte" className="mt-0">
-            <div className="h-[500px] border rounded-md overflow-hidden">
-              <ProvincesMap 
-                provinces={provinces} 
-                onProvinceSelect={handleProvinceSelect}
-              />
-            </div>
-          </TabsContent>
-        </CardContent>
-      </Card>
+    <div className="space-y-6 p-6">
+      <header className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+        <div>
+          <h2 className="text-3xl font-bold tracking-tight">Provinces romaines</h2>
+          <p className="text-muted-foreground">
+            Gérez les provinces de la République, leurs ressources et leurs gouverneurs.
+          </p>
+        </div>
+        <Button onClick={() => setIsNewProvinceDialogOpen(true)}>
+          <Plus className="h-4 w-4 mr-2" />
+          Nouvelle province
+        </Button>
+      </header>
       
-      {selectedProvince && (
-        <ProvinceModal 
-          province={selectedProvince} 
-          isOpen={isModalOpen}
-          onClose={handleCloseModal} 
-          onSave={handleSaveProvince}
-        />
-      )}
+      <Tabs value={activeTab} onValueChange={setActiveTab}>
+        <TabsList className="grid w-full grid-cols-2">
+          <TabsTrigger value="map">Carte</TabsTrigger>
+          <TabsTrigger value="list">Liste</TabsTrigger>
+        </TabsList>
+        
+        <TabsContent value="map" className="border rounded-md p-4">
+          <ProvinceMap 
+            provinces={sortedProvinces} 
+            onSelectProvince={handleSelectProvince}
+            selectedProvinceId={selectedProvinceId}
+          />
+        </TabsContent>
+        
+        <TabsContent value="list">
+          <Card>
+            <CardHeader>
+              <CardTitle>Liste des provinces</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <ProvincesList 
+                provinces={sortedProvinces} 
+                onSelectProvince={handleSelectProvince}
+              />
+            </CardContent>
+          </Card>
+        </TabsContent>
+      </Tabs>
+      
+      {/* Province details dialog */}
+      <Dialog open={isDetailsOpen} onOpenChange={setIsDetailsOpen}>
+        <DialogContent className="sm:max-w-[600px]">
+          {selectedProvince && (
+            <ProvinceDetails 
+              province={selectedProvince} 
+              onUpdateProvince={handleUpdateProvince}
+              onClose={() => setIsDetailsOpen(false)}
+            />
+          )}
+        </DialogContent>
+      </Dialog>
+      
+      {/* New province dialog */}
+      <Dialog open={isNewProvinceDialogOpen} onOpenChange={setIsNewProvinceDialogOpen}>
+        <DialogContent className="sm:max-w-[600px]">
+          <NewProvinceForm
+            onClose={() => setIsNewProvinceDialogOpen(false)}
+          />
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
