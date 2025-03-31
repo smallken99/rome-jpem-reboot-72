@@ -42,13 +42,13 @@ export interface Equilibre {
   optimates: number;
   moderates: number;
   
-  // Economic equilibrium - support both object and number
+  // Economic equilibrium - support both object and number format
   economie: {
     stabilite: number;
     croissance: number;
     commerce: number;
     agriculture: number;
-  } | number;
+  };
   
   // Social equilibrium
   social: {
@@ -74,7 +74,7 @@ export interface Equilibre {
     piete: number;
     traditions: number;
     superstition: number;
-  } | number;
+  };
   
   // Other stability factors
   stability: number;
@@ -93,7 +93,7 @@ export interface Equilibre {
     croissance: number;
     commerce: number;
     agriculture: number;
-  } | number;
+  };
   
   // Political object for compatibility
   political?: {

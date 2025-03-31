@@ -1,56 +1,4 @@
 
-export type EconomieType = 'income' | 'expense' | 'all';
-export type RecurringInterval = 'weekly' | 'monthly' | 'seasonal' | 'yearly' | string;
-
-export interface EconomieRecord {
-  id: string;
-  amount: number;
-  date: Date | { year: number; season: string };
-  description: string;
-  type: 'income' | 'expense';
-  category: string;
-  source?: string;
-  tags?: string[];
-  approved?: boolean;
-  recurring?: boolean;
-  recurringInterval?: RecurringInterval;
-  affectedSenateurId?: string;
-  affectedProvinceId?: string;
-}
-
-export interface EconomieCreationData {
-  amount: number;
-  date: Date | { year: number; season: string };
-  description: string;
-  type: 'income' | 'expense';
-  category: string;
-  source?: string;
-  tags?: string[];
-  approved?: boolean;
-  recurring?: boolean;
-  recurringInterval?: RecurringInterval;
-  affectedSenateurId?: string;
-  affectedProvinceId?: string;
-}
-
-export interface EconomieFilter {
-  type?: EconomieType;
-  category?: string;
-  dateRange?: [string, string] | { start: string; end: string };
-  amount?: number;
-  minAmount?: number;
-  maxAmount?: number;
-  searchTerm?: string;
-  categories?: string[];
-  affectedEntity?: string;
-}
-
-export interface EconomieSort {
-  field?: keyof EconomieRecord | string;
-  direction?: 'asc' | 'desc' | string;
-  fixed?: boolean;
-}
-
 export interface TreasuryStatus {
   balance: number;
   income: number;
@@ -78,33 +26,65 @@ export interface EconomicFactors {
   militaryExpenses?: number;
 }
 
-// Props for EconomieStats component
 export interface EconomieStatsProps {
-  treasuryStatus: TreasuryStatus;
+  treasury: TreasuryStatus;
   economicFactors: EconomicFactors;
 }
 
-// Categories for economy records
-export enum EconomieCategory {
-  TAX = 'tax',
-  TRADE = 'trade',
-  TRIBUTE = 'tribute',
-  SPOILS = 'spoils',
-  MILITARY = 'military',
-  ADMINISTRATION = 'administration',
-  CONSTRUCTION = 'construction',
-  GAMES = 'games',
-  RELIGION = 'religion',
-  LOAN = 'loan',
-  OTHER = 'other'
+export type RecurringInterval = 'weekly' | 'monthly' | 'seasonal' | 'yearly';
+
+export interface EconomieRecord {
+  id: string;
+  amount: number;
+  type: 'income' | 'expense';
+  category: string;
+  description: string;
+  date: Date | { year: number; season: string };
+  source?: string;
+  approved?: boolean;
+  recurring?: boolean;
+  recurringInterval?: RecurringInterval;
+  tags?: string[];
+  affectedSenateurId?: string;
+  affectedProvinceId?: string;
 }
 
-// Sources of economic transactions
-export enum EconomieSource {
-  SENATE = 'senate',
-  CONSUL = 'consul',
-  PROVINCE = 'province',
-  FOREIGN = 'foreign',
-  PRIVATE = 'private',
-  OTHER = 'other'
+export interface EconomieCreationData {
+  amount: number;
+  type: 'income' | 'expense';
+  category: string;
+  description: string;
+  date: Date | { year: number; season: string };
+  source?: string;
+  approved?: boolean;
+  recurring?: boolean;
+  recurringInterval?: RecurringInterval;
+  tags?: string[];
+  affectedSenateurId?: string;
+  affectedProvinceId?: string;
+}
+
+export interface EconomieFilter {
+  types?: string[];
+  category?: string;
+  dateRange?: [string, string] | { start: string; end: string };
+  minAmount?: number;
+  maxAmount?: number;
+  searchTerm?: string;
+  tags?: string[];
+  affectedEntity?: string;
+  approved?: boolean;
+  recurring?: boolean;
+}
+
+export type EconomieSort = keyof EconomieRecord | {
+  field: keyof EconomieRecord;
+  direction: 'asc' | 'desc';
+};
+
+export interface EconomieSource {
+  id: string;
+  name: string;
+  type: string;
+  description?: string;
 }

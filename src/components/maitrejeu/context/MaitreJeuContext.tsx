@@ -4,6 +4,7 @@ import { Evenement } from '../types/evenement';
 import { GameDate } from '@/utils/types/gameDate';
 import { FamilleInfo, MembreFamille, FamilleAlliance, MariageInfo, FamilleRelation } from '../types/familles';
 import { SenateurJouable } from '@/types/character';
+import { normalizeEquilibre } from '../utils/equilibreAdapter';
 
 // Define game phase type
 export type GamePhase = 'normal' | 'election' | 'crisis' | 'war' | 'POLITIQUE' | 'ECONOMIE' | 'SOCIAL' | 'MILITAIRE' | 'RELIGION';
@@ -277,7 +278,7 @@ export const MaitreJeuProvider: React.FC<{ children: React.ReactNode }> = ({ chi
   const changePhase = setPhase;
 
   const updateEquilibre = (updates: Partial<Equilibre>) => {
-    setEquilibre(prev => ({ ...prev, ...updates }));
+    setEquilibre(prev => normalizeEquilibre({ ...prev, ...updates }));
   };
 
   // Histoire management functions
@@ -472,19 +473,22 @@ export const MaitreJeuProvider: React.FC<{ children: React.ReactNode }> = ({ chi
   };
 
   const updateFactionBalance = (populaires: number, optimates: number, moderates: number) => {
-    setEquilibre(prev => ({
-      ...prev,
-      populaires,
-      populaires: populaires, // For compatibility
-      optimates,
-      moderates,
-      politique: {
-        ...prev.politique,
+    setEquilibre(prev => {
+      const normalized = normalizeEquilibre(prev);
+      return {
+        ...normalized,
         populaires,
+        populares: populaires, // Update both for compatibility
         optimates,
-        moderates
-      }
-    }));
+        moderates,
+        politique: {
+          ...normalized.politique,
+          populaires,
+          optimates,
+          moderates
+        }
+      };
+    });
   };
 
   const value = {

@@ -6,6 +6,7 @@ export interface SenateurJouable {
   nom: string;
   prenom: string;
   gens: string;
+  name?: string; // For compatibility with /types/character
   gender: 'male' | 'female';
   age: number;
   actif: boolean;
@@ -28,4 +29,14 @@ export interface SenateurJouable {
   dateMort?: GameDate;
   portrait?: string;
   notes?: string;
+  
+  // Additional attributes for compatibility
+  popularite?: number;
+  militaire?: number;
+  piete?: number;
+  eloquence?: number;
+  joueur?: boolean;
+  statut?: string;
+  roles?: string[];
+  diplomatie?: Record<string, any>;
 }

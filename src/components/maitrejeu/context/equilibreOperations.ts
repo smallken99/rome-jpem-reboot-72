@@ -1,25 +1,32 @@
 
 import { Equilibre } from '../types/equilibre';
+import { normalizeEquilibre } from '../utils/equilibreAdapter';
 
 export const createEquilibreOperations = (
   setEquilibre: React.Dispatch<React.SetStateAction<Equilibre | null>>
 ) => {
   const updateEquilibre = (updates: Partial<Equilibre>) => {
-    setEquilibre(prev => prev ? { ...prev, ...updates } : updates as Equilibre);
+    setEquilibre(prev => {
+      if (!prev) return normalizeEquilibre(updates);
+      return normalizeEquilibre({ ...prev, ...updates });
+    });
   };
 
   // Add function to update faction balance
   const updateFactionBalance = (populares: number, optimates: number, moderates: number) => {
     setEquilibre(prev => {
       if (!prev) return null;
+      
+      const normalized = normalizeEquilibre(prev);
+      
       return {
-        ...prev,
+        ...normalized,
         populares,
         populaires: populares, // Update both for compatibility
         optimates,
         moderates,
         politique: {
-          ...prev.politique,
+          ...normalized.politique,
           populaires: populares,
           optimates,
           moderates
