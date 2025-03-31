@@ -1,5 +1,7 @@
 
-export type Season = 'SPRING' | 'SUMMER' | 'AUTUMN' | 'WINTER' | 'Ver' | 'Aes' | 'Aut' | 'Hie' | 'Spring' | 'Summer' | 'Autumn' | 'Winter' | 'spring' | 'summer' | 'autumn' | 'winter' | 'fall';
+// Types de dates et saisons pour le système de jeu
+
+export type Season = 'SPRING' | 'SUMMER' | 'AUTUMN' | 'WINTER' | 'Ver' | 'Aes' | 'Aut' | 'Hie' | 'Spring' | 'Summer' | 'Autumn' | 'Winter' | 'spring' | 'summer' | 'autumn' | 'winter' | 'fall' | 'Fall' | 'Aestas' | 'Autumnus' | 'Hiems';
 
 export enum GamePhaseEnum {
   NORMAL = 'normal',
@@ -13,23 +15,44 @@ export enum GamePhaseEnum {
   TRIUMPH = 'triumph',
   GAMES = 'games',
   SCANDAL = 'scandal',
+  // Ajout des autres phases pour la compatibilité
+  SENATE = 'SENATE',
+  ACTIONS = 'ACTIONS',
+  ECONOMY = 'ECONOMY',
+  EVENTS = 'EVENTS',
+  DIPLOMACY = 'DIPLOMACY',
+  MILITARY = 'MILITARY',
+  POLITIQUE = 'POLITIQUE',
+  ECONOMIE = 'ECONOMIE',
+  MILITAIRE = 'MILITAIRE',
+  RELIGION = 'RELIGION',
+  SOCIAL = 'SOCIAL',
+  SETUP = 'SETUP',
+  ELECTION_CAPS = 'ELECTION',
+  ACTION = 'ACTION',
+  SENAT = 'SENAT',
+  EVENEMENT = 'EVENEMENT',
+  ADMINISTRATION = 'ADMINISTRATION'
 }
 
-export type GamePhase = 'normal' | 'election' | 'crisis' | 'war' | 'diplomatic' | 'religious' | 'economic' | 'revolt' | 'triumph' | 'games' | 'scandal';
+export type GamePhase = 'normal' | 'election' | 'crisis' | 'war' | 'diplomatic' | 'religious' | 'economic' | 'revolt' | 'triumph' | 'games' | 'scandal' | 
+  'SENATE' | 'ACTIONS' | 'ECONOMY' | 'EVENTS' | 'DIPLOMACY' | 'MILITARY' | 'POLITIQUE' | 'ECONOMIE' | 'MILITAIRE' | 'RELIGION' | 'SOCIAL' | 'SETUP' | 
+  'ELECTION' | 'ACTION' | 'SENAT' | 'EVENEMENT' | 'ADMINISTRATION';
 
 export interface GameDate {
   year: number;
   season: Season;
   phase?: GamePhase;
+  day?: number;
 }
 
 // Utility function to convert Season strings
 export function normalizeSeasonString(season: string): Season {
   if (season === 'Spring' || season === 'spring' || season === 'Ver') return 'SPRING';
-  if (season === 'Summer' || season === 'summer' || season === 'Aes') return 'SUMMER';
-  if (season === 'Autumn' || season === 'autumn' || season === 'fall' || season === 'Fall' || season === 'Aut') return 'AUTUMN';
-  if (season === 'Winter' || season === 'winter' || season === 'Hie') return 'WINTER';
-  return 'SPRING'; // Default to SPRING if unknown
+  if (season === 'Summer' || season === 'summer' || season === 'Aes' || season === 'Aestas') return 'SUMMER';
+  if (season === 'Autumn' || season === 'autumn' || season === 'fall' || season === 'Fall' || season === 'Aut' || season === 'Autumnus') return 'AUTUMN';
+  if (season === 'Winter' || season === 'winter' || season === 'Hie' || season === 'Hiems') return 'WINTER';
+  return season as Season; // Si c'est déjà une saison valide
 }
 
 // Function to convert a GameDate to a string representation
@@ -46,6 +69,19 @@ export const stringToGameDate = (dateString: string): GameDate => {
   };
 };
 
+// Function to parse a string to a GameDate safely
+export const parseStringToGameDate = (dateString: string): GameDate => {
+  if (!dateString) {
+    return { year: 701, season: 'SPRING' }; // Default date
+  }
+  try {
+    return stringToGameDate(dateString);
+  } catch (e) {
+    console.error("Error parsing date string:", e);
+    return { year: 701, season: 'SPRING' };
+  }
+};
+
 // Function to convert a JS Date to a GameDate
 export const dateToGameDate = (date: Date): GameDate => {
   const year = date.getFullYear();
@@ -58,4 +94,21 @@ export const dateToGameDate = (date: Date): GameDate => {
   else season = 'WINTER';
   
   return { year, season };
+};
+
+// Format a GameDate to a display string
+export const formatGameDate = (date: GameDate): string => {
+  const seasonStrings: Record<string, string> = {
+    'SPRING': 'Printemps',
+    'SUMMER': 'Été',
+    'AUTUMN': 'Automne',
+    'WINTER': 'Hiver',
+    'Ver': 'Printemps',
+    'Aestas': 'Été',
+    'Autumnus': 'Automne',
+    'Hiems': 'Hiver'
+  };
+
+  const seasonDisplay = seasonStrings[date.season] || date.season;
+  return `${seasonDisplay} ${date.year} AUC`;
 };

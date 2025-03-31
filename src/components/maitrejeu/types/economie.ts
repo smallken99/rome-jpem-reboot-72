@@ -9,7 +9,8 @@ export enum ECONOMIE_TYPES {
   MILITARY = 'military',
   CONSTRUCTION = 'construction',
   SLAVES = 'slaves',
-  OTHER = 'other'
+  OTHER = 'other',
+  COMMERCE = 'commerce'
 }
 
 export enum ECONOMIE_CATEGORIES {
@@ -25,7 +26,18 @@ export enum ECONOMIE_CATEGORIES {
   OTHER = 'other',
   MAINTENANCE = 'maintenance',
   IMPOTS = 'Impôts',
-  COMMERCE = 'Commerce'
+  COMMERCE = 'Commerce',
+  // Ajout pour la compatibilité
+  TAXES = "taxes",
+  TRIBUTE = "tribute",
+  RELIGIOUS = "religious", 
+  ADMINISTRATIVE = "administrative",
+  AGRICULTURE = "agriculture",
+  ARTISANAT = "artisanat",
+  FORUM = "forum",
+  administration = "administration",
+  income = "income",
+  all = "all"
 }
 
 export enum ECONOMIE_SOURCE {
@@ -35,7 +47,11 @@ export enum ECONOMIE_SOURCE {
   PROVINCES = 'provinces',
   PRIVATE = 'private',
   MANUAL_ENTRY = 'manual_entry',
-  TAX_COLLECTION = 'Collecte fiscale'
+  TAX_COLLECTION = 'Collecte fiscale',
+  FOREIGN = "foreign",
+  CITIZEN = "citizen",
+  MANUAL = "manual_entry",
+  treasury = "treasury"
 }
 
 export type RecurringInterval = 'monthly' | 'quarterly' | 'biannually' | 'annually' | 'special' | 'seasonal';
@@ -57,6 +73,8 @@ export interface EconomieRecord {
   // Champs supplémentaires pour résoudre les erreurs
   createdAt?: string;
   updatedAt?: string;
+  approved?: boolean;
+  isRecurring?: boolean;
 }
 
 export interface EconomieCreationData {

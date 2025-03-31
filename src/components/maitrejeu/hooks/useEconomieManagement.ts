@@ -1,3 +1,4 @@
+
 import { useState, useEffect, useMemo } from 'react';
 import { useMaitreJeu } from '@/components/maitrejeu/context';
 import { 
@@ -6,15 +7,16 @@ import {
   EconomieSort,
   EconomieCreationData,
   ECONOMIE_CATEGORIES,
-  TreasuryStatus
+  TreasuryStatus,
+  ECONOMIE_TYPES
 } from '@/components/maitrejeu/types/economie';
+import { GameDate, stringToGameDate } from '@/components/maitrejeu/types/common';
 import { toast } from 'sonner';
-import { GameDate, parseStringToGameDate } from '@/components/maitrejeu/types/common';
 
 const DEFAULT_FILTER: EconomieFilter = {
   searchTerm: '',
   category: [] as ECONOMIE_CATEGORIES[],
-  types: 'all'
+  types: ECONOMIE_TYPES.INCOME
 };
 
 const DEFAULT_SORT: EconomieSort = {
@@ -22,9 +24,13 @@ const DEFAULT_SORT: EconomieSort = {
   direction: 'desc'
 };
 
-const parseGameDate = (date: GameDate | string): GameDate => {
+const parseGameDate = (date: GameDate | Date | string): GameDate | Date => {
   if (typeof date === 'string') {
-    return parseStringToGameDate(date);
+    try {
+      return stringToGameDate(date);
+    } catch (e) {
+      return new Date(date);
+    }
   }
   return date;
 };
@@ -32,7 +38,6 @@ const parseGameDate = (date: GameDate | string): GameDate => {
 export const useEconomieManagement = () => {
   const { 
     economieRecords, 
-    setEconomieRecords,
     treasury,
     setTreasury,
     economicFactors, 
@@ -58,14 +63,25 @@ export const useEconomieManagement = () => {
         return false;
       }
       
-      if (filter.category && filter.category.length > 0 && !filter.category.includes(record.category) && !filter.category.includes('all')) {
+      // Filtrer par catégorie si spécifié
+      if (filter.category && 
+         ((Array.isArray(filter.category) && filter.category.length > 0) || 
+          (!Array.isArray(filter.category) && filter.category !== 'all'))) {
+        if (Array.isArray(filter.category)) {
+          if (!filter.category.includes(record.category) && !filter.category.includes('all')) {
+            return false;
+          }
+        } else if (filter.category !== 'all' && record.category !== filter.category) {
+          return false;
+        }
+      }
+      
+      // Filtrer par type si spécifié
+      if (filter.types && filter.types !== 'all' && record.type !== filter.types) {
         return false;
       }
       
-      if (filter.types !== 'all' && record.type !== filter.types) {
-        return false;
-      }
-      
+      // Filtrer par entité affectée
       if (filter.affectedEntity && filter.affectedEntity !== 'all') {
         if (filter.affectedEntity === 'senateur' && !record.affectedSenateurId) {
           return false;
@@ -75,6 +91,7 @@ export const useEconomieManagement = () => {
         }
       }
       
+      // Filtrer par montant
       if (filter.minAmount !== undefined && record.amount < filter.minAmount) {
         return false;
       }
@@ -83,15 +100,27 @@ export const useEconomieManagement = () => {
         return false;
       }
       
+      // Filtrer par plage de date
       if (filter.dateRange) {
         if (filter.dateRange.start) {
           const recordDate = parseGameDate(record.date);
           const startDate = filter.dateRange.start;
           
-          if (recordDate.year < startDate.year || 
-             (recordDate.year === startDate.year && 
-              recordDate.season < startDate.season)) {
-            return false;
+          if (recordDate instanceof Date && startDate instanceof Date) {
+            if (recordDate < startDate) return false;
+          } else if ('year' in recordDate && 'year' in startDate) {
+            if (recordDate.year < startDate.year) return false;
+            if (recordDate.year === startDate.year) {
+              const seasonOrder: Record<string, number> = {
+                'SPRING': 0, 'SUMMER': 1, 'AUTUMN': 2, 'WINTER': 3,
+                'Ver': 0, 'Aestas': 1, 'Autumnus': 2, 'Hiems': 3
+              };
+              
+              const recordSeason = seasonOrder[String(recordDate.season)] || 0;
+              const startSeason = seasonOrder[String(startDate.season)] || 0;
+              
+              if (recordSeason < startSeason) return false;
+            }
           }
         }
         
@@ -99,10 +128,21 @@ export const useEconomieManagement = () => {
           const recordDate = parseGameDate(record.date);
           const endDate = filter.dateRange.end;
           
-          if (recordDate.year > endDate.year || 
-             (recordDate.year === endDate.year && 
-              recordDate.season > endDate.season)) {
-            return false;
+          if (recordDate instanceof Date && endDate instanceof Date) {
+            if (recordDate > endDate) return false;
+          } else if ('year' in recordDate && 'year' in endDate) {
+            if (recordDate.year > endDate.year) return false;
+            if (recordDate.year === endDate.year) {
+              const seasonOrder: Record<string, number> = {
+                'SPRING': 0, 'SUMMER': 1, 'AUTUMN': 2, 'WINTER': 3,
+                'Ver': 0, 'Aestas': 1, 'Autumnus': 2, 'Hiems': 3
+              };
+              
+              const recordSeason = seasonOrder[String(recordDate.season)] || 0;
+              const endSeason = seasonOrder[String(endDate.season)] || 0;
+              
+              if (recordSeason > endSeason) return false;
+            }
           }
         }
       }
@@ -119,28 +159,31 @@ export const useEconomieManagement = () => {
         const dateA = parseGameDate(a.date);
         const dateB = parseGameDate(b.date);
         
-        const yearA = dateA.year;
-        const yearB = dateB.year;
-        
-        const seasonOrder: Record<string, number> = {
-          'SPRING': 0,
-          'SUMMER': 1,
-          'AUTUMN': 2,
-          'WINTER': 3,
-          'Ver': 0,
-          'Aestas': 1,
-          'Autumnus': 2,
-          'Hiems': 3
-        };
-        
-        const seasonA = seasonOrder[String(dateA.season)];
-        const seasonB = seasonOrder[String(dateB.season)];
-        
-        if (yearA !== yearB) {
-          return sort.direction === 'asc' ? yearA - yearB : yearB - yearA;
+        if (dateA instanceof Date && dateB instanceof Date) {
+          return sort.direction === 'asc' ? dateA.getTime() - dateB.getTime() : dateB.getTime() - dateA.getTime();
         }
         
-        return sort.direction === 'asc' ? seasonA - seasonB : seasonB - seasonA;
+        if ('year' in dateA && 'year' in dateB) {
+          const yearA = dateA.year;
+          const yearB = dateB.year;
+          
+          if (yearA !== yearB) {
+            return sort.direction === 'asc' ? yearA - yearB : yearB - yearA;
+          }
+          
+          const seasonOrder: Record<string, number> = {
+            'SPRING': 0, 'SUMMER': 1, 'AUTUMN': 2, 'WINTER': 3,
+            'Ver': 0, 'Aestas': 1, 'Autumnus': 2, 'Hiems': 3
+          };
+          
+          const seasonA = seasonOrder[String(dateA.season)] || 0;
+          const seasonB = seasonOrder[String(dateB.season)] || 0;
+          
+          return sort.direction === 'asc' ? seasonA - seasonB : seasonB - seasonA;
+        }
+        
+        // Fallback
+        return 0;
       }
       
       const valueA = a[field as keyof EconomieRecord];
@@ -221,7 +264,7 @@ export const useEconomieManagement = () => {
   };
   
   const updateTreasuryBalance = (newBalance: number) => {
-    setTreasury(prev => ({
+    setTreasury((prev: TreasuryStatus) => ({
       ...prev,
       balance: newBalance
     }));
@@ -229,11 +272,11 @@ export const useEconomieManagement = () => {
   
   const handleRefreshData = () => {
     const totalIncome = economieRecords
-      .filter(r => r.type === 'income')
+      .filter(r => r.type === ECONOMIE_TYPES.INCOME)
       .reduce((sum, r) => sum + r.amount, 0);
       
     const totalExpenses = economieRecords
-      .filter(r => r.type === 'expense')
+      .filter(r => r.type === ECONOMIE_TYPES.EXPENSE)
       .reduce((sum, r) => sum + r.amount, 0);
       
     updateTreasuryBalance(totalIncome - totalExpenses);

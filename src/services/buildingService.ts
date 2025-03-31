@@ -1,257 +1,455 @@
 
-import { Building, ConstructionProject, MaintenanceTask } from '@/components/maitrejeu/types/batiments';
 import { v4 as uuidv4 } from 'uuid';
-import { GameDate } from '@/components/maitrejeu/types/common';
+import { toast } from 'sonner';
+import { OwnedBuilding, PropertyUpgrade } from '@/components/proprietes/types/property';
+import { economyService } from './economyService';
 
 /**
- * Service pour la gestion des bâtiments, de leur construction et maintenance
+ * Service de gestion des bâtiments et propriétés
  */
-export class BuildingService {
-  /**
-   * Calcule le coût de maintenance annuel pour un bâtiment
-   */
-  static calculateMaintenanceCost(building: Building): number {
-    // Formule de base pour calculer le coût de maintenance
-    const baseCost = building.value * 0.02; // 2% de la valeur du bâtiment
-    const conditionFactor = Math.max(0.5, building.condition / 100); // Plus la condition est mauvaise, plus le coût est élevé
-    
-    let maintenanceCost = baseCost / conditionFactor;
-    
-    // Ajustements supplémentaires
-    if (building.type === 'temple') {
-      maintenanceCost *= 1.2; // Les temples coûtent plus cher à maintenir
-    } else if (building.type === 'road' || building.type === 'bridge') {
-      maintenanceCost *= 1.5; // Les infrastructures sont coûteuses
-    } else if (building.type === 'military') {
-      maintenanceCost *= 1.3; // Les bâtiments militaires sont coûteux
-    }
-    
-    return Math.round(maintenanceCost);
+class BuildingService {
+  private buildings: OwnedBuilding[] = [];
+  private buildingListeners: ((buildings: OwnedBuilding[]) => void)[] = [];
+  
+  constructor() {
+    // Initialiser avec quelques bâtiments par défaut si nécessaire
+    this.buildings = [];
   }
   
-  /**
-   * Calcule le revenu potentiel d'un bâtiment
-   */
-  static calculatePotentialIncome(building: Building): number {
-    let baseIncome = 0;
+  // Ajouter un nouveau bâtiment
+  addBuilding(building: Omit<OwnedBuilding, 'id'>): string {
+    const id = typeof building.id === 'string' ? building.id : uuidv4();
+    const newBuilding: OwnedBuilding = {
+      ...building,
+      id,
+      // Définir des valeurs par défaut si nécessaire
+      maintenanceLevel: building.maintenanceLevel || 50,
+      securityLevel: building.securityLevel || 1,
+      condition: building.condition || 100,
+      status: building.status || 'excellent',
+      upgrades: building.upgrades || []
+    };
     
-    switch (building.type) {
-      case 'market':
-        baseIncome = building.value * 0.08; // 8% de la valeur
-        break;
-      case 'workshop':
-        baseIncome = building.value * 0.06; // 6% de la valeur
-        break;
-      case 'port':
-        baseIncome = building.value * 0.10; // 10% de la valeur
-        break;
-      case 'villa':
-        baseIncome = building.value * 0.04; // 4% de la valeur
-        break;
-      case 'insula':
-        baseIncome = building.value * 0.05; // 5% de la valeur
-        break;
-      case 'warehouse':
-        baseIncome = building.value * 0.03; // 3% de la valeur
-        break;
-      default:
-        baseIncome = building.value * 0.01; // 1% pour les autres types
+    this.buildings = [...this.buildings, newBuilding];
+    this.notifyBuildingListeners();
+    
+    return id;
+  }
+  
+  // Supprimer un bâtiment
+  removeBuilding(id: string | number): boolean {
+    const index = this.buildings.findIndex(b => b.id === id);
+    if (index === -1) {
+      return false;
     }
     
-    // Facteurs d'ajustement
-    const conditionFactor = building.condition / 100; // Meilleure condition = meilleur revenu
+    this.buildings = [...this.buildings.slice(0, index), ...this.buildings.slice(index + 1)];
+    this.notifyBuildingListeners();
+    
+    return true;
+  }
+  
+  // Mettre à jour un bâtiment
+  updateBuilding(updatedBuilding: OwnedBuilding): boolean {
+    const index = this.buildings.findIndex(b => b.id === updatedBuilding.id);
+    if (index === -1) {
+      return false;
+    }
+    
+    this.buildings = [
+      ...this.buildings.slice(0, index),
+      updatedBuilding,
+      ...this.buildings.slice(index + 1)
+    ];
+    
+    this.notifyBuildingListeners();
+    return true;
+  }
+  
+  // Mettre à jour une propriété spécifique d'un bâtiment
+  updateBuildingProperty<K extends keyof OwnedBuilding>(
+    id: string | number,
+    property: K,
+    value: OwnedBuilding[K]
+  ): boolean {
+    const building = this.buildings.find(b => b.id === id);
+    if (!building) {
+      return false;
+    }
+    
+    const updatedBuilding = { ...building, [property]: value };
+    return this.updateBuilding(updatedBuilding);
+  }
+  
+  // Obtenir un bâtiment par id
+  getBuilding(id: string | number): OwnedBuilding | undefined {
+    return this.buildings.find(b => b.id === id);
+  }
+  
+  // Obtenir tous les bâtiments
+  getAllBuildings(): OwnedBuilding[] {
+    return [...this.buildings];
+  }
+  
+  // Filtrer les bâtiments par type
+  getBuildingsByType(type: string): OwnedBuilding[] {
+    return this.buildings.filter(b => b.buildingType === type || b.type === type);
+  }
+  
+  // Calculer les statistiques des bâtiments
+  calculateBuildingStats() {
+    const stats = {
+      totalValue: 0,
+      monthlyIncome: 0,
+      monthlyMaintenance: 0,
+      totalBuildings: this.buildings.length,
+      averageCondition: 0,
+      byType: {} as Record<string, number>
+    };
+    
+    // Calculer les statistiques globales
+    this.buildings.forEach(building => {
+      stats.totalValue += building.value || 0;
+      stats.monthlyIncome += building.income || 0;
+      stats.monthlyMaintenance += building.maintenanceCost || 0;
+      stats.averageCondition += building.condition || 0;
+      
+      // Compter par type
+      const type = building.buildingType || building.type || 'other';
+      stats.byType[type] = (stats.byType[type] || 0) + 1;
+    });
+    
+    // Calculer la condition moyenne
+    if (this.buildings.length > 0) {
+      stats.averageCondition /= this.buildings.length;
+    }
+    
+    return stats;
+  }
+  
+  // Acheter un bâtiment
+  purchaseBuilding(options: {
+    name: string;
+    type: string;
+    buildingType: string;
+    location: string;
+    cost: number;
+    maintenanceCost: number;
+    income?: number;
+    description?: string;
+  }): string | null {
+    // Vérifier si on peut se permettre ce bâtiment
+    if (!economyService.canAfford(options.cost)) {
+      toast.error("Fonds insuffisants pour acheter ce bâtiment");
+      return null;
+    }
+    
+    // Effectuer le paiement
+    economyService.makePayment(
+      options.cost,
+      "Vendeur de propriété",
+      "Achat immobilier",
+      `Achat de ${options.name}`
+    );
+    
+    // Créer le nouveau bâtiment
+    const buildingId = this.addBuilding({
+      id: uuidv4(),
+      buildingId: uuidv4(),
+      name: options.name,
+      type: options.type,
+      buildingType: options.buildingType,
+      location: options.location,
+      value: options.cost,
+      maintenanceCost: options.maintenanceCost,
+      maintenance: options.maintenanceCost,
+      condition: 100,
+      maintenanceLevel: 50,
+      securityLevel: 1,
+      income: options.income || 0,
+      description: options.description || '',
+      purchaseDate: new Date(),
+      size: 'medium',
+      maxWorkers: 5
+    });
+    
+    toast.success(`${options.name} acquis avec succès!`);
+    return buildingId;
+  }
+  
+  // Vendre un bâtiment
+  sellBuilding(id: string | number): boolean {
+    const building = this.getBuilding(id);
+    if (!building) {
+      toast.error("Bâtiment introuvable");
+      return false;
+    }
+    
+    // Calculer le prix de vente (généralement moins que la valeur)
+    const conditionFactor = building.condition / 100;
+    const ageFactor = calculateAgeFactor(building.purchaseDate);
+    const sellingPrice = Math.round(building.value * conditionFactor * ageFactor);
+    
+    // Recevoir le paiement
+    economyService.receivePayment(
+      sellingPrice,
+      "Acheteur de propriété",
+      "Vente immobilière",
+      `Vente de ${building.name}`
+    );
+    
+    // Supprimer le bâtiment
+    this.removeBuilding(id);
+    
+    toast.success(`${building.name} vendu pour ${sellingPrice.toLocaleString()} As`);
+    return true;
+  }
+  
+  // Calculer les revenus d'un bâtiment
+  calculateBuildingIncome(building: OwnedBuilding): number {
+    if (!building.income) return 0;
+    
+    // Facteurs affectant le revenu
+    const conditionFactor = building.condition / 100;
     const maintenanceFactor = building.maintenanceLevel ? building.maintenanceLevel / 100 : 0.5;
     
-    return Math.round(baseIncome * conditionFactor * maintenanceFactor);
+    // Ajustements des upgrades
+    const upgradeBonus = building.upgrades?.reduce((bonus, upgrade) => {
+      if (upgrade.applied && upgrade.effects?.income) {
+        return bonus + upgrade.effects.income;
+      }
+      return bonus;
+    }, 0) || 0;
+    
+    // Calcul final
+    return Math.round(building.income * conditionFactor * maintenanceFactor + upgradeBonus);
   }
   
-  /**
-   * Calcule le coût de construction d'un nouveau bâtiment
-   */
-  static calculateConstructionCost(type: string, size: number): number {
-    const baseCosts: Record<string, number> = {
-      'temple': 50000,
-      'villa': 30000,
-      'domus': 20000,
-      'insula': 15000,
-      'forum': 100000,
-      'baths': 40000,
-      'theater': 60000,
-      'amphitheater': 150000,
-      'senate': 80000,
-      'basilica': 70000,
-      'market': 25000,
-      'warehouse': 15000,
-      'workshop': 10000,
-      'port': 80000,
-      'aqueduct': 120000,
-      'road': 5000,
-      'bridge': 30000,
-      'military': 35000,
-      'other': 20000
-    };
+  // Calculer le coût de maintenance réel d'un bâtiment
+  calculateMaintenanceCost(building: OwnedBuilding): number {
+    if (!building.maintenanceCost) return 0;
     
-    const baseTypeCost = baseCosts[type] || 20000;
-    return Math.round(baseTypeCost * (size / 100));
+    // Facteurs affectant le coût de maintenance
+    const ageFactor = calculateAgeFactor(building.purchaseDate);
+    const conditionPenalty = (100 - building.condition) / 200; // +0-50% basé sur la condition
+    
+    // Ajustements des upgrades
+    const upgradeReduction = building.upgrades?.reduce((reduction, upgrade) => {
+      if (upgrade.applied && upgrade.effects?.maintenanceReduction) {
+        return reduction + upgrade.effects.maintenanceReduction;
+      }
+      return reduction;
+    }, 0) || 0;
+    
+    // Calcul final (ne peut pas être en dessous de 50% du coût de base)
+    const baseCost = building.maintenanceCost;
+    const reducedCost = baseCost * (1 - upgradeReduction / 100);
+    return Math.max(baseCost * 0.5, reducedCost * (1 + ageFactor * 0.5 + conditionPenalty));
   }
   
-  /**
-   * Estime le temps de construction d'un nouveau bâtiment
-   */
-  static estimateConstructionTime(type: string, size: number, workers: number): number {
-    // Temps de base en jours
-    const baseTimeInDays: Record<string, number> = {
-      'temple': 365,
-      'villa': 180,
-      'domus': 120,
-      'insula': 90,
-      'forum': 730,
-      'baths': 365,
-      'theater': 450,
-      'amphitheater': 1460,
-      'senate': 730,
-      'basilica': 545,
-      'market': 180,
-      'warehouse': 90,
-      'workshop': 60,
-      'port': 730,
-      'aqueduct': 1095,
-      'road': 30,
-      'bridge': 180,
-      'military': 180,
-      'other': 120
-    };
+  // Appliquer une amélioration à un bâtiment
+  applyUpgrade(buildingId: string | number, upgradeId: string): boolean {
+    const building = this.getBuilding(buildingId);
+    if (!building || !building.upgrades) {
+      return false;
+    }
     
-    // Base time adjusted for size
-    const baseTime = baseTimeInDays[type] || 120;
-    const sizeAdjustedTime = baseTime * (size / 100);
+    const upgradeIndex = building.upgrades.findIndex(u => u.id === upgradeId);
+    if (upgradeIndex === -1) {
+      return false;
+    }
     
-    // Adjust for number of workers (more workers = less time)
-    const workerAdjustment = Math.sqrt(100 / Math.max(workers, 1)); // Square root to model diminishing returns
+    const upgrade = building.upgrades[upgradeIndex];
     
-    // Final time in days
-    const timeInDays = Math.round(sizeAdjustedTime * workerAdjustment);
+    // Vérifier si on peut se permettre cette amélioration
+    if (!economyService.canAfford(upgrade.cost)) {
+      toast.error("Fonds insuffisants pour cette amélioration");
+      return false;
+    }
     
-    // Convert to seasons (90 days per season)
-    return Math.ceil(timeInDays / 90);
-  }
-  
-  /**
-   * Crée un nouveau projet de construction
-   */
-  static createConstructionProject(
-    name: string, 
-    type: string, 
-    location: string, 
-    size: number, 
-    workers: number,
-    currentDate: GameDate
-  ): ConstructionProject {
-    const cost = this.calculateConstructionCost(type, size);
-    const constructionTimeInSeasons = this.estimateConstructionTime(type, size, workers);
-    
-    // Calculer la date de fin estimée
-    let estimatedEndDate = { ...currentDate };
-    for (let i = 0; i < constructionTimeInSeasons; i++) {
-      const seasons = ['Ver', 'Aestas', 'Autumnus', 'Hiems'];
-      const currentIndex = seasons.indexOf(estimatedEndDate.season as 'Ver' | 'Aestas' | 'Autumnus' | 'Hiems');
-      if (currentIndex === 3) {
-        estimatedEndDate = {
-          year: estimatedEndDate.year + 1,
-          season: 'Ver'
-        };
-      } else {
-        estimatedEndDate = {
-          ...estimatedEndDate,
-          season: seasons[currentIndex + 1] as any
-        };
+    // Vérifier les prérequis
+    if (upgrade.requirements) {
+      if (upgrade.requirements.minBuildingLevel && building.maintenanceLevel < upgrade.requirements.minBuildingLevel) {
+        toast.error(`Niveau d'entretien insuffisant pour cette amélioration`);
+        return false;
+      }
+      
+      if (upgrade.requirements.minValue && building.value < upgrade.requirements.minValue) {
+        toast.error(`Valeur du bâtiment insuffisante pour cette amélioration`);
+        return false;
+      }
+      
+      if (upgrade.requirements.minWorkers && (building.workers || 0) < upgrade.requirements.minWorkers) {
+        toast.error(`Nombre de travailleurs insuffisant pour cette amélioration`);
+        return false;
+      }
+      
+      if (upgrade.requirements.minCondition && building.condition < upgrade.requirements.minCondition) {
+        toast.error(`État du bâtiment insuffisant pour cette amélioration`);
+        return false;
+      }
+      
+      // Vérifier les prérequis d'autres améliorations
+      if (upgrade.requirements.otherUpgrades && upgrade.requirements.otherUpgrades.length > 0) {
+        const missingUpgrades = upgrade.requirements.otherUpgrades.filter(
+          requiredId => !building.upgrades?.some(u => u.id === requiredId && u.applied)
+        );
+        
+        if (missingUpgrades.length > 0) {
+          toast.error(`Améliorations prérequises manquantes`);
+          return false;
+        }
       }
     }
     
-    return {
-      id: uuidv4(),
-      name,
-      type: type as any, // Note: needs proper type validation
-      location,
-      cost,
-      progress: 0,
-      startDate: currentDate,
-      estimatedEndDate,
-      status: 'planning',
-      workers,
-      description: `Construction de ${name} à ${location}`
+    // Effectuer le paiement
+    economyService.makePayment(
+      upgrade.cost,
+      "Entrepreneur",
+      "Amélioration immobilière",
+      `Amélioration: ${upgrade.name} pour ${building.name}`
+    );
+    
+    // Appliquer l'amélioration
+    const updatedUpgrades = [...building.upgrades];
+    updatedUpgrades[upgradeIndex] = {
+      ...upgrade,
+      applied: true
     };
-  }
-  
-  /**
-   * Crée une tâche de maintenance pour un bâtiment
-   */
-  static createMaintenanceTask(
-    building: Building,
-    description: string,
-    priority: 'high' | 'medium' | 'low' | 'critical',
-    currentDate: GameDate
-  ): MaintenanceTask {
-    // Calculer une date limite basée sur la priorité
-    let deadline = { ...currentDate };
-    const seasonsToAdd = priority === 'critical' ? 1 : (priority === 'high' ? 2 : (priority === 'medium' ? 3 : 4));
     
-    // Avancer la date
-    const seasons = ['Ver', 'Aestas', 'Autumnus', 'Hiems'];
-    let currentIndex = seasons.indexOf(deadline.season as 'Ver' | 'Aestas' | 'Autumnus' | 'Hiems');
+    // Appliquer les effets de l'amélioration au bâtiment
+    const updatedBuilding = { ...building, upgrades: updatedUpgrades };
     
-    for (let i = 0; i < seasonsToAdd; i++) {
-      currentIndex = (currentIndex + 1) % 4;
-      if (currentIndex === 0) {
-        deadline.year += 1;
+    if (upgrade.effects) {
+      if (upgrade.effects.income) {
+        updatedBuilding.income = (building.income || 0) + upgrade.effects.income;
+      }
+      
+      if (upgrade.effects.value) {
+        updatedBuilding.value = building.value + upgrade.effects.value;
+      }
+      
+      if (upgrade.effects.conditionBoost) {
+        updatedBuilding.condition = Math.min(100, building.condition + upgrade.effects.conditionBoost);
       }
     }
     
-    deadline.season = seasons[currentIndex] as any;
+    this.updateBuilding(updatedBuilding);
     
-    // Estimer le coût en fonction de la condition du bâtiment
-    const estimatedCost = Math.round(building.value * ((100 - building.condition) / 200));
+    toast.success(`Amélioration ${upgrade.name} appliquée avec succès!`);
+    return true;
+  }
+  
+  // Collecter les revenus d'un bâtiment
+  collectBuildingIncome(buildingId: string | number): number {
+    const building = this.getBuilding(buildingId);
+    if (!building || !building.income) {
+      toast.error("Ce bâtiment ne génère pas de revenus");
+      return 0;
+    }
     
-    return {
-      id: uuidv4(),
-      buildingId: building.id,
-      buildingName: building.name,
-      description,
-      estimatedCost,
-      priority,
-      deadline,
-      status: 'pending'
+    const adjustedIncome = this.calculateBuildingIncome(building);
+    
+    // Enregistrer la transaction
+    economyService.receivePayment(
+      adjustedIncome,
+      building.name,
+      "Revenus immobiliers",
+      `Revenus de ${building.name}`
+    );
+    
+    toast.success(`Revenus collectés: ${adjustedIncome.toLocaleString()} As de ${building.name}`);
+    
+    return adjustedIncome;
+  }
+  
+  // Collecter les revenus de tous les bâtiments
+  collectAllBuildingIncomes(): number {
+    let totalIncome = 0;
+    
+    this.buildings.forEach(building => {
+      if (building.income && building.income > 0) {
+        const adjustedIncome = this.calculateBuildingIncome(building);
+        
+        // Ajouter au revenu total
+        totalIncome += adjustedIncome;
+        
+        // Enregistrer la transaction pour ce bâtiment
+        economyService.receivePayment(
+          adjustedIncome,
+          building.name,
+          "Revenus immobiliers",
+          `Revenus de ${building.name}`
+        );
+      }
+    });
+    
+    if (totalIncome > 0) {
+      toast.success(`Revenus immobiliers collectés: ${totalIncome.toLocaleString()} As`);
+    } else {
+      toast.info("Aucun revenu à collecter pour le moment");
+    }
+    
+    return totalIncome;
+  }
+  
+  // Effectuer la maintenance d'un bâtiment
+  performMaintenance(buildingId: string | number): boolean {
+    const building = this.getBuilding(buildingId);
+    if (!building) {
+      toast.error("Bâtiment introuvable");
+      return false;
+    }
+    
+    const maintenanceCost = this.calculateMaintenanceCost(building);
+    
+    // Vérifier si on peut se permettre la maintenance
+    if (!economyService.canAfford(maintenanceCost)) {
+      toast.error(`Fonds insuffisants pour la maintenance (coût: ${maintenanceCost.toLocaleString()} As)`);
+      return false;
+    }
+    
+    // Effectuer le paiement
+    economyService.makePayment(
+      maintenanceCost,
+      "Équipe d'entretien",
+      "Maintenance",
+      `Maintenance de ${building.name}`
+    );
+    
+    // Améliorer l'état du bâtiment
+    const conditionImprovement = Math.min(100 - building.condition, 20); // +20% max, jusqu'à 100%
+    const updatedBuilding = {
+      ...building,
+      condition: building.condition + conditionImprovement,
+      lastMaintenance: new Date()
+    };
+    
+    this.updateBuilding(updatedBuilding);
+    
+    toast.success(`Maintenance effectuée sur ${building.name}`);
+    return true;
+  }
+  
+  // S'abonner aux changements de bâtiments
+  subscribeToBuildings(listener: (buildings: OwnedBuilding[]) => void): () => void {
+    this.buildingListeners.push(listener);
+    return () => {
+      this.buildingListeners = this.buildingListeners.filter(l => l !== listener);
     };
   }
   
-  /**
-   * Détermine si un bâtiment nécessite une maintenance
-   */
-  static needsMaintenance(building: Building): boolean {
-    return building.condition < 70;
-  }
-  
-  /**
-   * Calcule la détérioration d'un bâtiment par saison
-   */
-  static calculateDeteriorationRate(building: Building): number {
-    let baseRate = 1; // Détérioration de base: 1 point par saison
-    
-    // Ajustements selon le type de bâtiment
-    switch (building.type) {
-      case 'road':
-      case 'bridge':
-        baseRate = 2; // Les infrastructures se détériorent plus vite
-        break;
-      case 'temple':
-      case 'senate':
-        baseRate = 0.5; // Les monuments importants sont mieux entretenus
-        break;
-    }
-    
-    // Facteur de maintenance
-    const maintenanceFactor = building.maintenanceLevel ? (100 - building.maintenanceLevel) / 100 : 0.5;
-    
-    return baseRate * maintenanceFactor;
+  // Notifier les écouteurs de bâtiments
+  private notifyBuildingListeners(): void {
+    this.buildingListeners.forEach(listener => listener([...this.buildings]));
   }
 }
+
+// Fonction utilitaire pour calculer le facteur d'âge
+function calculateAgeFactor(purchaseDate: Date): number {
+  const ageInYears = (new Date().getTime() - new Date(purchaseDate).getTime()) / (1000 * 60 * 60 * 24 * 365);
+  return Math.max(0.7, 1 - (ageInYears * 0.05)); // 5% de dépréciation par an, minimum 70%
+}
+
+// Exporter une instance unique du service
+export const buildingService = new BuildingService();

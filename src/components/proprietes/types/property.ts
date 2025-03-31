@@ -1,72 +1,82 @@
 
-// Updating PropertyUpgrade interface to include all required fields
+import { BuildingType } from '@/components/maitrejeu/types/batiments';
+
+export type OwnedBuildingType = 'urban' | 'rural' | 'religious' | 'public' | 'commercial';
+
 export interface PropertyUpgrade {
   id: string;
   name: string;
   cost: number;
   description: string;
-  effect: string | string[];
-  effects?: Record<string, any>; // For compatibility
-  installed: boolean;
+  effect: string;
+  applied: boolean;
   requirements?: {
-    buildingLevel?: number;
-    buildingType?: string[];
-    prerequisiteUpgrades?: string[];
+    minBuildingLevel?: number;
     minValue?: number;
-    buildingCondition?: number;
-    minIncome?: number;
-    value?: number;
-    previousUpgrade?: string;
-    upgrades?: string[];
+    minWorkers?: number;
+    minCondition?: number;
+    otherUpgrades?: string[];
   };
-  type?: string;
-  buildingType?: string[];
-}
-
-export interface SlaveAssignment {
-  id?: string;
-  slaveId: string;
-  propertyId: string;
-  startDate: Date;
-  efficiency: number;
-  buildingId?: string;
-  assignedAt?: Date;
-  role?: string;
-  productivity?: number;
-}
-
-export interface Slave {
-  id: string;
-  name: string;
-  price: number;
-  specialty: string;
-  skills: string[];
-  age: number;
-  gender: string;
-  status: string;
-  acquired: Date;
-  value: number;
+  effects?: {
+    income?: number;
+    maintenanceReduction?: number;
+    conditionBoost?: number;
+    workers?: number;
+    value?: number;
+  };
 }
 
 export interface OwnedBuilding {
-  id: string;
+  id: string | number;
+  buildingId: string;
   name: string;
-  type: string;
+  buildingType: OwnedBuildingType | string;
+  type: BuildingType | string;
   location: string;
+  size: number | string;
   value: number;
   condition: number;
-  workers: number;
-  income: number;
-  maintenance: number;
-  buildingId: string;
-  buildingType: string;
-  size: number;
-  maintenanceCost: number;
-  maxWorkers: number;
-  securityLevel: number;
   maintenanceLevel: number;
+  maintenanceCost: number;
+  maintenance: number;
+  income?: number;
+  workers?: number;
+  maxWorkers?: number;
+  securityLevel?: number;
   description?: string;
-  purchaseDate?: Date;
+  purchaseDate: Date;
+  lastMaintenance?: Date;
   status?: string;
+  maintenanceEnabled?: boolean;
+  slaves?: number;
   upgrades?: PropertyUpgrade[];
+}
+
+export interface BuildingPurchaseOptions {
+  buildingId: string;
+  type: string;
+  name: string;
+  location: string;
+  initialCost: number;
+  maintenanceCost: number;
+  slaves?: number;
+  size?: string;
+}
+
+export interface BuildingStats {
+  totalValue: number;
+  monthlyIncome: number;
+  monthlyMaintenance: number;
+  totalBuildings: number;
+  averageCondition: number;
+  byType: Record<string, number>;
+}
+
+export interface PropertyUpgradeEffects {
+  income?: number;
+  maintenance?: number;
+  condition?: number;
+  workers?: number;
+  value?: number;
+  securityLevel?: number;
 }

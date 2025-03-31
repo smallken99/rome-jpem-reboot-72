@@ -1,4 +1,6 @@
 
+// Types pour les bâtiments
+
 export type BuildingType = 'temple' | 'villa' | 'domus' | 'insula' | 'forum' | 'baths' | 'theater' | 'amphitheater' | 'senate' | 'basilica' | 'market' | 'warehouse' | 'workshop' | 'port' | 'aqueduct' | 'road' | 'bridge' | 'military' | 'other' | 'wall';
 
 export type BuildingStatus = 'excellent' | 'good' | 'fair' | 'poor' | 'ruins' | 'construction' | 'renovation' | 'average' | 'damaged' | 'ruined' | 'under_construction';
@@ -25,6 +27,12 @@ export interface Building {
   purchaseDate?: Date;
   constructionYear?: number;
   revenue?: number;
+  // Propriétés additionnelles pour compatibilité
+  cost?: number;
+  capacity?: number;
+  owner?: string;
+  buildingType?: string;
+  size?: number | string;
 }
 
 export interface MaintenanceTask {
@@ -36,10 +44,21 @@ export interface MaintenanceTask {
   priority: BuildingPriority;
   deadline: {
     year: number;
-    season: string;
+    season: Season;
   };
   status: string;
   startDate?: Date;
+}
+
+export interface MaintenanceRecord {
+  id: string;
+  buildingId: string;
+  date: Date;
+  cost: number;
+  description: string;
+  workersAssigned: number;
+  completionDate?: Date;
+  status: string;
 }
 
 export interface ConstructionProject {
@@ -80,6 +99,9 @@ export interface BuildingRevenueRecord {
   date: Date;
   source: string;
   description: string;
+  year?: number;
+  season?: string;
+  taxRate?: number;
 }
 
 export interface BuildingCreationData {
@@ -92,6 +114,10 @@ export interface BuildingCreationData {
   workers?: number;
   status?: BuildingStatus;
   description?: string;
+  constructionYear?: number;
+  cost?: number;
+  capacity?: number;
+  owner?: string;
 }
 
 export interface PublicBuildingModalProps {

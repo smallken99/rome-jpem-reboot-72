@@ -1,8 +1,7 @@
 
 import { v4 as uuidv4 } from 'uuid';
-import { EconomieRecord, EconomieCreationData, TreasuryStatus, EconomicFactors } from '../types/economie';
-import { Season } from '@/utils/timeSystem';
-import { GameDate } from '../types/common';
+import { EconomieRecord, EconomieCreationData, TreasuryStatus, EconomicFactors, ECONOMIE_SOURCE } from '../types/economie';
+import { GameDate, stringToGameDate } from '../types/common';
 
 // Crée les opérations pour la gestion de l'économie par le MJ
 export const createEconomieOperations = (
@@ -15,15 +14,16 @@ export const createEconomieOperations = (
       amount: data.amount,
       category: data.category,
       description: data.description,
-      date: data.date || new Date().toISOString(),
-      source: data.source || 'manual_entry',
-      approved: data.approved !== undefined ? data.approved : true,
+      date: data.date || new Date(),
+      source: data.source || ECONOMIE_SOURCE.MANUAL_ENTRY,
+      approvedBy: data.approvedBy,
       tags: data.tags || [],
       type: data.type,
-      isRecurring: data.isRecurring || false,
+      recurring: data.recurring || data.isRecurring || false,
       recurringInterval: data.recurringInterval,
       affectedSenateurId: data.affectedSenateurId,
       affectedProvinceId: data.affectedProvinceId,
+      approved: data.approved !== undefined ? data.approved : true,
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString()
     };
@@ -55,17 +55,55 @@ export const createEconomieOperations = (
   // Calculer le bilan économique
   const calculateEconomicBalance = (
     records: EconomieRecord[], 
-    startDate?: string, 
-    endDate?: string
+    startDate?: GameDate | Date | string, 
+    endDate?: GameDate | Date | string
   ) => {
     let filteredRecords = [...records];
     
     if (startDate) {
-      filteredRecords = filteredRecords.filter(r => r.date >= startDate);
+      const compareDate = typeof startDate === 'string' ? stringToGameDate(startDate) : startDate;
+      filteredRecords = filteredRecords.filter(r => {
+        const recordDate = typeof r.date === 'string' ? stringToGameDate(r.date as string) : r.date;
+        
+        if (recordDate instanceof Date && compareDate instanceof Date) {
+          return recordDate >= compareDate;
+        }
+        
+        // Comparaison de GameDate
+        if (recordDate && 'year' in recordDate && compareDate && 'year' in compareDate) {
+          if (recordDate.year > compareDate.year) return true;
+          if (recordDate.year < compareDate.year) return false;
+          
+          // Même année, comparer la saison
+          const seasonOrder: Record<string, number> = { 'SPRING': 0, 'SUMMER': 1, 'AUTUMN': 2, 'WINTER': 3 };
+          return seasonOrder[recordDate.season] >= seasonOrder[compareDate.season];
+        }
+        
+        return true;
+      });
     }
     
     if (endDate) {
-      filteredRecords = filteredRecords.filter(r => r.date <= endDate);
+      const compareDate = typeof endDate === 'string' ? stringToGameDate(endDate as string) : endDate;
+      filteredRecords = filteredRecords.filter(r => {
+        const recordDate = typeof r.date === 'string' ? stringToGameDate(r.date as string) : r.date;
+        
+        if (recordDate instanceof Date && compareDate instanceof Date) {
+          return recordDate <= compareDate;
+        }
+        
+        // Comparaison de GameDate
+        if (recordDate && 'year' in recordDate && compareDate && 'year' in compareDate) {
+          if (recordDate.year < compareDate.year) return true;
+          if (recordDate.year > compareDate.year) return false;
+          
+          // Même année, comparer la saison
+          const seasonOrder: Record<string, number> = { 'SPRING': 0, 'SUMMER': 1, 'AUTUMN': 2, 'WINTER': 3 };
+          return seasonOrder[recordDate.season] <= seasonOrder[compareDate.season];
+        }
+        
+        return true;
+      });
     }
     
     const totalIncome = filteredRecords
@@ -196,10 +234,12 @@ export const createEconomieOperations = (
       // Créer un objet date pour cette projection
       // Correction du typage ici:
       const year = currentFactors.currentYear || 721;
+      const seasonIndex = index % 4;
+      const seasonMap: Season[] = ['SPRING', 'SUMMER', 'AUTUMN', 'WINTER'];
+      
       const dateInfo: GameDate = {
         year: Math.floor(year + index / 4),
-        season: getSeason(index % 4),
-        phase: "ECONOMY",
+        season: seasonMap[seasonIndex],
         day: 1
       };
       
@@ -214,17 +254,6 @@ export const createEconomieOperations = (
     });
     
     return projections;
-  };
-  
-  // Fonction utilitaire pour obtenir la saison selon l'index
-  const getSeason = (index: number): Season => {
-    switch (index) {
-      case 0: return 'Ver';
-      case 1: return 'Aestas';
-      case 2: return 'Autumnus';
-      case 3: return 'Hiems';
-      default: return 'Ver';
-    }
   };
   
   return {
