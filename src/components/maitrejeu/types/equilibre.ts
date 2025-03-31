@@ -56,6 +56,7 @@ export interface Equilibre {
     patriciens: number;
     esclaves: number;
     cohesion: number;
+    plébéiens?: number; // Alternative spelling
   };
   plébéiens?: number; // Alias for backward compatibility with different spelling
   patriciens?: number; // Additional property for direct access
@@ -85,4 +86,12 @@ export interface Equilibre {
   // History and risks
   historique?: HistoriqueEntry[];
   risques?: Record<string, Risk>;
+  
+  // Aliased names for compatibility
+  économie?: {
+    stabilite: number;
+    croissance: number;
+    commerce: number;
+    agriculture: number;
+  };
 }

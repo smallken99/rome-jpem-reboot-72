@@ -2,11 +2,28 @@
 import { GameDate, Season } from '@/components/maitrejeu/types/common';
 
 // Format a date to a string representation
-export function formatDate(date: Date | GameDate): string {
-  if (isGameDate(date)) {
+export function formatDate(date: Date | GameDate | string): string {
+  if (typeof date === 'string') {
+    try {
+      const parsedDate = JSON.parse(date);
+      if (parsedDate && parsedDate.year && parsedDate.season) {
+        return `${parsedDate.year} (${formatSeason(parsedDate.season)})`;
+      }
+    } catch (e) {
+      // Not a JSON string
+      return date;
+    }
+  }
+  
+  if (date instanceof Date) {
+    return date.toLocaleDateString();
+  }
+  
+  if (date && typeof date === 'object' && 'year' in date && 'season' in date) {
     return `${date.year} (${formatSeason(date.season)})`;
   }
-  return date.toLocaleDateString();
+  
+  return String(date);
 }
 
 // Check if an object is a GameDate
@@ -41,14 +58,15 @@ export function formatSeason(season: Season | string): string {
 // Get seasons after a given season
 export function getSeasonsAfter(startSeason: Season, count: number = 3): Season[] {
   const seasons: Season[] = ['spring', 'summer', 'fall', 'winter'];
-  const startIndex = seasons.indexOf(startSeason.toLowerCase() as Season);
+  const normalizedSeason = startSeason.toLowerCase();
+  const startIndex = seasons.indexOf(normalizedSeason as Season);
   
   if (startIndex === -1) return [];
   
   const result: Season[] = [];
   for (let i = 1; i <= count; i++) {
     const index = (startIndex + i) % seasons.length;
-    result.push(seasons[index]);
+    result.push(seasons[index] as Season);
   }
   
   return result;
@@ -65,7 +83,8 @@ export function getNextYear(date: GameDate): GameDate {
 // Get the GameDate for the next season
 export function getNextSeason(date: GameDate): GameDate {
   const seasons: Season[] = ['winter', 'spring', 'summer', 'fall'];
-  const currentSeasonIndex = seasons.indexOf(date.season.toLowerCase() as Season);
+  const normalizedSeason = date.season.toLowerCase();
+  const currentSeasonIndex = seasons.indexOf(normalizedSeason as Season);
   
   if (currentSeasonIndex === -1) {
     return date; // Can't determine the next season
@@ -75,7 +94,7 @@ export function getNextSeason(date: GameDate): GameDate {
   const nextSeason = seasons[nextSeasonIndex];
   
   // If we're moving from winter to spring, increment the year
-  if (nextSeason === 'spring' && date.season.toLowerCase() === 'winter') {
+  if (nextSeason === 'spring' && normalizedSeason === 'winter') {
     return {
       year: date.year + 1,
       season: nextSeason

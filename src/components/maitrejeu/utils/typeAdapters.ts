@@ -29,7 +29,8 @@ export function normalizeEquilibre(equilibreInput: Partial<Equilibre>): Equilibr
       plebeiens: 50,
       patriciens: 50,
       esclaves: 0,
-      cohesion: 50
+      cohesion: 50,
+      plébéiens: 50 // Alternate spelling
     },
     patriciens: 50,
     plébéiens: 50,
@@ -56,14 +57,30 @@ export function normalizeEquilibre(equilibreInput: Partial<Equilibre>): Equilibr
   // Fusion avec les valeurs fournies
   const result = { ...defaultEquilibre, ...equilibreInput };
 
-  // Make sure all fields are synchronized
-  result.populaires = result.politique.populaires;
-  result.populares = result.politique.populaires;
-  result.optimates = result.politique.optimates;
-  result.moderates = result.politique.moderates;
+  // Ensure all fields are synchronized
+  if (equilibreInput.politique) {
+    result.populaires = equilibreInput.politique.populaires;
+    result.populares = equilibreInput.politique.populaires;
+    result.optimates = equilibreInput.politique.optimates;
+    result.moderates = equilibreInput.politique.moderates;
+  }
   
-  result.patriciens = result.social.patriciens;
-  result.plébéiens = result.social.plebeiens;
+  if (equilibreInput.social) {
+    result.patriciens = equilibreInput.social.patriciens;
+    // Support both spelling variants
+    result.plébéiens = equilibreInput.social.plebeiens;
+    result.social.plébéiens = equilibreInput.social.plebeiens;
+  }
+
+  // Handle various aliased fields
+  if (typeof equilibreInput.economie === 'number') {
+    result.economie = {
+      stabilite: equilibreInput.economie,
+      croissance: equilibreInput.economie,
+      commerce: equilibreInput.economie,
+      agriculture: equilibreInput.economie
+    };
+  }
 
   return result;
 }
@@ -152,7 +169,14 @@ export function convertSlaveAssignments(
   assignments: Record<string, string[]> | SlaveAssignment[]
 ): SlaveAssignment[] {
   if (Array.isArray(assignments)) {
-    return assignments;
+    return assignments.map(assignment => ({
+      id: assignment.id || `${assignment.slaveId}-${assignment.buildingId}`,
+      slaveId: assignment.slaveId,
+      buildingId: assignment.buildingId,
+      assignedAt: assignment.assignedAt || new Date(),
+      role: assignment.role || 'worker',
+      productivity: assignment.productivity || 100
+    }));
   }
   
   const result: SlaveAssignment[] = [];

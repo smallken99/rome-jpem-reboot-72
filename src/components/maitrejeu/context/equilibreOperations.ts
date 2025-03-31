@@ -1,23 +1,29 @@
 
-import { RepublicEquilibre } from '@/types/republic';
+import { Equilibre } from '../types/equilibre';
 
 export const createEquilibreOperations = (
-  setEquilibre: React.Dispatch<React.SetStateAction<RepublicEquilibre | null>>
+  setEquilibre: React.Dispatch<React.SetStateAction<Equilibre | null>>
 ) => {
-  const updateEquilibre = (updates: Partial<RepublicEquilibre>) => {
-    setEquilibre(prev => prev ? { ...prev, ...updates } : updates as RepublicEquilibre);
+  const updateEquilibre = (updates: Partial<Equilibre>) => {
+    setEquilibre(prev => prev ? { ...prev, ...updates } : updates as Equilibre);
   };
 
-  // Ajouter la fonction pour mettre à jour l'équilibre des factions
+  // Add function to update faction balance
   const updateFactionBalance = (populares: number, optimates: number, moderates: number) => {
     setEquilibre(prev => {
       if (!prev) return null;
       return {
         ...prev,
         populares,
-        populaires: populares, // Mettre à jour les deux pour la compatibilité
+        populaires: populares, // Update both for compatibility
         optimates,
-        moderates
+        moderates,
+        politique: {
+          ...prev.politique,
+          populaires: populares,
+          optimates,
+          moderates
+        }
       };
     });
   };

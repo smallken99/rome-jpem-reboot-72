@@ -13,7 +13,7 @@ export interface SenateurJouable {
   richesse: number;
   fonction?: string;
   appartenance?: string;
-  famille?: string;
+  famille: string;
   magistrature?: string;
   playerId?: string;
   joueur?: string | boolean;
@@ -28,6 +28,6 @@ export interface SenateurJouable {
   allies: string[];
   ennemis: string[];
   stats?: any;
-  roles?: string[]; // Add this for compatibility
-  competences?: Record<string, number>; // Add this for compatibility
+  roles?: string[];
+  competences?: Record<string, number>;
 }

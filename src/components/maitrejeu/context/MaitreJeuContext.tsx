@@ -475,7 +475,7 @@ export const MaitreJeuProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     setEquilibre(prev => ({
       ...prev,
       populaires,
-      populares: populaires, // For compatibility
+      populaires: populaires, // For compatibility
       optimates,
       moderates,
       politique: {

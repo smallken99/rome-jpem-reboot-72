@@ -1,20 +1,12 @@
 
 import React from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { OwnedBuilding } from '@/components/proprietes/types/property';
+import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { Trash2 } from 'lucide-react';
+import { OwnedBuilding } from '@/components/proprietes/types/property';
+import { SlaveAssignment as SlaveAssignmentType } from '@/components/proprietes/types/property';
 
 interface SlaveAssignmentProps {
-  assignment: {
-    id: string;
-    slaveId: string;
-    buildingId: string;
-    assignedAt: Date;
-    role: string;
-    productivity: number;
-  };
+  assignment: SlaveAssignmentType;
   buildings: OwnedBuilding[];
   onRevoke: (assignmentId: string) => void;
 }
@@ -24,28 +16,27 @@ export const SlaveAssignment: React.FC<SlaveAssignmentProps> = ({
   buildings,
   onRevoke
 }) => {
-  const building = buildings.find(b => b.id === assignment.buildingId);
+  const building = buildings.find(b => b.id === assignment.buildingId || b.buildingId === assignment.buildingId);
   
   return (
     <Card>
-      <CardHeader className="pb-2">
-        <div className="flex justify-between items-center">
-          <CardTitle className="text-md">{building?.name || 'Propriété inconnue'}</CardTitle>
-          <Badge variant="outline">{assignment.role}</Badge>
-        </div>
-      </CardHeader>
-      <CardContent className="pb-4">
-        <div className="flex justify-between items-center">
+      <CardContent className="p-4">
+        <div className="flex items-center justify-between">
           <div>
+            <h3 className="font-medium">Esclave #{assignment.slaveId.slice(-4)}</h3>
             <p className="text-sm text-muted-foreground">
-              Productivité: {assignment.productivity}%
+              Assigné à {building?.name || 'Propriété inconnue'}
             </p>
-            <p className="text-sm text-muted-foreground">
-              Assigné le: {assignment.assignedAt.toLocaleDateString()}
+            <p className="text-xs text-muted-foreground">
+              Rôle: {assignment.role || 'Travailleur'} • Productivité: {assignment.productivity || 100}%
             </p>
           </div>
-          <Button variant="ghost" size="sm" onClick={() => onRevoke(assignment.id)}>
-            <Trash2 className="h-4 w-4 text-destructive" />
+          <Button 
+            variant="outline" 
+            size="sm" 
+            onClick={() => onRevoke(assignment.id)}
+          >
+            Révoquer
           </Button>
         </div>
       </CardContent>

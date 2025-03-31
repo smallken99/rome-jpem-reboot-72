@@ -1,123 +1,124 @@
 
-// Treasury status definition
-export interface TreasuryStatus {
-  balance: number;
-  income: number;
-  expenses: number;
-  totalIncome?: number;
-  totalExpenses?: number;
-  surplus?: number;
-  debt?: number;
-  taxRate?: number;
-}
+import { GameDate } from './common';
 
-// Economic factors definition
-export interface EconomicFactors {
-  taxCollection: number;
-  tradeEfficiency: number;
-  militaryExpenses: number;
-  militaryExpense?: number; // Alias for compatibility
-  corruption: number;
-  inflation?: number;
-  productivity?: number;
-  
-  // Additional factors needed by components
-  tradeRevenue?: number;
-  provinceRevenue?: number;
-  religiousCeremonyExpense?: number;
-  publicWorksExpense?: number;
-  warSpoilsRevenue?: number;
-  adminExpense?: number;
-  currentYear?: number;
-}
+export type EconomieType = 'income' | 'expense' | 'all';
+export type EconomieSort = 'date' | 'amount' | 'category' | 'type';
+export type EconomieCategory = 
+  | 'tax' 
+  | 'tribute' 
+  | 'trade' 
+  | 'agriculture' 
+  | 'military' 
+  | 'administration' 
+  | 'public_works' 
+  | 'ceremonies' 
+  | 'other'
+  | string;
 
-// Props for the EconomieStats component
-export interface EconomieStatsProps {
-  treasury: TreasuryStatus;
-  economicFactors: EconomicFactors;
-}
+export type RecurringInterval = 'weekly' | 'monthly' | 'seasonal' | 'yearly';
 
-// Basic economy record
-export interface EconomieRecord {
-  id: string;
-  amount: number;
-  type: 'income' | 'expense';
-  category: string;
-  description: string;
-  date: Date | { year: number; season: string };
-  source?: string;
-  approved: boolean;
-  recurring?: boolean;
-  recurringInterval?: 'weekly' | 'monthly' | 'seasonal' | 'yearly';
-  tags?: string[];
-  impact?: Record<string, number>;
-  
-  // Additional fields used in components
-  affectedSenateurId?: string;
-  affectedProvinceId?: string;
-}
-
-// Data for creating a new economy record
 export interface EconomieCreationData {
   amount: number;
   type: 'income' | 'expense';
   category: string;
   description: string;
-  date: Date | { year: number; season: string };
+  date: Date | GameDate;
   source?: string;
   approved?: boolean;
   recurring?: boolean;
-  recurringInterval?: 'weekly' | 'monthly' | 'seasonal' | 'yearly';
+  recurringInterval?: RecurringInterval;
   tags?: string[];
-  
-  // Additional fields used in components
   affectedSenateurId?: string;
   affectedProvinceId?: string;
 }
 
-// Filters for economy records
+export interface EconomieRecord extends EconomieCreationData {
+  id: string;
+  createdAt?: Date;
+}
+
+export interface EconomieStats {
+  totalIncome: number;
+  totalExpenses: number;
+  balance: number;
+  byCategory: Record<string, {
+    income: number;
+    expenses: number;
+    balance: number;
+  }>;
+  treasury: {
+    current: number;
+    previous: number;
+    change: number;
+    changePercent: number;
+  };
+  economicFactors: {
+    tradeRevenue: number;
+    provinceRevenue: number;
+    militaryExpense: number;
+    religiousCeremonyExpense: number;
+    publicWorksExpense: number;
+    adminExpense: number;
+    warSpoilsRevenue: number;
+  };
+}
+
 export interface EconomieFilter {
-  type: 'all' | 'income' | 'expense' | string;
-  category: string | null;
-  dateRange?: [string, string] | { start: string; end: string };
-  searchTerm: string;
-  amount?: [number, number];
-  affectedEntity?: string;
-  approved?: boolean;
-  
-  // Additional fields used in components
+  type?: EconomieType;
+  category?: string | string[];
+  amount?: number;
   minAmount?: number;
   maxAmount?: number;
+  source?: string;
+  dateRange?: [string, string] | { start: string; end: string };
+  tags?: string[];
+  affectedSenateur?: string;
+  affectedProvince?: string;
+  recurring?: boolean;
+  approved?: boolean;
 }
 
-// Sort field for economy records
-export interface EconomieSort {
-  field: keyof EconomieRecord;
-  direction: 'asc' | 'desc';
+export interface EconomieStatsProps {
+  treasury: {
+    balance: number;
+    income: number;
+    expenses: number;
+    surplus: number;
+    taxRate?: number;
+    previous?: number;
+    change?: number;
+    changePercent?: number;
+  };
+  economicFactors?: {
+    tradeRevenue: number;
+    provinceRevenue: number;
+    militaryExpense: number;
+    religiousCeremonyExpense: number;
+    publicWorksExpense: number;
+    adminExpense: number;
+    warSpoilsRevenue: number;
+    currentYear?: number;
+  };
 }
 
-// Economy type enum
-export enum EconomieType {
-  ALL = 'all',
-  INCOME = 'income',
-  EXPENSE = 'expense',
+export interface TreasuryStatus {
+  balance: number;
+  income: number;
+  expenses: number;
+  surplus: number;
+  taxRate?: number;
+  previous?: number;
+  change?: number;
+  changePercent?: number;
 }
 
-// Economy categories enum
-export enum EconomieCategory {
-  TAX = 'tax',
-  TRADE = 'trade',
-  MILITARY = 'military',
-  ADMINISTRATION = 'administration',
-  CONSTRUCTION = 'construction',
-  RELIGION = 'religion',
-  OTHER = 'other'
-}
-
-// Economy source enum
-export enum EconomieSource {
-  SENATE = 'senate',
-  PROVINCE = 'province',
-  PERSONAL = 'personal',
-  OTHER = 'other'
+export interface EconomicFactors {
+  tradeRevenue: number;
+  provinceRevenue: number;
+  militaryExpense: number;
+  religiousCeremonyExpense: number;
+  publicWorksExpense: number;
+  adminExpense: number;
+  warSpoilsRevenue: number;
+  currentYear?: number;
 }

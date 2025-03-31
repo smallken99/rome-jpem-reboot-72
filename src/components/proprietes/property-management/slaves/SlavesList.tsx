@@ -1,28 +1,23 @@
 
 import React from 'react';
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '@/components/ui/table';
+import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Trash2 } from 'lucide-react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
 
 export interface Slave {
   id: string;
-  name?: string;
+  name: string;
   age: number;
-  status: string;
-  acquired: Date;
-  value: number;
-  origin?: string;
+  gender: string;
   skills?: string[];
-  buildingId?: string;
+  origin?: string;
+  status: string;
+  health?: number;
+  loyalty?: number;
+  productivity?: number;
+  acquired: Date | string;
+  value: number;
 }
 
 interface SlavesListProps {
@@ -31,60 +26,55 @@ interface SlavesListProps {
 }
 
 export const SlavesList: React.FC<SlavesListProps> = ({ slaves, onDeleteSlave }) => {
+  if (!slaves || slaves.length === 0) {
+    return (
+      <Card>
+        <CardHeader>
+          <CardTitle>Esclaves</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <p className="text-center text-muted-foreground">Aucun esclave disponible</p>
+        </CardContent>
+      </Card>
+    );
+  }
+
   return (
     <Card>
       <CardHeader>
         <CardTitle>Liste des esclaves</CardTitle>
       </CardHeader>
       <CardContent>
-        {slaves.length === 0 ? (
-          <p className="text-center py-8 text-muted-foreground">
-            Aucun esclave enregistré
-          </p>
-        ) : (
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Identifiant</TableHead>
-                <TableHead>Âge</TableHead>
-                <TableHead>Statut</TableHead>
-                <TableHead>Acquis le</TableHead>
-                <TableHead>Valeur</TableHead>
-                <TableHead className="text-right">Actions</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {slaves.map((slave) => (
-                <TableRow key={slave.id}>
-                  <TableCell className="font-medium">
-                    {slave.name || `Esclave #${slave.id.substring(0, 6)}`}
-                  </TableCell>
-                  <TableCell>{slave.age} ans</TableCell>
-                  <TableCell>
-                    <Badge variant={slave.status === 'assigned' ? 'outline' : 'secondary'}>
-                      {slave.status === 'assigned' ? 'Assigné' : 'Disponible'}
-                    </Badge>
-                  </TableCell>
-                  <TableCell>
-                    {slave.acquired instanceof Date
-                      ? slave.acquired.toLocaleDateString()
-                      : new Date(slave.acquired).toLocaleDateString()}
-                  </TableCell>
-                  <TableCell>{slave.value} As</TableCell>
-                  <TableCell className="text-right">
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => onDeleteSlave(slave.id)}
-                    >
-                      <Trash2 className="h-4 w-4 text-destructive" />
-                    </Button>
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        )}
+        <div className="grid gap-4">
+          {slaves.map(slave => (
+            <div 
+              key={slave.id}
+              className="flex items-center justify-between p-3 border rounded-lg"
+            >
+              <div className="flex items-center space-x-3">
+                <Avatar>
+                  <AvatarFallback>{slave.name?.[0]?.toUpperCase() || 'S'}</AvatarFallback>
+                </Avatar>
+                <div>
+                  <p className="font-medium">{slave.name}</p>
+                  <p className="text-sm text-muted-foreground">
+                    {slave.age} ans • {slave.origin || 'Origine inconnue'}
+                  </p>
+                </div>
+              </div>
+              <div className="flex items-center space-x-2">
+                <p className="text-sm font-medium">{slave.value} as</p>
+                <Button 
+                  variant="outline" 
+                  size="icon"
+                  onClick={() => onDeleteSlave(slave.id)}
+                >
+                  <Trash2 className="h-4 w-4" />
+                </Button>
+              </div>
+            </div>
+          ))}
+        </div>
       </CardContent>
     </Card>
   );
