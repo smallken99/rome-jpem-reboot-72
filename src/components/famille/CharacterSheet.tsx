@@ -114,74 +114,76 @@ export const CharacterSheet: React.FC<CharacterSheetProps> = ({
   // Define the card content based on whether it's compact or full
   if (compact) {
     return (
-      <RomanCard 
+      <div 
         className={cn("hover:shadow-md transition-shadow cursor-pointer", className)}
         onClick={onClick}
       >
-        <RomanCard.Content className="p-4">
-          <div className="flex items-center gap-3">
-            <Avatar className="h-12 w-12 rounded-md">
-              <AvatarImage src={getRandomPortrait()} alt={character.name} className="object-cover" />
-              <AvatarFallback className={`${getFallbackColor()} text-lg font-cinzel`}>
-                {getInitials(character.name)}
-              </AvatarFallback>
-            </Avatar>
+        <RomanCard>
+          <RomanCard.Content className="p-4">
+            <div className="flex items-center gap-3">
+              <Avatar className="h-12 w-12 rounded-md">
+                <AvatarImage src={getRandomPortrait()} alt={character.name} className="object-cover" />
+                <AvatarFallback className={`${getFallbackColor()} text-lg font-cinzel`}>
+                  {getInitials(character.name)}
+                </AvatarFallback>
+              </Avatar>
+              
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center gap-2">
+                  <h3 className="font-cinzel text-base text-rome-navy font-medium truncate">{character.name}</h3>
+                  {character.isPlayer && (
+                    <Badge className="bg-rome-gold text-white border-none shrink-0">Principal</Badge>
+                  )}
+                </div>
+                
+                <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-3 text-xs text-muted-foreground">
+                  <span className="flex items-center">
+                    <Calendar className="h-3 w-3 mr-1" />
+                    {character.age} ans
+                  </span>
+                  
+                  {character.title && (
+                    <span className="flex items-center">
+                      <Crown className="h-3 w-3 mr-1 text-rome-gold" />
+                      {character.title}
+                    </span>
+                  )}
+                </div>
+              </div>
+            </div>
             
-            <div className="flex-1 min-w-0">
-              <div className="flex items-center gap-2">
-                <h3 className="font-cinzel text-base text-rome-navy font-medium truncate">{character.name}</h3>
-                {character.isPlayer && (
-                  <Badge className="bg-rome-gold text-white border-none shrink-0">Principal</Badge>
-                )}
+            <div className="mt-3 grid grid-cols-2 gap-1.5 text-xs">
+              <div className="flex items-center justify-between">
+                <span className="text-muted-foreground">Popularité</span>
+                <span className="font-medium">{typeof character.stats.popularity === 'number' 
+                  ? character.stats.popularity 
+                  : character.stats.popularity.value}/100</span>
               </div>
               
-              <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-3 text-xs text-muted-foreground">
-                <span className="flex items-center">
-                  <Calendar className="h-3 w-3 mr-1" />
-                  {character.age} ans
-                </span>
-                
-                {character.title && (
-                  <span className="flex items-center">
-                    <Crown className="h-3 w-3 mr-1 text-rome-gold" />
-                    {character.title}
-                  </span>
-                )}
+              <div className="flex items-center justify-between">
+                <span className="text-muted-foreground">Éloquence</span>
+                <span className="font-medium">{typeof character.stats.oratory === 'number' 
+                  ? character.stats.oratory 
+                  : character.stats.oratory.value}/100</span>
+              </div>
+              
+              <div className="flex items-center justify-between">
+                <span className="text-muted-foreground">Piété</span>
+                <span className="font-medium">{typeof character.stats.piety === 'number' 
+                  ? character.stats.piety 
+                  : character.stats.piety.value}/100</span>
+              </div>
+              
+              <div className="flex items-center justify-between">
+                <span className="text-muted-foreground">Éducation Martiale</span>
+                <span className="font-medium">{isFemale ? "N/A" : (typeof character.stats.martialEducation === 'number' 
+                  ? character.stats.martialEducation 
+                  : character.stats.martialEducation.value)}/100</span>
               </div>
             </div>
-          </div>
-          
-          <div className="mt-3 grid grid-cols-2 gap-1.5 text-xs">
-            <div className="flex items-center justify-between">
-              <span className="text-muted-foreground">Popularité</span>
-              <span className="font-medium">{typeof character.stats.popularity === 'number' 
-                ? character.stats.popularity 
-                : character.stats.popularity.value}/100</span>
-            </div>
-            
-            <div className="flex items-center justify-between">
-              <span className="text-muted-foreground">Éloquence</span>
-              <span className="font-medium">{typeof character.stats.oratory === 'number' 
-                ? character.stats.oratory 
-                : character.stats.oratory.value}/100</span>
-            </div>
-            
-            <div className="flex items-center justify-between">
-              <span className="text-muted-foreground">Piété</span>
-              <span className="font-medium">{typeof character.stats.piety === 'number' 
-                ? character.stats.piety 
-                : character.stats.piety.value}/100</span>
-            </div>
-            
-            <div className="flex items-center justify-between">
-              <span className="text-muted-foreground">Éducation Martiale</span>
-              <span className="font-medium">{isFemale ? "N/A" : (typeof character.stats.martialEducation === 'number' 
-                ? character.stats.martialEducation 
-                : character.stats.martialEducation.value)}/100</span>
-            </div>
-          </div>
-        </RomanCard.Content>
-      </RomanCard>
+          </RomanCard.Content>
+        </RomanCard>
+      </div>
     );
   }
 

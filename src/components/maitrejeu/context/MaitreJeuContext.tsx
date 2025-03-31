@@ -24,10 +24,16 @@ export interface MaitreJeuContextType {
   updateDate: (date: GameDate) => void;
   advanceDate: () => void;
   
+  // Added for compatibility with existing code
+  currentYear: number;
+  currentSeason: string;
+  advanceTime?: () => void;
+  changePhase?: (phase: GamePhase) => void;
+  
   // Events
   evenements: Evenement[];
   addEvenement: (evenement: Omit<Evenement, "id">) => void;
-  updateEvenement: (id: string, evenement: Partial<Evenement>) => void;
+  updateEvenement: (id: string, updates: Partial<Evenement>) => void;
   deleteEvenement: (id: string) => void;
   
   // Phase management
@@ -74,7 +80,7 @@ export interface MaitreJeuContextType {
   
   // Economy management
   economieRecords: any[];
-  treasury: number;
+  treasury: any; // Changed from number to any for compatibility
   economicFactors: any;
   setEconomieRecords: (records: any[]) => void;
   setTreasury: (amount: number) => void;
@@ -85,6 +91,18 @@ export interface MaitreJeuContextType {
   
   // Laws management
   setLois: (lois: any[]) => void;
+  addLoi?: (loi: any) => string;
+  
+  // Province management
+  updateProvince?: (id: string, updates: any) => void;
+  
+  // Histoire management
+  histoireEntries?: any[];
+  addHistoireEntry?: (entry: any) => void;
+  
+  // Election management
+  elections?: any[];
+  scheduleElection?: (election: any) => void;
 }
 
 // Create the context with default values
@@ -102,6 +120,8 @@ const MaitreJeuContext = createContext<MaitreJeuContextType>({
   },
   currentPhase: 'normal',
   currentDate: { year: 510, season: 'spring' },
+  currentYear: 510,
+  currentSeason: 'spring',
   updateDate: () => {},
   advanceDate: () => {},
   evenements: [],
@@ -166,6 +186,8 @@ export const MaitreJeuProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     religion: { piete: 80, traditions: 85, superstition: 70 }
   });
   const [evenements, setEvenements] = useState<Evenement[]>([]);
+  const [histoireEntries, setHistoireEntries] = useState<any[]>([]);
+  const [elections, setElections] = useState<any[]>([]);
   
   // Family state
   const [familles, setFamilles] = useState<FamilleInfo[]>([]);
@@ -179,8 +201,18 @@ export const MaitreJeuProvider: React.FC<{ children: React.ReactNode }> = ({ chi
   
   // Economy state
   const [economieRecords, setEconomieRecords] = useState<any[]>([]);
-  const [treasury, setTreasury] = useState<number>(1000000);
+  const [treasury, setTreasury] = useState<any>({
+    balance: 1000000,
+    income: 200000,
+    expenses: 150000,
+    surplus: 50000,
+    taxRate: 5
+  });
   const [economicFactors, setEconomicFactors] = useState<any>({});
+
+  // Derive year and season from currentDate
+  const currentYear = currentDate.year;
+  const currentSeason = currentDate.season;
 
   // Function implementations
   const updateDate = (date: GameDate) => {
@@ -214,6 +246,9 @@ export const MaitreJeuProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     });
   };
 
+  // Alias for advanceDate function
+  const advanceTime = advanceDate;
+
   const addEvenement = (evenementData: Omit<Evenement, "id">) => {
     const newEvenement: Evenement = {
       id: `evt-${Date.now()}`,
@@ -236,8 +271,38 @@ export const MaitreJeuProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     setCurrentPhase(newPhase);
   };
 
+  // Alias for setPhase
+  const changePhase = setPhase;
+
   const updateEquilibre = (updates: Partial<Equilibre>) => {
     setEquilibre(prev => ({ ...prev, ...updates }));
+  };
+
+  // Histoire management functions
+  const addHistoireEntry = (entry: any) => {
+    const newEntry = { id: `hist-${Date.now()}`, ...entry };
+    setHistoireEntries(prev => [...prev, newEntry]);
+  };
+
+  // Election management functions
+  const scheduleElection = (election: any) => {
+    const newElection = { id: `election-${Date.now()}`, ...election };
+    setElections(prev => [...prev, newElection]);
+  };
+
+  // Province management functions
+  const updateProvince = (id: string, updates: any) => {
+    setProvinces(prev =>
+      prev.map(prov => (prov.id === id ? { ...prov, ...updates } : prov))
+    );
+  };
+
+  // Laws management
+  const addLoi = (loi: any): string => {
+    const id = `loi-${Date.now()}`;
+    const newLoi = { id, ...loi };
+    setLois(prev => [...prev, newLoi]);
+    return id;
   };
 
   // Family management functions
@@ -410,11 +475,16 @@ export const MaitreJeuProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     provinces,
     lois,
     setLois,
+    addLoi,
     equilibre,
     currentPhase,
     currentDate,
+    currentYear,
+    currentSeason,
     updateDate,
     advanceDate,
+    advanceTime,
+    changePhase,
     evenements,
     addEvenement,
     updateEvenement,
@@ -457,7 +527,12 @@ export const MaitreJeuProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     setEconomicFactors,
     addEconomieRecord,
     updateEconomieRecord,
-    deleteEconomieRecord
+    deleteEconomieRecord,
+    updateProvince,
+    histoireEntries,
+    addHistoireEntry,
+    elections,
+    scheduleElection
   };
 
   return (

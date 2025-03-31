@@ -104,4 +104,8 @@ export interface SenateurJouable extends Omit<Character, 'stats'> {
     piety: number | CharacterStat;
     martialEducation: number | CharacterStat;
   };
+  
+  // Add properties for MaitreJeu compatibility
+  famille?: string;
+  actif?: boolean;
 }
