@@ -31,7 +31,9 @@ export enum ECONOMIE_SOURCE {
   GOVERNMENT = 'Gouvernement',
   SENATE = 'senate',
   PROVINCES = 'provinces',
-  PRIVATE = 'private'
+  PRIVATE = 'private',
+  MANUAL_ENTRY = 'manual_entry',
+  TAX_COLLECTION = 'Collecte fiscale'
 }
 
 export type RecurringInterval = 'monthly' | 'quarterly' | 'biannually' | 'annually' | 'special' | 'seasonal';
@@ -48,6 +50,8 @@ export interface EconomieRecord {
   recurringInterval?: RecurringInterval;
   approvedBy?: string;
   affectedProvinceId?: string;
+  affectedSenateurId?: string;
+  tags?: string[];
 }
 
 export interface EconomieCreationData {
@@ -61,17 +65,26 @@ export interface EconomieCreationData {
   recurringInterval: RecurringInterval;
   approvedBy?: string;
   affectedProvinceId?: string;
+  affectedSenateurId?: string;
+  tags?: string[];
 }
 
 export interface EconomieFilter {
-  types?: ECONOMIE_TYPES;
-  category?: ECONOMIE_CATEGORIES;
+  types?: ECONOMIE_TYPES | 'all';
+  category?: ECONOMIE_CATEGORIES[] | ECONOMIE_CATEGORIES | 'all';
   minAmount?: number;
   maxAmount?: number;
   startDate?: string | GameDate;
   endDate?: string | GameDate;
   searchTerm?: string;
   source?: ECONOMIE_SOURCE;
+  affectedEntity?: string;
+  dateRange?: {
+    start?: GameDate;
+    end?: GameDate;
+  };
+  showRecurring?: boolean;
+  showApproved?: boolean;
 }
 
 export interface EconomieSort {
@@ -85,6 +98,7 @@ export interface TreasuryStatus {
   expenses: number;
   surplus: number;
   previousBalance?: number;
+  taxRate?: number;
 }
 
 export interface EconomicFactors {
@@ -97,6 +111,7 @@ export interface EconomicFactors {
   warSpoilsRevenue: number;
   taxRate?: number;
   inflation?: number;
+  inflationRate?: number;
   militarySpending?: number;
   publicWorks?: number;
   commerce?: number;
@@ -104,6 +119,7 @@ export interface EconomicFactors {
   taxCollection?: number;
   growthRate?: number;
   taxRates?: Record<string, number>;
+  currentYear?: number;
 }
 
 export interface EconomieStatsProps {

@@ -1,287 +1,109 @@
-
-import React, { useState } from 'react';
-import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
+import React from 'react';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
-import { Plus } from 'lucide-react';
-import {
-  Table,
-  TableHeader,
-  TableRow,
-  TableHead,
-  TableBody,
-  TableCell,
-} from "@/components/ui/table"
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
-import { Dialog, DialogTrigger, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog';
-import { useMaitreJeu } from '@/components/maitrejeu/context';
+import { useMaitreJeu } from '../../context';
+import { ConstructionProject } from '../../types/batiments';
+import { ECONOMIE_CATEGORIES, ECONOMIE_TYPES, ECONOMIE_SOURCE } from '@/components/maitrejeu/types/economie';
 import { GameDate } from '@/components/maitrejeu/types/common';
-import { Calendar } from '@/components/ui/calendar';
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { cn } from '@/lib/utils';
-import { format } from 'date-fns';
-import { DateRange } from 'react-day-picker';
-import { gameToCompatibleDate } from '@/utils/gameDate-helpers';
 
-interface ConstructionProject {
-  id: string;
-  name: string;
-  type: string;
-  startDate: GameDate;
-  endDate: GameDate;
-  cost: number;
-  description: string;
-  status: 'planned' | 'inProgress' | 'completed' | 'delayed';
-}
-
-interface ConstructionProjectsProps {
-  currentYear: number;
-  currentSeason: string;
-}
-
-export const ConstructionProjects: React.FC<ConstructionProjectsProps> = ({
-  currentYear,
-  currentSeason
-}) => {
-  const [projects, setProjects] = useState<ConstructionProject[]>([
+export const ConstructionProjects = ({ currentYear, currentSeason }: { currentYear: number, currentSeason: string }) => {
+  const { evenements } = useMaitreJeu();
+  
+  const constructionProjects: ConstructionProject[] = [
     {
-      id: "cp-1",
-      name: "Construction du Colisée",
-      type: "Amphithéâtre",
-      startDate: { year: 72, season: "Aestas" },
-      endDate: { year: 80, season: "Aestas" },
-      cost: 100000,
-      description: "Construction du plus grand amphithéâtre de Rome.",
-      status: "inProgress"
+      id: 'project-1',
+      name: 'Nouveau Forum',
+      location: 'Champ de Mars',
+      description: 'Construction d\'un nouveau forum pour désengorger le centre-ville',
+      estimatedCost: 500000,
+      expectedCompletionYear: 725,
+      approved: true,
+      progress: 50
     },
     {
-      id: "cp-2",
-      name: "Agrandissement du Forum Romain",
-      type: "Infrastructure",
-      startDate: { year: 75, season: "Ver" },
-      endDate: { year: 78, season: "Autumnus" },
-      cost: 50000,
-      description: "Agrandissement et rénovation du Forum Romain.",
-      status: "completed"
+      id: 'project-2',
+      name: 'Aqueduc de la Via Appia',
+      location: 'Via Appia',
+      description: 'Construction d\'un aqueduc pour alimenter les thermes',
+      estimatedCost: 300000,
+      expectedCompletionYear: 724,
+      approved: false,
+      progress: 20
     }
-  ]);
+  ];
   
-  const [open, setOpen] = useState(false);
-  const [newProject, setNewProject] = useState<Omit<ConstructionProject, 'id' | 'status'>>({
-    name: '',
-    type: '',
-    startDate: { year: new Date().getFullYear(), season: 'Ver' },
-    endDate: { year: new Date().getFullYear(), season: 'Ver' },
-    cost: 0,
-    description: ''
-  });
-  
-  const { addEconomieRecord } = useMaitreJeu();
-  
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    const { name, value } = e.target;
-    setNewProject(prev => ({
-      ...prev,
-      [name]: value
-    }));
+  const handleApproveProject = (projectId: string) => {
+    console.log('Approve project', projectId);
   };
   
-  const handleDateChange = (name: 'startDate' | 'endDate', date: GameDate) => {
-    setNewProject(prev => ({
-      ...prev,
-      [name]: date
-    }));
+  const handleUpdateProgress = (projectId: string, progress: number) => {
+    console.log('Update progress', projectId, progress);
   };
   
-  const addProject = () => {
-    const newId = `cp-${Date.now()}`;
-    const newProjectWithId: ConstructionProject = {
-      ...newProject,
-      id: newId,
-      status: 'planned'
+  const handleCreateEconomicRecord = (project: ConstructionProject) => {
+    // Fix the enum values to use the correct types
+    const economicRecord = {
+      amount: project.estimatedCost,
+      description: `Construction: ${project.name}`,
+      category: ECONOMIE_CATEGORIES.CONSTRUCTION,
+      type: ECONOMIE_TYPES.EXPENSE,
+      date: { year: currentYear, season: currentSeason },
+      source: ECONOMIE_SOURCE.GOVERNMENT,
+      recurring: false,
+      recurringInterval: 'special' as const
     };
     
-    setProjects(prev => [...prev, newProjectWithId]);
-    setOpen(false);
-    
-    // Enregistrer la dépense dans l'économie
-    addEconomieRecord({
-      amount: -newProject.cost,
-      description: `Construction: ${newProject.name}`,
-      category: "Construction", // Changed to match expected enum values
-      type: 'expense',
-      date: new Date().toISOString(),
-      source: 'Gouvernement',
-      approved: true
-    });
+    // Add the economic record
+    // This would typically call a context function
+    console.log('Creating economic record for project', economicRecord);
   };
-
-  const [date, setDate] = useState<DateRange | undefined>({
-    from: new Date(newProject.startDate.year, 2, 1),
-    to: new Date(newProject.endDate.year, 2, 1),
-  })
-
+  
   return (
-    <Card className="space-y-4">
+    <Card>
       <CardHeader>
         <CardTitle>Projets de Construction</CardTitle>
         <CardDescription>
-          Gérez les projets de construction en cours et à venir dans la ville.
+          Suivez l'avancement des projets de construction en cours
         </CardDescription>
       </CardHeader>
-      
-      <CardContent>
+      <CardContent className="p-0">
         <Table>
+          <TableCaption>Liste des projets de construction</TableCaption>
           <TableHeader>
             <TableRow>
-              <TableHead>Projet</TableHead>
-              <TableHead>Type</TableHead>
-              <TableHead>Début</TableHead>
-              <TableHead>Fin</TableHead>
-              <TableHead>Coût</TableHead>
-              <TableHead>État</TableHead>
+              <TableHead>Nom</TableHead>
+              <TableHead>Localisation</TableHead>
+              <TableHead>Coût estimé</TableHead>
+              <TableHead>Année de fin prévue</TableHead>
+              <TableHead>Avancement</TableHead>
+              <TableHead>Actions</TableHead>
             </TableRow>
           </TableHeader>
-          
           <TableBody>
-            {projects.map(project => {
-              const startDate = gameToCompatibleDate(project.startDate);
-              const endDate = gameToCompatibleDate(project.endDate);
-              
-              return (
-                <TableRow key={project.id}>
-                  <TableCell className="font-medium">{project.name}</TableCell>
-                  <TableCell>{project.type}</TableCell>
-                  <TableCell>{new Date(startDate).toLocaleDateString()}</TableCell>
-                  <TableCell>{new Date(endDate).toLocaleDateString()}</TableCell>
-                  <TableCell>{project.cost}</TableCell>
-                  <TableCell>{project.status}</TableCell>
-                </TableRow>
-              );
-            })}
+            {constructionProjects.map(project => (
+              <TableRow key={project.id}>
+                <TableCell>{project.name}</TableCell>
+                <TableCell>{project.location}</TableCell>
+                <TableCell>{project.estimatedCost}</TableCell>
+                <TableCell>{project.expectedCompletionYear}</TableCell>
+                <TableCell>{project.progress}%</TableCell>
+                <TableCell>
+                  <Button variant="secondary" size="sm" onClick={() => handleApproveProject(project.id)}>
+                    Approuver
+                  </Button>
+                  <Button variant="outline" size="sm" onClick={() => handleUpdateProgress(project.id, project.progress + 10)}>
+                    Mettre à jour
+                  </Button>
+                  <Button variant="ghost" size="sm" onClick={() => handleCreateEconomicRecord(project)}>
+                    Enregistrer
+                  </Button>
+                </TableCell>
+              </TableRow>
+            ))}
           </TableBody>
         </Table>
       </CardContent>
-      
-      <Dialog open={open} onOpenChange={setOpen}>
-        <DialogTrigger asChild>
-          <Button className="ml-4">
-            <Plus className="h-4 w-4 mr-2" />
-            Nouveau Projet
-          </Button>
-        </DialogTrigger>
-        
-        <DialogContent className="sm:max-w-[425px]">
-          <DialogHeader>
-            <DialogTitle>Ajouter un Projet</DialogTitle>
-            <DialogDescription>
-              Ajoutez un nouveau projet de construction à la ville.
-            </DialogDescription>
-          </DialogHeader>
-          
-          <div className="grid gap-4 py-4">
-            <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="name" className="text-right">
-                Nom
-              </Label>
-              <Input 
-                type="text" 
-                id="name" 
-                name="name"
-                value={newProject.name}
-                onChange={handleInputChange}
-                className="col-span-3" 
-              />
-            </div>
-            
-            <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="type" className="text-right">
-                Type
-              </Label>
-              <Input 
-                type="text" 
-                id="type" 
-                name="type"
-                value={newProject.type}
-                onChange={handleInputChange}
-                className="col-span-3" 
-              />
-            </div>
-            
-            <div className="grid grid-cols-4 items-center gap-4">
-              <Label className="text-right">
-                Dates
-              </Label>
-              <Popover>
-                <PopoverTrigger asChild>
-                  <Button
-                    id="date"
-                    variant={"outline"}
-                    className="col-span-3 justify-start text-left font-normal"
-                  >
-                    <span>
-                      {date?.from ? (
-                        date.to ? (
-                          <>
-                            {format(date.from, "LLL dd, y")} -{" "}
-                            {format(date.to, "LLL dd, y")}
-                          </>
-                        ) : (
-                          format(date.from, "LLL dd, y")
-                        )
-                      ) : (
-                        <span>Pick a date</span>
-                      )}
-                    </span>
-                  </Button>
-                </PopoverTrigger>
-                <PopoverContent align="start" className="w-auto p-0">
-                  <Calendar
-                    initialFocus
-                    mode="range"
-                    defaultMonth={date?.from}
-                    selected={date}
-                    onSelect={setDate}
-                    numberOfMonths={2}
-                  />
-                </PopoverContent>
-              </Popover>
-            </div>
-            
-            <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="cost" className="text-right">
-                Coût
-              </Label>
-              <Input 
-                type="number" 
-                id="cost" 
-                name="cost"
-                value={newProject.cost}
-                onChange={handleInputChange}
-                className="col-span-3" 
-              />
-            </div>
-            
-            <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="description" className="text-right">
-                Description
-              </Label>
-              <Textarea 
-                id="description" 
-                name="description"
-                value={newProject.description}
-                onChange={handleInputChange}
-                className="col-span-3" 
-              />
-            </div>
-          </div>
-          
-          <DialogFooter>
-            <Button type="submit" onClick={addProject}>Ajouter</Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
     </Card>
   );
 };

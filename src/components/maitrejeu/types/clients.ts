@@ -39,6 +39,8 @@ export interface Client {
   backstory?: string;
   occupation?: string;
   annualIncome?: number;
+  description?: string;
+  competencePoints?: number;
 }
 
 export interface ClientCreationData {
@@ -47,7 +49,7 @@ export interface ClientCreationData {
   senateurId?: string;
   location: string;
   loyalty: string;
-  competences?: string[];
+  competences: string[];
   status: string;
   age: number;
   influence: number;
@@ -64,6 +66,7 @@ export interface ClientCreationData {
   lastInteraction: string;
   assignedToSenateurId?: string;
   subType?: string;
+  description?: string;
 }
 
 export interface ClientFilter {
@@ -75,6 +78,8 @@ export interface ClientFilter {
   minInfluence?: number;
   maxInfluence?: number;
   status?: string;
+  assignedOnly?: boolean;
+  minLoyalty?: number;
 }
 
 export interface ClientSort {

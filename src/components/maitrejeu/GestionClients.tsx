@@ -12,6 +12,7 @@ import {
   useClientManagement 
 } from './components/clients';
 import { SenateurJouable } from './types/senateurs';
+import { Client, ClientCreationData } from './types/clients';
 
 export const GestionClients = () => {
   const {
@@ -39,6 +40,15 @@ export const GestionClients = () => {
     handleAssignment,
     handleSaveClient
   } = useClientManagement();
+  
+  // Properly type the save handlers to match expected types
+  const handleSaveClientModal = (client: Client | ClientCreationData): void => {
+    handleSaveClient(client);
+  };
+  
+  const handleSaveAdvancedClient = (client: Client | ClientCreationData): void => {
+    handleSaveClient(client);
+  };
   
   return (
     <div className="space-y-6">
@@ -87,7 +97,7 @@ export const GestionClients = () => {
       <ClientModal
         isOpen={isClientModalOpen}
         onClose={() => setIsClientModalOpen(false)}
-        onSave={handleSaveClient}
+        onSave={handleSaveClientModal}
         client={selectedClient}
       />
       
@@ -95,7 +105,7 @@ export const GestionClients = () => {
       <AdvancedClientModal
         isOpen={isAdvancedModalOpen}
         onClose={() => setIsAdvancedModalOpen(false)}
-        onSave={handleSaveClient}
+        onSave={handleSaveAdvancedClient}
         client={selectedClient}
       />
       

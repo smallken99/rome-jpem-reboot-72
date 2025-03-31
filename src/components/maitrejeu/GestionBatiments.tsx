@@ -12,6 +12,7 @@ import { ConstructionProjects } from './components/batiments/ConstructionProject
 import MaintenanceManager from './components/batiments/MaintenanceManager';
 import BuildingRevenue from './components/batiments/BuildingRevenue';
 import PublicBuildingModal from './components/batiments/PublicBuildingModal';
+import { Building } from './types/batiments';
 
 export const GestionBatiments = () => {
   const [activeTab, setActiveTab] = useState<string>('liste');

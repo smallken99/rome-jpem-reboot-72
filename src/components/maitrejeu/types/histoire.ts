@@ -14,4 +14,16 @@ export interface HistoireEntry {
   tags: string[];
   importance?: string;
   catégorie?: string;
+  auteur?: string;
+}
+
+export interface PoliticalEvent {
+  id: string;
+  title: string;
+  description: string;
+  date: GameDate;
+  type: string;
+  impact: number;
+  faction: string;
+  consequences: string[];
 }

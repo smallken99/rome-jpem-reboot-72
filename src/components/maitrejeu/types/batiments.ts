@@ -26,6 +26,17 @@ export interface Building {
   owner: BuildingOwner;
   lastMaintenance?: GameDate;
   condition?: string;
+  maintenance?: number;
+  size?: number;
+  maxWorkers?: number;
+  securityLevel?: number;
+  maintenanceLevel?: number;
+  maintenanceEnabled?: boolean;
+  buildingType?: string;
+  value?: number;
+  income?: number;
+  workers?: number;
+  purchaseDate?: Date;
 }
 
 export interface BuildingCreationData {

@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableCaption, TableHead, TableHeader, TableRow } from '@/components/ui/table';
@@ -15,6 +14,7 @@ import { useMaitreJeu } from '../../context';
 import { Building, MaintenanceTask } from '../../types/batiments';
 import { GameDate } from '../../types/common';
 import { useBatimentsManagement } from '../../hooks/useBatimentsManagement';
+import { Season } from '@/components/maitrejeu/types/common';
 
 const MaintenanceManager: React.FC = () => {
   const { buildings } = useBatimentsManagement();
@@ -24,7 +24,6 @@ const MaintenanceManager: React.FC = () => {
   const [priorityFilter, setPriorityFilter] = useState<string>('');
 
   useEffect(() => {
-    // Simuler des tâches de maintenance
     const mockTasks: MaintenanceTask[] = [
       {
         id: 'task-1',
@@ -63,7 +62,73 @@ const MaintenanceManager: React.FC = () => {
     setTasks(mockTasks);
   }, []);
 
-  // Helper function to format GameDate for display
+  const scheduleMaintenanceTasks = () => {
+    const tasks = [
+      {
+        id: 'task-1',
+        buildingId: 'temple-1',
+        buildingName: 'Temple de Jupiter',
+        description: 'Réparation du toit endommagé',
+        estimatedCost: 5000,
+        priority: 'high',
+        deadline: { year: 703, season: 'SPRING' as Season },
+        status: 'pending'
+      },
+      {
+        id: 'task-2',
+        buildingId: 'market-1',
+        buildingName: 'Marché Central',
+        description: 'Renforcement des piliers',
+        estimatedCost: 3000,
+        priority: 'medium',
+        deadline: { year: 703, season: 'WINTER' as Season },
+        status: 'in_progress'
+      },
+      {
+        id: 'task-3',
+        buildingId: 'forum-1',
+        buildingName: 'Forum Romain',
+        description: 'Nettoyage des canaux d\'eau',
+        estimatedCost: 2000,
+        priority: 'low',
+        deadline: { year: 703, season: 'SUMMER' as Season },
+        status: 'pending'
+      },
+      {
+        id: 'task-4',
+        buildingId: 'temple-2',
+        buildingName: 'Temple de Vesta',
+        description: 'Restauration des fresques',
+        estimatedCost: 8000,
+        priority: 'medium',
+        deadline: { year: 704, season: 'SPRING' as Season },
+        status: 'scheduled'
+      },
+      {
+        id: 'task-5',
+        buildingId: 'bath-1',
+        buildingName: 'Thermes de Caracalla',
+        description: 'Réparation du système de chauffage',
+        estimatedCost: 12000,
+        priority: 'high',
+        deadline: { year: 703, season: 'AUTUMN' as Season },
+        status: 'delayed'
+      },
+      {
+        id: 'task-6',
+        buildingId: 'palace-1',
+        buildingName: 'Palais Impérial',
+        description: 'Rénovation des jardins',
+        estimatedCost: 15000,
+        priority: 'low',
+        deadline: { year: 704, season: 'SPRING' as Season },
+        status: 'scheduled'
+      }
+    ];
+    
+    setMaintenanceTasks(tasks);
+  };
+
   const formatGameDate = (gameDate: GameDate): string => {
     return `${gameDate.year}-${gameDate.season}`;
   };
@@ -72,7 +137,6 @@ const MaintenanceManager: React.FC = () => {
     const building = buildings?.find(b => b.id === task.buildingId);
     const buildingName = building ? building.name : task.buildingName || '';
     
-    // For date matching, we're comparing formatted dates
     const dateMatch = selectedDate 
       ? formatGameDate(task.deadline) === format(selectedDate, "yyyy-MM") 
       : true;
@@ -91,9 +155,9 @@ const MaintenanceManager: React.FC = () => {
   const getPriorityBadge = (priority: MaintenanceTask['priority']) => {
     switch (priority) {
       case 'low':
-        return 'secondary'; // Changed from "default"
+        return 'secondary';
       case 'medium':
-        return 'secondary'; // Changed from "warning"
+        return 'secondary';
       case 'high':
         return 'destructive';
       case 'critical':
