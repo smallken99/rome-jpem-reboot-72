@@ -58,8 +58,8 @@ export interface Equilibre {
     cohesion: number;
     plébéiens?: number; // Alternative spelling
   };
-  plébéiens?: number; // Alias for backward compatibility
-  patriciens?: number; // Additional property for direct access
+  plébéiens: number; // Direct access property for compatibility
+  patriciens: number; // Additional property for direct access
   
   // Military equilibrium
   militaire: {
@@ -77,15 +77,15 @@ export interface Equilibre {
   } | number;
   
   // Other stability factors
-  stability?: number;
-  armée?: number;
-  loyauté?: number;
-  morale?: number;
-  facteurJuridique?: number;
+  stability: number;
+  armée: number;
+  loyauté: number;
+  morale: number;
+  facteurJuridique: number;
   
   // History and risks
-  historique?: HistoriqueEntry[];
-  risques?: Record<string, Risk>;
+  historique: HistoriqueEntry[];
+  risques: Record<string, Risk>;
   
   // Aliased names for compatibility
   économie?: {

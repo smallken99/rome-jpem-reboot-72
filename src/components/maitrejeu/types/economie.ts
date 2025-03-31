@@ -48,6 +48,7 @@ export interface EconomieFilter {
 export interface EconomieSort {
   field?: keyof EconomieRecord | string;
   direction?: 'asc' | 'desc' | string;
+  fixed?: boolean;
 }
 
 export interface TreasuryStatus {
@@ -74,6 +75,13 @@ export interface EconomicFactors {
   warSpoilsRevenue: number;
   currentYear?: number;
   taxCollection?: number;
+  militaryExpenses?: number;
+}
+
+// Props for EconomieStats component
+export interface EconomieStatsProps {
+  treasuryStatus: TreasuryStatus;
+  economicFactors: EconomicFactors;
 }
 
 // Categories for economy records

@@ -83,6 +83,11 @@ export function dateToGameDate(dateString: string): GameDate {
   }
 }
 
+// Parse string to game date (for compatibility)
+export function parseStringToGameDate(dateString: string): GameDate {
+  return dateToGameDate(dateString);
+}
+
 // Mapping for compatibility between different versions of the equilibre structure
 export const equilibreMap = {
   politique: {

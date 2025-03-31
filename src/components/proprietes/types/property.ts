@@ -29,13 +29,19 @@ export interface PropertyUpgrade {
   description: string;
   cost: number;
   effect: string;
-  effects?: string[] | Record<string, any>;
+  effects?: Record<string, any> | string[];
   installed: boolean;
   requirements?: {
     buildingLevel?: number;
     buildingType?: string[];
     prerequisiteUpgrades?: string[];
     minValue?: number;
+    buildingCondition?: number;
+    minIncome?: number;
+    value?: number;
+    previousUpgrade?: string;
+    upgrades?: string[];
+    condition?: number;
   };
 }
 
@@ -67,6 +73,7 @@ export interface Slave {
 export interface SlaveStatisticsProps {
   totalSlaves: number;
   assignedSlaves: number;
+  availableSlaves?: number;
   slaveValue: number;
 }
 

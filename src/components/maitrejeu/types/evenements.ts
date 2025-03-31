@@ -7,6 +7,7 @@ export interface EvenementAction {
   id: string;
   label: string;
   description: string;
+  texte?: string;
   consequence?: string;
   impact?: Record<string, number>;
 }
@@ -23,6 +24,13 @@ export interface Evenement {
   options: EvenementAction[];
   actions?: EvenementAction[];
   resolved: boolean;
+  selectedOption?: string;
   nom?: string;
   tags?: string[];
+}
+
+export interface EvenementFormProps {
+  onSubmit: (evenement: Omit<Evenement, 'id'>) => void;
+  initialValues?: Partial<Evenement>;
+  mode?: 'create' | 'edit';
 }

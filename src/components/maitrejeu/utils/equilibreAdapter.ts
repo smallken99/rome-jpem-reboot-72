@@ -2,162 +2,139 @@
 import { Equilibre } from '../types/equilibre';
 
 /**
- * Adapts different equilibre formats to ensure compatibility
+ * Ensures that the economie property is always an object with the correct structure
  */
-export function adaptEquilibre(equilibre: any): Equilibre {
-  if (!equilibre) {
-    // Return default equilibre if none provided
+export function normalizeEconomie(equilibre: Equilibre): { stabilite: number; croissance: number; commerce: number; agriculture: number } {
+  if (typeof equilibre.economie === 'number') {
+    // Convert from number to object
     return {
-      politique: { populaires: 33, optimates: 33, moderates: 34 },
-      populaires: 33,
-      populares: 33,
-      optimates: 33,
-      moderates: 34,
-      economie: { stabilite: 50, croissance: 50, commerce: 50, agriculture: 50 },
-      social: { plebeiens: 40, patriciens: 40, esclaves: 20, cohesion: 60 },
-      militaire: { moral: 70, effectifs: 60, equipement: 65, discipline: 75 },
-      religion: { piete: 80, traditions: 85, superstition: 70 }
+      stabilite: equilibre.economie,
+      croissance: equilibre.economie,
+      commerce: equilibre.economie,
+      agriculture: equilibre.economie
     };
   }
-
-  // Ensure all required fields are present
-  const adapted: Equilibre = {
-    politique: { 
-      populaires: 0, 
-      optimates: 0, 
-      moderates: 0 
-    },
-    populaires: 0,
-    populares: 0,
-    optimates: 0,
-    moderates: 0,
-    economie: { 
-      stabilite: 0, 
-      croissance: 0, 
-      commerce: 0, 
-      agriculture: 0 
-    },
-    social: { 
-      plebeiens: 0, 
-      patriciens: 0, 
-      esclaves: 0, 
-      cohesion: 0 
-    },
-    militaire: { 
-      moral: 0, 
-      effectifs: 0, 
-      equipement: 0, 
-      discipline: 0 
-    },
-    religion: { 
-      piete: 0, 
-      traditions: 0, 
-      superstition: 0 
-    },
-    ...equilibre
-  };
-
-  // Handle political equilibrium
-  if (equilibre.political) {
-    adapted.politique.populaires = equilibre.political.populares || equilibre.political.populaires || 33;
-    adapted.politique.optimates = equilibre.political.optimates || 33;
-    adapted.politique.moderates = equilibre.political.moderates || 34;
-    
-    adapted.populaires = adapted.politique.populaires;
-    adapted.populares = adapted.politique.populaires;
-    adapted.optimates = adapted.politique.optimates;
-    adapted.moderates = adapted.politique.moderates;
-  } else if (equilibre.politique) {
-    adapted.populaires = equilibre.politique.populaires || 33;
-    adapted.populares = equilibre.politique.populaires || 33;
-    adapted.optimates = equilibre.politique.optimates || 33;
-    adapted.moderates = equilibre.politique.moderates || 34;
-  }
-
-  // Handle social fields
-  if (equilibre.social) {
-    if (equilibre.social.plébéiens !== undefined) {
-      adapted.social.plébéiens = equilibre.social.plébéiens;
-      adapted.plébéiens = equilibre.social.plébéiens;
-    } else if (equilibre.social.plebeiens !== undefined) {
-      adapted.social.plébéiens = equilibre.social.plebeiens;
-      adapted.plébéiens = equilibre.social.plebeiens;
-    }
-    
-    if (equilibre.social.patriciens !== undefined) {
-      adapted.patriciens = equilibre.social.patriciens;
-    }
-  }
-
-  // Handle economic fields - support both object and direct number
-  if (typeof equilibre.economie === 'number') {
-    adapted.economie = equilibre.economie;
-  }
-  if (typeof equilibre.économie === 'number') {
-    adapted.économie = equilibre.économie;
-  }
-  if (typeof equilibre.economy === 'number') {
-    adapted.economie = equilibre.economy;
-  }
-  if (typeof equilibre.economicStability === 'number') {
-    adapted.economie = equilibre.economicStability;
-  }
-
-  // Handle religion fields - support both object and direct number
-  if (typeof equilibre.religion === 'number') {
-    adapted.religion = equilibre.religion;
-  }
-
-  // Handle other stability factors
-  if (equilibre.facteurJuridique !== undefined) {
-    adapted.facteurJuridique = equilibre.facteurJuridique;
-  }
   
-  if (equilibre.stability !== undefined) {
-    adapted.stability = equilibre.stability;
-  }
-  
-  if (equilibre.armée !== undefined) {
-    adapted.armée = equilibre.armée;
-  }
-  
-  if (equilibre.loyauté !== undefined) {
-    adapted.loyauté = equilibre.loyauté;
-  }
-  
-  if (equilibre.morale !== undefined) {
-    adapted.morale = equilibre.morale;
-  }
-
-  // Handle history and risks
-  if (equilibre.historique) {
-    adapted.historique = equilibre.historique;
-  }
-  
-  if (equilibre.risques) {
-    adapted.risques = equilibre.risques;
-  }
-
-  return adapted;
+  return equilibre.economie;
 }
 
 /**
- * Gets a numeric value from the equilibre, handling both object and direct number
+ * Ensures that the religion property is always an object with the correct structure
  */
-export function getEquilibreNumber(value: any): number {
+export function normalizeReligion(equilibre: Equilibre): { piete: number; traditions: number; superstition: number } {
+  if (typeof equilibre.religion === 'number') {
+    // Convert from number to object
+    return {
+      piete: equilibre.religion,
+      traditions: equilibre.religion,
+      superstition: equilibre.religion
+    };
+  }
+  
+  return equilibre.religion as { piete: number; traditions: number; superstition: number };
+}
+
+/**
+ * Ensure an equilibre object has all the expected properties
+ */
+export function normalizeEquilibre(equilibre: Partial<Equilibre>): Equilibre {
+  const normalized: Partial<Equilibre> = { ...equilibre };
+  
+  // Ensure political properties
+  if (!normalized.politique) {
+    normalized.politique = {
+      populaires: normalized.populaires || normalized.populares || 33,
+      optimates: normalized.optimates || 33,
+      moderates: normalized.moderates || 34
+    };
+  }
+  
+  // Ensure direct access political properties
+  normalized.populaires = normalized.populaires || normalized.politique.populaires;
+  normalized.populares = normalized.populares || normalized.populaires;
+  normalized.optimates = normalized.optimates || normalized.politique.optimates;
+  normalized.moderates = normalized.moderates || normalized.politique.moderates;
+  
+  // Ensure social properties
+  if (!normalized.social) {
+    normalized.social = {
+      plebeiens: normalized.plébéiens || 50,
+      patriciens: normalized.patriciens || 50,
+      esclaves: 0,
+      cohesion: 50
+    };
+  }
+  
+  // Ensure direct access social properties
+  normalized.plébéiens = normalized.plébéiens || normalized.social.plebeiens;
+  normalized.patriciens = normalized.patriciens || normalized.social.patriciens;
+  
+  // Ensure economie is set
+  if (normalized.economie === undefined) {
+    normalized.economie = {
+      stabilite: 50,
+      croissance: 50,
+      commerce: 50,
+      agriculture: 50
+    };
+  }
+  
+  // Ensure religion is set
+  if (normalized.religion === undefined) {
+    normalized.religion = {
+      piete: 50,
+      traditions: 50,
+      superstition: 50
+    };
+  }
+  
+  // Ensure other stability factors
+  normalized.stability = normalized.stability || 50;
+  normalized.armée = normalized.armée || 50;
+  normalized.loyauté = normalized.loyauté || 50;
+  normalized.morale = normalized.morale || 50;
+  normalized.facteurJuridique = normalized.facteurJuridique || 50;
+  
+  // Ensure collections
+  normalized.historique = normalized.historique || [];
+  normalized.risques = normalized.risques || {};
+  
+  return normalized as Equilibre;
+}
+
+/**
+ * Creates a string representation of an equilibre value to display in UI
+ */
+export function getEquilibreValueString(value: unknown): string {
+  if (typeof value === 'number') {
+    return `${value}%`;
+  }
+  
+  if (typeof value === 'object' && value !== null) {
+    // For objects like economie or religion, calculate average
+    const values = Object.values(value as Record<string, number>);
+    if (values.length > 0) {
+      const avg = values.reduce((sum, val) => sum + val, 0) / values.length;
+      return `${Math.round(avg)}%`;
+    }
+  }
+  
+  return 'N/A';
+}
+
+/**
+ * Safely gets an equilibre numerical value for comparison
+ */
+export function getEquilibreValue(value: unknown): number {
   if (typeof value === 'number') {
     return value;
   }
   
   if (typeof value === 'object' && value !== null) {
-    if ('stabilite' in value) {
-      // Average the economic values if it's an object
-      return Math.round((value.stabilite + value.croissance + value.commerce + value.agriculture) / 4);
-    }
-    
-    if ('piete' in value) {
-      // Average the religion values if it's an object
-      return Math.round((value.piete + value.traditions + value.superstition) / 3);
+    // For objects like economie or religion, calculate average
+    const values = Object.values(value as Record<string, number>);
+    if (values.length > 0) {
+      return values.reduce((sum, val) => sum + val, 0) / values.length;
     }
   }
   
