@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useMemo } from 'react';
 import { useMaitreJeu } from '@/components/maitrejeu/context';
 import { 
@@ -6,7 +5,7 @@ import {
   EconomieFilter, 
   EconomieSort,
   EconomieCreationData,
-  EconomieCategory,
+  ECONOMIE_CATEGORIES,
   TreasuryStatus
 } from '@/components/maitrejeu/types/economie';
 import { toast } from 'sonner';
@@ -14,8 +13,8 @@ import { GameDate, parseStringToGameDate } from '@/components/maitrejeu/types/co
 
 const DEFAULT_FILTER: EconomieFilter = {
   searchTerm: '',
-  categories: [],
-  type: 'all'
+  category: [] as ECONOMIE_CATEGORIES[],
+  types: 'all'
 };
 
 const DEFAULT_SORT: EconomieSort = {
@@ -63,12 +62,12 @@ export const useEconomieManagement = () => {
       }
       
       // Filtre par catégorie
-      if (filter.categories && filter.categories.length > 0 && !filter.categories.includes(record.category) && !filter.categories.includes('all')) {
+      if (filter.category && filter.category.length > 0 && !filter.category.includes(record.category) && !filter.category.includes('all')) {
         return false;
       }
       
       // Filtre par type de transaction
-      if (filter.type !== 'all' && record.type !== filter.type) {
+      if (filter.types !== 'all' && record.type !== filter.types) {
         return false;
       }
       
