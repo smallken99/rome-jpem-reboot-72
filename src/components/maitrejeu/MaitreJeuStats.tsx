@@ -55,9 +55,9 @@ export const MaitreJeuStats: React.FC = () => {
     militaire: equilibre.militaire || {
       moral: 0,
       discipline: 0,
-      puissance: 0,
       effectifs: 0,
-      equipement: 0
+      equipement: 0,
+      puissance: 0 // Added this field
     },
     religion: equilibre.religion || {
       piete: 0,
@@ -220,7 +220,7 @@ export const MaitreJeuStats: React.FC = () => {
               {militaryPower.text}
             </div>
             <p className="text-xs text-muted-foreground">
-              {Math.floor((getMilitaireValue('puissance')) * 1000)} hommes
+              {Math.floor((getMilitaireValue('effectifs')) * 1000)} hommes
             </p>
           </CardContent>
         </Card>
@@ -235,7 +235,7 @@ export const MaitreJeuStats: React.FC = () => {
               {totalProvinces}
             </div>
             <p className="text-xs text-muted-foreground">
-              {provinces.filter(p => p.status === 'pacifiée' || p.statut === 'pacifiée').length} pacifiées
+              {provinces.filter(p => p.status === 'pacifiée').length} pacifiées
             </p>
           </CardContent>
         </Card>

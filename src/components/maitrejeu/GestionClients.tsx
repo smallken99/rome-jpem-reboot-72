@@ -41,13 +41,13 @@ export const GestionClients = () => {
     handleSaveClient
   } = useClientManagement();
   
-  // Properly type the save handlers to match expected types
-  const handleSaveClientModal = (client: Client | ClientCreationData): void => {
-    handleSaveClient(client);
+  // Use the correct types for handlers
+  const handleSaveClientModal = (client: Client | ClientCreationData) => {
+    handleSaveClient(client as any);
   };
   
-  const handleSaveAdvancedClient = (client: Client | ClientCreationData): void => {
-    handleSaveClient(client);
+  const handleSaveAdvancedClient = (client: Client | ClientCreationData) => {
+    handleSaveClient(client as any);
   };
   
   return (

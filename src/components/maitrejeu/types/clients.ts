@@ -49,7 +49,7 @@ export interface ClientCreationData {
   senateurId?: string;
   location: string;
   loyalty: string;
-  competences?: string[];  // Maintenu comme optionnel
+  competences?: string[];
   status: string;
   age: number;
   influence: number;
@@ -79,7 +79,7 @@ export interface ClientFilter {
   maxInfluence?: number;
   status?: string;
   assignedOnly?: boolean;
-  minLoyalty?: string; // Modifié de number à string pour correspondre au type de loyalty
+  minLoyalty?: string;
 }
 
 export interface ClientSort {

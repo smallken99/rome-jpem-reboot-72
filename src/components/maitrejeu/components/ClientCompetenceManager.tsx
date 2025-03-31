@@ -1,12 +1,12 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useMaitreJeu } from '../context';
 import { Client } from '../types/clients';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { Separator } from '@/components/ui/separator';
+import { Input } from '@/components/ui/input';
+import { ScrollArea } from '@/components/ui/scroll-area';
 import { Badge } from '@/components/ui/badge';
-import { CheckCircle, Circle, PlusCircle, MinusCircle } from 'lucide-react';
+import { X, Plus, ArrowRight } from 'lucide-react';
 
 interface ClientCompetenceManagerProps {
   client: Client;
@@ -14,109 +14,93 @@ interface ClientCompetenceManagerProps {
 }
 
 export const ClientCompetenceManager: React.FC<ClientCompetenceManagerProps> = ({ client, onClose }) => {
+  const [availablePoints, setAvailablePoints] = useState(client.competencePoints || 3);
+  const [newCompetence, setNewCompetence] = useState('');
+  const [competences, setCompetences] = useState<string[]>(client.competences || []);
   const { updateClient } = useMaitreJeu();
-  const [selectedCompetences, setSelectedCompetences] = useState<string[]>(client.competences || []);
-  const [availablePoints, setAvailablePoints] = useState<number>(client.competencePoints || 0);
-  const [isModified, setIsModified] = useState<boolean>(false);
   
-  const allCompetences = [
-    { id: 'diplomatie', name: 'Diplomatie', category: 'social', cost: 1 },
-    { id: 'commerce', name: 'Commerce', category: 'economique', cost: 1 },
-    { id: 'combat', name: 'Combat', category: 'militaire', cost: 1 },
-    { id: 'strategie', name: 'Stratégie', category: 'militaire', cost: 2 },
-    { id: 'eloquence', name: 'Éloquence', category: 'politique', cost: 1 },
-    { id: 'intrigue', name: 'Intrigue', category: 'politique', cost: 2 },
-    { id: 'administration', name: 'Administration', category: 'civil', cost: 1 },
-    { id: 'religieux', name: 'Connaissance religieuse', category: 'religieux', cost: 1 },
-    { id: 'juridique', name: 'Connaissance juridique', category: 'civil', cost: 2 },
-    { id: 'navigation', name: 'Navigation', category: 'militaire', cost: 1 },
-    { id: 'artisanat', name: 'Artisanat', category: 'economique', cost: 1 },
-    { id: 'agriculture', name: 'Agriculture', category: 'economique', cost: 1 }
-  ];
+  const handleAddCompetence = () => {
+    if (!newCompetence || availablePoints <= 0) return;
+    
+    const updatedCompetences = [...competences, newCompetence];
+    setCompetences(updatedCompetences);
+    setAvailablePoints(prev => prev - 1);
+    setNewCompetence('');
+  };
   
-  const toggleCompetence = (competenceId: string, cost: number) => {
-    if (selectedCompetences.includes(competenceId)) {
-      setSelectedCompetences(prev => prev.filter(id => id !== competenceId));
-      setAvailablePoints(prev => prev + cost);
-    } else {
-      if (availablePoints >= cost) {
-        setSelectedCompetences(prev => [...prev, competenceId]);
-        setAvailablePoints(prev => prev - cost);
-      }
-    }
-    setIsModified(true);
+  const handleRemoveCompetence = (index: number) => {
+    const newCompetences = [...competences];
+    newCompetences.splice(index, 1);
+    setCompetences(newCompetences);
+    setAvailablePoints(prev => prev + 1);
   };
   
   const handleSave = () => {
+    // Update the client with new competences
     updateClient(client.id, {
-      competences: selectedCompetences,
+      ...client,
+      competences,
       competencePoints: availablePoints
     });
     onClose();
   };
   
-  const competencesByCategory = allCompetences.reduce((acc, comp) => {
-    if (!acc[comp.category]) {
-      acc[comp.category] = [];
-    }
-    acc[comp.category].push(comp);
-    return acc;
-  }, {} as Record<string, typeof allCompetences>);
-  
-  const categoryLabels: Record<string, string> = {
-    'social': 'Compétences sociales',
-    'economique': 'Compétences économiques',
-    'militaire': 'Compétences militaires',
-    'politique': 'Compétences politiques',
-    'civil': 'Compétences civiles',
-    'religieux': 'Compétences religieuses'
-  };
-  
   return (
-    <Card className="w-full">
-      <CardHeader>
-        <CardTitle className="flex justify-between items-center">
-          <span>Gestion des compétences</span>
-          <Badge variant="outline">{availablePoints} points disponibles</Badge>
-        </CardTitle>
-        <CardDescription>Gérez les compétences de {client.name}</CardDescription>
-      </CardHeader>
+    <div className="space-y-4">
+      <div className="flex justify-between items-center">
+        <h2 className="text-xl font-semibold">Compétences de {client.name}</h2>
+        <Badge variant="outline" className="ml-2">
+          Points: {availablePoints}
+        </Badge>
+      </div>
       
-      <CardContent className="space-y-6">
-        {Object.entries(competencesByCategory).map(([category, competences]) => (
-          <div key={category} className="space-y-2">
-            <h3 className="font-semibold">{categoryLabels[category] || category}</h3>
-            <div className="grid grid-cols-2 gap-2">
-              {competences.map(comp => (
-                <Button 
-                  key={comp.id}
-                  variant={selectedCompetences.includes(comp.id) ? "default" : "outline"}
-                  className="justify-start"
-                  onClick={() => toggleCompetence(comp.id, comp.cost)}
-                >
-                  {selectedCompetences.includes(comp.id) ? (
-                    <CheckCircle className="mr-2 h-4 w-4" />
-                  ) : (
-                    <Circle className="mr-2 h-4 w-4" />
-                  )}
-                  {comp.name} ({comp.cost})
-                </Button>
-              ))}
-            </div>
-            <Separator />
-          </div>
-        ))}
-      </CardContent>
-      
-      <CardFooter className="flex justify-between">
-        <Button variant="ghost" onClick={onClose}>Annuler</Button>
+      <div className="flex gap-2">
+        <Input
+          type="text"
+          placeholder="Nouvelle compétence..."
+          value={newCompetence}
+          onChange={(e) => setNewCompetence(e.target.value)}
+          className="flex-1"
+        />
         <Button 
-          onClick={handleSave} 
-          disabled={!isModified}
+          onClick={handleAddCompetence}
+          disabled={availablePoints <= 0 || !newCompetence}
+          size="sm"
         >
-          Enregistrer
+          <Plus className="h-4 w-4 mr-1" /> Ajouter
         </Button>
-      </CardFooter>
-    </Card>
+      </div>
+      
+      <ScrollArea className="h-[200px] border rounded-md p-4">
+        <div className="space-y-2">
+          {competences.length === 0 ? (
+            <p className="text-sm text-muted-foreground">Aucune compétence</p>
+          ) : (
+            competences.map((comp, index) => (
+              <div key={index} className="flex justify-between items-center">
+                <span className="text-sm">{comp}</span>
+                <Button 
+                  variant="ghost" 
+                  size="sm" 
+                  onClick={() => handleRemoveCompetence(index)}
+                  className="h-6 w-6 p-0"
+                >
+                  <X className="h-4 w-4" />
+                </Button>
+              </div>
+            ))
+          )}
+        </div>
+      </ScrollArea>
+      
+      <div className="flex justify-end gap-2">
+        <Button variant="outline" onClick={onClose}>
+          Annuler
+        </Button>
+        <Button onClick={handleSave}>
+          Sauvegarder <ArrowRight className="ml-2 h-4 w-4" />
+        </Button>
+      </div>
+    </div>
   );
 };

@@ -12,7 +12,7 @@ import { ConstructionProjects } from './components/batiments/ConstructionProject
 import MaintenanceManager from './components/batiments/MaintenanceManager';
 import BuildingRevenue from './components/batiments/BuildingRevenue';
 import PublicBuildingModal from './components/batiments/PublicBuildingModal';
-import { Building } from './types/batiments';
+import { Building, BuildingCreationData } from './types/batiments';
 
 export const GestionBatiments = () => {
   const [activeTab, setActiveTab] = useState<string>('liste');
@@ -29,25 +29,25 @@ export const GestionBatiments = () => {
   const handleEditBuilding = (buildingId: string) => {
     // Dans une implémentation réelle, il faudrait récupérer le bâtiment depuis l'état
     console.log("Édition du bâtiment", buildingId);
-    setSelectedBuilding({
+    
+    // Use type assertion to ensure it matches Building type
+    const example: Building = {
       id: buildingId,
       name: "Bâtiment exemple",
       type: "temple",
       location: "Forum Romanum",
-      status: "good",
-      constructionYear: 720,
-      description: "Un exemple de bâtiment",
-      cost: 50000,
+      value: 50000,
       maintenance: 1000,
       maintenanceCost: 1000,
-      revenue: 2000,
-      capacity: 500,
-      owner: "république"
-    });
+      condition: 100,
+      status: "good"
+    };
+    
+    setSelectedBuilding(example);
     setIsAddBuildingModalOpen(true);
   };
 
-  const handleSaveBuilding = (data: any) => {
+  const handleSaveBuilding = (data: BuildingCreationData) => {
     if (selectedBuilding) {
       updateBuilding(selectedBuilding.id, data);
     } else {

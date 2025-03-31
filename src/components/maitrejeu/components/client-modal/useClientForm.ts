@@ -24,7 +24,7 @@ export const useClientForm = (client: Client | null) => {
     },
     specialAbilities: [],
     competencePoints: 3,
-    competences: [], // Maintenu comme tableau vide par défaut
+    competences: [], // Default empty array for competences
     backstory: '',
     activeStatus: 'active',
     relationshipLevel: 1,
@@ -53,7 +53,7 @@ export const useClientForm = (client: Client | null) => {
         },
         specialAbilities: client.specialAbility ? [client.specialAbility] : [],
         competencePoints: client.competencePoints || 3,
-        competences: client.competences || [],  // Utilisation de l'opérateur || pour fournir un tableau vide
+        competences: client.competences || [],
         backstory: client.backstory || '',
         activeStatus: client.activeStatus || 'active',
         relationshipLevel: client.relationshipLevel || 1,

@@ -1,7 +1,7 @@
 
-export type BuildingType = 'temple' | 'villa' | 'domus' | 'insula' | 'forum' | 'baths' | 'theater' | 'amphitheater' | 'senate' | 'basilica' | 'market' | 'warehouse' | 'workshop' | 'port' | 'aqueduct' | 'road' | 'bridge' | 'military' | 'other';
+export type BuildingType = 'temple' | 'villa' | 'domus' | 'insula' | 'forum' | 'baths' | 'theater' | 'amphitheater' | 'senate' | 'basilica' | 'market' | 'warehouse' | 'workshop' | 'port' | 'aqueduct' | 'road' | 'bridge' | 'military' | 'other' | 'wall';
 
-export type BuildingStatus = 'excellent' | 'good' | 'fair' | 'poor' | 'ruins' | 'construction' | 'renovation';
+export type BuildingStatus = 'excellent' | 'good' | 'fair' | 'poor' | 'ruins' | 'construction' | 'renovation' | 'average' | 'damaged' | 'ruined' | 'under_construction';
 
 export type BuildingPriority = 'high' | 'medium' | 'low' | 'critical';
 
@@ -12,14 +12,19 @@ export interface Building {
   location: string;
   value: number;
   maintenance: number;
-  maintenanceCost: number; // Champ manquant ajouté ici
+  maintenanceCost: number;
   condition: number;
   workers?: number;
+  maxWorkers?: number;
   securityLevel?: number;
   maintenanceLevel?: number;
   status?: BuildingStatus;
   upgrades?: any[];
   income?: number;
+  description?: string;
+  purchaseDate?: Date;
+  constructionYear?: number;
+  revenue?: number;
 }
 
 export interface MaintenanceTask {
@@ -34,6 +39,7 @@ export interface MaintenanceTask {
     season: string;
   };
   status: string;
+  startDate?: Date;
 }
 
 export interface ConstructionProject {
@@ -49,6 +55,13 @@ export interface ConstructionProject {
   responsibleMagistrate?: string;
   workers: number;
   description?: string;
+  estimatedCost?: number;
+  expectedCompletionYear?: number;
+  buildingType?: string;
+  buildingName?: string;
+  totalCost?: number;
+  sponsor?: string;
+  approved?: boolean;
 }
 
 export interface BuildingFilter {
@@ -59,3 +72,33 @@ export interface BuildingFilter {
   maxMaintenance: number;
   searchTerm: string;
 }
+
+export interface BuildingRevenueRecord {
+  id: string;
+  buildingId: string;
+  amount: number;
+  date: Date;
+  source: string;
+  description: string;
+}
+
+export interface BuildingCreationData {
+  name: string;
+  type: BuildingType;
+  location: string;
+  maintenanceCost: number;
+  value: number;
+  condition: number;
+  workers?: number;
+  status?: BuildingStatus;
+  description?: string;
+}
+
+export interface PublicBuildingModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+  onSave: (building: BuildingCreationData) => void;
+  building?: Building;
+}
+
+export type BuildingOwner = 'république' | 'privé' | 'religieux' | 'autre';
