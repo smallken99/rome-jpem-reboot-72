@@ -1,92 +1,91 @@
 
 import React from 'react';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Badge } from '@/components/ui/badge';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
-import { Pencil, Trash2 } from 'lucide-react';
+import { Trash2 } from 'lucide-react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
 
-interface Slave {
+export interface Slave {
   id: string;
-  name: string;
+  name?: string;
   age: number;
-  health: number;
-  specialization?: string;
-  acquired: string;
+  status: string;
+  acquired: Date;
   value: number;
-  status: 'assigned' | 'unassigned' | 'sick' | 'training';
+  origin?: string;
+  skills?: string[];
+  buildingId?: string;
 }
 
 interface SlavesListProps {
   slaves: Slave[];
-  onEdit?: (id: string) => void;
-  onDelete?: (id: string) => void;
+  onDeleteSlave: (id: string) => void;
 }
 
-export const SlavesList: React.FC<SlavesListProps> = ({
-  slaves,
-  onEdit,
-  onDelete
-}) => {
-  const getStatusBadge = (status: string) => {
-    switch (status) {
-      case 'assigned':
-        return <Badge variant="secondary">Assigné</Badge>;
-      case 'unassigned':
-        return <Badge variant="outline">Non assigné</Badge>;
-      case 'sick':
-        return <Badge variant="destructive">Malade</Badge>;
-      case 'training':
-        return <Badge variant="default">En formation</Badge>;
-      default:
-        return <Badge variant="outline">{status}</Badge>;
-    }
-  };
-
+export const SlavesList: React.FC<SlavesListProps> = ({ slaves, onDeleteSlave }) => {
   return (
-    <Table>
-      <TableHeader>
-        <TableRow>
-          <TableHead>Nom</TableHead>
-          <TableHead>Âge</TableHead>
-          <TableHead>Santé</TableHead>
-          <TableHead>Spécialisation</TableHead>
-          <TableHead>Valeur</TableHead>
-          <TableHead>Statut</TableHead>
-          <TableHead className="text-right">Actions</TableHead>
-        </TableRow>
-      </TableHeader>
-      <TableBody>
+    <Card>
+      <CardHeader>
+        <CardTitle>Liste des esclaves</CardTitle>
+      </CardHeader>
+      <CardContent>
         {slaves.length === 0 ? (
-          <TableRow>
-            <TableCell colSpan={7} className="text-center h-32 text-muted-foreground">
-              Aucun esclave dans votre propriété
-            </TableCell>
-          </TableRow>
+          <p className="text-center py-8 text-muted-foreground">
+            Aucun esclave enregistré
+          </p>
         ) : (
-          slaves.map((slave) => (
-            <TableRow key={slave.id}>
-              <TableCell className="font-medium">{slave.name}</TableCell>
-              <TableCell>{slave.age} ans</TableCell>
-              <TableCell>{slave.health}%</TableCell>
-              <TableCell>{slave.specialization || '—'}</TableCell>
-              <TableCell>{slave.value} as</TableCell>
-              <TableCell>{getStatusBadge(slave.status)}</TableCell>
-              <TableCell className="text-right">
-                {onEdit && (
-                  <Button variant="ghost" size="sm" onClick={() => onEdit(slave.id)}>
-                    <Pencil className="h-4 w-4" />
-                  </Button>
-                )}
-                {onDelete && (
-                  <Button variant="ghost" size="sm" onClick={() => onDelete(slave.id)}>
-                    <Trash2 className="h-4 w-4" />
-                  </Button>
-                )}
-              </TableCell>
-            </TableRow>
-          ))
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Identifiant</TableHead>
+                <TableHead>Âge</TableHead>
+                <TableHead>Statut</TableHead>
+                <TableHead>Acquis le</TableHead>
+                <TableHead>Valeur</TableHead>
+                <TableHead className="text-right">Actions</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {slaves.map((slave) => (
+                <TableRow key={slave.id}>
+                  <TableCell className="font-medium">
+                    {slave.name || `Esclave #${slave.id.substring(0, 6)}`}
+                  </TableCell>
+                  <TableCell>{slave.age} ans</TableCell>
+                  <TableCell>
+                    <Badge variant={slave.status === 'assigned' ? 'outline' : 'secondary'}>
+                      {slave.status === 'assigned' ? 'Assigné' : 'Disponible'}
+                    </Badge>
+                  </TableCell>
+                  <TableCell>
+                    {slave.acquired instanceof Date
+                      ? slave.acquired.toLocaleDateString()
+                      : new Date(slave.acquired).toLocaleDateString()}
+                  </TableCell>
+                  <TableCell>{slave.value} As</TableCell>
+                  <TableCell className="text-right">
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => onDeleteSlave(slave.id)}
+                    >
+                      <Trash2 className="h-4 w-4 text-destructive" />
+                    </Button>
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
         )}
-      </TableBody>
-    </Table>
+      </CardContent>
+    </Card>
   );
 };

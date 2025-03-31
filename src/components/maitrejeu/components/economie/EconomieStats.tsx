@@ -74,7 +74,7 @@ export const EconomieStats: React.FC<EconomieStatsProps> = ({
           </div>
           <div className="flex items-center mt-1 text-sm">
             <ArrowDownIcon className="h-4 w-4 text-red-500 mr-1" />
-            <span>Projection: {formatCurrency(treasury.expenses * economicFactors.militaryExpense)}</span>
+            <span>Projection: {formatCurrency(treasury.expenses * (economicFactors.militaryExpenses || economicFactors.militaryExpense || 1))}</span>
           </div>
         </CardContent>
       </Card>

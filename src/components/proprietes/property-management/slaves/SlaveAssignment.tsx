@@ -1,21 +1,21 @@
 
 import React from 'react';
-import { Building } from '@/types/building';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { OwnedBuilding } from '@/components/proprietes/types/property';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { Trash2 } from 'lucide-react';
 
-export interface SlaveAssignment {
-  id: string;
-  slaveId: string;
-  buildingId: string;
-  assignedAt: Date;
-  role: string;
-  productivity: number;
-  slaveName?: string;
-  buildingName?: string;
-}
-
-export interface SlaveAssignmentProps {
-  assignment: SlaveAssignment;
-  buildings: Building[];
+interface SlaveAssignmentProps {
+  assignment: {
+    id: string;
+    slaveId: string;
+    buildingId: string;
+    assignedAt: Date;
+    role: string;
+    productivity: number;
+  };
+  buildings: OwnedBuilding[];
   onRevoke: (assignmentId: string) => void;
 }
 
@@ -27,29 +27,28 @@ export const SlaveAssignment: React.FC<SlaveAssignmentProps> = ({
   const building = buildings.find(b => b.id === assignment.buildingId);
   
   return (
-    <div className="border rounded-md p-4 mb-4 bg-white shadow-sm">
-      <div className="flex justify-between items-center">
-        <div>
-          <h3 className="text-lg font-medium">
-            {assignment.slaveName || 'Esclave sans nom'} 
-          </h3>
-          <p className="text-sm text-muted-foreground">
-            Assigné à: {building?.name || 'Bâtiment inconnu'}
-          </p>
-          <p className="text-sm text-muted-foreground">
-            Rôle: {assignment.role}
-          </p>
-          <p className="text-sm text-muted-foreground">
-            Productivité: {assignment.productivity}%
-          </p>
+    <Card>
+      <CardHeader className="pb-2">
+        <div className="flex justify-between items-center">
+          <CardTitle className="text-md">{building?.name || 'Propriété inconnue'}</CardTitle>
+          <Badge variant="outline">{assignment.role}</Badge>
         </div>
-        <button
-          onClick={() => onRevoke(assignment.id)}
-          className="text-destructive hover:text-destructive hover:underline text-sm"
-        >
-          Retirer
-        </button>
-      </div>
-    </div>
+      </CardHeader>
+      <CardContent className="pb-4">
+        <div className="flex justify-between items-center">
+          <div>
+            <p className="text-sm text-muted-foreground">
+              Productivité: {assignment.productivity}%
+            </p>
+            <p className="text-sm text-muted-foreground">
+              Assigné le: {assignment.assignedAt.toLocaleDateString()}
+            </p>
+          </div>
+          <Button variant="ghost" size="sm" onClick={() => onRevoke(assignment.id)}>
+            <Trash2 className="h-4 w-4 text-destructive" />
+          </Button>
+        </div>
+      </CardContent>
+    </Card>
   );
 };

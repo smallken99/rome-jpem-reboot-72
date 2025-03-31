@@ -1,138 +1,199 @@
 
 import React, { useState } from 'react';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Slider } from '@/components/ui/slider';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { AlertCircle, PlusCircle, MinusCircle } from 'lucide-react';
+import { formatCurrency } from '@/utils/currencyUtils';
 
-interface SlavePurchaseFormProps {
-  onPurchase: (quantity: number, type: string, quality: number) => void;
-  currentBalance: number;
+export interface SlavePurchaseFormProps {
   slavePrice: number;
+  totalSlaves: number;
+  onPurchase: (count: number, price: number) => boolean;
+  onSell: (count: number) => boolean;
+  balance?: number;
+  maxPurchase?: number;
 }
 
-export const SlavePurchaseForm: React.FC<SlavePurchaseFormProps> = ({ 
-  onPurchase, 
-  currentBalance,
-  slavePrice
+export const SlavePurchaseForm: React.FC<SlavePurchaseFormProps> = ({
+  slavePrice,
+  totalSlaves,
+  onPurchase,
+  onSell,
+  balance = 0,
+  maxPurchase = 100
 }) => {
-  const [quantity, setQuantity] = useState(1);
-  const [type, setType] = useState('general');
-  const [quality, setQuality] = useState(3);
+  const [purchaseCount, setPurchaseCount] = useState(1);
+  const [sellCount, setSellCount] = useState(1);
+  const [error, setError] = useState('');
   
-  const slaveTypes = [
-    { value: 'general', label: 'Usage général' },
-    { value: 'domestic', label: 'Domestique' },
-    { value: 'field', label: 'Travail des champs' },
-    { value: 'artisan', label: 'Artisan' },
-    { value: 'educated', label: 'Éduqué' },
-    { value: 'gladiator', label: 'Gladiateur' }
-  ];
+  // Calculate total purchase price
+  const totalPurchasePrice = purchaseCount * slavePrice;
   
-  const totalCost = quantity * slavePrice * (quality / 3);
-  const canAfford = currentBalance >= totalCost;
+  // Check if purchase is possible
+  const canPurchase = purchaseCount > 0 && purchaseCount <= maxPurchase && totalPurchasePrice <= balance;
+  
+  // Check if selling is possible
+  const canSell = sellCount > 0 && sellCount <= totalSlaves;
   
   const handlePurchase = () => {
-    if (canAfford) {
-      onPurchase(quantity, type, quality);
+    if (!canPurchase) {
+      setError('Impossible d\'acheter ce nombre d\'esclaves. Vérifiez votre solde ou la quantité.');
+      return;
+    }
+    
+    setError('');
+    const success = onPurchase(purchaseCount, slavePrice);
+    if (success) {
+      setPurchaseCount(1);
+    } else {
+      setError('Une erreur est survenue lors de l\'achat');
+    }
+  };
+  
+  const handleSell = () => {
+    if (!canSell) {
+      setError('Impossible de vendre ce nombre d\'esclaves');
+      return;
+    }
+    
+    setError('');
+    const success = onSell(sellCount);
+    if (success) {
+      setSellCount(1);
+    } else {
+      setError('Une erreur est survenue lors de la vente');
     }
   };
   
   return (
-    <div className="space-y-4">
-      <div className="mb-6">
-        <h3 className="text-lg font-semibold">Achat d'esclaves</h3>
-        <p className="text-sm text-muted-foreground">
-          Les esclaves peuvent être assignés à vos propriétés pour augmenter leur productivité ou vendus pour profit.
-        </p>
-      </div>
-      
-      <div className="grid gap-4">
-        <div className="grid grid-cols-4 items-center gap-4">
-          <Label htmlFor="quantity" className="text-right">
-            Quantité
-          </Label>
-          <div className="col-span-3">
-            <Input
-              id="quantity"
-              type="number"
-              value={quantity}
-              onChange={(e) => setQuantity(Math.max(1, parseInt(e.target.value) || 0))}
-              min="1"
-              className="w-full"
-            />
-          </div>
-        </div>
-        
-        <div className="grid grid-cols-4 items-center gap-4">
-          <Label htmlFor="type" className="text-right">
-            Type
-          </Label>
-          <div className="col-span-3">
-            <Select value={type} onValueChange={setType}>
-              <SelectTrigger className="w-full">
-                <SelectValue placeholder="Sélectionner un type" />
-              </SelectTrigger>
-              <SelectContent>
-                {slaveTypes.map((slaveType) => (
-                  <SelectItem key={slaveType.value} value={slaveType.value}>
-                    {slaveType.label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-        </div>
-        
-        <div className="grid grid-cols-4 items-center gap-4">
-          <Label htmlFor="quality" className="text-right">
-            Qualité
-          </Label>
-          <div className="col-span-3 space-y-2">
-            <Slider
-              value={[quality]}
-              min={1}
-              max={5}
-              step={1}
-              onValueChange={(value) => setQuality(value[0])}
-            />
-            <div className="flex justify-between text-xs text-muted-foreground">
-              <span>Basique</span>
-              <span>Standard</span>
-              <span>Premium</span>
-            </div>
-          </div>
-        </div>
-      </div>
-      
-      <div className="border-t pt-4 mt-6">
-        <div className="flex justify-between mb-4">
-          <span className="font-medium">Coût total:</span>
-          <span className={canAfford ? 'font-semibold' : 'font-semibold text-destructive'}>
-            {totalCost.toFixed(0)} as
-          </span>
-        </div>
-        
-        <div className="flex justify-between mb-6">
-          <span className="text-sm text-muted-foreground">Balance actuelle:</span>
-          <span className="text-sm">{currentBalance.toFixed(0)} as</span>
-        </div>
-        
-        <Button 
-          onClick={handlePurchase} 
-          disabled={!canAfford}
-          className="w-full"
-        >
-          Acheter
-        </Button>
-        
-        {!canAfford && (
-          <p className="text-sm text-destructive mt-2">
-            Vous n'avez pas assez de fonds pour cet achat.
-          </p>
+    <Card>
+      <CardHeader>
+        <CardTitle>Acheter et vendre des esclaves</CardTitle>
+        <CardDescription>Gérez votre main d'œuvre servile</CardDescription>
+      </CardHeader>
+      <CardContent className="space-y-4">
+        {error && (
+          <Alert variant="destructive">
+            <AlertCircle className="h-4 w-4" />
+            <AlertDescription>{error}</AlertDescription>
+          </Alert>
         )}
-      </div>
-    </div>
+        
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          {/* Purchase section */}
+          <div className="space-y-4">
+            <h3 className="font-medium">Acheter des esclaves</h3>
+            
+            <div className="space-y-2">
+              <Label htmlFor="purchaseCount">Nombre d'esclaves à acheter</Label>
+              <div className="flex items-center space-x-2">
+                <Button 
+                  variant="outline" 
+                  size="icon"
+                  onClick={() => setPurchaseCount(Math.max(1, purchaseCount - 1))}
+                >
+                  <MinusCircle className="h-4 w-4" />
+                </Button>
+                <Input 
+                  id="purchaseCount"
+                  type="number" 
+                  min="1"
+                  value={purchaseCount}
+                  onChange={(e) => setPurchaseCount(Math.max(1, parseInt(e.target.value) || 1))}
+                  className="text-center"
+                />
+                <Button 
+                  variant="outline" 
+                  size="icon"
+                  onClick={() => setPurchaseCount(purchaseCount + 1)}
+                >
+                  <PlusCircle className="h-4 w-4" />
+                </Button>
+              </div>
+            </div>
+            
+            <div className="text-sm space-y-1">
+              <div className="flex justify-between">
+                <span>Prix unitaire:</span>
+                <span>{formatCurrency(slavePrice)}</span>
+              </div>
+              <div className="flex justify-between font-medium">
+                <span>Coût total:</span>
+                <span>{formatCurrency(totalPurchasePrice)}</span>
+              </div>
+              <div className="flex justify-between text-muted-foreground">
+                <span>Solde disponible:</span>
+                <span>{formatCurrency(balance)}</span>
+              </div>
+            </div>
+            
+            <Button 
+              onClick={handlePurchase}
+              disabled={!canPurchase}
+              className="w-full"
+            >
+              Acheter
+            </Button>
+          </div>
+          
+          {/* Sell section */}
+          <div className="space-y-4">
+            <h3 className="font-medium">Vendre des esclaves</h3>
+            
+            <div className="space-y-2">
+              <Label htmlFor="sellCount">Nombre d'esclaves à vendre</Label>
+              <div className="flex items-center space-x-2">
+                <Button 
+                  variant="outline" 
+                  size="icon"
+                  onClick={() => setSellCount(Math.max(1, sellCount - 1))}
+                >
+                  <MinusCircle className="h-4 w-4" />
+                </Button>
+                <Input 
+                  id="sellCount"
+                  type="number" 
+                  min="1"
+                  max={totalSlaves}
+                  value={sellCount}
+                  onChange={(e) => setSellCount(Math.max(1, parseInt(e.target.value) || 1))}
+                  className="text-center"
+                />
+                <Button 
+                  variant="outline" 
+                  size="icon"
+                  onClick={() => setSellCount(Math.min(totalSlaves, sellCount + 1))}
+                >
+                  <PlusCircle className="h-4 w-4" />
+                </Button>
+              </div>
+            </div>
+            
+            <div className="text-sm space-y-1">
+              <div className="flex justify-between">
+                <span>Prix de vente estimé:</span>
+                <span>{formatCurrency(sellCount * (slavePrice * 0.8))}</span>
+              </div>
+              <div className="flex justify-between text-muted-foreground">
+                <span>Esclaves disponibles:</span>
+                <span>{totalSlaves}</span>
+              </div>
+            </div>
+            
+            <Button 
+              onClick={handleSell}
+              disabled={!canSell}
+              variant="outline"
+              className="w-full"
+            >
+              Vendre
+            </Button>
+          </div>
+        </div>
+      </CardContent>
+    </Card>
   );
 };

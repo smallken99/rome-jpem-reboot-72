@@ -1,12 +1,13 @@
 export interface Equilibre {
-  // Political equilibrium
+  // Political equilibrium - both forms supported for compatibility
   politique: {
     populaires: number;
     optimates: number;
     moderates: number;
   };
+  // Direct access properties (used in many components)
   populaires: number;
-  populaires: number;
+  populares: number; // alias
   optimates: number;
   moderates: number;
   
@@ -78,8 +79,9 @@ export interface PoliticalEvent {
   id: string;
   title: string;
   description: string;
-  date: Date;
-  impact: Record<string, number>;
+  date: Date | { year: number; season: string };
   type: string;
   importance: "high" | "low" | "medium" | "critical" | string;
+  impact?: Record<string, number>;
+  event?: string;
 }

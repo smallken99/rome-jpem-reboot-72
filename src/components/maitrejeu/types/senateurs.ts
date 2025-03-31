@@ -29,4 +29,5 @@ export interface SenateurJouable {
   ennemis: string[];
   stats?: any;
   roles?: string[]; // Add this for compatibility
+  competences?: Record<string, number>; // Add this for compatibility
 }
