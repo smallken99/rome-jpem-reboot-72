@@ -32,9 +32,10 @@ export interface MaitreJeuContextType {
   histoireEntries: HistoireEntry[];
   elections: Election[];
   factions?: any[]; // Pour compatibilité avec le code existant
+  setSenateurs: React.Dispatch<React.SetStateAction<SenateurJouable[]>>;
   
   // Actions
-  advanceTime: () => void;
+  advanceTime: (newSeason?: Season) => void;
   changePhase: (phase: GamePhase) => void;
   updateEquilibre: (updates: Partial<Equilibre>) => void;
   updateFactionBalance: (populaires: number, optimates: number, moderates: number) => void;
@@ -42,7 +43,7 @@ export interface MaitreJeuContextType {
   // Political
   addLoi: (loi: Omit<Loi, "id">) => void;
   voteLoi: (id: string, vote: 'pour' | 'contre' | 'abstention', count?: number) => void;
-  scheduleElection: (magistrature: MagistratureType, year: number, season: Season) => string;
+  scheduleElection: (magistrature: MagistratureType) => string;
   
   // Events management
   addEvenement: (evenement: Omit<Evenement, "id">) => void;

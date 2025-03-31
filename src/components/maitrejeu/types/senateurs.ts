@@ -31,6 +31,7 @@ export interface SenateurJouable {
   roles?: string[];
   competences?: string[] | Record<string, any>;
   diplomatie?: string[] | Record<string, any>;
+  stats?: any;
 }
 
 // Extend this interface as needed for additional functionality

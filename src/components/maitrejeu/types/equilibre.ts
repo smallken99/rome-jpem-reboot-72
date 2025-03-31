@@ -1,3 +1,4 @@
+
 import { GameDate } from './common';
 
 export interface HistoriqueEntry {
@@ -9,7 +10,7 @@ export interface HistoriqueEntry {
   description?: string;
 }
 
-export type RiskType = 'political' | 'economic' | 'military' | 'social' | 'religious';
+export type RiskType = 'political' | 'economic' | 'military' | 'social' | 'religious' | string;
 
 export interface Risk {
   id: string;
@@ -49,6 +50,9 @@ export interface Equilibre {
   social: {
     patriciens: number;
     plébéiens: number;
+    plebeiens?: number;
+    esclaves?: number;
+    cohesion?: number;
   };
   
   // These are aliases for the social values above for compatibility
@@ -78,18 +82,22 @@ export interface Equilibre {
 
 export interface PoliticalEvent {
   id: string;
-  date: GameDate;
+  date: GameDate | Date;
   title: string;
   description: string;
-  impact: number;
+  impact: number | Record<string, number>;
   type: string;
+  importance: ImportanceType;
   resolved?: boolean;
+  event?: string;
 }
 
 export interface SocialStabilityCardProps {
   patriciens: number;
   plebeiens: number;
-  onUpdate: (patriciens: number, plebeiens: number) => void;
+  esclaves: number;
+  cohesion: number;
+  onUpdate: (values: { patriciens: number; plebeiens: number; esclaves: number; cohesion: number; }) => void;
   equilibre: Equilibre;
 }
 
@@ -102,11 +110,13 @@ export interface PoliticalBalanceCardProps {
 }
 
 export interface EconomicStabilityCardProps {
-  economy: number;
-  onUpdate: (economy: number) => void;
+  economy: number | { stabilite: number; croissance: number; commerce: number; agriculture: number; };
+  onUpdate: (economy: number | { stabilite: number; croissance: number; commerce: number; agriculture: number; }) => void;
   equilibre: Equilibre;
 }
 
 export interface RecentEventsTableProps {
   events: PoliticalEvent[];
 }
+
+export type ImportanceType = 'low' | 'medium' | 'high' | 'critical' | 'normale' | 'importante' | 'critique' | 'mineure' | string;

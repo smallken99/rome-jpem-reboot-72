@@ -8,7 +8,7 @@ import { WorkersTab } from './property-management/WorkersTab';
 import { UpgradesTab } from './property-management/UpgradesTab';
 import { PropertyHeader } from './property-management/PropertyHeader';
 import { useBuildingManagement } from '@/hooks/useBuildingManagement';
-import { OwnedBuilding, PropertyUpgrade } from '@/types/property';
+import { OwnedBuilding, PropertyUpgrade } from '@/components/proprietes/types/property';
 import { toast } from 'sonner';
 import { v4 as uuidv4 } from 'uuid';
 import { BuildingType } from '@/components/proprietes/types/buildingTypes';
@@ -21,8 +21,6 @@ export const PropertyManagement: React.FC = () => {
   const { 
     buildings,
     sellBuilding,
-    addBuilding,
-    setSelectedBuilding,
     updateBuildingCondition
   } = useBuildingManagement();
   
@@ -30,9 +28,8 @@ export const PropertyManagement: React.FC = () => {
   
   // Complete the building with all required properties for the OwnedBuilding type
   const building: OwnedBuilding | null = buildingWithType ? {
-    ...buildingWithType,
-    buildingId: buildingWithType.id, // ensure buildingId is set correctly
     id: buildingWithType.id,
+    buildingId: buildingWithType.id,
     name: buildingWithType.name || '',
     buildingType: buildingWithType.buildingType || buildingWithType.type || '',
     type: buildingWithType.type || BuildingType.OTHER,
@@ -83,7 +80,12 @@ export const PropertyManagement: React.FC = () => {
       toast.success(`Niveau d'entretien mis à jour pour ${building.name}`);
     };
     
-    updateMaintenanceLevel(building.id, level);
+    // Update to comply with the function signature
+    const adapter = (buildingId: string, level: number) => {
+      updateMaintenanceLevel(buildingId, level);
+    };
+    
+    adapter(building.id, level);
   };
 
   const handleRenovateBuilding = () => {
@@ -98,13 +100,18 @@ export const PropertyManagement: React.FC = () => {
       toast.success(`Personnel mis à jour pour ${building.name}`);
     };
     
-    assignWorkers(building.id, count);
+    // Update to comply with the function signature
+    const adapter = (buildingId: string, workers: number) => {
+      assignWorkers(buildingId, workers);
+    };
+    
+    adapter(building.id, count);
   };
 
   return (
     <div className="property-management space-y-6">
       <PropertyHeader 
-        building={building} 
+        building={building as any} 
         onSell={handleSellBuilding} 
       />
       
@@ -117,12 +124,12 @@ export const PropertyManagement: React.FC = () => {
         </TabsList>
         
         <TabsContent value="overview">
-          <OverviewTab building={building} />
+          <OverviewTab building={building as any} />
         </TabsContent>
         
         <TabsContent value="maintenance">
           <MaintenanceTab 
-            building={building} 
+            building={building as any} 
             updateMaintenanceLevel={handleUpdateMaintenanceLevel}
             updateSecurityLevel={() => {}}
             renovateBuilding={handleRenovateBuilding}
@@ -132,13 +139,13 @@ export const PropertyManagement: React.FC = () => {
         
         <TabsContent value="workers">
           <WorkersTab 
-            building={building} 
+            building={building as any} 
             updateWorkers={handleUpdateWorkers} 
           />
         </TabsContent>
         
         <TabsContent value="upgrades">
-          <UpgradesTab building={building} />
+          <UpgradesTab building={building as any} />
         </TabsContent>
       </Tabs>
     </div>

@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -10,6 +11,7 @@ import {
   ClientsTable, 
   useClientManagement 
 } from './components/clients';
+import { SenateurJouable } from './types/senateurs';
 
 export const GestionClients = () => {
   const {
@@ -72,7 +74,7 @@ export const GestionClients = () => {
         <CardContent>
           <ClientsTable
             clients={filteredClients}
-            senateurs={senateurs}
+            senateurs={senateurs as SenateurJouable[]}
             onEdit={handleEditClient}
             onAdvancedEdit={handleAdvancedEdit}
             onManageCompetences={handleCompetenceManager}

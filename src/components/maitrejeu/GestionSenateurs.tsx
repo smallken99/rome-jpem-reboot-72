@@ -15,7 +15,7 @@ import {
 import { SenateurCard } from './components/SenateurCard';
 import { SenateurModal } from './components/senateur-modal';
 import { useMaitreJeu } from './context/MaitreJeuContext';
-import { SenateurJouable } from './types';
+import { SenateurJouable } from './types/senateurs';
 import { Plus, Search } from 'lucide-react';
 
 export const GestionSenateurs: React.FC = () => {
@@ -63,15 +63,35 @@ export const GestionSenateurs: React.FC = () => {
 
   const handleSaveSenateurModal = (senateur: SenateurJouable) => {
     if (isCreateMode) {
-      // Générer un ID unique pour le nouveau sénateur
-      const newSenateur = {
+      // Créer un nouveau senateur avec des valeurs par défaut pour les champs requis
+      const newSenateur: SenateurJouable = {
         ...senateur,
         id: Date.now().toString(),
+        famille: senateur.famille || 'Inconnue',
+        actif: senateur.actif !== undefined ? senateur.actif : true,
+        faction: senateur.faction || 'Inconnue',
+        clientele: senateur.clientele || 0,
+        allies: senateur.allies || [],
+        ennemis: senateur.ennemis || [],
+        gender: senateur.gender || 'male'
       };
+      
       setSenateurs([...senateurs, newSenateur]);
     } else {
       // Mettre à jour un sénateur existant
-      setSenateurs(senateurs.map(s => s.id === senateur.id ? senateur : s));
+      setSenateurs(
+        senateurs.map(s => s.id === senateur.id ? {
+          ...senateur,
+          // Assurez-vous que les champs requis sont présents
+          famille: senateur.famille || 'Inconnue',
+          actif: senateur.actif !== undefined ? senateur.actif : true,
+          faction: senateur.faction || 'Inconnue',
+          clientele: senateur.clientele || 0,
+          allies: senateur.allies || [],
+          ennemis: senateur.ennemis || [],
+          gender: senateur.gender || 'male'
+        } : s)
+      );
     }
     setIsModalOpen(false);
   };

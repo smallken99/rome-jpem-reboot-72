@@ -1,87 +1,57 @@
 
-// TYPES DE CLIENTS
+import { GameDate } from './common';
 
 export interface Client {
   id: string;
   name: string;
-  type: string;
-  subType: string;
-  location: string;
-  loyalty: string;
-  influences: {
-    political: number;
-    popular: number;
-    religious: number;
-  };
-  specialAbilities: string[];
-  competencePoints: number;
-  backstory: string;
-  activeStatus: 'active' | 'inactive' | 'probation';
-  relationshipLevel: number;
-  lastInteraction: string;
-  senateurId?: string | null;
-  assignedToSenateurId?: string | null;
+  age: number;
+  status: 'active' | 'inactive' | 'probation';
+  type: 'standard' | 'premium' | 'exclusive';
+  loyalty: number;
+  influence: number;
+  income: number;
+  cost: number;
+  assignedTo: string | null;
+  assignedToName?: string;
+  description?: string;
+  skills?: string[];
+  origin?: string;
+  occupation?: string;
+  createdAt: string;
+  notes?: string;
+  lastInteraction?: GameDate | string;
+  competences?: Record<string, number>;
 }
 
-export type ClientCreationData = Omit<Client, 'id'>;
+export interface ClientCreationData {
+  name: string;
+  age: number;
+  status: 'active' | 'inactive' | 'probation';
+  type: 'standard' | 'premium' | 'exclusive';
+  loyalty: number;
+  influence: number;
+  income: number;
+  cost: number;
+  assignedTo: string | null;
+  assignedToName?: string;
+  description?: string;
+  skills?: string[];
+  origin?: string;
+  occupation?: string;
+  notes?: string;
+  competences?: Record<string, number>;
+}
 
-// Types pour le filtrage des clients
 export interface ClientFilter {
-  type?: string;
-  loyalty?: string;
-  status?: string;
-  location?: string;
-  assignedTo?: string | null;
-  assignedOnly?: boolean;
-  searchTerm?: string;
+  searchTerm: string;
+  type: 'all' | 'standard' | 'premium' | 'exclusive';
+  status: 'all' | 'active' | 'inactive' | 'probation';
+  assignedTo: 'all' | 'assigned' | 'unassigned' | string;
+  minInfluence?: number;
+  minLoyalty?: number;
 }
 
-// Types pour le tri des clients
-export type ClientSort = {
-  field: keyof Client | '';
+export interface ClientSort {
+  field: keyof Client;
   direction: 'asc' | 'desc';
-};
-
-// Export types constants
-export const CLIENT_TYPES = [
-  'artisan_commercant',
-  'religieux',
-  'politicien',
-  'proprietaire',
-  'pegre',
-  'militaire',
-  'etranger'
-] as const;
-
-export type ClientType = typeof CLIENT_TYPES[number];
-
-export const CLIENT_LOCATIONS = [
-  'Forum',
-  'Capitole',
-  'Palatin',
-  'Subure',
-  'Champs de Mars',
-  'Velia',
-  'Quirinal',
-  'Aventin',
-  'Port d\'Ostie'
-] as const;
-
-export type ClientLocation = typeof CLIENT_LOCATIONS[number];
-
-export const CLIENT_LOYALTIES = [
-  'faible',
-  'moyenne',
-  'forte',
-  'totale'
-] as const;
-
-export type ClientLoyalty = typeof CLIENT_LOYALTIES[number];
-
-export const CLIENT_STATUSES = [
-  'active',
-  'inactive',
-  'probation'
-] as const;
-
-export type ClientStatus = typeof CLIENT_STATUSES[number];
+}

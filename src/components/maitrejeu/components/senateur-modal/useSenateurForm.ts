@@ -4,6 +4,7 @@ import { SenateurJouable } from '../../types/senateurs';
 
 const defaultSenateur: SenateurJouable = {
   id: '',
+  name: '',
   nom: '',
   prenom: '',
   gens: '',
@@ -17,13 +18,15 @@ const defaultSenateur: SenateurJouable = {
   militaire: 0,
   piete: 0,
   eloquence: 0,
-  competences: {
-    diplomatie: 1,
-    guerre: 1,
-    administration: 1,
-    eloquence: 1
-  },
+  competences: {},
   famille: '',
+  faction: 'Neutral',
+  clientele: 0,
+  prestige: 0,
+  actif: true,
+  allies: [],
+  ennemis: [],
+  gender: 'male',
   fonction: '',
   appartenance: 'Neutral'
 };

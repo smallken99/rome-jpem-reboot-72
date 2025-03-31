@@ -14,6 +14,12 @@ export interface PropertyUpgrade {
     minBuildingValue?: number;
     minOwnerPrestige?: number;
     otherUpgrades?: string[];
+    buildingLevel?: number;
+    buildingCondition?: number;
+    minIncome?: number;
+    value?: number;
+    previousUpgrade?: string;
+    upgrades?: string[];
   };
   installed: boolean;
   installDate?: Date;
@@ -22,6 +28,7 @@ export interface PropertyUpgrade {
     value: number;
     description: string;
   }>;
+  buildingType?: string;
 }
 
 // Define the owned building interface

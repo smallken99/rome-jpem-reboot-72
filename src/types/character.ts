@@ -64,6 +64,9 @@ export interface Character {
   statut?: string;
   nom?: string;
   prenom?: string;
+  faction?: string;
+  famille?: string;
+  actif?: boolean | string;
   
   // Birth tracking
   lastChildBirthYear?: number;
@@ -91,15 +94,15 @@ export interface EducationInfo {
 // Interface pour les sénateurs jouables
 export interface SenateurJouable extends Omit<Character, 'stats'> {
   faction: string;
-  famille: string; // Made required to match the maitrejeu/types/senateurs.ts definition
-  actif: boolean | string; // Made required to match the maitrejeu/types/senateurs.ts definition
+  famille: string;
+  actif: boolean | string;
   influence: number;
   prestige: number;
   richesse: number;
   clientele: number;
   allies: string[];
   ennemis: string[];
-  gender: 'male' | 'female'; // Explicitly include gender to fix type errors
+  gender: 'male' | 'female';
   stats?: {
     popularity: number | CharacterStat;
     oratory: number | CharacterStat;
@@ -109,4 +112,6 @@ export interface SenateurJouable extends Omit<Character, 'stats'> {
   
   // Add properties for MaitreJeu compatibility
   competences?: string[] | Record<string, any>;
+  nom: string;
+  prenom: string;
 }

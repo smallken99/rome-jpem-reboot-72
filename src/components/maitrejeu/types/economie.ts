@@ -93,4 +93,34 @@ export interface EconomicFactors {
   publicWorks: number;
   militaryExpenses: number;
   generalProsperity: number;
+  
+  // Additional fields for compatibility
+  taxCollection?: number;
+  tradeRevenue?: number;
+  provinceRevenue?: number;
+  warSpoilsRevenue?: number;
+  publicWorksExpense?: number;
+  religiousCeremonyExpense?: number;
+  adminExpense?: number;
+  currentYear?: number;
+}
+
+// For compatibility with EconomieModal.tsx
+export type EconomieType = 'income' | 'expense' | 'tax' | 'tribute' | 'gift' | 'other';
+export type EconomieCategory = 'government' | 'military' | 'trade' | 'agriculture' | 'donations' | 'other';
+export type EconomieSource = 'treasury' | 'province' | 'senateur' | 'external' | 'other';
+
+export interface EconomieModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+  onSave: (record: EconomieCreationData) => void;
+  initialData?: Partial<EconomieCreationData>;
+  types?: EconomieType[];
+  categories?: EconomieCategory[];
+  sources?: EconomieSource[];
+}
+
+export interface EconomieStatsProps {
+  treasury: TreasuryStatus;
+  economicFactors: EconomicFactors;
 }
