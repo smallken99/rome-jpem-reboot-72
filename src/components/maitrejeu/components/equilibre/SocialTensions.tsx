@@ -270,7 +270,7 @@ export const SocialTensions = () => {
 // Calculate tension for patricians
 function calculatePatricienTension(equilibre: any): number {
   // Lower patricien value means higher tension
-  const baseTension = 100 - equilibre.social.patriciens;
+  const baseTension = 100 - (equilibre.social?.patriciens || 50);
   
   // Economic factors influence patricians strongly
   const economyValue = getEconomicStability(equilibre);
@@ -280,7 +280,7 @@ function calculatePatricienTension(equilibre: any): number {
   if (economyValue < 50) tension += 10;
   
   // Optimates faction strength reduces tension
-  if (equilibre.optimates > 50) tension -= 10;
+  if ((equilibre.optimates || 0) > 50) tension -= 10;
   
   return Math.max(0, Math.min(100, tension));
 }
@@ -288,7 +288,7 @@ function calculatePatricienTension(equilibre: any): number {
 // Calculate tension for plebeians
 function calculatePlebeienTension(equilibre: any): number {
   // Lower plebeien value means higher tension
-  const baseTension = 100 - equilibre.social.plebeiens;
+  const baseTension = 100 - (equilibre.social?.plebeiens || 50);
   
   // Economic factors influence plebeians more than anything
   const economyValue = getEconomicStability(equilibre);
@@ -298,7 +298,7 @@ function calculatePlebeienTension(equilibre: any): number {
   if (economyValue < 50) tension += 15;
   
   // Populares faction strength reduces tension
-  if ((equilibre.populaires || equilibre.populares) > 50) tension -= 15;
+  if ((equilibre.populaires || equilibre.populares || 0) > 50) tension -= 15;
   
   return Math.max(0, Math.min(100, tension));
 }
@@ -306,11 +306,11 @@ function calculatePlebeienTension(equilibre: any): number {
 // Calculate tension for slaves
 function calculateEsclaveTension(equilibre: any): number {
   // Lower esclaves value means higher tension
-  const baseTension = 100 - equilibre.social.esclaves;
+  const baseTension = 100 - (equilibre.social?.esclaves || 50);
   
   // Military strength reduces slave tension
   const militaryStrength = 
-    (equilibre.militaire.effectifs + equilibre.militaire.discipline) / 2;
+    (equilibre.militaire?.effectifs || 50) + (equilibre.militaire?.discipline || 50) / 2;
   
   let tension = baseTension;
   
