@@ -11,6 +11,7 @@ export const createHistoireOperations = (
       id: uuidv4()
     };
     setHistoireEntries(prev => [...prev, newEntry]);
+    return newEntry; // Return the newly created entry
   };
 
   return {

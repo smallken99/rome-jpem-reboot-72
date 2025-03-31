@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { useMaitreJeu } from '../context/MaitreJeuContext';
 import { 
@@ -11,8 +10,8 @@ import {
   PublicBuildingData
 } from '../types/batiments';
 import { useToast } from '@/components/ui/use-toast';
-import { generateId } from '../types/common';
-import { EconomieCategory } from '../types/economie';
+import { v4 as uuidv4 } from 'uuid';
+import { ECONOMIE_CATEGORIES } from '../types/economie';
 
 export const useBatimentsManagement = () => {
   // État du MaitreJeu
@@ -45,7 +44,7 @@ export const useBatimentsManagement = () => {
   // Méthodes CRUD pour les bâtiments
   const addBuilding = (buildingData: BuildingCreationData) => {
     const newBuilding: Building = {
-      id: generateId(),
+      id: uuidv4(),
       ...buildingData,
       status: buildingData.status || 'good'
     };
@@ -92,7 +91,7 @@ export const useBatimentsManagement = () => {
   // Méthodes pour les projets de construction
   const addConstructionProject = (projectData: Omit<ConstructionProject, "id" | "approved" | "progress">) => {
     const newProject: ConstructionProject = {
-      id: generateId(),
+      id: uuidv4(),
       ...projectData,
       approved: false,
       progress: 0
@@ -144,17 +143,17 @@ export const useBatimentsManagement = () => {
   const completeProject = (project: ConstructionProject) => {
     // Créer un nouveau bâtiment à partir du projet terminé
     const newBuilding: Building = {
-      id: generateId(),
+      id: uuidv4(),
       name: project.buildingName || project.name,
       type: project.buildingType,
       location: project.location,
       status: 'good',
       constructionYear: currentYear,
       description: project.description,
-      cost: project.estimatedCost, // Simplified for now to avoid type errors
-      maintenanceCost: Math.round(project.estimatedCost * 0.05), // 5% du coût initial
-      revenue: 0, // À définir selon le type de bâtiment
-      capacity: 0, // À définir selon le type de bâtiment
+      cost: project.estimatedCost,
+      maintenanceCost: Math.round(project.estimatedCost * 0.05),
+      revenue: 0,
+      capacity: 0,
       owner: 'république'
     };
     
@@ -173,7 +172,7 @@ export const useBatimentsManagement = () => {
   // Méthodes pour la maintenance des bâtiments
   const addMaintenanceTask = (taskData: Omit<MaintenanceTask, "id">) => {
     const newTask: MaintenanceTask = {
-      id: generateId(),
+      id: uuidv4(),
       ...taskData
     };
     
@@ -225,7 +224,7 @@ export const useBatimentsManagement = () => {
     
     // Enregistrer la maintenance
     const maintenanceRecord: MaintenanceRecord = {
-      id: generateId(),
+      id: uuidv4(),
       buildingId: building.id,
       date: { year: currentYear, season: currentSeason },
       cost,
@@ -257,7 +256,7 @@ export const useBatimentsManagement = () => {
     if (!building) return;
     
     const revenueRecord: BuildingRevenueRecord = {
-      id: generateId(),
+      id: uuidv4(),
       buildingId,
       year: currentYear,
       season: currentSeason,
@@ -281,11 +280,11 @@ export const useBatimentsManagement = () => {
   
   // Méthodes auxiliaires
   const addConstructionExpense = (buildingOrProject: Building | ConstructionProject) => {
-    // Create the record with the correct EconomieCategory type
+    // Create the record with the correct ECONOMIE_CATEGORIES type
     const record = {
-      id: generateId(),
+      id: uuidv4(),
       amount: 'cost' in buildingOrProject ? buildingOrProject.cost : buildingOrProject.estimatedCost,
-      category: 'Construction' as EconomieCategory,
+      category: ECONOMIE_CATEGORIES.CONSTRUCTION,
       description: `Construction de ${buildingOrProject.name}`,
       date: { year: currentYear, season: currentSeason },
       type: 'expense' as const,
@@ -309,11 +308,11 @@ export const useBatimentsManagement = () => {
   };
   
   const addMaintenanceExpense = (building: Building, cost: number) => {
-    // Create the record with the correct EconomieCategory type
+    // Create the record with the correct ECONOMIE_CATEGORIES type
     const record = {
-      id: generateId(),
+      id: uuidv4(),
       amount: cost,
-      category: 'Maintenance' as EconomieCategory,
+      category: ECONOMIE_CATEGORIES.MAINTENANCE,
       description: `Maintenance de ${building.name}`,
       date: { year: currentYear, season: currentSeason },
       type: 'expense' as const,
@@ -337,11 +336,11 @@ export const useBatimentsManagement = () => {
   };
   
   const addBuildingRevenueIncome = (building: Building, amount: number) => {
-    // Create the record with the correct EconomieCategory type
+    // Create the record with the correct ECONOMIE_CATEGORIES type
     const record = {
-      id: generateId(),
+      id: uuidv4(),
       amount,
-      category: 'Commerce' as EconomieCategory,
+      category: ECONOMIE_CATEGORIES.COMMERCE,
       description: `Revenus de ${building.name}`,
       date: { year: currentYear, season: currentSeason },
       type: 'income' as const,
