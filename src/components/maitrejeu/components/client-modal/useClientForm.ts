@@ -1,6 +1,6 @@
 
 import { useState, useEffect } from 'react';
-import { ClientCreationData, Client, ClientInfluences } from '../../types/clients';
+import { ClientCreationData, Client, ClientInfluences, ClientType } from '../../types/clients';
 
 export const useClientForm = (client: Client | null) => {
   const isEditMode = !!client;
@@ -24,7 +24,7 @@ export const useClientForm = (client: Client | null) => {
     },
     specialAbilities: [],
     competencePoints: 3,
-    competences: [], // Add the competences field with a default empty array
+    competences: [], // Maintenu comme tableau vide par défaut
     backstory: '',
     activeStatus: 'active',
     relationshipLevel: 1,
@@ -45,7 +45,7 @@ export const useClientForm = (client: Client | null) => {
         influence: client.influence || 1,
         income: client.income || 0,
         cost: client.cost || 0,
-        assignedTo: client.assignedTo,
+        assignedTo: client.assignedTo || null,
         influences: client.influences || {
           political: 1,
           popular: 1,
@@ -53,7 +53,7 @@ export const useClientForm = (client: Client | null) => {
         },
         specialAbilities: client.specialAbility ? [client.specialAbility] : [],
         competencePoints: client.competencePoints || 3,
-        competences: client.competences || [],  // Copy the competences
+        competences: client.competences || [],  // Utilisation de l'opérateur || pour fournir un tableau vide
         backstory: client.backstory || '',
         activeStatus: client.activeStatus || 'active',
         relationshipLevel: client.relationshipLevel || 1,

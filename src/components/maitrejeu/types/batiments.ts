@@ -1,76 +1,25 @@
 
-import { GameDate } from './common';
+export type BuildingType = 'temple' | 'villa' | 'domus' | 'insula' | 'forum' | 'baths' | 'theater' | 'amphitheater' | 'senate' | 'basilica' | 'market' | 'warehouse' | 'workshop' | 'port' | 'aqueduct' | 'road' | 'bridge' | 'military' | 'other';
 
-export type BuildingType = 'temple' | 'forum' | 'market' | 'villa' | 'domus' | 'insula' | 'warehouse' | 'baths' | 'theater' | 'port' | 'aqueduct' | 'road' | 'wall' | 'barracks' | 'palace' | 'senate' | 'other' | 'basilica' | 'amphitheater' | 'circus' | 'bath' | 'bridge';
+export type BuildingStatus = 'excellent' | 'good' | 'fair' | 'poor' | 'ruins' | 'construction' | 'renovation';
 
-export type BuildingStatus = 'excellent' | 'good' | 'damaged' | 'poor' | 'ruined' | 'under_construction' | 'average';
-
-export type BuildingOwner = 'république' | 'private' | 'temple' | 'military';
-
-export type MaintenanceLevel = 'minor' | 'moderate' | 'major' | 'excellent' | 'minimal' | 'standard';
-
-export type BuildingPriority = 'low' | 'medium' | 'high' | 'critical';
+export type BuildingPriority = 'high' | 'medium' | 'low' | 'critical';
 
 export interface Building {
   id: string;
   name: string;
   type: BuildingType;
   location: string;
-  status: BuildingStatus;
-  constructionYear: number;
-  description?: string;
-  cost: number;
-  maintenanceCost: number;
-  revenue: number;
-  capacity: number;
-  owner: BuildingOwner;
-  lastMaintenance?: GameDate;
-  condition?: string;
-  maintenance?: number;
-  size?: number;
-  maxWorkers?: number;
-  securityLevel?: number;
-  maintenanceLevel?: MaintenanceLevel;
-  maintenanceEnabled?: boolean;
-  buildingType?: string;
-  value?: number;
-  income?: number;
+  value: number;
+  maintenance: number;
+  maintenanceCost: number; // Champ manquant ajouté ici
+  condition: number;
   workers?: number;
-  purchaseDate?: Date;
-}
-
-export interface BuildingCreationData {
-  name: string;
-  type: BuildingType;
-  location: string;
+  securityLevel?: number;
+  maintenanceLevel?: number;
   status?: BuildingStatus;
-  constructionYear: number;
-  description?: string;
-  cost: number;
-  maintenanceCost: number;
-  revenue: number;
-  capacity: number;
-  owner: BuildingOwner;
-}
-
-export interface ConstructionProject {
-  id: string;
-  name: string;
-  buildingName?: string;
-  buildingType?: BuildingType;
-  location: string;
-  description: string;
-  estimatedCost: number;
-  expectedCompletionYear: number;
-  startDate?: GameDate;
-  sponsor?: string;
-  approved: boolean;
-  progress: number;
-  estimatedCompletionDate?: GameDate;
-  duration?: number;
-  cost?: number;
-  totalCost?: number;
-  workers?: number; // Ajout de cette propriété
+  upgrades?: any[];
+  income?: number;
 }
 
 export interface MaintenanceTask {
@@ -80,61 +29,33 @@ export interface MaintenanceTask {
   description: string;
   estimatedCost: number;
   priority: BuildingPriority;
-  deadline?: GameDate;
-  assignedTeam?: string;
-  status: 'pending' | 'in_progress' | 'completed' | 'delayed' | 'scheduled';
-  notes?: string;
-  startDate?: GameDate;
+  deadline: {
+    year: number;
+    season: string;
+  };
+  status: string;
 }
 
-export interface MaintenanceRecord {
-  id: string;
-  buildingId: string;
-  date: GameDate;
-  cost: number;
-  description: string;
-  performedBy: string;
-  repairLevel: MaintenanceLevel;
-  previousStatus: BuildingStatus;
-  newStatus: BuildingStatus;
-}
-
-export interface BuildingRevenueRecord {
-  id: string;
-  buildingId: string;
-  year: number;
-  season: string;
-  amount: number;
-  source: string;
-  taxRate: number;
-  collectedBy: string;
-}
-
-export interface PublicBuildingData {
+export interface ConstructionProject {
   id: string;
   name: string;
   type: BuildingType;
-  description: string;
-  constructionCost: number;
-  constructionTime: number;
-  maintenanceCost: number;
-  revenueGeneration: number;
-  effects: Record<string, number>;
-  unlockRequirements?: Record<string, any>;
-  isUnlocked: boolean;
+  location: string;
+  cost: number;
+  progress: number;
+  startDate: any;
+  estimatedEndDate: any;
+  status: string;
+  responsibleMagistrate?: string;
+  workers: number;
+  description?: string;
 }
 
-// Interfaces pour les props de composants
-export interface BuildingsListProps {
-  buildings?: Building[];
-  onEdit: (id: string) => void;
-  onDelete?: (id: string) => void;
-  onSelect?: (id: string) => void;
-}
-
-export interface PublicBuildingModalProps {
-  isOpen: boolean;
-  onClose: () => void;
-  onSave: (data: BuildingCreationData) => void;
-  building?: Building;
+export interface BuildingFilter {
+  types: string[];
+  locations: string[];
+  status: string;
+  minRevenue: number;
+  maxMaintenance: number;
+  searchTerm: string;
 }

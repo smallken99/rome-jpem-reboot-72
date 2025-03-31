@@ -23,7 +23,9 @@ export enum ECONOMIE_CATEGORIES {
   TRADE = 'trade',
   DIPLOMACY = 'diplomacy',
   OTHER = 'other',
-  MAINTENANCE = 'maintenance'
+  MAINTENANCE = 'maintenance',
+  IMPOTS = 'Impôts',
+  COMMERCE = 'Commerce'
 }
 
 export enum ECONOMIE_SOURCE {
@@ -52,6 +54,9 @@ export interface EconomieRecord {
   affectedProvinceId?: string;
   affectedSenateurId?: string;
   tags?: string[];
+  // Champs supplémentaires pour résoudre les erreurs
+  createdAt?: string;
+  updatedAt?: string;
 }
 
 export interface EconomieCreationData {
@@ -67,6 +72,8 @@ export interface EconomieCreationData {
   affectedProvinceId?: string;
   affectedSenateurId?: string;
   tags?: string[];
+  isRecurring?: boolean; // Pour la compatibilité
+  approved?: boolean; // Pour la compatibilité
 }
 
 export interface EconomieFilter {
@@ -85,6 +92,9 @@ export interface EconomieFilter {
   };
   showRecurring?: boolean;
   showApproved?: boolean;
+  // Pour compatibilité avec le code existant
+  type?: ECONOMIE_TYPES | 'all';
+  categories?: ECONOMIE_CATEGORIES[] | ECONOMIE_CATEGORIES | 'all';
 }
 
 export interface EconomieSort {
