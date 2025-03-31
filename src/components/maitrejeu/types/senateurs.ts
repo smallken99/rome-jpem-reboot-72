@@ -1,6 +1,4 @@
 
-import { Character } from '@/types/character';
-
 export interface SenateurJouable {
   id: string;
   name: string;
@@ -30,4 +28,5 @@ export interface SenateurJouable {
   allies: string[];
   ennemis: string[];
   stats?: any;
+  roles?: string[]; // Add this for compatibility
 }

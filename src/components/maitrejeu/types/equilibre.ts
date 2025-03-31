@@ -6,7 +6,7 @@ export interface Equilibre {
     moderates: number;
   };
   populaires: number;
-  populares: number;
+  populaires: number;
   optimates: number;
   moderates: number;
   
@@ -26,6 +26,7 @@ export interface Equilibre {
     cohesion: number;
   };
   plébéiens?: number; // Alias for backward compatibility
+  patriciens?: number; // Additional property for direct access
   
   // Military equilibrium
   militaire: {
@@ -42,18 +43,35 @@ export interface Equilibre {
     superstition: number;
   };
   
-  // Other properties
+  // Other stability factors
+  stability?: number;
+  armée?: number;
+  loyauté?: number;
+  morale?: number;
   facteurJuridique?: number;
-  historique?: any[];
-  risques?: Record<string, number>;
+  
+  // History and risks
+  historique?: HistoriqueEntry[];
+  risques?: Record<string, Risk>;
 }
 
-export enum RiskType {
-  REVOLTE = 'revolte',
-  GUERRE = 'guerre',
-  POLITIQUE = 'politique',
-  ECONOMIQUE = 'economique',
-  RELIGIEUX = 'religieux'
+export type RiskType = 'revolte' | 'guerre' | 'politique' | 'economique' | 'religieux' | 'military' | 'political' | 'economic' | 'social' | 'religious' | string;
+
+export interface Risk {
+  id: string;
+  type: RiskType;
+  name: string;
+  description: string;
+  severity: number;
+  createdAt: string;
+  active: boolean;
+  impact: Record<string, any>;
+}
+
+export interface HistoriqueEntry {
+  date: string | Date;
+  event: string;
+  values: Record<string, number>;
 }
 
 export interface PoliticalEvent {

@@ -38,10 +38,13 @@ export interface EconomieFilter {
   source?: string;
   startDate?: string;
   endDate?: string;
-  type?: 'income' | 'expense' | 'all';
+  type?: 'income' | 'all' | 'expense';
   minAmount?: number;
   maxAmount?: number;
   searchTerm?: string;
+  categories?: string[]; // Add for backward compatibility
+  affectedEntity?: string; // Add for backward compatibility
+  dateRange?: [string, string]; // Add for backward compatibility
 }
 
 export interface EconomieSort {
@@ -113,4 +116,9 @@ export enum EconomieSource {
   PRIVATE = 'private',
   FOREIGN = 'foreign',
   OTHER = 'other'
+}
+
+export interface EconomieStatsProps {
+  treasury: TreasuryStatus;
+  factors: EconomicFactors;
 }

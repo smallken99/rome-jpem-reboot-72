@@ -28,7 +28,9 @@ export type GamePhase =
   | 'SENATE'
   | 'EVENEMENT'
   | 'ADMINISTRATION'
-  | 'senate';
+  | 'senate'
+  | 'ELECTION'
+  | 'SENAT';
 
 export enum ImportanceType {
   MINOR = 'minor',
@@ -60,4 +62,27 @@ export function dateToGameDate(date: Date): GameDate {
     year: date.getFullYear(),
     season
   };
+}
+
+// Add missing utility functions
+export function formatAnyDate(date: GameDate | Date): string {
+  if (isGameDate(date)) {
+    return `${date.year} (${date.season})`;
+  } else {
+    return date.toLocaleDateString();
+  }
+}
+
+export function isGameDate(date: any): date is GameDate {
+  return date && typeof date === 'object' && 
+    typeof date.year === 'number' && 
+    typeof date.season === 'string';
+}
+
+export function parseStringToGameDate(dateString: string): GameDate {
+  const parts = dateString.split(' ');
+  const year = parseInt(parts[0], 10);
+  const season = parts[1].replace(/[()]/g, '') as Season;
+  
+  return { year, season };
 }
