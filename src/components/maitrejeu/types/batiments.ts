@@ -18,7 +18,7 @@ export interface Building {
   location: string;
   status: BuildingStatus;
   constructionYear: number;
-  description: string;
+  description?: string;
   cost: number;
   maintenanceCost: number;
   revenue: number;
@@ -30,7 +30,7 @@ export interface Building {
   size?: number;
   maxWorkers?: number;
   securityLevel?: number;
-  maintenanceLevel?: number;
+  maintenanceLevel?: MaintenanceLevel;
   maintenanceEnabled?: boolean;
   buildingType?: string;
   value?: number;
@@ -45,7 +45,7 @@ export interface BuildingCreationData {
   location: string;
   status?: BuildingStatus;
   constructionYear: number;
-  description: string;
+  description?: string;
   cost: number;
   maintenanceCost: number;
   revenue: number;

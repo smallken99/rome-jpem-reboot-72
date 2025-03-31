@@ -1,5 +1,5 @@
 
-export type Season = 'Ver' | 'Aestas' | 'Autumnus' | 'Hiems' | 'SPRING' | 'SUMMER' | 'AUTUMN' | 'WINTER';
+export type Season = 'Ver' | 'Aestas' | 'Autumnus' | 'Hiems' | 'SPRING' | 'SUMMER' | 'AUTUMN' | 'WINTER' | 'Spring' | 'Summer' | 'Autumn' | 'Winter' | 'spring' | 'summer' | 'autumn' | 'fall' | 'winter';
 
 export type GamePhase = 
   'normal' | 'SENATE' | 'ACTIONS' | 'ECONOMY' | 'EVENTS' | 'DIPLOMACY' | 'MILITARY' |
@@ -30,11 +30,7 @@ export const parseStringToGameDate = (dateString: string): GameDate => {
     const year = parseInt(parts[0], 10);
     let season = parts[1] as Season;
     
-    // Normalize season if needed
-    if (season === 'Spring' || season === 'spring') season = 'SPRING';
-    if (season === 'Summer' || season === 'summer') season = 'SUMMER';
-    if (season === 'Autumn' || season === 'autumn' || season === 'Fall' || season === 'fall') season = 'AUTUMN';
-    if (season === 'Winter' || season === 'winter') season = 'WINTER';
+    // No need to normalize here since we've broadened the Season type
     
     if (!isNaN(year)) {
       return {
@@ -85,4 +81,42 @@ export const dateToGameDate = (date: Date): GameDate => {
   else season = 'WINTER';
   
   return { year, season };
+};
+
+/**
+ * Normalize a season string to a consistent format
+ * @param season Season string to normalize
+ * @returns Normalized season string
+ */
+export const normalizeSeasonString = (season: string): Season => {
+  season = season.toLowerCase();
+  if (season === 'spring' || season === 'ver') return 'SPRING';
+  if (season === 'summer' || season === 'aestas') return 'SUMMER';
+  if (season === 'autumn' || season === 'fall' || season === 'autumnus') return 'AUTUMN';
+  if (season === 'winter' || season === 'hiems') return 'WINTER';
+  return 'SPRING'; // Default
+};
+
+/**
+ * Convert between different season formats
+ * @param season Season to convert
+ * @param targetFormat Desired format ('roman', 'uppercase', 'lowercase')
+ * @returns Converted season
+ */
+export const convertSeason = (season: Season, targetFormat: 'roman' | 'uppercase' | 'lowercase'): Season => {
+  const normalized = normalizeSeasonString(season);
+  
+  if (targetFormat === 'roman') {
+    if (normalized === 'SPRING') return 'Ver';
+    if (normalized === 'SUMMER') return 'Aestas';
+    if (normalized === 'AUTUMN') return 'Autumnus';
+    if (normalized === 'WINTER') return 'Hiems';
+  } else if (targetFormat === 'lowercase') {
+    if (normalized === 'SPRING') return 'spring';
+    if (normalized === 'SUMMER') return 'summer';
+    if (normalized === 'AUTUMN') return 'fall';
+    if (normalized === 'WINTER') return 'winter';
+  }
+  
+  return normalized; // uppercase is the normalized format
 };

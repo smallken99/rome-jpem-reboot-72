@@ -24,6 +24,7 @@ export const useClientForm = (client: Client | null) => {
     },
     specialAbilities: [],
     competencePoints: 3,
+    competences: [], // Add the competences field with a default empty array
     backstory: '',
     activeStatus: 'active',
     relationshipLevel: 1,
@@ -51,7 +52,8 @@ export const useClientForm = (client: Client | null) => {
           religious: 1
         },
         specialAbilities: client.specialAbility ? [client.specialAbility] : [],
-        competencePoints: client.competences ? client.competences.length : 3,
+        competencePoints: client.competencePoints || 3,
+        competences: client.competences || [],  // Copy the competences
         backstory: client.backstory || '',
         activeStatus: client.activeStatus || 'active',
         relationshipLevel: client.relationshipLevel || 1,
@@ -88,11 +90,33 @@ export const useClientForm = (client: Client | null) => {
     }));
   };
   
+  const handleAddCompetence = (competence: string) => {
+    if (!competence) return;
+    
+    setFormData(prev => ({
+      ...prev,
+      competences: [...(prev.competences || []), competence]
+    }));
+  };
+  
+  const handleRemoveCompetence = (index: number) => {
+    setFormData(prev => {
+      const newCompetences = [...(prev.competences || [])];
+      newCompetences.splice(index, 1);
+      return {
+        ...prev,
+        competences: newCompetences
+      };
+    });
+  };
+  
   return {
     isEditMode,
     formData,
     handleChange,
     handleSelectChange,
-    handleInfluenceChange
+    handleInfluenceChange,
+    handleAddCompetence,
+    handleRemoveCompetence
   };
 };

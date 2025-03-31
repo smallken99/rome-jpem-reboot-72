@@ -1,97 +1,148 @@
-
 import React from 'react';
-import { HistoireEntry } from '../types/histoire';
-import { CalendarDays, BookText, Flag, ScrollText } from 'lucide-react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { VerticalTimeline, VerticalTimelineElement } from 'react-vertical-timeline-component';
+import 'react-vertical-timeline-component/style.min.css';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Separator } from '@/components/ui/separator';
+import { formatGameDate } from '../types/common';
+import { HistoireEntry } from '../types/histoire';
+import { ScrollArea } from '@/components/ui/scroll-area';
 
 interface HistoireTimelineProps {
   entries: HistoireEntry[];
+  onEdit?: (entry: HistoireEntry) => void;
+  onDelete?: (id: string) => void;
+  viewMode?: 'full' | 'compact';
 }
 
-export const HistoireTimeline: React.FC<HistoireTimelineProps> = ({ entries }) => {
-  // Sort entries by date, most recent first
+export const HistoireTimeline: React.FC<HistoireTimelineProps> = ({ 
+  entries, 
+  onEdit, 
+  onDelete, 
+  viewMode = 'full' 
+}) => {
+  // Sort entries chronologically
   const sortedEntries = [...entries].sort((a, b) => {
     if (a.date.year !== b.date.year) {
-      return b.date.year - a.date.year;
+      return b.date.year - a.date.year; // Latest year first
     }
     
-    const seasons = ['SPRING', 'SUMMER', 'AUTUMN', 'WINTER'];
-    return seasons.indexOf(b.date.season) - seasons.indexOf(a.date.season);
+    // If years are the same, compare by seasons
+    const seasonOrder = { 'Ver': 0, 'Aestas': 1, 'Autumnus': 2, 'Hiems': 3 };
+    const seasonA = typeof a.date.season === 'string' ? a.date.season : 'Ver';
+    const seasonB = typeof b.date.season === 'string' ? b.date.season : 'Ver';
+    
+    return seasonOrder[seasonB as keyof typeof seasonOrder] - seasonOrder[seasonA as keyof typeof seasonOrder];
   });
-  
-  const getIconForType = (type: string | undefined) => {
-    switch (type || 'default') {
-      case 'POLITIQUE':
-        return <ScrollText className="h-5 w-5 text-blue-500" />;
-      case 'MILITAIRE':
-        return <Flag className="h-5 w-5 text-red-500" />;
-      case 'ECONOMIQUE':
-        return <ScrollText className="h-5 w-5 text-green-500" />;
+
+  const getImportanceBadge = (importance: string) => {
+    switch(importance.toLowerCase()) {
+      case 'critique':
+      case 'critical':
+        return 'destructive';
+      case 'majeur':
+      case 'major':
+        return 'destructive';
+      case 'standard':
+        return 'secondary';
+      case 'mineur':
+      case 'minor':
+        return 'outline';
       default:
-        return <BookText className="h-5 w-5 text-gray-500" />;
+        return 'secondary';
     }
   };
-  
-  const getSeasonName = (season: string) => {
-    const seasonMap: Record<string, string> = {
-      'SPRING': 'Printemps',
-      'SUMMER': 'Été',
-      'AUTUMN': 'Automne',
-      'WINTER': 'Hiver'
-    };
-    return seasonMap[season] || season;
+
+  const renderPeople = (entry: HistoireEntry) => {
+    if (!entry.personnesImpliquées || entry.personnesImpliquées.length === 0) {
+      return null;
+    }
+    
+    return (
+      <div className="mb-2">
+        <strong>Personnes impliquées : </strong>
+        {entry.personnesImpliquées.join(', ')}
+      </div>
+    );
   };
   
+  const renderAuthor = (entry: HistoireEntry) => {
+    if (!entry.auteur) {
+      return null;
+    }
+    
+    return (
+      <div className="text-sm text-muted-foreground mt-2">
+        Écrit par <em>{entry.auteur}</em>
+      </div>
+    );
+  };
+
   return (
-    <div className="space-y-4">
-      {sortedEntries.map((entry) => (
-        <Card key={entry.id} className="overflow-hidden">
-          <CardHeader className="pb-2">
-            <div className="flex justify-between items-start">
-              <div className="flex items-center space-x-2">
-                {getIconForType(entry.type || entry.catégorie)}
-                <CardTitle className="text-lg">{entry.titre}</CardTitle>
-              </div>
-              <Badge variant="outline" className="ml-2">
-                {entry.date.year} - {getSeasonName(entry.date.season)}
-              </Badge>
-            </div>
-            <CardDescription>
-              {entry.catégorie || entry.type} - {entry.importance}
-            </CardDescription>
-          </CardHeader>
-          <Separator />
-          <CardContent className="pt-4">
-            <p className="text-sm leading-relaxed">{entry.contenu}</p>
-            {entry.personnagesImpliqués && entry.personnagesImpliqués.length > 0 && (
-              <div className="mt-3">
-                <div className="text-xs font-medium text-muted-foreground mb-1">Personnages impliqués:</div>
-                <div className="flex flex-wrap gap-1">
-                  {entry.personnagesImpliqués.map((person, index) => (
-                    <Badge key={index} variant="secondary" className="text-xs">
-                      {person}
-                    </Badge>
-                  ))}
+    <Card className={viewMode === 'compact' ? 'h-[500px]' : ''}>
+      <CardHeader>
+        <CardTitle>Chroniques de la République</CardTitle>
+      </CardHeader>
+      <CardContent>
+        <ScrollArea className={viewMode === 'compact' ? 'h-[400px] pr-4' : ''}>
+          <VerticalTimeline layout={viewMode === 'compact' ? '1-column-left' : '2-columns'} lineColor="#888">
+            {sortedEntries.map((entry) => (
+              <VerticalTimelineElement
+                key={entry.id}
+                className="vertical-timeline-element--work"
+                contentStyle={{ background: 'var(--background)', borderTop: '3px solid var(--primary)' }}
+                contentArrowStyle={{ borderRight: '7px solid var(--primary)' }}
+                date={formatGameDate(entry.date)}
+                iconStyle={{ background: 'var(--primary)', color: '#fff' }}
+              >
+                <div className="flex justify-between items-start mb-2">
+                  <h3 className="vertical-timeline-element-title text-xl font-semibold">
+                    {entry.titre}
+                  </h3>
+                  <Badge variant={getImportanceBadge(entry.importanceLevel)}>
+                    {entry.importanceLevel}
+                  </Badge>
                 </div>
-              </div>
-            )}
-            {entry.auteur && (
-              <div className="mt-3 text-xs text-right text-muted-foreground">
-                Enregistré par: {entry.auteur}
-              </div>
-            )}
-          </CardContent>
-        </Card>
-      ))}
-      
-      {sortedEntries.length === 0 && (
-        <div className="text-center py-8 text-muted-foreground">
-          <BookText className="mx-auto h-10 w-10 mb-2 opacity-50" />
-          <p>Aucun événement historique enregistré.</p>
-        </div>
-      )}
-    </div>
+                
+                <Badge className="mb-2" variant="outline">{entry.type}</Badge>
+                
+                <p className="mb-3 vertical-timeline-element-subtitle">
+                  {entry.contenu}
+                </p>
+                
+                {renderPeople(entry)}
+                
+                {entry.tags && entry.tags.length > 0 && (
+                  <div className="flex flex-wrap gap-1 mb-3">
+                    {entry.tags.map((tag, idx) => (
+                      <Badge key={idx} variant="secondary" className="text-xs">
+                        {tag}
+                      </Badge>
+                    ))}
+                  </div>
+                )}
+                
+                {renderAuthor(entry)}
+                
+                {(onEdit || onDelete) && (
+                  <div className="flex justify-end gap-2 mt-4">
+                    {onEdit && (
+                      <Button size="sm" variant="outline" onClick={() => onEdit(entry)}>
+                        Modifier
+                      </Button>
+                    )}
+                    {onDelete && (
+                      <Button size="sm" variant="destructive" onClick={() => onDelete(entry.id)}>
+                        Supprimer
+                      </Button>
+                    )}
+                  </div>
+                )}
+              </VerticalTimelineElement>
+            ))}
+          </VerticalTimeline>
+        </ScrollArea>
+      </CardContent>
+    </Card>
   );
 };

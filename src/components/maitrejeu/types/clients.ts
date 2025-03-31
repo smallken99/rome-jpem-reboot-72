@@ -49,7 +49,7 @@ export interface ClientCreationData {
   senateurId?: string;
   location: string;
   loyalty: string;
-  competences: string[];
+  competences?: string[];  // Make competences optional
   status: string;
   age: number;
   influence: number;

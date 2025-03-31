@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableCaption, TableHead, TableHeader, TableRow } from '@/components/ui/table';
@@ -12,9 +13,8 @@ import { cn } from "@/lib/utils"
 import { format } from "date-fns"
 import { useMaitreJeu } from '../../context';
 import { Building, MaintenanceTask } from '../../types/batiments';
-import { GameDate } from '../../types/common';
+import { GameDate, Season } from '../../types/common';
 import { useBatimentsManagement } from '../../hooks/useBatimentsManagement';
-import { Season } from '@/components/maitrejeu/types/common';
 
 const MaintenanceManager: React.FC = () => {
   const { buildings } = useBatimentsManagement();
@@ -29,34 +29,34 @@ const MaintenanceManager: React.FC = () => {
         id: 'task-1',
         buildingId: 'forum-romanum',
         buildingName: 'Forum Romanum',
-        deadline: { year: 2023, season: 'Spring' },
+        deadline: { year: 2023, season: 'SPRING' as Season },
         estimatedCost: 15000,
         priority: 'high',
         status: 'scheduled',
         description: 'Réparer les dommages causés par les récentes émeutes',
-        startDate: { year: 2023, season: 'Winter' }
+        startDate: { year: 2023, season: 'WINTER' as Season }
       },
       {
         id: 'task-2',
         buildingId: 'basilica-aemilia',
         buildingName: 'Basilica Aemilia',
-        deadline: { year: 2023, season: 'Summer' },
+        deadline: { year: 2023, season: 'SUMMER' as Season },
         estimatedCost: 8000,
         priority: 'medium',
         status: 'in_progress',
         description: 'Remplacer les tuiles endommagées sur le toit',
-        startDate: { year: 2023, season: 'Spring' }
+        startDate: { year: 2023, season: 'SPRING' as Season }
       },
       {
         id: 'task-3',
         buildingId: 'temple-jupiter',
         buildingName: 'Temple de Jupiter',
-        deadline: { year: 2023, season: 'Autumn' },
+        deadline: { year: 2023, season: 'AUTUMN' as Season },
         estimatedCost: 12000,
         priority: 'low',
         status: 'completed',
         description: 'Nettoyer et restaurer les statues',
-        startDate: { year: 2023, season: 'Spring' }
+        startDate: { year: 2023, season: 'SPRING' as Season }
       }
     ];
     setTasks(mockTasks);
@@ -126,7 +126,7 @@ const MaintenanceManager: React.FC = () => {
       }
     ];
     
-    setMaintenanceTasks(tasks);
+    setTasks(tasks);
   };
 
   const formatGameDate = (gameDate: GameDate): string => {

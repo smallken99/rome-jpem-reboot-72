@@ -38,6 +38,7 @@ export const GestionBatiments = () => {
       constructionYear: 720,
       description: "Un exemple de bâtiment",
       cost: 50000,
+      maintenance: 1000,
       maintenanceCost: 1000,
       revenue: 2000,
       capacity: 500,
