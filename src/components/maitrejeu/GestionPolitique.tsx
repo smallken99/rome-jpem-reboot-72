@@ -14,7 +14,7 @@ export const GestionPolitique: React.FC = () => {
   
   const getLoisWarningCount = () => {
     // Compter les lois en attente
-    return lois.filter(loi => loi.état === 'proposed' || loi.state === 'proposed').length;
+    return lois.filter(loi => loi.état === 'proposed').length;
   };
   
   const getWarningColor = (count: number) => {

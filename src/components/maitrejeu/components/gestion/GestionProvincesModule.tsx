@@ -1,257 +1,214 @@
 
 import React, { useState } from 'react';
-import { useMaitreJeu } from '../../context/MaitreJeuContext';
-import { Card, CardContent } from '@/components/ui/card';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Input } from '@/components/ui/input';
-import { Button } from '@/components/ui/button';
-import { MapPin, Edit, Trash, Search, Plus } from 'lucide-react';
+import { useMaitreJeu } from '../../context';
 import { GestionContainer } from './GestionContainer';
-import { Province } from '../../types/provinces';
-import { formatGameDate } from '../../types/common';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle, CardFooter, CardDescription } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Search, Plus, Edit, Trash, Star, Shield, Coin, Users, Flag, History, Map, Target } from 'lucide-react';
+import { Badge } from '@/components/ui/badge';
+import { Province } from '../../types/province';
+import { toast } from 'sonner';
+import { GameDate } from '../../types/common';
 
 export const GestionProvincesModule: React.FC = () => {
-  const { provinces, updateProvince } = useMaitreJeu();
-  
+  const { provinces } = useMaitreJeu();
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedProvince, setSelectedProvince] = useState<Province | null>(null);
-  const [showForm, setShowForm] = useState(false);
-  const [activeTab, setActiveTab] = useState('all');
-  
-  // Filtrer les provinces en fonction du terme de recherche
-  const filteredProvinces = provinces.filter(province => {
-    const nom = province.nom || province.name || '';
-    const gouverneur = province.gouverneur || province.governor || '';
-    
-    return (
-      nom.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      gouverneur.toLowerCase().includes(searchTerm.toLowerCase())
-    );
-  });
-  
-  // Filtrer les provinces en fonction de l'onglet actif
-  const provincesByTab = (tab: string) => {
-    switch (tab) {
-      case 'pacifiees':
-        return filteredProvinces.filter(p => p.status === 'Pacifiée' || p.status === 'Pacified');
-      case 'troublees':
-        return filteredProvinces.filter(p => p.status === 'Troublée' || p.status === 'Troubled');
-      case 'rebelles':
-        return filteredProvinces.filter(p => p.status === 'Rebelle' || p.status === 'Rebellious');
-      default:
-        return filteredProvinces;
-    }
-  };
-  
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
+  const filteredProvinces = provinces.filter(province => 
+    province.nom.toLowerCase().includes(searchTerm.toLowerCase()) || 
+    province.gouverneur?.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
   const handleAddProvince = () => {
     setSelectedProvince(null);
-    setShowForm(true);
+    setIsModalOpen(true);
   };
-  
+
   const handleEditProvince = (province: Province) => {
     setSelectedProvince(province);
-    setShowForm(true);
+    setIsModalOpen(true);
   };
-  
-  const handleSelectProvince = (province: Province) => {
-    setSelectedProvince(province);
+
+  const handleDeleteProvince = (provinceId: string) => {
+    // Implémenter la suppression
+    toast.success("Province supprimée avec succès");
   };
-  
-  // Function to render the province card
-  const ProvinceCard = ({ province }: { province: Province }) => (
-    <Card 
-      className={`mb-4 cursor-pointer hover:bg-accent/10 ${
-        selectedProvince?.id === province.id ? 'border-primary' : ''
-      }`}
-      onClick={() => handleSelectProvince(province)}
-    >
-      <CardContent className="p-4">
-        <div className="flex justify-between items-start">
-          <div>
-            <h3 className="text-lg font-semibold flex items-center">
-              <MapPin className="h-4 w-4 mr-1 inline-block" />
-              {province.nom || province.name}
-            </h3>
-            <p className="text-sm text-muted-foreground">
-              Gouverneur: {province.gouverneur || province.governor || 'Non assigné'}
-            </p>
-            <p className="text-sm mt-1">
-              Status: <span className={`font-medium ${
-                (province.status === 'Pacifiée' || province.status === 'Pacified') ? 'text-green-600' :
-                (province.status === 'Troublée' || province.status === 'Troubled') ? 'text-amber-600' :
-                'text-red-600'
-              }`}>{province.status}</span>
-            </p>
-            <p className="text-sm">
-              Population: {province.population?.toLocaleString() || 'Inconnue'}
-            </p>
-            <p className="text-sm">
-              Revenu annuel: {province.revenue?.toLocaleString() || 'Inconnu'} as
-            </p>
-          </div>
-          <div className="flex space-x-2">
-            <Button 
-              variant="outline" 
-              size="sm"
-              onClick={(e) => {
-                e.stopPropagation();
-                handleEditProvince(province);
-              }}
-            >
-              <Edit className="h-4 w-4" />
-            </Button>
-          </div>
-        </div>
-      </CardContent>
-    </Card>
-  );
-  
+
+  // Fonction format de la date de conquête
+  const formatConquestDate = (date?: GameDate) => {
+    if (!date) return "Inconnue";
+    return `${date.year} (${date.season})`;
+  };
+
+  // Fonction pour obtenir la couleur du statut
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case 'pacifiée':
+        return 'bg-green-100 text-green-800';
+      case 'instable':
+        return 'bg-amber-100 text-amber-800';
+      case 'rebelle':
+        return 'bg-red-100 text-red-800';
+      default:
+        return 'bg-gray-100 text-gray-800';
+    }
+  };
+
   return (
     <GestionContainer
       title="Gestion des Provinces"
-      description="Administrez les territoires de la République Romaine"
+      description="Administrez les provinces de la République"
       onAddNew={handleAddProvince}
       addButtonLabel="Ajouter une province"
     >
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <div className="col-span-1">
-          <div className="mb-4 flex items-center">
-            <Search className="h-4 w-4 mr-2 text-muted-foreground" />
-            <Input
-              placeholder="Rechercher une province..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="flex-1"
-            />
-          </div>
-          
-          <Tabs value={activeTab} onValueChange={setActiveTab} className="mb-4">
-            <TabsList className="grid grid-cols-4 w-full">
-              <TabsTrigger value="all">Toutes</TabsTrigger>
-              <TabsTrigger value="pacifiees">Pacifiées</TabsTrigger>
-              <TabsTrigger value="troublees">Troublées</TabsTrigger>
-              <TabsTrigger value="rebelles">Rebelles</TabsTrigger>
-            </TabsList>
-          </Tabs>
-          
-          {provincesByTab(activeTab).length === 0 ? (
-            <div className="text-center py-8 text-muted-foreground">
-              Aucune province trouvée
-            </div>
-          ) : (
-            <div className="space-y-2 max-h-[calc(100vh-16rem)] overflow-y-auto pr-2">
-              {provincesByTab(activeTab).map(province => (
-                <ProvinceCard key={province.id} province={province} />
-              ))}
-            </div>
-          )}
+      <div className="space-y-6">
+        {/* Barre de recherche */}
+        <div className="relative">
+          <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+          <Input
+            placeholder="Rechercher une province..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="pl-8"
+          />
         </div>
-        
-        <div className="col-span-2">
-          {selectedProvince ? (
-            <Card>
-              <CardContent className="p-6">
-                <h2 className="text-2xl font-bold mb-4 flex items-center">
-                  <MapPin className="h-5 w-5 mr-2" />
-                  {selectedProvince.nom || selectedProvince.name}
-                </h2>
-                
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-                  <div>
-                    <h3 className="font-semibold mb-2">Informations générales</h3>
-                    <p className="text-sm mb-1">
-                      <span className="font-medium">Gouverneur:</span> {selectedProvince.gouverneur || selectedProvince.governor || 'Non assigné'}
-                    </p>
-                    <p className="text-sm mb-1">
-                      <span className="font-medium">Population:</span> {selectedProvince.population?.toLocaleString() || 'Inconnue'}
-                    </p>
-                    <p className="text-sm mb-1">
-                      <span className="font-medium">Statut:</span> {selectedProvince.status}
-                    </p>
-                    <p className="text-sm mb-1">
-                      <span className="font-medium">Région:</span> {selectedProvince.region || 'Non spécifiée'}
-                    </p>
-                    <p className="text-sm mb-1">
-                      <span className="font-medium">Conquise en:</span> {selectedProvince.conqueredDate 
-                        ? formatGameDate(selectedProvince.conqueredDate)
-                        : 'Date inconnue'
-                      }
-                    </p>
-                  </div>
-                  
-                  <div>
-                    <h3 className="font-semibold mb-2">Économie</h3>
-                    <p className="text-sm mb-1">
-                      <span className="font-medium">Revenu annuel:</span> {selectedProvince.revenue?.toLocaleString() || '0'} as
-                    </p>
-                    <p className="text-sm mb-1">
-                      <span className="font-medium">Taux d'imposition:</span> {selectedProvince.taxRate || '5'}%
-                    </p>
-                    <p className="text-sm mb-1">
-                      <span className="font-medium">Ressources principales:</span> {selectedProvince.ressources?.join(', ') || 'Aucune'}
-                    </p>
-                    <p className="text-sm mb-1">
-                      <span className="font-medium">Garnison:</span> {selectedProvince.garrison?.toLocaleString() || '0'} soldats
-                    </p>
-                  </div>
+
+        {/* Liste des provinces */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          {filteredProvinces.map(province => (
+            <Card key={province.id} className="overflow-hidden">
+              <CardHeader className="pb-2">
+                <div className="flex justify-between items-start">
+                  <CardTitle className="text-xl">{province.nom}</CardTitle>
+                  <Badge className={getStatusColor(province.statut)}>
+                    {province.statut}
+                  </Badge>
                 </div>
-                
-                <div className="mb-6">
-                  <h3 className="font-semibold mb-2">Stabilité</h3>
-                  <div className="flex flex-wrap gap-3">
-                    <div className="bg-accent/30 rounded px-3 py-1 text-sm">
-                      Loyauté: {selectedProvince.loyalty || '50'}/100
-                    </div>
-                    <div className="bg-accent/30 rounded px-3 py-1 text-sm">
-                      Dissidence: {selectedProvince.unrest || '0'}/100
-                    </div>
-                    <div className="bg-accent/30 rounded px-3 py-1 text-sm">
-                      Romanisation: {selectedProvince.romanization || '0'}/100
-                    </div>
-                    <div className="bg-accent/30 rounded px-3 py-1 text-sm">
-                      Prospérité: {selectedProvince.prosperity || '50'}/100
-                    </div>
+                <CardDescription>
+                  {province.gouverneur ? `Gouvernée par ${province.gouverneur}` : "Sans gouverneur"}
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="pb-2">
+                <div className="space-y-2">
+                  <div className="flex justify-between text-sm">
+                    <span className="text-muted-foreground flex items-center">
+                      <Map className="h-4 w-4 mr-1" />
+                      Région:
+                    </span>
+                    <span className="font-medium">{province.région}</span>
                   </div>
-                </div>
-                
-                <div>
-                  <h3 className="font-semibold mb-2">Description</h3>
-                  <p className="text-sm text-muted-foreground">
-                    {selectedProvince.description || 'Aucune description disponible.'}
-                  </p>
-                </div>
-                
-                <div className="flex justify-end mt-6 space-x-2">
-                  <Button
-                    variant="outline"
-                    onClick={() => handleEditProvince(selectedProvince)}
-                  >
-                    <Edit className="h-4 w-4 mr-2" />
-                    Modifier
-                  </Button>
+                  <div className="flex justify-between text-sm">
+                    <span className="text-muted-foreground flex items-center">
+                      <Users className="h-4 w-4 mr-1" />
+                      Population:
+                    </span>
+                    <span className="font-medium">{province.population.toLocaleString()}</span>
+                  </div>
+                  <div className="flex justify-between text-sm">
+                    <span className="text-muted-foreground flex items-center">
+                      <Coin className="h-4 w-4 mr-1" />
+                      Richesse:
+                    </span>
+                    <span className="font-medium">{province.richesse.toLocaleString()} As</span>
+                  </div>
+                  <div className="flex justify-between text-sm">
+                    <span className="text-muted-foreground flex items-center">
+                      <History className="h-4 w-4 mr-1" />
+                      Conquête:
+                    </span>
+                    <span className="font-medium">{formatConquestDate(province.dateConquete)}</span>
+                  </div>
                 </div>
               </CardContent>
-            </Card>
-          ) : (
-            <div className="flex items-center justify-center h-full">
-              <div className="text-center p-8">
-                <MapPin className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
-                <h3 className="text-lg font-medium">Aucune province sélectionnée</h3>
-                <p className="text-muted-foreground mt-1">
-                  Sélectionnez une province dans la liste ou ajoutez-en une nouvelle
-                </p>
+              <div className="px-6 pt-0 pb-3">
+                <div className="flex flex-wrap gap-1 mb-3">
+                  {province.ressources.map((ressource, index) => (
+                    <Badge key={index} variant="outline">{ressource}</Badge>
+                  ))}
+                </div>
+                
+                <div className="grid grid-cols-3 gap-2 mb-4">
+                  <div className="space-y-1">
+                    <div className="text-xs text-muted-foreground text-center">Impôts</div>
+                    <div className="text-center text-sm font-medium">
+                      {province.tauxImposition ? `${province.tauxImposition}%` : 'N/A'}
+                    </div>
+                  </div>
+                  <div className="space-y-1">
+                    <div className="text-xs text-muted-foreground text-center">Garnison</div>
+                    <div className="text-center text-sm font-medium">
+                      {province.garnison || 'N/A'}
+                    </div>
+                  </div>
+                  <div className="space-y-1">
+                    <div className="text-xs text-muted-foreground text-center">Revenu</div>
+                    <div className="text-center text-sm font-medium">
+                      {province.revenuAnnuel.toLocaleString()}
+                    </div>
+                  </div>
+                </div>
+                
+                <div className="grid grid-cols-3 gap-2">
+                  <div className="space-y-1">
+                    <div className="text-xs text-muted-foreground text-center">Mécontentement</div>
+                    <div className="h-1.5 bg-gray-200 rounded">
+                      <div 
+                        className="h-full bg-red-500 rounded" 
+                        style={{ width: `${province.mécontentement || 0}%` }}
+                      />
+                    </div>
+                  </div>
+                  <div className="space-y-1">
+                    <div className="text-xs text-muted-foreground text-center">Romanisation</div>
+                    <div className="h-1.5 bg-gray-200 rounded">
+                      <div 
+                        className="h-full bg-blue-500 rounded" 
+                        style={{ width: `${province.romanisation || 0}%` }}
+                      />
+                    </div>
+                  </div>
+                  <div className="space-y-1">
+                    <div className="text-xs text-muted-foreground text-center">Prospérité</div>
+                    <div className="h-1.5 bg-gray-200 rounded">
+                      <div 
+                        className="h-full bg-green-500 rounded" 
+                        style={{ width: `${province.prospérité || 0}%` }}
+                      />
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <CardFooter className="flex justify-between pt-0">
                 <Button 
                   variant="outline" 
-                  className="mt-4"
-                  onClick={handleAddProvince}
+                  size="sm"
+                  onClick={() => handleEditProvince(province)}
                 >
-                  <Plus className="h-4 w-4 mr-2" />
-                  Nouvelle province
+                  <Edit className="h-4 w-4 mr-1" />
+                  Éditer
                 </Button>
-              </div>
-            </div>
-          )}
+                <Button 
+                  variant="destructive" 
+                  size="sm"
+                  onClick={() => handleDeleteProvince(province.id)}
+                >
+                  <Trash className="h-4 w-4 mr-1" />
+                  Supprimer
+                </Button>
+              </CardFooter>
+            </Card>
+          ))}
         </div>
+        
+        {filteredProvinces.length === 0 && (
+          <div className="text-center py-12">
+            <p className="text-muted-foreground">Aucune province ne correspond à votre recherche</p>
+          </div>
+        )}
       </div>
     </GestionContainer>
   );

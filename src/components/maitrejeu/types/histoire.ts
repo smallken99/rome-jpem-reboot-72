@@ -1,25 +1,43 @@
 
-// Types pour l'histoire
+import { GameDate } from './common';
 
 export interface HistoireEntry {
   id: string;
-  date: {
-    year: number;
-    season: string;
-  };
+  titre: string;
+  date: GameDate;
   contenu: string;
-  type: string;
-  importance: 'mineure' | 'majeure' | 'critique' | 'normale';
-  sources?: string[];
-  auteur?: string;
+  type: 'politique' | 'militaire' | 'économique' | 'religieux' | 'social';
+  importanceLevel: 'mineur' | 'standard' | 'majeur' | 'historique';
+  personnesImpliquées?: string[];
+  lieuConcerné?: string;
   tags?: string[];
-  
-  // Propriétés additionnelles nécessaires
-  titre?: string;
-  title?: string; // Alias pour titre
-  year?: number; // Pour compatibilité
-  description?: string; // Alias pour contenu
-  catégorie?: string; // Alias pour type
-  personnagesImpliqués?: string[]; // Personnages impliqués dans l'événement
-  visible?: boolean; // Visibilité de l'entrée d'histoire
+}
+
+// Type pour adapteur avec les types PoliticalEvent
+export interface PoliticalEvent {
+  id: string;
+  title: string;
+  description: string;
+  type: string;
+  date: GameDate;
+  importance: 'low' | 'medium' | 'high' | 'critical';
+}
+
+// Fonction pour convertir HistoireEntry vers PoliticalEvent
+export function histoireEntryToPoliticalEvent(entry: HistoireEntry): PoliticalEvent {
+  const importanceMap: Record<string, 'low' | 'medium' | 'high' | 'critical'> = {
+    'mineur': 'low',
+    'standard': 'medium',
+    'majeur': 'high',
+    'historique': 'critical'
+  };
+
+  return {
+    id: entry.id,
+    title: entry.titre,
+    description: entry.contenu,
+    type: entry.type,
+    date: entry.date,
+    importance: importanceMap[entry.importanceLevel] || 'medium'
+  };
 }

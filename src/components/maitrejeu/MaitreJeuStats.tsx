@@ -1,269 +1,343 @@
 
 import React from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { 
-  BarChart, 
-  Bar, 
-  XAxis, 
-  YAxis, 
-  CartesianGrid, 
-  Tooltip, 
-  Legend, 
-  ResponsiveContainer,
-  PieChart,
-  Pie,
-  Cell
-} from 'recharts';
-import { useMaitreJeu } from './context/MaitreJeuContext';
-import { TreasuryStatus } from './types/economie';
+  Card, 
+  CardContent, 
+  CardDescription, 
+  CardFooter, 
+  CardHeader, 
+  CardTitle 
+} from '@/components/ui/card';
+import { 
+  Activity, 
+  Users, 
+  BookOpen, 
+  Star, 
+  Map, 
+  Banknote, 
+  Scale, 
+  Landmark, 
+  TrendingUp, 
+  Medal,
+  Award
+} from 'lucide-react';
+import { useMaitreJeu } from './context';
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 
 export const MaitreJeuStats: React.FC = () => {
-  const { currentYear, equilibre, treasury } = useMaitreJeu();
+  const { 
+    senateurs, 
+    provinces, 
+    lois, 
+    equilibre, 
+    treasury,
+    economicFactors
+  } = useMaitreJeu();
   
-  // Format numbers as Roman currency
-  const formatAsCurrency = (value: number) => `${value.toLocaleString()} denarii`;
-
-  // Prepare data for political faction chart
-  const politicalData = [
-    { name: 'Populares', value: equilibre.political.populaires, color: '#ef4444' },
-    { name: 'Optimates', value: equilibre.political.optimates, color: '#3b82f6' },
-    { name: 'Modérés', value: equilibre.political.moderates, color: '#84cc16' }
+  const statisticsEquilibre = {
+    politique: {
+      populares: equilibre.politique.populares || 0,
+      optimates: equilibre.politique.optimates || 0,
+      moderates: equilibre.politique.moderates || 0
+    },
+    social: { 
+      patriciens: equilibre.social.patriciens || 0, 
+      plebeiens: equilibre.social.plebeiens || 0 
+    },
+    economie: {
+      stabilite: equilibre.economie?.stabilite || 0,
+      croissance: equilibre.economie?.croissance || 0,
+      commerce: equilibre.economie?.commerce || 0,
+      agriculture: equilibre.economie?.agriculture || 0
+    },
+    militaire: {
+      moral: equilibre.militaire?.moral || 0,
+      discipline: equilibre.militaire?.discipline || 0,
+      puissance: equilibre.militaire?.puissance || 0
+    },
+    religion: {
+      piete: equilibre.religion?.piete || 0,
+      traditions: equilibre.religion?.traditions || 0,
+      superstition: equilibre.religion?.superstition || 0
+    }
+  };
+  
+  // Données simplifiées pour les graphiques
+  const senateursByFaction = [
+    { name: 'Populares', value: statisticsEquilibre.politique.populares },
+    { name: 'Optimates', value: statisticsEquilibre.politique.optimates },
+    { name: 'Modérés', value: statisticsEquilibre.politique.moderates }
   ];
   
-  // Prepare quarterly financial data
-  const financialData = [
-    { name: 'Q1', income: treasury?.income || 0, expenses: treasury?.expenses || 0 },
-    { name: 'Q2', income: treasury?.income || 0, expenses: treasury?.expenses || 0 },
-    { name: 'Q3', income: treasury?.income || 0, expenses: treasury?.expenses || 0 },
-    { name: 'Q4', income: treasury?.income || 0, expenses: treasury?.expenses || 0 }
+  // Tendances économiques fictives sur 6 mois
+  const economicTrends = [
+    { month: 'Jan', balance: 15000, income: 25000, expenses: 10000 },
+    { month: 'Fév', balance: 20000, income: 28000, expenses: 8000 },
+    { month: 'Mar', balance: 18000, income: 22000, expenses: 4000 },
+    { month: 'Avr', balance: 25000, income: 32000, expenses: 7000 },
+    { month: 'Mai', balance: 22000, income: 29000, expenses: 7000 },
+    { month: 'Jun', balance: 30000, income: 38000, expenses: 8000 }
   ];
   
-  // Prepare social stats data
-  const socialData = [
-    { name: 'Patriciens', value: equilibre.social.patriciens, color: '#8b5cf6' },
-    { name: 'Plébéiens', value: equilibre.social.plébéiens, color: '#f59e0b' }
-  ];
+  // Fonction pour déterminer la santé économique
+  const getEconomicHealth = () => {
+    // Simplification pour la démo
+    const economicScore = 75;  // score sur 100
+    
+    if (economicScore >= 80) return { text: 'Excellente', color: 'text-green-500' };
+    if (economicScore >= 60) return { text: 'Bonne', color: 'text-emerald-500' };
+    if (economicScore >= 40) return { text: 'Stable', color: 'text-blue-500' };
+    if (economicScore >= 20) return { text: 'Préoccupante', color: 'text-amber-500' };
+    return { text: 'Critique', color: 'text-red-500' };
+  };
   
-  // Prepare stability indicators data
-  const stabilityData = [
-    { name: 'Stabilité', value: equilibre.stability, color: '#3b82f6' },
-    { name: 'Armée', value: equilibre.armée, color: '#ef4444' },
-    { name: 'Loyauté', value: equilibre.loyauté, color: '#84cc16' },
-    { name: 'Morale', value: equilibre.morale, color: '#8b5cf6' },
-    { name: 'Religion', value: equilibre.religion, color: '#ec4899' },
-    { name: 'Juridique', value: equilibre.facteurJuridique, color: '#0ea5e9' }
-  ];
+  // Fonction pour déterminer la santé politique
+  const getPoliticalStability = () => {
+    const politicalScore = Math.floor(
+      (statisticsEquilibre.politique.moderates * 100) / 
+      (statisticsEquilibre.politique.populares + 
+       statisticsEquilibre.politique.optimates + 
+       statisticsEquilibre.politique.moderates)
+    );
+    
+    if (politicalScore >= 40) return { text: 'Stable', color: 'text-green-500' };
+    if (politicalScore >= 25) return { text: 'Tendue', color: 'text-amber-500' };
+    return { text: 'Instable', color: 'text-red-500' };
+  };
+  
+  // Fonction pour déterminer la puissance militaire
+  const getMilitaryPower = () => {
+    // Simplification pour la démo
+    const militaryScore = 82;  // score sur 100
+    
+    if (militaryScore >= 80) return { text: 'Supérieure', color: 'text-green-500' };
+    if (militaryScore >= 60) return { text: 'Forte', color: 'text-emerald-500' };
+    if (militaryScore >= 40) return { text: 'Adéquate', color: 'text-blue-500' };
+    if (militaryScore >= 20) return { text: 'Faible', color: 'text-amber-500' };
+    return { text: 'Critique', color: 'text-red-500' };
+  };
+  
+  // Stats calculées
+  const economicHealth = getEconomicHealth();
+  const politicalStability = getPoliticalStability();
+  const militaryPower = getMilitaryPower();
+  
+  // Calculer le nombre de projets de loi en attente
+  const pendingLaws = lois.filter(law => law.état === 'proposed').length;
+  
+  // Calculer le nombre total de provinces
+  const totalProvinces = provinces.length;
+  
+  // Calculer le nombre total de sénateurs
+  const totalSenators = senateurs.length;
+  
+  // Déterminer la stabilité de l'économie
+  const economicStability = 
+    equilibre.economie && equilibre.economie.stabilite >= 50 ? 'stable' : 'instable';
+  
+  // Déterminer la croissance économique
+  const economicGrowth = 
+    equilibre.economie && equilibre.economie.croissance >= 50 ? 'positive' : 'négative';
+  
+  // Calculer l'équilibre social
+  const socialBalance = 
+    (statisticsEquilibre.social.patriciens + statisticsEquilibre.social.plebeiens) / 2;
   
   return (
     <div className="space-y-6 p-6">
-      <header>
-        <h2 className="text-3xl font-bold tracking-tight">Statistiques de la République</h2>
-        <p className="text-muted-foreground">
-          Vue d'ensemble des indicateurs clés de la République Romaine pour l'année {currentYear}.
-        </p>
-      </header>
+      <h1 className="text-2xl font-bold tracking-tight">Statistiques globales</h1>
       
-      <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-4">
+      {/* Cartes principales */}
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium">Trésor public</CardTitle>
+          <CardHeader className="flex flex-row items-center justify-between pb-2">
+            <CardTitle className="text-sm font-medium">Santé Économique</CardTitle>
+            <Banknote className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{formatAsCurrency(treasury?.balance || 0)}</div>
-            <p className="text-xs text-muted-foreground">
-              {((treasury?.income || 0) > (treasury?.expenses || 0)) 
-                ? `Excédent: ${formatAsCurrency((treasury?.income || 0) - (treasury?.expenses || 0))}`
-                : `Déficit: ${formatAsCurrency((treasury?.expenses || 0) - (treasury?.income || 0))}`
-              }
-            </p>
-          </CardContent>
-        </Card>
-        
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium">Revenus annuels</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{formatAsCurrency(treasury?.income || 0)}</div>
-            <p className="text-xs text-muted-foreground">
-              Taxes, tributs et autres sources
-            </p>
-          </CardContent>
-        </Card>
-        
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium">Dépenses annuelles</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{formatAsCurrency(treasury?.expenses || 0)}</div>
-            <p className="text-xs text-muted-foreground">
-              Militaire, administration et jeux publics
-            </p>
-          </CardContent>
-        </Card>
-        
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium">Variation budgétaire</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className={`text-2xl font-bold ${(treasury?.surplus || 0) >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-              {(treasury?.surplus || 0) >= 0 ? '+' : ''}{formatAsCurrency(treasury?.surplus || 0)}
+            <div className={`text-2xl font-bold ${economicHealth.color}`}>
+              {economicHealth.text}
             </div>
             <p className="text-xs text-muted-foreground">
-              {(treasury?.surplus || 0) >= 0 ? 'Excédent budgétaire' : 'Déficit budgétaire'}
+              Balance: {treasury.balance.toLocaleString()} As
+            </p>
+          </CardContent>
+        </Card>
+        
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between pb-2">
+            <CardTitle className="text-sm font-medium">Stabilité Politique</CardTitle>
+            <Scale className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className={`text-2xl font-bold ${politicalStability.color}`}>
+              {politicalStability.text}
+            </div>
+            <p className="text-xs text-muted-foreground">
+              {pendingLaws} lois en attente
+            </p>
+          </CardContent>
+        </Card>
+        
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between pb-2">
+            <CardTitle className="text-sm font-medium">Puissance Militaire</CardTitle>
+            <Award className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className={`text-2xl font-bold ${militaryPower.color}`}>
+              {militaryPower.text}
+            </div>
+            <p className="text-xs text-muted-foreground">
+              {Math.floor(statisticsEquilibre.militaire.puissance * 1000)} hommes
+            </p>
+          </CardContent>
+        </Card>
+        
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between pb-2">
+            <CardTitle className="text-sm font-medium">Provinces</CardTitle>
+            <Map className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">
+              {totalProvinces}
+            </div>
+            <p className="text-xs text-muted-foreground">
+              {provinces.filter(p => p.statut === 'pacifiée').length} pacifiées
             </p>
           </CardContent>
         </Card>
       </div>
       
-      <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-        <Card>
-          <CardHeader>
-            <CardTitle>Équilibre politique</CardTitle>
-          </CardHeader>
-          <CardContent className="pt-2">
-            <ResponsiveContainer width="100%" height={300}>
-              <PieChart>
-                <Pie
-                  data={politicalData}
-                  cx="50%"
-                  cy="50%"
-                  outerRadius={100}
-                  fill="#8884d8"
-                  dataKey="value"
-                  label={({ name, value }) => `${name}: ${value}%`}
-                >
-                  {politicalData.map((entry, index) => (
-                    <Cell key={`cell-${index}`} fill={entry.color} />
-                  ))}
-                </Pie>
-                <Tooltip formatter={(value) => `${value}%`} />
-                <Legend />
-              </PieChart>
-            </ResponsiveContainer>
-          </CardContent>
-        </Card>
-        
-        <Card>
-          <CardHeader>
-            <CardTitle>Finances trimestrielles</CardTitle>
-          </CardHeader>
-          <CardContent className="pt-2">
-            <ResponsiveContainer width="100%" height={300}>
-              <BarChart
-                data={financialData}
-                margin={{ top: 20, right: 30, left: 20, bottom: 5 }}
-              >
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="name" />
-                <YAxis />
-                <Tooltip formatter={(value) => formatAsCurrency(value as number)} />
-                <Legend />
-                <Bar dataKey="income" name="Revenus" fill="#10b981" />
-                <Bar dataKey="expenses" name="Dépenses" fill="#ef4444" />
-              </BarChart>
-            </ResponsiveContainer>
-          </CardContent>
-        </Card>
-      </div>
-      
-      <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-        <Card>
-          <CardHeader>
-            <CardTitle>Économie</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="flex flex-col items-center justify-center">
-              <div className="relative w-40 h-40 flex items-center justify-center">
-                <div className="absolute inset-0 flex items-center justify-center">
-                  <div className="text-5xl font-bold">{equilibre.economie}</div>
-                </div>
-                <svg viewBox="0 0 100 100" className="transform -rotate-90 w-full h-full">
-                  <circle
-                    cx="50"
-                    cy="50"
-                    r="45"
-                    fill="transparent"
-                    stroke="#e2e8f0"
-                    strokeWidth="10"
-                  />
-                  <circle
-                    cx="50"
-                    cy="50"
-                    r="45"
-                    fill="transparent"
-                    stroke={
-                      equilibre.economie >= 75 ? "#10b981" :
-                      equilibre.economie >= 50 ? "#f59e0b" :
-                      "#ef4444"
-                    }
-                    strokeWidth="10"
-                    strokeDasharray={`${2 * Math.PI * 45 * equilibre.economie / 100} ${2 * Math.PI * 45 * (1 - equilibre.economie / 100)}`}
-                  />
-                </svg>
-              </div>
-              <p className="mt-4 text-center text-muted-foreground">
-                Indice économique de la République
-              </p>
-            </div>
-          </CardContent>
-        </Card>
-        
-        <Card>
-          <CardHeader>
-            <CardTitle>Équilibre social</CardTitle>
-          </CardHeader>
-          <CardContent className="pt-2">
-            <ResponsiveContainer width="100%" height={300}>
-              <PieChart>
-                <Pie
-                  data={socialData}
-                  cx="50%"
-                  cy="50%"
-                  outerRadius={100}
-                  fill="#8884d8"
-                  dataKey="value"
-                  label={({ name, value }) => `${name}: ${value}%`}
-                >
-                  {socialData.map((entry, index) => (
-                    <Cell key={`cell-${index}`} fill={entry.color} />
-                  ))}
-                </Pie>
-                <Tooltip formatter={(value) => `${value}%`} />
-                <Legend />
-              </PieChart>
-            </ResponsiveContainer>
-          </CardContent>
-        </Card>
-      </div>
-      
+      {/* Graphique d'évolution économique */}
       <Card>
         <CardHeader>
-          <CardTitle>Indicateurs de stabilité</CardTitle>
+          <CardTitle>Évolution économique</CardTitle>
+          <CardDescription>
+            Progression du trésor public sur les 6 derniers mois
+          </CardDescription>
         </CardHeader>
         <CardContent>
-          <ResponsiveContainer width="100%" height={300}>
-            <BarChart
-              data={stabilityData}
-              layout="vertical"
-              margin={{ top: 5, right: 30, left: 80, bottom: 5 }}
-            >
-              <CartesianGrid strokeDasharray="3 3" />
-              <XAxis type="number" domain={[0, 100]} />
-              <YAxis dataKey="name" type="category" width={80} />
-              <Tooltip formatter={(value) => `${value}/100`} />
-              <Legend />
-              <Bar dataKey="value" name="Indice" radius={[0, 10, 10, 0]}>
-                {stabilityData.map((entry, index) => (
-                  <Cell key={`cell-${index}`} fill={entry.color} />
-                ))}
-              </Bar>
-            </BarChart>
-          </ResponsiveContainer>
+          <div className="h-[300px]">
+            <ResponsiveContainer width="100%" height="100%">
+              <LineChart
+                data={economicTrends}
+                margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
+              >
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis dataKey="month" />
+                <YAxis />
+                <Tooltip 
+                  formatter={(value) => [`${value.toLocaleString()} As`, undefined]}
+                />
+                <Line 
+                  type="monotone" 
+                  dataKey="balance" 
+                  stroke="#8884d8" 
+                  activeDot={{ r: 8 }}
+                  name="Balance"
+                />
+                <Line type="monotone" dataKey="income" stroke="#82ca9d" name="Revenus" />
+                <Line type="monotone" dataKey="expenses" stroke="#ff7300" name="Dépenses" />
+              </LineChart>
+            </ResponsiveContainer>
+          </div>
         </CardContent>
       </Card>
+      
+      {/* Stats détaillées */}
+      <div className="grid gap-4 md:grid-cols-2">
+        <Card>
+          <CardHeader>
+            <CardTitle>Équilibre Politique</CardTitle>
+            <CardDescription>
+              Distribution des factions politiques
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-4">
+              <div className="flex justify-between">
+                <div>Populares</div>
+                <div className="font-medium">{Math.round(statisticsEquilibre.politique.populares * 100)}%</div>
+              </div>
+              <div className="h-2 bg-gray-200 rounded">
+                <div 
+                  className="h-full bg-red-500 rounded" 
+                  style={{ width: `${statisticsEquilibre.politique.populares * 100}%` }}
+                />
+              </div>
+              
+              <div className="flex justify-between">
+                <div>Optimates</div>
+                <div className="font-medium">{Math.round(statisticsEquilibre.politique.optimates * 100)}%</div>
+              </div>
+              <div className="h-2 bg-gray-200 rounded">
+                <div 
+                  className="h-full bg-blue-500 rounded" 
+                  style={{ width: `${statisticsEquilibre.politique.optimates * 100}%` }}
+                />
+              </div>
+              
+              <div className="flex justify-between">
+                <div>Modérés</div>
+                <div className="font-medium">{Math.round(statisticsEquilibre.politique.moderates * 100)}%</div>
+              </div>
+              <div className="h-2 bg-gray-200 rounded">
+                <div 
+                  className="h-full bg-green-500 rounded" 
+                  style={{ width: `${statisticsEquilibre.politique.moderates * 100}%` }}
+                />
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+        
+        <Card>
+          <CardHeader>
+            <CardTitle>Équilibre Religieux</CardTitle>
+            <CardDescription>
+              Mesures de la religiosité romaine
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-4">
+              <div className="flex justify-between">
+                <div>Piété</div>
+                <div className="font-medium">{statisticsEquilibre.religion.piete.toFixed(1)}</div>
+              </div>
+              <div className="h-2 bg-gray-200 rounded">
+                <div 
+                  className="h-full bg-purple-500 rounded" 
+                  style={{ width: `${(statisticsEquilibre.religion.piete / 10) * 100}%` }}
+                />
+              </div>
+              
+              <div className="flex justify-between">
+                <div>Traditions</div>
+                <div className="font-medium">{statisticsEquilibre.religion.traditions.toFixed(1)}</div>
+              </div>
+              <div className="h-2 bg-gray-200 rounded">
+                <div 
+                  className="h-full bg-amber-500 rounded" 
+                  style={{ width: `${(statisticsEquilibre.religion.traditions / 10) * 100}%` }}
+                />
+              </div>
+              
+              <div className="flex justify-between">
+                <div>Superstition</div>
+                <div className="font-medium">{statisticsEquilibre.religion.superstition.toFixed(1)}</div>
+              </div>
+              <div className="h-2 bg-gray-200 rounded">
+                <div 
+                  className="h-full bg-indigo-500 rounded" 
+                  style={{ width: `${(statisticsEquilibre.religion.superstition / 10) * 100}%` }}
+                />
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
     </div>
   );
 };

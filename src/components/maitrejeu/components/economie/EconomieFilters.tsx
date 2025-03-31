@@ -15,7 +15,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from '@/components/ui/popover';
-import { EconomieFilter, EconomieType, EconomieCategory } from '../../types/economie';
+import { EconomieFilter, ECONOMIE_TYPES, ECONOMIE_CATEGORIES } from '../../types/economie';
 
 interface EconomieFiltersProps {
   filter: EconomieFilter;
@@ -50,8 +50,8 @@ export const EconomieFilters: React.FC<EconomieFiltersProps> = ({
         </div>
 
         <Select
-          value={filter.type || 'all'}
-          onValueChange={(value) => onFilterChange({ type: value as EconomieType })}
+          value={filter.types || 'all'}
+          onValueChange={(value) => onFilterChange({ types: value as ECONOMIE_TYPES | 'all' })}
         >
           <SelectTrigger className="w-[180px]">
             <SelectValue placeholder="Type" />
@@ -81,12 +81,12 @@ export const EconomieFilters: React.FC<EconomieFiltersProps> = ({
               <div className="space-y-2">
                 <h4 className="font-medium">Catégories</h4>
                 <Select
-                  value={(filter.categories && filter.categories.length > 0) ? filter.categories[0] : 'all'}
+                  value={(filter.category && filter.category !== 'all') ? filter.category : 'all'}
                   onValueChange={(value) => {
                     if (value === 'all') {
-                      onFilterChange({ categories: undefined });
+                      onFilterChange({ category: undefined });
                     } else {
-                      onFilterChange({ categories: [value as EconomieCategory] });
+                      onFilterChange({ category: value as ECONOMIE_CATEGORIES });
                     }
                   }}
                 >

@@ -1,48 +1,39 @@
 
-import { LoiType, LoiState, ImportanceType } from '@/components/maitrejeu/components/lois/types/loiTypes';
+import { GameDate } from './common';
+
+export type LoiType = 'civile' | 'militaire' | 'économique' | 'religieuse' | 'constitutionnelle';
+export type LoiState = 'proposed' | 'active' | 'rejected' | 'expired';
+export type ImportanceType = 'mineure' | 'normale' | 'majeure' | 'critique';
 
 export interface Loi {
   id: string;
   titre: string;
-  title?: string;
   description: string;
   proposeur: string;
-  proposedBy?: string;
-  auteur?: string;
+  date: GameDate;
+  état: LoiState;
+  state?: LoiState; // Alias anglais pour compatibilité
   catégorie: string;
-  category?: string;
-  date: { year: number; season: string };
-  dateProposition?: { year: number; season: string } | string;
-  implementationDate?: { year: number; season: string };
-  état: string | LoiState;
-  status?: string;
-  statut?: string;
-  importance: string | ImportanceType;
   votesPositifs: number;
   votesNégatifs: number;
-  abstentions?: number;
-  votesFor?: number;
-  votesAgainst?: number;
-  votesAbstention?: number;
-  impacts: Record<string, number>;
+  votesAbstention: number;
+  soutenusParFactions: string[];
+  opposésParFactions: string[];
+  type: LoiType;
+  importance: ImportanceType;
   effets: string[];
-  type: string | LoiType;
-  clauses: string[];
-  conditions?: string[];
-  pénalités?: string[];
-  commentaires: string[];
-  history: any[];
-  tags: string[];
-  supporters?: string[];
-  soutiens?: string[];
-  opposants?: string[];
-  votes?: any;
-  notes?: string;
-  contenu?: string;
-  categorieId?: string;
-  catégorieId?: string;
-  name?: string;
+  impacts?: Record<string, number>; // Pour compatibilité
+  history?: {date: GameDate, event: string}[]; // Pour compatibilité
+  
+  // Champs anglais pour compatibilité
+  title?: string;
+  proposedBy?: string;
+  category?: string;
+  positiveVotes?: number;
+  negativeVotes?: number;
+  abstentionVotes?: number;
+  supportedByFactions?: string[];
+  opposedByFactions?: string[];
+  effects?: string[];
+  auteur?: string;
 }
-
-// Export the enum types to make them available
-export { LoiType, LoiState, ImportanceType };

@@ -1,200 +1,189 @@
+
 import React, { useState } from 'react';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { useMaitreJeu } from './context';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
-import { Check, Plus, Search, BookText, CalendarClock } from 'lucide-react';
-import { useMaitreJeu } from './context';
-import { HistoireEntry } from './types/histoire';
-import { HistoireTimeline } from './components/HistoireTimeline';
+import { Search, Plus, Filter, CalendarDays, BookOpen } from 'lucide-react';
 import { v4 as uuidv4 } from 'uuid';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Badge } from '@/components/ui/badge';
+import { toast } from 'sonner';
+import { HistoireEntry } from './types/histoire';
 
 export const GestionHistoire: React.FC = () => {
-  const { histoireEntries, addHistoireEntry, currentDate } = useMaitreJeu();
+  // État de recherche et de filtrage
   const [searchTerm, setSearchTerm] = useState('');
-  const [activeTab, setActiveTab] = useState('chronique');
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [activeTab, setActiveTab] = useState('chronologie');
   
-  // État du formulaire d'ajout
-  const [titre, setTitre] = useState('');
-  const [contenu, setContenu] = useState('');
-  const [importance, setImportance] = useState<'majeure' | 'mineure' | 'normale'>('normale');
-  const [categorie, setCategorie] = useState('POLITIQUE');
-  const [visible, setVisible] = useState(true);
-  const [personnagesImpliqués, setPersonnagesImpliqués] = useState('');
+  // Données contextuelles
+  const { histoireEntries = [], addHistoireEntry, gameState } = useMaitreJeu();
   
-  // Filtrage des entrées d'histoire
-  const filteredEntries = searchTerm 
-    ? histoireEntries.filter(
-        entry => (entry.titre || '').toLowerCase().includes(searchTerm.toLowerCase()) || 
-                (entry.contenu || entry.description || '').toLowerCase().includes(searchTerm.toLowerCase())
-      )
-    : histoireEntries;
+  // Nouvelles entrées d'histoire
+  const [newEntryTitle, setNewEntryTitle] = useState('');
+  const [newEntryContent, setNewEntryContent] = useState('');
+  const [newEntryType, setNewEntryType] = useState<HistoireEntry['type']>('politique');
   
-  // Ajouter une nouvelle entrée d'histoire
-  const handleAddEntry = () => {
-    if (!titre || !contenu) return;
+  // Filtrer les entrées d'histoire
+  const filteredEntries = histoireEntries.filter(entry => 
+    entry.titre.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    entry.contenu.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
+  // Fonction pour créer une nouvelle entrée d'histoire
+  const handleCreateEntry = () => {
+    if (!newEntryTitle.trim() || !newEntryContent.trim()) {
+      toast.error("Veuillez remplir tous les champs");
+      return;
+    }
     
-    const newEntry: Omit<HistoireEntry, "id"> = {
-      titre,
-      contenu,
-      date: { ...currentDate },
-      catégorie: categorie,
-      importance: importance,
-      auteur: "Maître du Jeu",
-      visible,
-      personnagesImpliqués: personnagesImpliqués.split(',').map(p => p.trim()).filter(p => p),
-      
-      // Pour la compatibilité avec le code existant
-      description: contenu,
-      type: categorie
+    const newEntry: HistoireEntry = {
+      id: uuidv4(),
+      titre: newEntryTitle,
+      contenu: newEntryContent,
+      date: gameState,
+      type: newEntryType,
+      importanceLevel: 'standard',
+      personnesImpliquées: [],
+      tags: []
     };
     
     addHistoireEntry(newEntry);
+    setIsModalOpen(false);
     
-    // Réinitialiser le formulaire
-    setTitre('');
-    setContenu('');
-    setImportance('normale');
-    setCategorie('POLITIQUE');
-    setVisible(true);
-    setPersonnagesImpliqués('');
+    // Réinitialiser les champs
+    setNewEntryTitle('');
+    setNewEntryContent('');
+    setNewEntryType('politique');
+    
+    toast.success("Nouvelle entrée historique créée");
   };
   
   return (
-    <div className="p-6 space-y-6">
-      <div className="flex items-center justify-between">
+    <div className="space-y-6 p-6">
+      <div className="flex justify-between items-center">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">
-            <span className="flex items-center gap-2">
-              <BookText className="h-8 w-8 text-amber-600" />
-              Chroniques Historiques
-            </span>
-          </h1>
+          <h1 className="text-2xl font-bold">Chroniques de la République</h1>
           <p className="text-muted-foreground">
-            Enregistrez et consultez les événements marquants de la République
+            Enregistrez et consultez les événements marquants de l'histoire de Rome
           </p>
         </div>
+        <Button onClick={() => setIsModalOpen(true)}>
+          <Plus className="h-4 w-4 mr-2" />
+          Ajouter un événement
+        </Button>
       </div>
-      
+
       <Card>
-        <CardHeader>
-          <div className="flex items-center justify-between">
-            <CardTitle>Gestion de l'Histoire</CardTitle>
-            <div className="relative w-64">
+        <CardHeader className="pb-3">
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+            <div>
+              <CardTitle>Événements historiques</CardTitle>
+              <CardDescription>
+                Les moments qui ont façonné la République
+              </CardDescription>
+            </div>
+            <div className="relative w-full sm:w-auto">
               <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
               <Input
                 placeholder="Rechercher..."
-                className="pl-8"
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
+                className="pl-8 w-full sm:w-[250px]"
               />
             </div>
           </div>
-          
-          <Tabs value={activeTab} onValueChange={setActiveTab} className="mt-4">
-            <TabsList>
-              <TabsTrigger value="chronique">Chronique</TabsTrigger>
-              <TabsTrigger value="ajouter">Ajouter un Événement</TabsTrigger>
-            </TabsList>
-          </Tabs>
         </CardHeader>
-        
         <CardContent>
-          <TabsContent value="chronique" className="mt-0">
-            <HistoireTimeline entries={filteredEntries} />
-          </TabsContent>
-          
-          <TabsContent value="ajouter" className="mt-0">
-            <div className="space-y-4">
-              <div className="space-y-2">
-                <label className="text-sm font-medium">Titre de l'événement</label>
-                <Input
-                  placeholder="Ex: Victoire contre Carthage"
-                  value={titre}
-                  onChange={(e) => setTitre(e.target.value)}
-                />
-              </div>
-              
-              <div className="space-y-2">
-                <label className="text-sm font-medium">Description</label>
-                <Textarea
-                  placeholder="Décrivez l'événement historique..."
-                  className="min-h-[100px]"
-                  value={contenu}
-                  onChange={(e) => setContenu(e.target.value)}
-                />
-              </div>
-              
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <label className="text-sm font-medium">Catégorie</label>
-                  <Select value={categorie} onValueChange={setCategorie}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Sélectionner une catégorie" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="POLITIQUE">Politique</SelectItem>
-                      <SelectItem value="MILITAIRE">Militaire</SelectItem>
-                      <SelectItem value="ECONOMIQUE">Économique</SelectItem>
-                      <SelectItem value="SOCIAL">Social</SelectItem>
-                      <SelectItem value="RELIGIEUX">Religieux</SelectItem>
-                    </SelectContent>
-                  </Select>
+          <Tabs defaultValue={activeTab} onValueChange={setActiveTab}>
+            <TabsList className="mb-4">
+              <TabsTrigger value="chronologie">Chronologie</TabsTrigger>
+              <TabsTrigger value="categories">Par catégorie</TabsTrigger>
+              <TabsTrigger value="importance">Par importance</TabsTrigger>
+            </TabsList>
+            
+            <TabsContent value="chronologie">
+              {filteredEntries.length > 0 ? (
+                <div className="space-y-4">
+                  {filteredEntries
+                    .sort((a, b) => {
+                      // Tri par date décroissante
+                      if (a.date.year !== b.date.year) {
+                        return b.date.year - a.date.year;
+                      }
+                      
+                      // Si même année, tri par saison
+                      const seasons = ['SPRING', 'SUMMER', 'AUTUMN', 'WINTER'];
+                      return seasons.indexOf(String(b.date.season)) - seasons.indexOf(String(a.date.season));
+                    })
+                    .map(entry => (
+                      <Card key={entry.id} className="overflow-hidden">
+                        <div className="flex border-l-4 border-blue-500">
+                          <div className="py-4 px-6 bg-muted/20 flex flex-col justify-center items-center min-w-[100px]">
+                            <div className="font-semibold">{entry.date.year}</div>
+                            <div className="text-sm text-muted-foreground">{entry.date.season}</div>
+                          </div>
+                          <div className="py-4 px-6 flex-1">
+                            <h3 className="font-semibold text-lg mb-1">{entry.titre}</h3>
+                            <p className="text-muted-foreground">{entry.contenu}</p>
+                            
+                            <div className="flex mt-2 gap-2">
+                              <span className={`text-xs px-2 py-1 rounded-full ${
+                                entry.type === 'politique' ? 'bg-blue-100 text-blue-800' :
+                                entry.type === 'militaire' ? 'bg-red-100 text-red-800' :
+                                entry.type === 'économique' ? 'bg-green-100 text-green-800' :
+                                entry.type === 'religieux' ? 'bg-purple-100 text-purple-800' :
+                                entry.type === 'social' ? 'bg-amber-100 text-amber-800' :
+                                'bg-gray-100 text-gray-800'
+                              }`}>
+                                {entry.type}
+                              </span>
+                              <span className={`text-xs px-2 py-1 rounded-full ${
+                                entry.importanceLevel === 'mineur' ? 'bg-gray-100 text-gray-800' :
+                                entry.importanceLevel === 'standard' ? 'bg-blue-100 text-blue-800' : 
+                                entry.importanceLevel === 'majeur' ? 'bg-amber-100 text-amber-800' :
+                                'bg-red-100 text-red-800'
+                              }`}>
+                                {entry.importanceLevel}
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+                      </Card>
+                    ))}
                 </div>
-                
-                <div className="space-y-2">
-                  <label className="text-sm font-medium">Importance</label>
-                  <Select value={importance} onValueChange={setImportance as (value: string) => void}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Sélectionner l'importance" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="majeure">Majeure</SelectItem>
-                      <SelectItem value="normale">Normale</SelectItem>
-                      <SelectItem value="mineure">Mineure</SelectItem>
-                    </SelectContent>
-                  </Select>
+              ) : (
+                <div className="text-center py-12">
+                  <BookOpen className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
+                  <h3 className="text-lg font-medium mb-2">Aucun événement trouvé</h3>
+                  <p className="text-muted-foreground mb-4">
+                    {searchTerm 
+                      ? "Aucun événement ne correspond à votre recherche"
+                      : "Commencez à enregistrer l'histoire de la République"}
+                  </p>
+                  <Button onClick={() => setIsModalOpen(true)}>
+                    Créer un premier événement
+                  </Button>
                 </div>
+              )}
+            </TabsContent>
+            
+            <TabsContent value="categories">
+              <div className="text-center py-12">
+                <span className="text-muted-foreground">
+                  Visualisation par catégories en cours de développement
+                </span>
               </div>
-              
-              <div className="space-y-2">
-                <label className="text-sm font-medium">Personnages impliqués</label>
-                <Input
-                  placeholder="Noms séparés par des virgules"
-                  value={personnagesImpliqués}
-                  onChange={(e) => setPersonnagesImpliqués(e.target.value)}
-                />
-                <p className="text-xs text-muted-foreground">
-                  Entrez les noms des personnages séparés par des virgules
-                </p>
+            </TabsContent>
+            
+            <TabsContent value="importance">
+              <div className="text-center py-12">
+                <span className="text-muted-foreground">
+                  Visualisation par niveau d'importance en cours de développement
+                </span>
               </div>
-              
-              <div className="flex items-center space-x-2">
-                <input
-                  type="checkbox"
-                  id="visible"
-                  checked={visible}
-                  onChange={(e) => setVisible(e.target.checked)}
-                  className="rounded border-input"
-                />
-                <label htmlFor="visible" className="text-sm">
-                  Événement visible pour les joueurs
-                </label>
-              </div>
-              
-              <Button 
-                onClick={handleAddEntry}
-                disabled={!titre || !contenu}
-                className="w-full"
-              >
-                <Plus className="h-4 w-4 mr-2" />
-                Ajouter l'événement
-              </Button>
-            </div>
-          </TabsContent>
+            </TabsContent>
+          </Tabs>
         </CardContent>
       </Card>
     </div>

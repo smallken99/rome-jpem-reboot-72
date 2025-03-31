@@ -15,7 +15,7 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Switch } from '@/components/ui/switch';
-import { EconomieCreationData, EconomieRecord, EconomieType, EconomieCategory, EconomieSource } from '../../types/economie';
+import { EconomieCreationData, EconomieRecord, ECONOMIE_TYPES, ECONOMIE_CATEGORIES, ECONOMIE_SOURCE } from '../../types/economie';
 
 export interface EconomieModalProps {
   isOpen: boolean;
@@ -49,7 +49,7 @@ export const EconomieModal: React.FC<EconomieModalProps> = ({ isOpen, onClose, o
         source: record.source,
         tags: record.tags,
         approved: record.approved,
-        date: record.date,
+        date: record.date instanceof Date ? record.date.toISOString() : record.date,
         recurring: record.recurring,
         recurringInterval: 'monthly', // Default value
         affectedSenateurId: record.affectedSenateurId,
@@ -194,7 +194,7 @@ export const EconomieModal: React.FC<EconomieModalProps> = ({ isOpen, onClose, o
                 id="date"
                 name="date"
                 type="date"
-                value={formData.date ? new Date(formData.date).toISOString().split('T')[0] : ''}
+                value={typeof formData.date === 'string' ? formData.date.split('T')[0] : ''}
                 onChange={handleInputChange}
               />
             </div>

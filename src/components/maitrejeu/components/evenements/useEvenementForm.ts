@@ -5,7 +5,8 @@ import { useMaitreJeu } from '../../context';
 import { 
   EvenementType, 
   EvenementAction, 
-  ImportanceType 
+  ImportanceType,
+  Evenement
 } from '../../types/evenements';
 
 export const useEvenementForm = (onClose: () => void) => {
@@ -37,7 +38,8 @@ export const useEvenementForm = (onClose: () => void) => {
       texte: optionText,
       effets: {},
       label: optionText,
-      consequence: consequence
+      consequence: consequence,
+      description: consequence // Ajouter description pour satisfaire le type
     };
     
     // Update the evenement state with the new option
@@ -64,13 +66,20 @@ export const useEvenementForm = (onClose: () => void) => {
       return;
     }
     
-    // Add an id to the event
-    const eventWithId = {
-      ...evenement,
-      id: uuidv4()
+    // Adapter le format pour correspondre à l'interface Evenement
+    const eventToSubmit: Evenement = {
+      id: uuidv4(),
+      title: evenement.titre,
+      description: evenement.description,
+      type: evenement.type,
+      date: evenement.date,
+      importance: evenement.importance,
+      options: evenement.options,
+      resolved: evenement.resolved,
+      titre: evenement.titre
     };
     
-    addEvenement(eventWithId);
+    addEvenement(eventToSubmit);
     onClose();
     
     // Reset the form

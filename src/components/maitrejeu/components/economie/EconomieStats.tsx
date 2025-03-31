@@ -11,9 +11,9 @@ export const EconomieStats: React.FC<EconomieStatsProps> = ({
 }) => {
   // Calculer un indicateur de santé économique
   const healthStatus = () => {
-    if (treasury.balance > (treasury.totalExpenses || treasury.expenses) * 5) return 'Excellente';
-    if (treasury.balance > (treasury.totalExpenses || treasury.expenses) * 2) return 'Bonne';
-    if (treasury.balance > (treasury.totalExpenses || treasury.expenses)) return 'Stable';
+    if (treasury.balance > (treasury.expenses) * 5) return 'Excellente';
+    if (treasury.balance > (treasury.expenses) * 2) return 'Bonne';
+    if (treasury.balance > (treasury.expenses)) return 'Stable';
     if (treasury.balance > 0) return 'Préoccupante';
     return 'Critique';
   };
@@ -54,7 +54,7 @@ export const EconomieStats: React.FC<EconomieStatsProps> = ({
         </CardHeader>
         <CardContent>
           <div className="text-2xl font-bold text-green-500">
-            {formatCurrency(treasury.totalIncome || treasury.income)}
+            {formatCurrency(treasury.income)}
           </div>
           <div className="flex items-center mt-1 text-sm">
             <ArrowUpIcon className="h-4 w-4 text-green-500 mr-1" />
@@ -70,11 +70,11 @@ export const EconomieStats: React.FC<EconomieStatsProps> = ({
         </CardHeader>
         <CardContent>
           <div className="text-2xl font-bold text-red-500">
-            {formatCurrency(treasury.totalExpenses || treasury.expenses)}
+            {formatCurrency(treasury.expenses)}
           </div>
           <div className="flex items-center mt-1 text-sm">
             <ArrowDownIcon className="h-4 w-4 text-red-500 mr-1" />
-            <span>Projection: {formatCurrency(treasury.expenses * (economicFactors.militaryExpenses || economicFactors.militaryExpense || 1))}</span>
+            <span>Projection: {formatCurrency(treasury.expenses * (economicFactors.militaryExpense || 1))}</span>
           </div>
         </CardContent>
       </Card>

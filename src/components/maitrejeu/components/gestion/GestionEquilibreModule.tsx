@@ -1,778 +1,391 @@
 
-import React, { useState } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import React from 'react';
+import { useMaitreJeu } from '../../context';
+import { GestionContainer } from './GestionContainer';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Slider } from '@/components/ui/slider';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { 
-  Dialog, 
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger
-} from '@/components/ui/dialog';
-import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
-import { Label } from '@/components/ui/label';
-import { useMaitreJeu } from '../../context/MaitreJeuContext';
-import { 
-  BarChart, 
-  Bar, 
-  XAxis, 
-  YAxis, 
-  CartesianGrid, 
-  Tooltip, 
-  Legend, 
-  ResponsiveContainer,
-  PieChart,
-  Pie,
-  Cell
-} from 'recharts';
-import { EquilibreOverview } from '../equilibre/EquilibreOverview';
-import { RecentEventsTable } from '../equilibre/RecentEventsTable';
-import { Risk, RiskType } from '../../types/equilibre';
-import { formatAnyDate, isGameDate } from '../../types/common';
-import { getEconomicStability, getReligionStability } from '../../utils/equilibreAdapter';
+import { Slider } from '@/components/ui/slider';
+import { PoliticalEventsTimeline } from '../PoliticalEventsTimeline';
+import { histoireEntryToPoliticalEvent } from '../../types/histoire';
+import { toast } from 'sonner';
 
 export const GestionEquilibreModule: React.FC = () => {
-  const { equilibre, updateEquilibre, updateFactionBalance } = useMaitreJeu();
+  const { equilibre, updateEquilibre, histoireEntries = [] } = useMaitreJeu();
   
-  const [localEquilibre, setLocalEquilibre] = useState({
-    populares: equilibre.politique.populaires,
-    optimates: equilibre.politique.optimates,
-    moderates: equilibre.politique.moderates,
-    patriciens: equilibre.social.patriciens,
-    plebeiens: equilibre.social.plebeiens,
-    economie: getEconomicStability(equilibre),
-    stability: equilibre.stability,
-    armée: equilibre.armée,
-    loyauté: equilibre.loyauté,
-    morale: equilibre.morale,
-    religion: getReligionStability(equilibre),
-    facteurJuridique: equilibre.facteurJuridique,
-  });
-  
-  const [activeSlider, setActiveSlider] = useState<string | null>(null);
-  const [activeTab, setActiveTab] = useState<string>('overview');
-  const [politicalDialog, setPoliticalDialog] = useState(false);
-  const [socialDialog, setSocialDialog] = useState(false);
-  const [economicDialog, setEconomicDialog] = useState(false);
-  const [otherDialog, setOtherDialog] = useState(false);
-  const [newRiskDialog, setNewRiskDialog] = useState(false);
-  
-  // States for new risk
-  const [newRisk, setNewRisk] = useState<Partial<Risk>>({
-    type: 'political',
-    name: '',
-    description: '',
-    severity: 5,
-    active: true,
-    impact: {}
-  });
-  
-  // Political pie chart data
-  const politicalData = [
-    { name: 'Populares', value: localEquilibre.populares, color: '#ef4444' },
-    { name: 'Optimates', value: localEquilibre.optimates, color: '#3b82f6' },
-    { name: 'Modérés', value: localEquilibre.moderates, color: '#84cc16' }
-  ];
-  
-  // Social pie chart data
-  const socialData = [
-    { name: 'Patriciens', value: localEquilibre.patriciens, color: '#8b5cf6' },
-    { name: 'Plébéiens', value: localEquilibre.plebeiens, color: '#f59e0b' }
-  ];
-  
-  // Stability factors data for bar chart
-  const stabilityFactors = [
-    { name: 'Économie', value: localEquilibre.economie, color: '#f59e0b' },
-    { name: 'Stabilité', value: localEquilibre.stability, color: '#3b82f6' },
-    { name: 'Armée', value: localEquilibre.armée, color: '#ef4444' },
-    { name: 'Loyauté', value: localEquilibre.loyauté, color: '#84cc16' },
-    { name: 'Morale', value: localEquilibre.morale, color: '#8b5cf6' },
-    { name: 'Religion', value: localEquilibre.religion, color: '#ec4899' },
-    { name: 'Juridique', value: localEquilibre.facteurJuridique, color: '#0ea5e9' }
-  ];
-  
-  // Handle updating political balance
-  const handleUpdatePolitical = () => {
-    updateFactionBalance(
-      localEquilibre.populares,
-      localEquilibre.optimates,
-      localEquilibre.moderates
-    );
-    setPoliticalDialog(false);
-  };
-  
-  // Handle updating social balance
-  const handleUpdateSocial = () => {
-    // Update with proper fields
-    updateEquilibre({
-      social: {
-        patriciens: localEquilibre.patriciens,
-        plebeiens: localEquilibre.plebeiens,
-        esclaves: equilibre.social.esclaves,
-        cohesion: equilibre.social.cohesion
-      },
-      patriciens: localEquilibre.patriciens,
-      plebeiens: localEquilibre.plebeiens
-    });
-    setSocialDialog(false);
-  };
-  
-  // Handle updating economic factors
-  const handleUpdateEconomic = () => {
-    // Create detailed economics object
-    const economieDetailed = {
-      stabilite: localEquilibre.economie,
-      croissance: localEquilibre.economie,
-      commerce: localEquilibre.economie,
-      agriculture: localEquilibre.economie
-    };
+  // Fonction pour mettre à jour un aspect de l'équilibre
+  const handleUpdateEquilibre = (
+    category: 'politique' | 'social' | 'economie' | 'militaire' | 'religion',
+    subcategory: string,
+    value: number
+  ) => {
+    // Faire une copie profonde pour éviter les références partagées
+    const updatedEquilibre = JSON.parse(JSON.stringify(equilibre));
     
-    updateEquilibre({
-      economie: localEquilibre.economie,
-      economy: localEquilibre.economie,
-      économie: localEquilibre.economie,
-      economicStability: localEquilibre.economie,
-      economieDetailed: economieDetailed
-    });
-    setEconomicDialog(false);
-  };
-  
-  // Handle updating other stability factors
-  const handleUpdateOther = () => {
-    updateEquilibre({
-      stability: localEquilibre.stability,
-      armée: localEquilibre.armée,
-      loyauté: localEquilibre.loyauté,
-      morale: localEquilibre.morale,
-      religion: localEquilibre.religion,
-      facteurJuridique: localEquilibre.facteurJuridique,
-      religionDetailed: {
-        piete: localEquilibre.religion,
-        traditions: localEquilibre.religion,
-        superstition: localEquilibre.religion
-      }
-    });
-    setOtherDialog(false);
-  };
-  
-  // Handle adding a new risk
-  const handleAddRisk = () => {
-    const risk: Risk = {
-      id: Math.random().toString(36).substring(2, 11),
-      type: newRisk.type as RiskType,
-      name: newRisk.name || '',
-      description: newRisk.description || '',
-      severity: newRisk.severity || 5,
-      createdAt: new Date().toISOString(),
-      active: newRisk.active || true,
-      impact: newRisk.impact || {}
-    };
-    
-    const updatedRisques = [...equilibre.risques, risk];
-    
-    updateEquilibre({
-      risques: updatedRisques
-    });
-    
-    setNewRisk({
-      type: 'political',
-      name: '',
-      description: '',
-      severity: 5,
-      active: true,
-      impact: {}
-    });
-    setNewRiskDialog(false);
-  };
-  
-  // Function to handle slider changes
-  const handleSliderChange = (key: string, value: number[]) => {
-    setLocalEquilibre(prev => ({
-      ...prev,
-      [key]: value[0]
-    }));
-  };
-  
-  // Function to format date for display
-  const formatDate = (date: Date | string) => {
-    if (isGameDate(date)) {
-      return formatAnyDate(date);
-    } else if (date instanceof Date) {
-      return date.toLocaleString();
+    // Mettre à jour la valeur spécifique
+    if (updatedEquilibre[category]) {
+      updatedEquilibre[category][subcategory] = value;
     }
-    return String(date);
+    
+    // Appliquer la mise à jour
+    updateEquilibre(updatedEquilibre);
+    toast.success(`${subcategory} mis à jour à ${Math.round(value * 100)}%`);
   };
+  
+  // Valeurs par défaut si null pour éviter les erreurs
+  const economieValues = equilibre.economie || {
+    stabilite: 0.5,
+    croissance: 0.5,
+    commerce: 0.5,
+    agriculture: 0.5
+  };
+  
+  // Conversion des événements d'histoire en événements politiques pour la timeline
+  const politicalEvents = histoireEntries.map(histoireEntryToPoliticalEvent);
   
   return (
-    <div className="space-y-6 p-6">
-      <header>
-        <h2 className="text-3xl font-bold tracking-tight">Équilibre de la République</h2>
-        <p className="text-muted-foreground">
-          Gérez l'équilibre politique, social et économique de la République Romaine.
-        </p>
-      </header>
-      
-      <Tabs value={activeTab} onValueChange={setActiveTab}>
-        <TabsList className="grid w-full grid-cols-4">
-          <TabsTrigger value="overview">Aperçu général</TabsTrigger>
-          <TabsTrigger value="political">Politique</TabsTrigger>
-          <TabsTrigger value="stability">Stabilité</TabsTrigger>
-          <TabsTrigger value="risks">Risques</TabsTrigger>
+    <GestionContainer
+      title="Gestion de l'Équilibre"
+      description="Ajustez les différents facteurs d'équilibre de la République"
+      showAddButton={false}
+    >
+      <Tabs defaultValue="politique">
+        <TabsList className="mb-6">
+          <TabsTrigger value="politique">Politique</TabsTrigger>
+          <TabsTrigger value="economie">Économie</TabsTrigger>
+          <TabsTrigger value="social">Social</TabsTrigger>
+          <TabsTrigger value="militaire">Militaire</TabsTrigger>
+          <TabsTrigger value="religion">Religion</TabsTrigger>
+          <TabsTrigger value="evenements">Événements</TabsTrigger>
         </TabsList>
         
-        <TabsContent value="overview">
-          <EquilibreOverview equilibre={equilibre} />
-        </TabsContent>
-        
-        <TabsContent value="political">
-          <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+        {/* Onglet Équilibre Politique */}
+        <TabsContent value="politique">
+          <div className="space-y-6">
             <Card>
               <CardHeader>
-                <div className="flex items-center justify-between">
-                  <CardTitle>Équilibre politique</CardTitle>
-                  <Dialog open={politicalDialog} onOpenChange={setPoliticalDialog}>
-                    <DialogTrigger asChild>
-                      <Button variant="outline" size="sm">Modifier</Button>
-                    </DialogTrigger>
-                    <DialogContent>
-                      <DialogHeader>
-                        <DialogTitle>Équilibre des factions politiques</DialogTitle>
-                        <DialogDescription>
-                          Ajustez la répartition des pouvoirs entre les factions. Le total doit être égal à 100%.
-                        </DialogDescription>
-                      </DialogHeader>
-                      
-                      <div className="grid gap-4 py-4">
-                        <div className="grid gap-2">
-                          <Label htmlFor="populares">Populares ({localEquilibre.populares}%)</Label>
-                          <Slider
-                            id="populares"
-                            min={0}
-                            max={100}
-                            step={1}
-                            value={[localEquilibre.populares]}
-                            onValueChange={(value) => handleSliderChange('populares', value)}
-                            className="[&_[role=slider]]:bg-red-500"
-                          />
-                        </div>
-                        <div className="grid gap-2">
-                          <Label htmlFor="optimates">Optimates ({localEquilibre.optimates}%)</Label>
-                          <Slider
-                            id="optimates"
-                            min={0}
-                            max={100}
-                            step={1}
-                            value={[localEquilibre.optimates]}
-                            onValueChange={(value) => handleSliderChange('optimates', value)}
-                            className="[&_[role=slider]]:bg-blue-500"
-                          />
-                        </div>
-                        <div className="grid gap-2">
-                          <Label htmlFor="moderates">Modérés ({localEquilibre.moderates}%)</Label>
-                          <Slider
-                            id="moderates"
-                            min={0}
-                            max={100}
-                            step={1}
-                            value={[localEquilibre.moderates]}
-                            onValueChange={(value) => handleSliderChange('moderates', value)}
-                            className="[&_[role=slider]]:bg-green-500"
-                          />
-                        </div>
-                        <div className="mt-2 text-sm text-right">
-                          Total: {localEquilibre.populares + localEquilibre.optimates + localEquilibre.moderates}%
-                          {(localEquilibre.populares + localEquilibre.optimates + localEquilibre.moderates) !== 100 && (
-                            <span className="text-red-500 ml-2">Le total doit être égal à 100%</span>
-                          )}
-                        </div>
-                      </div>
-                      
-                      <DialogFooter>
-                        <Button
-                          variant="outline"
-                          onClick={() => setPoliticalDialog(false)}
-                        >
-                          Annuler
-                        </Button>
-                        <Button
-                          onClick={handleUpdatePolitical}
-                          disabled={(localEquilibre.populares + localEquilibre.optimates + localEquilibre.moderates) !== 100}
-                        >
-                          Sauvegarder
-                        </Button>
-                      </DialogFooter>
-                    </DialogContent>
-                  </Dialog>
-                </div>
+                <CardTitle>Équilibre des Factions</CardTitle>
+                <CardDescription>
+                  Ajustez la balance des pouvoirs entre les grandes factions politiques romaines
+                </CardDescription>
               </CardHeader>
-              <CardContent>
-                <ResponsiveContainer width="100%" height={300}>
-                  <PieChart>
-                    <Pie
-                      data={politicalData}
-                      cx="50%"
-                      cy="50%"
-                      outerRadius={100}
-                      fill="#8884d8"
-                      dataKey="value"
-                      label={({ name, value }) => `${name}: ${value}%`}
-                    >
-                      {politicalData.map((entry, index) => (
-                        <Cell key={`cell-${index}`} fill={entry.color} />
-                      ))}
-                    </Pie>
-                    <Tooltip formatter={(value) => `${value}%`} />
-                    <Legend />
-                  </PieChart>
-                </ResponsiveContainer>
+              <CardContent className="space-y-6">
+                <div className="space-y-3">
+                  <div className="flex justify-between items-center">
+                    <span className="font-medium">Populares</span>
+                    <span className="text-sm text-muted-foreground">
+                      {Math.round(equilibre.politique.populares * 100)}%
+                    </span>
+                  </div>
+                  <Slider
+                    value={[equilibre.politique.populares * 100]}
+                    min={0}
+                    max={100}
+                    step={1}
+                    onValueChange={(value) => handleUpdateEquilibre('politique', 'populares', value[0]/100)}
+                    className="w-full"
+                  />
+                  <p className="text-sm text-muted-foreground">
+                    Les Populares cherchent à gagner du pouvoir en s'appuyant sur le soutien du peuple
+                    et prônent des réformes agraires et sociales.
+                  </p>
+                </div>
+                
+                <div className="space-y-3">
+                  <div className="flex justify-between items-center">
+                    <span className="font-medium">Optimates</span>
+                    <span className="text-sm text-muted-foreground">
+                      {Math.round(equilibre.politique.optimates * 100)}%
+                    </span>
+                  </div>
+                  <Slider
+                    value={[equilibre.politique.optimates * 100]}
+                    min={0}
+                    max={100}
+                    step={1}
+                    onValueChange={(value) => handleUpdateEquilibre('politique', 'optimates', value[0]/100)}
+                    className="w-full"
+                  />
+                  <p className="text-sm text-muted-foreground">
+                    Les Optimates défendent les privilèges de l'aristocratie et du Sénat,
+                    et s'opposent aux réformes populaires.
+                  </p>
+                </div>
+                
+                <div className="space-y-3">
+                  <div className="flex justify-between items-center">
+                    <span className="font-medium">Modérés</span>
+                    <span className="text-sm text-muted-foreground">
+                      {Math.round(equilibre.politique.moderates * 100)}%
+                    </span>
+                  </div>
+                  <Slider
+                    value={[equilibre.politique.moderates * 100]}
+                    min={0}
+                    max={100}
+                    step={1}
+                    onValueChange={(value) => handleUpdateEquilibre('politique', 'moderates', value[0]/100)}
+                    className="w-full"
+                  />
+                  <p className="text-sm text-muted-foreground">
+                    Les Modérés cherchent à maintenir un équilibre politique et évitent les positions extrêmes,
+                    favorisant le compromis et la stabilité.
+                  </p>
+                </div>
+                
+                <div className="pt-4">
+                  <Button 
+                    onClick={() => {
+                      // Normaliser pour que la somme soit égale à 1
+                      const total = equilibre.politique.populares + equilibre.politique.optimates + equilibre.politique.moderates;
+                      const updatedEquilibre = {
+                        ...equilibre,
+                        politique: {
+                          populares: equilibre.politique.populares / total,
+                          optimates: equilibre.politique.optimates / total,
+                          moderates: equilibre.politique.moderates / total
+                        }
+                      };
+                      updateEquilibre(updatedEquilibre);
+                      toast.success("Les valeurs ont été normalisées");
+                    }}
+                    variant="outline"
+                  >
+                    Normaliser les valeurs
+                  </Button>
+                </div>
               </CardContent>
             </Card>
             
             <Card>
               <CardHeader>
-                <div className="flex items-center justify-between">
-                  <CardTitle>Équilibre social</CardTitle>
-                  <Dialog open={socialDialog} onOpenChange={setSocialDialog}>
-                    <DialogTrigger asChild>
-                      <Button variant="outline" size="sm">Modifier</Button>
-                    </DialogTrigger>
-                    <DialogContent>
-                      <DialogHeader>
-                        <DialogTitle>Équilibre social</DialogTitle>
-                        <DialogDescription>
-                          Ajustez la répartition entre classes sociales. 
-                        </DialogDescription>
-                      </DialogHeader>
-                      
-                      <div className="grid gap-4 py-4">
-                        <div className="grid gap-2">
-                          <Label htmlFor="patriciens">Patriciens ({localEquilibre.patriciens}%)</Label>
-                          <Slider
-                            id="patriciens"
-                            min={0}
-                            max={100}
-                            step={1}
-                            value={[localEquilibre.patriciens]}
-                            onValueChange={(value) => handleSliderChange('patriciens', value)}
-                            className="[&_[role=slider]]:bg-purple-500"
-                          />
-                        </div>
-                        <div className="grid gap-2">
-                          <Label htmlFor="plebeiens">Plébéiens ({localEquilibre.plebeiens}%)</Label>
-                          <Slider
-                            id="plebeiens"
-                            min={0}
-                            max={100}
-                            step={1}
-                            value={[localEquilibre.plebeiens]}
-                            onValueChange={(value) => handleSliderChange('plebeiens', value)}
-                            className="[&_[role=slider]]:bg-amber-500"
-                          />
-                        </div>
-                      </div>
-                      
-                      <DialogFooter>
-                        <Button
-                          variant="outline"
-                          onClick={() => setSocialDialog(false)}
-                        >
-                          Annuler
-                        </Button>
-                        <Button
-                          onClick={handleUpdateSocial}
-                        >
-                          Sauvegarder
-                        </Button>
-                      </DialogFooter>
-                    </DialogContent>
-                  </Dialog>
-                </div>
+                <CardTitle>Tendances politiques</CardTitle>
+                <CardDescription>
+                  Visualisez l'évolution des tendances politiques au fil du temps
+                </CardDescription>
               </CardHeader>
               <CardContent>
-                <ResponsiveContainer width="100%" height={300}>
-                  <PieChart>
-                    <Pie
-                      data={socialData}
-                      cx="50%"
-                      cy="50%"
-                      outerRadius={100}
-                      fill="#8884d8"
-                      dataKey="value"
-                      label={({ name, value }) => `${name}: ${value}%`}
-                    >
-                      {socialData.map((entry, index) => (
-                        <Cell key={`cell-${index}`} fill={entry.color} />
-                      ))}
-                    </Pie>
-                    <Tooltip formatter={(value) => `${value}%`} />
-                    <Legend />
-                  </PieChart>
-                </ResponsiveContainer>
+                <div className="h-[300px] flex items-center justify-center">
+                  <p className="text-muted-foreground">
+                    Le graphique des tendances politiques sera disponible prochainement
+                  </p>
+                </div>
               </CardContent>
             </Card>
           </div>
-          
-          <Card className="mt-6">
-            <CardHeader>
-              <div className="flex items-center justify-between">
-                <CardTitle>Économie</CardTitle>
-                <Dialog open={economicDialog} onOpenChange={setEconomicDialog}>
-                  <DialogTrigger asChild>
-                    <Button variant="outline" size="sm">Modifier</Button>
-                  </DialogTrigger>
-                  <DialogContent>
-                    <DialogHeader>
-                      <DialogTitle>Facteurs économiques</DialogTitle>
-                      <DialogDescription>
-                        Ajustez les différents facteurs qui influencent l'économie romaine.
-                      </DialogDescription>
-                    </DialogHeader>
-                    
-                    <div className="grid gap-4 py-4">
-                      <div className="grid gap-2">
-                        <Label htmlFor="economie">Stabilité économique ({localEquilibre.economie})</Label>
-                        <Slider
-                          id="economie"
-                          min={0}
-                          max={100}
-                          step={1}
-                          value={[localEquilibre.economie]}
-                          onValueChange={(value) => handleSliderChange('economie', value)}
-                          className="[&_[role=slider]]:bg-amber-500"
-                        />
-                      </div>
-                    </div>
-                    
-                    <DialogFooter>
-                      <Button
-                        variant="outline"
-                        onClick={() => setEconomicDialog(false)}
-                      >
-                        Annuler
-                      </Button>
-                      <Button
-                        onClick={handleUpdateEconomic}
-                      >
-                        Sauvegarder
-                      </Button>
-                    </DialogFooter>
-                  </DialogContent>
-                </Dialog>
-              </div>
-            </CardHeader>
-            <CardContent>
-              <div className="flex justify-center items-center text-center h-24">
-                <div>
-                  <h3 className="text-6xl font-bold">{localEquilibre.economie}</h3>
-                  <p className="text-muted-foreground mt-2">Indice économique</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-          
-          <div className="mt-6">
-            <RecentEventsTable events={equilibre.historique.slice(0, 5)} />
-          </div>
         </TabsContent>
         
-        <TabsContent value="stability">
-          <Card>
-            <CardHeader>
-              <div className="flex items-center justify-between">
-                <CardTitle>Facteurs de stabilité</CardTitle>
-                <Dialog open={otherDialog} onOpenChange={setOtherDialog}>
-                  <DialogTrigger asChild>
-                    <Button variant="outline" size="sm">Modifier</Button>
-                  </DialogTrigger>
-                  <DialogContent className="max-w-2xl">
-                    <DialogHeader>
-                      <DialogTitle>Facteurs de stabilité</DialogTitle>
-                      <DialogDescription>
-                        Ajustez les divers facteurs qui influencent la stabilité de la République.
-                      </DialogDescription>
-                    </DialogHeader>
-                    
-                    <div className="grid gap-4 py-4 md:grid-cols-2">
-                      <div className="grid gap-2">
-                        <Label htmlFor="stability">Stabilité générale ({localEquilibre.stability})</Label>
-                        <Slider
-                          id="stability"
-                          min={0}
-                          max={100}
-                          step={1}
-                          value={[localEquilibre.stability]}
-                          onValueChange={(value) => handleSliderChange('stability', value)}
-                          className="[&_[role=slider]]:bg-blue-500"
-                        />
-                      </div>
-                      <div className="grid gap-2">
-                        <Label htmlFor="armée">Force militaire ({localEquilibre.armée})</Label>
-                        <Slider
-                          id="armée"
-                          min={0}
-                          max={100}
-                          step={1}
-                          value={[localEquilibre.armée]}
-                          onValueChange={(value) => handleSliderChange('armée', value)}
-                          className="[&_[role=slider]]:bg-red-500"
-                        />
-                      </div>
-                      <div className="grid gap-2">
-                        <Label htmlFor="loyauté">Loyauté du peuple ({localEquilibre.loyauté})</Label>
-                        <Slider
-                          id="loyauté"
-                          min={0}
-                          max={100}
-                          step={1}
-                          value={[localEquilibre.loyauté]}
-                          onValueChange={(value) => handleSliderChange('loyauté', value)}
-                          className="[&_[role=slider]]:bg-green-500"
-                        />
-                      </div>
-                      <div className="grid gap-2">
-                        <Label htmlFor="morale">Morale publique ({localEquilibre.morale})</Label>
-                        <Slider
-                          id="morale"
-                          min={0}
-                          max={100}
-                          step={1}
-                          value={[localEquilibre.morale]}
-                          onValueChange={(value) => handleSliderChange('morale', value)}
-                          className="[&_[role=slider]]:bg-purple-500"
-                        />
-                      </div>
-                      <div className="grid gap-2">
-                        <Label htmlFor="religion">Piété et religion ({localEquilibre.religion})</Label>
-                        <Slider
-                          id="religion"
-                          min={0}
-                          max={100}
-                          step={1}
-                          value={[localEquilibre.religion]}
-                          onValueChange={(value) => handleSliderChange('religion', value)}
-                          className="[&_[role=slider]]:bg-pink-500"
-                        />
-                      </div>
-                      <div className="grid gap-2">
-                        <Label htmlFor="facteurJuridique">Cadre juridique ({localEquilibre.facteurJuridique})</Label>
-                        <Slider
-                          id="facteurJuridique"
-                          min={0}
-                          max={100}
-                          step={1}
-                          value={[localEquilibre.facteurJuridique]}
-                          onValueChange={(value) => handleSliderChange('facteurJuridique', value)}
-                          className="[&_[role=slider]]:bg-sky-500"
-                        />
-                      </div>
-                    </div>
-                    
-                    <DialogFooter>
-                      <Button
-                        variant="outline"
-                        onClick={() => setOtherDialog(false)}
-                      >
-                        Annuler
-                      </Button>
-                      <Button
-                        onClick={handleUpdateOther}
-                      >
-                        Sauvegarder
-                      </Button>
-                    </DialogFooter>
-                  </DialogContent>
-                </Dialog>
-              </div>
-            </CardHeader>
-            <CardContent>
-              <ResponsiveContainer width="100%" height={400}>
-                <BarChart
-                  data={stabilityFactors}
-                  layout="vertical"
-                  margin={{ top: 5, right: 30, left: 120, bottom: 5 }}
-                >
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis type="number" domain={[0, 100]} />
-                  <YAxis dataKey="name" type="category" width={100} />
-                  <Tooltip formatter={(value) => `${value}/100`} />
-                  <Legend />
-                  <Bar dataKey="value" name="Valeur" radius={[0, 10, 10, 0]}>
-                    {stabilityFactors.map((entry, index) => (
-                      <Cell key={`cell-${index}`} fill={entry.color} />
-                    ))}
-                  </Bar>
-                </BarChart>
-              </ResponsiveContainer>
-            </CardContent>
-          </Card>
-        </TabsContent>
-        
-        <TabsContent value="risks">
-          <div className="flex justify-between items-center mb-4">
-            <h3 className="text-xl font-semibold">Risques actuels</h3>
-            <Dialog open={newRiskDialog} onOpenChange={setNewRiskDialog}>
-              <DialogTrigger asChild>
-                <Button>Ajouter un risque</Button>
-              </DialogTrigger>
-              <DialogContent>
-                <DialogHeader>
-                  <DialogTitle>Ajouter un nouveau risque</DialogTitle>
-                  <DialogDescription>
-                    Définissez un nouveau facteur de risque pour la République.
-                  </DialogDescription>
-                </DialogHeader>
-                
-                <div className="grid gap-4 py-4">
-                  <div className="grid gap-2">
-                    <Label htmlFor="risk-type">Type de risque</Label>
-                    <select
-                      id="risk-type"
-                      className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
-                      value={newRisk.type as string}
-                      onChange={(e) => setNewRisk({ ...newRisk, type: e.target.value as RiskType })}
-                    >
-                      <option value="political">Politique</option>
-                      <option value="economic">Économique</option>
-                      <option value="military">Militaire</option>
-                      <option value="social">Social</option>
-                      <option value="religious">Religieux</option>
-                    </select>
-                  </div>
-                  <div className="grid gap-2">
-                    <Label htmlFor="risk-name">Nom du risque</Label>
-                    <Input
-                      id="risk-name"
-                      value={newRisk.name || ''}
-                      onChange={(e) => setNewRisk({ ...newRisk, name: e.target.value })}
-                    />
-                  </div>
-                  <div className="grid gap-2">
-                    <Label htmlFor="risk-description">Description</Label>
-                    <Textarea
-                      id="risk-description"
-                      value={newRisk.description || ''}
-                      onChange={(e) => setNewRisk({ ...newRisk, description: e.target.value })}
-                    />
-                  </div>
-                  <div className="grid gap-2">
-                    <Label htmlFor="risk-severity">Sévérité ({newRisk.severity || 5}/10)</Label>
-                    <Slider
-                      id="risk-severity"
-                      min={1}
-                      max={10}
-                      step={1}
-                      value={[newRisk.severity || 5]}
-                      onValueChange={(value) => setNewRisk({ ...newRisk, severity: value[0] })}
-                      className="[&_[role=slider]]:bg-red-500"
-                    />
-                  </div>
-                </div>
-                
-                <DialogFooter>
-                  <Button variant="outline" onClick={() => setNewRiskDialog(false)}>
-                    Annuler
-                  </Button>
-                  <Button onClick={handleAddRisk}>
-                    Ajouter
-                  </Button>
-                </DialogFooter>
-              </DialogContent>
-            </Dialog>
-          </div>
-          
-          {equilibre.risques.length === 0 ? (
+        {/* Onglet Équilibre Économique */}
+        <TabsContent value="economie">
+          <div className="space-y-6">
             <Card>
-              <CardContent className="py-10 text-center">
-                <p className="text-muted-foreground">Aucun risque actif pour le moment.</p>
+              <CardHeader>
+                <CardTitle>Indicateurs Économiques</CardTitle>
+                <CardDescription>
+                  Ajustez les différents aspects de l'économie romaine
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-6">
+                <div className="space-y-3">
+                  <div className="flex justify-between items-center">
+                    <span className="font-medium">Stabilité</span>
+                    <span className="text-sm text-muted-foreground">
+                      {Math.round(economieValues.stabilite * 100)}%
+                    </span>
+                  </div>
+                  <Slider
+                    value={[economieValues.stabilite * 100]}
+                    min={0}
+                    max={100}
+                    step={1}
+                    onValueChange={(value) => handleUpdateEquilibre('economie', 'stabilite', value[0]/100)}
+                    className="w-full"
+                  />
+                  <p className="text-sm text-muted-foreground">
+                    La stabilité économique reflète la confiance dans la monnaie et la prévisibilité des marchés.
+                  </p>
+                </div>
+                
+                <div className="space-y-3">
+                  <div className="flex justify-between items-center">
+                    <span className="font-medium">Croissance</span>
+                    <span className="text-sm text-muted-foreground">
+                      {Math.round(economieValues.croissance * 100)}%
+                    </span>
+                  </div>
+                  <Slider
+                    value={[economieValues.croissance * 100]}
+                    min={0}
+                    max={100}
+                    step={1}
+                    onValueChange={(value) => handleUpdateEquilibre('economie', 'croissance', value[0]/100)}
+                    className="w-full"
+                  />
+                  <p className="text-sm text-muted-foreground">
+                    La croissance économique représente l'expansion générale de l'économie et la création de richesse.
+                  </p>
+                </div>
+                
+                <div className="space-y-3">
+                  <div className="flex justify-between items-center">
+                    <span className="font-medium">Commerce</span>
+                    <span className="text-sm text-muted-foreground">
+                      {Math.round(economieValues.commerce * 100)}%
+                    </span>
+                  </div>
+                  <Slider
+                    value={[economieValues.commerce * 100]}
+                    min={0}
+                    max={100}
+                    step={1}
+                    onValueChange={(value) => handleUpdateEquilibre('economie', 'commerce', value[0]/100)}
+                    className="w-full"
+                  />
+                  <p className="text-sm text-muted-foreground">
+                    Le commerce mesure l'activité marchande, les échanges et l'importance des routes commerciales.
+                  </p>
+                </div>
+                
+                <div className="space-y-3">
+                  <div className="flex justify-between items-center">
+                    <span className="font-medium">Agriculture</span>
+                    <span className="text-sm text-muted-foreground">
+                      {Math.round(economieValues.agriculture * 100)}%
+                    </span>
+                  </div>
+                  <Slider
+                    value={[economieValues.agriculture * 100]}
+                    min={0}
+                    max={100}
+                    step={1}
+                    onValueChange={(value) => handleUpdateEquilibre('economie', 'agriculture', value[0]/100)}
+                    className="w-full"
+                  />
+                  <p className="text-sm text-muted-foreground">
+                    L'agriculture représente la santé des récoltes, l'approvisionnement alimentaire et les terres cultivées.
+                  </p>
+                </div>
               </CardContent>
             </Card>
-          ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {equilibre.risques.map((risk) => (
-                <Card key={risk.id} className={`border-l-4 ${
-                  risk.severity >= 8 ? 'border-l-red-500' :
-                  risk.severity >= 5 ? 'border-l-amber-500' :
-                  'border-l-blue-500'
-                }`}>
-                  <CardHeader className="pb-2">
-                    <div className="flex justify-between items-start">
-                      <div>
-                        <CardTitle>{risk.name}</CardTitle>
-                        <p className="text-sm text-muted-foreground">
-                          {risk.type.charAt(0).toUpperCase() + risk.type.slice(1)} • Sévérité: {risk.severity}/10
-                        </p>
-                      </div>
-                      <div className="flex gap-2">
-                        <Button variant="outline" size="sm">Modifier</Button>
-                        <Button
-                          variant="destructive"
-                          size="sm"
-                          onClick={() => {
-                            const updatedRisques = equilibre.risques.filter(r => r.id !== risk.id);
-                            updateEquilibre({
-                              risques: updatedRisques
-                            });
-                          }}
-                        >
-                          Supprimer
-                        </Button>
-                      </div>
-                    </div>
-                  </CardHeader>
-                  <CardContent>
-                    <p className="text-sm">{risk.description}</p>
-                    <div className="mt-2 text-xs text-muted-foreground">
-                      Ajouté le {formatDate(risk.createdAt)}
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-          )}
-          
-          <h3 className="text-xl font-semibold mt-8 mb-4">Historique d'équilibre</h3>
-          <Card>
-            <CardContent className="p-0">
-              <table className="w-full">
-                <thead>
-                  <tr className="border-b">
-                    <th className="text-left p-3">Date</th>
-                    <th className="text-left p-3">Événement</th>
-                    <th className="text-left p-3">Modifications</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {equilibre.historique.map((entry, index) => (
-                    <tr key={index} className="border-b hover:bg-secondary/5">
-                      <td className="p-3">{entry.date}</td>
-                      <td className="p-3">{entry.event || '-'}</td>
-                      <td className="p-3">
-                        {Object.entries(entry.values).map(([key, value]) => (
-                          <div key={key} className="text-sm">
-                            {key}: {typeof value === 'number' && value > 0 ? `+${value}` : value}
-                          </div>
-                        ))}
-                      </td>
-                    </tr>
-                  ))}
-                  {equilibre.historique.length === 0 && (
-                    <tr>
-                      <td colSpan={3} className="p-4 text-center text-muted-foreground">
-                        Aucune entrée dans l'historique
-                      </td>
-                    </tr>
-                  )}
-                </tbody>
-              </table>
-            </CardContent>
-          </Card>
+            
+            <Card>
+              <CardHeader>
+                <CardTitle>Projection économique</CardTitle>
+                <CardDescription>
+                  Tendances économiques prévisionnelles
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="h-[300px] flex items-center justify-center">
+                  <p className="text-muted-foreground">
+                    Les projections économiques seront disponibles prochainement
+                  </p>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        </TabsContent>
+        
+        {/* Onglet Équilibre Social */}
+        <TabsContent value="social">
+          <div className="space-y-6">
+            <Card>
+              <CardHeader>
+                <CardTitle>Structure Sociale</CardTitle>
+                <CardDescription>
+                  Ajustez l'équilibre entre les différentes classes sociales
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-6">
+                <div className="space-y-3">
+                  <div className="flex justify-between items-center">
+                    <span className="font-medium">Patriciens</span>
+                    <span className="text-sm text-muted-foreground">
+                      {Math.round(equilibre.social.patriciens * 100)}%
+                    </span>
+                  </div>
+                  <Slider
+                    value={[equilibre.social.patriciens * 100]}
+                    min={0}
+                    max={100}
+                    step={1}
+                    onValueChange={(value) => handleUpdateEquilibre('social', 'patriciens', value[0]/100)}
+                    className="w-full"
+                  />
+                  <p className="text-sm text-muted-foreground">
+                    Influence et pouvoir de l'aristocratie patricienne dans la société romaine.
+                  </p>
+                </div>
+                
+                <div className="space-y-3">
+                  <div className="flex justify-between items-center">
+                    <span className="font-medium">Plébéiens</span>
+                    <span className="text-sm text-muted-foreground">
+                      {Math.round(equilibre.social.plebeiens * 100)}%
+                    </span>
+                  </div>
+                  <Slider
+                    value={[equilibre.social.plebeiens * 100]}
+                    min={0}
+                    max={100}
+                    step={1}
+                    onValueChange={(value) => handleUpdateEquilibre('social', 'plebeiens', value[0]/100)}
+                    className="w-full"
+                  />
+                  <p className="text-sm text-muted-foreground">
+                    Influence et pouvoir des classes populaires et de la plèbe dans la société.
+                  </p>
+                </div>
+                
+                <div className="space-y-3">
+                  <div className="flex justify-between items-center">
+                    <span className="font-medium">Esclaves</span>
+                    <span className="text-sm text-muted-foreground">
+                      {Math.round((equilibre.social.esclaves || 0) * 100)}%
+                    </span>
+                  </div>
+                  <Slider
+                    value={[(equilibre.social.esclaves || 0) * 100]}
+                    min={0}
+                    max={100}
+                    step={1}
+                    onValueChange={(value) => handleUpdateEquilibre('social', 'esclaves', value[0]/100)}
+                    className="w-full"
+                  />
+                  <p className="text-sm text-muted-foreground">
+                    Proportion et importance des esclaves dans l'économie et la société.
+                  </p>
+                </div>
+                
+                <div className="space-y-3">
+                  <div className="flex justify-between items-center">
+                    <span className="font-medium">Cohésion Sociale</span>
+                    <span className="text-sm text-muted-foreground">
+                      {Math.round((equilibre.social.cohesion || 0) * 100)}%
+                    </span>
+                  </div>
+                  <Slider
+                    value={[(equilibre.social.cohesion || 0) * 100]}
+                    min={0}
+                    max={100}
+                    step={1}
+                    onValueChange={(value) => handleUpdateEquilibre('social', 'cohesion', value[0]/100)}
+                    className="w-full"
+                  />
+                  <p className="text-sm text-muted-foreground">
+                    Mesure de l'unité et de la stabilité sociale dans la République.
+                  </p>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        </TabsContent>
+        
+        {/* Onglet Événements */}
+        <TabsContent value="evenements">
+          <PoliticalEventsTimeline events={politicalEvents} />
         </TabsContent>
       </Tabs>
-    </div>
+    </GestionContainer>
   );
 };

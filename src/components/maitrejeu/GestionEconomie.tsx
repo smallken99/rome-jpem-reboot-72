@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -68,7 +69,8 @@ export const GestionEconomie = () => {
 
       <EconomieStats 
         treasury={treasury} 
-        economicFactors={economicFactors} 
+        economicFactors={economicFactors}
+        economieRecords={economieRecords}
       />
 
       <Card>

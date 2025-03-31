@@ -1,38 +1,39 @@
 
 import { GameDate } from './common';
 
-export type EvenementType = 'POLITIQUE' | 'MILITAIRE' | 'ECONOMIQUE' | 'SOCIAL' | 'RELIGIEUX' | 'DIPLOMATIC' | string;
-export type ImportanceType = 'mineure' | 'normale' | 'majeure' | 'critique' | 'low' | 'medium' | 'high' | 'critical' | string;
+export type EvenementType = 'POLITIQUE' | 'MILITAIRE' | 'ECONOMIQUE' | 'SOCIAL' | 'RELIGIEUX' | 'CATASTROPHE';
+
+export type ImportanceType = 'mineure' | 'normale' | 'majeure' | 'critique';
 
 export interface EvenementAction {
   id: string;
   texte: string;
   label: string;
+  effets: Record<string, any>;
   consequence: string;
   description: string;
-  effets?: Record<string, number> | {};
 }
 
 export interface Evenement {
   id: string;
-  title: string; // Standard English field
-  titre?: string; // French alias
+  title: string;
   description: string;
   type: EvenementType;
   date: GameDate;
   importance: ImportanceType;
   options: EvenementAction[];
   resolved: boolean;
-  selectedOption?: string;
-  endDate?: GameDate;
-  tags?: string[];
-  actions?: EvenementAction[];
+  // Champs français pour compatibilité
+  titre?: string;
+  nom?: string;
 }
 
 export interface EvenementFormProps {
-  onSubmit: (evenement: Omit<Evenement, "id">) => void;
-  evenementInitial?: Partial<Evenement>;
+  onSubmit: (evenement: Evenement) => void;
+  currentDate?: GameDate;
+  isOpen?: boolean;
+  onClose?: () => void;
 }
 
-// Export types for compatibility
-export { ImportanceType as ImportanceType };
+// Exportation correcte du type ImportanceType
+export type { ImportanceType };
