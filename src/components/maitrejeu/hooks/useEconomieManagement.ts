@@ -22,7 +22,6 @@ const DEFAULT_SORT: EconomieSort = {
   direction: 'desc'
 };
 
-// Helper function to safely parse GameDate
 const parseGameDate = (date: GameDate | string): GameDate => {
   if (typeof date === 'string') {
     return parseStringToGameDate(date);
@@ -51,27 +50,22 @@ export const useEconomieManagement = () => {
   const [isReportOpen, setIsReportOpen] = useState(false);
   const [isProjectionOpen, setIsProjectionOpen] = useState(false);
   
-  // Fonction pour filtrer les enregistrements économiques
   const filterRecords = (records: EconomieRecord[], filter: EconomieFilter): EconomieRecord[] => {
     return records.filter(record => {
-      // Filtre de recherche textuelle
       if (filter.searchTerm && !Object.values(record).some(value => 
         typeof value === 'string' && value.toLowerCase().includes(filter.searchTerm.toLowerCase())
       )) {
         return false;
       }
       
-      // Filtre par catégorie
       if (filter.category && filter.category.length > 0 && !filter.category.includes(record.category) && !filter.category.includes('all')) {
         return false;
       }
       
-      // Filtre par type de transaction
       if (filter.types !== 'all' && record.type !== filter.types) {
         return false;
       }
       
-      // Filtre par entité affectée
       if (filter.affectedEntity && filter.affectedEntity !== 'all') {
         if (filter.affectedEntity === 'senateur' && !record.affectedSenateurId) {
           return false;
@@ -81,17 +75,14 @@ export const useEconomieManagement = () => {
         }
       }
       
-      // Filtre par montant minimum
       if (filter.minAmount !== undefined && record.amount < filter.minAmount) {
         return false;
       }
       
-      // Filtre par montant maximum
       if (filter.maxAmount !== undefined && record.amount > filter.maxAmount) {
         return false;
       }
       
-      // Filtre par plage de dates
       if (filter.dateRange) {
         if (filter.dateRange.start) {
           const recordDate = parseGameDate(record.date);
@@ -120,12 +111,10 @@ export const useEconomieManagement = () => {
     });
   };
   
-  // Fonction pour trier les enregistrements économiques
   const sortRecords = (records: EconomieRecord[], sort: EconomieSort): EconomieRecord[] => {
     return [...records].sort((a, b) => {
       const field = sort.field;
       
-      // Tri spécial pour les dates du jeu
       if (field === 'date') {
         const dateA = parseGameDate(a.date);
         const dateB = parseGameDate(b.date);
@@ -154,7 +143,6 @@ export const useEconomieManagement = () => {
         return sort.direction === 'asc' ? seasonA - seasonB : seasonB - seasonA;
       }
       
-      // Tri pour les champs simples
       const valueA = a[field as keyof EconomieRecord];
       const valueB = b[field as keyof EconomieRecord];
       
@@ -172,13 +160,11 @@ export const useEconomieManagement = () => {
     });
   };
   
-  // Obtenir les enregistrements filtrés et triés
   const filteredAndSortedRecords = useMemo(() => {
     const filtered = filterRecords(economieRecords, filter);
     return sortRecords(filtered, sort);
   }, [economieRecords, filter, sort]);
   
-  // Fonctions de gestion des filtres et du tri
   const handleFilterChange = (newFilter: Partial<EconomieFilter>) => {
     setFilter(prev => ({
       ...prev,
@@ -197,7 +183,6 @@ export const useEconomieManagement = () => {
     }));
   };
   
-  // Fonctions de gestion des transactions
   const handleAddTransaction = () => {
     setSelectedRecord(undefined);
     setIsModalOpen(true);
@@ -227,7 +212,6 @@ export const useEconomieManagement = () => {
     setIsModalOpen(false);
   };
   
-  // Fonctions de rapports et projections
   const handleGenerateReport = () => {
     setIsReportOpen(true);
   };
@@ -236,7 +220,6 @@ export const useEconomieManagement = () => {
     setIsProjectionOpen(true);
   };
   
-  // Fonction de mise à jour du trésor
   const updateTreasuryBalance = (newBalance: number) => {
     setTreasury(prev => ({
       ...prev,
@@ -244,9 +227,7 @@ export const useEconomieManagement = () => {
     }));
   };
   
-  // Fonction de rafraîchissement des données
   const handleRefreshData = () => {
-    // Calculer le solde du trésor en fonction des transactions
     const totalIncome = economieRecords
       .filter(r => r.type === 'income')
       .reduce((sum, r) => sum + r.amount, 0);
