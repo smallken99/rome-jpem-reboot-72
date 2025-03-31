@@ -1,33 +1,38 @@
 
-export const ECONOMIE_CATEGORIES = [
-  "Impôts",
-  "Armée",
-  "Construction",
-  "Commerce",
-  "Religion",
-  "Administration",
-  "Justice",
-  "Agriculture",
-  "Santé",
-  "Éducation",
-  "Fêtes et Jeux",
-  "Diplomatie",
-  "Infrastructure",
-  "Logistique militaire",
-  "Salaires"
-];
+// Shared enums for economy system
+export enum ECONOMIE_TYPES {
+  INCOME = "income",
+  EXPENSE = "expense",
+  TAX = "tax",
+  COMMERCE = "commerce",
+  MILITARY = "military",
+  CONSTRUCTION = "construction"
+}
 
-export const SOURCE_TYPES = [
-  "Trésor public",
-  "Impôts",
-  "Taxes douanières",
-  "Amendes",
-  "Butin de guerre",
-  "Dons",
-  "Tributs",
-  "Ventes de terres",
-  "Mines",
-  "Confiscations",
-  "Prêts",
-  "Revenus des provinces"
+export enum ECONOMIE_CATEGORIES {
+  TAXES = "taxes",
+  TRIBUTE = "tribute",
+  COMMERCE = "commerce",
+  CONSTRUCTION = "construction",
+  MILITARY = "military",
+  ADMINISTRATIVE = "administrative",
+  RELIGIOUS = "religious",
+  OTHER = "other"
+}
+
+export enum ECONOMIE_SOURCE {
+  SENATE = "senate",
+  PROVINCE = "province",
+  CITIZEN = "citizen",
+  FOREIGN = "foreign",
+  GOVERNMENT = "government",
+  MANUAL = "manual_entry"
+}
+
+export const RECURRING_INTERVALS = [
+  "monthly",
+  "quarterly",
+  "biannually",
+  "annually",
+  "special"
 ];

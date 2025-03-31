@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useMaitreJeu } from './context';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -17,7 +16,7 @@ export const GestionHistoire: React.FC = () => {
   const [activeTab, setActiveTab] = useState('chronologie');
   
   // Données contextuelles
-  const { histoireEntries = [], addHistoireEntry, gameState } = useMaitreJeu();
+  const { histoireEntries = [], addHistoireEntry, currentDate } = useMaitreJeu();
   
   // Nouvelles entrées d'histoire
   const [newEntryTitle, setNewEntryTitle] = useState('');
@@ -37,11 +36,10 @@ export const GestionHistoire: React.FC = () => {
       return;
     }
     
-    const newEntry: HistoireEntry = {
-      id: uuidv4(),
+    const newEntry: Omit<HistoireEntry, "id"> = {
       titre: newEntryTitle,
       contenu: newEntryContent,
-      date: gameState,
+      date: currentDate,
       type: newEntryType,
       importanceLevel: 'standard',
       personnesImpliquées: [],

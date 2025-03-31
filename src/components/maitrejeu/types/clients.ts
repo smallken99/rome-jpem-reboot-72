@@ -23,6 +23,12 @@ export interface Client {
   relationshipLevel?: number;
   lastInteraction?: string;
   age: number;
+  assignedTo?: string;
+  competencePoints?: number;
+  notes?: string;
+  origin?: string;
+  income?: number;
+  cost?: number;
 }
 
 export type ClientCreationData = Omit<Client, 'id'>;
@@ -32,9 +38,20 @@ export interface ClientFilter {
   type?: string;
   status?: string;
   assignedTo?: string;
+  location?: string;
+  loyalty?: string;
+  assignedOnly?: boolean;
+  minInfluence?: number;
+  minLoyalty?: number;
 }
 
 export interface ClientSort {
   field: keyof Client;
   direction: 'asc' | 'desc';
 }
+
+// Constants for client dropdowns
+export const CLIENT_TYPES = ['standard', 'influent', 'élite', 'étranger', 'militaire'];
+export const CLIENT_LOCATIONS = ['Rome', 'Italie', 'Provinces', 'Étranger'];
+export const CLIENT_LOYALTIES = ['faible', 'moyenne', 'forte', 'indéfectible'];
+export const CLIENT_STATUSES = ['active', 'inactive', 'probation'];

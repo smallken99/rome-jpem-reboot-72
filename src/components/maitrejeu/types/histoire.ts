@@ -9,21 +9,25 @@ export interface HistoireEntry {
   type: 'politique' | 'militaire' | 'économique' | 'religieux' | 'social';
   importanceLevel: 'mineur' | 'standard' | 'majeur' | 'historique';
   personnesImpliquées?: string[];
+  personnagesImpliqués?: string[]; // Alternative spelling
   lieuConcerné?: string;
   tags?: string[];
+  catégorie?: string; // Additional field
+  importance?: string; // Additional field
+  auteur?: string; // Additional field
 }
 
-// Type pour adapteur avec les types PoliticalEvent
+// Type for adapter with PoliticalEvent
 export interface PoliticalEvent {
   id: string;
   title: string;
   description: string;
   type: string;
   date: GameDate;
-  importance: 'low' | 'medium' | 'high' | 'critical';
+  importance: 'low' | 'medium' | 'high' | 'critical' | string;
 }
 
-// Fonction pour convertir HistoireEntry vers PoliticalEvent
+// Function to convert HistoireEntry to PoliticalEvent
 export function histoireEntryToPoliticalEvent(entry: HistoireEntry): PoliticalEvent {
   const importanceMap: Record<string, 'low' | 'medium' | 'high' | 'critical'> = {
     'mineur': 'low',

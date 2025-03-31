@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
@@ -58,6 +57,18 @@ export const EconomieTable: React.FC<EconomieTableProps> = ({
     }
     
     return <Badge variant={variant}>{category}</Badge>;
+  };
+
+  const formatGameDate = (date: Date | GameDate): string => {
+    if (date instanceof Date) {
+      return date.toLocaleDateString();
+    }
+
+    if (typeof date === 'object' && 'year' in date && 'season' in date) {
+      return `${date.year} ${date.season}`;
+    }
+
+    return String(date);
   };
 
   return (
@@ -123,9 +134,7 @@ export const EconomieTable: React.FC<EconomieTableProps> = ({
           records.map((record) => (
             <TableRow key={record.id}>
               <TableCell className="font-medium">
-                {typeof record.date === 'string' 
-                  ? formatDate(new Date(record.date)) 
-                  : `${record.date.year} ${record.date.season}`}
+                {formatGameDate(record.date)}
               </TableCell>
               <TableCell>{record.description}</TableCell>
               <TableCell>{getCategoryBadge(record.category)}</TableCell>

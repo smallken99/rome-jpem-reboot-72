@@ -1,12 +1,12 @@
 
-// Creating or updating this file to include the missing properties
+// Updating PropertyUpgrade interface to include all required fields
 export interface PropertyUpgrade {
   id: string;
   name: string;
   cost: number;
   description: string;
-  effect: string[];
-  effects?: string[]; // Alias for effect
+  effect: string | string[];
+  effects?: Record<string, any>; // For compatibility
   installed: boolean;
   requirements?: {
     buildingLevel?: number;

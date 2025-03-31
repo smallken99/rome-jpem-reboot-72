@@ -4,29 +4,30 @@ import { GameDate } from './common';
 export interface Province {
   id: string;
   nom: string;
-  name?: string; // Alias anglais pour compatibilité
+  name?: string; // English alias for compatibility
   région: string;
-  region?: string; // Alias anglais pour compatibilité
+  region?: string; // English alias for compatibility
   gouverneur?: string;
-  governor?: string; // Alias anglais pour compatibilité
+  governor?: string; // English alias for compatibility
   population: number;
   richesse: number;
   ressources: string[];
-  resources?: string[]; // Alias anglais pour compatibilité
+  resources?: string[]; // English alias for compatibility
   dateConquete?: GameDate;
-  conqueredDate?: GameDate; // Alias anglais pour compatibilité
+  conqueredDate?: GameDate; // English alias for compatibility
   stabilité: number;
   revenuAnnuel: number;
   garnison?: number;
-  garrison?: number; // Alias anglais pour compatibilité
+  garrison?: number; // English alias for compatibility
   tauxImposition?: number;
-  taxRate?: number; // Alias anglais pour compatibilité
+  taxRate?: number; // English alias for compatibility
   mécontentement?: number;
-  unrest?: number; // Alias anglais pour compatibilité
+  unrest?: number; // English alias for compatibility
   romanisation?: number;
-  romanization?: number; // Alias anglais pour compatibilité
+  romanization?: number; // English alias for compatibility
   prospérité?: number;
-  prosperity?: number; // Alias anglais pour compatibilité
+  prosperity?: number; // English alias for compatibility
   description?: string;
   statut: 'pacifiée' | 'instable' | 'rebelle';
+  status?: 'pacifiée' | 'instable' | 'rebelle'; // English alias
 }

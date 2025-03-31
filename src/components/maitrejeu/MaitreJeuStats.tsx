@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { 
   Card, 
@@ -34,37 +33,40 @@ export const MaitreJeuStats: React.FC = () => {
     economicFactors
   } = useMaitreJeu();
   
+  // Statistiques calculées
   const statisticsEquilibre = {
     politique: {
-      populares: equilibre.politique.populares || 0,
+      populaires: equilibre.politique.populaires || 0,
       optimates: equilibre.politique.optimates || 0,
       moderates: equilibre.politique.moderates || 0
     },
     social: { 
-      patriciens: equilibre.social.patriciens || 0, 
-      plebeiens: equilibre.social.plebeiens || 0 
+      patriciens: equilibre.social?.patriciens || 0, 
+      plebeiens: equilibre.social?.plebeiens || 0 
     },
-    economie: {
-      stabilite: equilibre.economie?.stabilite || 0,
-      croissance: equilibre.economie?.croissance || 0,
-      commerce: equilibre.economie?.commerce || 0,
-      agriculture: equilibre.economie?.agriculture || 0
+    economie: equilibre.economie || {
+      stabilite: 0,
+      croissance: 0,
+      commerce: 0,
+      agriculture: 0
     },
-    militaire: {
-      moral: equilibre.militaire?.moral || 0,
-      discipline: equilibre.militaire?.discipline || 0,
-      puissance: equilibre.militaire?.puissance || 0
+    militaire: equilibre.militaire || {
+      moral: 0,
+      discipline: 0,
+      puissance: 0,
+      effectifs: 0,
+      equipement: 0
     },
-    religion: {
-      piete: equilibre.religion?.piete || 0,
-      traditions: equilibre.religion?.traditions || 0,
-      superstition: equilibre.religion?.superstition || 0
+    religion: equilibre.religion || {
+      piete: 0,
+      traditions: 0,
+      superstition: 0
     }
   };
   
   // Données simplifiées pour les graphiques
   const senateursByFaction = [
-    { name: 'Populares', value: statisticsEquilibre.politique.populares },
+    { name: 'Populares', value: statisticsEquilibre.politique.populaires },
     { name: 'Optimates', value: statisticsEquilibre.politique.optimates },
     { name: 'Modérés', value: statisticsEquilibre.politique.moderates }
   ];
@@ -95,7 +97,7 @@ export const MaitreJeuStats: React.FC = () => {
   const getPoliticalStability = () => {
     const politicalScore = Math.floor(
       (statisticsEquilibre.politique.moderates * 100) / 
-      (statisticsEquilibre.politique.populares + 
+      (statisticsEquilibre.politique.populaires + 
        statisticsEquilibre.politique.optimates + 
        statisticsEquilibre.politique.moderates)
     );
@@ -123,7 +125,7 @@ export const MaitreJeuStats: React.FC = () => {
   const militaryPower = getMilitaryPower();
   
   // Calculer le nombre de projets de loi en attente
-  const pendingLaws = lois.filter(law => law.état === 'proposed').length;
+  const pendingLaws = lois.filter(law => law.état === LoiState.PROPOSED || law.état === "proposed").length;
   
   // Calculer le nombre total de provinces
   const totalProvinces = provinces.length;
@@ -131,17 +133,13 @@ export const MaitreJeuStats: React.FC = () => {
   // Calculer le nombre total de sénateurs
   const totalSenators = senateurs.length;
   
-  // Déterminer la stabilité de l'économie
-  const economicStability = 
-    equilibre.economie && equilibre.economie.stabilite >= 50 ? 'stable' : 'instable';
-  
-  // Déterminer la croissance économique
-  const economicGrowth = 
-    equilibre.economie && equilibre.economie.croissance >= 50 ? 'positive' : 'négative';
-  
-  // Calculer l'équilibre social
-  const socialBalance = 
-    (statisticsEquilibre.social.patriciens + statisticsEquilibre.social.plebeiens) / 2;
+  // Afficher les composants économiques structurés correctement
+  const renderEconomicIndicator = (label: string, value: number) => (
+    <div className="flex justify-between mb-1">
+      <span>{label}</span>
+      <span>{value}%</span>
+    </div>
+  );
   
   return (
     <div className="space-y-6 p-6">
@@ -189,7 +187,7 @@ export const MaitreJeuStats: React.FC = () => {
               {militaryPower.text}
             </div>
             <p className="text-xs text-muted-foreground">
-              {Math.floor(statisticsEquilibre.militaire.puissance * 1000)} hommes
+              {Math.floor((statisticsEquilibre.militaire.puissance || 0) * 1000)} hommes
             </p>
           </CardContent>
         </Card>
@@ -204,7 +202,7 @@ export const MaitreJeuStats: React.FC = () => {
               {totalProvinces}
             </div>
             <p className="text-xs text-muted-foreground">
-              {provinces.filter(p => p.statut === 'pacifiée').length} pacifiées
+              {provinces.filter(p => p.status === 'pacifiée' || p.statut === 'pacifiée').length} pacifiées
             </p>
           </CardContent>
         </Card>
@@ -259,12 +257,12 @@ export const MaitreJeuStats: React.FC = () => {
             <div className="space-y-4">
               <div className="flex justify-between">
                 <div>Populares</div>
-                <div className="font-medium">{Math.round(statisticsEquilibre.politique.populares * 100)}%</div>
+                <div className="font-medium">{Math.round(statisticsEquilibre.politique.populaires * 100)}%</div>
               </div>
               <div className="h-2 bg-gray-200 rounded">
                 <div 
                   className="h-full bg-red-500 rounded" 
-                  style={{ width: `${statisticsEquilibre.politique.populares * 100}%` }}
+                  style={{ width: `${statisticsEquilibre.politique.populaires * 100}%` }}
                 />
               </div>
               

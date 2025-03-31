@@ -1,10 +1,10 @@
-
 import React from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { useMaitreJeu } from './context';
 import { Trophy, Users, Landmark, MapPin, Scroll, ArrowRight, Sword, Book, Scale, GanttChart } from 'lucide-react';
 import { formatSeasonDisplay } from '@/utils/timeSystem';
+import { LoiState } from './types/lois';
 
 export const MaitreJeuWelcome = () => {
   const { 
@@ -21,7 +21,14 @@ export const MaitreJeuWelcome = () => {
   // Statistiques calculées
   const activeSenatorsCount = senateurs.filter(s => s.actif).length;
   const pendingEventsCount = evenements.filter(e => !e.resolved).length;
-  const proposedLawsCount = lois.filter(l => l.état === 'Proposée' || l.status === 'proposée').length;
+  
+  // Check for proposed laws using either état or state property
+  const proposedLawsCount = lois.filter(l => {
+    return l.état === LoiState.PROPOSED || 
+           l.état === "proposed" || 
+           l.état === "Proposée" || 
+           l.state === "proposed";
+  }).length;
   
   // Formatage de la date et phase actuelle
   const formattedSeason = formatSeasonDisplay(currentSeason);

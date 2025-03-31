@@ -1,16 +1,17 @@
 
 import { Equilibre } from './equilibre';
 import { Loi } from './lois';
-import { Province } from './provinces';
+import { Province } from './province';
 import { SenateurJouable } from './senateurs';
 import { Evenement } from './evenements';
 import { HistoireEntry } from './histoire';
 import { Election } from './elections';
-import { GamePhase, Season } from './common';
+import { GamePhase, Season, GameDate } from './common';
 import { MagistratureType } from './magistratures';
+import { Client, ClientCreationData } from './clients';
 
 export interface MaitreJeuContextType {
-  // État du jeu
+  // Game state
   gameState: {
     year: number;
     season: Season;
@@ -20,8 +21,9 @@ export interface MaitreJeuContextType {
   currentYear: number;
   currentSeason: Season;
   currentPhase: GamePhase;
-  year?: number; // Pour compatibilité avec le code existant
-  season?: Season; // Pour compatibilité avec le code existant
+  currentDate: GameDate;
+  year?: number; // For compatibility with existing code
+  season?: Season; // For compatibility with existing code
   
   // Entities
   equilibre: Equilibre;
@@ -31,8 +33,17 @@ export interface MaitreJeuContextType {
   evenements: Evenement[];
   histoireEntries: HistoireEntry[];
   elections: Election[];
-  factions?: any[]; // Pour compatibilité avec le code existant
+  clients: Client[];
+  factions?: any[]; // For compatibility with existing code
+  
+  // State setters
   setSenateurs: React.Dispatch<React.SetStateAction<SenateurJouable[]>>;
+  setProvinces: React.Dispatch<React.SetStateAction<Province[]>>;
+  setEvenements: React.Dispatch<React.SetStateAction<Evenement[]>>;
+  setLois: React.Dispatch<React.SetStateAction<Loi[]>>;
+  setHistoireEntries: React.Dispatch<React.SetStateAction<HistoireEntry[]>>;
+  setClients: React.Dispatch<React.SetStateAction<Client[]>>;
+  setEquilibre: React.Dispatch<React.SetStateAction<Equilibre>>;
   
   // Actions
   advanceTime: (newSeason?: Season) => void;
@@ -43,7 +54,7 @@ export interface MaitreJeuContextType {
   // Political
   addLoi: (loi: Omit<Loi, "id">) => void;
   voteLoi: (id: string, vote: 'pour' | 'contre' | 'abstention', count?: number) => void;
-  scheduleElection: (magistrature: MagistratureType) => string;
+  scheduleElection: (magistrature: MagistratureType, year?: number, season?: Season) => string;
   
   // Events management
   addEvenement: (evenement: Omit<Evenement, "id">) => void;
@@ -58,7 +69,25 @@ export interface MaitreJeuContextType {
   // Senateurs
   updateSenateur: (id: string, updates: Partial<SenateurJouable>) => void;
   assignSenateurToPlayer: (senateurId: string, playerId: string) => void;
-  addSenateur?: (senateur: Omit<SenateurJouable, "id">) => void; // Pour compatibilité avec le code existant
-  deleteSenateur?: (id: string) => void; // Pour compatibilité avec le code existant
-  assignSenateur?: (senateurId: string, playerId: string) => void; // Pour compatibilité avec le code existant
+  addSenateur?: (senateur: Omit<SenateurJouable, "id">) => void; // For compatibility
+  deleteSenateur?: (id: string) => void; // For compatibility
+  assignSenateur?: (senateurId: string, playerId: string) => void; // For compatibility
+  
+  // Client operations
+  addClient: (client: ClientCreationData) => string;
+  updateClient: (id: string, updates: Partial<Client>) => void;
+  deleteClient: (id: string) => void;
+  assignClientToSenateur: (clientId: string, senateurId: string | null) => void;
+  adjustCompetencePoints: (clientId: string, points: number) => void;
+  changeClientStatus: (clientId: string, status: 'active' | 'inactive' | 'probation') => void;
+  
+  // Family operations
+  getFamille?: (id: string) => any;
+  getMembre?: (id: string) => any;
+  getMembresByFamille?: (familleId: string) => any[];
+  deleteMembreFamille?: (id: string) => void;
+  updateMembreFamille?: (id: string, updates: any) => void;
+  addFamille?: (familleData: any) => string;
+  addMembreFamille?: (membreData: any) => string;
+  createAlliance?: (famille1Id: string, famille2Id: string, type: string, termes: string, benefices: string[]) => string;
 }
