@@ -1,53 +1,40 @@
 
-export type Season = 'winter' | 'spring' | 'summer' | 'fall';
+export type Season = 'spring' | 'summer' | 'fall' | 'winter';
 
 export interface GameDate {
   year: number;
   season: Season;
-  day?: number;
-  month?: number;
-  endDate?: GameDate;
+  
+  // Add compatibility method for date-like operations
   toLocaleDateString?: () => string;
+  toLocaleString?: () => string;
 }
 
-export type NormalizedDate = {
-  year: number;
-  month: number;
-  day: number;
-};
+export function formatGameDate(date: GameDate): string {
+  return `${date.season} ${date.year}`;
+}
 
-export const isGameDate = (date: any): date is GameDate => {
+// Add additional helper functions
+export function isGameDate(date: any): date is GameDate {
   return date && typeof date === 'object' && 'year' in date && 'season' in date;
-};
+}
 
-export const convertToNormalizedDate = (date: GameDate): NormalizedDate => {
-  const seasonToMonth = {
-    winter: 1,
-    spring: 4,
-    summer: 7,
-    fall: 10
+export function seasonToString(season: Season): string {
+  const seasonMap = {
+    'spring': 'Printemps',
+    'summer': 'Été',
+    'fall': 'Automne',
+    'winter': 'Hiver'
   };
   
-  return {
-    year: date.year,
-    month: seasonToMonth[date.season],
-    day: date.day || 15
-  };
-};
+  return seasonMap[season] || season;
+}
 
-export const gameDateToDate = (gameDate: GameDate): Date => {
-  const { year, month, day } = convertToNormalizedDate(gameDate);
-  return new Date(year, month - 1, day);
-};
-
-export const gameDateToString = (gameDate: GameDate): string => {
-  const { season, year } = gameDate;
-  return `${season} ${year}`;
-};
-
-export const gameDateToStringOrDate = (date: GameDate | Date): string => {
-  if (isGameDate(date)) {
-    return gameDateToString(date);
-  }
-  return date.toLocaleDateString('fr-FR');
-};
+export function formatSeasonDisplay(season: string): string {
+  const upperSeason = season.toUpperCase();
+  if (upperSeason === 'SPRING' || upperSeason === 'VER') return 'Printemps';
+  if (upperSeason === 'SUMMER' || upperSeason === 'AESTAS') return 'Été';
+  if (upperSeason === 'AUTUMN' || upperSeason === 'FALL' || upperSeason === 'AUTUMNUS') return 'Automne';
+  if (upperSeason === 'WINTER' || upperSeason === 'HIEMS') return 'Hiver';
+  return season;
+}

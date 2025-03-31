@@ -3,7 +3,7 @@ import React from 'react';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { PoliticalEvent } from '@/types/equilibre';
 import { Badge } from '@/components/ui/badge';
-import { formatGameDate } from '@/utils/types/gameDate';
+import { formatGameDate, isGameDate } from '@/utils/types/gameDate';
 
 interface RecentEventsTableProps {
   events: PoliticalEvent[];
@@ -21,8 +21,8 @@ export const RecentEventsTable: React.FC<RecentEventsTableProps> = ({
         return b.date.getTime() - a.date.getTime();
       }
       // Handle GameDate objects
-      const aDate = 'year' in a.date ? a.date : { year: 0, season: 'spring' };
-      const bDate = 'year' in b.date ? b.date : { year: 0, season: 'spring' };
+      const aDate = isGameDate(a.date) ? a.date : { year: 0, season: 'spring' };
+      const bDate = isGameDate(b.date) ? b.date : { year: 0, season: 'spring' };
       
       if (aDate.year !== bDate.year) {
         return bDate.year - aDate.year;
@@ -38,7 +38,7 @@ export const RecentEventsTable: React.FC<RecentEventsTableProps> = ({
     if (date instanceof Date) {
       return date.toLocaleDateString();
     }
-    if (typeof date === 'object' && 'year' in date && 'season' in date) {
+    if (isGameDate(date)) {
       return formatGameDate(date);
     }
     return 'Date inconnue';
