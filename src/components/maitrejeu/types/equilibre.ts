@@ -1,4 +1,3 @@
-
 export type RiskType = 'revolte' | 'guerre' | 'politique' | 'economique' | 'religieux' | 'military' | 'political' | 'economic' | 'social' | 'religious' | string;
 
 export interface Risk {
@@ -36,19 +35,20 @@ export interface Equilibre {
     optimates: number;
     moderates: number;
   };
+  
   // Direct access properties (used in many components)
   populaires: number;
   populares: number; // alias
   optimates: number;
   moderates: number;
   
-  // Economic equilibrium
+  // Economic equilibrium - support both object and number
   economie: {
     stabilite: number;
     croissance: number;
     commerce: number;
     agriculture: number;
-  };
+  } | number;
   
   // Social equilibrium
   social: {
@@ -58,7 +58,7 @@ export interface Equilibre {
     cohesion: number;
     plébéiens?: number; // Alternative spelling
   };
-  plébéiens?: number; // Alias for backward compatibility with different spelling
+  plébéiens?: number; // Alias for backward compatibility
   patriciens?: number; // Additional property for direct access
   
   // Military equilibrium
@@ -74,7 +74,7 @@ export interface Equilibre {
     piete: number;
     traditions: number;
     superstition: number;
-  };
+  } | number;
   
   // Other stability factors
   stability?: number;
@@ -93,5 +93,12 @@ export interface Equilibre {
     croissance: number;
     commerce: number;
     agriculture: number;
+  } | number;
+  
+  // Political object for compatibility
+  political?: {
+    populares: number;
+    optimates: number;
+    moderates: number;
   };
 }

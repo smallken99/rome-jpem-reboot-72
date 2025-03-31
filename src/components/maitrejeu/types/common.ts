@@ -1,117 +1,114 @@
 
-// Season type for strict type checking
-export type Season = 'spring' | 'summer' | 'fall' | 'winter' | 'Spring' | 'Summer' | 'Fall' | 'Autumn' | 'Winter';
+// Common types used across the application
 
-// Game phase types
-export type GamePhase = 
-  | 'normal' 
-  | 'election' 
-  | 'crisis' 
-  | 'war' 
-  | 'POLITIQUE' 
-  | 'ECONOMIE' 
-  | 'SOCIAL' 
-  | 'MILITAIRE' 
-  | 'RELIGION'
-  | 'ACTIONS' 
-  | 'ELECTION'
-  | 'SENAT'
-  | 'SENATE';
-
-// Standard game date format
+// GameDate type for consistent date representation
 export interface GameDate {
   year: number;
   season: Season;
 }
 
-// Function to check if a value is a GameDate
-export function isGameDate(value: any): value is GameDate {
-  return (
-    value &&
-    typeof value === 'object' &&
-    typeof value.year === 'number' &&
-    typeof value.season === 'string'
-  );
-}
+// Season type - both Latin and English names supported
+export type Season = 
+  // English seasons
+  'spring' | 'summer' | 'fall' | 'winter' | 
+  // English with capital
+  'Spring' | 'Summer' | 'Fall' | 'Winter' |
+  // Latin seasons
+  'Ver' | 'Aestas' | 'Autumnus' | 'Hiems' |
+  // French translations
+  'Printemps' | 'Été' | 'Automne' | 'Hiver' |
+  // All-caps versions
+  'SPRING' | 'SUMMER' | 'AUTUMN' | 'WINTER' |
+  string;
 
-// Format any date for display
-export function formatAnyDate(date: Date | GameDate | string): string {
-  if (isGameDate(date)) {
-    return `${date.year} (${formatSeason(date.season)})`;
-  }
+// Game phase type
+export type GamePhase = 
+  // Standard phases
+  'normal' | 'election' | 'crisis' | 'war' | 
+  // English phases
+  'SENATE' | 'ACTIONS' | 'ECONOMY' | 'EVENTS' | 'DIPLOMACY' | 'MILITARY' |
+  // French phases
+  'POLITIQUE' | 'ECONOMIE' | 'SOCIAL' | 'MILITAIRE' | 'RELIGION' | 
+  'SETUP' | 'ELECTION' | 'ACTION' | 'SENAT' | 'EVENEMENT' | 'ADMINISTRATION' |
+  string;
+
+// Importance type used in events and political events
+export type ImportanceType = 'low' | 'medium' | 'high' | 'critical' | 'normale' | 'importante' | 'cruciale' | 'mineure' | string;
+
+// Function to format any game date for display
+export function formatAnyDate(date: Date | GameDate | { year: number; season: string }): string {
   if (date instanceof Date) {
     return date.toLocaleDateString();
   }
-  // Try to parse as a GameDate from string
-  try {
-    const jsonDate = JSON.parse(date);
-    if (isGameDate(jsonDate)) {
-      return `${jsonDate.year} (${formatSeason(jsonDate.season)})`;
-    }
-  } catch (e) {
-    // Not a JSON string
+  
+  if ('year' in date && 'season' in date) {
+    return `${date.season} ${date.year}`;
   }
-  return String(date);
+  
+  return 'Invalid date format';
 }
 
-// Format a season name
-export function formatSeason(season: string): string {
-  const seasonMap: Record<string, string> = {
-    spring: 'Printemps',
-    summer: 'Été',
-    fall: 'Automne',
-    winter: 'Hiver',
-    Spring: 'Printemps',
-    Summer: 'Été',
-    Fall: 'Automne',
-    Autumn: 'Automne',
-    Winter: 'Hiver',
-    ver: 'Printemps',
-    aestas: 'Été',
-    autumnus: 'Automne',
-    hiems: 'Hiver',
-  };
-  return seasonMap[season] || season;
+// Function to check if an object is a GameDate
+export function isGameDate(date: any): date is GameDate | { year: number; season: string } {
+  return date && typeof date === 'object' && 'year' in date && 'season' in date;
 }
 
-// Season dictionary maps for compatibility across components
-export const SAISONS = {
-  SPRING: 'spring',
-  SUMMER: 'summer',
-  AUTUMN: 'fall',
-  WINTER: 'winter',
-  PRINTEMPS: 'spring',
-  ETE: 'summer',
-  AUTOMNE: 'fall',
-  HIVER: 'winter'
+// Generate a unique ID (helper function)
+export function generateId(prefix = ''): string {
+  return `${prefix}${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+}
+
+// Convert a string date to a GameDate object
+export function dateToGameDate(dateString: string): GameDate {
+  if (!dateString) {
+    const now = new Date();
+    return {
+      year: now.getFullYear(),
+      season: 'Spring'
+    };
+  }
+  
+  try {
+    const [season, yearStr] = dateString.split(' ');
+    const year = parseInt(yearStr, 10);
+    return {
+      year: isNaN(year) ? new Date().getFullYear() : year,
+      season: season as Season
+    };
+  } catch (e) {
+    return {
+      year: new Date().getFullYear(),
+      season: 'Spring'
+    };
+  }
+}
+
+// Mapping for compatibility between different versions of the equilibre structure
+export const equilibreMap = {
+  politique: {
+    populaires: 'populaires',
+    populares: 'populares',
+    optimates: 'optimates', 
+    moderates: 'moderates'
+  },
+  social: {
+    patriciens: 'patriciens',
+    plebeiens: 'plebeiens',
+    plébéiens: 'plébéiens',
+    esclaves: 'esclaves',
+    cohesion: 'cohesion'
+  },
+  economie: 'economie',
+  économie: 'économie',
+  economy: 'economy',
+  economicStability: 'economicStability',
+  militaire: 'militaire',
+  religion: 'religion',
+  stability: 'stability',
+  armée: 'armée',
+  loyauté: 'loyauté',
+  morale: 'morale',
+  facteurJuridique: 'facteurJuridique',
+  risques: 'risques',
+  historique: 'historique'
 };
-
-// Parse string to GameDate
-export function parseStringToGameDate(dateStr: string): GameDate | null {
-  try {
-    // Try to parse as JSON
-    const parsed = JSON.parse(dateStr);
-    if (parsed && typeof parsed.year === 'number' && typeof parsed.season === 'string') {
-      return {
-        year: parsed.year,
-        season: parsed.season as Season
-      };
-    }
-  } catch (e) {
-    // Try to parse other formats
-    const dateMatch = dateStr.match(/(\d+)\s*\(([^)]+)\)/);
-    if (dateMatch) {
-      const year = parseInt(dateMatch[1], 10);
-      let season = dateMatch[2].trim().toLowerCase();
-      
-      // Map to standard season
-      if (season.includes('printemps')) season = 'spring';
-      else if (season.includes('été') || season.includes('ete')) season = 'summer';
-      else if (season.includes('automne')) season = 'fall';
-      else if (season.includes('hiver')) season = 'winter';
-      
-      return { year, season: season as Season };
-    }
-  }
-  return null;
-}

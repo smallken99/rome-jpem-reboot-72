@@ -1,41 +1,28 @@
 
-// Types pour les événements
+import { ImportanceType } from './common';
 
-export type EvenementType = 'POLITIQUE' | 'MILITAIRE' | 'DIPLOMATIQUE' | 'ECONOMIQUE' | 'SOCIAL' | 'RELIGIEUX' | 'CATASTROPHE';
-export type ImportanceType = 'mineure' | 'normale' | 'majeure' | 'critique';
+export type EvenementType = 'politique' | 'militaire' | 'economic' | 'social' | 'religious' | 'political' | 'military' | 'other' | string;
 
-// Interface pour une option de résolution d'un événement
 export interface EvenementAction {
   id: string;
-  texte: string;
-  effets: Record<string, number>;  // Effets sur différentes statistiques
   label: string;
-  consequence: string;
+  description: string;
+  consequence?: string;
+  impact?: Record<string, number>;
 }
 
-// Interface principale pour un événement
 export interface Evenement {
   id: string;
-  titre: string;
+  title: string;
+  titre?: string;
   description: string;
   type: EvenementType;
-  date: {
-    year: number;
-    season: string;
-  };
+  date: { year: number; season: string };
+  endDate?: { year: number; season: string };
   importance: ImportanceType;
   options: EvenementAction[];
+  actions?: EvenementAction[];
   resolved: boolean;
-  selectedOption?: string;
-  
-  // Propriétés manquantes dans l'interface mais utilisées dans le code
-  status?: 'planifiée' | 'en cours' | 'terminée';
-  year?: number; // Pour compatibilité
-  title?: string; // Alias pour titre
-}
-
-// Interface pour les props du formulaire d'événements
-export interface EvenementFormProps {
-  isOpen: boolean;
-  onClose: () => void;
+  nom?: string;
+  tags?: string[];
 }

@@ -1,37 +1,4 @@
 
-// Define the property upgrade interface
-export interface PropertyUpgrade {
-  id: string;
-  name: string;
-  description: string;
-  cost: number;
-  type: string;
-  effect: {
-    [key: string]: number;
-  };
-  effects?: Array<{
-    type: string;
-    value: number;
-    description: string;
-  }>;
-  requirements?: {
-    minBuildingSize?: number;
-    minBuildingValue?: number;
-    minOwnerPrestige?: number;
-    otherUpgrades?: string[];
-    buildingLevel?: number;
-    buildingCondition?: number;
-    minIncome?: number;
-    value?: number;
-    previousUpgrade?: string;
-    upgrades?: string[];
-  };
-  installed: boolean;
-  installDate?: Date;
-  buildingType?: string;
-}
-
-// Define the owned building interface
 export interface OwnedBuilding {
   id: string;
   buildingId: string;
@@ -44,34 +11,69 @@ export interface OwnedBuilding {
   condition: number;
   maintenanceLevel: number;
   maintenanceCost: number;
-  maintenance?: number; // For compatibility
+  maintenance: number;
   income: number;
   workers: number;
   maxWorkers: number;
   securityLevel: number;
-  description: string;
-  purchaseDate: Date;
+  description?: string;
+  purchaseDate?: Date | string;
   status?: string;
-  upgrades: PropertyUpgrade[];
+  upgrades?: PropertyUpgrade[];
 }
 
-// Define property tax information
-export interface PropertyTax {
+export interface PropertyUpgrade {
   id: string;
-  buildingId: string;
-  amount: number;
-  paid: boolean;
-  dueDate: Date;
-  taxType: 'property' | 'luxury' | 'income' | 'other';
-  period: string;
+  name: string;
+  type?: string;
+  description: string;
+  cost: number;
+  effect: string;
+  effects?: string[] | Record<string, any>;
+  installed: boolean;
+  requirements?: {
+    buildingLevel?: number;
+    buildingType?: string[];
+    prerequisiteUpgrades?: string[];
+    minValue?: number;
+  };
 }
 
-// Define the slave assignment interface for compatibility
 export interface SlaveAssignment {
   id: string;
   slaveId: string;
   buildingId: string;
+  propertyId?: string;
   assignedAt: Date;
+  startDate?: Date | string;
   role: string;
   productivity: number;
+  efficiency?: number;
+}
+
+export interface Slave {
+  id: string;
+  name: string;
+  age: number;
+  gender: string;
+  skills: string[];
+  price: number;
+  health: number;
+  status: string;
+  acquired: Date | string;
+  value: number;
+}
+
+export interface SlaveStatisticsProps {
+  totalSlaves: number;
+  assignedSlaves: number;
+  slaveValue: number;
+}
+
+export interface SlavePurchaseFormProps {
+  slavePrice: number;
+  totalSlaves: number;
+  balance: number;
+  onPurchase: (quantity: number) => void;
+  onSell: (quantity: number) => void;
 }
