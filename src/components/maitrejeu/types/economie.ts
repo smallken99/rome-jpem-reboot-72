@@ -1,126 +1,116 @@
 
 import { GameDate } from './common';
 
-// Types for economy records
 export interface EconomieRecord {
   id: string;
   amount: number;
-  date: GameDate | string;
-  type: 'income' | 'expense' | 'tax' | 'tribute' | 'gift' | 'other';
   category: string;
   description: string;
-  source?: string;
+  date: string;
+  source: string;
+  approved: boolean;
+  tags: string[];
+  type: string;
+  recurring: boolean;
   affectedSenateurId?: string;
   affectedProvinceId?: string;
-  affectedEntityName?: string;
-  approved: boolean;
-  approvedBy?: string;
-  approvedDate?: string;
-  recurring?: boolean;
-  recurringPeriod?: 'monthly' | 'quarterly' | 'yearly';
-  nextRecurrenceDate?: string;
   createdAt: string;
-  updatedAt?: string;
-  tags?: string[];
+  updatedAt: string;
 }
 
-// Type for creating new economy records
 export interface EconomieCreationData {
   amount: number;
-  date: GameDate | string;
-  type: 'income' | 'expense' | 'tax' | 'tribute' | 'gift' | 'other';
   category: string;
   description: string;
+  date: string;
   source?: string;
+  approved?: boolean;
+  tags?: string[];
+  type: string;
+  recurring?: boolean;
+  recurringInterval?: string;
   affectedSenateurId?: string;
   affectedProvinceId?: string;
-  affectedEntityName?: string;
-  approved?: boolean;
-  approvedBy?: string;
-  approvedDate?: string;
-  recurring?: boolean;
-  recurringPeriod?: 'monthly' | 'quarterly' | 'yearly';
-  nextRecurrenceDate?: string;
-  tags?: string[];
 }
 
-// Filters for economy records
 export interface EconomieFilter {
-  searchTerm: string;
-  categories?: string[];
-  type: 'all' | 'income' | 'expense' | 'tax' | 'tribute' | 'gift' | 'other';
-  affectedEntity?: 'all' | 'senateur' | 'province' | 'other';
+  category?: string;
+  source?: string;
+  startDate?: string;
+  endDate?: string;
+  type?: 'income' | 'expense' | 'all';
   minAmount?: number;
   maxAmount?: number;
-  dateRange?: {
-    start?: GameDate;
-    end?: GameDate;
-  };
+  searchTerm?: string;
 }
 
-// Sorting for economy records
 export interface EconomieSort {
   field: keyof EconomieRecord;
   direction: 'asc' | 'desc';
 }
 
-// Type for treasury status
 export interface TreasuryStatus {
   balance: number;
   income: number;
   expenses: number;
   surplus: number;
-  lastUpdated: string;
-  previousBalance?: number;
-  taxRate?: number;
-  projectedBalance?: number;
-  crisisThreshold?: number;
-  warFund?: number;
-  reserveRatio?: number;
-  debtLevel?: number;
-  creditRating?: 'excellent' | 'good' | 'fair' | 'poor' | 'terrible';
+  taxRate: number;
+  totalIncome?: number;
+  totalExpenses?: number;
+  debt?: number;
 }
 
-// Type for economic factors influencing the Republic
 export interface EconomicFactors {
-  taxRatePleb: number;
-  taxRatePatrician: number;
-  taxRateProvincial: number;
-  tradeEfficiency: number;
-  agricultureOutput: number;
-  inflation: number;
-  corruption: number;
-  publicWorks: number;
-  militaryExpenses: number;
-  generalProsperity: number;
-  
-  // Additional fields for compatibility
   taxCollection?: number;
   tradeRevenue?: number;
+  militaryExpenses?: number;
+  militaryExpense?: number; // For backward compatibility
   provinceRevenue?: number;
-  warSpoilsRevenue?: number;
-  publicWorksExpense?: number;
   religiousCeremonyExpense?: number;
+  publicWorksExpense?: number;
+  warSpoilsRevenue?: number;
   adminExpense?: number;
   currentYear?: number;
+  // Default values
+  administrativeEfficiency?: number;
+  taxComplianceRate?: number;
+  marketStability?: number;
+  inflationRate?: number;
 }
-
-// For compatibility with EconomieModal.tsx
-export type EconomieType = 'income' | 'expense' | 'tax' | 'tribute' | 'gift' | 'other';
-export type EconomieCategory = 'government' | 'military' | 'trade' | 'agriculture' | 'donations' | 'other';
-export type EconomieSource = 'treasury' | 'province' | 'senateur' | 'external' | 'other';
 
 export interface EconomieModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onSave: (record: EconomieCreationData) => void;
-  initialData?: Partial<EconomieCreationData>;
-  types?: EconomieType[];
-  categories?: EconomieCategory[];
-  sources?: EconomieSource[];
+  onSave: (data: EconomieCreationData) => void;
+  record?: EconomieRecord;
 }
 
-export interface EconomieStatsProps {
-  treasury: TreasuryStatus;
-  economicFactors: EconomicFactors;
+export enum EconomieType {
+  INCOME = 'income',
+  EXPENSE = 'expense',
+  TRANSFER = 'transfer',
+  LOAN = 'loan',
+  INVESTMENT = 'investment',
+  TAX = 'tax',
+  TRIBUTE = 'tribute',
+  OTHER = 'other'
+}
+
+export enum EconomieCategory {
+  MILITARY = 'military',
+  ADMINISTRATION = 'administration',
+  INFRASTRUCTURE = 'infrastructure',
+  RELIGION = 'religion',
+  TRADE = 'trade',
+  DIPLOMACY = 'diplomacy',
+  ENTERTAINMENT = 'entertainment',
+  OTHER = 'other'
+}
+
+export enum EconomieSource {
+  TREASURY = 'treasury',
+  PROVINCE = 'province',
+  PRIVATE = 'private',
+  FOREIGN = 'foreign',
+  OTHER = 'other'
 }

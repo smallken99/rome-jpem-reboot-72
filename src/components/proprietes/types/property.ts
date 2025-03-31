@@ -5,10 +5,15 @@ export interface PropertyUpgrade {
   name: string;
   description: string;
   cost: number;
-  type: string; // This is now required in both implementations
+  type: string;
   effect: {
     [key: string]: number;
   };
+  effects?: Array<{
+    type: string;
+    value: number;
+    description: string;
+  }>;
   requirements?: {
     minBuildingSize?: number;
     minBuildingValue?: number;
@@ -23,11 +28,6 @@ export interface PropertyUpgrade {
   };
   installed: boolean;
   installDate?: Date;
-  effects?: Array<{
-    type: string;
-    value: number;
-    description: string;
-  }>;
   buildingType?: string;
 }
 

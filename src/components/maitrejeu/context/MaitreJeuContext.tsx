@@ -1,4 +1,3 @@
-
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { Equilibre } from '@/types/equilibre';
 import { Evenement } from '../types/evenement';
@@ -103,6 +102,9 @@ export interface MaitreJeuContextType {
   // Election management
   elections?: any[];
   scheduleElection?: (election: any) => void;
+  
+  // Add the updateFactionBalance method
+  updateFactionBalance: (populaires: number, optimates: number, moderates: number) => void;
 }
 
 // Create the context with default values
@@ -469,6 +471,22 @@ export const MaitreJeuProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     setEconomieRecords(prev => prev.filter(rec => rec.id !== id));
   };
 
+  const updateFactionBalance = (populaires: number, optimates: number, moderates: number) => {
+    setEquilibre(prev => ({
+      ...prev,
+      populaires,
+      populares: populaires, // For compatibility
+      optimates,
+      moderates,
+      politique: {
+        ...prev.politique,
+        populaires,
+        optimates,
+        moderates
+      }
+    }));
+  };
+
   const value = {
     senateurs,
     setSenateurs,
@@ -532,7 +550,8 @@ export const MaitreJeuProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     histoireEntries,
     addHistoireEntry,
     elections,
-    scheduleElection
+    scheduleElection,
+    updateFactionBalance
   };
 
   return (

@@ -11,10 +11,11 @@ export const createClientOperations = (
     const newClient: Client = {
       ...client,
       id,
-      competencePoints: client.competencePoints || 3,
+      competences: client.competences || {},
       relationshipLevel: client.relationshipLevel || 1,
       activeStatus: client.activeStatus || 'active',
-      lastInteraction: client.lastInteraction || new Date().toISOString()
+      lastInteraction: client.lastInteraction || new Date().toISOString(),
+      createdAt: new Date().toISOString()
     };
     
     setClients(prev => [...prev, newClient]);
@@ -31,8 +32,14 @@ export const createClientOperations = (
   };
   
   // Supprimer un client
-  const deleteClient = (id: string) => {
-    setClients(prev => prev.filter(client => client.id !== id));
+  const deleteClient = (id: string): boolean => {
+    let deleted = false;
+    setClients(prev => {
+      const newClients = prev.filter(client => client.id !== id);
+      deleted = newClients.length < prev.length;
+      return newClients;
+    });
+    return deleted;
   };
   
   // Assigner un client à un sénateur
@@ -45,11 +52,17 @@ export const createClientOperations = (
   };
   
   // Attribuer des points de compétence à un client
-  const adjustCompetencePoints = (clientId: string, points: number) => {
+  const adjustCompetencePoints = (clientId: string, competence: string, value: number) => {
     setClients(prev => 
       prev.map(client => 
         client.id === clientId ? 
-          { ...client, competencePoints: (client.competencePoints || 0) + points } : 
+          { 
+            ...client, 
+            competences: { 
+              ...(client.competences || {}), 
+              [competence]: value
+            } 
+          } : 
           client
       )
     );
@@ -68,7 +81,7 @@ export const createClientOperations = (
   const filterClients = (clients: Client[], filter: ClientFilter): Client[] => {
     return clients.filter(client => {
       // Filtrer par type
-      if (filter.type && client.type !== filter.type) return false;
+      if (filter.type && filter.type !== 'all' && client.type !== filter.type) return false;
       
       // Filtrer par emplacement
       if (filter.location && client.location !== filter.location) return false;
@@ -84,8 +97,8 @@ export const createClientOperations = (
         const searchLower = filter.searchTerm.toLowerCase();
         return (
           client.name.toLowerCase().includes(searchLower) ||
-          client.subType.toLowerCase().includes(searchLower) ||
-          client.location.toLowerCase().includes(searchLower)
+          (client.subType && client.subType.toLowerCase().includes(searchLower)) ||
+          (client.location && client.location.toLowerCase().includes(searchLower))
         );
       }
       

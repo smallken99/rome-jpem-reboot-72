@@ -18,7 +18,8 @@ const defaultFormData: Partial<Client> = {
   backstory: '',
   activeStatus: 'active',
   relationshipLevel: 1,
-  lastInteraction: new Date().toISOString()
+  lastInteraction: new Date().toISOString(),
+  age: 30  // Make age a number by default
 };
 
 export const useAdvancedClientForm = (client: Client | null) => {

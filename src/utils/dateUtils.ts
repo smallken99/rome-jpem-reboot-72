@@ -1,64 +1,93 @@
 
-/**
- * Format a date object or string to a more readable format
- */
-export const formatDate = (date: Date | string): string => {
-  if (!date) return '';
-  
-  const dateObj = typeof date === 'string' ? new Date(date) : date;
-  
-  // Check if date is valid
-  if (isNaN(dateObj.getTime())) {
-    return 'Date invalide';
-  }
-  
-  return dateObj.toLocaleDateString('fr-FR', {
-    day: 'numeric',
-    month: 'long',
-    year: 'numeric'
-  });
-};
+import { GameDate } from '@/components/maitrejeu/types/common';
 
 /**
- * Format a date to show how long ago it was (e.g. "2 days ago")
+ * Get an array of seasons after a specific date
+ * @param startDate The starting game date
+ * @param count Number of seasons to generate
+ * @returns Array of GameDate objects
  */
-export const formatTimeAgo = (date: Date | string): string => {
-  if (!date) return '';
+export const getSeasonsAfter = (startDate: GameDate, count: number): GameDate[] => {
+  const seasons: GameDate[] = [];
+  const seasonOrder: Array<GameDate['season']> = ['spring', 'summer', 'fall', 'winter'];
   
-  const dateObj = typeof date === 'string' ? new Date(date) : date;
+  let currentYear = startDate.year;
+  let currentSeasonIndex = seasonOrder.indexOf(startDate.season as any);
   
-  // Check if date is valid
-  if (isNaN(dateObj.getTime())) {
-    return 'Date invalide';
+  if (currentSeasonIndex === -1) {
+    // Handle non-standard season names
+    if (startDate.season === 'Ver' || startDate.season === 'SPRING') {
+      currentSeasonIndex = 0;
+    } else if (startDate.season === 'Aestas' || startDate.season === 'SUMMER') {
+      currentSeasonIndex = 1;
+    } else if (startDate.season === 'Autumnus' || startDate.season === 'AUTUMN') {
+      currentSeasonIndex = 2;
+    } else if (startDate.season === 'Hiems' || startDate.season === 'WINTER') {
+      currentSeasonIndex = 3;
+    } else {
+      currentSeasonIndex = 0; // Default to spring
+    }
   }
   
-  const now = new Date();
-  const diffInSeconds = Math.floor((now.getTime() - dateObj.getTime()) / 1000);
-  
-  if (diffInSeconds < 60) {
-    return 'À l\'instant';
+  for (let i = 0; i < count; i++) {
+    // Add the current season
+    seasons.push({
+      year: currentYear,
+      season: seasonOrder[currentSeasonIndex]
+    });
+    
+    // Move to the next season
+    currentSeasonIndex = (currentSeasonIndex + 1) % 4;
+    // If we've completed a full year, increment the year
+    if (currentSeasonIndex === 0) {
+      currentYear++;
+    }
   }
   
-  const diffInMinutes = Math.floor(diffInSeconds / 60);
-  if (diffInMinutes < 60) {
-    return `Il y a ${diffInMinutes} minute${diffInMinutes > 1 ? 's' : ''}`;
+  return seasons;
+};
+
+export const formatGameDate = (date: GameDate): string => {
+  return `${date.year} ${date.season}`;
+};
+
+export const parseGameDate = (dateStr: string): GameDate | null => {
+  const parts = dateStr.split(' ');
+  if (parts.length < 2) return null;
+  
+  const year = parseInt(parts[0], 10);
+  const season = parts[1].toLowerCase() as GameDate['season'];
+  
+  if (isNaN(year)) return null;
+  
+  return { year, season };
+};
+
+export const compareGameDates = (date1: GameDate, date2: GameDate): number => {
+  // First compare years
+  if (date1.year !== date2.year) {
+    return date1.year - date2.year;
   }
   
-  const diffInHours = Math.floor(diffInMinutes / 60);
-  if (diffInHours < 24) {
-    return `Il y a ${diffInHours} heure${diffInHours > 1 ? 's' : ''}`;
-  }
+  // If years are the same, compare seasons
+  const seasonOrder: { [key: string]: number } = {
+    'spring': 0,
+    'Ver': 0,
+    'SPRING': 0,
+    'summer': 1,
+    'Aestas': 1,
+    'SUMMER': 1,
+    'fall': 2,
+    'autumn': 2,
+    'Autumnus': 2,
+    'AUTUMN': 2,
+    'winter': 3,
+    'Hiems': 3,
+    'WINTER': 3
+  };
   
-  const diffInDays = Math.floor(diffInHours / 24);
-  if (diffInDays < 30) {
-    return `Il y a ${diffInDays} jour${diffInDays > 1 ? 's' : ''}`;
-  }
+  const season1Value = seasonOrder[date1.season] ?? 0;
+  const season2Value = seasonOrder[date2.season] ?? 0;
   
-  const diffInMonths = Math.floor(diffInDays / 30);
-  if (diffInMonths < 12) {
-    return `Il y a ${diffInMonths} mois`;
-  }
-  
-  const diffInYears = Math.floor(diffInMonths / 12);
-  return `Il y a ${diffInYears} an${diffInYears > 1 ? 's' : ''}`;
+  return season1Value - season2Value;
 };

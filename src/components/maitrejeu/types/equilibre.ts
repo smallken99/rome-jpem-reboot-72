@@ -1,122 +1,67 @@
-
-import { GameDate } from './common';
-
-export interface HistoriqueEntry {
-  id: string;
-  date: GameDate | Date;
-  event: string;
-  impact: number | Record<string, number>;
-  type: string;
-  description?: string;
-}
-
-export type RiskType = 'political' | 'economic' | 'military' | 'social' | 'religious' | string;
-
-export interface Risk {
-  id: string;
-  type: RiskType;
-  name: string;
-  description: string;
-  severity: number; // 1-10
-  createdAt: string;
-  active: boolean;
-  impact: Record<string, number>; // e.g. { "populaires": -5, "optimates": +3 }
-}
-
-export interface EquilibreHistoryEntry {
-  date: string;
-  values: Record<string, number>;
-  event?: string;
-  description?: string;
-}
-
 export interface Equilibre {
-  id: string;
-  
-  // Political balance
-  political: {
+  // Political equilibrium
+  politique: {
     populaires: number;
     optimates: number;
     moderates: number;
   };
-  
-  // These are aliases for the political values above for compatibility
   populaires: number;
-  populares: number; // Another alias sometimes used
+  populares: number;
   optimates: number;
   moderates: number;
   
-  // Social balance
-  social: {
-    patriciens: number;
-    plébéiens: number;
-    plebeiens?: number;
-    esclaves?: number;
-    cohesion?: number;
+  // Economic equilibrium
+  economie: {
+    stabilite: number;
+    croissance: number;
+    commerce: number;
+    agriculture: number;
   };
   
-  // These are aliases for the social values above for compatibility
-  patriciens: number;
-  plébéiens: number;
+  // Social equilibrium
+  social: {
+    plebeiens: number;
+    patriciens: number;
+    esclaves: number;
+    cohesion: number;
+  };
+  plébéiens?: number; // Alias for backward compatibility
   
-  // Economic stability (0-100)
-  economie: number;
-  economy: number; // Alias for compatibility
-  économie: number; // Alias with accent for compatibility
-  economicStability: number; // Another alias sometimes used
+  // Military equilibrium
+  militaire: {
+    moral: number;
+    effectifs: number;
+    equipement: number;
+    discipline: number;
+  };
   
-  // Other stability factors (0-100)
-  stability: number;
-  armée: number;
-  loyauté: number;
-  morale: number;
-  religion: number;
-  facteurJuridique: number;
+  // Religious equilibrium
+  religion: {
+    piete: number;
+    traditions: number;
+    superstition: number;
+  };
   
-  // Risks affecting equilibrium
-  risques: Risk[];
-  
-  // History of equilibrium changes
-  historique: EquilibreHistoryEntry[];
+  // Other properties
+  facteurJuridique?: number;
+  historique?: any[];
+  risques?: Record<string, number>;
+}
+
+export enum RiskType {
+  REVOLTE = 'revolte',
+  GUERRE = 'guerre',
+  POLITIQUE = 'politique',
+  ECONOMIQUE = 'economique',
+  RELIGIEUX = 'religieux'
 }
 
 export interface PoliticalEvent {
   id: string;
-  date: GameDate | Date;
   title: string;
   description: string;
-  impact: number | Record<string, number>;
+  date: Date;
+  impact: Record<string, number>;
   type: string;
-  importance: ImportanceType;
-  resolved?: boolean;
-  event?: string;
+  importance: "high" | "low" | "medium" | "critical" | string;
 }
-
-export interface SocialStabilityCardProps {
-  patriciens: number;
-  plebeiens: number;
-  esclaves: number;
-  cohesion: number;
-  onUpdate: (values: { patriciens: number; plebeiens: number; esclaves: number; cohesion: number; }) => void;
-  equilibre: Equilibre;
-}
-
-export interface PoliticalBalanceCardProps {
-  populaires: number;
-  optimates: number;
-  moderates: number;
-  onUpdate: (populaires: number, optimates: number, moderates: number) => void;
-  equilibre: Equilibre;
-}
-
-export interface EconomicStabilityCardProps {
-  economy: number | { stabilite: number; croissance: number; commerce: number; agriculture: number; };
-  onUpdate: (economy: number | { stabilite: number; croissance: number; commerce: number; agriculture: number; }) => void;
-  equilibre: Equilibre;
-}
-
-export interface RecentEventsTableProps {
-  events: PoliticalEvent[];
-}
-
-export type ImportanceType = 'low' | 'medium' | 'high' | 'critical' | 'normale' | 'importante' | 'critique' | 'mineure' | string;

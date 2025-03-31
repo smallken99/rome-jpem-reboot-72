@@ -4,14 +4,16 @@ import { GameDate } from './common';
 export interface Client {
   id: string;
   name: string;
-  age: number;
-  status: 'active' | 'inactive' | 'probation';
+  age?: number;
+  status?: 'active' | 'inactive' | 'probation';
   type: 'standard' | 'premium' | 'exclusive';
-  loyalty: number;
-  influence: number;
-  income: number;
-  cost: number;
-  assignedTo: string | null;
+  subType?: string;
+  location?: string;
+  loyalty?: string | number;
+  influence?: number;
+  income?: number;
+  cost?: number;
+  assignedTo?: string | null;
   assignedToName?: string;
   description?: string;
   skills?: string[];
@@ -22,10 +24,7 @@ export interface Client {
   lastInteraction?: GameDate | string;
   competences?: Record<string, number>;
   
-  // Additional properties from other interfaces
-  subType?: string;
-  location?: string;
-  loyalty?: string;
+  // Additional properties
   activeStatus?: 'active' | 'inactive' | 'probation';
   influences?: {
     political: number;
@@ -40,14 +39,16 @@ export interface Client {
 
 export interface ClientCreationData {
   name: string;
-  age: number;
-  status: 'active' | 'inactive' | 'probation';
+  age?: number;
+  status?: 'active' | 'inactive' | 'probation';
   type: 'standard' | 'premium' | 'exclusive';
-  loyalty: number | string;
-  influence: number;
-  income: number;
-  cost: number;
-  assignedTo: string | null;
+  subType?: string;
+  location?: string;
+  loyalty?: string | number;
+  influence?: number;
+  income?: number;
+  cost?: number;
+  assignedTo?: string | null;
   assignedToName?: string;
   description?: string;
   skills?: string[];
@@ -56,9 +57,7 @@ export interface ClientCreationData {
   notes?: string;
   competences?: Record<string, number>;
   
-  // Additional properties for client creation
-  subType?: string;
-  location?: string;
+  // Additional properties
   influences?: {
     political: number;
     popular: number;
@@ -72,6 +71,7 @@ export interface ClientCreationData {
   lastInteraction?: string | GameDate;
   assignedToSenateurId?: string | null;
   recurring?: boolean;
+  createdAt?: string;
 }
 
 export interface ClientFilter {
