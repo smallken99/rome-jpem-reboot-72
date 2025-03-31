@@ -3,8 +3,6 @@ import React from 'react';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
-import { format } from 'date-fns';
-import { fr } from 'date-fns/locale';
 import { Client } from '../../types/clients';
 
 interface BackstoryTabProps {
@@ -16,72 +14,69 @@ export const BackstoryTab: React.FC<BackstoryTabProps> = ({
   formData,
   handleChange
 }) => {
-  // Format the last interaction date if it exists
-  const formatLastInteraction = () => {
-    if (!formData.lastInteraction) return '';
-    
+  // Format the date for display
+  const formatDate = (dateString?: string) => {
+    if (!dateString) return '';
     try {
-      if (typeof formData.lastInteraction === 'string') {
-        return format(new Date(formData.lastInteraction), 'PPP', { locale: fr });
-      }
-      return 'Date invalide';
-    } catch (error) {
-      console.error('Error formatting date:', error);
-      return 'Date invalide';
+      const date = new Date(dateString);
+      return date.toLocaleDateString();
+    } catch (e) {
+      return dateString;
     }
   };
-  
+
   return (
-    <div className="space-y-6 py-2">
+    <div className="space-y-6 py-4">
       <div>
-        <Label htmlFor="backstory" className="mb-2 block">
-          Histoire personnelle
-        </Label>
+        <Label htmlFor="backstory" className="text-base">Histoire personnelle</Label>
+        <p className="text-sm text-muted-foreground mb-4">
+          Détaillez le passé et la personnalité de ce client
+        </p>
         <Textarea
           id="backstory"
           name="backstory"
+          placeholder="Histoire et antécédents du client..."
           value={formData.backstory || ''}
           onChange={handleChange}
-          placeholder="Histoire et origines du client..."
-          rows={8}
+          className="min-h-[200px]"
         />
       </div>
       
       <div className="grid grid-cols-2 gap-4">
-        <div>
-          <Label htmlFor="origin" className="mb-2 block">
-            Origine
-          </Label>
+        <div className="space-y-2">
+          <Label htmlFor="income">Revenu annuel (as)</Label>
           <Input
-            id="origin"
-            name="origin"
-            value={formData.origin || ''}
+            id="income"
+            name="income"
+            type="number"
+            value={formData.income || 0}
             onChange={handleChange}
-            placeholder="Lieu d'origine"
+            min={0}
           />
         </div>
         
-        <div>
-          <Label htmlFor="occupation" className="mb-2 block">
-            Occupation principale
-          </Label>
+        <div className="space-y-2">
+          <Label htmlFor="location">Occupation</Label>
           <Input
             id="occupation"
             name="occupation"
-            value={formData.occupation || ''}
+            value={formData.location || ''}
             onChange={handleChange}
-            placeholder="Occupation du client"
+            placeholder="Marchand, Artisan, etc."
           />
         </div>
       </div>
       
-      <div>
-        <Label className="mb-2 block">
-          Dernière interaction
-        </Label>
-        <p className="text-sm p-2 border rounded bg-muted">
-          {formatLastInteraction() || 'Aucune interaction enregistrée'}
-        </p>
+      <div className="space-y-2">
+        <Label htmlFor="notes" className="text-base">Notes supplémentaires</Label>
+        <Textarea
+          id="notes"
+          name="notes"
+          placeholder="Informations additionnelles..."
+          value={formData.backstory || ''}
+          onChange={handleChange}
+          className="min-h-[100px]"
+        />
       </div>
     </div>
   );

@@ -1,6 +1,6 @@
 
 import { useState } from 'react';
-import { Client } from '../../types/clients';
+import { Client, ClientInfluences } from '../../types/clients';
 
 const defaultFormData: Partial<Client> = {
   name: '',
@@ -13,13 +13,13 @@ const defaultFormData: Partial<Client> = {
     popular: 0,
     religious: 0
   },
-  competences: {},
-  specialAbilities: [],
+  competences: [],
+  specialAbility: '',
   backstory: '',
   activeStatus: 'active',
   relationshipLevel: 1,
   lastInteraction: new Date().toISOString(),
-  age: 30  // Make age a number by default
+  age: 30
 };
 
 export const useAdvancedClientForm = (client: Client | null) => {
@@ -44,46 +44,32 @@ export const useAdvancedClientForm = (client: Client | null) => {
     }));
   };
   
-  const handleInfluenceChange = (type: keyof Client['influences'], value: number) => {
-    if (!formData.influences) {
-      setFormData(prev => ({
-        ...prev,
-        influences: {
-          political: 0,
-          popular: 0,
-          religious: 0,
-          [type]: value
-        }
-      }));
-      return;
-    }
+  const handleInfluenceChange = (type: 'political' | 'popular' | 'religious', value: number) => {
+    const influences = formData.influences || { political: 0, popular: 0, religious: 0 };
     
     setFormData(prev => ({
       ...prev,
       influences: {
-        ...(prev.influences || { political: 0, popular: 0, religious: 0 }),
+        ...influences,
         [type]: value
       }
     }));
   };
   
   const handleAddAbility = () => {
-    if (newAbility.trim() && !formData.specialAbilities?.includes(newAbility.trim())) {
+    if (newAbility.trim()) {
       setFormData(prev => ({
         ...prev,
-        specialAbilities: [
-          ...(prev.specialAbilities || []),
-          newAbility.trim()
-        ]
+        specialAbility: newAbility.trim()
       }));
       setNewAbility('');
     }
   };
   
-  const handleRemoveAbility = (ability: string) => {
+  const handleRemoveAbility = () => {
     setFormData(prev => ({
       ...prev,
-      specialAbilities: prev.specialAbilities?.filter(a => a !== ability) || []
+      specialAbility: ''
     }));
   };
   

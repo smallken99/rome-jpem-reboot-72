@@ -1,6 +1,6 @@
 
 import { useState, useEffect } from 'react';
-import { ClientCreationData, Client } from '../../types/clients';
+import { ClientCreationData, Client, ClientInfluences } from '../../types/clients';
 
 export const useClientForm = (client: Client | null) => {
   const isEditMode = !!client;
@@ -50,8 +50,8 @@ export const useClientForm = (client: Client | null) => {
           popular: 1,
           religious: 1
         },
-        specialAbilities: client.specialAbilities || [],
-        competencePoints: client.competences ? Object.keys(client.competences).length : 3,
+        specialAbilities: client.specialAbility ? [client.specialAbility] : [],
+        competencePoints: client.competences ? client.competences.length : 3,
         backstory: client.backstory || '',
         activeStatus: client.activeStatus || 'active',
         relationshipLevel: client.relationshipLevel || 1,
@@ -76,24 +76,13 @@ export const useClientForm = (client: Client | null) => {
     }));
   };
   
-  const handleInfluenceChange = (type: keyof ClientCreationData['influences'], value: string) => {
-    if (!formData.influences) {
-      setFormData(prev => ({
-        ...prev,
-        influences: {
-          political: 1,
-          popular: 1,
-          religious: 1,
-          [type]: parseInt(value) || 1
-        }
-      }));
-      return;
-    }
+  const handleInfluenceChange = (type: 'political' | 'popular' | 'religious', value: string) => {
+    const influences = formData.influences || { political: 1, popular: 1, religious: 1 };
     
     setFormData(prev => ({
       ...prev,
       influences: {
-        ...(prev.influences || { political: 1, popular: 1, religious: 1 }),
+        ...influences,
         [type]: parseInt(value) || 1
       }
     }));

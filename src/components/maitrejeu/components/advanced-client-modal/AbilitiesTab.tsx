@@ -2,7 +2,6 @@
 import React from 'react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Plus, X } from 'lucide-react';
@@ -12,9 +11,9 @@ interface AbilitiesTabProps {
   formData: Partial<Client>;
   newAbility: string;
   setNewAbility: (value: string) => void;
-  handleChange: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => void;
+  handleChange: (e: React.ChangeEvent<HTMLTextAreaElement>) => void;
   handleAddAbility: () => void;
-  handleRemoveAbility: (ability: string) => void;
+  handleRemoveAbility: () => void;
 }
 
 export const AbilitiesTab: React.FC<AbilitiesTabProps> = ({
@@ -26,66 +25,53 @@ export const AbilitiesTab: React.FC<AbilitiesTabProps> = ({
   handleRemoveAbility
 }) => {
   return (
-    <div className="space-y-6 py-2">
+    <div className="space-y-6 py-4">
       <div>
-        <Label htmlFor="competences" className="mb-2 block">
-          Points de compétence disponibles
-        </Label>
-        <div className="text-4xl font-bold mb-2">
-          {formData.competences ? Object.keys(formData.competences).length : 0} <span className="text-base text-muted-foreground">/ 10</span>
-        </div>
-        <p className="text-sm text-muted-foreground">
-          Les points de compétence représentent les domaines d'expertise du client, utilisables pour influencer ses actions.
+        <Label className="text-base">Capacité Spéciale</Label>
+        <p className="text-sm text-muted-foreground mb-4">
+          Ajoutez une capacité spéciale unique à ce client
         </p>
-      </div>
-      
-      <div>
-        <Label htmlFor="specialAbilities" className="mb-2 block">
-          Capacités spéciales
-        </Label>
-        <div className="mb-4 flex flex-wrap gap-2">
-          {formData.specialAbilities && formData.specialAbilities.length > 0 ? (
-            formData.specialAbilities.map((ability, index) => (
-              <Badge key={index} variant="secondary" className="px-2 py-1 gap-1">
-                {ability}
-                <button
-                  onClick={() => handleRemoveAbility(ability)}
-                  className="ml-1 text-muted-foreground hover:text-foreground transition-colors"
-                >
-                  <X className="h-3 w-3" />
-                </button>
-              </Badge>
-            ))
-          ) : (
-            <p className="text-sm text-muted-foreground">Aucune capacité spéciale ajoutée.</p>
-          )}
-        </div>
-        <div className="flex gap-2">
+        
+        <div className="flex gap-2 mb-4">
           <Input
+            placeholder="Nouvelle capacité..."
             value={newAbility}
             onChange={(e) => setNewAbility(e.target.value)}
-            placeholder="Nouvelle capacité..."
             className="flex-1"
-            onKeyDown={(e) => e.key === 'Enter' && handleAddAbility()}
           />
-          <Button type="button" onClick={handleAddAbility}>
-            <Plus className="h-4 w-4 mr-1" />
+          <Button type="button" onClick={handleAddAbility} disabled={!newAbility.trim()}>
+            <Plus className="h-4 w-4 mr-2" />
             Ajouter
           </Button>
         </div>
+        
+        {formData.specialAbility && (
+          <div className="bg-muted/30 rounded-md p-3 mb-2 flex justify-between items-center">
+            <span>{formData.specialAbility}</span>
+            <Button 
+              variant="ghost" 
+              size="sm" 
+              onClick={handleRemoveAbility}
+              className="h-8 w-8 p-0 rounded-full"
+            >
+              <X className="h-4 w-4" />
+            </Button>
+          </div>
+        )}
       </div>
       
       <div>
-        <Label htmlFor="notes" className="mb-2 block">
-          Notes
-        </Label>
+        <Label htmlFor="notes" className="text-base">Notes de compétence</Label>
+        <p className="text-sm text-muted-foreground mb-4">
+          Détails additionnels sur les compétences et capacités de ce client
+        </p>
         <Textarea
-          id="notes"
-          name="notes"
-          value={formData.notes || ''}
+          id="backstory"
+          name="backstory"
+          placeholder="Ajoutez des notes sur les compétences et capacités particulières de ce client..."
+          value={formData.backstory || ''}
           onChange={handleChange}
-          placeholder="Notes supplémentaires sur ce client..."
-          rows={5}
+          className="min-h-[120px]"
         />
       </div>
     </div>

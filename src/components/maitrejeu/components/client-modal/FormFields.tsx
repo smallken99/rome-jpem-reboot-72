@@ -8,7 +8,8 @@ import {
   CLIENT_LOCATIONS, 
   CLIENT_LOYALTIES, 
   CLIENT_STATUSES, 
-  ClientCreationData 
+  ClientCreationData,
+  ClientInfluences
 } from '../../types/clients';
 
 interface FormFieldsProps {

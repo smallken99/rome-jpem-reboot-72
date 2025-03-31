@@ -50,7 +50,7 @@ export const EconomieFilters: React.FC<EconomieFiltersProps> = ({
         </div>
 
         <Select
-          value={filter.types ? filter.types.toString() : 'all'}
+          value={filter.types ? String(filter.types) : 'all'}
           onValueChange={(value) => onFilterChange({ types: value === 'all' ? undefined : value as ECONOMIE_TYPES })}
         >
           <SelectTrigger className="w-[180px]">
@@ -58,14 +58,14 @@ export const EconomieFilters: React.FC<EconomieFiltersProps> = ({
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="all">Tous les types</SelectItem>
-            <SelectItem value="income">Revenus</SelectItem>
-            <SelectItem value="expense">Dépenses</SelectItem>
-            <SelectItem value="tax">Impôts</SelectItem>
-            <SelectItem value="trade">Commerce</SelectItem>
-            <SelectItem value="military">Militaire</SelectItem>
-            <SelectItem value="construction">Construction</SelectItem>
-            <SelectItem value="slaves">Esclaves</SelectItem>
-            <SelectItem value="other">Autres</SelectItem>
+            <SelectItem value={ECONOMIE_TYPES.INCOME}>Revenus</SelectItem>
+            <SelectItem value={ECONOMIE_TYPES.EXPENSE}>Dépenses</SelectItem>
+            <SelectItem value={ECONOMIE_TYPES.TAX}>Impôts</SelectItem>
+            <SelectItem value={ECONOMIE_TYPES.TRADE}>Commerce</SelectItem>
+            <SelectItem value={ECONOMIE_TYPES.MILITARY}>Militaire</SelectItem>
+            <SelectItem value={ECONOMIE_TYPES.CONSTRUCTION}>Construction</SelectItem>
+            <SelectItem value={ECONOMIE_TYPES.SLAVES}>Esclaves</SelectItem>
+            <SelectItem value={ECONOMIE_TYPES.OTHER}>Autres</SelectItem>
           </SelectContent>
         </Select>
 
@@ -81,7 +81,7 @@ export const EconomieFilters: React.FC<EconomieFiltersProps> = ({
               <div className="space-y-2">
                 <h4 className="font-medium">Catégories</h4>
                 <Select
-                  value={filter.category ? filter.category.toString() : 'all'}
+                  value={filter.category ? String(filter.category) : 'all'}
                   onValueChange={(value) => {
                     if (value === 'all') {
                       onFilterChange({ category: undefined });
@@ -95,16 +95,16 @@ export const EconomieFilters: React.FC<EconomieFiltersProps> = ({
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="all">Toutes les catégories</SelectItem>
-                    <SelectItem value="military">Militaire</SelectItem>
-                    <SelectItem value="administration">Administration</SelectItem>
-                    <SelectItem value="construction">Construction</SelectItem>
-                    <SelectItem value="religion">Religion</SelectItem>
-                    <SelectItem value="slaves">Esclaves</SelectItem>
-                    <SelectItem value="entertainment">Divertissement</SelectItem>
-                    <SelectItem value="tax">Impôts</SelectItem>
-                    <SelectItem value="trade">Commerce</SelectItem>
-                    <SelectItem value="diplomacy">Diplomatie</SelectItem>
-                    <SelectItem value="other">Autres</SelectItem>
+                    <SelectItem value={ECONOMIE_CATEGORIES.MILITARY}>Militaire</SelectItem>
+                    <SelectItem value={ECONOMIE_CATEGORIES.ADMINISTRATIVE}>Administration</SelectItem>
+                    <SelectItem value={ECONOMIE_CATEGORIES.CONSTRUCTION}>Construction</SelectItem>
+                    <SelectItem value={ECONOMIE_CATEGORIES.RELIGION}>Religion</SelectItem>
+                    <SelectItem value={ECONOMIE_CATEGORIES.SLAVES}>Esclaves</SelectItem>
+                    <SelectItem value={ECONOMIE_CATEGORIES.ENTERTAINMENT}>Divertissement</SelectItem>
+                    <SelectItem value={ECONOMIE_CATEGORIES.TAX}>Impôts</SelectItem>
+                    <SelectItem value={ECONOMIE_CATEGORIES.TRADE}>Commerce</SelectItem>
+                    <SelectItem value={ECONOMIE_CATEGORIES.DIPLOMACY}>Diplomatie</SelectItem>
+                    <SelectItem value={ECONOMIE_CATEGORIES.OTHER}>Autres</SelectItem>
                   </SelectContent>
                 </Select>
               </div>

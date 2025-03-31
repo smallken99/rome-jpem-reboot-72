@@ -43,8 +43,6 @@ export const GestionClients = () => {
   return (
     <div className="space-y-6">
       <ClientFilters
-        searchTerm={searchTerm}
-        setSearchTerm={setSearchTerm}
         currentClientFilter={currentClientFilter}
         setCurrentClientFilter={setCurrentClientFilter}
         currentSort={currentSort}

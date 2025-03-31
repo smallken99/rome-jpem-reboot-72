@@ -22,7 +22,7 @@ export const FamilleMembres: React.FC<FamilleMembresProps> = ({
   onEditMembre,
   onDeleteMembre
 }) => {
-  const { deleteMembreFamille, getFamille, updateMembreFamille, familles } = useMaitreJeu();
+  const { getFamille, familles } = useMaitreJeu();
   const [membreToDelete, setMembreToDelete] = useState<string | null>(null);
   const [membreToEdit, setMembreToEdit] = useState<MembreFamille | null>(null);
   const [filter, setFilter] = useState<{
@@ -60,7 +60,7 @@ export const FamilleMembres: React.FC<FamilleMembresProps> = ({
   
   const confirmDelete = () => {
     if (membreToDelete) {
-      deleteMembreFamille(membreToDelete);
+      onDeleteMembre(membreToDelete);
       setMembreToDelete(null);
     }
   };
@@ -92,7 +92,7 @@ export const FamilleMembres: React.FC<FamilleMembresProps> = ({
                 <SelectValue placeholder="Tous les genres" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">Tous</SelectItem>
+                <SelectItem value="">Tous</SelectItem>
                 <SelectItem value="male">Homme</SelectItem>
                 <SelectItem value="female">Femme</SelectItem>
               </SelectContent>
@@ -109,7 +109,7 @@ export const FamilleMembres: React.FC<FamilleMembresProps> = ({
                 <SelectValue placeholder="Tous les statuts" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">Tous</SelectItem>
+                <SelectItem value="">Tous</SelectItem>
                 <SelectItem value="Célibataire">Célibataire</SelectItem>
                 <SelectItem value="Marié">Marié(e)</SelectItem>
                 <SelectItem value="Veuf">Veuf/Veuve</SelectItem>
@@ -164,7 +164,7 @@ export const FamilleMembres: React.FC<FamilleMembresProps> = ({
           selectedFamilleId={familleId}
           membre={membreToEdit}
           familles={familles}
-          onSave={() => {}}
+          onSave={onEditMembre}
         />
       )}
     </div>

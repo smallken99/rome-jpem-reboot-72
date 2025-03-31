@@ -45,7 +45,19 @@ export const AdvancedClientModal: React.FC<AdvancedClientModalProps> = ({
       } as Client);
     } else {
       // For creation mode, we pass formData as ClientCreationData
-      onSave(formData as ClientCreationData);
+      const clientData: any = {
+        ...formData,
+        // Add required fields that might be missing
+        name: formData.name || 'Nouveau client',
+        type: formData.type || 'standard',
+        status: 'active',
+        competencePoints: 3,
+        influence: 1,
+        income: formData.income || 0,
+        cost: 0,
+        assignedTo: null
+      };
+      onSave(clientData);
     }
   };
   

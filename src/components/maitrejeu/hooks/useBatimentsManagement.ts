@@ -1,408 +1,334 @@
 
-import { useState, useEffect } from 'react';
-import { useMaitreJeu } from '../context/MaitreJeuContext';
+import { useState } from 'react';
+import { useMaitreJeu } from '../context';
 import { v4 as uuidv4 } from 'uuid';
-import { 
-  Building, 
-  BuildingCreationData, 
-  MaintenanceTask,
-  ConstructionProject,
-  MaintenanceRecord,
-  BuildingRevenueRecord,
-  PublicBuildingData
-} from '../types/batiments';
-import { useToast } from '@/components/ui/use-toast';
-import { ECONOMIE_CATEGORIES } from '../types/economie';
+import { toast } from 'sonner';
+import { ECONOMIE_TYPES, ECONOMIE_CATEGORIES, ECONOMIE_SOURCE } from '../types/economie';
+
+// Types
+interface Building {
+  id: string;
+  name: string;
+  type: string;
+  location: string;
+  status: string;
+  constructionYear: number;
+  description: string;
+  cost: number;
+  maintenance: number;
+  revenue: number;
+  capacity: number;
+  owner: string;
+}
 
 export const useBatimentsManagement = () => {
-  // État du MaitreJeu
-  const { 
-    currentYear, 
-    currentSeason,
-    treasury,
-    setTreasury,
-    economieRecords,
-    setEconomieRecords
-  } = useMaitreJeu();
+  const { economieRecords, addEconomieRecord, treasury, setTreasury, currentYear, currentSeason } = useMaitreJeu();
   
   // État local
   const [buildings, setBuildings] = useState<Building[]>([]);
-  const [constructionProjects, setConstructionProjects] = useState<ConstructionProject[]>([]);
-  const [maintenanceTasks, setMaintenanceTasks] = useState<MaintenanceTask[]>([]);
-  const [maintenanceRecords, setMaintenanceRecords] = useState<MaintenanceRecord[]>([]);
-  const [revenueRecords, setRevenueRecords] = useState<BuildingRevenueRecord[]>([]);
-  
-  // État UI
+  const [constructionProjects, setConstructionProjects] = useState<any[]>([]);
+  const [maintenanceRecords, setMaintenanceRecords] = useState<any[]>([]);
+  const [revenueRecords, setRevenueRecords] = useState<any[]>([]);
   const [isAddBuildingModalOpen, setIsAddBuildingModalOpen] = useState(false);
   const [selectedBuilding, setSelectedBuilding] = useState<Building | undefined>();
-  const [isMaintenanceModalOpen, setIsMaintenanceModalOpen] = useState(false);
-  const [selectedMaintenanceTask, setSelectedMaintenanceTask] = useState<MaintenanceTask | null>(null);
-  const [isConstructionModalOpen, setIsConstructionModalOpen] = useState(false);
-  const [selectedProject, setSelectedProject] = useState<ConstructionProject | null>(null);
   
-  const { toast } = useToast();
+  // Filtres
+  const [filter, setFilter] = useState({
+    types: [] as string[],
+    locations: [] as string[],
+    status: 'all',
+    minRevenue: 0,
+    maxMaintenance: 0,
+    searchTerm: ''
+  });
   
-  // Méthodes CRUD pour les bâtiments
-  const addBuilding = (buildingData: BuildingCreationData) => {
-    const newBuilding: Building = {
-      id: uuidv4(),
+  // CRUD operations
+  const addBuilding = (buildingData: Omit<Building, "id">) => {
+    const newBuilding = {
       ...buildingData,
-      status: buildingData.status || 'good'
+      id: uuidv4()
     };
     
     setBuildings(prev => [...prev, newBuilding]);
     
-    toast({
-      title: "Bâtiment ajouté",
-      description: `${newBuilding.name} a été ajouté avec succès.`,
-      variant: "default"
-    });
+    // Ajouter un enregistrement économique pour la construction
+    if (buildingData.cost > 0) {
+      addEconomieRecord({
+        id: uuidv4(),
+        amount: buildingData.cost,
+        description: `Construction de ${buildingData.name}`,
+        date: { year: currentYear, season: currentSeason },
+        type: ECONOMIE_TYPES.EXPENSE,
+        category: ECONOMIE_CATEGORIES.CONSTRUCTION,
+        source: ECONOMIE_SOURCE.TREASURY,
+        recurring: false
+      });
+      
+      // Mettre à jour le trésor
+      setTreasury(prev => ({
+        ...prev,
+        balance: prev.balance - buildingData.cost,
+        expenses: prev.expenses + buildingData.cost,
+        surplus: prev.income - (prev.expenses + buildingData.cost)
+      }));
+    }
     
-    // Ajouter une dépense économique pour la construction du bâtiment
-    addConstructionExpense(newBuilding);
-    
+    toast.success(`Le bâtiment ${buildingData.name} a été ajouté avec succès`);
     return newBuilding.id;
   };
   
   const updateBuilding = (id: string, updates: Partial<Building>) => {
-    setBuildings(prev => prev.map(building => 
-      building.id === id ? { ...building, ...updates } : building
-    ));
+    setBuildings(prev => 
+      prev.map(building => 
+        building.id === id ? { ...building, ...updates } : building
+      )
+    );
     
-    toast({
-      title: "Bâtiment mis à jour",
-      description: "Les informations du bâtiment ont été mises à jour.",
-      variant: "default"
-    });
+    toast.success(`Le bâtiment a été mis à jour avec succès`);
   };
   
   const deleteBuilding = (id: string) => {
     setBuildings(prev => prev.filter(building => building.id !== id));
-    
-    // Supprimer les tâches de maintenance associées
-    setMaintenanceTasks(prev => prev.filter(task => task.buildingId !== id));
-    
-    toast({
-      title: "Bâtiment supprimé",
-      description: "Le bâtiment a été supprimé avec succès.",
-      variant: "default"
-    });
+    toast.success(`Le bâtiment a été supprimé avec succès`);
   };
   
-  // Méthodes pour les projets de construction
-  const addConstructionProject = (projectData: Omit<ConstructionProject, "id" | "approved" | "progress">) => {
-    const newProject: ConstructionProject = {
-      id: uuidv4(),
+  // Maintenance and Revenue
+  const updateMaintenance = (buildingId: string, level: number) => {
+    setBuildings(prev => 
+      prev.map(building => 
+        building.id === buildingId 
+          ? { 
+              ...building, 
+              maintenance: Math.round(building.cost * (level / 100) * 10) / 10,
+              status: level < 30 ? 'poor' : level < 60 ? 'fair' : 'good'
+            } 
+          : building
+      )
+    );
+    
+    // Ajouter un enregistrement de maintenance
+    const building = buildings.find(b => b.id === buildingId);
+    if (building) {
+      const maintenanceCost = Math.round(building.cost * (level / 100) * 10) / 10;
+      
+      addEconomieRecord({
+        id: uuidv4(),
+        amount: maintenanceCost,
+        description: `Maintenance de ${building.name} (niveau ${level}%)`,
+        date: { year: currentYear, season: currentSeason },
+        type: ECONOMIE_TYPES.EXPENSE,
+        category: ECONOMIE_CATEGORIES.MAINTENANCE,
+        source: ECONOMIE_SOURCE.TREASURY,
+        recurring: true,
+        recurringInterval: 'seasonal'
+      });
+      
+      // Mettre à jour le trésor
+      setTreasury(prev => ({
+        ...prev,
+        balance: prev.balance - maintenanceCost,
+        expenses: prev.expenses + maintenanceCost,
+        surplus: prev.income - (prev.expenses + maintenanceCost)
+      }));
+      
+      toast.success(`Niveau de maintenance mis à jour pour ${building.name}`);
+    }
+  };
+  
+  const updateWorkers = (buildingId: string, workers: number) => {
+    setBuildings(prev => 
+      prev.map(building => 
+        building.id === buildingId 
+          ? { 
+              ...building, 
+              workers,
+              revenue: calculateRevenue(building.type, building.cost, workers)
+            } 
+          : building
+      )
+    );
+    
+    const building = buildings.find(b => b.id === buildingId);
+    if (building) {
+      toast.success(`Nombre de travailleurs mis à jour pour ${building.name}`);
+    }
+  };
+  
+  const calculateRevenue = (type: string, cost: number, workers: number) => {
+    // Logique simplifiée pour calculer le revenu
+    const baseRevenue = cost * 0.05; // 5% du coût initial
+    const workerFactor = workers / 100; // Impact des travailleurs (0 à 1)
+    
+    switch (type) {
+      case 'commercial':
+        return Math.round(baseRevenue * 1.5 * workerFactor * 100) / 100;
+      case 'industrial':
+        return Math.round(baseRevenue * 1.2 * workerFactor * 100) / 100;
+      case 'residential':
+        return Math.round(baseRevenue * 0.8 * workerFactor * 100) / 100;
+      case 'agricultural':
+        return Math.round(baseRevenue * 1.1 * workerFactor * 100) / 100;
+      default:
+        return Math.round(baseRevenue * workerFactor * 100) / 100;
+    }
+  };
+  
+  const collectRevenue = (buildingId: string) => {
+    const building = buildings.find(b => b.id === buildingId);
+    if (building && building.revenue > 0) {
+      // Ajouter un enregistrement de revenu
+      addEconomieRecord({
+        id: uuidv4(),
+        amount: building.revenue,
+        description: `Revenu de ${building.name}`,
+        date: { year: currentYear, season: currentSeason },
+        type: ECONOMIE_TYPES.INCOME,
+        category: ECONOMIE_CATEGORIES.OTHER,
+        source: ECONOMIE_SOURCE.TREASURY,
+        recurring: false
+      });
+      
+      // Mettre à jour le trésor
+      setTreasury(prev => ({
+        ...prev,
+        balance: prev.balance + building.revenue,
+        income: prev.income + building.revenue,
+        surplus: (prev.income + building.revenue) - prev.expenses
+      }));
+      
+      toast.success(`Revenu de ${building.revenue} as collecté pour ${building.name}`);
+      
+      // Ajouter à l'historique des revenus
+      setRevenueRecords(prev => [
+        ...prev,
+        {
+          id: uuidv4(),
+          buildingId: building.id,
+          buildingName: building.name,
+          amount: building.revenue,
+          date: { year: currentYear, season: currentSeason }
+        }
+      ]);
+    }
+  };
+  
+  const startConstruction = (projectData: any) => {
+    const newProject = {
       ...projectData,
-      approved: false,
-      progress: 0
+      id: uuidv4(),
+      startDate: { year: currentYear, season: currentSeason },
+      progress: 0,
+      status: 'in_progress'
     };
     
     setConstructionProjects(prev => [...prev, newProject]);
     
-    toast({
-      title: "Projet ajouté",
-      description: `Le projet de construction de ${newProject.name} a été ajouté.`,
-      variant: "default"
-    });
+    // Ajouter un enregistrement économique pour le début de la construction
+    if (projectData.cost > 0) {
+      addEconomieRecord({
+        id: uuidv4(),
+        amount: projectData.cost * 0.3, // 30% initial payment
+        description: `Début de construction: ${projectData.name}`,
+        date: { year: currentYear, season: currentSeason },
+        type: ECONOMIE_TYPES.EXPENSE,
+        category: ECONOMIE_CATEGORIES.CONSTRUCTION,
+        source: ECONOMIE_SOURCE.TREASURY,
+        recurring: false
+      });
+      
+      // Mettre à jour le trésor
+      setTreasury(prev => ({
+        ...prev,
+        balance: prev.balance - (projectData.cost * 0.3),
+        expenses: prev.expenses + (projectData.cost * 0.3),
+        surplus: prev.income - (prev.expenses + (projectData.cost * 0.3))
+      }));
+    }
     
+    toast.success(`Construction de ${projectData.name} démarrée`);
     return newProject.id;
   };
   
-  const approveProject = (id: string) => {
-    setConstructionProjects(prev => prev.map(project => 
-      project.id === id ? { ...project, approved: true } : project
-    ));
+  const updateConstructionProgress = (projectId: string, progress: number) => {
+    setConstructionProjects(prev => 
+      prev.map(project => {
+        if (project.id !== projectId) return project;
+        
+        const newProgress = Math.min(100, Math.max(0, progress));
+        const isCompleted = newProgress >= 100;
+        
+        return {
+          ...project,
+          progress: newProgress,
+          status: isCompleted ? 'completed' : 'in_progress',
+          completionDate: isCompleted ? { year: currentYear, season: currentSeason } : undefined
+        };
+      })
+    );
     
-    // Ajouter une dépense économique pour le début de la construction
-    const project = constructionProjects.find(p => p.id === id);
+    const project = constructionProjects.find(p => p.id === projectId);
     if (project) {
-      addConstructionExpense(project);
-    }
-    
-    toast({
-      title: "Projet approuvé",
-      description: "Le projet de construction a été approuvé et les travaux vont commencer.",
-      variant: "default"
-    });
-  };
-  
-  const updateProjectProgress = (id: string, progress: number) => {
-    setConstructionProjects(prev => prev.map(project => 
-      project.id === id ? { ...project, progress } : project
-    ));
-    
-    // Si le projet est terminé, créer un nouveau bâtiment
-    if (progress >= 100) {
-      const project = constructionProjects.find(p => p.id === id);
-      if (project) {
-        completeProject(project);
+      // Si le projet est terminé, ajouter le bâtiment
+      if (progress >= 100 && project.status !== 'completed') {
+        addBuilding({
+          name: project.name,
+          type: project.type,
+          location: project.location,
+          status: 'good',
+          constructionYear: currentYear,
+          description: project.description || '',
+          cost: project.cost,
+          maintenance: project.cost * 0.05, // 5% par défaut
+          revenue: 0,
+          capacity: project.capacity || 50,
+          owner: 'république'
+        });
+        
+        // Paiement final
+        addEconomieRecord({
+          id: uuidv4(),
+          amount: project.cost * 0.7, // 70% final payment
+          description: `Finalisation de construction: ${project.name}`,
+          date: { year: currentYear, season: currentSeason },
+          type: ECONOMIE_TYPES.EXPENSE,
+          category: ECONOMIE_CATEGORIES.CONSTRUCTION,
+          source: ECONOMIE_SOURCE.TREASURY,
+          recurring: false
+        });
+        
+        // Mettre à jour le trésor
+        setTreasury(prev => ({
+          ...prev,
+          balance: prev.balance - (project.cost * 0.7),
+          expenses: prev.expenses + (project.cost * 0.7),
+          surplus: prev.income - (prev.expenses + (project.cost * 0.7))
+        }));
+        
+        toast.success(`Construction de ${project.name} terminée!`);
+      } else {
+        toast.info(`Progression de construction mise à jour: ${progress}%`);
       }
     }
   };
   
-  const completeProject = (project: ConstructionProject) => {
-    // Créer un nouveau bâtiment à partir du projet terminé
-    const newBuilding: Building = {
-      id: uuidv4(),
-      name: project.buildingName || project.name,
-      type: project.buildingType,
-      location: project.location,
-      status: 'good',
-      constructionYear: currentYear,
-      description: project.description,
-      cost: project.estimatedCost,
-      maintenanceCost: Math.round(project.estimatedCost * 0.05),
-      revenue: 0,
-      capacity: 0,
-      owner: 'république'
-    };
-    
-    addBuilding(newBuilding);
-    
-    // Supprimer le projet de la liste des projets en cours
-    setConstructionProjects(prev => prev.filter(p => p.id !== project.id));
-    
-    toast({
-      title: "Construction terminée",
-      description: `La construction de ${newBuilding.name} est terminée.`,
-      variant: "default"
-    });
-  };
-  
-  // Méthodes pour la maintenance des bâtiments
-  const addMaintenanceTask = (taskData: Omit<MaintenanceTask, "id">) => {
-    const newTask: MaintenanceTask = {
-      id: uuidv4(),
-      ...taskData
-    };
-    
-    setMaintenanceTasks(prev => [...prev, newTask]);
-    
-    toast({
-      title: "Tâche de maintenance ajoutée",
-      description: `Une tâche de maintenance a été programmée pour ${taskData.buildingName}.`,
-      variant: "default"
-    });
-    
-    return newTask.id;
-  };
-  
-  const completeMaintenanceTask = (id: string, performedBy: string, description: string, cost: number) => {
-    const task = maintenanceTasks.find(t => t.id === id);
-    if (!task) return;
-    
-    const building = buildings.find(b => b.id === task.buildingId);
-    if (!building) return;
-    
-    // Déterminer le nouveau statut en fonction de l'ancien statut et du niveau de réparation
-    const previousStatus = building.status;
-    let newStatus: Building['status'] = previousStatus;
-    
-    // Amélioration du statut selon le coût de la maintenance
-    const costRatio = cost / task.estimatedCost;
-    if (costRatio >= 1.5) {
-      // Maintenance majeure
-      if (previousStatus === 'ruined') newStatus = 'poor';
-      else if (previousStatus === 'poor') newStatus = 'damaged';
-      else if (previousStatus === 'damaged') newStatus = 'good';
-      else if (previousStatus === 'good') newStatus = 'excellent';
-    } else if (costRatio >= 1) {
-      // Maintenance standard
-      if (previousStatus === 'ruined') newStatus = 'poor';
-      else if (previousStatus === 'poor') newStatus = 'damaged';
-      else if (previousStatus === 'damaged') newStatus = 'good';
-    } else {
-      // Maintenance mineure
-      if (previousStatus === 'ruined') newStatus = 'poor';
-    }
-    
-    // Mettre à jour le bâtiment
-    updateBuilding(building.id, {
-      status: newStatus,
-      lastMaintenance: { year: currentYear, season: currentSeason }
-    });
-    
-    // Enregistrer la maintenance
-    const maintenanceRecord: MaintenanceRecord = {
-      id: uuidv4(),
-      buildingId: building.id,
-      date: { year: currentYear, season: currentSeason },
-      cost,
-      description,
-      performedBy,
-      repairLevel: costRatio >= 1.5 ? 'major' : costRatio >= 1 ? 'moderate' : 'minor',
-      previousStatus,
-      newStatus
-    };
-    
-    setMaintenanceRecords(prev => [...prev, maintenanceRecord]);
-    
-    // Supprimer la tâche de maintenance
-    setMaintenanceTasks(prev => prev.filter(t => t.id !== id));
-    
-    // Ajouter une dépense économique pour la maintenance
-    addMaintenanceExpense(building, cost);
-    
-    toast({
-      title: "Maintenance effectuée",
-      description: `La maintenance de ${building.name} a été effectuée avec succès.`,
-      variant: "default"
-    });
-  };
-  
-  // Méthodes pour les revenus des bâtiments
-  const addBuildingRevenue = (buildingId: string, amount: number, source: string, taxRate: number, collectedBy: string) => {
-    const building = buildings.find(b => b.id === buildingId);
-    if (!building) return;
-    
-    const revenueRecord: BuildingRevenueRecord = {
-      id: uuidv4(),
-      buildingId,
-      year: currentYear,
-      season: currentSeason,
-      amount,
-      source,
-      taxRate,
-      collectedBy
-    };
-    
-    setRevenueRecords(prev => [...prev, revenueRecord]);
-    
-    // Ajouter un revenu économique
-    addBuildingRevenueIncome(building, amount);
-    
-    toast({
-      title: "Revenu enregistré",
-      description: `Un revenu de ${amount} deniers a été enregistré pour ${building.name}.`,
-      variant: "default"
-    });
-  };
-  
-  // Méthodes auxiliaires
-  const addConstructionExpense = (buildingOrProject: Building | ConstructionProject) => {
-    // Create the record with the correct ECONOMIE_CATEGORIES type
-    const record = {
-      id: uuidv4(),
-      amount: 'cost' in buildingOrProject ? buildingOrProject.cost : buildingOrProject.estimatedCost,
-      category: ECONOMIE_CATEGORIES.CONSTRUCTION,
-      description: `Construction de ${buildingOrProject.name}`,
-      date: { year: currentYear, season: currentSeason },
-      type: 'expense' as const,
-      source: 'Construction',
-      approved: true,
-      tags: ['construction', 'bâtiment'],
-      isRecurring: false,
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString()
-    };
-    
-    // Add the record
-    setEconomieRecords(prev => [...prev, record]);
-    
-    // Mettre à jour le trésor
-    setTreasury(prev => ({
-      ...prev,
-      balance: prev.balance - record.amount,
-      totalExpenses: prev.totalExpenses + record.amount
-    }));
-  };
-  
-  const addMaintenanceExpense = (building: Building, cost: number) => {
-    // Create the record with the correct ECONOMIE_CATEGORIES type
-    const record = {
-      id: uuidv4(),
-      amount: cost,
-      category: ECONOMIE_CATEGORIES.MAINTENANCE,
-      description: `Maintenance de ${building.name}`,
-      date: { year: currentYear, season: currentSeason },
-      type: 'expense' as const,
-      source: 'Services d\'entretien',
-      approved: true,
-      tags: ['maintenance', 'bâtiment'],
-      isRecurring: false,
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString()
-    };
-    
-    // Add the record
-    setEconomieRecords(prev => [...prev, record]);
-    
-    // Mettre à jour le trésor
-    setTreasury(prev => ({
-      ...prev,
-      balance: prev.balance - cost,
-      totalExpenses: prev.totalExpenses + cost
-    }));
-  };
-  
-  const addBuildingRevenueIncome = (building: Building, amount: number) => {
-    // Create the record with the correct ECONOMIE_CATEGORIES type
-    const record = {
-      id: uuidv4(),
-      amount,
-      category: ECONOMIE_CATEGORIES.COMMERCE,
-      description: `Revenus de ${building.name}`,
-      date: { year: currentYear, season: currentSeason },
-      type: 'income' as const,
-      source: 'Commerce extérieur',
-      approved: true,
-      tags: ['revenus', 'bâtiment'],
-      isRecurring: true,
-      recurringInterval: 'seasonal' as const,
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString()
-    };
-    
-    // Add the record
-    setEconomieRecords(prev => [...prev, record]);
-    
-    // Mettre à jour le trésor
-    setTreasury(prev => ({
-      ...prev,
-      balance: prev.balance + amount,
-      totalIncome: prev.totalIncome + amount
-    }));
-  };
-  
   return {
-    // Données
     buildings,
     constructionProjects,
-    maintenanceTasks,
     maintenanceRecords,
     revenueRecords,
-    
-    // État UI
+    filter,
+    setFilter,
     isAddBuildingModalOpen,
     setIsAddBuildingModalOpen,
     selectedBuilding,
     setSelectedBuilding,
-    isMaintenanceModalOpen,
-    setIsMaintenanceModalOpen,
-    selectedMaintenanceTask,
-    setSelectedMaintenanceTask,
-    isConstructionModalOpen,
-    setIsConstructionModalOpen,
-    selectedProject,
-    setSelectedProject,
-    
-    // Méthodes CRUD pour les bâtiments
     addBuilding,
     updateBuilding,
     deleteBuilding,
-    
-    // Méthodes pour les projets de construction
-    addConstructionProject,
-    approveProject,
-    updateProjectProgress,
-    completeProject,
-    
-    // Méthodes pour la maintenance des bâtiments
-    addMaintenanceTask,
-    completeMaintenanceTask,
-    
-    // Méthodes pour les revenus des bâtiments
-    addBuildingRevenue
+    updateMaintenance,
+    updateWorkers,
+    collectRevenue,
+    startConstruction,
+    updateConstructionProgress
   };
 };

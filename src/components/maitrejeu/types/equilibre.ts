@@ -5,9 +5,11 @@ export interface Equilibre {
     optimates: number;
     moderates: number;
   };
-  social?: {
+  social: {
     patriciens: number;
     plebeiens: number;
+    esclaves?: number;
+    cohesion?: number;
   };
   economie: {
     stabilite: number;
@@ -17,38 +19,26 @@ export interface Equilibre {
   };
   militaire: {
     moral: number;
-    discipline: number;
-    puissance: number;
     effectifs: number;
     equipement: number;
+    discipline: number;
   };
   religion: {
     piete: number;
     traditions: number;
     superstition: number;
   };
-  // Additional structures for other balance aspects
-  paix?: number;
   stabilite?: number;
-  risks?: Risk[];
-}
-
-export interface Risk {
-  id: string;
-  name: string;
-  type: string;
-  probability: number;
-  impact: number;
-  description: string;
-}
-
-export interface PoliticalEvent {
-  id: string;
-  title: string;
-  description: string;
-  date: string;
-  type: string;
-  importance: "low" | "medium" | "high" | "critical";
-  affectedValues: string[];
-  resolved: boolean;
+  populaires?: number;
+  populares?: number;
+  optimates?: number;
+  moderates?: number;
+  patriciens?: number;
+  plébéiens?: number;
+  armée?: number;
+  loyauté?: number;
+  morale?: number;
+  facteurJuridique?: number;
+  historique?: any[];
+  risques?: Record<string, any>;
 }

@@ -1,26 +1,24 @@
 
 import React from 'react';
-import { 
-  Table, 
-  TableBody, 
-  TableCell, 
-  TableHead, 
-  TableHeader, 
-  TableRow 
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
 } from '@/components/ui/table';
-import { 
-  DropdownMenu, 
-  DropdownMenuContent, 
-  DropdownMenuItem, 
-  DropdownMenuTrigger 
-} from '@/components/ui/dropdown-menu';
-import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 import { Client } from '../../types/clients';
 import { SenateurJouable } from '../../types/senateurs';
-import { format } from 'date-fns';
-import { fr } from 'date-fns/locale';
-import { MoreHorizontal, Edit, Settings, ToggleLeft, Trash2, UserPlus } from 'lucide-react';
+import { MoreHorizontal, Edit, FileEdit, Trash2, UserPlus, Star, Shield } from 'lucide-react';
 
 interface ClientsTableProps {
   clients: Client[];
@@ -28,9 +26,9 @@ interface ClientsTableProps {
   onEdit: (client: Client) => void;
   onAdvancedEdit: (client: Client) => void;
   onManageCompetences: (client: Client) => void;
-  onStatusChange: (id: string, status: 'active' | 'inactive' | 'probation') => void;
-  onDelete: (id: string) => void;
-  onAssign: (clientId: string, senatorId: string | null) => void;
+  onStatusChange: (clientId: string, status: string) => void;
+  onDelete: (clientId: string) => void;
+  onAssign: (clientId: string, senateurId: string | null) => void;
 }
 
 export const ClientsTable: React.FC<ClientsTableProps> = ({
@@ -41,172 +39,114 @@ export const ClientsTable: React.FC<ClientsTableProps> = ({
   onManageCompetences,
   onStatusChange,
   onDelete,
-  onAssign
+  onAssign,
 }) => {
-  const getStatusBadge = (status: string) => {
+  const getStatusColor = (status?: string) => {
+    if (!status) return "default";
     switch (status) {
       case 'active':
-        return <Badge variant="success">Actif</Badge>;
+        return 'success';
       case 'inactive':
-        return <Badge variant="destructive">Inactif</Badge>;
+        return 'secondary';
       case 'probation':
-        return <Badge variant="warning">Probation</Badge>;
+        return 'destructive';
       default:
-        return <Badge variant="outline">{status}</Badge>;
+        return 'default';
     }
   };
-  
-  const getClientTypeLabel = (type: string) => {
-    switch (type) {
-      case 'standard':
-        return <Badge variant="outline">Standard</Badge>;
-      case 'premium':
-        return <Badge>Premium</Badge>;
-      case 'exclusive':
-        return <Badge className="bg-amber-500">Exclusif</Badge>;
-      default:
-        return <Badge variant="outline">{type}</Badge>;
-    }
+
+  const getAssignedSenateur = (client: Client) => {
+    if (!client.assignedToSenateurId) return null;
+    return senateurs.find((s) => s.id === client.assignedToSenateurId);
   };
-  
-  const formatDate = (date: string | undefined) => {
-    if (!date) return 'N/A';
-    try {
-      return format(new Date(date), 'dd/MM/yyyy', { locale: fr });
-    } catch (error) {
-      return 'Date invalide';
-    }
-  };
-  
-  // Function to capitalize the first letter of a string
-  const capitalize = (str: string) => {
-    if (!str) return '';
-    return str.charAt(0).toUpperCase() + str.slice(1);
-  };
-  
+
   return (
-    <div className="border rounded-lg overflow-hidden">
+    <div className="rounded-md border">
       <Table>
         <TableHeader>
           <TableRow>
-            <TableHead>Nom</TableHead>
+            <TableHead className="w-[200px]">Nom</TableHead>
             <TableHead>Type</TableHead>
-            <TableHead>Statut</TableHead>
             <TableHead>Lieu</TableHead>
-            <TableHead>Sénateur</TableHead>
+            <TableHead>Loyauté</TableHead>
+            <TableHead>Statut</TableHead>
+            <TableHead>Assigné à</TableHead>
             <TableHead className="text-right">Actions</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
           {clients.length === 0 ? (
             <TableRow>
-              <TableCell colSpan={6} className="text-center p-4 text-muted-foreground">
-                Aucun client trouvé
+              <TableCell colSpan={7} className="h-24 text-center">
+                Aucun client trouvé.
               </TableCell>
             </TableRow>
           ) : (
-            clients.map(client => (
+            clients.map((client) => (
               <TableRow key={client.id}>
+                <TableCell className="font-medium">{client.name}</TableCell>
                 <TableCell>
-                  <div className="font-medium">{client.name}</div>
-                  <div className="text-xs text-muted-foreground">
-                    {client.subType && `${capitalize(client.subType)}`}
-                  </div>
+                  {client.type.charAt(0).toUpperCase() + client.type.slice(1)}
+                  {client.subType && (
+                    <span className="text-muted-foreground ml-1">({client.subType})</span>
+                  )}
                 </TableCell>
+                <TableCell>{client.location || 'Inconnu'}</TableCell>
+                <TableCell>{client.loyalty || 'Moyenne'}</TableCell>
                 <TableCell>
-                  {getClientTypeLabel(client.type)}
-                </TableCell>
-                <TableCell>
-                  {getStatusBadge(client.activeStatus || client.status || 'active')}
-                </TableCell>
-                <TableCell>
-                  {client.location || '-'}
+                  <Badge variant={getStatusColor(client.activeStatus)}>
+                    {client.activeStatus
+                      ? client.activeStatus.charAt(0).toUpperCase() + client.activeStatus.slice(1)
+                      : 'Actif'}
+                  </Badge>
                 </TableCell>
                 <TableCell>
                   {client.assignedToSenateurId ? (
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" size="sm">
-                          {senateurs.find(s => s.id === client.assignedToSenateurId)?.nom || 'Assigné'}
-                        </Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end">
-                        <DropdownMenuItem onClick={() => onAssign(client.id, null)}>
-                          Retirer l'assignation
-                        </DropdownMenuItem>
-                        {senateurs.map(senateur => (
-                          <DropdownMenuItem 
-                            key={senateur.id}
-                            onClick={() => onAssign(client.id, senateur.id)}
-                          >
-                            {senateur.prenom} {senateur.nom}
-                          </DropdownMenuItem>
-                        ))}
-                      </DropdownMenuContent>
-                    </DropdownMenu>
+                    <span className="flex items-center">
+                      <UserPlus className="mr-2 h-4 w-4 text-green-500" />
+                      {getAssignedSenateur(client)?.name || 'Sénateur'}
+                    </span>
                   ) : (
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <Button variant="outline" size="sm">
-                          <UserPlus className="h-4 w-4 mr-1" />
-                          Assigner
-                        </Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end">
-                        {senateurs.map(senateur => (
-                          <DropdownMenuItem 
-                            key={senateur.id}
-                            onClick={() => onAssign(client.id, senateur.id)}
-                          >
-                            {senateur.prenom} {senateur.nom}
-                          </DropdownMenuItem>
-                        ))}
-                      </DropdownMenuContent>
-                    </DropdownMenu>
+                    <span className="text-muted-foreground">Non assigné</span>
                   )}
                 </TableCell>
                 <TableCell className="text-right">
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
-                      <Button variant="ghost" size="icon">
+                      <Button variant="ghost" className="h-8 w-8 p-0">
+                        <span className="sr-only">Menu</span>
                         <MoreHorizontal className="h-4 w-4" />
                       </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end">
                       <DropdownMenuItem onClick={() => onEdit(client)}>
-                        <Edit className="h-4 w-4 mr-2" />
+                        <Edit className="mr-2 h-4 w-4" />
                         Modifier
                       </DropdownMenuItem>
                       <DropdownMenuItem onClick={() => onAdvancedEdit(client)}>
-                        <Settings className="h-4 w-4 mr-2" />
+                        <FileEdit className="mr-2 h-4 w-4" />
                         Édition avancée
                       </DropdownMenuItem>
                       <DropdownMenuItem onClick={() => onManageCompetences(client)}>
-                        <Settings className="h-4 w-4 mr-2" />
-                        Gérer les compétences
+                        <Star className="mr-2 h-4 w-4" />
+                        Compétences
                       </DropdownMenuItem>
-                      <DropdownMenu>
-                        <DropdownMenuTrigger className="flex w-full items-center px-2 py-1.5 text-sm">
-                          <ToggleLeft className="h-4 w-4 mr-2" />
-                          Changer le statut
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent>
-                          <DropdownMenuItem onClick={() => onStatusChange(client.id, 'active')}>
-                            Actif
-                          </DropdownMenuItem>
-                          <DropdownMenuItem onClick={() => onStatusChange(client.id, 'inactive')}>
-                            Inactif
-                          </DropdownMenuItem>
-                          <DropdownMenuItem onClick={() => onStatusChange(client.id, 'probation')}>
-                            Probation
-                          </DropdownMenuItem>
-                        </DropdownMenuContent>
-                      </DropdownMenu>
-                      <DropdownMenuItem 
+                      {client.activeStatus !== 'active' ? (
+                        <DropdownMenuItem onClick={() => onStatusChange(client.id, 'active')}>
+                          <Shield className="mr-2 h-4 w-4 text-green-500" />
+                          Activer
+                        </DropdownMenuItem>
+                      ) : (
+                        <DropdownMenuItem onClick={() => onStatusChange(client.id, 'inactive')}>
+                          <Shield className="mr-2 h-4 w-4 text-red-500" />
+                          Désactiver
+                        </DropdownMenuItem>
+                      )}
+                      <DropdownMenuItem
+                        className="text-red-600"
                         onClick={() => onDelete(client.id)}
-                        className="text-destructive"
                       >
-                        <Trash2 className="h-4 w-4 mr-2" />
+                        <Trash2 className="mr-2 h-4 w-4" />
                         Supprimer
                       </DropdownMenuItem>
                     </DropdownMenuContent>
