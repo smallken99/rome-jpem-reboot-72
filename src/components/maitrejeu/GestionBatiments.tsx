@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -40,32 +39,32 @@ export const GestionBatiments = () => {
       maintenance: 1000,
       maintenanceCost: 1000,
       condition: 100,
-      status: "good" as BuildingStatus  // Cast to BuildingStatus to avoid specific enum type issues
+      status: "good" as BuildingStatus,  // Cast to BuildingStatus to avoid specific enum type issues
+      description: "" // Make description a required field with default value
     };
     
-    // Direct assignment instead of using setState functional form to fix type error
-    setSelectedBuilding(example);
-    setIsAddBuildingModalOpen(true);
+    // Use functional form of setSelectedBuilding to avoid type issues
+    setSelectedBuilding(() => example);
   };
 
   const handleSaveBuilding = (data: BuildingCreationData) => {
     if (selectedBuilding) {
-      // Add missing properties required by Building type
-      const completeData = {
+      // Using spread to keep all properties from Building type
+      updateBuilding(selectedBuilding.id, {
         ...data,
         revenue: 0,      // Add missing revenue property
         maintenance: data.maintenanceCost || 0, // Set maintenance equal to maintenanceCost
-        status: data.status || 'good' as BuildingStatus // Ensure status is provided with correct type
-      };
-      
-      updateBuilding(selectedBuilding.id, completeData);
+        status: data.status || 'good' as BuildingStatus, // Ensure status is provided with correct type
+        description: data.description || "", // Ensure description is provided
+      });
     } else {
       // Add missing properties required by Building type
-      const completeData = {
+      const completeData: Omit<Building, 'id'> = {
         ...data,
         revenue: 0,      // Add missing revenue property
         maintenance: data.maintenanceCost || 0, // Set maintenance equal to maintenanceCost
-        status: data.status || 'good' as BuildingStatus // Ensure status is provided with correct type
+        status: data.status || 'good' as BuildingStatus, // Ensure status is provided with correct type
+        description: data.description || "" // Ensure description is provided
       };
       
       addBuilding(completeData);

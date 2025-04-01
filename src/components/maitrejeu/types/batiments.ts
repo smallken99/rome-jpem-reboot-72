@@ -16,14 +16,14 @@ export interface Building {
   maintenance: number;
   maintenanceCost: number;
   condition: number;
+  description: string; // Make description required
+  status: BuildingStatus; // Make status required
   workers?: number;
   maxWorkers?: number;
   securityLevel?: number;
   maintenanceLevel?: number;
-  status?: BuildingStatus;
   upgrades?: any[];
   income?: number;
-  description?: string;
   purchaseDate?: Date;
   constructionYear?: number;
   revenue?: number;
@@ -41,10 +41,10 @@ export interface MaintenanceTask {
   buildingName: string;
   description: string;
   estimatedCost: number;
-  priority: BuildingPriority;
+  priority: BuildingPriority; // Use the enum type here
   deadline: {
     year: number;
-    season: Season;
+    season: string; // Updated from Season type to avoid circular dependencies
   };
   status: string;
   startDate?: Date;
@@ -71,10 +71,10 @@ export interface ConstructionProject {
   startDate: any;
   estimatedEndDate: any;
   status: string;
-  responsibleMagistrate?: string;
   workers: number;
   description?: string;
   estimatedCost?: number;
+  responsibleMagistrate?: string;
   expectedCompletionYear?: number;
   buildingType?: string;
   buildingName?: string;
@@ -102,6 +102,8 @@ export interface BuildingRevenueRecord {
   year?: number;
   season?: string;
   taxRate?: number;
+  // Add collectedBy property to fix error
+  collectedBy?: string;
 }
 
 export interface BuildingCreationData {
@@ -111,13 +113,15 @@ export interface BuildingCreationData {
   maintenanceCost: number;
   value: number;
   condition: number;
-  workers?: number;
+  description: string; // Make description required
   status?: BuildingStatus;
-  description?: string;
+  workers?: number;
   constructionYear?: number;
   cost?: number;
   capacity?: number;
   owner?: string;
+  // Add revenue property for compatibility
+  revenue?: number;
 }
 
 export interface PublicBuildingModalProps {

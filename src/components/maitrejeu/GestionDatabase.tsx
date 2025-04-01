@@ -27,7 +27,7 @@ export const GestionDatabase = () => {
       <DatabaseStats stats={stats} />
       
       {stats.backups.length === 0 && (
-        <Alert variant="warning" className="mb-6">
+        <Alert variant="destructive" className="mb-6">
           <AlertTriangle className="h-4 w-4" />
           <AlertTitle>Aucune sauvegarde trouvée</AlertTitle>
           <AlertDescription>
