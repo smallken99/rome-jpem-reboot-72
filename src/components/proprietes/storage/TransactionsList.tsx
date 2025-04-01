@@ -112,7 +112,7 @@ export const TransactionsList: React.FC<TransactionsListProps> = ({
           <Button size="sm" onClick={onAddTransaction}>
             <Plus className="h-4 w-4 mr-1" /> Transaction
           </Button>
-        </CardTitle>
+        </div>
       </CardHeader>
       <CardContent>
         <div className="flex flex-col sm:flex-row gap-4 mb-4">
