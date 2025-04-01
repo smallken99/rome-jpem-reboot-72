@@ -44,6 +44,10 @@ export interface Slave {
   assigned: boolean;
   specialties: string[];
   notes?: string;
+  // Additional compatibility properties
+  health?: number;
+  skills?: string[];
+  origin?: string;
 }
 
 // Define SlaveAssignment interface
@@ -57,6 +61,10 @@ export interface SlaveAssignment {
   buildingName?: string;
   count?: number;
   maxCount?: number;
+  // Additional compatibility properties 
+  role?: string;
+  productivity?: number;
+  assignedAt?: Date;
 }
 
 // Define PropertyUpgrade interface
@@ -66,6 +74,17 @@ export interface PropertyUpgrade {
   description: string;
   cost: number;
   effect: {
+    income?: number;
+    popularity?: number;
+    security?: number;
+    maintenance?: number;
+    condition?: number;
+    value?: number;
+    conditionBoost?: number;
+    maintenanceReduction?: number;
+  };
+  // Alias for compatibility with code using 'effects'
+  effects?: {
     income?: number;
     popularity?: number;
     security?: number;
@@ -86,8 +105,15 @@ export interface PropertyUpgrade {
     minBuildingLevel?: number;
     minValue?: number;
     otherUpgrades?: string[];
+    buildingLevel?: number;
+    buildingCondition?: number;
+    previousUpgrade?: string;
+    value?: number;
+    upgrades?: string[];
   };
   applied?: boolean;
+  type?: string;
+  buildingType?: string[];
 }
 
 // Re-export building types

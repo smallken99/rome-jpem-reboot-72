@@ -48,6 +48,7 @@ export const GestionBatiments = () => {
       capacity: 0
     };
     
+    // Fixed: Pass the building directly instead of using a setState function
     setSelectedBuilding(exampleBuilding);
   };
 
@@ -69,13 +70,15 @@ export const GestionBatiments = () => {
         status: data.status || 'good' as BuildingStatus,
         description: data.description || "",
         constructionYear: data.constructionYear || currentYear,
+        cost: data.cost,
+        revenue: data.revenue || 0,
         capacity: data.capacity
       };
       
       addBuilding(completeData);
     }
     setIsAddBuildingModalOpen(false);
-    setSelectedBuilding(undefined);
+    setSelectedBuilding(null);
   };
 
   return (
@@ -151,7 +154,7 @@ export const GestionBatiments = () => {
         isOpen={isAddBuildingModalOpen} 
         onClose={() => setIsAddBuildingModalOpen(false)} 
         onSave={handleSaveBuilding}
-        building={selectedBuilding}
+        building={selectedBuilding || undefined}
       />
     </div>
   );

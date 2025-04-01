@@ -2,7 +2,7 @@
 // Définition des types pour le module d'équilibre
 
 export interface Politique {
-  populares: number;
+  populares: number;  // Changed from populaires to populares for consistency
   optimates: number;
   moderates: number;
 }
@@ -34,7 +34,7 @@ export interface Stabilite {
 }
 
 export interface Militaire {
-  morale: number;
+  morale: number;  // Changed from moral to morale for consistency
   loyaute: number;
   puissance: number;
   discipline: number;
@@ -83,6 +83,10 @@ export interface Equilibre {
   populares?: number;
   optimates?: number;
   moderates?: number;
+  // Additional compatibility properties
+  armée?: number;
+  loyauté?: number;
+  morale?: number;
 }
 
 // Types pour les événements politiques

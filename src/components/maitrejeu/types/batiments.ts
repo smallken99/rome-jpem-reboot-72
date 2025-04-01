@@ -31,10 +31,7 @@ export interface Building {
   upgrades?: any[];
   income?: number;
   purchaseDate?: Date;
-  // Propriétés additionnelles pour compatibilité
-  owner?: string;
-  buildingType?: string;
-  size?: number | string;
+  owner?: BuildingOwner;  // Making owner optional but with correct type
 }
 
 export interface MaintenanceTask {
@@ -121,7 +118,7 @@ export interface BuildingCreationData {
   capacity: number;
   status?: BuildingStatus;
   workers?: number;
-  owner?: string;
+  owner?: BuildingOwner;
   income?: number;
 }
 

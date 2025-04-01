@@ -1,111 +1,165 @@
 
 import React, { useState } from 'react';
-import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
+import { Button } from '@/components/ui/button';
+import { Calendar } from '@/components/ui/calendar';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Label } from '@/components/ui/label';
-import { Calendar, CalendarCell, CalendarGrid, CalendarHeader, CalendarHeading, CalendarMonthSelectTrigger, CalendarNextButton, CalendarPrevButton, CalendarViewTrigger } from '@/components/ui/calendar';
-import { MagistratureType } from '@/components/maitrejeu/types/magistratures';
-import { useMaitreJeu } from '@/components/maitrejeu/context';
-import { getSeasonsAfter } from '@/utils/dateUtils';
+import { Input } from '@/components/ui/input';
+import { Magistrature, MagistratureType } from '@/components/maitrejeu/types/magistratures';
 
-export const ElectionPlanner = () => {
-  const [isOpen, setIsOpen] = useState(false);
+export const ElectionPlanner: React.FC = () => {
   const [selectedMagistrature, setSelectedMagistrature] = useState<MagistratureType>('consul');
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(new Date());
-  const { currentYear, currentSeason, currentDate } = useMaitreJeu();
-  
-  // Since scheduleElection might not exist in context, implement it locally
-  const scheduleElection = (magistrature: MagistratureType, year?: number, season?: string) => {
-    console.log(`Scheduling election for ${magistrature} in ${year || currentYear}, ${season || currentSeason}`);
-    // Implementation would normally call the context version
-    return "election-id";
+  const [candidates, setCandidates] = useState<string[]>([]);
+  const [newCandidate, setNewCandidate] = useState<string>('');
+
+  // Sample magistratures data
+  const magistratures: Magistrature[] = [
+    {
+      id: '1',
+      type: 'consul',
+      title: 'Consul',
+      description: 'Magistrature suprême de la République',
+      termLength: 12,
+      collegiality: 2,
+      powers: ['imperium', 'auspices', 'veto', 'convocation du sénat'],
+      requirements: ['patricien', 'âge minimum 43 ans', 'cursus honorum complété'],
+      responsibilities: ['commandement des armées', 'présidence du sénat', 'administration des lois'],
+      imperium: true,
+      sacrosanctity: false,
+      veto: true,
+      rank: 1
+    },
+    {
+      id: '2',
+      type: 'praetor',
+      title: 'Préteur',
+      description: 'Magistrat chargé de la justice',
+      termLength: 12,
+      collegiality: 8,
+      powers: ['imperium', 'auspices', 'juridiction'],
+      requirements: ['patricien ou plébéien', 'âge minimum 40 ans', 'édile ou tribun'],
+      responsibilities: ['administration de la justice', 'gouvernement provincial', 'remplacement des consuls'],
+      imperium: true,
+      sacrosanctity: false,
+      veto: false,
+      rank: 2
+    }
+  ];
+
+  const addCandidate = () => {
+    if (newCandidate && !candidates.includes(newCandidate)) {
+      setCandidates([...candidates, newCandidate]);
+      setNewCandidate('');
+    }
   };
-  
-  const handleScheduleElection = () => {
-    const electionId = scheduleElection(selectedMagistrature);
-    console.log(`Planned election with ID: ${electionId}`);
-    setIsOpen(false);
+
+  const removeCandidate = (candidateName: string) => {
+    setCandidates(candidates.filter(c => c !== candidateName));
   };
-  
-  // Generate upcoming dates based on current date
-  const futureDates = getSeasonsAfter(currentDate, 4);
-  
+
+  const scheduleElection = () => {
+    console.log("Election scheduled for:", {
+      magistrature: selectedMagistrature,
+      date: selectedDate,
+      candidates
+    });
+    // Here you would typically call an API or dispatch an action
+  };
+
+  // Get seasons from the current date's year
+  const getAvailableSeasons = (year: number) => {
+    return [
+      { value: 'ver', label: 'Printemps' },
+      { value: 'aestas', label: 'Été' },
+      { value: 'autumnus', label: 'Automne' },
+      { value: 'hiems', label: 'Hiver' }
+    ];
+  };
+
+  const currentYear = new Date().getFullYear();
+  const seasons = getAvailableSeasons(currentYear);
+
   return (
-    <Card>
+    <Card className="w-full">
       <CardHeader>
-        <CardTitle>Planification des Élections</CardTitle>
+        <CardTitle>Planifier une Élection</CardTitle>
       </CardHeader>
-      <CardContent>
-        <div className="space-y-4">
-          <p className="text-muted-foreground">
-            Planifiez les prochaines élections pour les différentes magistratures de la République.
-          </p>
-          
-          <Button onClick={() => setIsOpen(true)}>
-            Planifier une Élection
-          </Button>
-          
-          <Dialog open={isOpen} onOpenChange={setIsOpen}>
-            <DialogContent>
-              <DialogHeader>
-                <DialogTitle>Planifier une Élection</DialogTitle>
-              </DialogHeader>
-              
-              <div className="grid gap-4 py-4">
-                <div className="grid grid-cols-4 items-center gap-4">
-                  <Label className="text-right">Magistrature</Label>
-                  <div className="col-span-3">
-                    <Select 
-                      value={selectedMagistrature} 
-                      onValueChange={(value: MagistratureType) => setSelectedMagistrature(value)}
-                    >
-                      <SelectTrigger>
-                        <SelectValue placeholder="Choisir une magistrature" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="consul">Consul</SelectItem>
-                        <SelectItem value="praetor">Préteur</SelectItem>
-                        <SelectItem value="aedile">Édile</SelectItem>
-                        <SelectItem value="quaestor">Questeur</SelectItem>
-                        <SelectItem value="tribunus">Tribun de la Plèbe</SelectItem>
-                        <SelectItem value="censor">Censeur</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                </div>
-                
-                <div className="grid grid-cols-4 items-center gap-4">
-                  <Label className="text-right">Date</Label>
-                  <div className="col-span-3">
-                    <Select>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Choisir une date" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {futureDates.map((date, index) => (
-                          <SelectItem key={index} value={`${date.season} ${date.year}`}>
-                            {date.season} {date.year}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-                </div>
-              </div>
-              
-              <DialogFooter>
-                <Button variant="outline" onClick={() => setIsOpen(false)}>
-                  Annuler
-                </Button>
-                <Button onClick={handleScheduleElection}>
-                  Planifier
-                </Button>
-              </DialogFooter>
-            </DialogContent>
-          </Dialog>
+      <CardContent className="space-y-6">
+        <div className="space-y-2">
+          <Label htmlFor="magistrature">Magistrature</Label>
+          <Select
+            value={selectedMagistrature}
+            onValueChange={(value) => setSelectedMagistrature(value as MagistratureType)}
+          >
+            <SelectTrigger>
+              <SelectValue placeholder="Sélectionner une magistrature" />
+            </SelectTrigger>
+            <SelectContent>
+              {magistratures.map(mag => (
+                <SelectItem key={mag.id} value={mag.type}>
+                  {mag.title}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </div>
+
+        <div className="space-y-2">
+          <Label>Date de l'Élection</Label>
+          <div className="flex flex-col space-y-2 sm:flex-row sm:space-x-4 sm:space-y-0">
+            <div className="flex-1">
+              <Calendar
+                mode="single"
+                selected={selectedDate}
+                onSelect={setSelectedDate}
+                className="border rounded-md p-3"
+              />
+            </div>
+          </div>
+        </div>
+
+        <div className="space-y-4">
+          <Label>Candidats</Label>
+          <div className="flex space-x-2">
+            <Input
+              value={newCandidate}
+              onChange={(e) => setNewCandidate(e.target.value)}
+              placeholder="Nom du candidat"
+              className="flex-1"
+            />
+            <Button type="button" onClick={addCandidate} variant="secondary">
+              Ajouter
+            </Button>
+          </div>
+
+          <div className="mt-2">
+            {candidates.length > 0 ? (
+              <ul className="space-y-2">
+                {candidates.map((candidate, index) => (
+                  <li key={index} className="flex justify-between items-center p-2 border rounded-md">
+                    <span>{candidate}</span>
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => removeCandidate(candidate)}
+                    >
+                      ✕
+                    </Button>
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <p className="text-muted-foreground">Aucun candidat ajouté</p>
+            )}
+          </div>
+        </div>
+
+        <Button onClick={scheduleElection} className="w-full">
+          Planifier l'Élection
+        </Button>
       </CardContent>
     </Card>
   );

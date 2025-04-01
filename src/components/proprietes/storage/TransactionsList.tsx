@@ -1,228 +1,201 @@
 
-import React, { useState, useEffect } from 'react';
-import { 
-  Card, 
-  CardContent, 
-  CardHeader, 
-  CardTitle, 
-  CardFooter 
-} from '@/components/ui/card';
+import React, { useState, useMemo } from 'react';
+import { Card, CardContent, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { PropertyTransaction } from '../types/property';
-import { 
-  Table, 
-  TableBody, 
-  TableCell, 
-  TableHead, 
-  TableHeader, 
-  TableRow 
-} from '@/components/ui/table';
 import { Input } from '@/components/ui/input';
-import { Search, Plus, Filter, ArrowDown, ArrowUp } from 'lucide-react';
-import { formatCurrency } from '@/utils/currencyUtils';
-import { formatDate } from '@/utils/dateUtils';
+import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from '@/components/ui/table';
+import { PropertyTransaction, TransactionsListProps } from '../types/property';
 
-interface TransactionsListProps {
-  transactions: PropertyTransaction[];
-  searchTerm?: string;
-  resourceId?: string;
-  onTransactionSelect?: (transaction: PropertyTransaction) => void;
-  onAddTransaction?: () => void;
-  filters?: {
-    resourceName?: string;
-    type?: string;
-    startDate?: Date;
-    endDate?: Date;
-    responsible?: string;
-  };
-}
-
+/**
+ * TransactionsList component for displaying property transactions
+ */
 export const TransactionsList: React.FC<TransactionsListProps> = ({
-  transactions,
-  searchTerm: initialSearchTerm,
+  searchTerm: externalSearchTerm,
   resourceId,
   onTransactionSelect,
   onAddTransaction,
-  filters: initialFilters
+  filters = {}
 }) => {
-  const [searchTerm, setSearchTerm] = useState(initialSearchTerm || '');
-  const [sortField, setSortField] = useState<keyof PropertyTransaction>('date');
-  const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('desc');
-  const [filters, setFilters] = useState(initialFilters || {});
-  const [filteredTransactions, setFilteredTransactions] = useState<PropertyTransaction[]>([]);
-
-  useEffect(() => {
-    let filtered = [...transactions];
-
-    // Filter by resourceId if provided
-    if (resourceId) {
-      filtered = filtered.filter(t => t.resourceId === resourceId);
+  const [localSearchTerm, setLocalSearchTerm] = useState('');
+  const [page, setPage] = useState(1);
+  const itemsPerPage = 10;
+  
+  // Sample transactions data for demonstration
+  const transactions: PropertyTransaction[] = [
+    {
+      id: '1',
+      resourceId: 'wheat-001',
+      resourceName: 'Blé',
+      type: 'acquisition',
+      quantity: 100,
+      date: new Date(2023, 3, 15),
+      responsible: 'Marcus Licinius',
+      source: 'Marché de Rome',
+      cost: 500
+    },
+    {
+      id: '2',
+      resourceId: 'wine-001',
+      resourceName: 'Vin',
+      type: 'consumption',
+      quantity: 20,
+      date: new Date(2023, 4, 1),
+      responsible: 'Tullia',
+      destination: 'Banquet Sénatorial'
+    },
+    {
+      id: '3',
+      resourceId: 'olive-oil-001',
+      resourceName: 'Huile d\'olive',
+      type: 'transfer',
+      quantity: 50,
+      date: new Date(2023, 4, 12),
+      responsible: 'Gaius Marius',
+      source: 'Villa Campania',
+      destination: 'Domus Rome'
     }
-
-    // Apply search term
+  ];
+  
+  // Use external search term if provided, otherwise use local state
+  const searchTerm = externalSearchTerm !== undefined ? externalSearchTerm : localSearchTerm;
+  
+  // Filter transactions based on search term and filters
+  const filteredTransactions = useMemo(() => {
+    let result = [...transactions];
+    
+    // Apply search term filter
     if (searchTerm) {
-      filtered = filtered.filter(t => 
-        t.resourceName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        t.responsible.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        (t.reason && t.reason.toLowerCase().includes(searchTerm.toLowerCase()))
+      const lowerSearch = searchTerm.toLowerCase();
+      result = result.filter(t => 
+        t.resourceName.toLowerCase().includes(lowerSearch) ||
+        t.responsible.toLowerCase().includes(lowerSearch) ||
+        (t.source && t.source.toLowerCase().includes(lowerSearch)) ||
+        (t.destination && t.destination.toLowerCase().includes(lowerSearch))
       );
     }
-
+    
+    // Apply resource ID filter
+    if (resourceId) {
+      result = result.filter(t => t.resourceId === resourceId);
+    }
+    
     // Apply additional filters
     if (filters.resourceName) {
-      filtered = filtered.filter(t => t.resourceName === filters.resourceName);
+      result = result.filter(t => t.resourceName === filters.resourceName);
     }
     
     if (filters.type) {
-      filtered = filtered.filter(t => t.type === filters.type);
+      result = result.filter(t => t.type === filters.type);
     }
     
     if (filters.startDate) {
-      filtered = filtered.filter(t => new Date(t.date) >= new Date(filters.startDate!));
+      result = result.filter(t => t.date >= filters.startDate!);
     }
     
     if (filters.endDate) {
-      filtered = filtered.filter(t => new Date(t.date) <= new Date(filters.endDate!));
+      result = result.filter(t => t.date <= filters.endDate!);
     }
     
     if (filters.responsible) {
-      filtered = filtered.filter(t => t.responsible === filters.responsible);
+      result = result.filter(t => t.responsible === filters.responsible);
     }
-
-    // Sort the transactions
-    filtered.sort((a, b) => {
-      const aValue = a[sortField];
-      const bValue = b[sortField];
-      
-      if (aValue === bValue) return 0;
-      
-      const compareResult = aValue < bValue ? -1 : 1;
-      return sortDirection === 'asc' ? compareResult : -compareResult;
-    });
-
-    setFilteredTransactions(filtered);
-  }, [transactions, searchTerm, resourceId, filters, sortField, sortDirection]);
-
-  const handleSort = (field: keyof PropertyTransaction) => {
-    if (field === sortField) {
-      setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc');
-    } else {
-      setSortField(field);
-      setSortDirection('asc');
-    }
-  };
-
-  const getSortIcon = (field: keyof PropertyTransaction) => {
-    if (field !== sortField) return null;
-    return sortDirection === 'asc' ? <ArrowUp className="h-4 w-4 ml-1" /> : <ArrowDown className="h-4 w-4 ml-1" />;
-  };
-
+    
+    return result;
+  }, [transactions, searchTerm, resourceId, filters]);
+  
+  // Pagination
+  const paginatedTransactions = useMemo(() => {
+    const startIndex = (page - 1) * itemsPerPage;
+    return filteredTransactions.slice(startIndex, startIndex + itemsPerPage);
+  }, [filteredTransactions, page, itemsPerPage]);
+  
+  const totalPages = Math.ceil(filteredTransactions.length / itemsPerPage);
+  
   return (
-    <Card className="w-full">
-      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-        <CardTitle className="text-xl font-bold">Transactions</CardTitle>
-        <div className="flex space-x-2">
-          {onAddTransaction && (
-            <Button size="sm" onClick={onAddTransaction}>
-              <Plus className="h-4 w-4 mr-1" /> Ajouter
-            </Button>
-          )}
-          <Button variant="outline" size="sm">
-            <Filter className="h-4 w-4 mr-1" /> Filtrer
+    <Card>
+      <CardHeader className="flex flex-row items-center justify-between pb-2">
+        <CardTitle className="text-md font-medium">
+          Transactions ({filteredTransactions.length})
+        </CardTitle>
+        <div className="flex gap-2">
+          <Input
+            placeholder="Rechercher..."
+            value={localSearchTerm}
+            onChange={(e) => setLocalSearchTerm(e.target.value)}
+            className="w-[200px]"
+          />
+          <Button variant="outline" size="sm" onClick={onAddTransaction}>
+            Ajouter
           </Button>
         </div>
       </CardHeader>
       <CardContent>
-        <div className="relative mb-4">
-          <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-          <Input
-            type="search"
-            placeholder="Rechercher des transactions..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="pl-8"
-          />
-        </div>
-
-        <div className="rounded-md border overflow-hidden">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead className="w-[180px] cursor-pointer" onClick={() => handleSort('date')}>
-                  <div className="flex items-center">
-                    Date {getSortIcon('date')}
-                  </div>
-                </TableHead>
-                <TableHead className="cursor-pointer" onClick={() => handleSort('resourceName')}>
-                  <div className="flex items-center">
-                    Ressource {getSortIcon('resourceName')}
-                  </div>
-                </TableHead>
-                <TableHead className="cursor-pointer" onClick={() => handleSort('type')}>
-                  <div className="flex items-center">
-                    Type {getSortIcon('type')}
-                  </div>
-                </TableHead>
-                <TableHead className="cursor-pointer text-right" onClick={() => handleSort('quantity')}>
-                  <div className="flex items-center justify-end">
-                    Quantité {getSortIcon('quantity')}
-                  </div>
-                </TableHead>
-                <TableHead className="cursor-pointer text-right" onClick={() => handleSort('cost')}>
-                  <div className="flex items-center justify-end">
-                    Coût {getSortIcon('cost')}
-                  </div>
-                </TableHead>
-                <TableHead className="cursor-pointer" onClick={() => handleSort('responsible')}>
-                  <div className="flex items-center">
-                    Responsable {getSortIcon('responsible')}
-                  </div>
-                </TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {filteredTransactions.length > 0 ? (
-                filteredTransactions.map(transaction => (
-                  <TableRow 
-                    key={transaction.id} 
-                    className={onTransactionSelect ? 'cursor-pointer hover:bg-muted' : ''}
-                    onClick={() => onTransactionSelect?.(transaction)}
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead>Date</TableHead>
+              <TableHead>Ressource</TableHead>
+              <TableHead>Type</TableHead>
+              <TableHead>Quantité</TableHead>
+              <TableHead>Responsable</TableHead>
+              <TableHead>Détails</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {paginatedTransactions.map(transaction => (
+              <TableRow key={transaction.id} onClick={() => onTransactionSelect?.(transaction)} className="cursor-pointer">
+                <TableCell>{transaction.date.toLocaleDateString()}</TableCell>
+                <TableCell>{transaction.resourceName}</TableCell>
+                <TableCell>
+                  <Badge 
+                    variant={
+                      transaction.type === 'acquisition' ? 'success' :
+                      transaction.type === 'consumption' ? 'destructive' : 'outline'
+                    }
                   >
-                    <TableCell>{formatDate(transaction.date)}</TableCell>
-                    <TableCell className="font-medium">{transaction.resourceName}</TableCell>
-                    <TableCell>
-                      <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-                        transaction.type === 'acquisition' ? 'bg-green-100 text-green-800' :
-                        transaction.type === 'consumption' ? 'bg-red-100 text-red-800' :
-                        'bg-blue-100 text-blue-800'
-                      }`}>
-                        {transaction.type === 'acquisition' ? 'Acquisition' :
-                         transaction.type === 'consumption' ? 'Consommation' : 'Transfert'}
-                      </span>
-                    </TableCell>
-                    <TableCell className="text-right">{transaction.quantity}</TableCell>
-                    <TableCell className="text-right">
-                      {transaction.cost ? formatCurrency(transaction.cost) : '-'}
-                    </TableCell>
-                    <TableCell>{transaction.responsible}</TableCell>
-                  </TableRow>
-                ))
-              ) : (
-                <TableRow>
-                  <TableCell colSpan={6} className="h-24 text-center">
-                    Aucune transaction trouvée.
-                  </TableCell>
-                </TableRow>
-              )}
-            </TableBody>
-          </Table>
-        </div>
+                    {transaction.type}
+                  </Badge>
+                </TableCell>
+                <TableCell>{transaction.quantity}</TableCell>
+                <TableCell>{transaction.responsible}</TableCell>
+                <TableCell>
+                  {transaction.source && <div>Source: {transaction.source}</div>}
+                  {transaction.destination && <div>Destination: {transaction.destination}</div>}
+                  {transaction.cost && <div>Coût: {transaction.cost} As</div>}
+                </TableCell>
+              </TableRow>
+            ))}
+            {paginatedTransactions.length === 0 && (
+              <TableRow>
+                <TableCell colSpan={6} className="text-center py-4 text-muted-foreground">
+                  Aucune transaction trouvée
+                </TableCell>
+              </TableRow>
+            )}
+          </TableBody>
+        </Table>
       </CardContent>
       <CardFooter className="flex justify-between">
-        <span className="text-sm text-muted-foreground">
-          {filteredTransactions.length} transaction(s) trouvée(s)
-        </span>
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => setPage(prev => Math.max(1, prev - 1))}
+          disabled={page === 1}
+        >
+          Précédent
+        </Button>
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => setPage(prev => Math.min(totalPages, prev + 1))}
+          disabled={page === totalPages || totalPages === 0}
+        >
+          Suivant
+        </Button>
       </CardFooter>
     </Card>
   );
 };
+
+// Add missing Badge import
+import { Badge } from '@/components/ui/badge';

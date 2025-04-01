@@ -1,177 +1,149 @@
 
 /**
- * This file contains adapter functions to bridge type incompatibilities
- * across different parts of the codebase that use similar but slightly different
- * types.
+ * Type adapter utilities for converting between different interfaces
  */
 
-import { BuildingType, BuildingStatus } from '@/components/maitrejeu/types/batiments';
 import { OwnedBuilding, PropertyUpgrade, Slave, SlaveAssignment } from '@/components/proprietes/types/property';
+import { BuildingType as MJBuildingType, Building as MJBuilding } from '@/components/maitrejeu/types/batiments';
+import { BuildingType as PropBuildingType } from '@/components/proprietes/types/buildingTypes';
 
 /**
- * Ensures a building status value complies with the BuildingStatus enum
+ * Adapt a MaitreJeu Building to a Proprietes OwnedBuilding
  */
-export function adaptBuildingStatus(status?: string): BuildingStatus {
-  if (!status) return 'good';
+export const adaptOwnedBuilding = (building: any): OwnedBuilding => {
+  if (!building) return null;
   
-  const validStatus: Record<string, BuildingStatus> = {
-    'excellent': 'excellent',
-    'good': 'good',
-    'fair': 'fair',
-    'poor': 'poor',
-    'ruins': 'ruins',
-    'construction': 'construction',
-    'renovation': 'renovation',
-    'average': 'average',
-    'damaged': 'damaged',
-    'ruined': 'ruined',
-    'under_construction': 'under_construction'
-  };
+  // Handle different ID types
+  const id = typeof building.id === 'number' ? String(building.id) : building.id;
   
-  return validStatus[status] || 'good';
-}
-
-/**
- * Ensures a building type value complies with the BuildingType enum
- */
-export function adaptBuildingType(type?: string): BuildingType {
-  if (!type) return 'other';
-  
-  const validTypes: Record<string, BuildingType> = {
-    'temple': 'temple',
-    'villa': 'villa',
-    'domus': 'domus',
-    'insula': 'insula',
-    'forum': 'forum',
-    'baths': 'baths',
-    'theater': 'theater',
-    'amphitheater': 'amphitheater',
-    'senate': 'senate',
-    'basilica': 'basilica',
-    'market': 'market',
-    'warehouse': 'warehouse',
-    'workshop': 'workshop',
-    'port': 'port',
-    'aqueduct': 'aqueduct',
-    'road': 'road',
-    'bridge': 'bridge',
-    'military': 'military',
-    'wall': 'wall'
-  };
-  
-  return validTypes[type] || 'other';
-}
-
-/**
- * Ensures property upgrades have the required properties
- */
-export function adaptPropertyUpgrades(upgrades?: any[]): PropertyUpgrade[] {
-  if (!upgrades) return [];
-  
-  return upgrades.map(upgrade => ({
-    id: upgrade.id || String(Date.now()),
-    name: upgrade.name || 'Unknown Upgrade',
-    cost: upgrade.cost || 0,
-    description: upgrade.description || '',
-    effect: upgrade.effect || upgrade.effects?.toString() || '',
-    applied: upgrade.applied || upgrade.installed || false,
-    installed: upgrade.installed || upgrade.applied || false,
-    buildingType: Array.isArray(upgrade.buildingType) ? upgrade.buildingType : [],
-    type: upgrade.type || 'general',
-    requirements: {
-      minBuildingLevel: upgrade.requirements?.minBuildingLevel || upgrade.requirements?.buildingLevel,
-      minValue: upgrade.requirements?.minValue || upgrade.requirements?.value,
-      minWorkers: upgrade.requirements?.minWorkers || upgrade.requirements?.workers,
-      minCondition: upgrade.requirements?.minCondition || upgrade.requirements?.buildingCondition,
-      otherUpgrades: upgrade.requirements?.otherUpgrades || upgrade.requirements?.upgrades || [],
-      buildingLevel: upgrade.requirements?.buildingLevel,
-      buildingCondition: upgrade.requirements?.buildingCondition,
-      minIncome: upgrade.requirements?.minIncome,
-      value: upgrade.requirements?.value,
-      previousUpgrade: upgrade.requirements?.previousUpgrade,
-      upgrades: upgrade.requirements?.upgrades
-    },
-    effects: {
-      income: upgrade.effects?.income || 0,
-      maintenanceReduction: upgrade.effects?.maintenanceReduction || 0,
-      conditionBoost: upgrade.effects?.conditionBoost || 0,
-      workers: upgrade.effects?.workers || 0,
-      value: upgrade.effects?.value || 0,
-      maintenance: upgrade.effects?.maintenance,
-      condition: upgrade.effects?.condition,
-      security: upgrade.effects?.security
-    }
-  }));
-}
-
-/**
- * Standardize the OwnedBuilding type based on different building inputs
- */
-export function adaptOwnedBuilding(building: any): OwnedBuilding {
   return {
-    id: building.id || String(Date.now()),
-    buildingId: building.buildingId || building.id || String(Date.now()),
-    name: building.name || 'Unknown Building',
-    buildingType: building.buildingType || 'other',
-    type: adaptBuildingType(building.type),
-    location: building.location || 'Rome',
-    size: building.size || 'medium',
+    id: id,
+    buildingId: building.buildingId || id,
+    name: building.name || '',
+    buildingType: building.buildingType || building.type || 'other',
+    type: building.type || PropBuildingType.OTHER,
+    location: building.location || '',
+    size: building.size || 1,
     value: building.value || 0,
     condition: building.condition || 100,
     maintenanceLevel: building.maintenanceLevel || 1,
     maintenanceCost: building.maintenanceCost || building.maintenance || 0,
-    maintenance: building.maintenance || building.maintenanceCost || 0,
+    maintenanceEnabled: building.maintenanceEnabled || true,
     income: building.income || 0,
     workers: building.workers || 0,
     maxWorkers: building.maxWorkers || 10,
     securityLevel: building.securityLevel || 1,
     description: building.description || '',
     purchaseDate: building.purchaseDate || new Date(),
-    lastMaintenance: building.lastMaintenance,
-    status: adaptBuildingStatus(building.status),
-    maintenanceEnabled: building.maintenanceEnabled ?? true,
-    slaves: building.slaves || 0,
-    upgrades: adaptPropertyUpgrades(building.upgrades)
+    status: building.status || 'active',
+    maintenance: building.maintenance || building.maintenanceCost || 0,
+    upgrades: adaptPropertyUpgrades(building.upgrades || [])
   };
-}
+};
 
 /**
- * Standardize the Slave type
+ * Adapt property upgrades to ensure consistent format
  */
-export function adaptSlave(slave: any): Slave {
+export const adaptPropertyUpgrades = (upgrades: any[]): PropertyUpgrade[] => {
+  if (!upgrades || !Array.isArray(upgrades)) {
+    return [];
+  }
+  
+  return upgrades.map(upgrade => {
+    if (!upgrade) return null;
+    
+    // Normalize effect/effects
+    const effect = upgrade.effect || upgrade.effects || {};
+    
+    // Normalize requirements
+    const requirements = upgrade.requirements || {};
+    
+    return {
+      id: upgrade.id || `upgrade-${Math.random().toString(36).substr(2, 9)}`,
+      name: upgrade.name || '',
+      description: upgrade.description || '',
+      cost: upgrade.cost || 0,
+      effect: {
+        income: effect.income,
+        popularity: effect.popularity,
+        security: effect.security,
+        maintenance: effect.maintenance,
+        condition: effect.condition,
+        value: effect.value,
+        conditionBoost: effect.conditionBoost,
+        maintenanceReduction: effect.maintenanceReduction
+      },
+      effects: effect, // Maintain compatibility
+      installed: upgrade.installed || upgrade.applied || false,
+      buildingTypes: Array.isArray(upgrade.buildingTypes) 
+        ? upgrade.buildingTypes 
+        : (upgrade.buildingType 
+            ? (Array.isArray(upgrade.buildingType) ? upgrade.buildingType : [upgrade.buildingType]) 
+            : []),
+      requirements: {
+        minWorkers: requirements.minWorkers,
+        minSecurity: requirements.minSecurity,
+        minMaintenance: requirements.minMaintenance,
+        minIncome: requirements.minIncome,
+        minCondition: requirements.minCondition,
+        minBuildingLevel: requirements.minBuildingLevel || requirements.buildingLevel,
+        minValue: requirements.minValue || requirements.value,
+        otherUpgrades: requirements.otherUpgrades || requirements.upgrades,
+        buildingLevel: requirements.buildingLevel,
+        buildingCondition: requirements.buildingCondition,
+        previousUpgrade: requirements.previousUpgrade,
+        value: requirements.value,
+        upgrades: requirements.upgrades
+      },
+      applied: upgrade.applied || false,
+      type: upgrade.type || '',
+    };
+  }).filter(Boolean);
+};
+
+/**
+ * Adapt a slave to ensure consistent format
+ */
+export const adaptSlave = (slave: any): Slave => {
+  if (!slave) return null;
+  
   return {
-    id: slave.id || String(Date.now()),
-    name: slave.name || 'Unknown Slave',
+    id: slave.id || `slave-${Math.random().toString(36).substr(2, 9)}`,
+    name: slave.name || 'Esclave sans nom',
     age: slave.age || 25,
     gender: slave.gender || 'male',
     status: slave.status || 'healthy',
     acquired: slave.acquired || new Date(),
-    value: slave.value || 1000,
+    value: slave.value || slave.price || 500,
     assignedTo: slave.assignedTo,
-    health: slave.health || 100,
-    skills: slave.skills || [],
-    origin: slave.origin || 'Unknown',
+    assigned: !!slave.assignedTo || slave.assigned || false,
+    specialties: slave.specialties || slave.skills || [],
     notes: slave.notes || '',
-    assigned: slave.assigned ?? false
+    // Additional compatibility fields
+    health: slave.health,
+    skills: slave.skills,
+    origin: slave.origin
   };
-}
+};
 
 /**
- * Standardize the SlaveAssignment type
+ * Adapt slave assignments to ensure consistent format
  */
-export function adaptSlaveAssignment(assignment: any): SlaveAssignment {
+export const adaptSlaveAssignment = (assignment: any): SlaveAssignment => {
+  if (!assignment) return null;
+  
   return {
-    id: assignment.id || String(Date.now()),
-    slaveId: assignment.slaveId || '',
-    buildingId: assignment.buildingId || '',
-    propertyId: assignment.propertyId || assignment.buildingId || '',
+    id: assignment.id,
+    propertyId: assignment.propertyId || assignment.buildingId,
+    slaveId: assignment.slaveId,
+    buildingId: assignment.buildingId,
     startDate: assignment.startDate || assignment.assignedAt || new Date(),
     efficiency: assignment.efficiency || assignment.productivity || 100,
-    buildingName: assignment.buildingName || '',
-    assignedAt: assignment.assignedAt || assignment.startDate || new Date(),
-    role: assignment.role || 'worker',
-    productivity: assignment.productivity || assignment.efficiency || 100,
-    count: assignment.count || 1,
-    maxCount: assignment.maxCount || 10
+    role: assignment.role,
+    productivity: assignment.productivity,
+    assignedAt: assignment.assignedAt,
+    buildingName: assignment.buildingName,
+    count: assignment.count,
+    maxCount: assignment.maxCount
   };
-}
+};
