@@ -8,8 +8,8 @@ import { formatCurrency } from '@/utils/currencyUtils';
 export const EconomieStats: React.FC = () => {
   const { balance, transactions } = useEconomy();
   
-  // Calculate financial stats locally since getFinancialStats doesn't exist
-  const getFinancialStats = () => {
+  // Calculate financial stats locally
+  const calculateFinancialStats = () => {
     const oneMonthAgo = new Date();
     oneMonthAgo.setMonth(oneMonthAgo.getMonth() - 1);
     
@@ -28,7 +28,7 @@ export const EconomieStats: React.FC = () => {
     return { monthlyIncome, monthlyExpenses };
   };
   
-  const stats = getFinancialStats();
+  const stats = calculateFinancialStats();
   
   return (
     <div className="grid grid-cols-1 md:grid-cols-3 gap-4">

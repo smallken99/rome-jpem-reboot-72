@@ -61,21 +61,20 @@ export function useEquilibreEffects() {
       // Multiplier les revenus par un facteur basé sur la prospérité
       const factor = 1 + (impact.prosperity / 200); // +/- 50% max
       
-      // Implement a workaround if updateBuildingIncome isn't available
-      if (typeof buildingsHook.updateBuildingIncome === 'function') {
-        buildingsHook.updateBuildingIncome(factor);
-      } else {
-        console.warn('updateBuildingIncome not available in useBuildings hook');
-        // Implement a fallback like modifying each building's income directly if needed
+      // Handle income adjustments directly with available methods
+      if (typeof buildingsHook.calculateBuildingIncome === 'function') {
+        // Apply to all buildings individually
         buildingsHook.buildings.forEach(building => {
           if (building.income) {
             const updatedBuilding = {
               ...building,
-              income: Math.round(building.income * factor)
+              income: Math.round((building.income || 0) * factor)
             };
             buildingsHook.updateBuilding(building.id, updatedBuilding);
           }
         });
+      } else {
+        console.warn('Building income adjustment functionality not available');
       }
     }
     
@@ -84,21 +83,20 @@ export function useEquilibreEffects() {
       // Augmenter les coûts d'entretien en fonction du risque de rébellion
       const factor = 1 + (impact.rebellionRisk / 100); // +100% max
       
-      // Implement a workaround if updateMaintenanceCost isn't available
-      if (typeof buildingsHook.updateMaintenanceCost === 'function') {
-        buildingsHook.updateMaintenanceCost(factor);
-      } else {
-        console.warn('updateMaintenanceCost not available in useBuildings hook');
-        // Implement a fallback like modifying each building's maintenance directly if needed
+      // Handle maintenance cost adjustments directly with available methods
+      if (typeof buildingsHook.calculateMaintenanceCost === 'function') {
+        // Apply to all buildings individually
         buildingsHook.buildings.forEach(building => {
           if (building.maintenanceCost) {
             const updatedBuilding = {
               ...building,
-              maintenanceCost: Math.round(building.maintenanceCost * factor)
+              maintenanceCost: Math.round((building.maintenanceCost || 0) * factor)
             };
             buildingsHook.updateBuilding(building.id, updatedBuilding);
           }
         });
+      } else {
+        console.warn('Building maintenance cost adjustment functionality not available');
       }
     }
   };

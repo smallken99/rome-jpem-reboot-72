@@ -2,18 +2,21 @@
 import { useEffect, useState } from 'react';
 import { buildingService } from '@/services/buildingService';
 import { OwnedBuilding } from '@/components/proprietes/types/property';
+import { adaptOwnedBuilding } from '@/utils/typeAdapters';
 
 /**
- * Hook pour la gestion des bâtiments simplifié
+ * Hook pour la gestion des bâtiments
  */
 export function useBuildings() {
-  const [buildings, setBuildings] = useState<OwnedBuilding[]>(buildingService.getAllBuildings());
+  const [buildings, setBuildings] = useState<OwnedBuilding[]>(
+    buildingService.getAllBuildings().map(adaptOwnedBuilding)
+  );
   const [stats, setStats] = useState(buildingService.calculateBuildingStats());
   
   useEffect(() => {
     // S'abonner aux changements de bâtiments
     const unsubscribe = buildingService.subscribeToBuildings(newBuildings => {
-      setBuildings(newBuildings);
+      setBuildings(newBuildings.map(adaptOwnedBuilding));
       setStats(buildingService.calculateBuildingStats());
     });
     
@@ -23,16 +26,51 @@ export function useBuildings() {
     };
   }, []);
   
+  // Update a building's income with a multiplier
+  const updateBuildingIncome = (factor: number) => {
+    buildings.forEach(building => {
+      if (building.income) {
+        const updatedBuilding = {
+          ...building,
+          income: Math.round((building.income || 0) * factor)
+        };
+        buildingService.updateBuilding(String(building.id), updatedBuilding);
+      }
+    });
+  };
+  
+  // Update a building's maintenance cost with a multiplier
+  const updateMaintenanceCost = (factor: number) => {
+    buildings.forEach(building => {
+      const updatedBuilding = {
+        ...building,
+        maintenanceCost: Math.round((building.maintenanceCost || 0) * factor),
+        maintenance: Math.round((building.maintenance || 0) * factor)
+      };
+      buildingService.updateBuilding(String(building.id), updatedBuilding);
+    });
+  };
+  
   return {
     buildings,
     stats,
     // Fonctions de gestion des bâtiments
-    addBuilding: buildingService.addBuilding.bind(buildingService),
+    addBuilding: (buildingData: any) => {
+      const adaptedBuilding = adaptOwnedBuilding(buildingData);
+      return buildingService.addBuilding(adaptedBuilding);
+    },
     removeBuilding: buildingService.removeBuilding.bind(buildingService),
-    updateBuilding: buildingService.updateBuilding.bind(buildingService),
+    updateBuilding: (id: string | number, data: Partial<OwnedBuilding>) => {
+      return buildingService.updateBuilding(String(id), data);
+    },
     updateBuildingProperty: buildingService.updateBuildingProperty.bind(buildingService),
-    getBuilding: buildingService.getBuilding.bind(buildingService),
-    getBuildingsByType: buildingService.getBuildingsByType.bind(buildingService),
+    getBuilding: (id: string | number) => {
+      const building = buildingService.getBuilding(String(id));
+      return building ? adaptOwnedBuilding(building) : null;
+    },
+    getBuildingsByType: (type: string) => {
+      return buildingService.getBuildingsByType(type).map(adaptOwnedBuilding);
+    },
     // Fonctions économiques liées aux bâtiments
     purchaseBuilding: buildingService.purchaseBuilding.bind(buildingService),
     sellBuilding: buildingService.sellBuilding.bind(buildingService),
@@ -43,6 +81,9 @@ export function useBuildings() {
     calculateBuildingIncome: buildingService.calculateBuildingIncome.bind(buildingService),
     calculateMaintenanceCost: buildingService.calculateMaintenanceCost.bind(buildingService),
     calculateBuildingStats: buildingService.calculateBuildingStats.bind(buildingService),
-    applyUpgrade: buildingService.applyUpgrade.bind(buildingService)
+    applyUpgrade: buildingService.applyUpgrade.bind(buildingService),
+    // Added functions for equilibre effects
+    updateBuildingIncome,
+    updateMaintenanceCost
   };
 }

@@ -12,7 +12,7 @@ import { ConstructionProjects } from './components/batiments/ConstructionProject
 import MaintenanceManager from './components/batiments/MaintenanceManager';
 import BuildingRevenue from './components/batiments/BuildingRevenue';
 import PublicBuildingModal from './components/batiments/PublicBuildingModal';
-import { Building, BuildingCreationData } from './types/batiments';
+import { Building, BuildingCreationData, BuildingStatus } from './types/batiments';
 
 export const GestionBatiments = () => {
   const [activeTab, setActiveTab] = useState<string>('liste');
@@ -40,11 +40,11 @@ export const GestionBatiments = () => {
       maintenance: 1000,
       maintenanceCost: 1000,
       condition: 100,
-      status: "good" as any  // Cast to any to avoid specific enum type issues
+      status: "good" as BuildingStatus  // Cast to BuildingStatus to avoid specific enum type issues
     };
     
-    // Use useState setter pattern to avoid type errors
-    setSelectedBuilding(() => example);
+    // Direct assignment instead of using setState functional form to fix type error
+    setSelectedBuilding(example);
     setIsAddBuildingModalOpen(true);
   };
 
@@ -54,7 +54,8 @@ export const GestionBatiments = () => {
       const completeData = {
         ...data,
         revenue: 0,      // Add missing revenue property
-        maintenance: data.maintenanceCost || 0 // Set maintenance equal to maintenanceCost
+        maintenance: data.maintenanceCost || 0, // Set maintenance equal to maintenanceCost
+        status: data.status || 'good' as BuildingStatus // Ensure status is provided with correct type
       };
       
       updateBuilding(selectedBuilding.id, completeData);
@@ -63,7 +64,8 @@ export const GestionBatiments = () => {
       const completeData = {
         ...data,
         revenue: 0,      // Add missing revenue property
-        maintenance: data.maintenanceCost || 0 // Set maintenance equal to maintenanceCost
+        maintenance: data.maintenanceCost || 0, // Set maintenance equal to maintenanceCost
+        status: data.status || 'good' as BuildingStatus // Ensure status is provided with correct type
       };
       
       addBuilding(completeData);

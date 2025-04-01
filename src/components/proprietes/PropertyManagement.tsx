@@ -11,7 +11,8 @@ import { useBuildingManagement } from '@/hooks/useBuildingManagement';
 import { OwnedBuilding, PropertyUpgrade } from '@/components/proprietes/types/property';
 import { toast } from 'sonner';
 import { v4 as uuidv4 } from 'uuid';
-import { BuildingType } from '@/components/proprietes/types/buildingTypes';
+import { BuildingType } from '@/components/maitrejeu/types/batiments';
+import { adaptOwnedBuilding } from '@/utils/typeAdapters';
 
 export const PropertyManagement: React.FC = () => {
   const [activeTab, setActiveTab] = useState('overview');
@@ -27,31 +28,7 @@ export const PropertyManagement: React.FC = () => {
   const buildingWithType = buildings.find(b => b.id === (buildingId || "building-1"));
   
   // Complete the building with all required properties for the OwnedBuilding type
-  const building: OwnedBuilding | null = buildingWithType ? {
-    id: buildingWithType.id,
-    buildingId: buildingWithType.id,
-    name: buildingWithType.name || '',
-    buildingType: buildingWithType.buildingType || buildingWithType.type || '',
-    type: buildingWithType.type || BuildingType.OTHER,
-    location: buildingWithType.location || '',
-    size: buildingWithType.size || 1,
-    value: buildingWithType.value || 0,
-    condition: buildingWithType.condition || 100,
-    maintenanceLevel: buildingWithType.maintenanceLevel || 1,
-    maintenanceCost: buildingWithType.maintenanceCost || buildingWithType.maintenance || 0,
-    maintenance: buildingWithType.maintenance || buildingWithType.maintenanceCost || 0,
-    income: buildingWithType.income || 0,
-    workers: buildingWithType.workers || 0,
-    maxWorkers: buildingWithType.maxWorkers || 10,
-    securityLevel: buildingWithType.securityLevel || 1,
-    description: buildingWithType.description || '',
-    purchaseDate: buildingWithType.purchaseDate || new Date(),
-    status: buildingWithType.status || 'active',
-    upgrades: (buildingWithType.upgrades || []).map(upgrade => ({
-      ...upgrade,
-      applied: upgrade.applied || upgrade.installed || false
-    })) as PropertyUpgrade[]
-  } : null;
+  const building: OwnedBuilding | null = buildingWithType ? adaptOwnedBuilding(buildingWithType) : null;
 
   if (!building) {
     return (
@@ -84,13 +61,8 @@ export const PropertyManagement: React.FC = () => {
       toast.success(`Niveau d'entretien mis à jour pour ${building.name}`);
     };
     
-    // Adapt to expected signature by creating a wrapper function
-    const adapter = (level: number) => {
-      updateMaintenanceLevel(String(building.id), level);
-    };
-    
-    // Call the adapter function
-    adapter(level);
+    // Call the function directly with the adapted level
+    updateMaintenanceLevel(String(building.id), level);
   };
 
   const handleRenovateBuilding = () => {
@@ -106,13 +78,8 @@ export const PropertyManagement: React.FC = () => {
       toast.success(`Personnel mis à jour pour ${building.name}`);
     };
     
-    // Adapt to expected signature by creating a wrapper function
-    const adapter = (count: number) => {
-      assignWorkers(String(building.id), count);
-    };
-    
-    // Call the adapter function
-    adapter(count);
+    // Call the function directly with the adapted count
+    assignWorkers(String(building.id), count);
   };
 
   return (

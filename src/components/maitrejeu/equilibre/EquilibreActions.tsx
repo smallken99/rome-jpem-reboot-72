@@ -5,9 +5,9 @@ import {
   TrendingUp, 
   TrendingDown, 
   AlertTriangle, 
-  Scale, // Changed from Scales which doesn't exist
+  Scale,
   Gavel, 
-  Government 
+  Building2
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -65,7 +65,7 @@ export const EquilibreActions: React.FC<EquilibreActionProps> = ({ onApplyAction
             />
             
             <ActionButton
-              icon={<Government className="h-5 w-5 text-indigo-500" />}
+              icon={<Building2 className="h-5 w-5 text-indigo-500" />}
               label="Concessions Politiques"
               description="Équilibrer les factions politiques"
               onClick={() => handleActionClick('political_concessions', 12)}

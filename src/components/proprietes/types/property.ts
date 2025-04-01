@@ -107,6 +107,7 @@ export interface Slave {
   skills?: string[];
   origin?: string;
   notes?: string;
+  assigned?: boolean;
 }
 
 export interface SlaveAssignment {
