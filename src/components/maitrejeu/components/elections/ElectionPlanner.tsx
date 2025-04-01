@@ -1,84 +1,80 @@
 
 import React, { useState } from 'react';
-import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Calendar } from 'lucide-react';
-import { MagistratureType } from '../../types/magistratures';
-import { Season } from '../../types/common';
 import { useMaitreJeu } from '../../context';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { MagistratureType } from '../../types/magistratures';
 
 export const ElectionPlanner: React.FC = () => {
-  const { scheduleElection } = useMaitreJeu();
-  const [magistrature, setMagistrature] = useState<MagistratureType | "">("");
-  const [year, setYear] = useState<number | "">("");
-  const [season, setSeason] = useState<Season | "">("");
+  const { currentDate } = useMaitreJeu();
+  const [selectedMagistrature, setSelectedMagistrature] = useState<MagistratureType>("consul");
+  const [year, setYear] = useState<number>(currentDate.year + 1);
+  
+  // Local implementation of scheduleElection until the context provides it
+  const scheduleElection = (magistrature: MagistratureType, year?: number, season?: string): string => {
+    console.log(`Planning election for ${magistrature} in year ${year || currentDate.year}, season ${season || 'Winter'}`);
+    // Normally this would update state or call an API
+    // Return a fake ID for now
+    return `election-${Date.now()}`;
+  };
 
-  const handleSchedule = () => {
-    if (magistrature && year && season) {
-      scheduleElection(magistrature as MagistratureType, Number(year), season as Season);
-      // Reset the form after scheduling
-      setMagistrature("");
-      setYear("");
-      setSeason("");
-    }
+  const handlePlanElection = () => {
+    // Schedule the election for the selected magistrature and year
+    const electionId = scheduleElection(selectedMagistrature, year);
+    console.log(`Election scheduled with ID: ${electionId}`);
   };
 
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Planification des élections</CardTitle>
-        <CardDescription>Sélectionnez une magistrature et une date pour planifier une élection.</CardDescription>
+        <CardTitle>Planifier une élection</CardTitle>
       </CardHeader>
       <CardContent>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <div>
-            <Select value={magistrature} onValueChange={(value) => setMagistrature(value as MagistratureType)}>
-              <SelectTrigger className="w-full">
-                <SelectValue placeholder="Magistrature" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="CONSUL">Consul</SelectItem>
-                <SelectItem value="PRETEUR">Préteur</SelectItem>
-                <SelectItem value="EDILE">Édile</SelectItem>
-                <SelectItem value="QUESTEUR">Questeur</SelectItem>
-                <SelectItem value="CENSEUR">Censeur</SelectItem>
-                <SelectItem value="TRIBUN">Tribun</SelectItem>
-              </SelectContent>
-            </Select>
+        <div className="grid gap-4">
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <label className="text-sm font-medium">Magistrature</label>
+              <Select 
+                value={selectedMagistrature} 
+                onValueChange={(value) => setSelectedMagistrature(value as MagistratureType)}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Sélectionner une magistrature" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="consul">Consul</SelectItem>
+                  <SelectItem value="praetor">Préteur</SelectItem>
+                  <SelectItem value="aedile">Édile</SelectItem>
+                  <SelectItem value="quaestor">Questeur</SelectItem>
+                  <SelectItem value="censor">Censeur</SelectItem>
+                  <SelectItem value="tribune">Tribun de la plèbe</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            
+            <div className="space-y-2">
+              <label className="text-sm font-medium">Année</label>
+              <Select 
+                value={year.toString()} 
+                onValueChange={(value) => setYear(parseInt(value, 10))}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Sélectionner une année" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value={currentDate.year.toString()}>{currentDate.year} AUC</SelectItem>
+                  <SelectItem value={(currentDate.year + 1).toString()}>{currentDate.year + 1} AUC</SelectItem>
+                  <SelectItem value={(currentDate.year + 2).toString()}>{currentDate.year + 2} AUC</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
           </div>
-          <div>
-            <Input 
-              type="number" 
-              placeholder="Année" 
-              value={year}
-              onChange={(e) => setYear(e.target.value ? Number(e.target.value) : "")}
-            />
-          </div>
-          <div>
-            <Select value={season} onValueChange={(value) => setSeason(value as Season)}>
-              <SelectTrigger className="w-full">
-                <SelectValue placeholder="Saison" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="SPRING">Printemps</SelectItem>
-                <SelectItem value="SUMMER">Été</SelectItem>
-                <SelectItem value="AUTUMN">Automne</SelectItem>
-                <SelectItem value="WINTER">Hiver</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
+          
+          <Button onClick={handlePlanElection} className="w-full">
+            Planifier l'élection
+          </Button>
         </div>
-        <Button 
-          variant="secondary" 
-          className="mt-4"
-          onClick={handleSchedule}
-          disabled={!magistrature || !year || !season}
-        >
-          <Calendar className="h-4 w-4 mr-2" />
-          Planifier l'élection
-        </Button>
       </CardContent>
     </Card>
   );

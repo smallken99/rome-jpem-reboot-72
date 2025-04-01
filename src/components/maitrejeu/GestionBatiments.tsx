@@ -44,10 +44,10 @@ export const GestionBatiments = () => {
       description: "Description du bâtiment",
       constructionYear: currentYear - 5,
       cost: 75000,
-      revenue: 5000 // Add required revenue property
+      revenue: 5000,
+      capacity: 0
     };
     
-    // Set the selected building directly without using a function expression
     setSelectedBuilding(exampleBuilding);
   };
 
@@ -62,7 +62,9 @@ export const GestionBatiments = () => {
         description: data.description || "",
         constructionYear: data.constructionYear || currentYear,
         cost: data.cost,
-        revenue: data.revenue
+        revenue: data.revenue,
+        value: data.value,
+        condition: data.condition,
       });
     } else {
       // Add new building with all required properties
@@ -76,7 +78,8 @@ export const GestionBatiments = () => {
         value: data.value || 0,
         condition: data.condition || 100,
         cost: data.cost,
-        revenue: data.revenue
+        revenue: data.revenue,
+        capacity: data.capacity || 0
       };
       
       addBuilding(completeData);

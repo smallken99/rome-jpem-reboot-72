@@ -1,115 +1,121 @@
 
-import React, { useState } from 'react';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import React, { useState, useEffect } from 'react';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Eye, Edit, Search, Filter } from 'lucide-react';
-import { 
-  Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle 
-} from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { useMaitreJeu } from '../../context';
+import { Edit, Trash, Filter, Search, BarChart } from 'lucide-react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useBatimentsManagement } from '../../hooks/useBatimentsManagement';
-import { Building, BuildingType } from '../../types/batiments';
+import { Building, BuildingStatus } from '../../types/batiments';
+import { formatCurrency } from '@/utils/formatters';
 
 interface BuildingsListProps {
-  onEdit: (buildingId: string) => void;
+  onEdit: (id: string) => void;
+  onDelete?: (id: string) => void;
 }
 
-const BuildingsList: React.FC<BuildingsListProps> = ({ onEdit }) => {
-  const { currentYear } = useMaitreJeu();
-  const { buildings, filter, setFilter } = useBatimentsManagement();
-  
-  const [searchTerm, setSearchTerm] = useState("");
-  
-  const handleFilterChange = (newFilter: Partial<typeof filter>) => {
-    setFilter(prev => ({ ...prev, ...newFilter }));
-  };
-  
-  const handleSearch = () => {
-    handleFilterChange({ searchTerm });
-  };
-  
-  const clearFilters = () => {
-    setSearchTerm("");
-    handleFilterChange({ 
-      searchTerm: "", 
-      types: [], 
-      locations: [], 
-      status: "", 
-      minRevenue: 0, 
-      maxMaintenance: 0 
+const statusColors: Record<BuildingStatus, string> = {
+  excellent: 'bg-green-100 text-green-800',
+  good: 'bg-green-100 text-green-800',
+  fair: 'bg-yellow-100 text-yellow-800',
+  poor: 'bg-orange-100 text-orange-800',
+  ruins: 'bg-red-100 text-red-800',
+  construction: 'bg-blue-100 text-blue-800',
+  renovation: 'bg-purple-100 text-purple-800',
+  average: 'bg-yellow-100 text-yellow-800',
+  damaged: 'bg-orange-100 text-orange-800',
+  ruined: 'bg-red-100 text-red-800',
+  under_construction: 'bg-blue-100 text-blue-800'
+};
+
+const BuildingsList: React.FC<BuildingsListProps> = ({ onEdit, onDelete }) => {
+  const { buildings, filter, handleFilterChange, deleteBuilding } = useBatimentsManagement();
+  const [searchTerm, setSearchTerm] = useState<string>('');
+  const [filteredBuildings, setFilteredBuildings] = useState<Building[]>([]);
+
+  useEffect(() => {
+    const filtered = buildings.filter(building => {
+      // Filter by name and location
+      if (searchTerm && 
+          !building.name.toLowerCase().includes(searchTerm.toLowerCase()) &&
+          !building.location.toLowerCase().includes(searchTerm.toLowerCase())) {
+        return false;
+      }
+      
+      // Filter by type
+      if (filter.types.length > 0 && !filter.types.includes(building.type)) {
+        return false;
+      }
+      
+      // Filter by location
+      if (filter.locations.length > 0 && !filter.locations.includes(building.location)) {
+        return false;
+      }
+      
+      // Filter by status
+      if (filter.status && filter.status !== 'all' && building.status !== filter.status) {
+        return false;
+      }
+      
+      // Filter by revenue
+      if (filter.minRevenue > 0 && building.revenue < filter.minRevenue) {
+        return false;
+      }
+      
+      // Filter by maintenance cost
+      if (filter.maxMaintenance > 0 && building.maintenanceCost > filter.maxMaintenance) {
+        return false;
+      }
+      
+      return true;
     });
+    
+    setFilteredBuildings(filtered);
+  }, [buildings, searchTerm, filter]);
+
+  const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchTerm(e.target.value);
   };
-  
-  // Helper function to get badge color based on status
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'excellent':
-        return 'bg-green-500';
-      case 'good':
-        return 'bg-green-300';
-      case 'fair':
-        return 'bg-yellow-300';
-      case 'poor':
-        return 'bg-yellow-600';
-      case 'ruins':
-        return 'bg-red-500';
-      case 'construction':
-      case 'under_construction':
-        return 'bg-blue-500';
-      case 'renovation':
-        return 'bg-purple-500';
-      default:
-        return 'bg-gray-500';
+
+  const handleDelete = (id: string) => {
+    if (onDelete) {
+      onDelete(id);
+    } else if (deleteBuilding) {
+      deleteBuilding(id);
     }
   };
-  
-  // Helper function to format currency
-  const formatCurrency = (amount: number) => {
-    return `${amount.toLocaleString()} As`;
-  };
-  
-  // Helper function to calculate age
-  const calculateAge = (year: number) => {
-    return currentYear - year;
-  };
-  
+
   return (
     <Card>
-      <CardHeader className="pb-3">
-        <CardTitle>Liste des Bâtiments Publics</CardTitle>
-        <CardDescription>
-          Gérez les bâtiments et infrastructures publiques de Rome
-        </CardDescription>
-        
-        <div className="flex items-center space-x-2 mt-4">
-          <div className="relative flex-1">
-            <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-            <Input
-              type="search"
-              placeholder="Rechercher un bâtiment..."
-              className="pl-8"
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
-            />
-          </div>
-          <Button variant="outline" size="icon" onClick={handleSearch}>
-            <Search className="h-4 w-4" />
-          </Button>
-          <Button variant="outline" size="icon" onClick={() => {}}>
-            <Filter className="h-4 w-4" />
-          </Button>
-          {filter.searchTerm && (
-            <Button variant="ghost" size="sm" onClick={clearFilters}>
-              Effacer les filtres
+      <CardHeader className="pb-2">
+        <div className="flex justify-between items-center">
+          <CardTitle>Bâtiments Publics</CardTitle>
+          <div className="flex items-center space-x-2">
+            <div className="relative w-64">
+              <Search className="h-4 w-4 absolute left-2.5 top-2.5 text-muted-foreground" />
+              <Input
+                type="search"
+                placeholder="Rechercher un bâtiment..."
+                value={searchTerm}
+                onChange={handleSearch}
+                className="pl-8"
+              />
+            </div>
+            <Button variant="outline" size="icon">
+              <Filter className="h-4 w-4" />
             </Button>
-          )}
+          </div>
         </div>
       </CardHeader>
-      
-      <CardContent>
+      <CardContent className="p-0">
         <Table>
           <TableHeader>
             <TableRow>
@@ -117,42 +123,51 @@ const BuildingsList: React.FC<BuildingsListProps> = ({ onEdit }) => {
               <TableHead>Type</TableHead>
               <TableHead>Emplacement</TableHead>
               <TableHead>État</TableHead>
-              <TableHead>Âge</TableHead>
-              <TableHead>Valeur</TableHead>
-              <TableHead>Entretien</TableHead>
-              <TableHead>Revenus</TableHead>
-              <TableHead>Actions</TableHead>
+              <TableHead className="text-right">Valeur</TableHead>
+              <TableHead className="text-right">Entretien</TableHead>
+              <TableHead className="text-right">Revenue</TableHead>
+              <TableHead className="text-right">Actions</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
-            {buildings.length === 0 ? (
+            {filteredBuildings.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={9} className="text-center py-4 text-muted-foreground">
-                  Aucun bâtiment trouvé
+                <TableCell colSpan={8} className="text-center py-6 text-muted-foreground">
+                  Aucun bâtiment trouvé. Ajoutez de nouveaux bâtiments avec le bouton "Nouveau bâtiment".
                 </TableCell>
               </TableRow>
             ) : (
-              buildings.map((building) => (
+              filteredBuildings.map((building) => (
                 <TableRow key={building.id}>
                   <TableCell className="font-medium">{building.name}</TableCell>
                   <TableCell>{building.type}</TableCell>
                   <TableCell>{building.location}</TableCell>
                   <TableCell>
-                    <Badge className={getStatusColor(building.status)}>
+                    <Badge className={statusColors[building.status] || 'bg-gray-100'}>
                       {building.status}
                     </Badge>
                   </TableCell>
-                  <TableCell>{calculateAge(building.constructionYear)} ans</TableCell>
-                  <TableCell>{formatCurrency(building.value)}</TableCell>
-                  <TableCell>{formatCurrency(building.maintenanceCost)}</TableCell>
-                  <TableCell>{formatCurrency(building.revenue)}</TableCell>
-                  <TableCell>
-                    <div className="flex space-x-2">
-                      <Button variant="ghost" size="icon" onClick={() => {}}>
-                        <Eye className="h-4 w-4" />
-                      </Button>
+                  <TableCell className="text-right">
+                    {formatCurrency(building.value)}
+                  </TableCell>
+                  <TableCell className="text-right">
+                    {formatCurrency(building.maintenanceCost)}/an
+                  </TableCell>
+                  <TableCell className="text-right">
+                    {formatCurrency(building.revenue)}/an
+                  </TableCell>
+                  <TableCell className="text-right">
+                    <div className="flex justify-end space-x-1">
                       <Button variant="ghost" size="icon" onClick={() => onEdit(building.id)}>
                         <Edit className="h-4 w-4" />
+                      </Button>
+                      {onDelete && (
+                        <Button variant="ghost" size="icon" onClick={() => handleDelete(building.id)}>
+                          <Trash className="h-4 w-4" />
+                        </Button>
+                      )}
+                      <Button variant="ghost" size="icon">
+                        <BarChart className="h-4 w-4" />
                       </Button>
                     </div>
                   </TableCell>
@@ -162,15 +177,6 @@ const BuildingsList: React.FC<BuildingsListProps> = ({ onEdit }) => {
           </TableBody>
         </Table>
       </CardContent>
-      
-      <CardFooter className="justify-between">
-        <div className="text-sm text-muted-foreground">
-          {buildings.length} bâtiments au total
-        </div>
-        <div className="text-sm text-muted-foreground">
-          Valeur totale: {formatCurrency(buildings.reduce((sum, b) => sum + b.value, 0))}
-        </div>
-      </CardFooter>
     </Card>
   );
 };

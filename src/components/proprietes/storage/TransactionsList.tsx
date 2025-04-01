@@ -1,8 +1,10 @@
+
 import React from 'react';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import { formatCurrency } from '@/utils/formatters';
-import { dateToGameDate } from '@/components/maitrejeu/types/common';
-import { PropertyTransaction } from '../types/property';
+import { PropertyTransaction, TransactionsListProps } from '../types/property';
 import { Badge } from '@/components/ui/badge';
 import { Eye, Plus } from 'lucide-react';
 

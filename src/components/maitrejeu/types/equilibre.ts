@@ -1,19 +1,17 @@
 
+// Définition des types pour le module d'équilibre
+
 export interface Politique {
-  populaires: number;
+  populares: number;
   optimates: number;
   moderates: number;
-  // Provide compatibility with references using 'populares'
-  populares?: number;
 }
 
 export interface Social {
   patriciens: number;
   plebeiens: number;
-  esclaves?: number;
-  cohesion?: number;
-  // Provide compatibility for misspelled variations
-  plébéiens?: number;
+  esclaves: number;
+  cohesion: number;
 }
 
 export interface Economie {
@@ -36,9 +34,41 @@ export interface Stabilite {
 }
 
 export interface Militaire {
-  armée: number;
-  loyauté: number;
-  morale: number;
+  morale: number;  // Changed from 'moral' to 'morale'
+  loyaute: number;
+  puissance: number;
+  discipline: number; // Added this property
+  effectifs: number; // Added this property
+  equipement: number; // Added this property
+}
+
+export type RiskType = 
+  'POLITICAL' | 
+  'ECONOMIC' | 
+  'MILITARY' | 
+  'RELIGIOUS' | 
+  'SOCIAL' | 
+  'DIPLOMATIC' | 
+  'NATURAL' | 
+  'INFRASTRUCTURE' |
+  'CONSPIRACY' |
+  'REVOLT' |
+  'INVASION' |
+  'PLAGUE' |
+  'FAMINE' |
+  'SCANDAL';
+
+export interface Risk {
+  id: string;
+  name: string;
+  type: RiskType;
+  probability: number;
+  impact: number;
+  triggers: string[];
+  mitigations: string[];
+  active: boolean;
+  description: string;
+  createdAt: Date;
 }
 
 export interface Equilibre {
@@ -47,65 +77,47 @@ export interface Equilibre {
   economie: Economie;
   religion: Religion;
   stabilite: Stabilite;
-  militaire?: Militaire;
+  militaire: Militaire;
   risques?: Record<string, any>;
-  
-  // Compatibility properties to match the existing references
+  // Pour compatibilité avec le code existant
   populares?: number;
   optimates?: number;
   moderates?: number;
 }
 
-// Type for historical political events
+// Types pour les événements politiques
 export interface PoliticalEvent {
   id: string;
-  date: {
-    year: number;
-    season: string;
-  };
   title: string;
   description: string;
+  date: number | Date | { year: number; season: string };
+  type: 'scandal' | 'reform' | 'election' | 'rebellion' | 'war' | 'natural' | 'economic' | 'religious' | 'social';
   impact: {
-    type: string;
-    value: number;
-  }[];
+    politique?: Partial<Politique>;
+    social?: Partial<Social>;
+    economie?: Partial<Economie>;
+    religion?: Partial<Religion>;
+    stabilite?: Partial<Stabilite>;
+    militaire?: Partial<Militaire>;
+  };
+  resolved: boolean;
+  resolution?: string;
   actors?: string[];
-  consequences?: string[];
 }
 
-// Type for a risk that could materialize
-export interface Risk {
-  id: string;
-  type: RiskType;
-  name: string;
-  probability: number;
-  severity: number;
-  description: string;
-  triggers?: string[];
-  mitigations?: string[];
-  createdAt?: Date;
-  active?: boolean;
-  impact?: any;
-}
-
-export type RiskType = 'POLITICAL' | 'ECONOMIC' | 'SOCIAL' | 'RELIGIOUS' | 'MILITARY' | 'DIPLOMATIC' | 
-                        'politique' | 'economique' | 'militaire' | 'religieux' | 'social';
-
-// Type for history entries in the equilibre system
+// Types pour les entrées d'historique d'équilibre
 export interface HistoriqueEntry {
   id: string;
-  date: {
-    year: number;
-    season: string;
-  };
-  type: 'EQUILIBRE_CHANGE' | 'EVENT' | 'DECISION' | 'CRISIS';
+  date: Date | { year: number; season: string };
   description: string;
-  visible?: boolean;
-  changes?: {
-    category: string;
-    property: string;
-    from: number;
-    to: number;
-  }[];
-  actors?: string[];
+  changes: {
+    politique?: Partial<Politique>;
+    social?: Partial<Social>;
+    economie?: Partial<Economie>;
+    religion?: Partial<Religion>;
+    stabilite?: Partial<Stabilite>;
+    militaire?: Partial<Militaire>;
+  };
+  cause: string;
+  type: 'political' | 'economic' | 'military' | 'religious' | 'social' | 'other';
 }
