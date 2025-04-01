@@ -48,8 +48,8 @@ export const GestionBatiments = () => {
       capacity: 0
     };
     
-    // Pass the building as a value (not a function)
-    setSelectedBuilding(exampleBuilding);
+    // Use a function to update state to avoid type errors
+    setSelectedBuilding(() => exampleBuilding);
   };
 
   const handleSaveBuilding = (data: BuildingCreationData) => {
@@ -67,7 +67,7 @@ export const GestionBatiments = () => {
       });
     } else {
       // Add new building with all required properties
-      const completeData: Omit<Building, 'id'> = {
+      const completeData = {
         ...data,
         maintenance: data.maintenanceCost,
         status: data.status || 'good' as BuildingStatus,
@@ -75,7 +75,9 @@ export const GestionBatiments = () => {
         constructionYear: data.constructionYear || currentYear,
         cost: data.cost,
         revenue: data.revenue || 0,
-        capacity: data.capacity
+        capacity: data.capacity,
+        value: data.value || 0,
+        condition: data.condition || 100
       };
       
       addBuilding(completeData);

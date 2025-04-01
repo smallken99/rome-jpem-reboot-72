@@ -1,45 +1,77 @@
 
 import React from 'react';
-import { Card, CardContent } from '@/components/ui/card';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Progress } from '@/components/ui/progress';
 
-export const StorageStats: React.FC = () => {
-  // Mock data - in a real implementation, this would come from a hook or context
-  const stats = {
-    totalResources: 15,
-    totalValue: 75000,
-    lowStockItems: 3,
-    recentTransactions: 8
-  };
+interface StorageStatsProps {
+  totalCapacity: number;
+  usedCapacity: number;
+  resourceCount: number;
+  totalValue: number;
+}
 
+const StorageStats: React.FC<StorageStatsProps> = ({ 
+  totalCapacity = 1000,
+  usedCapacity = 0,
+  resourceCount = 0,
+  totalValue = 0
+}) => {
+  const usagePercentage = Math.min(100, Math.round((usedCapacity / totalCapacity) * 100));
+  
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+    <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
       <Card>
-        <CardContent className="pt-6">
-          <div className="text-2xl font-bold">{stats.totalResources}</div>
-          <p className="text-muted-foreground">Ressources Totales</p>
+        <CardHeader className="pb-2">
+          <CardTitle className="text-sm font-medium">Capacité de stockage</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="text-2xl font-bold">{usedCapacity} / {totalCapacity}</div>
+          <Progress className="mt-2" value={usagePercentage} />
+          <p className="text-xs text-muted-foreground mt-2">
+            {usagePercentage}% de l'espace utilisé
+          </p>
         </CardContent>
       </Card>
       
       <Card>
-        <CardContent className="pt-6">
-          <div className="text-2xl font-bold">{stats.totalValue.toLocaleString()} as</div>
-          <p className="text-muted-foreground">Valeur Totale</p>
+        <CardHeader className="pb-2">
+          <CardTitle className="text-sm font-medium">Nombre de ressources</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="text-2xl font-bold">{resourceCount}</div>
+          <p className="text-xs text-muted-foreground mt-2">
+            Types différents de ressources
+          </p>
         </CardContent>
       </Card>
       
       <Card>
-        <CardContent className="pt-6">
-          <div className="text-2xl font-bold">{stats.lowStockItems}</div>
-          <p className="text-muted-foreground">Stock Faible</p>
+        <CardHeader className="pb-2">
+          <CardTitle className="text-sm font-medium">Valeur totale</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="text-2xl font-bold">{totalValue} as</div>
+          <p className="text-xs text-muted-foreground mt-2">
+            Valeur estimée au prix du marché
+          </p>
         </CardContent>
       </Card>
       
       <Card>
-        <CardContent className="pt-6">
-          <div className="text-2xl font-bold">{stats.recentTransactions}</div>
-          <p className="text-muted-foreground">Transactions Récentes</p>
+        <CardHeader className="pb-2">
+          <CardTitle className="text-sm font-medium">Efficacité</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="text-2xl font-bold">
+            {Math.round(totalValue / (usedCapacity || 1))} as/unité
+          </div>
+          <p className="text-xs text-muted-foreground mt-2">
+            Valeur moyenne par unité de stockage
+          </p>
         </CardContent>
       </Card>
     </div>
   );
 };
+
+export default StorageStats;

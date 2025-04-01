@@ -2,14 +2,14 @@
 // Définition des types pour le module d'équilibre
 
 export interface Politique {
-  populares: number;  // Changed from populaires to populares for consistency
+  populares: number;  // Consistently using 'populares' instead of 'populaires'
   optimates: number;
   moderates: number;
 }
 
 export interface Social {
   patriciens: number;
-  plebeiens: number;  // Changed from plébéiens to plebeiens for consistency
+  plebeiens: number;  // Consistently using 'plebeiens' instead of 'plébéiens'
   esclaves: number;
   cohesion: number;
 }
@@ -34,7 +34,7 @@ export interface Stabilite {
 }
 
 export interface Militaire {
-  morale: number;  // Changed from moral to morale for consistency
+  morale: number;  // Consistently using 'morale' instead of 'moral'
   loyaute: number;
   puissance: number;
   discipline: number;
@@ -79,15 +79,17 @@ export interface Equilibre {
   stabilite: Stabilite;
   militaire: Militaire;
   risques?: Record<string, any>;
-  // Pour compatibilité avec le code existant
-  populares?: number;  // Renamed from populaires to populares
+  // For compatibility with existing code
+  populares?: number;
   optimates?: number;
   moderates?: number;
   // Additional compatibility properties
   armée?: number;
   loyauté?: number;
-  morale?: number;  // Renamed from moral to morale
-  population?: number; // Add this for required fields in Republic interface
+  morale?: number;
+  patriciens?: number;
+  plebeiens?: number;
+  population?: number;
 }
 
 // Types pour les événements politiques

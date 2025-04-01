@@ -1,189 +1,199 @@
-import { useState, useCallback } from 'react';
+
+import { useState, useEffect } from 'react';
 import { useMaitreJeu } from '../../context';
-import { EconomieRecord, EconomieCreationData, EconomieFilter, EconomieSort } from '../../types/economie';
+import { useToast } from '@/components/ui/use-toast';
+import { v4 as uuidv4 } from 'uuid';
+import { 
+  EconomieRecord, 
+  EconomieCreationData, 
+  EconomieFilter, 
+  ECONOMIE_CATEGORIES,
+  ECONOMIE_TYPES,
+  ECONOMIE_SOURCE,
+  RecurringInterval
+} from '../../types/economie';
 import { parseStringToGameDate } from '../../types/common';
 
 export const useEconomieManagement = () => {
+  // Use appropriate functions from context
   const { 
     economieRecords, 
-    setEconomieRecords, 
-    addEconomieRecord,
-    updateEconomieRecord,
-    deleteEconomieRecord,
+    addEconomieRecord, 
     treasury,
-    economicFactors
+    setTreasury, 
+    currentDate 
   } = useMaitreJeu();
   
-  // State for filtering and sorting
-  const [filter, setFilter] = useState<EconomieFilter>({
-    searchTerm: '',
-    type: 'all'
-  });
+  const { toast } = useToast();
   
-  const [sort, setSort] = useState<EconomieSort>({
-    field: 'date',
-    direction: 'desc'
-  });
-  
-  // State for modal and selected record
-  const [isModalOpen, setIsModalOpen] = useState(false);
+  // States for UI
+  const [activeTab, setActiveTab] = useState('apercu');
+  const [showAddModal, setShowAddModal] = useState(false);
   const [selectedRecord, setSelectedRecord] = useState<EconomieRecord | null>(null);
+  const [filter, setFilter] = useState<EconomieFilter>({
+    types: 'all',
+    category: 'all',
+    minAmount: 0,
+    maxAmount: 1000000,
+    showRecurring: true,
+    showApproved: true
+  });
   
-  // Filter records
-  const filteredRecords = useCallback(() => {
+  // Function to filter records
+  const getFilteredRecords = () => {
     return economieRecords.filter(record => {
-      // Search term filter
-      if (filter.searchTerm && !record.description.toLowerCase().includes(filter.searchTerm.toLowerCase())) {
+      // Filter by type
+      if (filter.types !== 'all' && record.type !== filter.types) {
         return false;
       }
       
-      // Type filter
-      if (filter.type !== 'all' && record.type !== filter.type) {
+      // Filter by category
+      if (filter.category !== 'all' && record.category !== filter.category) {
         return false;
       }
       
-      // Categories filter
-      if (filter.categories && filter.categories.length > 0 && !filter.categories.includes(record.category)) {
+      // Filter by amount
+      if (record.amount < (filter.minAmount || 0)) {
         return false;
       }
       
-      // Amount range filter
-      if (filter.minAmount !== undefined && Math.abs(record.amount) < filter.minAmount) {
+      if (filter.maxAmount && record.amount > filter.maxAmount) {
         return false;
       }
       
-      if (filter.maxAmount !== undefined && Math.abs(record.amount) > filter.maxAmount) {
-        return false;
-      }
-      
-      // Entity filter
-      if (filter.affectedEntity) {
-        if (record.affectedSenateurId && record.affectedSenateurId === filter.affectedEntity) {
-          return true;
-        }
+      // Filter by date range
+      if (filter.startDate && filter.endDate) {
+        const recordDate = typeof record.date === 'string' 
+          ? new Date(record.date) 
+          : record.date instanceof Date 
+            ? record.date 
+            : new Date();
         
-        if (record.affectedProvinceId && record.affectedProvinceId === filter.affectedEntity) {
-          return true;
-        }
+        const startDate = typeof filter.startDate === 'string'
+          ? new Date(filter.startDate)
+          : filter.startDate instanceof Date
+            ? filter.startDate
+            : parseStringToGameDate(filter.startDate as string);
         
+        const endDate = typeof filter.endDate === 'string'
+          ? new Date(filter.endDate)
+          : filter.endDate instanceof Date
+            ? filter.endDate
+            : parseStringToGameDate(filter.endDate as string);
+            
+        // Check if the record date is within range
+        if (recordDate < startDate || recordDate > endDate) {
+          return false;
+        }
+      }
+      
+      // Filter by source
+      if (filter.source && record.source !== filter.source) {
+        return false;
+      }
+      
+      // Filter recurring transactions
+      if (filter.showRecurring === false && record.recurring) {
+        return false;
+      }
+      
+      // Filter approved transactions
+      if (filter.showApproved === false && record.approved) {
         return false;
       }
       
       return true;
-    }).sort((a, b) => {
-      if (sort.field === 'date') {
-        // Handle date comparison
-        const dateA = new Date(a.date instanceof Date ? a.date : String(a.date));
-        const dateB = new Date(b.date instanceof Date ? b.date : String(b.date));
+    });
+  };
+  
+  // Function to calculate statistics
+  const calculateStats = () => {
+    const records = getFilteredRecords();
+    
+    const totalIncome = records
+      .filter(r => r.type === ECONOMIE_TYPES.INCOME)
+      .reduce((sum, r) => sum + r.amount, 0);
+      
+    const totalExpenses = records
+      .filter(r => r.type === ECONOMIE_TYPES.EXPENSE)
+      .reduce((sum, r) => sum + r.amount, 0);
+      
+    const byCategory = Object.values(ECONOMIE_CATEGORIES).reduce((acc, category) => {
+      if (category === 'all' || category === ECONOMIE_CATEGORIES.all) return acc;
+      
+      acc[category] = records
+        .filter(r => r.category === category)
+        .reduce((sum, r) => sum + r.amount, 0);
         
-        return sort.direction === 'asc' 
-          ? dateA.getTime() - dateB.getTime() 
-          : dateB.getTime() - dateA.getTime();
-      }
+      return acc;
+    }, {} as Record<string, number>);
+    
+    return {
+      totalIncome,
+      totalExpenses,
+      byCategory
+    };
+  };
+  
+  // Function to handle new transaction
+  const handleAddTransaction = (data: EconomieCreationData) => {
+    // Create transaction record
+    const newRecord: EconomieRecord = {
+      id: uuidv4(),
+      ...data,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString()
+    };
+    
+    // Add to records
+    addEconomieRecord(newRecord);
+    
+    // Update treasury
+    if (data.type === ECONOMIE_TYPES.INCOME) {
+      setTreasury({
+        ...treasury,
+        balance: treasury.balance + data.amount,
+        income: treasury.income + data.amount,
+        surplus: treasury.surplus + data.amount
+      });
       
-      if (sort.field === 'amount') {
-        return sort.direction === 'asc' 
-          ? a.amount - b.amount 
-          : b.amount - a.amount;
-      }
+      toast({
+        title: "Revenus ajoutés",
+        description: `${data.amount.toLocaleString()} As ajoutés au trésor`,
+        variant: "default"
+      });
+    } else if (data.type === ECONOMIE_TYPES.EXPENSE) {
+      setTreasury({
+        ...treasury,
+        balance: treasury.balance - data.amount,
+        expenses: treasury.expenses + data.amount,
+        surplus: treasury.surplus - data.amount
+      });
       
-      // Handle string fields
-      const valA = String(a[sort.field]);
-      const valB = String(b[sort.field]);
-      
-      return sort.direction === 'asc' 
-        ? valA.localeCompare(valB) 
-        : valB.localeCompare(valA);
-    });
-  }, [economieRecords, filter, sort]);
-  
-  // Handle filter changes
-  const handleFilterChange = (newFilter: Partial<EconomieFilter>) => {
-    setFilter(prev => ({ ...prev, ...newFilter }));
-  };
-  
-  // Reset filters
-  const handleResetFilters = () => {
-    setFilter({
-      searchTerm: '',
-      type: 'all'
-    });
-  };
-  
-  // Handle sort changes
-  const handleSortChange = (field: keyof EconomieRecord) => {
-    setSort(prev => ({
-      field,
-      direction: prev.field === field && prev.direction === 'asc' ? 'desc' : 'asc'
-    }));
-  };
-  
-  // Open modal for adding a new transaction
-  const handleAddTransaction = () => {
-    setSelectedRecord(null);
-    setIsModalOpen(true);
-  };
-  
-  // Open modal for editing a transaction
-  const handleEditTransaction = (record: EconomieRecord) => {
-    setSelectedRecord(record);
-    setIsModalOpen(true);
-  };
-  
-  // Delete a transaction
-  const handleDeleteTransaction = (id: string) => {
-    deleteEconomieRecord(id);
-  };
-  
-  // Save a transaction (add or update)
-  const handleSaveTransaction = (data: EconomieCreationData) => {
-    if (selectedRecord) {
-      // Update existing record
-      updateEconomieRecord(selectedRecord.id, data);
-    } else {
-      // Add new record
-      addEconomieRecord(data);
+      toast({
+        title: "Dépense enregistrée",
+        description: `${data.amount.toLocaleString()} As dépensés`,
+        variant: "default"
+      });
     }
     
-    setIsModalOpen(false);
-  };
-  
-  // Generate a financial report
-  const handleGenerateReport = () => {
-    console.log('Generating financial report...');
-    // Implementation would prepare a printable report of financial data
-  };
-  
-  // Calculate economic projections
-  const handleCalculateProjections = () => {
-    console.log('Calculating economic projections...');
-    // Implementation would show projections based on current economic factors
-  };
-  
-  // Refresh economic data
-  const handleRefreshData = () => {
-    console.log('Refreshing economic data...');
-    // Implementation would refresh data, possibly with updated calculations
+    return newRecord.id;
   };
   
   return {
-    economieRecords: filteredRecords(),
-    filter,
-    sort,
-    isModalOpen,
-    selectedRecord,
+    economieRecords,
     treasury,
-    economicFactors,
-    handleFilterChange,
-    handleResetFilters,
-    handleSortChange,
-    handleAddTransaction,
-    handleEditTransaction,
-    handleDeleteTransaction,
-    handleSaveTransaction,
-    handleGenerateReport,
-    handleCalculateProjections,
-    handleRefreshData,
-    setIsModalOpen
+    currentDate,
+    activeTab,
+    setActiveTab,
+    showAddModal,
+    setShowAddModal,
+    selectedRecord,
+    setSelectedRecord,
+    filter,
+    setFilter,
+    getFilteredRecords,
+    calculateStats,
+    handleAddTransaction
   };
 };

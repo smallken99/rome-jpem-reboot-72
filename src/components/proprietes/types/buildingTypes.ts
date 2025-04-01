@@ -29,6 +29,9 @@ export interface PropertyUpgrade {
     security?: number;
     maintenance?: number;
     condition?: number;
+    value?: number;
+    conditionBoost?: number;
+    maintenanceReduction?: number;
   };
   // Add this to support the code using 'effects' instead of 'effect'
   effects?: {
@@ -37,16 +40,28 @@ export interface PropertyUpgrade {
     security?: number;
     maintenance?: number;
     condition?: number;
+    value?: number;
+    conditionBoost?: number;
+    maintenanceReduction?: number;
   };
   installed: boolean;
+  applied?: boolean;
   buildingTypes: BuildingType[];
-  // Add this for the requirements property
+  // Add requirements field
   requirements?: {
     minWorkers?: number;
     minSecurity?: number;
     minMaintenance?: number;
     minIncome?: number;
     minCondition?: number;
+    minBuildingLevel?: number;
+    minValue?: number;
+    otherUpgrades?: string[];
+    buildingLevel?: number;
+    buildingCondition?: number;
+    previousUpgrade?: string;
+    value?: number;
+    upgrades?: string[];
   };
 }
 

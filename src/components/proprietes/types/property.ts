@@ -31,15 +31,15 @@ export interface TransactionsListProps {
   };
 }
 
-// Define Slave interface
+// Define Slave interface with all possible properties
 export interface Slave {
   id: string;
   name: string;
-  age: number;
-  gender: 'male' | 'female';
-  status: 'healthy' | 'sick' | 'injured';
-  acquired: Date;
-  value: number;
+  age?: number;
+  gender?: 'male' | 'female';
+  status?: 'healthy' | 'sick' | 'injured';
+  acquired?: Date;
+  value?: number;
   assignedTo?: string;
   assigned: boolean;
   specialties: string[];
@@ -50,12 +50,12 @@ export interface Slave {
   origin?: string;
 }
 
-// Define SlaveAssignment interface
+// Define SlaveAssignment interface with all possible properties
 export interface SlaveAssignment {
-  id?: string;  // Make id optional to handle different usages
-  slaveId?: string;  // Make slaveId optional for compatibility
+  id?: string;
+  slaveId?: string;
   propertyId: string;
-  buildingId?: string;  // Make buildingId optional
+  buildingId?: string;
   startDate: Date;
   efficiency: number;
   buildingName?: string;

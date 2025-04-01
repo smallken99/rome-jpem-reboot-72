@@ -31,7 +31,7 @@ export interface Building {
   upgrades?: any[];
   income?: number;
   purchaseDate?: Date;
-  owner?: BuildingOwner;  // Make owner optional
+  owner?: BuildingOwner;  // Made optional
 }
 
 export interface MaintenanceTask {
@@ -118,7 +118,7 @@ export interface BuildingCreationData {
   capacity: number;
   status?: BuildingStatus;
   workers?: number;
-  owner?: BuildingOwner;
+  owner?: BuildingOwner; // Made optional
   income?: number;
 }
 
