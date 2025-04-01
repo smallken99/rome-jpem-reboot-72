@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Input } from '@/components/ui/input';
 import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from '@/components/ui/pagination';
-import { Card, CardContent, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Search, Filter, Plus } from 'lucide-react';
 import { PropertyTransaction } from '../types/property';
 import { format } from 'date-fns';
@@ -221,9 +221,6 @@ export const TransactionsList: React.FC<TransactionsListProps> = ({
           </Pagination>
         )}
       </CardContent>
-      <CardFooter>
-        {/* Optional footer content */}
-      </CardFooter>
     </Card>
   );
 };

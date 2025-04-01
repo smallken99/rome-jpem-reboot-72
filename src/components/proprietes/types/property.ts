@@ -53,8 +53,8 @@ export interface Slave {
 // Define SlaveAssignment interface
 export interface SlaveAssignment {
   id?: string;  // Make id optional to handle different usages
+  slaveId?: string;  // Make slaveId optional for compatibility
   propertyId: string;
-  slaveId: string;
   buildingId?: string;  // Make buildingId optional
   startDate: Date;
   efficiency: number;

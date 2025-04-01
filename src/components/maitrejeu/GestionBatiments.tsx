@@ -48,7 +48,7 @@ export const GestionBatiments = () => {
       capacity: 0
     };
     
-    // Pass the building directly as a value, not as a state setter function
+    // Pass the building as a value (not a function)
     setSelectedBuilding(exampleBuilding);
   };
 
@@ -61,7 +61,6 @@ export const GestionBatiments = () => {
         status: data.status || 'good' as BuildingStatus,
         description: data.description || "",
         constructionYear: data.constructionYear || currentYear,
-        // Remove income which may not be part of Building type
         cost: data.cost,
         revenue: data.revenue,
         capacity: data.capacity

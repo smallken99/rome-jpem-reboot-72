@@ -9,7 +9,7 @@ export interface Politique {
 
 export interface Social {
   patriciens: number;
-  plebeiens: number;
+  plebeiens: number;  // Changed from plébéiens to plebeiens for consistency
   esclaves: number;
   cohesion: number;
 }
@@ -80,13 +80,13 @@ export interface Equilibre {
   militaire: Militaire;
   risques?: Record<string, any>;
   // Pour compatibilité avec le code existant
-  populares?: number;  // Rename to match Politique
+  populares?: number;  // Renamed from populaires to populares
   optimates?: number;
   moderates?: number;
   // Additional compatibility properties
   armée?: number;
   loyauté?: number;
-  morale?: number;  // Renamed from moral to morale for consistency
+  morale?: number;  // Renamed from moral to morale
   population?: number; // Add this for required fields in Republic interface
 }
 

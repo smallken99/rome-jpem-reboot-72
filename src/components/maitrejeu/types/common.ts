@@ -1,265 +1,118 @@
 
-export type Season = 
-  | "Ver" 
-  | "Aes" 
-  | "Aut" 
-  | "Hie" 
-  | "SPRING" 
-  | "SUMMER" 
-  | "AUTUMN" 
-  | "WINTER" 
-  | "Spring" 
-  | "Summer" 
-  | "Autumn" 
-  | "Winter" 
-  | "spring" 
-  | "summer" 
-  | "autumn" 
-  | "winter" 
-  | "fall" 
-  | "Fall"
-  | "Aestas"
-  | "Autumnus"
-  | "Hiems";
+/**
+ * Common types used across the maître-jeu module
+ */
 
+// Game phases
+export type GamePhase = 'preparation' | 'action' | 'resolution' | 'administration' | 'events';
+
+// Seasons
+export type Season = 'Ver' | 'Aes' | 'Aut' | 'Hie' | 'Spring' | 'Summer' | 'Autumn' | 'Winter' | 'SPRING' | 'SUMMER' | 'AUTUMN' | 'WINTER' | 'Fall' | 'Aestas' | 'Autumnus' | 'Hiems';
+
+// GameDate interface
 export interface GameDate {
   year: number;
   season: Season;
   day?: number;
-  phase?: GamePhase;
 }
 
-export type GamePhase = 
-  | "Normal" | "normal" | "NORMAL"
-  | "Election" | "election" | "ELECTION"
-  | "Crisis" | "crisis" | "CRISIS"
-  | "War" | "war" | "WAR"
-  | "Diplomatic" | "diplomatic" | "DIPLOMATIC"
-  | "Religious" | "religious" | "RELIGIOUS"
-  | "Economic" | "economic" | "ECONOMIC"
-  | "Revolt" | "revolt" | "REVOLT"
-  | "Triumph" | "triumph" | "TRIUMPH"
-  | "Games" | "games" | "GAMES"
-  | "Scandal" | "scandal" | "SCANDAL"
-  | "SENATE" | "ACTIONS" | "ECONOMY" | "EVENTS"
-  | "SETUP" | "ACTION" | "SENAT"
-  | "Military" | "MILITARY" | "MILITAIRE" 
-  | "Politique" | "POLITIQUE"
-  | "Economie" | "ECONOMIE" 
-  | "Social" | "SOCIAL"
-  | "Evenements" | "EVENEMENT"
-  | "Administration" | "ADMINISTRATION"
-  | "EVENTS" | "Events"
-  | "DIPLOMACY" | "DIPLOMATIC"
-  | "RELIGION" | "Religious"
-  | "ELECTION";
-
-// Helper function to adapt any string to a valid Season value
-export function adaptSeason(seasonStr: string): Season {
-  const seasonMap: Record<string, Season> = {
-    "Ver": "Ver",
-    "Aes": "Aes",
-    "Aut": "Aut",
-    "Hie": "Hie",
-    "SPRING": "SPRING",
-    "SUMMER": "SUMMER",
-    "AUTUMN": "AUTUMN",
-    "WINTER": "WINTER",
-    "Spring": "Spring",
-    "Summer": "Summer",
-    "Autumn": "Autumn",
-    "Winter": "Winter",
-    "spring": "spring",
-    "summer": "summer",
-    "autumn": "autumn",
-    "winter": "winter",
-    "fall": "fall",
-    "Fall": "Fall",
-    "Aestas": "Aestas", 
-    "Autumnus": "Autumnus",
-    "Hiems": "Hiems"
-  };
-
-  return seasonMap[seasonStr] || "Ver";
+// Functions for date operations
+export function formatSeasonName(season: Season): string {
+  switch (season) {
+    case 'Ver':
+    case 'Spring':
+    case 'SPRING':
+      return 'Printemps';
+    case 'Aes':
+    case 'Aestas':
+    case 'Summer':
+    case 'SUMMER':
+      return 'Été';
+    case 'Aut':
+    case 'Autumnus':
+    case 'Autumn':
+    case 'Fall':
+    case 'AUTUMN':
+      return 'Automne';
+    case 'Hie':
+    case 'Hiems':
+    case 'Winter':
+    case 'WINTER':
+      return 'Hiver';
+    default:
+      return season;
+  }
 }
 
-// Helper function to adapt any string to a valid GamePhase value
-export function adaptGamePhase(phaseStr: string): GamePhase {
-  if (!phaseStr) return "Normal";
-  
-  // Try to match directly
-  const validPhases: Record<string, GamePhase> = {
-    "Normal": "Normal",
-    "normal": "normal",
-    "NORMAL": "NORMAL",
-    "Election": "Election",
-    "election": "election",
-    "ELECTION": "ELECTION",
-    "Crisis": "Crisis",
-    "crisis": "crisis",
-    "CRISIS": "CRISIS",
-    "War": "War",
-    "war": "war",
-    "WAR": "WAR",
-    "Diplomatic": "Diplomatic",
-    "diplomatic": "diplomatic",
-    "DIPLOMATIC": "DIPLOMATIC",
-    "Religious": "Religious",
-    "religious": "religious",
-    "RELIGIOUS": "RELIGIOUS",
-    "Economic": "Economic",
-    "economic": "economic",
-    "ECONOMIC": "ECONOMIC",
-    "Revolt": "Revolt",
-    "revolt": "revolt",
-    "REVOLT": "REVOLT",
-    "Triumph": "Triumph",
-    "triumph": "triumph",
-    "TRIUMPH": "TRIUMPH",
-    "Games": "Games",
-    "games": "games",
-    "GAMES": "GAMES",
-    "Scandal": "Scandal",
-    "scandal": "scandal",
-    "SCANDAL": "SCANDAL",
-    "SENATE": "SENATE",
-    "ACTIONS": "ACTIONS",
-    "ECONOMY": "ECONOMY",
-    "EVENTS": "EVENTS",
-    "SETUP": "SETUP",
-    "ACTION": "ACTION",
-    "SENAT": "SENAT",
-    "Military": "Military",
-    "MILITARY": "MILITARY",
-    "MILITAIRE": "MILITAIRE",
-    "Politique": "Politique",
-    "POLITIQUE": "POLITIQUE",
-    "Economie": "Economie",
-    "ECONOMIE": "ECONOMIE",
-    "Social": "Social",
-    "SOCIAL": "SOCIAL",
-    "Evenements": "Evenements",
-    "EVENEMENT": "EVENEMENT",
-    "Administration": "Administration",
-    "ADMINISTRATION": "ADMINISTRATION"
-  };
-  
-  if (validPhases[phaseStr]) {
-    return validPhases[phaseStr];
-  }
-  
-  // Default to Normal
-  return "Normal";
-}
-
-/**
- * Convert a string to a GameDate object
- * @param dateString The string representation of a date (e.g., "750 Ver")
- * @returns A GameDate object
- */
-export function stringToGameDate(dateString: string): GameDate {
-  if (!dateString) {
-    return { year: 700, season: 'Ver' };
-  }
-  
-  // Try to parse "YEAR SEASON" format
-  const parts = dateString.trim().split(/\s+/);
-  if (parts.length >= 2) {
-    const year = parseInt(parts[0], 10);
-    const seasonStr = parts[1];
-    
-    if (!isNaN(year)) {
-      return {
-        year: year,
-        season: adaptSeason(seasonStr)
-      };
-    }
-  }
-  
-  // Try to parse more complex formats: "YEAR AUC, SEASON"
-  const aucMatch = dateString.match(/(\d+)\s*(?:AUC)?,\s*(\w+)/i);
-  if (aucMatch) {
-    const year = parseInt(aucMatch[1], 10);
-    const seasonStr = aucMatch[2];
-    
-    if (!isNaN(year)) {
-      return {
-        year: year,
-        season: adaptSeason(seasonStr)
-      };
-    }
-  }
-  
-  // Default values if parsing fails
-  return { year: 700, season: 'Ver' };
-}
-
-/**
- * Convert a GameDate to a formatted string
- * @param date The GameDate to format
- * @returns A string representation of the date
- */
 export function formatGameDate(date: GameDate): string {
-  if (!date) return '';
-  
-  const seasonDisplayMap: Record<string, string> = {
-    'Ver': 'Printemps',
-    'Aes': 'Été',
-    'Aut': 'Automne',
-    'Hie': 'Hiver',
-    'SPRING': 'Printemps',
-    'SUMMER': 'Été',
-    'AUTUMN': 'Automne',
-    'WINTER': 'Hiver',
-    'Spring': 'Printemps',
-    'Summer': 'Été',
-    'Autumn': 'Automne',
-    'Winter': 'Hiver',
-    'spring': 'Printemps',
-    'summer': 'Été',
-    'autumn': 'Automne',
-    'winter': 'Hiver',
-    'fall': 'Automne',
-    'Fall': 'Automne',
-    'Aestas': 'Été',
-    'Autumnus': 'Automne',
-    'Hiems': 'Hiver'
-  };
-  
-  const seasonDisplay = seasonDisplayMap[date.season] || date.season;
-  return `${seasonDisplay} de l'an ${date.year} AUC`;
+  return `${formatSeasonName(date.season)} ${date.year}${date.day ? ` (jour ${date.day})` : ''}`;
 }
 
-/**
- * Parse a string to a GameDate
- * For compatibility with other functions
- */
-export function parseStringToGameDate(dateString: string): GameDate | null {
-  try {
-    return stringToGameDate(dateString);
-  } catch (error) {
-    console.error("Error parsing date string:", dateString, error);
-    return null;
+export function getSeasonOrder(season: Season): number {
+  switch (season) {
+    case 'Ver':
+    case 'Spring':
+    case 'SPRING':
+      return 0;
+    case 'Aes':
+    case 'Aestas':
+    case 'Summer':
+    case 'SUMMER':
+      return 1;
+    case 'Aut':
+    case 'Autumnus':
+    case 'Autumn':
+    case 'Fall':
+    case 'AUTUMN':
+      return 2;
+    case 'Hie':
+    case 'Hiems':
+    case 'Winter':
+    case 'WINTER':
+      return 3;
+    default:
+      return 0;
   }
 }
 
-/**
- * Convert a JS Date to a GameDate
- */
-export function dateToGameDate(date: Date): GameDate {
-  const year = date.getFullYear() - 753; // Convert to AUC format (753 BC = year 1)
-  const month = date.getMonth();
-  
-  let season: Season;
-  if (month >= 2 && month <= 4) { // March-May
-    season = 'Ver';
-  } else if (month >= 5 && month <= 7) { // June-August
-    season = 'Aestas';
-  } else if (month >= 8 && month <= 10) { // September-November
-    season = 'Autumnus';
-  } else { // December-February
-    season = 'Hiems';
+export function compareGameDates(date1: GameDate, date2: GameDate): number {
+  if (date1.year !== date2.year) {
+    return date1.year - date2.year;
   }
   
-  return { year, season };
+  return getSeasonOrder(date1.season) - getSeasonOrder(date2.season);
+}
+
+export function advanceGameDate(date: GameDate): GameDate {
+  const newDate = { ...date };
+  
+  switch (newDate.season) {
+    case 'Ver':
+    case 'Spring':
+    case 'SPRING':
+      newDate.season = 'Aes';
+      break;
+    case 'Aes':
+    case 'Aestas':
+    case 'Summer':
+    case 'SUMMER':
+      newDate.season = 'Aut';
+      break;
+    case 'Aut':
+    case 'Autumnus':
+    case 'Autumn':
+    case 'Fall':
+    case 'AUTUMN':
+      newDate.season = 'Hie';
+      break;
+    case 'Hie':
+    case 'Hiems':
+    case 'Winter':
+    case 'WINTER':
+      newDate.season = 'Ver';
+      newDate.year += 1;
+      break;
+  }
+  
+  return newDate;
 }
