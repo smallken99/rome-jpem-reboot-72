@@ -5,7 +5,22 @@ import { useBuildingManagement } from '../../hooks/useBuildingManagement';
 import { Area, AreaChart, CartesianGrid, Legend, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
 import { useTheme } from "@/components/ui/theme-provider";
 import { useMaitreJeu } from '../../context';
-import { adaptSeason } from '../../types/common';
+
+// Helper function to adapt season names
+const adaptSeason = (season: string): string => {
+  const seasonMap: Record<string, string> = {
+    'Ver': 'Printemps',
+    'Aes': 'Été',
+    'Aut': 'Automne',
+    'Hie': 'Hiver',
+    'Spring': 'Printemps',
+    'Summer': 'Été',
+    'Fall': 'Automne',
+    'Autumn': 'Automne',
+    'Winter': 'Hiver'
+  };
+  return seasonMap[season] || season;
+};
 
 interface BuildingRevenueProps {
   buildingId: string;
