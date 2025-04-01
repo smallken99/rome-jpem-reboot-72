@@ -20,12 +20,31 @@ export const ElectionPlanner: React.FC = () => {
   
   const [selectedMagistrature, setSelectedMagistrature] = useState<MagistratureType>('CONSUL');
   
-  // Since elections and scheduleElection don't exist, let's create dummy implementations
-  const elections = [];
+  // Create our own local implementation since the context doesn't have these yet
+  const [elections, setElections] = useState<any[]>([]);
   
-  const scheduleElection = (magistrature: MagistratureType) => {
+  const scheduleElection = (magistrature: MagistratureType, year?: number, season?: string) => {
+    // Create a fake ID
+    const id = `election-${Date.now()}`;
+    
+    // Create a new election entry
+    const newElection = {
+      id,
+      magistrature,
+      date: {
+        year: year || currentYear,
+        season: season || currentSeason
+      }
+    };
+    
+    // Add it to our local state
+    setElections(prev => [...prev, newElection]);
+    
+    // Show success message
     toast.success(`Élection pour le poste de ${magistrature} programmée`);
-    console.log(`Election scheduled for ${magistrature}`);
+    
+    // Return the ID as expected
+    return id;
   };
   
   const handleScheduleElection = () => {
@@ -69,7 +88,7 @@ export const ElectionPlanner: React.FC = () => {
               <ul className="space-y-2">
                 {elections.map((election: any, index: number) => (
                   <li key={index} className="text-sm">
-                    {`${election.magistrature} - ${election.date}`}
+                    {`${election.magistrature} - ${election.date.year} ${election.date.season}`}
                   </li>
                 ))}
               </ul>

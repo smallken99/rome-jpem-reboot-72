@@ -42,12 +42,13 @@ export const GestionBatiments = () => {
       condition: 100,
       status: "good" as BuildingStatus,
       description: "Description du bâtiment",
-      constructionYear: currentYear - 5, // Set a default construction year
-      cost: 75000 // Add required cost property
+      constructionYear: currentYear - 5,
+      cost: 75000,
+      revenue: 5000 // Add required revenue property
     };
     
-    // Use a function to set the selected building to avoid the type error
-    setSelectedBuilding(() => exampleBuilding);
+    // Set the selected building directly without using a function expression
+    setSelectedBuilding(exampleBuilding);
   };
 
   const handleSaveBuilding = (data: BuildingCreationData) => {
@@ -55,27 +56,27 @@ export const GestionBatiments = () => {
       // Update existing building
       updateBuilding(selectedBuilding.id, {
         ...data,
-        revenue: data.revenue || 0,
+        income: data.income || 0,
         maintenance: data.maintenanceCost || 0,
         status: data.status || 'good' as BuildingStatus,
         description: data.description || "",
         constructionYear: data.constructionYear || currentYear,
-        cost: data.cost || 0, // Provide a default value for cost
-        value: data.value || 0,
-        condition: data.condition || 100
+        cost: data.cost,
+        revenue: data.revenue
       });
     } else {
       // Add new building with all required properties
       const completeData: Omit<Building, 'id'> = {
         ...data,
-        revenue: data.revenue || 0,
+        income: data.income || 0,
         maintenance: data.maintenanceCost || 0,
         status: data.status || 'good' as BuildingStatus,
         description: data.description || "",
         constructionYear: data.constructionYear || currentYear,
         value: data.value || 0,
         condition: data.condition || 100,
-        cost: data.cost || 0 // Provide a default value for cost
+        cost: data.cost,
+        revenue: data.revenue
       };
       
       addBuilding(completeData);

@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -8,6 +8,7 @@ import {
   Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle 
 } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { useMaitreJeu } from '../../context';
 import { useBatimentsManagement } from '../../hooks/useBatimentsManagement';
 import { Building, BuildingType } from '../../types/batiments';
 
@@ -16,8 +17,14 @@ interface BuildingsListProps {
 }
 
 const BuildingsList: React.FC<BuildingsListProps> = ({ onEdit }) => {
-  const { buildings, filter, handleFilterChange } = useBatimentsManagement();
+  const { currentYear } = useMaitreJeu();
+  const { buildings, filter, setFilter } = useBatimentsManagement();
+  
   const [searchTerm, setSearchTerm] = useState("");
+  
+  const handleFilterChange = (newFilter: Partial<typeof filter>) => {
+    setFilter(prev => ({ ...prev, ...newFilter }));
+  };
   
   const handleSearch = () => {
     handleFilterChange({ searchTerm });
@@ -63,6 +70,11 @@ const BuildingsList: React.FC<BuildingsListProps> = ({ onEdit }) => {
     return `${amount.toLocaleString()} As`;
   };
   
+  // Helper function to calculate age
+  const calculateAge = (year: number) => {
+    return currentYear - year;
+  };
+  
   return (
     <Card>
       <CardHeader className="pb-3">
@@ -105,8 +117,9 @@ const BuildingsList: React.FC<BuildingsListProps> = ({ onEdit }) => {
               <TableHead>Type</TableHead>
               <TableHead>Emplacement</TableHead>
               <TableHead>État</TableHead>
+              <TableHead>Âge</TableHead>
               <TableHead>Valeur</TableHead>
-              <TableHead>Maintenance</TableHead>
+              <TableHead>Entretien</TableHead>
               <TableHead>Revenus</TableHead>
               <TableHead>Actions</TableHead>
             </TableRow>
@@ -114,7 +127,7 @@ const BuildingsList: React.FC<BuildingsListProps> = ({ onEdit }) => {
           <TableBody>
             {buildings.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={8} className="text-center py-4 text-muted-foreground">
+                <TableCell colSpan={9} className="text-center py-4 text-muted-foreground">
                   Aucun bâtiment trouvé
                 </TableCell>
               </TableRow>
@@ -129,25 +142,16 @@ const BuildingsList: React.FC<BuildingsListProps> = ({ onEdit }) => {
                       {building.status}
                     </Badge>
                   </TableCell>
+                  <TableCell>{calculateAge(building.constructionYear)} ans</TableCell>
                   <TableCell>{formatCurrency(building.value)}</TableCell>
                   <TableCell>{formatCurrency(building.maintenanceCost)}</TableCell>
-                  <TableCell>{formatCurrency(building.income || 0)}</TableCell>
+                  <TableCell>{formatCurrency(building.revenue)}</TableCell>
                   <TableCell>
                     <div className="flex space-x-2">
-                      <Button 
-                        variant="ghost" 
-                        size="icon"
-                        className="h-8 w-8 p-0"
-                        onClick={() => {}}
-                      >
+                      <Button variant="ghost" size="icon" onClick={() => {}}>
                         <Eye className="h-4 w-4" />
                       </Button>
-                      <Button 
-                        variant="ghost" 
-                        size="icon"
-                        className="h-8 w-8 p-0"
-                        onClick={() => onEdit(building.id)}
-                      >
+                      <Button variant="ghost" size="icon" onClick={() => onEdit(building.id)}>
                         <Edit className="h-4 w-4" />
                       </Button>
                     </div>
