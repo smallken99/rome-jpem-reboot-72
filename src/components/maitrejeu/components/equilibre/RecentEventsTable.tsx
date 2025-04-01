@@ -4,7 +4,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Badge } from '@/components/ui/badge';
 import { Equilibre } from '../../types/equilibre';
 import { Event } from '../../types/events';
-import { formatGameDate, adaptSeason } from '@/utils/types/gameDate';
+import { adaptSeason } from '@/utils/types/gameDate';
 
 interface RecentEventsTableProps {
   events: Event[];
@@ -38,6 +38,11 @@ export const RecentEventsTable: React.FC<RecentEventsTableProps> = ({ events, eq
     const seasonB = seasonToNumber[b.date.season] || 0;
     return seasonB - seasonA;
   });
+  
+  // Custom format function since formatGameDate is missing
+  const formatGameDate = (date: { year: number; season: string }): string => {
+    return `${adaptSeason(date.season)} ${date.year}`;
+  };
   
   return (
     <div className="border rounded-md">

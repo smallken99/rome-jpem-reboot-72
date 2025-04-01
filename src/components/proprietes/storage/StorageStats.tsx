@@ -17,6 +17,13 @@ const StorageStats: React.FC<StorageStatsProps> = ({
   totalValue
 }) => {
   const usagePercent = Math.min(100, Math.round((usedCapacity / totalCapacity) * 100));
+  
+  // Determine indicator class based on usage percentage
+  const indicatorClassName = usagePercent > 85 
+    ? "bg-red-500" 
+    : usagePercent > 60 
+      ? "bg-amber-500" 
+      : "bg-green-500";
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
@@ -29,7 +36,7 @@ const StorageStats: React.FC<StorageStatsProps> = ({
           <Progress 
             value={usagePercent} 
             className="h-2 mt-2" 
-            indicator={usagePercent > 85 ? "bg-red-500" : usagePercent > 60 ? "bg-amber-500" : "bg-green-500"}
+            indicatorClassName={indicatorClassName}
           />
           <p className="text-xs text-muted-foreground mt-2">
             {usagePercent}% de la capacité totale utilisée

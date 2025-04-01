@@ -6,11 +6,9 @@ import { useToast } from '@/components/ui/use-toast';
 export const useClientActions = () => {
   const { 
     deleteClient, 
-    assignClientToSenateur,
-    changeClientStatus,
-    senateurs,
     updateClient,
-    addClient
+    addClient,
+    senateurs,
   } = useMaitreJeu();
   
   const { toast } = useToast();
@@ -27,7 +25,7 @@ export const useClientActions = () => {
   
   // Function to change the status of a client
   const handleStatusChange = (id: string, status: 'active' | 'inactive' | 'probation') => {
-    changeClientStatus(id, status);
+    updateClient(id, { activeStatus: status });
     toast({
       title: "Statut modifié",
       description: `Le statut du client a été changé en "${status}"`,
@@ -37,7 +35,7 @@ export const useClientActions = () => {
   
   // Function to assign a client to a senator
   const handleAssignment = (clientId: string, senateurId: string | null) => {
-    assignClientToSenateur(clientId, senateurId);
+    updateClient(clientId, { assignedToSenateurId: senateurId });
     toast({
       title: senateurId ? "Client assigné" : "Client non assigné",
       description: senateurId 
@@ -57,7 +55,12 @@ export const useClientActions = () => {
         variant: "default"
       });
     } else {
-      const id = addClient(clientData);
+      // For new clients, ensure the competences is an array
+      const newClient = {
+        ...clientData,
+        competences: Array.isArray(clientData.competences) ? clientData.competences : []
+      };
+      const id = addClient(newClient as any);
       toast({
         title: "Client ajouté",
         description: `${clientData.name} a été ajouté à la liste des clients`,

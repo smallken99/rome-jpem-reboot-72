@@ -36,9 +36,8 @@ export const ClientCompetenceManager: React.FC<ClientCompetenceManagerProps> = (
   };
   
   const handleSave = () => {
-    // Update the client with new competences
+    // Update the client with new competences - fix function call parameter count
     updateClient(client.id, {
-      ...client,
       competences,
       competencePoints: availablePoints
     });

@@ -11,7 +11,7 @@ export const createClientOperations = (
     const newClient: Client = {
       ...client,
       id,
-      competences: client.competences || {},
+      competences: client.competences || [],
       relationshipLevel: client.relationshipLevel || 1,
       activeStatus: client.activeStatus || 'active',
       lastInteraction: client.lastInteraction || new Date().toISOString(),
@@ -54,17 +54,21 @@ export const createClientOperations = (
   // Attribuer des points de compétence à un client
   const adjustCompetencePoints = (clientId: string, competence: string, value: number) => {
     setClients(prev => 
-      prev.map(client => 
-        client.id === clientId ? 
-          { 
+      prev.map(client => {
+        if (client.id === clientId) {
+          const updatedCompetences = { ...(client.competences || {}) };
+          // Ensure competences is always an array
+          const competencesArray = Array.isArray(updatedCompetences) 
+            ? updatedCompetences 
+            : [];
+            
+          return { 
             ...client, 
-            competences: { 
-              ...(client.competences || {}), 
-              [competence]: value
-            } 
-          } : 
-          client
-      )
+            competences: competencesArray 
+          };
+        }
+        return client;
+      })
     );
   };
   

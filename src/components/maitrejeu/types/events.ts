@@ -6,8 +6,8 @@ export interface Event {
   title: string;
   description: string;
   date: GameDate;
-  type: string;
-  importance: string;
+  type: EventType;
+  importance: EventImportance;
   effects: Record<string, number>; // Impact on different aspects
   source?: string;
   tags?: string[];
