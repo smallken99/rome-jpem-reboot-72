@@ -48,8 +48,8 @@ export const GestionBatiments = () => {
       capacity: 0
     };
     
-    // Use a function to update state to avoid type errors
-    setSelectedBuilding(() => exampleBuilding);
+    // Utilisez directement la valeur au lieu de la fonction
+    setSelectedBuilding(exampleBuilding);
   };
 
   const handleSaveBuilding = (data: BuildingCreationData) => {
@@ -63,11 +63,15 @@ export const GestionBatiments = () => {
         constructionYear: data.constructionYear || currentYear,
         cost: data.cost,
         revenue: data.revenue,
-        capacity: data.capacity
+        capacity: data.capacity,
+        value: data.value || 0,  // Assurez-vous que toutes les propriétés requises sont définies
+        condition: data.condition || 100,
+        // Ajoutez owner si nécessaire
+        owner: data.owner
       });
     } else {
       // Add new building with all required properties
-      const completeData = {
+      const completeData: BuildingCreationData = {
         ...data,
         maintenance: data.maintenanceCost,
         status: data.status || 'good' as BuildingStatus,
@@ -77,7 +81,9 @@ export const GestionBatiments = () => {
         revenue: data.revenue || 0,
         capacity: data.capacity,
         value: data.value || 0,
-        condition: data.condition || 100
+        condition: data.condition || 100,
+        // Ajoutez owner si nécessaire
+        owner: data.owner
       };
       
       addBuilding(completeData);

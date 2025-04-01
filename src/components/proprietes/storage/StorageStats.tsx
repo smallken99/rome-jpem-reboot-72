@@ -1,72 +1,52 @@
 
 import React from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Progress } from '@/components/ui/progress';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Resource } from '../types/resourceTypes';
+import { formatCurrency } from '@/utils/formatters';
 
 interface StorageStatsProps {
-  totalCapacity: number;
-  usedCapacity: number;
-  resourceCount: number;
-  totalValue: number;
+  resources: Resource[];
 }
 
-const StorageStats: React.FC<StorageStatsProps> = ({ 
-  totalCapacity = 1000,
-  usedCapacity = 0,
-  resourceCount = 0,
-  totalValue = 0
-}) => {
-  const usagePercentage = Math.min(100, Math.round((usedCapacity / totalCapacity) * 100));
+const StorageStats: React.FC<StorageStatsProps> = ({ resources }) => {
+  const totalValue = resources.reduce((total, resource) => total + (resource.value * resource.quantity), 0);
+  const totalItems = resources.reduce((total, resource) => total + resource.quantity, 0);
+  
+  const categoryCounts = resources.reduce((counts, resource) => {
+    const category = resource.type.toString();
+    counts[category] = (counts[category] || 0) + 1;
+    return counts;
+  }, {} as Record<string, number>);
+  
+  const highestCategory = Object.entries(categoryCounts).sort((a, b) => b[1] - a[1])[0];
   
   return (
-    <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
       <Card>
         <CardHeader className="pb-2">
-          <CardTitle className="text-sm font-medium">Capacité de stockage</CardTitle>
+          <CardTitle className="text-base">Valeur totale</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="text-2xl font-bold">{usedCapacity} / {totalCapacity}</div>
-          <Progress className="mt-2" value={usagePercentage} />
-          <p className="text-xs text-muted-foreground mt-2">
-            {usagePercentage}% de l'espace utilisé
-          </p>
+          <p className="text-2xl font-semibold">{formatCurrency(totalValue)}</p>
         </CardContent>
       </Card>
       
       <Card>
         <CardHeader className="pb-2">
-          <CardTitle className="text-sm font-medium">Nombre de ressources</CardTitle>
+          <CardTitle className="text-base">Nombre d'articles</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="text-2xl font-bold">{resourceCount}</div>
-          <p className="text-xs text-muted-foreground mt-2">
-            Types différents de ressources
-          </p>
+          <p className="text-2xl font-semibold">{totalItems.toLocaleString()}</p>
         </CardContent>
       </Card>
       
       <Card>
         <CardHeader className="pb-2">
-          <CardTitle className="text-sm font-medium">Valeur totale</CardTitle>
+          <CardTitle className="text-base">Catégorie principale</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="text-2xl font-bold">{totalValue} as</div>
-          <p className="text-xs text-muted-foreground mt-2">
-            Valeur estimée au prix du marché
-          </p>
-        </CardContent>
-      </Card>
-      
-      <Card>
-        <CardHeader className="pb-2">
-          <CardTitle className="text-sm font-medium">Efficacité</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="text-2xl font-bold">
-            {Math.round(totalValue / (usedCapacity || 1))} as/unité
-          </div>
-          <p className="text-xs text-muted-foreground mt-2">
-            Valeur moyenne par unité de stockage
+          <p className="text-2xl font-semibold capitalize">
+            {highestCategory ? highestCategory[0] : 'Aucune'}
           </p>
         </CardContent>
       </Card>

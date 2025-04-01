@@ -1,8 +1,3 @@
-
-/**
- * Type adapter utilities for converting between different interfaces
- */
-
 import { OwnedBuilding, PropertyUpgrade, Slave, SlaveAssignment } from '@/components/proprietes/types/property';
 import { BuildingType as MJBuildingType, Building as MJBuilding } from '@/components/maitrejeu/types/batiments';
 import { BuildingType as PropBuildingType } from '@/components/proprietes/types/buildingTypes';

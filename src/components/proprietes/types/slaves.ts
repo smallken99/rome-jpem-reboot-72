@@ -10,21 +10,28 @@ export interface Slave {
   loyalty: number;
   origin: string;
   specialization?: string;
+  specialties?: string[];
   assigned?: boolean;
   assignedTo?: string;
   purchaseDate?: Date;
   status: 'idle' | 'working' | 'training' | 'sick' | 'escaped';
+  acquired?: Date;
+  value?: number;
+  notes?: string;
 }
 
 export interface SlaveAssignment {
-  id: string;
-  slaveId: string;
+  id?: string;
+  slaveId?: string;
   propertyId: string;
+  buildingId?: string;
   role: string;
   startDate: Date;
   endDate?: Date;
   efficiency: number;
   income: number;
+  productivity?: number;
+  assignedAt?: Date;
 }
 
 export interface SlaveTraining {
