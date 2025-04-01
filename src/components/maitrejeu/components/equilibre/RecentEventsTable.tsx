@@ -22,7 +22,16 @@ export const RecentEventsTable: React.FC<RecentEventsTableProps> = ({ events, eq
       Spring: 1, Ver: 1,
       Summer: 2, Aes: 2,
       Autumn: 3, Fall: 3, Aut: 3,
-      Winter: 4, Hie: 4
+      Winter: 4, Hie: 4,
+      SPRING: 1,
+      SUMMER: 2,
+      AUTUMN: 3,
+      WINTER: 4,
+      spring: 1,
+      summer: 2,
+      autumn: 3,
+      winter: 4,
+      fall: 3
     };
     
     const seasonA = seasonToNumber[a.date.season] || 0;

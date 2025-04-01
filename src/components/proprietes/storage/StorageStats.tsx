@@ -1,12 +1,7 @@
 
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { 
-  PackagePlus, 
-  PackageMinus, 
-  Warehouse, 
-  Coins 
-} from 'lucide-react';
+import { Progress } from '@/components/ui/progress';
 
 export interface StorageStatsProps {
   totalCapacity: number;
@@ -21,71 +16,61 @@ const StorageStats: React.FC<StorageStatsProps> = ({
   resourceCount,
   totalValue
 }) => {
-  // Calculate usage percentage
-  const usagePercentage = totalCapacity > 0 
-    ? Math.min(100, Math.round((usedCapacity / totalCapacity) * 100)) 
-    : 0;
+  const usagePercent = Math.min(100, Math.round((usedCapacity / totalCapacity) * 100));
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
       <Card>
-        <CardHeader className="flex flex-row items-center justify-between pb-2">
-          <CardTitle className="text-sm font-medium">Capacité utilisée</CardTitle>
-          <Warehouse className="h-4 w-4 text-muted-foreground" />
+        <CardHeader className="pb-2">
+          <CardTitle className="text-sm font-medium">Capacité de stockage</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="text-2xl font-bold">{usagePercentage}%</div>
-          <p className="text-xs text-muted-foreground">
-            {usedCapacity.toLocaleString()} / {totalCapacity.toLocaleString()} unités
+          <div className="text-2xl font-bold">{usedCapacity} / {totalCapacity}</div>
+          <Progress 
+            value={usagePercent} 
+            className="h-2 mt-2" 
+            indicator={usagePercent > 85 ? "bg-red-500" : usagePercent > 60 ? "bg-amber-500" : "bg-green-500"}
+          />
+          <p className="text-xs text-muted-foreground mt-2">
+            {usagePercent}% de la capacité totale utilisée
           </p>
-          <div className="mt-2 h-2 w-full bg-gray-200 rounded-full overflow-hidden">
-            <div 
-              className={`h-full ${
-                usagePercentage > 90 ? 'bg-red-500' : 
-                usagePercentage > 75 ? 'bg-yellow-500' : 
-                'bg-green-500'
-              }`} 
-              style={{ width: `${usagePercentage}%` }}
-            />
-          </div>
         </CardContent>
       </Card>
-
+      
       <Card>
-        <CardHeader className="flex flex-row items-center justify-between pb-2">
-          <CardTitle className="text-sm font-medium">Ressources distinctes</CardTitle>
-          <PackagePlus className="h-4 w-4 text-muted-foreground" />
+        <CardHeader className="pb-2">
+          <CardTitle className="text-sm font-medium">Nombre de ressources</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="text-2xl font-bold">{resourceCount}</div>
-          <p className="text-xs text-muted-foreground">
-            Types de ressources différents
+          <p className="text-xs text-muted-foreground mt-2">
+            Types de ressources stockées
           </p>
         </CardContent>
       </Card>
-
+      
       <Card>
-        <CardHeader className="flex flex-row items-center justify-between pb-2">
+        <CardHeader className="pb-2">
           <CardTitle className="text-sm font-medium">Valeur totale</CardTitle>
-          <Coins className="h-4 w-4 text-muted-foreground" />
         </CardHeader>
         <CardContent>
-          <div className="text-2xl font-bold">{totalValue.toLocaleString()} As</div>
-          <p className="text-xs text-muted-foreground">
-            Estimation des biens entreposés
+          <div className="text-2xl font-bold">{totalValue.toLocaleString()} as</div>
+          <p className="text-xs text-muted-foreground mt-2">
+            Valeur marchande des stocks
           </p>
         </CardContent>
       </Card>
-
+      
       <Card>
-        <CardHeader className="flex flex-row items-center justify-between pb-2">
-          <CardTitle className="text-sm font-medium">Espace disponible</CardTitle>
-          <PackageMinus className="h-4 w-4 text-muted-foreground" />
+        <CardHeader className="pb-2">
+          <CardTitle className="text-sm font-medium">Efficacité d'utilisation</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="text-2xl font-bold">{(totalCapacity - usedCapacity).toLocaleString()}</div>
-          <p className="text-xs text-muted-foreground">
-            Unités de stockage disponibles
+          <div className="text-2xl font-bold">
+            {Math.round(totalValue / usedCapacity).toLocaleString()} as / unité
+          </div>
+          <p className="text-xs text-muted-foreground mt-2">
+            Valeur moyenne par unité de stockage
           </p>
         </CardContent>
       </Card>

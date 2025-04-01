@@ -2,7 +2,9 @@
 export type Season = 
   'Spring' | 'Summer' | 'Autumn' | 'Winter' | 'Fall' | 
   'Ver' | 'Aestas' | 'Autumnus' | 'Hiems' |
-  'Aes' | 'Aut' | 'Hie';
+  'Aes' | 'Aut' | 'Hie' |
+  'SPRING' | 'SUMMER' | 'AUTUMN' | 'WINTER' |
+  'spring' | 'summer' | 'autumn' | 'winter' | 'fall';
 
 export interface GameDate {
   year: number;
@@ -49,7 +51,16 @@ export function adaptSeason(season: string): string {
     'Summer': 'Été',
     'Fall': 'Automne',
     'Autumn': 'Automne',
-    'Winter': 'Hiver'
+    'Winter': 'Hiver',
+    'SPRING': 'Printemps',
+    'SUMMER': 'Été',
+    'AUTUMN': 'Automne',
+    'WINTER': 'Hiver',
+    'spring': 'Printemps',
+    'summer': 'Été',
+    'autumn': 'Automne',
+    'fall': 'Automne',
+    'winter': 'Hiver'
   };
   return seasonMap[season] || season;
 }

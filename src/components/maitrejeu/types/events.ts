@@ -1,21 +1,48 @@
 
-export interface PoliticalEvent {
+import { GameDate } from '@/utils/types/gameDate';
+
+export interface Event {
   id: string;
   title: string;
-  name?: string;
   description: string;
-  date: string | { year: number; season: string };
+  date: GameDate;
   type: string;
-  impact: Record<string, number>;
-  severity: 'low' | 'medium' | 'high' | 'critical';
-  importance?: string;
+  importance: string;
+  effects: Record<string, number>; // Impact on different aspects
   source?: string;
-  faction?: string;
-  resolved?: boolean;
-  relatedTo?: string[];
+  tags?: string[];
+  actors?: string[];
+  location?: string;
+  isHistorical?: boolean;
+  isPublic?: boolean;
+  isResolved?: boolean;
 }
 
-export interface GameDate {
-  year: number;
-  season: string;
+export type EventType = 
+  | 'political'
+  | 'economic'
+  | 'military'
+  | 'religious'
+  | 'social'
+  | 'cultural'
+  | 'diplomatic'
+  | 'natural'
+  | 'other';
+
+export type EventImportance = 
+  | 'minor'
+  | 'normal'
+  | 'major'
+  | 'critical';
+
+export interface EventFilter {
+  type?: EventType | string;
+  importance?: EventImportance | string;
+  startDate?: GameDate;
+  endDate?: GameDate;
+  searchTerm?: string;
+  tags?: string[];
+  isHistorical?: boolean;
+  isPublic?: boolean;
+  isResolved?: boolean;
 }

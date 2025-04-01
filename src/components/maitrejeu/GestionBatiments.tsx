@@ -49,7 +49,7 @@ export const GestionBatiments = () => {
       capacity: 0
     };
     
-    // Utilisez directement la valeur au lieu de la fonction
+    // Utilisez la valeur directement au lieu de passer une fonction
     setSelectedBuilding(exampleBuilding);
   };
 
@@ -131,7 +131,7 @@ export const GestionBatiments = () => {
             <TabsContent value="construction" className="pt-2">
               <ConstructionProjects 
                 currentYear={currentYear} 
-                currentSeason={currentSeason} 
+                currentSeason={currentSeason === "SPRING" ? "Spring" : currentSeason === "SUMMER" ? "Summer" : currentSeason === "AUTUMN" ? "Autumn" : "Winter"} 
               />
             </TabsContent>
 

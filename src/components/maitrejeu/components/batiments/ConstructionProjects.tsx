@@ -6,7 +6,7 @@ import { Progress } from '@/components/ui/progress';
 import { Plus, Calendar, Hammer, CheckCircle } from 'lucide-react';
 import { useBuildingManagement } from '../../hooks/useBuildingManagement';
 import { ConstructionProject, BuildingType } from '../../types/batiments';
-import { GameDate, Season } from '@/utils/types/gameDate';
+import { Season } from '@/utils/types/gameDate';
 
 interface ConstructionProjectsProps {
   currentYear: number;
@@ -17,19 +17,20 @@ export const ConstructionProjects: React.FC<ConstructionProjectsProps> = ({ curr
   const { constructionProjects, addConstructionProject, updateConstructionProgress } = useBuildingManagement();
   
   const addNewProject = () => {
+    const startDate = new Date();
+    
+    // Create construction project properly
     const projectData = {
       name: "Nouveau Temple de Jupiter",
       type: "temple" as BuildingType,
       location: "Capitole",
       estimatedCost: 50000,
-      startDate: new Date(),
-      estimatedCompletionDate: {
-        year: currentYear + 1,
-        season: currentSeason
-      } as GameDate,
+      startDate,
+      expectedCompletionYear: currentYear + 1,
       status: 'planned' as 'planned' | 'in_progress' | 'completed' | 'abandoned',
       description: "Construction d'un nouveau temple dédié à Jupiter",
-      supervisor: "Marcus Agrippa"
+      supervisor: "Marcus Agrippa",
+      progress: 0
     };
     
     const newProjectId = addConstructionProject(projectData);
