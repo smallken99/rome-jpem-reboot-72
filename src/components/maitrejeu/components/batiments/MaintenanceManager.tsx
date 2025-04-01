@@ -6,12 +6,12 @@ import {
 } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Building, BuildingTask } from '../../types/batiments';
+import { Building, MaintenanceTask } from '../../types/batiments';
 import { useBuildingManagement } from '../../hooks/useBuildingManagement';
 import { Wrench, Check } from 'lucide-react';
 
 interface MaintenanceManagerProps {
-  onClose: () => void;
+  onClose?: () => void;
 }
 
 export const MaintenanceManager: React.FC<MaintenanceManagerProps> = ({ onClose }) => {
@@ -27,7 +27,7 @@ export const MaintenanceManager: React.FC<MaintenanceManagerProps> = ({ onClose 
     if (addMaintenanceTask) {
       const building = buildings.find(b => b.id === buildingId);
       
-      const task: BuildingTask = {
+      const task: MaintenanceTask = {
         id: `task-${Date.now()}`,
         buildingId,
         buildingName: building?.name || 'Bâtiment',
@@ -129,7 +129,7 @@ export const MaintenanceManager: React.FC<MaintenanceManagerProps> = ({ onClose 
                     </Badge>
                   </TableCell>
                   <TableCell className="space-x-2">
-                    {building.condition <, {, 50 && (
+                    {building.condition < 50 && (
                       <Button 
                         variant="outline" 
                         size="sm"
@@ -158,11 +158,15 @@ export const MaintenanceManager: React.FC<MaintenanceManagerProps> = ({ onClose 
             </TableBody>
           </Table>
           
-          <div className="flex justify-end mt-4">
-            <Button variant="outline" onClick={onClose}>Fermer</Button>
-          </div>
+          {onClose && (
+            <div className="flex justify-end mt-4">
+              <Button variant="outline" onClick={onClose}>Fermer</Button>
+            </div>
+          )}
         </div>
       </CardContent>
     </Card>
   );
 };
+
+export default MaintenanceManager;
