@@ -1,190 +1,228 @@
 
-import React from 'react';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import React, { useState, useEffect } from 'react';
+import { 
+  Card, 
+  CardContent, 
+  CardHeader, 
+  CardTitle, 
+  CardFooter 
+} from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
-import { formatCurrency } from '@/utils/formatters';
-import { PropertyTransaction, TransactionsListProps } from '../types/property';
-import { Badge } from '@/components/ui/badge';
-import { Eye, Plus } from 'lucide-react';
+import { PropertyTransaction } from '../types/property';
+import { 
+  Table, 
+  TableBody, 
+  TableCell, 
+  TableHead, 
+  TableHeader, 
+  TableRow 
+} from '@/components/ui/table';
+import { Input } from '@/components/ui/input';
+import { Search, Plus, Filter, ArrowDown, ArrowUp } from 'lucide-react';
+import { formatCurrency } from '@/utils/currencyUtils';
+import { formatDate } from '@/utils/dateUtils';
 
-const getTransactionTypeColor = (type: string) => {
-  switch (type) {
-    case 'acquisition':
-      return 'bg-green-100 text-green-800';
-    case 'consumption':
-      return 'bg-red-100 text-red-800';
-    case 'transfer':
-      return 'bg-blue-100 text-blue-800';
-    default:
-      return 'bg-gray-100 text-gray-800';
-  }
-};
+interface TransactionsListProps {
+  transactions: PropertyTransaction[];
+  searchTerm?: string;
+  resourceId?: string;
+  onTransactionSelect?: (transaction: PropertyTransaction) => void;
+  onAddTransaction?: () => void;
+  filters?: {
+    resourceName?: string;
+    type?: string;
+    startDate?: Date;
+    endDate?: Date;
+    responsible?: string;
+  };
+}
 
-const getTransactionTypeLabel = (type: string) => {
-  switch (type) {
-    case 'acquisition':
-      return 'Acquisition';
-    case 'consumption':
-      return 'Consommation';
-    case 'transfer':
-      return 'Transfert';
-    default:
-      return type;
-  }
-};
-
-const TransactionsList: React.FC<TransactionsListProps> = ({
-  searchTerm = '',
+export const TransactionsList: React.FC<TransactionsListProps> = ({
+  transactions,
+  searchTerm: initialSearchTerm,
   resourceId,
   onTransactionSelect,
   onAddTransaction,
-  filters
+  filters: initialFilters
 }) => {
-  // Example transactions for demo
-  const [transactions, setTransactions] = React.useState<PropertyTransaction[]>([
-    {
-      id: '1',
-      resourceId: '1',
-      resourceName: 'Blé',
-      type: 'acquisition',
-      quantity: 200,
-      date: new Date(2022, 2, 10),
-      responsible: 'Marcus Aurelius',
-      source: 'Marché de Rome',
-      cost: 500
-    },
-    {
-      id: '2',
-      resourceId: '1',
-      resourceName: 'Blé',
-      type: 'consumption',
-      quantity: 50,
-      date: new Date(2022, 2, 15),
-      responsible: 'Lucius Verus',
-      destination: 'Cuisine principale',
-      reason: 'Banquet sénatorial'
-    },
-    {
-      id: '3',
-      resourceId: '2',
-      resourceName: 'Huile d\'olive',
-      type: 'transfer',
-      quantity: 30,
-      date: new Date(2022, 3, 5),
-      responsible: 'Claudius Maximus',
-      source: 'Cellier principal',
-      destination: 'Villa de campagne',
-      reason: 'Déplacement saisonnier'
+  const [searchTerm, setSearchTerm] = useState(initialSearchTerm || '');
+  const [sortField, setSortField] = useState<keyof PropertyTransaction>('date');
+  const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('desc');
+  const [filters, setFilters] = useState(initialFilters || {});
+  const [filteredTransactions, setFilteredTransactions] = useState<PropertyTransaction[]>([]);
+
+  useEffect(() => {
+    let filtered = [...transactions];
+
+    // Filter by resourceId if provided
+    if (resourceId) {
+      filtered = filtered.filter(t => t.resourceId === resourceId);
     }
-  ]);
-  
-  // Filter transactions based on search term, resource ID, and filters
-  const filteredTransactions = transactions.filter(transaction => {
-    // Filter by resource ID if provided
-    if (resourceId && transaction.resourceId !== resourceId) {
-      return false;
+
+    // Apply search term
+    if (searchTerm) {
+      filtered = filtered.filter(t => 
+        t.resourceName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        t.responsible.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        (t.reason && t.reason.toLowerCase().includes(searchTerm.toLowerCase()))
+      );
+    }
+
+    // Apply additional filters
+    if (filters.resourceName) {
+      filtered = filtered.filter(t => t.resourceName === filters.resourceName);
     }
     
-    // Search term filter
-    if (
-      searchTerm && 
-      !transaction.resourceName.toLowerCase().includes(searchTerm.toLowerCase()) &&
-      !transaction.responsible.toLowerCase().includes(searchTerm.toLowerCase())
-    ) {
-      return false;
+    if (filters.type) {
+      filtered = filtered.filter(t => t.type === filters.type);
     }
     
-    // Apply other filters if provided
-    if (filters) {
-      if (filters.resourceName && transaction.resourceName !== filters.resourceName) {
-        return false;
-      }
-      if (filters.type && transaction.type !== filters.type) {
-        return false;
-      }
-      if (filters.startDate && transaction.date < filters.startDate) {
-        return false;
-      }
-      if (filters.endDate && transaction.date > filters.endDate) {
-        return false;
-      }
-      if (filters.responsible && transaction.responsible !== filters.responsible) {
-        return false;
-      }
+    if (filters.startDate) {
+      filtered = filtered.filter(t => new Date(t.date) >= new Date(filters.startDate!));
     }
     
-    return true;
-  });
-  
+    if (filters.endDate) {
+      filtered = filtered.filter(t => new Date(t.date) <= new Date(filters.endDate!));
+    }
+    
+    if (filters.responsible) {
+      filtered = filtered.filter(t => t.responsible === filters.responsible);
+    }
+
+    // Sort the transactions
+    filtered.sort((a, b) => {
+      const aValue = a[sortField];
+      const bValue = b[sortField];
+      
+      if (aValue === bValue) return 0;
+      
+      const compareResult = aValue < bValue ? -1 : 1;
+      return sortDirection === 'asc' ? compareResult : -compareResult;
+    });
+
+    setFilteredTransactions(filtered);
+  }, [transactions, searchTerm, resourceId, filters, sortField, sortDirection]);
+
+  const handleSort = (field: keyof PropertyTransaction) => {
+    if (field === sortField) {
+      setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc');
+    } else {
+      setSortField(field);
+      setSortDirection('asc');
+    }
+  };
+
+  const getSortIcon = (field: keyof PropertyTransaction) => {
+    if (field !== sortField) return null;
+    return sortDirection === 'asc' ? <ArrowUp className="h-4 w-4 ml-1" /> : <ArrowDown className="h-4 w-4 ml-1" />;
+  };
+
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle className="flex justify-between items-center">
-          <span>Transactions</span>
+    <Card className="w-full">
+      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+        <CardTitle className="text-xl font-bold">Transactions</CardTitle>
+        <div className="flex space-x-2">
           {onAddTransaction && (
-            <Button onClick={onAddTransaction} size="sm">
-              <Plus className="h-4 w-4 mr-2" />
-              Nouvelle transaction
+            <Button size="sm" onClick={onAddTransaction}>
+              <Plus className="h-4 w-4 mr-1" /> Ajouter
             </Button>
           )}
-        </CardTitle>
+          <Button variant="outline" size="sm">
+            <Filter className="h-4 w-4 mr-1" /> Filtrer
+          </Button>
+        </div>
       </CardHeader>
       <CardContent>
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>Ressource</TableHead>
-              <TableHead>Type</TableHead>
-              <TableHead>Quantité</TableHead>
-              <TableHead>Date</TableHead>
-              <TableHead>Responsable</TableHead>
-              <TableHead>Détails</TableHead>
-              <TableHead className="text-right">Actions</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {filteredTransactions.length === 0 ? (
+        <div className="relative mb-4">
+          <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+          <Input
+            type="search"
+            placeholder="Rechercher des transactions..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="pl-8"
+          />
+        </div>
+
+        <div className="rounded-md border overflow-hidden">
+          <Table>
+            <TableHeader>
               <TableRow>
-                <TableCell colSpan={7} className="text-center py-4">
-                  Aucune transaction trouvée
-                </TableCell>
+                <TableHead className="w-[180px] cursor-pointer" onClick={() => handleSort('date')}>
+                  <div className="flex items-center">
+                    Date {getSortIcon('date')}
+                  </div>
+                </TableHead>
+                <TableHead className="cursor-pointer" onClick={() => handleSort('resourceName')}>
+                  <div className="flex items-center">
+                    Ressource {getSortIcon('resourceName')}
+                  </div>
+                </TableHead>
+                <TableHead className="cursor-pointer" onClick={() => handleSort('type')}>
+                  <div className="flex items-center">
+                    Type {getSortIcon('type')}
+                  </div>
+                </TableHead>
+                <TableHead className="cursor-pointer text-right" onClick={() => handleSort('quantity')}>
+                  <div className="flex items-center justify-end">
+                    Quantité {getSortIcon('quantity')}
+                  </div>
+                </TableHead>
+                <TableHead className="cursor-pointer text-right" onClick={() => handleSort('cost')}>
+                  <div className="flex items-center justify-end">
+                    Coût {getSortIcon('cost')}
+                  </div>
+                </TableHead>
+                <TableHead className="cursor-pointer" onClick={() => handleSort('responsible')}>
+                  <div className="flex items-center">
+                    Responsable {getSortIcon('responsible')}
+                  </div>
+                </TableHead>
               </TableRow>
-            ) : (
-              filteredTransactions.map(transaction => (
-                <TableRow key={transaction.id}>
-                  <TableCell>{transaction.resourceName}</TableCell>
-                  <TableCell>
-                    <Badge className={getTransactionTypeColor(transaction.type)}>
-                      {getTransactionTypeLabel(transaction.type)}
-                    </Badge>
-                  </TableCell>
-                  <TableCell>{transaction.quantity}</TableCell>
-                  <TableCell>{transaction.date.toLocaleDateString()}</TableCell>
-                  <TableCell>{transaction.responsible}</TableCell>
-                  <TableCell>
-                    {transaction.type === 'acquisition' && transaction.source}
-                    {transaction.type === 'consumption' && transaction.destination}
-                    {transaction.type === 'transfer' && `${transaction.source} → ${transaction.destination}`}
-                  </TableCell>
-                  <TableCell className="text-right">
-                    {onTransactionSelect && (
-                      <Button variant="ghost" size="icon" onClick={() => onTransactionSelect(transaction)}>
-                        <Eye className="h-4 w-4" />
-                      </Button>
-                    )}
+            </TableHeader>
+            <TableBody>
+              {filteredTransactions.length > 0 ? (
+                filteredTransactions.map(transaction => (
+                  <TableRow 
+                    key={transaction.id} 
+                    className={onTransactionSelect ? 'cursor-pointer hover:bg-muted' : ''}
+                    onClick={() => onTransactionSelect?.(transaction)}
+                  >
+                    <TableCell>{formatDate(transaction.date)}</TableCell>
+                    <TableCell className="font-medium">{transaction.resourceName}</TableCell>
+                    <TableCell>
+                      <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                        transaction.type === 'acquisition' ? 'bg-green-100 text-green-800' :
+                        transaction.type === 'consumption' ? 'bg-red-100 text-red-800' :
+                        'bg-blue-100 text-blue-800'
+                      }`}>
+                        {transaction.type === 'acquisition' ? 'Acquisition' :
+                         transaction.type === 'consumption' ? 'Consommation' : 'Transfert'}
+                      </span>
+                    </TableCell>
+                    <TableCell className="text-right">{transaction.quantity}</TableCell>
+                    <TableCell className="text-right">
+                      {transaction.cost ? formatCurrency(transaction.cost) : '-'}
+                    </TableCell>
+                    <TableCell>{transaction.responsible}</TableCell>
+                  </TableRow>
+                ))
+              ) : (
+                <TableRow>
+                  <TableCell colSpan={6} className="h-24 text-center">
+                    Aucune transaction trouvée.
                   </TableCell>
                 </TableRow>
-              ))
-            )}
-          </TableBody>
-        </Table>
+              )}
+            </TableBody>
+          </Table>
+        </div>
       </CardContent>
       <CardFooter className="flex justify-between">
-        <div>Total: {filteredTransactions.length} transactions</div>
+        <span className="text-sm text-muted-foreground">
+          {filteredTransactions.length} transaction(s) trouvée(s)
+        </span>
       </CardFooter>
     </Card>
   );
 };
-
-export default TransactionsList;

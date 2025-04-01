@@ -56,30 +56,20 @@ export const GestionBatiments = () => {
       // Update existing building
       updateBuilding(selectedBuilding.id, {
         ...data,
-        income: data.income || 0,
-        maintenance: data.maintenanceCost || 0,
+        maintenance: data.maintenanceCost,
         status: data.status || 'good' as BuildingStatus,
         description: data.description || "",
         constructionYear: data.constructionYear || currentYear,
-        cost: data.cost,
-        revenue: data.revenue,
-        value: data.value,
-        condition: data.condition,
       });
     } else {
       // Add new building with all required properties
       const completeData: Omit<Building, 'id'> = {
         ...data,
-        income: data.income || 0,
-        maintenance: data.maintenanceCost || 0,
+        maintenance: data.maintenanceCost,
         status: data.status || 'good' as BuildingStatus,
         description: data.description || "",
         constructionYear: data.constructionYear || currentYear,
-        value: data.value || 0,
-        condition: data.condition || 100,
-        cost: data.cost,
-        revenue: data.revenue,
-        capacity: data.capacity || 0
+        capacity: data.capacity
       };
       
       addBuilding(completeData);

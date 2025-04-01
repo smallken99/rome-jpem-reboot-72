@@ -1,5 +1,4 @@
 
-
 // Types pour les bâtiments
 
 export type BuildingType = 'temple' | 'villa' | 'domus' | 'insula' | 'forum' | 'baths' | 'theater' | 'amphitheater' | 'senate' | 'basilica' | 'market' | 'warehouse' | 'workshop' | 'port' | 'aqueduct' | 'road' | 'bridge' | 'military' | 'other' | 'wall';
@@ -24,13 +23,13 @@ export interface Building {
   constructionYear: number;
   cost: number;
   revenue: number;
+  capacity: number;
   workers?: number;
   maxWorkers?: number;
   securityLevel?: number;
   maintenanceLevel?: number;
   upgrades?: any[];
   income?: number;
-  capacity?: number;
   purchaseDate?: Date;
   // Propriétés additionnelles pour compatibilité
   owner?: string;
@@ -119,9 +118,9 @@ export interface BuildingCreationData {
   constructionYear: number;
   cost: number;
   revenue: number;
+  capacity: number;
   status?: BuildingStatus;
   workers?: number;
-  capacity?: number;
   owner?: string;
   income?: number;
 }
@@ -132,4 +131,3 @@ export interface PublicBuildingModalProps {
   onSave: (building: BuildingCreationData) => void;
   building?: Building;
 }
-

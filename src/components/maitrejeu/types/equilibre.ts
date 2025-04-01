@@ -34,12 +34,12 @@ export interface Stabilite {
 }
 
 export interface Militaire {
-  morale: number;  // Changed from 'moral' to 'morale'
+  morale: number;
   loyaute: number;
   puissance: number;
-  discipline: number; // Added this property
-  effectifs: number; // Added this property
-  equipement: number; // Added this property
+  discipline: number;
+  effectifs: number;
+  equipement: number;
 }
 
 export type RiskType = 

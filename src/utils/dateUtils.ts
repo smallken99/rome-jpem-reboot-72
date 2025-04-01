@@ -76,3 +76,117 @@ export const resolveGamePhase = (phase: string | undefined): string => {
   
   return validPhases.includes(phase || '') ? phase || 'Normal' : 'Normal';
 };
+
+/**
+ * Format a date for display
+ */
+export const formatDate = (date: GameDate | Date | string): string => {
+  if (!date) return '';
+  
+  if (typeof date === 'string') {
+    return date;
+  }
+  
+  if (date instanceof Date) {
+    return date.toLocaleDateString();
+  }
+  
+  // Handle GameDate
+  return formatGameDate(date as GameDate);
+};
+
+/**
+ * Get the seasons after a given date
+ */
+export const getSeasonsAfter = (date: GameDate, count: number = 4): GameDate[] => {
+  const seasons: Season[] = ['Ver', 'Aes', 'Aut', 'Hie'];
+  const result: GameDate[] = [];
+  
+  // Find the index of the current season
+  const currentSeasonIndex = seasons.indexOf(date.season as Season);
+  if (currentSeasonIndex === -1) return result;
+  
+  let year = date.year;
+  let seasonIndex = currentSeasonIndex;
+  
+  for (let i = 0; i < count; i++) {
+    seasonIndex = (seasonIndex + 1) % 4;
+    if (seasonIndex === 0) {
+      year++;
+    }
+    
+    result.push({
+      year,
+      season: seasons[seasonIndex],
+      day: 1
+    });
+  }
+  
+  return result;
+};
+
+/**
+ * Convert a string to a GameDate
+ */
+export const stringToGameDate = (dateString: string): GameDate | null => {
+  if (!dateString) return null;
+  
+  // Try to parse the format "Season Year" (e.g., "Ver 752")
+  const seasonYearRegex = /^([A-Za-z]+)\s+(\d+)$/;
+  const match = dateString.match(seasonYearRegex);
+  
+  if (match) {
+    const seasonStr = match[1];
+    const year = parseInt(match[2], 10);
+    
+    // Map the season string to a known season
+    const seasonMap: Record<string, Season> = {
+      'Ver': 'Ver',
+      'Printemps': 'Ver',
+      'Spring': 'Ver',
+      'Aes': 'Aes',
+      'Été': 'Aes',
+      'Summer': 'Aes',
+      'Aut': 'Aut',
+      'Automne': 'Aut',
+      'Autumn': 'Aut',
+      'Hie': 'Hie',
+      'Hiver': 'Hie',
+      'Winter': 'Hie'
+    };
+    
+    const season = seasonMap[seasonStr];
+    
+    if (season && !isNaN(year)) {
+      return { year, season, day: 1 };
+    }
+  }
+  
+  // Try to parse as a regular date
+  const dateObj = new Date(dateString);
+  if (!isNaN(dateObj.getTime())) {
+    // Convert regular date to GameDate
+    const year = dateObj.getFullYear();
+    const month = dateObj.getMonth();
+    
+    // Map month to season
+    let season: Season;
+    if (month >= 2 && month <= 4) {
+      season = 'Ver'; // Spring (March-May)
+    } else if (month >= 5 && month <= 7) {
+      season = 'Aes'; // Summer (June-August)
+    } else if (month >= 8 && month <= 10) {
+      season = 'Aut'; // Autumn (September-November)
+    } else {
+      season = 'Hie'; // Winter (December-February)
+    }
+    
+    return {
+      year,
+      season,
+      day: dateObj.getDate()
+    };
+  }
+  
+  return null;
+};
