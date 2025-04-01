@@ -1,80 +1,77 @@
 
 import React, { useState } from 'react';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { useDatabaseManager } from './hooks/useDatabaseManager';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
+import { CalendarDays, Save, Trash2, RotateCcw, AlertTriangle, Clock, Download } from 'lucide-react';
+import { toast } from 'sonner';
+import { format, parseISO } from 'date-fns';
+import { fr } from 'date-fns/locale';
+import { Separator } from '@/components/ui/separator';
+import { Badge } from '@/components/ui/badge';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Save, Clock, RotateCw, Download, Trash2 } from 'lucide-react';
-import { toast } from 'sonner';
-
-type Backup = {
-  id: string;
-  name: string;
-  date: string;
-  size: string;
-  description: string;
-};
 
 export const DatabaseBackupManager: React.FC = () => {
-  const [backups, setBackups] = useState<Backup[]>([
-    {
-      id: '1',
-      name: 'Sauvegarde automatique',
-      date: '2023-11-15 12:30',
-      size: '2.3 MB',
-      description: 'Sauvegarde automatique quotidienne'
-    },
-    {
-      id: '2',
-      name: 'Avant la mise à jour majeure',
-      date: '2023-11-10 09:15',
-      size: '2.1 MB',
-      description: 'Sauvegarde avant déploiement des nouvelles fonctionnalités'
-    }
-  ]);
+  const { backups, createBackup, restoreBackup, deleteBackup, exportAllTables } = useDatabaseManager();
+  const [newBackupDescription, setNewBackupDescription] = useState('');
+  const [backupToDelete, setBackupToDelete] = useState<string | null>(null);
+  const [backupToRestore, setBackupToRestore] = useState<string | null>(null);
+  const [backupFilter, setBackupFilter] = useState('');
   
-  const [backupName, setBackupName] = useState('');
-  const [backupDescription, setBackupDescription] = useState('');
-  const [activeTab, setActiveTab] = useState('list');
+  // Filtrer les sauvegardes
+  const filteredBackups = backups.filter(backup => 
+    backup.description.toLowerCase().includes(backupFilter.toLowerCase()) ||
+    format(parseISO(backup.date), 'dd MMMM yyyy', { locale: fr }).toLowerCase().includes(backupFilter.toLowerCase())
+  ).sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()); // Tri par date, plus récent en premier
   
   const handleCreateBackup = () => {
-    const newBackup: Backup = {
-      id: Date.now().toString(),
-      name: backupName || `Sauvegarde du ${new Date().toLocaleString()}`,
-      date: new Date().toLocaleString(),
-      size: '2.4 MB',
-      description: backupDescription
-    };
-    
-    setBackups([newBackup, ...backups]);
-    setBackupName('');
-    setBackupDescription('');
-    setActiveTab('list');
-    
-    toast.success('Sauvegarde créée avec succès');
+    const backupId = createBackup(newBackupDescription);
+    if (backupId) {
+      setNewBackupDescription('');
+      toast.success("Sauvegarde créée avec succès");
+    }
   };
   
-  const handleRestoreBackup = (backupId: string) => {
-    // Simuler une restauration
-    setTimeout(() => {
-      toast.success('Sauvegarde restaurée avec succès');
-    }, 1500);
+  const confirmDeleteBackup = (id: string) => {
+    setBackupToDelete(id);
   };
   
-  const handleDownloadBackup = (backupId: string) => {
-    // Simuler un téléchargement
-    toast.success('Téléchargement de la sauvegarde démarré');
+  const confirmRestoreBackup = (id: string) => {
+    setBackupToRestore(id);
   };
   
-  const handleDeleteBackup = (backupId: string) => {
-    setBackups(backups.filter(backup => backup.id !== backupId));
-    toast.success('Sauvegarde supprimée');
+  const handleDeleteBackup = () => {
+    if (backupToDelete) {
+      const result = deleteBackup(backupToDelete);
+      if (result) {
+        toast.success("Sauvegarde supprimée avec succès");
+      }
+      setBackupToDelete(null);
+    }
   };
   
-  const handleScheduleBackup = () => {
-    toast.success('Planification de sauvegarde mise à jour');
+  const handleRestoreBackup = () => {
+    if (backupToRestore) {
+      const result = restoreBackup(backupToRestore);
+      if (result) {
+        toast.success("Sauvegarde restaurée avec succès");
+      }
+      setBackupToRestore(null);
+    }
+  };
+  
+  // Formater la date
+  const formatBackupDate = (dateString: string) => {
+    try {
+      const date = parseISO(dateString);
+      return format(date, 'dd MMMM yyyy à HH:mm', { locale: fr });
+    } catch {
+      return dateString;
+    }
   };
 
   return (
@@ -82,160 +79,206 @@ export const DatabaseBackupManager: React.FC = () => {
       <CardHeader>
         <CardTitle className="text-xl">Gestionnaire de sauvegardes</CardTitle>
         <CardDescription>
-          Créez, restaurez et gérez les sauvegardes de la base de données
+          Gérez vos sauvegardes locales de base de données
         </CardDescription>
       </CardHeader>
-      <CardContent>
-        <Tabs value={activeTab} onValueChange={setActiveTab}>
-          <TabsList className="grid w-full grid-cols-3">
-            <TabsTrigger value="list">Sauvegardes</TabsTrigger>
-            <TabsTrigger value="create">Nouvelle sauvegarde</TabsTrigger>
-            <TabsTrigger value="schedule">Planification</TabsTrigger>
-          </TabsList>
+      <CardContent className="space-y-6">
+        <div className="grid md:grid-cols-2 gap-6">
+          {/* Créer une nouvelle sauvegarde */}
+          <Card>
+            <CardHeader className="pb-3">
+              <CardTitle className="text-lg">Nouvelle sauvegarde</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                <div className="grid w-full gap-1.5">
+                  <Label htmlFor="backup-description">Description</Label>
+                  <Input
+                    id="backup-description"
+                    value={newBackupDescription}
+                    onChange={(e) => setNewBackupDescription(e.target.value)}
+                    placeholder="Description de la sauvegarde"
+                  />
+                </div>
+              </div>
+            </CardContent>
+            <CardFooter>
+              <Button 
+                onClick={handleCreateBackup} 
+                className="w-full"
+              >
+                <Save className="mr-2 h-4 w-4" />
+                Créer une sauvegarde
+              </Button>
+            </CardFooter>
+          </Card>
           
-          <TabsContent value="list" className="space-y-4">
-            <div className="rounded-md border">
+          {/* Exporter toutes les données */}
+          <Card>
+            <CardHeader className="pb-3">
+              <CardTitle className="text-lg">Export complet</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p className="text-sm text-muted-foreground mb-4">
+                Exportez l'intégralité des données du jeu dans un fichier JSON.
+                Cette option est utile pour créer des sauvegardes externes.
+              </p>
+            </CardContent>
+            <CardFooter>
+              <Button 
+                variant="outline" 
+                onClick={exportAllTables}
+                className="w-full"
+              >
+                <Download className="mr-2 h-4 w-4" />
+                Exporter toutes les données
+              </Button>
+            </CardFooter>
+          </Card>
+        </div>
+        
+        <Separator />
+        
+        {/* Liste des sauvegardes */}
+        <div>
+          <div className="flex justify-between items-center mb-4">
+            <h3 className="text-lg font-semibold">Sauvegardes ({backups.length})</h3>
+            <div className="relative w-64">
+              <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+              <Input
+                placeholder="Filtrer les sauvegardes..."
+                value={backupFilter}
+                onChange={(e) => setBackupFilter(e.target.value)}
+                className="pl-8"
+              />
+            </div>
+          </div>
+          
+          {filteredBackups.length === 0 ? (
+            <div className="text-center py-8 border rounded-md bg-muted/10">
+              <Clock className="h-10 w-10 text-muted-foreground mx-auto mb-2" />
+              <p className="text-muted-foreground">
+                {backups.length === 0 
+                  ? "Aucune sauvegarde n'existe encore" 
+                  : "Aucune sauvegarde ne correspond au filtre"}
+              </p>
+            </div>
+          ) : (
+            <ScrollArea className="h-[300px]">
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead className="w-[250px]">Nom</TableHead>
                     <TableHead>Date</TableHead>
+                    <TableHead>Description</TableHead>
+                    <TableHead>Tables</TableHead>
                     <TableHead>Taille</TableHead>
                     <TableHead className="text-right">Actions</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {backups.length === 0 ? (
-                    <TableRow>
-                      <TableCell colSpan={4} className="h-24 text-center">
-                        Aucune sauvegarde trouvée
+                  {filteredBackups.map((backup) => (
+                    <TableRow key={backup.id}>
+                      <TableCell className="font-medium">
+                        <div className="flex items-center">
+                          <CalendarDays className="h-4 w-4 mr-2 text-muted-foreground" />
+                          {formatBackupDate(backup.date)}
+                        </div>
+                      </TableCell>
+                      <TableCell>{backup.description}</TableCell>
+                      <TableCell>
+                        <Badge variant="outline">{backup.tables.length}</Badge>
+                      </TableCell>
+                      <TableCell>{backup.size}</TableCell>
+                      <TableCell className="text-right">
+                        <div className="flex justify-end gap-2">
+                          <Button 
+                            variant="ghost" 
+                            size="icon"
+                            onClick={() => confirmRestoreBackup(backup.id)}
+                          >
+                            <RotateCcw className="h-4 w-4" />
+                          </Button>
+                          <Button 
+                            variant="ghost" 
+                            size="icon"
+                            onClick={() => confirmDeleteBackup(backup.id)}
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </div>
                       </TableCell>
                     </TableRow>
-                  ) : (
-                    backups.map((backup) => (
-                      <TableRow key={backup.id}>
-                        <TableCell className="font-medium">
-                          {backup.name}
-                          {backup.description && (
-                            <div className="text-xs text-muted-foreground mt-1">
-                              {backup.description}
-                            </div>
-                          )}
-                        </TableCell>
-                        <TableCell>{backup.date}</TableCell>
-                        <TableCell>{backup.size}</TableCell>
-                        <TableCell className="text-right">
-                          <div className="flex justify-end space-x-2">
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              onClick={() => handleRestoreBackup(backup.id)}
-                            >
-                              <RotateCw className="h-4 w-4" />
-                            </Button>
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              onClick={() => handleDownloadBackup(backup.id)}
-                            >
-                              <Download className="h-4 w-4" />
-                            </Button>
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              onClick={() => handleDeleteBackup(backup.id)}
-                            >
-                              <Trash2 className="h-4 w-4" />
-                            </Button>
-                          </div>
-                        </TableCell>
-                      </TableRow>
-                    ))
-                  )}
+                  ))}
                 </TableBody>
               </Table>
-            </div>
-          </TabsContent>
-          
-          <TabsContent value="create" className="space-y-4">
-            <div className="space-y-4">
-              <div className="grid w-full items-center gap-1.5">
-                <Label htmlFor="backup-name">Nom de la sauvegarde</Label>
-                <Input
-                  id="backup-name"
-                  value={backupName}
-                  onChange={(e) => setBackupName(e.target.value)}
-                  placeholder="Ex: Avant la mise à jour"
-                />
-              </div>
-              
-              <div className="grid w-full items-center gap-1.5">
-                <Label htmlFor="backup-description">Description (optionnelle)</Label>
-                <Input
-                  id="backup-description"
-                  value={backupDescription}
-                  onChange={(e) => setBackupDescription(e.target.value)}
-                  placeholder="Détails sur cette sauvegarde"
-                />
-              </div>
-              
-              <Button onClick={handleCreateBackup} className="w-full">
-                <Save className="mr-2 h-4 w-4" />
-                Créer la sauvegarde
-              </Button>
-            </div>
-          </TabsContent>
-          
-          <TabsContent value="schedule" className="space-y-4">
-            <div className="space-y-4">
-              <div className="p-4 border rounded-md bg-muted/10">
-                <h3 className="font-medium mb-2">Sauvegarde automatique</h3>
-                <p className="text-sm text-muted-foreground mb-4">
-                  Configurez la fréquence des sauvegardes automatiques
-                </p>
-                
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <Label htmlFor="backup-frequency">Fréquence</Label>
-                    <select
-                      id="backup-frequency"
-                      className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
-                    >
-                      <option value="daily">Quotidienne</option>
-                      <option value="weekly">Hebdomadaire</option>
-                      <option value="monthly">Mensuelle</option>
-                    </select>
-                  </div>
-                  
-                  <div>
-                    <Label htmlFor="backup-time">Heure</Label>
-                    <Input
-                      id="backup-time"
-                      type="time"
-                      defaultValue="03:00"
-                    />
-                  </div>
-                </div>
-                
-                <div className="mt-4">
-                  <Label htmlFor="retention-days">Conservation (jours)</Label>
-                  <Input
-                    id="retention-days"
-                    type="number"
-                    defaultValue="30"
-                    min="1"
-                  />
-                </div>
-                
-                <Button onClick={handleScheduleBackup} className="w-full mt-4">
-                  <Clock className="mr-2 h-4 w-4" />
-                  Mettre à jour la planification
-                </Button>
-              </div>
-            </div>
-          </TabsContent>
-        </Tabs>
+            </ScrollArea>
+          )}
+        </div>
+        
+        {/* Boîte de dialogue de confirmation de suppression */}
+        <AlertDialog open={!!backupToDelete} onOpenChange={(open) => !open && setBackupToDelete(null)}>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle className="flex items-center">
+                <AlertTriangle className="h-5 w-5 text-amber-500 mr-2" />
+                Confirmer la suppression
+              </AlertDialogTitle>
+              <AlertDialogDescription>
+                Êtes-vous sûr de vouloir supprimer cette sauvegarde ? 
+                Cette action est irréversible.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>Annuler</AlertDialogCancel>
+              <AlertDialogAction onClick={handleDeleteBackup} className="bg-destructive">
+                Supprimer
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
+        
+        {/* Boîte de dialogue de confirmation de restauration */}
+        <AlertDialog open={!!backupToRestore} onOpenChange={(open) => !open && setBackupToRestore(null)}>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle className="flex items-center">
+                <RotateCcw className="h-5 w-5 text-amber-500 mr-2" />
+                Confirmer la restauration
+              </AlertDialogTitle>
+              <AlertDialogDescription>
+                Êtes-vous sûr de vouloir restaurer cette sauvegarde ? 
+                Les données actuelles seront remplacées.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>Annuler</AlertDialogCancel>
+              <AlertDialogAction onClick={handleRestoreBackup}>
+                Restaurer
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
       </CardContent>
     </Card>
   );
 };
+
+function Search(props: React.SVGProps<SVGSVGElement>) {
+  return (
+    <svg
+      {...props}
+      xmlns="http://www.w3.org/2000/svg"
+      width="24"
+      height="24"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <circle cx="11" cy="11" r="8" />
+      <path d="m21 21-4.3-4.3" />
+    </svg>
+  );
+}

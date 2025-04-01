@@ -1,25 +1,41 @@
 
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { UploadCloud, FileUp, AlertCircle } from 'lucide-react';
+import { UploadCloud, FileUp, AlertCircle, FilePlus2, RefreshCw } from 'lucide-react';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { toast } from 'sonner';
-import { useMaitreJeu } from '../../context';
+import { useDatabaseManager } from './hooks/useDatabaseManager';
+import { Progress } from '@/components/ui/progress';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 export const DatabaseImporter: React.FC = () => {
+  const { importData, tableDetails } = useDatabaseManager();
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  
   const [file, setFile] = useState<File | null>(null);
   const [jsonData, setJsonData] = useState<string>('');
   const [importMethod, setImportMethod] = useState<'file' | 'paste'>('file');
   const [importPreview, setImportPreview] = useState<any>(null);
+  const [selectedTable, setSelectedTable] = useState<string>('');
+  const [isImporting, setIsImporting] = useState(false);
+  const [importProgress, setImportProgress] = useState(0);
+  const [validationErrors, setValidationErrors] = useState<string[]>([]);
   
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const selectedFile = e.target.files?.[0];
     if (selectedFile) {
+      if (selectedFile.type !== 'application/json' && !selectedFile.name.endsWith('.json')) {
+        toast.error("Format de fichier non pris en charge. Veuillez sélectionner un fichier JSON.");
+        return;
+      }
+      
       setFile(selectedFile);
+      setValidationErrors([]);
       
       // Lire le contenu du fichier
       const reader = new FileReader();
@@ -27,10 +43,12 @@ export const DatabaseImporter: React.FC = () => {
         try {
           const content = event.target?.result as string;
           const parsed = JSON.parse(content);
+          validateImportData(parsed);
           setImportPreview(parsed);
         } catch (error) {
-          toast.error("Format de fichier invalide");
           setImportPreview(null);
+          setValidationErrors(["Erreur d'analyse JSON : format invalide"]);
+          toast.error("Format de fichier invalide");
         }
       };
       reader.readAsText(selectedFile);
@@ -39,38 +57,104 @@ export const DatabaseImporter: React.FC = () => {
   
   const handleJsonDataChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     setJsonData(e.target.value);
+    setValidationErrors([]);
     
     try {
       if (e.target.value.trim()) {
         const parsed = JSON.parse(e.target.value);
+        validateImportData(parsed);
         setImportPreview(parsed);
       } else {
         setImportPreview(null);
       }
     } catch (error) {
       setImportPreview(null);
+      setValidationErrors(["Erreur d'analyse JSON : format invalide"]);
     }
   };
   
-  const handleImport = () => {
+  const validateImportData = (data: any) => {
+    const errors: string[] = [];
+    
+    // Validation basique de structure
+    if (!data || typeof data !== 'object') {
+      errors.push('Les données importées doivent être un objet JSON');
+      return;
+    }
+    
+    // Validation de schéma selon la table sélectionnée
+    if (selectedTable && Array.isArray(data)) {
+      // Validations spécifiques selon le type de table
+      switch (selectedTable) {
+        case 'senateurs':
+          if (!data.every(item => 'nom' in item)) {
+            errors.push('Certains enregistrements de sénateurs ne contiennent pas de champ "nom"');
+          }
+          break;
+        case 'familles':
+          if (!data.every(item => 'nom' in item)) {
+            errors.push('Certains enregistrements de familles ne contiennent pas de champ "nom"');
+          }
+          break;
+        case 'provinces':
+          if (!data.every(item => 'nom' in item && 'gouverneur' in item)) {
+            errors.push('Certains enregistrements de provinces sont incomplets');
+          }
+          break;
+        // Ajouter d'autres validations spécifiques au besoin
+      }
+    } else if (selectedTable && !Array.isArray(data)) {
+      errors.push(`Les données pour la table ${selectedTable} doivent être un tableau`);
+    }
+    
+    setValidationErrors(errors);
+  };
+  
+  const simulateImport = async () => {
     if (!importPreview) {
       toast.error("Aucune donnée valide à importer");
       return;
     }
     
+    if (validationErrors.length > 0) {
+      toast.error("Veuillez corriger les erreurs de validation avant d'importer");
+      return;
+    }
+    
+    setIsImporting(true);
+    setImportProgress(0);
+    
     try {
-      // Ici vous pourriez implémenter la logique pour importer les données
-      // dans votre état d'application ou votre base de données
+      // Simulation de progression
+      for (let i = 0; i <= 100; i += 10) {
+        setImportProgress(i);
+        await new Promise(resolve => setTimeout(resolve, 150));
+      }
       
-      // Exemple de traitement des données (simulé)
-      setTimeout(() => {
+      // Appel de la fonction d'import
+      const result = importData(importPreview, selectedTable || undefined);
+      
+      if (result) {
         toast.success("Données importées avec succès");
-        setFile(null);
-        setJsonData('');
-        setImportPreview(null);
-      }, 1000);
+      } else {
+        toast.info("Fonction d'import en développement");
+      }
+      
+      // Réinitialiser le formulaire
+      setFile(null);
+      setJsonData('');
+      setImportPreview(null);
+      if (fileInputRef.current) {
+        fileInputRef.current.value = '';
+      }
+      
     } catch (error) {
-      toast.error("Erreur lors de l'importation");
+      toast.error(`Erreur lors de l'importation: ${error instanceof Error ? error.message : 'Erreur inconnue'}`);
+    } finally {
+      setTimeout(() => {
+        setIsImporting(false);
+        setImportProgress(0);
+      }, 500);
     }
   };
   
@@ -79,9 +163,15 @@ export const DatabaseImporter: React.FC = () => {
     
     const counts: Record<string, number> = {};
     
+    if (Array.isArray(importPreview)) {
+      return { [selectedTable || 'items']: importPreview.length };
+    }
+    
     Object.keys(importPreview).forEach(key => {
       if (Array.isArray(importPreview[key])) {
         counts[key] = importPreview[key].length;
+      } else if (importPreview[key] && typeof importPreview[key] === 'object') {
+        counts[key] = 1;
       }
     });
     
@@ -89,6 +179,16 @@ export const DatabaseImporter: React.FC = () => {
   };
   
   const previewCounts = getPreviewCount();
+  
+  const handleReset = () => {
+    setFile(null);
+    setJsonData('');
+    setImportPreview(null);
+    setValidationErrors([]);
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
+  };
 
   return (
     <Card>
@@ -110,12 +210,30 @@ export const DatabaseImporter: React.FC = () => {
           </TabsList>
           
           <TabsContent value="file" className="space-y-4">
+            <div className="grid w-full gap-1.5">
+              <Label htmlFor="table-select">Table de destination (optionnel)</Label>
+              <Select value={selectedTable} onValueChange={setSelectedTable}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Toutes les tables (import global)" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="">Toutes les tables (import global)</SelectItem>
+                  {Object.keys(tableDetails).map(key => (
+                    <SelectItem key={key} value={key}>
+                      {tableDetails[key].name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            
             <div className="grid w-full max-w-sm items-center gap-1.5">
               <Label htmlFor="file">Sélectionner un fichier JSON</Label>
               <Input
                 id="file"
                 type="file"
                 accept=".json"
+                ref={fileInputRef}
                 onChange={handleFileChange}
               />
             </div>
@@ -129,6 +247,23 @@ export const DatabaseImporter: React.FC = () => {
           
           <TabsContent value="paste" className="space-y-4">
             <div className="grid w-full gap-1.5">
+              <Label htmlFor="table-select-paste">Table de destination (optionnel)</Label>
+              <Select value={selectedTable} onValueChange={setSelectedTable}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Toutes les tables (import global)" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="">Toutes les tables (import global)</SelectItem>
+                  {Object.keys(tableDetails).map(key => (
+                    <SelectItem key={key} value={key}>
+                      {tableDetails[key].name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            
+            <div className="grid w-full gap-1.5">
               <Label htmlFor="json-data">Coller le contenu JSON</Label>
               <textarea
                 id="json-data"
@@ -141,38 +276,74 @@ export const DatabaseImporter: React.FC = () => {
           </TabsContent>
         </Tabs>
         
-        {importPreview && Object.keys(previewCounts).length > 0 && (
-          <div className="mt-6 mb-6">
-            <h3 className="text-sm font-medium mb-2">Aperçu de l'import:</h3>
-            <ul className="space-y-1 text-sm">
-              {Object.entries(previewCounts).map(([key, count]) => (
-                <li key={key} className="flex items-center">
-                  <span className="text-muted-foreground">{key}:</span>
-                  <span className="ml-1 font-medium">{count} éléments</span>
-                </li>
-              ))}
-            </ul>
-          </div>
-        )}
-        
-        {!importPreview && (jsonData.trim() || file) && (
+        {validationErrors.length > 0 && (
           <Alert variant="destructive" className="mt-6">
             <AlertCircle className="h-4 w-4" />
-            <AlertTitle>Format invalide</AlertTitle>
+            <AlertTitle>Erreurs de validation</AlertTitle>
             <AlertDescription>
-              Le format des données n'est pas un JSON valide.
+              <ul className="list-disc pl-5 space-y-1 mt-2">
+                {validationErrors.map((error, index) => (
+                  <li key={index}>{error}</li>
+                ))}
+              </ul>
             </AlertDescription>
           </Alert>
         )}
         
-        <Button 
-          onClick={handleImport} 
-          className="w-full mt-6"
-          disabled={!importPreview}
-        >
-          <UploadCloud className="mr-2 h-4 w-4" />
-          Importer les données
-        </Button>
+        {importPreview && Object.keys(previewCounts).length > 0 && (
+          <div className="mt-6 mb-6">
+            <h3 className="text-sm font-medium mb-2">Aperçu de l'import:</h3>
+            <ScrollArea className="h-[100px] rounded-md border p-4">
+              <ul className="space-y-1">
+                {Object.entries(previewCounts).map(([key, count]) => (
+                  <li key={key} className="flex items-center">
+                    <span className="text-muted-foreground">{key}:</span>
+                    <span className="ml-1 font-medium">{count} éléments</span>
+                  </li>
+                ))}
+              </ul>
+            </ScrollArea>
+          </div>
+        )}
+        
+        {!importPreview && (jsonData.trim() || file) && !validationErrors.length && (
+          <Alert className="mt-6">
+            <FilePlus2 className="h-4 w-4" />
+            <AlertTitle>Aucun aperçu disponible</AlertTitle>
+            <AlertDescription>
+              Les données importées n'ont pas pu être analysées ou sont vides.
+            </AlertDescription>
+          </Alert>
+        )}
+        
+        {isImporting && (
+          <div className="mt-6 mb-6">
+            <Label className="text-sm text-muted-foreground mb-2 block">
+              Importation en cours... {importProgress}%
+            </Label>
+            <Progress value={importProgress} className="h-2" />
+          </div>
+        )}
+        
+        <div className="flex space-x-2 mt-6">
+          <Button 
+            variant="outline"
+            onClick={handleReset}
+            className="flex-1"
+          >
+            <RefreshCw className="mr-2 h-4 w-4" />
+            Réinitialiser
+          </Button>
+          
+          <Button 
+            onClick={simulateImport} 
+            className="flex-1"
+            disabled={!importPreview || isImporting || validationErrors.length > 0}
+          >
+            <UploadCloud className="mr-2 h-4 w-4" />
+            Importer les données
+          </Button>
+        </div>
       </CardContent>
     </Card>
   );

@@ -9,20 +9,13 @@ import { DatabaseExporter } from './components/database/DatabaseExporter';
 import { DatabaseImporter } from './components/database/DatabaseImporter';
 import { DatabaseBackupManager } from './components/database/DatabaseBackupManager';
 import { useMaitreJeu } from './context';
-import { Database } from 'lucide-react';
+import { Database, AlertTriangle } from 'lucide-react';
+import { useDatabaseManager } from './components/database/hooks/useDatabaseManager';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 
 export const GestionDatabase = () => {
   const [activeTab, setActiveTab] = useState('overview');
-  const { familles, senateurs, provinces, lois } = useMaitreJeu();
-
-  // Statistiques de la base de données
-  const dbStats = {
-    totalTables: 14, // Nombre de tables dans la base de données
-    totalRecords: familles.length + senateurs.length + provinces.length + lois.length + 42, // Estimation du nombre total d'enregistrements
-    lastUpdated: new Date().toISOString(),
-    databaseSize: '4.8 MB', // Taille estimée
-    backups: [] // Liste des sauvegardes
-  };
+  const { stats } = useDatabaseManager();
   
   return (
     <div className="p-6 space-y-6">
@@ -31,7 +24,18 @@ export const GestionDatabase = () => {
         subtitle="Gérez, exportez et importez les données du jeu"
       />
       
-      <DatabaseStats stats={dbStats} />
+      <DatabaseStats stats={stats} />
+      
+      {stats.backups.length === 0 && (
+        <Alert variant="warning" className="mb-6">
+          <AlertTriangle className="h-4 w-4" />
+          <AlertTitle>Aucune sauvegarde trouvée</AlertTitle>
+          <AlertDescription>
+            Il est recommandé de créer régulièrement des sauvegardes de vos données.
+            Accédez à l'onglet "Sauvegardes" pour créer votre première sauvegarde.
+          </AlertDescription>
+        </Alert>
+      )}
       
       <Tabs value={activeTab} onValueChange={setActiveTab} className="mt-6">
         <TabsList className="grid grid-cols-5 max-w-3xl mx-auto">

@@ -1,141 +1,143 @@
 
 import React, { useState } from 'react';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { ChevronLeft, Copy, Check, Download, Eye, EyeOff } from 'lucide-react';
+import { ChevronsRight, Copy, Check } from 'lucide-react';
 import { toast } from 'sonner';
-import { motion } from 'framer-motion';
 
 interface JsonViewProps {
   data: any;
-  onClose: () => void;
+  onClose?: () => void;
 }
 
 export const JsonView: React.FC<JsonViewProps> = ({ data, onClose }) => {
   const [copied, setCopied] = useState(false);
-  const [expanded, setExpanded] = useState(false);
-  
-  const jsonString = JSON.stringify(data, null, 2);
+  const [expandAll, setExpandAll] = useState(false);
   
   const handleCopy = () => {
-    navigator.clipboard.writeText(jsonString);
+    navigator.clipboard.writeText(JSON.stringify(data, null, 2));
     setCopied(true);
-    toast.success('Copié dans le presse-papiers');
+    toast.success('Copié dans le presse-papier');
     
-    setTimeout(() => {
-      setCopied(false);
-    }, 2000);
+    setTimeout(() => setCopied(false), 2000);
   };
   
-  const handleDownload = () => {
-    const blob = new Blob([jsonString], { type: 'application/json' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `record-${data.id || 'export'}.json`;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
-    toast.success('Fichier JSON téléchargé');
-  };
-  
-  const toggleExpanded = () => {
-    setExpanded(!expanded);
+  // Formater proprement le JSON avec indentation et coloration syntaxique
+  const formatJson = (obj: any): JSX.Element => {
+    return (
+      <div className="json-formatter overflow-auto">
+        <pre className="text-sm p-2">
+          {renderJsonNode(obj, 0, expandAll)}
+        </pre>
+      </div>
+    );
   };
   
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.3 }}
-    >
-      <Card className="border shadow-sm">
-        <CardHeader className="pb-3">
-          <div className="flex items-center justify-between">
-            <div>
-              <CardTitle>Détails de l'enregistrement</CardTitle>
-              <CardDescription>
-                ID: {data.id || 'Non disponible'}
-              </CardDescription>
-            </div>
-            <div className="flex gap-2">
-              <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={handleCopy}
-                >
-                  {copied ? (
-                    <>
-                      <Check className="mr-2 h-4 w-4" />
-                      Copié
-                    </>
-                  ) : (
-                    <>
-                      <Copy className="mr-2 h-4 w-4" />
-                      Copier JSON
-                    </>
-                  )}
-                </Button>
-              </motion.div>
-              
-              <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={handleDownload}
-                >
-                  <Download className="mr-2 h-4 w-4" />
-                  Télécharger
-                </Button>
-              </motion.div>
-              
-              <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={onClose}
-                >
-                  <ChevronLeft className="mr-2 h-4 w-4" />
-                  Retour
-                </Button>
-              </motion.div>
-            </div>
-          </div>
-        </CardHeader>
-        <CardContent>
-          <div className="flex justify-end mb-2">
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={toggleExpanded}
-              className="text-xs"
-            >
-              {expanded ? (
-                <>
-                  <EyeOff className="h-3 w-3 mr-1" />
-                  Réduire
-                </>
-              ) : (
-                <>
-                  <Eye className="h-3 w-3 mr-1" />
-                  Tout afficher
-                </>
-              )}
-            </Button>
-          </div>
-          <motion.pre 
-            className="bg-gray-50 dark:bg-gray-900 p-4 rounded-md overflow-auto text-sm"
-            style={{ maxHeight: expanded ? 'none' : '60vh' }}
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ duration: 0.3, delay: 0.1 }}
+    <div className="border rounded-md bg-muted/10">
+      <div className="flex justify-between items-center p-2 border-b">
+        <div className="flex items-center gap-2">
+          <Button 
+            variant="ghost" 
+            size="sm" 
+            onClick={() => setExpandAll(!expandAll)}
           >
-            <code>{jsonString}</code>
-          </motion.pre>
-        </CardContent>
-      </Card>
-    </motion.div>
+            <ChevronsRight className="h-4 w-4 mr-1" />
+            {expandAll ? 'Réduire tout' : 'Développer tout'}
+          </Button>
+        </div>
+        
+        <Button 
+          variant="ghost" 
+          size="sm"
+          onClick={handleCopy}
+          disabled={copied}
+        >
+          {copied ? (
+            <>
+              <Check className="h-4 w-4 mr-1 text-green-500" />
+              Copié
+            </>
+          ) : (
+            <>
+              <Copy className="h-4 w-4 mr-1" />
+              Copier
+            </>
+          )}
+        </Button>
+      </div>
+      
+      <div className="p-2 max-h-[400px] overflow-auto">
+        {formatJson(data)}
+      </div>
+    </div>
   );
 };
+
+// Rendu récursif des nœuds JSON avec coloration
+function renderJsonNode(value: any, level: number, expanded: boolean): JSX.Element | string {
+  if (value === null) {
+    return <span className="text-red-500">null</span>;
+  }
+
+  if (typeof value === 'boolean') {
+    return <span className="text-orange-500">{value ? 'true' : 'false'}</span>;
+  }
+
+  if (typeof value === 'number') {
+    return <span className="text-blue-500">{value}</span>;
+  }
+
+  if (typeof value === 'string') {
+    return <span className="text-green-500">"{value}"</span>;
+  }
+
+  if (Array.isArray(value)) {
+    if (value.length === 0) {
+      return <span>[]</span>;
+    }
+    
+    const indent = '  '.repeat(level);
+    const childIndent = '  '.repeat(level + 1);
+    
+    return (
+      <span>
+        [<br />
+        {value.map((item, index) => (
+          <span key={index}>
+            {childIndent}
+            {renderJsonNode(item, level + 1, expanded)}
+            {index < value.length - 1 ? ',' : ''}<br />
+          </span>
+        ))}
+        {indent}]
+      </span>
+    );
+  }
+
+  if (typeof value === 'object') {
+    const keys = Object.keys(value);
+    
+    if (keys.length === 0) {
+      return <span>{'{}'}</span>;
+    }
+    
+    const indent = '  '.repeat(level);
+    const childIndent = '  '.repeat(level + 1);
+    
+    return (
+      <span>
+        {'{'}<br />
+        {keys.map((key, index) => (
+          <span key={key}>
+            {childIndent}
+            <span className="text-purple-500">"{key}"</span>: {renderJsonNode(value[key], level + 1, expanded)}
+            {index < keys.length - 1 ? ',' : ''}<br />
+          </span>
+        ))}
+        {indent}{'}'}
+      </span>
+    );
+  }
+
+  return String(value);
+}
