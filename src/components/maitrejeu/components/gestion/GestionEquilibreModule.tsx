@@ -26,9 +26,9 @@ export const GestionEquilibreModule = () => {
   });
   
   const [politicalValues, setPoliticalValues] = useState({
-    popularesInfluence: equilibre?.factions?.populares || 33,
-    optimatesInfluence: equilibre?.factions?.optimates || 33,
-    moderatesInfluence: equilibre?.factions?.moderates || 34,
+    popularesInfluence: equilibre?.politique?.populaires || 33,
+    optimatesInfluence: equilibre?.politique?.optimates || 33,
+    moderatesInfluence: equilibre?.politique?.moderates || 34,
     senateAuthority: equilibre?.stabilite?.senat || 50,
     plebeianTribunes: equilibre?.stabilite?.tribuns || 50,
     lawsRespect: equilibre?.stabilite?.lois || 50
@@ -58,9 +58,9 @@ export const GestionEquilibreModule = () => {
       });
       
       setPoliticalValues({
-        popularesInfluence: equilibre.factions?.populares || 33,
-        optimatesInfluence: equilibre.factions?.optimates || 33,
-        moderatesInfluence: equilibre.factions?.moderates || 34,
+        popularesInfluence: equilibre.politique?.populaires || 33,
+        optimatesInfluence: equilibre.politique?.optimates || 33,
+        moderatesInfluence: equilibre.politique?.moderates || 34,
         senateAuthority: equilibre.stabilite?.senat || 50,
         plebeianTribunes: equilibre.stabilite?.tribuns || 50,
         lawsRespect: equilibre.stabilite?.lois || 50
@@ -125,8 +125,8 @@ export const GestionEquilibreModule = () => {
         esclaves: socialValues.slaves,
         cohesion: socialValues.cohesion
       },
-      factions: {
-        populares: politicalValues.popularesInfluence,
+      politique: {
+        populaires: politicalValues.popularesInfluence,
         optimates: politicalValues.optimatesInfluence,
         moderates: politicalValues.moderatesInfluence
       },
@@ -248,10 +248,10 @@ export const GestionEquilibreModule = () => {
             plebeiens: Math.min(100, (updatedEquilibre.social?.plebeiens || 50) + calculatedIntensity),
             cohesion: Math.min(100, (updatedEquilibre.social?.cohesion || 50) + calculatedIntensity / 2)
           },
-          factions: {
-            ...updatedEquilibre.factions,
-            populares: Math.min(100, (updatedEquilibre.factions?.populares || 33) + calculatedIntensity / 2),
-            optimates: Math.max(0, (updatedEquilibre.factions?.optimates || 33) - calculatedIntensity / 3)
+          politique: {
+            ...updatedEquilibre.politique,
+            populaires: Math.min(100, (updatedEquilibre.politique?.populaires || 33) + calculatedIntensity / 2),
+            optimates: Math.max(0, (updatedEquilibre.politique?.optimates || 33) - calculatedIntensity / 3)
           },
           risques: [
             ...(updatedEquilibre.risques || []),
@@ -275,10 +275,10 @@ export const GestionEquilibreModule = () => {
             patriciens: Math.min(100, (updatedEquilibre.social?.patriciens || 50) + calculatedIntensity),
             plebeiens: Math.max(0, (updatedEquilibre.social?.plebeiens || 50) - calculatedIntensity / 2)
           },
-          factions: {
-            ...updatedEquilibre.factions,
-            optimates: Math.min(100, (updatedEquilibre.factions?.optimates || 33) + calculatedIntensity / 2),
-            populares: Math.max(0, (updatedEquilibre.factions?.populares || 33) - calculatedIntensity / 3)
+          politique: {
+            ...updatedEquilibre.politique,
+            optimates: Math.min(100, (updatedEquilibre.politique?.optimates || 33) + calculatedIntensity / 2),
+            populaires: Math.max(0, (updatedEquilibre.politique?.populaires || 33) - calculatedIntensity / 3)
           },
           religion: {
             ...updatedEquilibre.religion,
@@ -301,9 +301,9 @@ export const GestionEquilibreModule = () => {
       case 'political_concessions':
         updatedEquilibre = {
           ...updatedEquilibre,
-          factions: {
-            ...updatedEquilibre.factions,
-            moderates: Math.min(100, (updatedEquilibre.factions?.moderates || 34) + calculatedIntensity / 2)
+          politique: {
+            ...updatedEquilibre.politique,
+            moderates: Math.min(100, (updatedEquilibre.politique?.moderates || 34) + calculatedIntensity / 2)
           },
           stabilite: {
             ...updatedEquilibre.stabilite,
@@ -326,7 +326,7 @@ export const GestionEquilibreModule = () => {
         
       case 'neutral_balance':
         // Ajuster légèrement tous les équilibres vers le centre (50)
-        const adjustTowardsMiddle = (value: number) => {
+        const adjustTowardsMiddle = (value: number | undefined) => {
           if (!value && value !== 0) return 50;
           return value > 50 ? Math.max(50, value - calculatedIntensity / 3) : Math.min(50, value + calculatedIntensity / 3);
         };
@@ -345,8 +345,8 @@ export const GestionEquilibreModule = () => {
             esclaves: adjustTowardsMiddle(updatedEquilibre.social?.esclaves || 30),
             cohesion: adjustTowardsMiddle(updatedEquilibre.social?.cohesion || 50)
           },
-          factions: {
-            populares: 33 + (calculatedIntensity / 10),
+          politique: {
+            populaires: 33 + (calculatedIntensity / 10),
             optimates: 33 + (calculatedIntensity / 10),
             moderates: 34 - (calculatedIntensity / 5)
           }
