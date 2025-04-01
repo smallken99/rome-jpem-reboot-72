@@ -131,6 +131,19 @@ export const PoliticalStability: React.FC<PoliticalStabilityProps> = ({ values, 
             </p>
           </div>
         </div>
+        
+        <hr className="my-4" />
+        
+        <div className="rounded-md bg-blue-50 p-4 border border-blue-200">
+          <h4 className="text-sm font-medium text-blue-800 mb-2">Stabilité politique</h4>
+          <p className="text-sm text-blue-700">
+            {values.senateAuthority > 70 && values.lawsRespect > 70 
+              ? "La République est stable. Le Sénat est respecté et les institutions fonctionnent normalement."
+              : values.senateAuthority < 30 || values.lawsRespect < 30
+                ? "Instabilité politique majeure. Les institutions sont contestées et les tensions sont fortes."
+                : "Situation politique modérément stable, mais des tensions persistent."}
+          </p>
+        </div>
       </CardContent>
     </Card>
   );

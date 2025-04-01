@@ -21,6 +21,7 @@ export interface Building {
   description: string;
   status: BuildingStatus;
   constructionYear: number;
+  cost: number; // Make this required
   workers?: number;
   maxWorkers?: number;
   securityLevel?: number;
@@ -30,7 +31,6 @@ export interface Building {
   purchaseDate?: Date;
   revenue?: number;
   // Propriétés additionnelles pour compatibilité
-  cost?: number;
   capacity?: number;
   owner?: string;
   buildingType?: string;
@@ -116,9 +116,9 @@ export interface BuildingCreationData {
   condition: number;
   description: string;
   constructionYear: number;
+  cost: number; // Make this required
   status?: BuildingStatus;
   workers?: number;
-  cost?: number;
   capacity?: number;
   owner?: string;
   revenue?: number;

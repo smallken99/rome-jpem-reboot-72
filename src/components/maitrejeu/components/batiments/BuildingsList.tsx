@@ -1,167 +1,103 @@
 
-import React, { useState } from 'react';
-import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from '@/components/ui/table';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import React, { useState, useEffect } from 'react';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
-import { Building, BuildingType, BuildingStatus } from '../../types/batiments';
+import { Input } from '@/components/ui/input';
+import { Eye, Edit, Search, Filter } from 'lucide-react';
+import { 
+  Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle 
+} from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Edit, Trash, Construction, Info } from 'lucide-react';
-import { useMaitreJeu } from '../../context';
-import { Card, CardContent } from '@/components/ui/card';
+import { useBatimentsManagement } from '../../hooks/useBatimentsManagement';
+import { Building, BuildingType } from '../../types/batiments';
 
 interface BuildingsListProps {
-  onEdit: (id: string) => void;
+  onEdit: (buildingId: string) => void;
 }
 
 const BuildingsList: React.FC<BuildingsListProps> = ({ onEdit }) => {
-  const { buildings = [] } = useMaitreJeu();
-  const [searchTerm, setSearchTerm] = useState('');
-  const [statusFilter, setStatusFilter] = useState<BuildingStatus | 'all'>('all');
-  const [typeFilter, setTypeFilter] = useState<string>('all');
+  const { buildings, filter, handleFilterChange } = useBatimentsManagement();
+  const [searchTerm, setSearchTerm] = useState("");
   
-  // Status mapping for display and filtering
-  const statusMap: Record<string, BuildingStatus> = {
-    'excellent': 'excellent',
-    'good': 'good',
-    'fair': 'fair',
-    'poor': 'poor',
-    'average': 'fair', // Map 'average' to 'fair'
-    'damaged': 'poor', // Map 'damaged' to 'poor'
-    'ruins': 'ruins',
-    'ruined': 'ruins', // Map 'ruined' to 'ruins'
-    'under_construction': 'construction', // Map 'under_construction' to 'construction'
-    'construction': 'construction',
-    'renovation': 'renovation'
+  const handleSearch = () => {
+    handleFilterChange({ searchTerm });
   };
   
-  // Filter buildings based on search term and filters
-  const filteredBuildings = buildings.filter(building => {
-    // Check if building matches the search term
-    const matchesSearch = building.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         building.location.toLowerCase().includes(searchTerm.toLowerCase());
-    
-    // Check if building matches the status filter
-    const matchesStatus = statusFilter === 'all' || 
-                         (building.status && statusMap[building.status] === statusFilter);
-    
-    // Check if building matches the type filter
-    const matchesType = typeFilter === 'all' || building.type === typeFilter;
-    
-    return matchesSearch && matchesStatus && matchesType;
-  });
+  const clearFilters = () => {
+    setSearchTerm("");
+    handleFilterChange({ 
+      searchTerm: "", 
+      types: [], 
+      locations: [], 
+      status: "", 
+      minRevenue: 0, 
+      maxMaintenance: 0 
+    });
+  };
   
-  // Building types for the filter dropdown
-  const buildingTypes = ['temple', 'forum', 'market', 'villa', 'domus', 'insula', 
-                        'warehouse', 'baths', 'theater', 'port', 'aqueduct', 'road', 
-                        'bridge', 'military', 'other', 'wall'];
-  
-  // Get status badge color
-  const getStatusColor = (status: BuildingStatus | string | undefined): string => {
-    const mappedStatus = status ? (statusMap[status] || status) : 'fair';
-    
-    switch (mappedStatus) {
-      case 'excellent': return 'bg-green-500';
-      case 'good': return 'bg-emerald-400';
-      case 'fair': return 'bg-blue-400';
-      case 'poor': return 'bg-amber-400';
-      case 'ruins': return 'bg-red-500';
-      case 'construction': return 'bg-purple-400';
-      case 'renovation': return 'bg-indigo-400';
-      default: return 'bg-gray-400';
+  // Helper function to get badge color based on status
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case 'excellent':
+        return 'bg-green-500';
+      case 'good':
+        return 'bg-green-300';
+      case 'fair':
+        return 'bg-yellow-300';
+      case 'poor':
+        return 'bg-yellow-600';
+      case 'ruins':
+        return 'bg-red-500';
+      case 'construction':
+      case 'under_construction':
+        return 'bg-blue-500';
+      case 'renovation':
+        return 'bg-purple-500';
+      default:
+        return 'bg-gray-500';
     }
   };
   
-  // Get icon for building type
-  const getBuildingTypeIcon: Record<BuildingType, string> = {
-    'temple': '🏛️',
-    'forum': '🏢',
-    'market': '🏪',
-    'villa': '🏡',
-    'domus': '🏠',
-    'insula': '🏘️',
-    'warehouse': '🏭',
-    'baths': '🧖‍♀️',
-    'theater': '🎭',
-    'amphitheater': '🏟️',
-    'senate': '🏛️',
-    'basilica': '⚖️',
-    'market': '🛒',
-    'warehouse': '📦',
-    'workshop': '🔨',
-    'port': '⚓',
-    'aqueduct': '🌊',
-    'road': '🛣️',
-    'bridge': '🌉',
-    'military': '⚔️',
-    'other': '❓',
-    'wall': '🧱'
+  // Helper function to format currency
+  const formatCurrency = (amount: number) => {
+    return `${amount.toLocaleString()} As`;
   };
   
   return (
-    <div className="space-y-4">
-      {/* Filtres et recherche */}
-      <Card>
-        <CardContent className="pt-4 pb-3">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
-            <div>
-              <Label htmlFor="searchTerm">Recherche</Label>
-              <Input
-                id="searchTerm"
-                placeholder="Nom ou emplacement..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-              />
-            </div>
-            
-            <div>
-              <Label htmlFor="statusFilter">État</Label>
-              <Select 
-                value={statusFilter} 
-                onValueChange={(value) => setStatusFilter(value as BuildingStatus | 'all')}
-              >
-                <SelectTrigger id="statusFilter">
-                  <SelectValue placeholder="Tous les états" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">Tous les états</SelectItem>
-                  <SelectItem value="excellent">Excellent</SelectItem>
-                  <SelectItem value="good">Bon</SelectItem>
-                  <SelectItem value="fair">Correct</SelectItem>
-                  <SelectItem value="poor">Médiocre</SelectItem>
-                  <SelectItem value="ruins">En ruine</SelectItem>
-                  <SelectItem value="construction">En construction</SelectItem>
-                  <SelectItem value="renovation">En rénovation</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-            
-            <div>
-              <Label htmlFor="typeFilter">Type</Label>
-              <Select 
-                value={typeFilter} 
-                onValueChange={setTypeFilter}
-              >
-                <SelectTrigger id="typeFilter">
-                  <SelectValue placeholder="Tous les types" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">Tous les types</SelectItem>
-                  {buildingTypes.map(type => (
-                    <SelectItem key={type} value={type}>
-                      {type.charAt(0).toUpperCase() + type.slice(1)}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
+    <Card>
+      <CardHeader className="pb-3">
+        <CardTitle>Liste des Bâtiments Publics</CardTitle>
+        <CardDescription>
+          Gérez les bâtiments et infrastructures publiques de Rome
+        </CardDescription>
+        
+        <div className="flex items-center space-x-2 mt-4">
+          <div className="relative flex-1">
+            <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+            <Input
+              type="search"
+              placeholder="Rechercher un bâtiment..."
+              className="pl-8"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
+            />
           </div>
-        </CardContent>
-      </Card>
+          <Button variant="outline" size="icon" onClick={handleSearch}>
+            <Search className="h-4 w-4" />
+          </Button>
+          <Button variant="outline" size="icon" onClick={() => {}}>
+            <Filter className="h-4 w-4" />
+          </Button>
+          {filter.searchTerm && (
+            <Button variant="ghost" size="sm" onClick={clearFilters}>
+              Effacer les filtres
+            </Button>
+          )}
+        </div>
+      </CardHeader>
       
-      {/* Liste des bâtiments */}
-      <div className="rounded-md border">
+      <CardContent>
         <Table>
           <TableHeader>
             <TableRow>
@@ -171,53 +107,67 @@ const BuildingsList: React.FC<BuildingsListProps> = ({ onEdit }) => {
               <TableHead>État</TableHead>
               <TableHead>Valeur</TableHead>
               <TableHead>Maintenance</TableHead>
-              <TableHead className="text-right">Actions</TableHead>
+              <TableHead>Revenus</TableHead>
+              <TableHead>Actions</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
-            {filteredBuildings.length === 0 ? (
+            {buildings.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={7} className="text-center">
+                <TableCell colSpan={8} className="text-center py-4 text-muted-foreground">
                   Aucun bâtiment trouvé
                 </TableCell>
               </TableRow>
             ) : (
-              filteredBuildings.map((building) => (
+              buildings.map((building) => (
                 <TableRow key={building.id}>
                   <TableCell className="font-medium">{building.name}</TableCell>
-                  <TableCell>
-                    {getBuildingTypeIcon[building.type as BuildingType]} {building.type.charAt(0).toUpperCase() + building.type.slice(1)}
-                  </TableCell>
+                  <TableCell>{building.type}</TableCell>
                   <TableCell>{building.location}</TableCell>
                   <TableCell>
-                    <Badge className={`${getStatusColor(building.status)}`}>
-                      {building.status || 'Inconnu'}
+                    <Badge className={getStatusColor(building.status)}>
+                      {building.status}
                     </Badge>
                   </TableCell>
-                  <TableCell>{building.value.toLocaleString()} As</TableCell>
-                  <TableCell>{building.maintenanceCost.toLocaleString()} As/an</TableCell>
-                  <TableCell className="text-right space-x-2">
-                    <Button 
-                      variant="ghost" 
-                      size="icon"
-                      onClick={() => onEdit(building.id)}
-                    >
-                      <Edit className="h-4 w-4" />
-                    </Button>
-                    <Button 
-                      variant="ghost" 
-                      size="icon"
-                    >
-                      <Info className="h-4 w-4" />
-                    </Button>
+                  <TableCell>{formatCurrency(building.value)}</TableCell>
+                  <TableCell>{formatCurrency(building.maintenanceCost)}</TableCell>
+                  <TableCell>{formatCurrency(building.income || 0)}</TableCell>
+                  <TableCell>
+                    <div className="flex space-x-2">
+                      <Button 
+                        variant="ghost" 
+                        size="icon"
+                        className="h-8 w-8 p-0"
+                        onClick={() => {}}
+                      >
+                        <Eye className="h-4 w-4" />
+                      </Button>
+                      <Button 
+                        variant="ghost" 
+                        size="icon"
+                        className="h-8 w-8 p-0"
+                        onClick={() => onEdit(building.id)}
+                      >
+                        <Edit className="h-4 w-4" />
+                      </Button>
+                    </div>
                   </TableCell>
                 </TableRow>
               ))
             )}
           </TableBody>
         </Table>
-      </div>
-    </div>
+      </CardContent>
+      
+      <CardFooter className="justify-between">
+        <div className="text-sm text-muted-foreground">
+          {buildings.length} bâtiments au total
+        </div>
+        <div className="text-sm text-muted-foreground">
+          Valeur totale: {formatCurrency(buildings.reduce((sum, b) => sum + b.value, 0))}
+        </div>
+      </CardFooter>
+    </Card>
   );
 };
 

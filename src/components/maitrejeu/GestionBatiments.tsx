@@ -42,11 +42,12 @@ export const GestionBatiments = () => {
       condition: 100,
       status: "good" as BuildingStatus,
       description: "Description du bâtiment",
-      constructionYear: currentYear - 5 // Set a default construction year
+      constructionYear: currentYear - 5, // Set a default construction year
+      cost: 75000 // Add required cost property
     };
     
-    // Set the selected building directly
-    setSelectedBuilding(exampleBuilding);
+    // Use a function to set the selected building to avoid the type error
+    setSelectedBuilding(() => exampleBuilding);
   };
 
   const handleSaveBuilding = (data: BuildingCreationData) => {
@@ -58,7 +59,10 @@ export const GestionBatiments = () => {
         maintenance: data.maintenanceCost || 0,
         status: data.status || 'good' as BuildingStatus,
         description: data.description || "",
-        constructionYear: data.constructionYear || currentYear
+        constructionYear: data.constructionYear || currentYear,
+        cost: data.cost || 0, // Provide a default value for cost
+        value: data.value || 0,
+        condition: data.condition || 100
       });
     } else {
       // Add new building with all required properties
@@ -70,7 +74,8 @@ export const GestionBatiments = () => {
         description: data.description || "",
         constructionYear: data.constructionYear || currentYear,
         value: data.value || 0,
-        condition: data.condition || 100
+        condition: data.condition || 100,
+        cost: data.cost || 0 // Provide a default value for cost
       };
       
       addBuilding(completeData);

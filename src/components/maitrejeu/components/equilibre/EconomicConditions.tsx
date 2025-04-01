@@ -102,7 +102,6 @@ export const EconomicConditions: React.FC<EconomicConditionsProps> = ({ values, 
                 : "L'économie romaine est stable mais présente des fragilités. Les revenus publics sont suffisants pour couvrir les dépenses courantes."}
           </p>
         </div>
-        
       </CardContent>
     </Card>
   );
