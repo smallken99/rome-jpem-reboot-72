@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useMemo } from 'react';
 import { useMaitreJeu } from '@/components/maitrejeu/context';
 import { 
@@ -10,7 +9,7 @@ import {
   TreasuryStatus,
   ECONOMIE_TYPES
 } from '@/components/maitrejeu/types/economie';
-import { GameDate, stringToGameDate } from '@/components/maitrejeu/types/common';
+import { GameDate, parseStringToGameDate } from '@/components/maitrejeu/types/common';
 import { toast } from 'sonner';
 
 const DEFAULT_FILTER: EconomieFilter = {
@@ -27,7 +26,7 @@ const DEFAULT_SORT: EconomieSort = {
 const parseGameDate = (date: GameDate | Date | string): GameDate | Date => {
   if (typeof date === 'string') {
     try {
-      return stringToGameDate(date);
+      return parseStringToGameDate(date);
     } catch (e) {
       return new Date(date);
     }

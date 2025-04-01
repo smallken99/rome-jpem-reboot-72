@@ -1,12 +1,10 @@
-
 import React from 'react';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import { formatCurrency } from '@/utils/formatters';
+import { dateToGameDate } from '@/components/maitrejeu/types/common';
+import { PropertyTransaction } from '../types/property';
 import { Badge } from '@/components/ui/badge';
 import { Eye, Plus } from 'lucide-react';
-import { Transaction, TransactionsListProps } from './types';
-import { dateToGameDate } from '@/components/maitrejeu/types/common';
 
 const getTransactionTypeColor = (type: string) => {
   switch (type) {
@@ -42,7 +40,7 @@ const TransactionsList: React.FC<TransactionsListProps> = ({
   filters
 }) => {
   // Example transactions for demo
-  const [transactions, setTransactions] = React.useState<Transaction[]>([
+  const [transactions, setTransactions] = React.useState<PropertyTransaction[]>([
     {
       id: '1',
       resourceId: '1',
