@@ -52,12 +52,12 @@ export interface Slave {
 
 // Define SlaveAssignment interface
 export interface SlaveAssignment {
+  id?: string;  // Make id optional to handle different usages
   propertyId: string;
   slaveId: string;
-  buildingId: string;
+  buildingId?: string;  // Make buildingId optional
   startDate: Date;
   efficiency: number;
-  id?: string;
   buildingName?: string;
   count?: number;
   maxCount?: number;
@@ -95,6 +95,7 @@ export interface PropertyUpgrade {
     maintenanceReduction?: number;
   };
   installed: boolean;
+  applied?: boolean;  // Add for compatibility
   buildingTypes: string[];
   requirements?: {
     minWorkers?: number;
@@ -111,7 +112,6 @@ export interface PropertyUpgrade {
     value?: number;
     upgrades?: string[];
   };
-  applied?: boolean;
   type?: string;
   buildingType?: string[];
 }

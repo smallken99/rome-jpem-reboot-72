@@ -31,7 +31,7 @@ export interface Building {
   upgrades?: any[];
   income?: number;
   purchaseDate?: Date;
-  owner?: BuildingOwner;  // Making owner optional but with correct type
+  owner?: BuildingOwner;  // Make owner optional
 }
 
 export interface MaintenanceTask {

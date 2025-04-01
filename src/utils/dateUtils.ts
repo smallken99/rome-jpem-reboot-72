@@ -1,15 +1,8 @@
 
-/**
- * Date utilities for handling different date formats in the application
- */
-
-import { format, parseISO, isValid } from 'date-fns';
+import { format, parse, isValid, parseISO } from 'date-fns';
 import { fr } from 'date-fns/locale';
 
-export type Season = 'SPRING' | 'SUMMER' | 'AUTUMN' | 'WINTER' | 
-                    'Ver' | 'Aes' | 'Aut' | 'Hie' |
-                    'Spring' | 'Summer' | 'Autumn' | 'Winter' |
-                    'spring' | 'summer' | 'autumn' | 'winter' | 'fall';
+export type Season = 'Spring' | 'Summer' | 'Fall' | 'Winter';
 
 export interface GameDate {
   year: number;
@@ -17,156 +10,128 @@ export interface GameDate {
 }
 
 /**
- * Format a date for display
+ * Formats a date to a localized string
  */
-export const formatDate = (date: Date | string | GameDate | undefined, formatStr: string = 'PP'): string => {
+export function formatDate(date: Date | string | number | GameDate): string {
   if (!date) return '';
   
-  // Handle GameDate
+  // Handle GameDate object
   if (typeof date === 'object' && 'year' in date && 'season' in date) {
-    return `${date.year} ${formatSeason(date.season)}`;
+    return `${date.season} ${date.year} AUC`;
   }
   
-  // Handle string dates
+  // Handle string that might be ISO
   if (typeof date === 'string') {
     try {
       const parsedDate = parseISO(date);
       if (isValid(parsedDate)) {
-        return format(parsedDate, formatStr, { locale: fr });
+        return format(parsedDate, 'dd MMMM yyyy', { locale: fr });
       }
-    } catch (error) {
-      console.error('Error parsing date string:', error);
+    } catch (e) {
+      console.error('Error parsing date string:', e);
     }
-    return date;
   }
   
-  // Handle Date objects
+  // Handle regular Date objects
   try {
-    return format(date, formatStr, { locale: fr });
-  } catch (error) {
-    console.error('Error formatting date:', error);
-    return String(date);
+    const dateObj = new Date(date);
+    if (isValid(dateObj)) {
+      return format(dateObj, 'dd MMMM yyyy', { locale: fr });
+    }
+  } catch (e) {
+    console.error('Error formatting date:', e);
   }
-};
+  
+  return String(date);
+}
 
 /**
- * Format a season name consistently
+ * Formats a GameDate to a string
  */
-export const formatSeason = (season: Season): string => {
-  const seasonFormatMap: Record<Season, string> = {
-    'SPRING': 'Printemps',
-    'SUMMER': 'Été',
-    'AUTUMN': 'Automne',
-    'WINTER': 'Hiver',
-    'Ver': 'Printemps',
-    'Aes': 'Été',
-    'Aut': 'Automne',
-    'Hie': 'Hiver',
-    'Spring': 'Printemps',
-    'Summer': 'Été',
-    'Autumn': 'Automne',
-    'Winter': 'Hiver',
-    'spring': 'Printemps',
-    'summer': 'Été',
-    'autumn': 'Automne',
-    'fall': 'Automne',
-    'winter': 'Hiver'
-  };
-  
-  return seasonFormatMap[season] || String(season);
-};
+export function formatGameDate(gameDate: GameDate): string {
+  if (!gameDate) return '';
+  return `${gameDate.season} ${gameDate.year} AUC`;
+}
 
 /**
- * Parse a string into a GameDate object
+ * Gets all seasons coming after a specified game date
  */
-export const stringToGameDate = (dateString: string): GameDate | undefined => {
-  if (!dateString) return undefined;
+export function getSeasonsAfter(gameDate: GameDate, count: number = 4): GameDate[] {
+  if (!gameDate) return [];
   
-  // Handle format "YYYY Season"
-  const dateRegex = /(\d+)\s+(\w+)/;
-  const matches = dateString.match(dateRegex);
+  const seasons: Season[] = ['Spring', 'Summer', 'Fall', 'Winter'];
+  const currentSeasonIndex = seasons.indexOf(gameDate.season);
   
-  if (matches && matches.length >= 3) {
-    const year = parseInt(matches[1], 10);
-    const seasonStr = matches[2];
-    
-    // Map season string to Season type
-    let season: Season;
-    const seasonLower = seasonStr.toLowerCase();
-    
-    if (seasonLower.includes('prin') || seasonLower.includes('ver') || seasonLower.includes('spring')) {
-      season = 'SPRING';
-    } else if (seasonLower.includes('été') || seasonLower.includes('aes') || seasonLower.includes('summer')) {
-      season = 'SUMMER';
-    } else if (seasonLower.includes('autom') || seasonLower.includes('aut') || seasonLower.includes('fall')) {
-      season = 'AUTUMN';
-    } else if (seasonLower.includes('hiver') || seasonLower.includes('hie') || seasonLower.includes('winter')) {
-      season = 'WINTER';
-    } else {
-      // Default to spring if unknown
-      season = 'SPRING';
+  const result: GameDate[] = [];
+  let year = gameDate.year;
+  let seasonIndex = currentSeasonIndex;
+  
+  for (let i = 0; i < count; i++) {
+    seasonIndex = (seasonIndex + 1) % 4;
+    if (seasonIndex === 0) {
+      year++;
     }
     
-    return { year, season };
+    result.push({
+      year,
+      season: seasons[seasonIndex]
+    });
   }
   
-  return undefined;
-};
+  return result;
+}
 
 /**
- * Convert GameDate to Date object (approximation)
+ * Convert a string, date, or GameDate to a standard GameDate object
  */
-export const gameDateToDate = (gameDate: GameDate): Date => {
-  const seasonToMonth: Record<Season, number> = {
-    'SPRING': 2, // March
-    'SUMMER': 5, // June
-    'AUTUMN': 8, // September
-    'WINTER': 11, // December
-    'Ver': 2,
-    'Aes': 5,
-    'Aut': 8,
-    'Hie': 11,
-    'Spring': 2,
-    'Summer': 5,
-    'Autumn': 8,
-    'Winter': 11,
-    'spring': 2,
-    'summer': 5,
-    'autumn': 8,
-    'fall': 8,
-    'winter': 11
+export function ensureGameDate(date: string | Date | GameDate | any): GameDate {
+  // If it's already a GameDate
+  if (date && typeof date === 'object' && 'year' in date && 'season' in date) {
+    return {
+      year: date.year,
+      season: normalizeSeason(date.season)
+    };
+  }
+  
+  // If it's a Date object
+  if (date instanceof Date) {
+    const month = date.getMonth();
+    let season: Season;
+    
+    if (month >= 2 && month <= 4) season = 'Spring';
+    else if (month >= 5 && month <= 7) season = 'Summer';
+    else if (month >= 8 && month <= 10) season = 'Fall';
+    else season = 'Winter';
+    
+    return {
+      year: date.getFullYear(),
+      season
+    };
+  }
+  
+  // Default fallback
+  return {
+    year: new Date().getFullYear(),
+    season: 'Spring'
+  };
+}
+
+/**
+ * Normalize various season formats to the standard Season type
+ */
+function normalizeSeason(season: string): Season {
+  const seasonMap: Record<string, Season> = {
+    'spring': 'Spring',
+    'summer': 'Summer',
+    'fall': 'Fall',
+    'autumn': 'Fall',
+    'winter': 'Winter',
+    'ver': 'Spring',
+    'aestas': 'Summer',
+    'autumnus': 'Fall',
+    'hiems': 'Winter'
   };
   
-  const month = seasonToMonth[gameDate.season] || 0;
-  return new Date(gameDate.year, month, 1);
-};
-
-/**
- * Get seasons after a specific date
- */
-export const getSeasonsAfter = (date: GameDate): Season[] => {
-  const seasons: Season[] = ['SPRING', 'SUMMER', 'AUTUMN', 'WINTER'];
-  const currentSeasonIndex = seasons.indexOf(date.season as Season);
-  
-  if (currentSeasonIndex === -1) {
-    return seasons;
-  }
-  
-  return seasons.slice(currentSeasonIndex + 1);
-};
-
-/**
- * Compare two GameDate objects
- * Returns negative if a < b, 0 if equal, positive if a > b
- */
-export const compareGameDates = (a: GameDate, b: GameDate): number => {
-  if (a.year !== b.year) {
-    return a.year - b.year;
-  }
-  
-  const seasons: Season[] = ['SPRING', 'SUMMER', 'AUTUMN', 'WINTER'];
-  const aIndex = seasons.indexOf(a.season as Season);
-  const bIndex = seasons.indexOf(b.season as Season);
-  
-  return aIndex - bIndex;
-};
+  const normalizedSeason = seasonMap[season.toLowerCase()];
+  return normalizedSeason || 'Spring';
+}

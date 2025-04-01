@@ -1,201 +1,229 @@
 
-import React, { useState, useMemo } from 'react';
-import { Card, CardContent, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
+import React, { useState } from 'react';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Input } from '@/components/ui/input';
-import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from '@/components/ui/table';
-import { PropertyTransaction, TransactionsListProps } from '../types/property';
+import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from '@/components/ui/pagination';
+import { Card, CardContent, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
+import { Search, Filter, Plus } from 'lucide-react';
+import { PropertyTransaction } from '../types/property';
+import { format } from 'date-fns';
 
-/**
- * TransactionsList component for displaying property transactions
- */
+interface TransactionsListProps {
+  searchTerm?: string;
+  resourceId?: string;
+  onTransactionSelect?: (transaction: PropertyTransaction) => void;
+  onAddTransaction?: () => void;
+  filters?: {
+    resourceName?: string;
+    type?: string;
+    startDate?: Date;
+    endDate?: Date;
+    responsible?: string;
+  };
+}
+
 export const TransactionsList: React.FC<TransactionsListProps> = ({
-  searchTerm: externalSearchTerm,
+  searchTerm,
   resourceId,
   onTransactionSelect,
   onAddTransaction,
-  filters = {}
+  filters,
 }) => {
-  const [localSearchTerm, setLocalSearchTerm] = useState('');
-  const [page, setPage] = useState(1);
-  const itemsPerPage = 10;
+  const [currentPage, setCurrentPage] = useState(1);
+  const [localSearch, setLocalSearch] = useState(searchTerm || '');
+  const [transactionType, setTransactionType] = useState<string>('all');
   
-  // Sample transactions data for demonstration
+  // Mock transaction data - in a real implementation, this would come from a hook or context
   const transactions: PropertyTransaction[] = [
     {
-      id: '1',
-      resourceId: 'wheat-001',
+      id: 'tx-1',
+      resourceId: 'res-1',
       resourceName: 'Blé',
       type: 'acquisition',
-      quantity: 100,
-      date: new Date(2023, 3, 15),
-      responsible: 'Marcus Licinius',
-      source: 'Marché de Rome',
-      cost: 500
+      quantity: 1000,
+      date: new Date('2023-07-15'),
+      responsible: 'Gaius Servius',
+      source: 'Sicile',
+      cost: 5000,
+      reason: 'Approvisionnement saisonnier'
     },
     {
-      id: '2',
-      resourceId: 'wine-001',
+      id: 'tx-2',
+      resourceId: 'res-3',
       resourceName: 'Vin',
       type: 'consumption',
-      quantity: 20,
-      date: new Date(2023, 4, 1),
-      responsible: 'Tullia',
-      destination: 'Banquet Sénatorial'
+      quantity: 50,
+      date: new Date('2023-07-20'),
+      responsible: 'Quintus Fabius',
+      destination: 'Banquet Sénatorial',
+      reason: 'Célébration des victoires en Gaule'
     },
     {
-      id: '3',
-      resourceId: 'olive-oil-001',
+      id: 'tx-3',
+      resourceId: 'res-2',
       resourceName: 'Huile d\'olive',
       type: 'transfer',
-      quantity: 50,
-      date: new Date(2023, 4, 12),
-      responsible: 'Gaius Marius',
-      source: 'Villa Campania',
-      destination: 'Domus Rome'
+      quantity: 200,
+      date: new Date('2023-07-25'),
+      responsible: 'Marcus Tullius',
+      source: 'Entrepôt Principal',
+      destination: 'Villa Toscane',
+      reason: 'Redistribution des stocks'
     }
   ];
   
-  // Use external search term if provided, otherwise use local state
-  const searchTerm = externalSearchTerm !== undefined ? externalSearchTerm : localSearchTerm;
-  
-  // Filter transactions based on search term and filters
-  const filteredTransactions = useMemo(() => {
-    let result = [...transactions];
-    
-    // Apply search term filter
-    if (searchTerm) {
-      const lowerSearch = searchTerm.toLowerCase();
-      result = result.filter(t => 
-        t.resourceName.toLowerCase().includes(lowerSearch) ||
-        t.responsible.toLowerCase().includes(lowerSearch) ||
-        (t.source && t.source.toLowerCase().includes(lowerSearch)) ||
-        (t.destination && t.destination.toLowerCase().includes(lowerSearch))
-      );
-    }
-    
-    // Apply resource ID filter
-    if (resourceId) {
-      result = result.filter(t => t.resourceId === resourceId);
-    }
-    
-    // Apply additional filters
-    if (filters.resourceName) {
-      result = result.filter(t => t.resourceName === filters.resourceName);
-    }
-    
-    if (filters.type) {
-      result = result.filter(t => t.type === filters.type);
-    }
-    
-    if (filters.startDate) {
-      result = result.filter(t => t.date >= filters.startDate!);
-    }
-    
-    if (filters.endDate) {
-      result = result.filter(t => t.date <= filters.endDate!);
-    }
-    
-    if (filters.responsible) {
-      result = result.filter(t => t.responsible === filters.responsible);
-    }
-    
-    return result;
-  }, [transactions, searchTerm, resourceId, filters]);
+  // Filter transactions based on search, resource, and type
+  const filteredTransactions = transactions.filter(transaction => {
+    const matchesSearch = localSearch
+      ? transaction.resourceName.toLowerCase().includes(localSearch.toLowerCase()) ||
+        transaction.responsible.toLowerCase().includes(localSearch.toLowerCase()) ||
+        (transaction.reason && transaction.reason.toLowerCase().includes(localSearch.toLowerCase()))
+      : true;
+      
+    const matchesResource = resourceId
+      ? transaction.resourceId === resourceId
+      : true;
+      
+    const matchesType = transactionType !== 'all'
+      ? transaction.type === transactionType
+      : true;
+      
+    return matchesSearch && matchesResource && matchesType;
+  });
   
   // Pagination
-  const paginatedTransactions = useMemo(() => {
-    const startIndex = (page - 1) * itemsPerPage;
-    return filteredTransactions.slice(startIndex, startIndex + itemsPerPage);
-  }, [filteredTransactions, page, itemsPerPage]);
-  
+  const itemsPerPage = 10;
   const totalPages = Math.ceil(filteredTransactions.length / itemsPerPage);
+  const paginatedTransactions = filteredTransactions.slice(
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage
+  );
   
   return (
     <Card>
-      <CardHeader className="flex flex-row items-center justify-between pb-2">
-        <CardTitle className="text-md font-medium">
-          Transactions ({filteredTransactions.length})
-        </CardTitle>
+      <CardHeader className="flex flex-row items-center justify-between">
+        <CardTitle>Transactions</CardTitle>
         <div className="flex gap-2">
-          <Input
-            placeholder="Rechercher..."
-            value={localSearchTerm}
-            onChange={(e) => setLocalSearchTerm(e.target.value)}
-            className="w-[200px]"
-          />
           <Button variant="outline" size="sm" onClick={onAddTransaction}>
-            Ajouter
+            <Plus className="h-4 w-4 mr-1" /> Filtre
           </Button>
-        </div>
+          <Button size="sm" onClick={onAddTransaction}>
+            <Plus className="h-4 w-4 mr-1" /> Transaction
+          </Button>
+        </CardTitle>
       </CardHeader>
       <CardContent>
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>Date</TableHead>
-              <TableHead>Ressource</TableHead>
-              <TableHead>Type</TableHead>
-              <TableHead>Quantité</TableHead>
-              <TableHead>Responsable</TableHead>
-              <TableHead>Détails</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {paginatedTransactions.map(transaction => (
-              <TableRow key={transaction.id} onClick={() => onTransactionSelect?.(transaction)} className="cursor-pointer">
-                <TableCell>{transaction.date.toLocaleDateString()}</TableCell>
-                <TableCell>{transaction.resourceName}</TableCell>
-                <TableCell>
-                  <Badge 
-                    variant={
-                      transaction.type === 'acquisition' ? 'success' :
-                      transaction.type === 'consumption' ? 'destructive' : 'outline'
-                    }
-                  >
-                    {transaction.type}
-                  </Badge>
-                </TableCell>
-                <TableCell>{transaction.quantity}</TableCell>
-                <TableCell>{transaction.responsible}</TableCell>
-                <TableCell>
-                  {transaction.source && <div>Source: {transaction.source}</div>}
-                  {transaction.destination && <div>Destination: {transaction.destination}</div>}
-                  {transaction.cost && <div>Coût: {transaction.cost} As</div>}
-                </TableCell>
-              </TableRow>
-            ))}
-            {paginatedTransactions.length === 0 && (
+        <div className="flex flex-col sm:flex-row gap-4 mb-4">
+          <div className="relative flex-1">
+            <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+            <Input
+              placeholder="Rechercher des transactions..."
+              className="pl-8"
+              value={localSearch}
+              onChange={(e) => setLocalSearch(e.target.value)}
+            />
+          </div>
+          <Select
+            value={transactionType}
+            onValueChange={setTransactionType}
+          >
+            <SelectTrigger className="w-[180px]">
+              <SelectValue placeholder="Type de transaction" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">Tous les types</SelectItem>
+              <SelectItem value="acquisition">Acquisition</SelectItem>
+              <SelectItem value="consumption">Consommation</SelectItem>
+              <SelectItem value="transfer">Transfert</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+        
+        <div className="border rounded-md">
+          <Table>
+            <TableHeader>
               <TableRow>
-                <TableCell colSpan={6} className="text-center py-4 text-muted-foreground">
-                  Aucune transaction trouvée
-                </TableCell>
+                <TableHead>Ressource</TableHead>
+                <TableHead>Type</TableHead>
+                <TableHead>Quantité</TableHead>
+                <TableHead className="hidden md:table-cell">Date</TableHead>
+                <TableHead className="hidden md:table-cell">Responsable</TableHead>
+                <TableHead className="text-right">Actions</TableHead>
               </TableRow>
-            )}
-          </TableBody>
-        </Table>
+            </TableHeader>
+            <TableBody>
+              {paginatedTransactions.length > 0 ? (
+                paginatedTransactions.map(transaction => (
+                  <TableRow key={transaction.id}>
+                    <TableCell>{transaction.resourceName}</TableCell>
+                    <TableCell>
+                      {transaction.type === 'acquisition' && 'Acquisition'}
+                      {transaction.type === 'consumption' && 'Consommation'}
+                      {transaction.type === 'transfer' && 'Transfert'}
+                    </TableCell>
+                    <TableCell>{transaction.quantity}</TableCell>
+                    <TableCell className="hidden md:table-cell">
+                      {format(transaction.date, 'dd/MM/yyyy')}
+                    </TableCell>
+                    <TableCell className="hidden md:table-cell">{transaction.responsible}</TableCell>
+                    <TableCell className="text-right">
+                      <Button
+                        variant="ghost" 
+                        size="sm"
+                        onClick={() => onTransactionSelect?.(transaction)}
+                      >
+                        Détails
+                      </Button>
+                    </TableCell>
+                  </TableRow>
+                ))
+              ) : (
+                <TableRow>
+                  <TableCell colSpan={6} className="text-center py-6">
+                    Aucune transaction trouvée
+                  </TableCell>
+                </TableRow>
+              )}
+            </TableBody>
+          </Table>
+        </div>
+        
+        {totalPages > 1 && (
+          <Pagination className="mt-4">
+            <PaginationContent>
+              <PaginationItem>
+                <PaginationPrevious 
+                  onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+                  className={currentPage === 1 ? 'pointer-events-none opacity-50' : ''}
+                />
+              </PaginationItem>
+              
+              {Array.from({ length: totalPages }).map((_, index) => (
+                <PaginationItem key={index}>
+                  <PaginationLink
+                    isActive={currentPage === index + 1}
+                    onClick={() => setCurrentPage(index + 1)}
+                  >
+                    {index + 1}
+                  </PaginationLink>
+                </PaginationItem>
+              ))}
+              
+              <PaginationItem>
+                <PaginationNext 
+                  onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+                  className={currentPage === totalPages ? 'pointer-events-none opacity-50' : ''}
+                />
+              </PaginationItem>
+            </PaginationContent>
+          </Pagination>
+        )}
       </CardContent>
-      <CardFooter className="flex justify-between">
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={() => setPage(prev => Math.max(1, prev - 1))}
-          disabled={page === 1}
-        >
-          Précédent
-        </Button>
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={() => setPage(prev => Math.min(totalPages, prev + 1))}
-          disabled={page === totalPages || totalPages === 0}
-        >
-          Suivant
-        </Button>
+      <CardFooter>
+        {/* Optional footer content */}
       </CardFooter>
     </Card>
   );
 };
-
-// Add missing Badge import
-import { Badge } from '@/components/ui/badge';

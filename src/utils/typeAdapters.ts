@@ -6,6 +6,8 @@
 import { OwnedBuilding, PropertyUpgrade, Slave, SlaveAssignment } from '@/components/proprietes/types/property';
 import { BuildingType as MJBuildingType, Building as MJBuilding } from '@/components/maitrejeu/types/batiments';
 import { BuildingType as PropBuildingType } from '@/components/proprietes/types/buildingTypes';
+import { ensureArray } from './arrayUtils';
+import { militaireAdapter, politiqueAdapter } from './militaireAdapter';
 
 /**
  * Adapt a MaitreJeu Building to a Proprietes OwnedBuilding
@@ -75,6 +77,7 @@ export const adaptPropertyUpgrades = (upgrades: any[]): PropertyUpgrade[] => {
       },
       effects: effect, // Maintain compatibility
       installed: upgrade.installed || upgrade.applied || false,
+      applied: upgrade.applied || upgrade.installed || false, // Ensure both properties exist
       buildingTypes: Array.isArray(upgrade.buildingTypes) 
         ? upgrade.buildingTypes 
         : (upgrade.buildingType 
@@ -95,7 +98,6 @@ export const adaptPropertyUpgrades = (upgrades: any[]): PropertyUpgrade[] => {
         value: requirements.value,
         upgrades: requirements.upgrades
       },
-      applied: upgrade.applied || false,
       type: upgrade.type || '',
     };
   }).filter(Boolean);
@@ -133,7 +135,7 @@ export const adaptSlaveAssignment = (assignment: any): SlaveAssignment => {
   if (!assignment) return null;
   
   return {
-    id: assignment.id,
+    id: assignment.id, // Add id property for compatibility
     propertyId: assignment.propertyId || assignment.buildingId,
     slaveId: assignment.slaveId,
     buildingId: assignment.buildingId,

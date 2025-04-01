@@ -80,13 +80,14 @@ export interface Equilibre {
   militaire: Militaire;
   risques?: Record<string, any>;
   // Pour compatibilité avec le code existant
-  populares?: number;
+  populares?: number;  // Rename to match Politique
   optimates?: number;
   moderates?: number;
   // Additional compatibility properties
   armée?: number;
   loyauté?: number;
-  morale?: number;
+  morale?: number;  // Renamed from moral to morale for consistency
+  population?: number; // Add this for required fields in Republic interface
 }
 
 // Types pour les événements politiques
