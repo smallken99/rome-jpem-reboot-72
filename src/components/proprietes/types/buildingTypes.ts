@@ -33,7 +33,6 @@ export interface PropertyUpgrade {
     conditionBoost?: number;
     maintenanceReduction?: number;
   };
-  // Add this to support the code using 'effects' instead of 'effect'
   effects?: {
     income?: number;
     popularity?: number;
@@ -47,7 +46,6 @@ export interface PropertyUpgrade {
   installed: boolean;
   applied?: boolean;
   buildingTypes: BuildingType[];
-  // Add requirements field
   requirements?: {
     minWorkers?: number;
     minSecurity?: number;
@@ -110,6 +108,8 @@ export interface OwnedBuilding {
   upgrades: PropertyUpgrade[];
   description: string;
   purchaseDate: Date;
+  maintenanceEnabled?: boolean;
+  lastMaintenance?: Date;
   buildingDescription?: BuildingDescription;
   status?: string;
   maintenance?: number;

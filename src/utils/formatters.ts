@@ -1,46 +1,83 @@
 
 /**
- * Formate un nombre en valeur monétaire (As romains)
+ * Formate un nombre en monnaie romaine (As)
+ * @param amount Montant à formater
  */
-export const formatCurrency = (value: number): string => {
-  return `${value.toLocaleString('fr-FR')} As`;
-};
-
-/**
- * Formate un pourcentage
- */
-export const formatPercentage = (value: number): string => {
-  return `${value.toFixed(1)}%`;
-};
-
-/**
- * Formate une date romaine
- */
-export const formatRomanDate = (year: number, season: string): string => {
-  let result = `An ${year}`;
-  if (season) {
-    result += `, ${season}`;
+export const formatCurrency = (amount: number): string => {
+  if (amount === undefined || amount === null) return '0 As';
+  
+  if (amount >= 1000000) {
+    return `${(amount / 1000000).toLocaleString('fr-FR', { 
+      maximumFractionDigits: 1,
+      minimumFractionDigits: 0
+    })}M As`;
   }
-  return result;
+  
+  if (amount >= 1000) {
+    return `${(amount / 1000).toLocaleString('fr-FR', { 
+      maximumFractionDigits: 1,
+      minimumFractionDigits: 0
+    })}k As`;
+  }
+  
+  return `${amount.toLocaleString('fr-FR')} As`;
 };
 
 /**
- * Format date object to roman date format
+ * Formate une date pour l'affichage
+ * @param date Date à formater
  */
-export const formatGameDate = (date: {year: number, season: string} | Date): string => {
-  if (date instanceof Date) {
-    // Convert standard date to game date format
-    const month = date.getMonth();
-    let season = '';
-    
-    if (month >= 0 && month <= 2) season = 'Hiems';
-    else if (month >= 3 && month <= 5) season = 'Ver';
-    else if (month >= 6 && month <= 8) season = 'Aestas';
-    else season = 'Autumnus';
-    
-    return `An ${date.getFullYear()}, ${season}`;
-  } else {
-    // It's already a game date format
-    return `An ${date.year}, ${date.season}`;
-  }
+export const formatDate = (date: Date | string): string => {
+  if (!date) return 'Date inconnue';
+  
+  const dateObj = typeof date === 'string' ? new Date(date) : date;
+  
+  return dateObj.toLocaleDateString('fr-FR', {
+    day: 'numeric',
+    month: 'long',
+    year: 'numeric'
+  });
+};
+
+/**
+ * Formate un nombre pour l'affichage
+ * @param value Nombre à formater
+ * @param decimals Nombre de décimales
+ */
+export const formatNumber = (value: number, decimals: number = 0): string => {
+  if (value === undefined || value === null) return '0';
+  
+  return value.toLocaleString('fr-FR', {
+    maximumFractionDigits: decimals,
+    minimumFractionDigits: decimals
+  });
+};
+
+/**
+ * Formate un pourcentage pour l'affichage
+ * @param value Valeur à formater (0-1 ou 0-100)
+ * @param decimals Nombre de décimales
+ */
+export const formatPercent = (value: number, decimals: number = 0): string => {
+  if (value === undefined || value === null) return '0%';
+  
+  // Si la valeur est entre 0 et 1, on la multiplie par 100
+  const percentage = value > 1 ? value : value * 100;
+  
+  return `${percentage.toLocaleString('fr-FR', {
+    maximumFractionDigits: decimals,
+    minimumFractionDigits: decimals
+  })}%`;
+};
+
+/**
+ * Tronque un texte trop long et ajoute des points de suspension
+ * @param text Texte à tronquer
+ * @param maxLength Longueur maximale
+ */
+export const truncateText = (text: string, maxLength: number = 100): string => {
+  if (!text) return '';
+  if (text.length <= maxLength) return text;
+  
+  return text.substring(0, maxLength) + '...';
 };
