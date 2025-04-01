@@ -1,7 +1,8 @@
 
-export type Season = 'Spring' | 'Summer' | 'Autumn' | 'Winter' | 'Fall' | 
-                    'Ver' | 'Aestas' | 'Autumnus' | 'Hiems' |
-                    'Aes' | 'Aut' | 'Hie';
+export type Season = 
+  'Spring' | 'Summer' | 'Autumn' | 'Winter' | 'Fall' | 
+  'Ver' | 'Aestas' | 'Autumnus' | 'Hiems' |
+  'Aes' | 'Aut' | 'Hie';
 
 export interface GameDate {
   year: number;
@@ -31,4 +32,24 @@ export function stringToGameDate(dateStr: string): GameDate {
     year: parseInt(match[1], 10),
     season: match[2] as Season
   };
+}
+
+export function formatGameDate(date: GameDate): string {
+  // Format the date with season and year
+  return `${date.season} ${date.year}`;
+}
+
+export function adaptSeason(season: string): string {
+  const seasonMap: Record<string, string> = {
+    'Ver': 'Printemps',
+    'Aes': 'Été',
+    'Aut': 'Automne',
+    'Hie': 'Hiver',
+    'Spring': 'Printemps',
+    'Summer': 'Été',
+    'Fall': 'Automne',
+    'Autumn': 'Automne',
+    'Winter': 'Hiver'
+  };
+  return seasonMap[season] || season;
 }

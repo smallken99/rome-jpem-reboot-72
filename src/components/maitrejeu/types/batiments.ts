@@ -5,15 +5,24 @@ export type BuildingType =
   'urban' | 'rural' | 'religious' | 'other';
 
 export type BuildingStatus = 
-  'excellent' | 'good' | 'average' | 'poor' | 'ruined' | 
-  'under_construction' | 'planned' | 'abandoned';
+  'excellent' | 'good' | 'average' | 'poor' | 'ruined' | 'fair' | 'damaged' |
+  'under_construction' | 'planned' | 'in_progress' | 'completed' | 'abandoned';
+
+export interface BuildingFilter {
+  types: string[];
+  locations: string[];
+  status: string;
+  minRevenue: number;
+  maxMaintenance: number;
+  searchTerm: string;
+}
 
 export interface Building {
   id: string;
   name: string;
   type: BuildingType;
   location: string;
-  owner?: string;  // Rendu optionnel pour résoudre le conflit de types
+  owner: string;  // Made required as per error message
   value: number;
   maintenance: number;
   maintenanceCost: number;
@@ -25,15 +34,34 @@ export interface Building {
   cost: number;
   revenue: number;
   capacity: number;
+  income?: number;
+  maintenanceLevel?: number;
+  securityLevel?: number;
 }
 
-export interface BuildingCreationData extends Omit<Building, 'id'> {
+export interface BuildingCreationData {
+  name: string;
+  type: BuildingType;
+  location: string;
+  owner: string;  // Made required as per error message
+  value: number;
+  maintenance: number;
+  maintenanceCost: number;
+  condition: number;
+  status: BuildingStatus;
+  workers?: number;
+  description: string;
+  constructionYear: number;
+  cost: number;
+  revenue: number;
+  capacity: number;
   income?: number;
 }
 
 export interface MaintenanceTask {
   id: string;
   buildingId: string;
+  buildingName?: string; // Added based on error messages
   type: 'repair' | 'upgrade' | 'routine';
   description: string;
   cost: number;
@@ -79,10 +107,17 @@ export interface ConstructionProject {
   estimatedCost: number;
   actualCost?: number;
   startDate: Date;
-  estimatedCompletionDate: Date;
+  estimatedCompletionDate?: Date;
+  estimatedEndDate?: Date;  // Added based on error in useBuildingManagement.ts
+  expectedCompletionYear?: number; // Added based on errors
   actualCompletionDate?: Date;
   status: 'planned' | 'in_progress' | 'completed' | 'abandoned';
   progress: number; // 0-100
   supervisor?: string;
   description?: string;
+  workers?: number;
+  approved?: boolean;
 }
+
+export type BuildingPriority = 'high' | 'medium' | 'low'; // Added based on errors
+export type BuildingOwner = 'public' | 'private' | 'religious' | 'state' | 'imperial'; // Added based on errors

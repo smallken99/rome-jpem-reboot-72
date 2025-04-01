@@ -36,6 +36,7 @@ export const GestionBatiments = () => {
       name: "Bâtiment exemple",
       type: "temple" as BuildingType,
       location: "Forum Romanum",
+      owner: "république",
       value: 50000,
       maintenance: 1000,
       maintenanceCost: 1000,
@@ -57,17 +58,6 @@ export const GestionBatiments = () => {
       // Update existing building
       updateBuilding(selectedBuilding.id, {
         ...data,
-        maintenance: data.maintenanceCost,
-        status: data.status || 'good' as BuildingStatus,
-        description: data.description || "",
-        constructionYear: data.constructionYear || currentYear,
-        cost: data.cost,
-        revenue: data.revenue,
-        capacity: data.capacity,
-        value: data.value || 0,  // Assurez-vous que toutes les propriétés requises sont définies
-        condition: data.condition || 100,
-        // Ajoutez owner si nécessaire
-        owner: data.owner
       });
     } else {
       // Add new building with all required properties
@@ -82,8 +72,7 @@ export const GestionBatiments = () => {
         capacity: data.capacity,
         value: data.value || 0,
         condition: data.condition || 100,
-        // Ajoutez owner si nécessaire
-        owner: data.owner
+        owner: data.owner || "république"
       };
       
       addBuilding(completeData);

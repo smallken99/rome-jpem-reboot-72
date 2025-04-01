@@ -1,116 +1,158 @@
 
-import React from 'react';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { useMaitreJeu } from '../../context';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Progress } from '@/components/ui/progress';
+import { Plus, Calendar, Hammer, CheckCircle } from 'lucide-react';
+import { useBuildingManagement } from '../../hooks/useBuildingManagement';
 import { ConstructionProject, BuildingType } from '../../types/batiments';
-import { GameDate } from '../../types/common';
+import { GameDate, Season } from '@/utils/types/gameDate';
 
-export const ConstructionProjects = ({ currentYear, currentSeason }: { currentYear: number, currentSeason: string }) => {
-  const { evenements } = useMaitreJeu();
+interface ConstructionProjectsProps {
+  currentYear: number;
+  currentSeason: Season;
+}
+
+export const ConstructionProjects: React.FC<ConstructionProjectsProps> = ({ currentYear, currentSeason }) => {
+  const { constructionProjects, addConstructionProject, updateConstructionProgress } = useBuildingManagement();
   
-  // Create complete construction projects with all required properties
-  const constructionProjects: ConstructionProject[] = [
-    {
-      id: 'project-1',
-      name: 'Nouveau Forum',
-      type: 'forum' as BuildingType,
-      location: 'Champ de Mars',
-      cost: 500000,
-      progress: 50,
-      startDate: { year: currentYear - 1, season: 'Ver' },
-      estimatedEndDate: { year: currentYear + 1, season: 'Aes' },
-      status: 'in_progress',
-      workers: 200,
-      description: 'Construction d\'un nouveau forum pour désengorger le centre-ville',
-      estimatedCost: 500000,
-      expectedCompletionYear: currentYear + 1,
-      approved: true
-    },
-    {
-      id: 'project-2',
-      name: 'Aqueduc de la Via Appia',
-      type: 'aqueduct' as BuildingType,
-      location: 'Via Appia',
-      cost: 300000,
-      progress: 20,
-      startDate: { year: currentYear, season: 'Ver' },
-      estimatedEndDate: { year: currentYear + 2, season: 'Aut' },
-      status: 'planning',
-      workers: 150,
-      description: 'Construction d\'un aqueduc pour alimenter les thermes',
-      estimatedCost: 300000,
-      expectedCompletionYear: currentYear + 2,
-      approved: false
-    }
-  ];
-  
-  const handleApproveProject = (projectId: string) => {
-    console.log('Approve project', projectId);
-  };
-  
-  const handleUpdateProgress = (projectId: string, progress: number) => {
-    console.log('Update progress', projectId, progress);
-  };
-  
-  const handleCreateEconomicRecord = (project: ConstructionProject) => {
-    // Create an economic record for the project
-    const economicRecord = {
-      amount: project.estimatedCost,
-      description: `Construction: ${project.name}`,
-      date: { year: currentYear, season: currentSeason } as GameDate,
-      recurring: false
+  const addNewProject = () => {
+    const projectData = {
+      name: "Nouveau Temple de Jupiter",
+      type: "temple" as BuildingType,
+      location: "Capitole",
+      estimatedCost: 50000,
+      startDate: new Date(),
+      estimatedCompletionDate: {
+        year: currentYear + 1,
+        season: currentSeason
+      } as GameDate,
+      status: 'planned' as 'planned' | 'in_progress' | 'completed' | 'abandoned',
+      description: "Construction d'un nouveau temple dédié à Jupiter",
+      supervisor: "Marcus Agrippa"
     };
     
-    // Log the economic record (in a real app, you would add this to your state)
-    console.log('Creating economic record for project', economicRecord);
+    const newProjectId = addConstructionProject(projectData);
+    console.log(`Nouveau projet ajouté: ${newProjectId}`);
+    
+    // Simulate progress
+    simulateConstructionProgress(newProjectId);
+  };
+  
+  const simulateConstructionProgress = (projectId: string) => {
+    const interval = setInterval(() => {
+      updateConstructionProgress(projectId, 10);
+      
+      // Check if project is complete or at 100%
+      const project = constructionProjects.find(p => p.id === projectId);
+      if (project && project.progress >= 100) {
+        clearInterval(interval);
+      }
+    }, 2000);
+    
+    // Clean up interval on component unmount
+    return () => clearInterval(interval);
+  };
+  
+  return (
+    <div className="space-y-6">
+      <div className="flex justify-between items-center">
+        <h2 className="text-lg font-medium">Projets de Construction</h2>
+        <Button onClick={addNewProject} className="flex items-center gap-2">
+          <Plus className="h-4 w-4" />
+          Nouveau projet
+        </Button>
+      </div>
+      
+      {constructionProjects.length === 0 ? (
+        <div className="text-center p-8">
+          <h3 className="text-lg font-medium mb-2">Aucun projet en cours</h3>
+          <p className="text-muted-foreground mb-4">
+            Commencez par ajouter un nouveau projet de construction
+          </p>
+          <Button onClick={addNewProject}>Ajouter un projet</Button>
+        </div>
+      ) : (
+        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+          {constructionProjects.map(project => (
+            <ConstructionProjectCard 
+              key={project.id} 
+              project={project}
+              currentYear={currentYear}
+              onProgressUpdate={(progress) => updateConstructionProgress(project.id, progress)}
+            />
+          ))}
+        </div>
+      )}
+    </div>
+  );
+};
+
+interface ConstructionProjectCardProps {
+  project: ConstructionProject;
+  currentYear: number;
+  onProgressUpdate: (progress: number) => void;
+}
+
+const ConstructionProjectCard: React.FC<ConstructionProjectCardProps> = ({ project, currentYear, onProgressUpdate }) => {
+  const getRemainingTime = () => {
+    const estimatedCompletion = project.expectedCompletionYear || (currentYear + 1);
+    const yearsRemaining = estimatedCompletion - currentYear;
+    return yearsRemaining <= 0 ? "Achèvement imminent" : `${yearsRemaining} an${yearsRemaining > 1 ? 's' : ''} restant${yearsRemaining > 1 ? 's' : ''}`;
   };
   
   return (
     <Card>
-      <CardHeader>
-        <CardTitle>Projets de Construction</CardTitle>
-        <CardDescription>
-          Suivez l'avancement des projets de construction en cours
-        </CardDescription>
+      <CardHeader className="pb-2">
+        <CardTitle className="text-lg">{project.name}</CardTitle>
       </CardHeader>
-      <CardContent className="p-0">
-        <Table>
-          <TableCaption>Liste des projets de construction</TableCaption>
-          <TableHeader>
-            <TableRow>
-              <TableHead>Nom</TableHead>
-              <TableHead>Localisation</TableHead>
-              <TableHead>Coût estimé</TableHead>
-              <TableHead>Année de fin prévue</TableHead>
-              <TableHead>Avancement</TableHead>
-              <TableHead>Actions</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {constructionProjects.map(project => (
-              <TableRow key={project.id}>
-                <TableCell>{project.name}</TableCell>
-                <TableCell>{project.location}</TableCell>
-                <TableCell>{project.estimatedCost}</TableCell>
-                <TableCell>{project.expectedCompletionYear}</TableCell>
-                <TableCell>{project.progress}%</TableCell>
-                <TableCell>
-                  <Button variant="secondary" size="sm" onClick={() => handleApproveProject(project.id)}>
-                    Approuver
-                  </Button>
-                  <Button variant="outline" size="sm" onClick={() => handleUpdateProgress(project.id, project.progress + 10)}>
-                    Mettre à jour
-                  </Button>
-                  <Button variant="ghost" size="sm" onClick={() => handleCreateEconomicRecord(project)}>
-                    Enregistrer
-                  </Button>
-                </TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
+      <CardContent className="space-y-4">
+        <div className="flex justify-between text-sm">
+          <span>Type: {project.type}</span>
+          <span>Emplacement: {project.location}</span>
+        </div>
+        
+        <div className="space-y-2">
+          <div className="flex justify-between items-center">
+            <span className="text-sm font-medium">Progression</span>
+            <span className="text-sm">{project.progress}%</span>
+          </div>
+          <Progress value={project.progress} className="h-2" />
+        </div>
+        
+        <div className="grid grid-cols-2 gap-4 text-sm">
+          <div className="flex items-center gap-2">
+            <Calendar className="h-4 w-4 text-muted-foreground" />
+            <span>Début: {new Date(project.startDate).getFullYear()}</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <Calendar className="h-4 w-4 text-muted-foreground" />
+            <span>Fin estimée: {getRemainingTime()}</span>
+          </div>
+        </div>
+        
+        <div className="flex items-center gap-2 text-sm">
+          <Hammer className="h-4 w-4 text-muted-foreground" />
+          <span>Superviseur: {project.supervisor || "Non assigné"}</span>
+        </div>
+        
+        <div className="flex items-center gap-2 text-sm">
+          <CheckCircle className="h-4 w-4 text-muted-foreground" />
+          <span>Statut: {
+            project.status === 'planned' ? 'Planifié' :
+            project.status === 'in_progress' ? 'En cours' :
+            project.status === 'completed' ? 'Terminé' : 'Abandonné'
+          }</span>
+        </div>
+        
+        <div className="pt-2">
+          <Button 
+            onClick={() => onProgressUpdate(10)}
+            disabled={project.progress >= 100 || project.status === 'completed' || project.status === 'abandoned'}
+          >
+            Avancer les travaux (+10%)
+          </Button>
+        </div>
       </CardContent>
     </Card>
   );
