@@ -1,273 +1,297 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Table, TableBody, TableCell, TableCaption, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
+import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Calendar } from '@/components/ui/calendar';
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
-import { CalendarIcon } from "lucide-react"
-import { cn } from "@/lib/utils"
-import { format } from "date-fns"
-import { useMaitreJeu } from '../../context';
-import { Building, MaintenanceTask } from '../../types/batiments';
-import { GameDate, Season } from '../../types/common';
+import { Textarea } from '@/components/ui/textarea';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Badge } from '@/components/ui/badge';
 import { useBatimentsManagement } from '../../hooks/useBatimentsManagement';
+import { Building, MaintenanceTask, BuildingPriority } from '../../types/batiments';
+import { Season } from '../../types/common';
+import { v4 as uuidv4 } from 'uuid';
 
-const MaintenanceManager: React.FC = () => {
-  const { buildings } = useBatimentsManagement();
-  const [tasks, setTasks] = useState<MaintenanceTask[]>([]);
-  const [selectedDate, setSelectedDate] = useState<Date | undefined>(new Date());
-  const [buildingFilter, setBuildingFilter] = useState<string>('');
-  const [priorityFilter, setPriorityFilter] = useState<string>('');
-
-  useEffect(() => {
-    const mockTasks: MaintenanceTask[] = [
-      {
-        id: 'task-1',
-        buildingId: 'forum-romanum',
-        buildingName: 'Forum Romanum',
-        deadline: { year: 2023, season: 'SPRING' as Season },
-        estimatedCost: 15000,
-        priority: 'high',
-        status: 'scheduled',
-        description: 'Réparer les dommages causés par les récentes émeutes',
-        startDate: { year: 2023, season: 'WINTER' as Season }
+export default function MaintenanceManager() {
+  const { buildings, maintenanceTasks, addMaintenanceTask, setMaintenanceTasks, completeMaintenanceTask } = useBatimentsManagement();
+  
+  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+  const [selectedBuilding, setSelectedBuilding] = useState<string>('');
+  const [taskDescription, setTaskDescription] = useState('');
+  const [estimatedCost, setEstimatedCost] = useState(0);
+  const [priority, setPriority] = useState<BuildingPriority>('medium');
+  const [deadlineYear, setDeadlineYear] = useState(new Date().getFullYear());
+  const [deadlineSeason, setDeadlineSeason] = useState<string>('Ver');
+  
+  // Create sample data if none exists
+  const sampleTasks: MaintenanceTask[] = [
+    {
+      id: 'task-1',
+      buildingId: 'building-1',
+      buildingName: 'Temple de Jupiter',
+      description: 'Réparation du toit endommagé',
+      estimatedCost: 5000,
+      priority: 'high',
+      deadline: {
+        year: new Date().getFullYear(),
+        season: 'Ver'
       },
-      {
-        id: 'task-2',
-        buildingId: 'basilica-aemilia',
-        buildingName: 'Basilica Aemilia',
-        deadline: { year: 2023, season: 'SUMMER' as Season },
-        estimatedCost: 8000,
-        priority: 'medium',
-        status: 'in_progress',
-        description: 'Remplacer les tuiles endommagées sur le toit',
-        startDate: { year: 2023, season: 'SPRING' as Season }
+      status: 'pending'
+    },
+    {
+      id: 'task-2',
+      buildingId: 'building-2',
+      buildingName: 'Forum Romanum',
+      description: 'Nettoyage des colonnes et réparation des escaliers',
+      estimatedCost: 3000,
+      priority: 'medium',
+      deadline: {
+        year: new Date().getFullYear(),
+        season: 'Aes'
       },
-      {
-        id: 'task-3',
-        buildingId: 'temple-jupiter',
-        buildingName: 'Temple de Jupiter',
-        deadline: { year: 2023, season: 'AUTUMN' as Season },
-        estimatedCost: 12000,
-        priority: 'low',
-        status: 'completed',
-        description: 'Nettoyer et restaurer les statues',
-        startDate: { year: 2023, season: 'SPRING' as Season }
-      }
-    ];
-    setTasks(mockTasks);
-  }, []);
-
-  const scheduleMaintenanceTasks = () => {
-    const tasks = [
-      {
-        id: 'task-1',
-        buildingId: 'temple-1',
-        buildingName: 'Temple de Jupiter',
-        description: 'Réparation du toit endommagé',
-        estimatedCost: 5000,
-        priority: 'high',
-        deadline: { year: 703, season: 'SPRING' as Season },
-        status: 'pending'
+      status: 'in_progress'
+    },
+    {
+      id: 'task-3',
+      buildingId: 'building-3',
+      buildingName: 'Thermes de Caracalla',
+      description: 'Entretien des systèmes d\'eau et chauffage',
+      estimatedCost: 8000,
+      priority: 'low',
+      deadline: {
+        year: new Date().getFullYear(),
+        season: 'Aut'
       },
-      {
-        id: 'task-2',
-        buildingId: 'market-1',
-        buildingName: 'Marché Central',
-        description: 'Renforcement des piliers',
-        estimatedCost: 3000,
-        priority: 'medium',
-        deadline: { year: 703, season: 'WINTER' as Season },
-        status: 'in_progress'
-      },
-      {
-        id: 'task-3',
-        buildingId: 'forum-1',
-        buildingName: 'Forum Romain',
-        description: 'Nettoyage des canaux d\'eau',
-        estimatedCost: 2000,
-        priority: 'low',
-        deadline: { year: 703, season: 'SUMMER' as Season },
-        status: 'pending'
-      },
-      {
-        id: 'task-4',
-        buildingId: 'temple-2',
-        buildingName: 'Temple de Vesta',
-        description: 'Restauration des fresques',
-        estimatedCost: 8000,
-        priority: 'medium',
-        deadline: { year: 704, season: 'SPRING' as Season },
-        status: 'scheduled'
-      },
-      {
-        id: 'task-5',
-        buildingId: 'bath-1',
-        buildingName: 'Thermes de Caracalla',
-        description: 'Réparation du système de chauffage',
-        estimatedCost: 12000,
-        priority: 'high',
-        deadline: { year: 703, season: 'AUTUMN' as Season },
-        status: 'delayed'
-      },
-      {
-        id: 'task-6',
-        buildingId: 'palace-1',
-        buildingName: 'Palais Impérial',
-        description: 'Rénovation des jardins',
-        estimatedCost: 15000,
-        priority: 'low',
-        deadline: { year: 704, season: 'SPRING' as Season },
-        status: 'scheduled'
-      }
-    ];
+      status: 'completed'
+    }
+  ];
+  
+  // Initialize with sample tasks if no tasks exist
+  React.useEffect(() => {
+    if (maintenanceTasks.length === 0) {
+      setMaintenanceTasks(sampleTasks);
+    }
+  }, [maintenanceTasks.length, setMaintenanceTasks]);
+  
+  const handleAddTask = () => {
+    if (!selectedBuilding || !taskDescription) return;
     
-    setTasks(tasks);
-  };
-
-  const formatGameDate = (gameDate: GameDate): string => {
-    return `${gameDate.year}-${gameDate.season}`;
-  };
-
-  const filteredTasks = tasks.filter(task => {
-    const building = buildings?.find(b => b.id === task.buildingId);
-    const buildingName = building ? building.name : task.buildingName || '';
+    const building = buildings.find(b => b.id === selectedBuilding);
+    if (!building) return;
     
-    const dateMatch = selectedDate 
-      ? formatGameDate(task.deadline) === format(selectedDate, "yyyy-MM") 
-      : true;
-      
-    const buildingMatch = buildingFilter 
-      ? buildingName.toLowerCase().includes(buildingFilter.toLowerCase()) 
-      : true;
-      
-    const priorityMatch = priorityFilter 
-      ? task.priority === priorityFilter 
-      : true;
-      
-    return dateMatch && buildingMatch && priorityMatch;
-  });
-
-  const getPriorityBadge = (priority: MaintenanceTask['priority']) => {
-    switch (priority) {
-      case 'low':
-        return 'secondary';
-      case 'medium':
-        return 'secondary';
-      case 'high':
-        return 'destructive';
+    const newTask: MaintenanceTask = {
+      id: uuidv4(),
+      buildingId: selectedBuilding,
+      buildingName: building.name,
+      description: taskDescription,
+      estimatedCost,
+      priority: priority,
+      deadline: {
+        year: deadlineYear,
+        season: deadlineSeason
+      },
+      status: 'pending'
+    };
+    
+    addMaintenanceTask(newTask);
+    setIsAddModalOpen(false);
+    resetForm();
+  };
+  
+  const handleCompleteTask = (taskId: string) => {
+    completeMaintenanceTask(taskId);
+  };
+  
+  const resetForm = () => {
+    setSelectedBuilding('');
+    setTaskDescription('');
+    setEstimatedCost(0);
+    setPriority('medium');
+    setDeadlineYear(new Date().getFullYear());
+    setDeadlineSeason('Ver');
+  };
+  
+  const getPriorityBadge = (priority: BuildingPriority) => {
+    switch(priority) {
       case 'critical':
-        return 'destructive';
+        return <Badge className="bg-red-600">Critique</Badge>;
+      case 'high':
+        return <Badge className="bg-orange-500">Haute</Badge>;
+      case 'medium':
+        return <Badge className="bg-blue-500">Moyenne</Badge>;
+      case 'low':
+        return <Badge className="bg-green-500">Basse</Badge>;
       default:
-        return 'secondary';
+        return <Badge>Inconnue</Badge>;
     }
   };
-
+  
+  const getStatusBadge = (status: string) => {
+    switch(status) {
+      case 'pending':
+        return <Badge variant="outline" className="border-yellow-500 text-yellow-500">En attente</Badge>;
+      case 'in_progress':
+        return <Badge variant="outline" className="border-blue-500 text-blue-500">En cours</Badge>;
+      case 'completed':
+        return <Badge variant="outline" className="border-green-500 text-green-500">Terminée</Badge>;
+      case 'cancelled':
+        return <Badge variant="outline" className="border-red-500 text-red-500">Annulée</Badge>;
+      default:
+        return <Badge variant="outline">Inconnue</Badge>;
+    }
+  };
+  
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>Gestion des Tâches de Maintenance</CardTitle>
-      </CardHeader>
-      <CardContent>
-        <div className="grid gap-4 grid-cols-1 md:grid-cols-3">
-          <div>
-            <Label htmlFor="building-filter">Filtrer par Bâtiment</Label>
-            <Input
-              type="text"
-              id="building-filter"
-              placeholder="Nom du bâtiment"
-              value={buildingFilter}
-              onChange={e => setBuildingFilter(e.target.value)}
-            />
-          </div>
-          <div>
-            <Label htmlFor="priority-filter">Filtrer par Priorité</Label>
-            <select
-              id="priority-filter"
-              className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-foreground file:text-background file:h-9 file:px-3 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-              value={priorityFilter}
-              onChange={e => setPriorityFilter(e.target.value)}
-            >
-              <option value="">Toutes les Priorités</option>
-              <option value="low">Basse</option>
-              <option value="medium">Moyenne</option>
-              <option value="high">Haute</option>
-              <option value="critical">Critique</option>
-            </select>
-          </div>
-          <div>
-            <Label>Filtrer par Date</Label>
-            <Popover>
-              <PopoverTrigger asChild>
-                <Button
-                  variant={"outline"}
-                  className={cn(
-                    "w-full justify-start text-left font-normal",
-                    !selectedDate && "text-muted-foreground"
-                  )}
-                >
-                  {selectedDate ? (
-                    format(selectedDate, "yyyy-MM-dd")
-                  ) : (
-                    <span>Choisir une date</span>
-                  )}
-                  <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                </Button>
-              </PopoverTrigger>
-              <PopoverContent className="w-auto p-0" align="start">
-                <Calendar
-                  mode="single"
-                  selected={selectedDate}
-                  onSelect={setSelectedDate}
-                  disabled={false}
-                  initialFocus
-                />
-              </PopoverContent>
-            </Popover>
-          </div>
-        </div>
-        <Table className="mt-4">
-          <TableCaption>Liste des tâches de maintenance planifiées.</TableCaption>
-          <TableHeader>
-            <TableRow>
-              <TableHead>Bâtiment</TableHead>
-              <TableHead>Date Limite</TableHead>
-              <TableHead>Priorité</TableHead>
-              <TableHead>Statut</TableHead>
-              <TableHead>Description</TableHead>
-              <TableHead className="text-right">Actions</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {filteredTasks.map(task => {
-              const building = buildings?.find(b => b.id === task.buildingId);
-              const buildingName = building ? building.name : task.buildingName || 'Inconnu';
-              return (
-                <TableRow key={task.id}>
-                  <TableCell>{buildingName}</TableCell>
-                  <TableCell>{formatGameDate(task.deadline)}</TableCell>
-                  <TableCell>
-                    <Badge variant={getPriorityBadge(task.priority)}>
-                      {task.priority}
-                    </Badge>
-                  </TableCell>
-                  <TableCell>{task.status}</TableCell>
-                  <TableCell>{task.description}</TableCell>
-                  <TableCell className="text-right">
-                    <Button size="sm">Marquer comme Terminé</Button>
+    <div className="space-y-4">
+      <div className="flex justify-between">
+        <h2 className="text-lg font-medium">Tâches de maintenance</h2>
+        <Button onClick={() => setIsAddModalOpen(true)}>Nouvelle tâche</Button>
+      </div>
+      
+      <Card>
+        <CardContent className="pt-6">
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Bâtiment</TableHead>
+                <TableHead>Description</TableHead>
+                <TableHead>Priorité</TableHead>
+                <TableHead>Coût est.</TableHead>
+                <TableHead>Échéance</TableHead>
+                <TableHead>Statut</TableHead>
+                <TableHead>Actions</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {maintenanceTasks.length > 0 ? (
+                maintenanceTasks.map(task => (
+                  <TableRow key={task.id}>
+                    <TableCell>{task.buildingName}</TableCell>
+                    <TableCell>{task.description}</TableCell>
+                    <TableCell>{getPriorityBadge(task.priority)}</TableCell>
+                    <TableCell>{task.estimatedCost} As</TableCell>
+                    <TableCell>{task.deadline.year} {task.deadline.season}</TableCell>
+                    <TableCell>{getStatusBadge(task.status)}</TableCell>
+                    <TableCell>
+                      <div className="flex space-x-2">
+                        {task.status !== 'completed' && (
+                          <Button 
+                            size="sm" 
+                            variant="outline"
+                            onClick={() => handleCompleteTask(task.id)}
+                          >
+                            Terminer
+                          </Button>
+                        )}
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                ))
+              ) : (
+                <TableRow>
+                  <TableCell colSpan={7} className="text-center py-4">
+                    Aucune tâche de maintenance
                   </TableCell>
                 </TableRow>
-              );
-            })}
-          </TableBody>
-        </Table>
-      </CardContent>
-    </Card>
+              )}
+            </TableBody>
+          </Table>
+        </CardContent>
+      </Card>
+      
+      <Dialog open={isAddModalOpen} onOpenChange={setIsAddModalOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Nouvelle tâche de maintenance</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label htmlFor="building">Bâtiment</Label>
+              <Select value={selectedBuilding} onValueChange={setSelectedBuilding}>
+                <SelectTrigger id="building">
+                  <SelectValue placeholder="Sélectionnez un bâtiment" />
+                </SelectTrigger>
+                <SelectContent>
+                  {buildings.map(building => (
+                    <SelectItem key={building.id} value={building.id}>
+                      {building.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            
+            <div className="space-y-2">
+              <Label htmlFor="description">Description</Label>
+              <Textarea 
+                id="description" 
+                value={taskDescription}
+                onChange={e => setTaskDescription(e.target.value)}
+                placeholder="Décrivez les travaux à effectuer"
+                rows={3}
+              />
+            </div>
+            
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="cost">Coût estimé (As)</Label>
+                <Input 
+                  id="cost" 
+                  type="number"
+                  value={estimatedCost}
+                  onChange={e => setEstimatedCost(parseInt(e.target.value) || 0)}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="priority">Priorité</Label>
+                <Select value={priority} onValueChange={value => setPriority(value as BuildingPriority)}>
+                  <SelectTrigger id="priority">
+                    <SelectValue placeholder="Niveau de priorité" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="critical">Critique</SelectItem>
+                    <SelectItem value="high">Haute</SelectItem>
+                    <SelectItem value="medium">Moyenne</SelectItem>
+                    <SelectItem value="low">Basse</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+            
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="year">Année d'échéance</Label>
+                <Input 
+                  id="year" 
+                  type="number"
+                  value={deadlineYear}
+                  onChange={e => setDeadlineYear(parseInt(e.target.value) || new Date().getFullYear())}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="season">Saison d'échéance</Label>
+                <Select value={deadlineSeason} onValueChange={setDeadlineSeason}>
+                  <SelectTrigger id="season">
+                    <SelectValue placeholder="Saison" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="Ver">Printemps (Ver)</SelectItem>
+                    <SelectItem value="Aes">Été (Aes)</SelectItem>
+                    <SelectItem value="Aut">Automne (Aut)</SelectItem>
+                    <SelectItem value="Hie">Hiver (Hie)</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setIsAddModalOpen(false)}>Annuler</Button>
+            <Button onClick={handleAddTask}>Ajouter</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    </div>
   );
-};
-
-export default MaintenanceManager;
+}

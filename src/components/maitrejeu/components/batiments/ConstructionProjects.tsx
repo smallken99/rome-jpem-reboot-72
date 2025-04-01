@@ -1,35 +1,48 @@
+
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
 import { useMaitreJeu } from '../../context';
-import { ConstructionProject } from '../../types/batiments';
-import { ECONOMIE_CATEGORIES, ECONOMIE_TYPES, ECONOMIE_SOURCE } from '@/components/maitrejeu/types/economie';
-import { GameDate } from '@/components/maitrejeu/types/common';
+import { ConstructionProject, BuildingType } from '../../types/batiments';
+import { GameDate } from '../../types/common';
 
 export const ConstructionProjects = ({ currentYear, currentSeason }: { currentYear: number, currentSeason: string }) => {
   const { evenements } = useMaitreJeu();
   
+  // Create complete construction projects with all required properties
   const constructionProjects: ConstructionProject[] = [
     {
       id: 'project-1',
       name: 'Nouveau Forum',
+      type: 'forum' as BuildingType,
       location: 'Champ de Mars',
+      cost: 500000,
+      progress: 50,
+      startDate: { year: currentYear - 1, season: 'Ver' },
+      estimatedEndDate: { year: currentYear + 1, season: 'Aes' },
+      status: 'in_progress',
+      workers: 200,
       description: 'Construction d\'un nouveau forum pour désengorger le centre-ville',
       estimatedCost: 500000,
-      expectedCompletionYear: 725,
-      approved: true,
-      progress: 50
+      expectedCompletionYear: currentYear + 1,
+      approved: true
     },
     {
       id: 'project-2',
       name: 'Aqueduc de la Via Appia',
+      type: 'aqueduct' as BuildingType,
       location: 'Via Appia',
+      cost: 300000,
+      progress: 20,
+      startDate: { year: currentYear, season: 'Ver' },
+      estimatedEndDate: { year: currentYear + 2, season: 'Aut' },
+      status: 'planning',
+      workers: 150,
       description: 'Construction d\'un aqueduc pour alimenter les thermes',
       estimatedCost: 300000,
-      expectedCompletionYear: 724,
-      approved: false,
-      progress: 20
+      expectedCompletionYear: currentYear + 2,
+      approved: false
     }
   ];
   
@@ -42,20 +55,15 @@ export const ConstructionProjects = ({ currentYear, currentSeason }: { currentYe
   };
   
   const handleCreateEconomicRecord = (project: ConstructionProject) => {
-    // Fix the enum values to use the correct types
+    // Create an economic record for the project
     const economicRecord = {
       amount: project.estimatedCost,
       description: `Construction: ${project.name}`,
-      category: ECONOMIE_CATEGORIES.CONSTRUCTION,
-      type: ECONOMIE_TYPES.EXPENSE,
-      date: { year: currentYear, season: currentSeason },
-      source: ECONOMIE_SOURCE.GOVERNMENT,
-      recurring: false,
-      recurringInterval: 'special' as const
+      date: { year: currentYear, season: currentSeason } as GameDate,
+      recurring: false
     };
     
-    // Add the economic record
-    // This would typically call a context function
+    // Log the economic record (in a real app, you would add this to your state)
     console.log('Creating economic record for project', economicRecord);
   };
   

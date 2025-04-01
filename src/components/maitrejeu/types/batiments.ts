@@ -7,6 +7,8 @@ export type BuildingStatus = 'excellent' | 'good' | 'fair' | 'poor' | 'ruins' | 
 
 export type BuildingPriority = 'high' | 'medium' | 'low' | 'critical';
 
+export type BuildingOwner = 'république' | 'privé' | 'religieux' | 'autre';
+
 export interface Building {
   id: string;
   name: string;
@@ -16,8 +18,9 @@ export interface Building {
   maintenance: number;
   maintenanceCost: number;
   condition: number;
-  description: string; // Make description required
-  status: BuildingStatus; // Make status required
+  description: string;
+  status: BuildingStatus;
+  constructionYear: number;
   workers?: number;
   maxWorkers?: number;
   securityLevel?: number;
@@ -25,7 +28,6 @@ export interface Building {
   upgrades?: any[];
   income?: number;
   purchaseDate?: Date;
-  constructionYear?: number;
   revenue?: number;
   // Propriétés additionnelles pour compatibilité
   cost?: number;
@@ -41,10 +43,10 @@ export interface MaintenanceTask {
   buildingName: string;
   description: string;
   estimatedCost: number;
-  priority: BuildingPriority; // Use the enum type here
+  priority: BuildingPriority;
   deadline: {
     year: number;
-    season: string; // Updated from Season type to avoid circular dependencies
+    season: string;
   };
   status: string;
   startDate?: Date;
@@ -97,12 +99,11 @@ export interface BuildingRevenueRecord {
   buildingId: string;
   amount: number;
   date: Date;
-  source: string;
   description: string;
+  source: string;
   year?: number;
   season?: string;
   taxRate?: number;
-  // Add collectedBy property to fix error
   collectedBy?: string;
 }
 
@@ -113,14 +114,13 @@ export interface BuildingCreationData {
   maintenanceCost: number;
   value: number;
   condition: number;
-  description: string; // Make description required
+  description: string;
+  constructionYear: number;
   status?: BuildingStatus;
   workers?: number;
-  constructionYear?: number;
   cost?: number;
   capacity?: number;
   owner?: string;
-  // Add revenue property for compatibility
   revenue?: number;
 }
 
@@ -130,5 +130,3 @@ export interface PublicBuildingModalProps {
   onSave: (building: BuildingCreationData) => void;
   building?: Building;
 }
-
-export type BuildingOwner = 'république' | 'privé' | 'religieux' | 'autre';

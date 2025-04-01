@@ -1,105 +1,180 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
-import { ChevronDownIcon, ChevronUpIcon, PlusCircleIcon } from 'lucide-react';
-import { useMaitreJeu } from '../../context';
-import { BuildingRevenueRecord } from '../../types/batiments';
+import { Input } from '@/components/ui/input';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useBatimentsManagement } from '../../hooks/useBatimentsManagement';
+import { BuildingRevenueRecord } from '../../types/batiments';
+import { adaptSeason } from '../../types/common';
+import { v4 as uuidv4 } from 'uuid';
 
-interface BuildingRevenueProps {
-  buildingId: string;
-}
-
-const BuildingRevenue: React.FC<BuildingRevenueProps> = ({ buildingId }) => {
-  const { maintenanceTasks, buildings } = useBatimentsManagement();
-  const [building, setBuilding] = useState<any | null>(null);
-  const [revenues, setRevenues] = useState<BuildingRevenueRecord[]>([]);
-  const [expanded, setExpanded] = useState(false);
-
-  useEffect(() => {
-    const foundBuilding = buildings?.find(b => b.id === buildingId);
-    if (foundBuilding) {
-      setBuilding(foundBuilding);
-      // Simulation de données de revenus
-      const mockRevenues: BuildingRevenueRecord[] = [
-        {
-          id: '1',
-          buildingId,
-          year: 705,
-          season: 'Spring',
-          amount: 5000,
-          source: 'Loyers',
-          taxRate: 10,
-          collectedBy: 'Questeur'
-        },
-        {
-          id: '2',
-          buildingId,
-          year: 705,
-          season: 'Summer',
-          amount: 5500,
-          source: 'Loyers',
-          taxRate: 10,
-          collectedBy: 'Questeur'
-        }
-      ];
-      setRevenues(mockRevenues);
-    }
-  }, [buildingId, buildings]);
-
-  if (!building) return null;
-
+export default function BuildingRevenue({ buildingId }: { buildingId: string }) {
+  const { buildings, revenueRecords, addRevenueRecord } = useBatimentsManagement();
+  const building = buildings.find(b => b.id === buildingId);
+  
+  // We'll create a mock building if none is found, for demonstration
+  const [year, setYear] = useState<number>(new Date().getFullYear());
+  const [season, setSeason] = useState<string>('Ver');
+  const [amount, setAmount] = useState<number>(0);
+  const [source, setSource] = useState<string>('taxes');
+  const [taxRate, setTaxRate] = useState<number>(10);
+  
+  // Get revenue records for this building
+  const filteredRecords = revenueRecords.filter(record => record.buildingId === buildingId);
+  
+  const handleAddRecord = () => {
+    const newRecord: BuildingRevenueRecord = {
+      id: uuidv4(),
+      buildingId,
+      date: new Date(),
+      description: `Revenus de ${source} du bâtiment`,
+      amount,
+      source,
+      year,
+      season,
+      taxRate,
+      collectedBy: 'Administrateur'
+    };
+    
+    addRevenueRecord(newRecord);
+    setAmount(0);
+  };
+  
+  const generateRandomRecord = () => {
+    const sources = ['location', 'taxes', 'ventes', 'dons', 'amendes'];
+    const randomSource = sources[Math.floor(Math.random() * sources.length)];
+    const randomAmount = Math.floor(Math.random() * 5000) + 500;
+    
+    const newRecord: BuildingRevenueRecord = {
+      id: uuidv4(),
+      buildingId,
+      date: new Date(),
+      description: `Revenus de ${randomSource} du bâtiment`,
+      amount: randomAmount,
+      source: randomSource,
+      year,
+      season,
+      taxRate: Math.floor(Math.random() * 20) + 5,
+      collectedBy: 'Système'
+    };
+    
+    addRevenueRecord(newRecord);
+  };
+  
   return (
-    <Card className="mt-4">
-      <CardHeader className="pb-2">
-        <CardTitle className="flex justify-between items-center text-sm font-medium">
-          <span>Revenus de {building.name}</span>
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => setExpanded(!expanded)}
-            className="h-8 w-8 p-0"
-          >
-            {expanded ? <ChevronUpIcon className="h-4 w-4" /> : <ChevronDownIcon className="h-4 w-4" />}
-          </Button>
-        </CardTitle>
-      </CardHeader>
-      {expanded && (
+    <div className="space-y-4">
+      <Card>
+        <CardHeader>
+          <CardTitle>Revenus du bâtiment</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <label className="text-sm">Année</label>
+              <Input 
+                type="number" 
+                value={year} 
+                onChange={e => setYear(parseInt(e.target.value) || new Date().getFullYear())} 
+              />
+            </div>
+            <div className="space-y-2">
+              <label className="text-sm">Saison</label>
+              <Select value={season} onValueChange={setSeason}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Sélectionner une saison" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="Ver">Printemps (Ver)</SelectItem>
+                  <SelectItem value="Aes">Été (Aes)</SelectItem>
+                  <SelectItem value="Aut">Automne (Aut)</SelectItem>
+                  <SelectItem value="Hie">Hiver (Hie)</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+          
+          <div className="grid grid-cols-3 gap-4 mt-4">
+            <div className="space-y-2">
+              <label className="text-sm">Montant (As)</label>
+              <Input 
+                type="number" 
+                value={amount} 
+                onChange={e => setAmount(parseInt(e.target.value) || 0)} 
+              />
+            </div>
+            <div className="space-y-2">
+              <label className="text-sm">Source</label>
+              <Select value={source} onValueChange={setSource}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Source des revenus" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="taxes">Taxes</SelectItem>
+                  <SelectItem value="location">Location</SelectItem>
+                  <SelectItem value="ventes">Ventes</SelectItem>
+                  <SelectItem value="dons">Dons</SelectItem>
+                  <SelectItem value="amendes">Amendes</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <label className="text-sm">Taux d'imposition (%)</label>
+              <Input 
+                type="number" 
+                value={taxRate} 
+                onChange={e => setTaxRate(parseInt(e.target.value) || 0)} 
+              />
+            </div>
+          </div>
+          
+          <div className="flex space-x-2 mt-4">
+            <Button onClick={handleAddRecord}>Ajouter un revenu</Button>
+            <Button variant="outline" onClick={generateRandomRecord}>Générer aléatoirement</Button>
+          </div>
+        </CardContent>
+      </Card>
+      
+      <Card>
+        <CardHeader>
+          <CardTitle>Historique des revenus</CardTitle>
+        </CardHeader>
         <CardContent>
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Année</TableHead>
-                <TableHead>Saison</TableHead>
-                <TableHead>Montant</TableHead>
+                <TableHead>Date</TableHead>
                 <TableHead>Source</TableHead>
-                <TableHead>Taxe</TableHead>
+                <TableHead>Montant (As)</TableHead>
+                <TableHead>Taux</TableHead>
+                <TableHead>Percepteur</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
-              {revenues.map(revenue => (
-                <TableRow key={revenue.id}>
-                  <TableCell>{revenue.year}</TableCell>
-                  <TableCell>{revenue.season}</TableCell>
-                  <TableCell>{revenue.amount} As</TableCell>
-                  <TableCell>{revenue.source}</TableCell>
-                  <TableCell>{revenue.taxRate}%</TableCell>
+              {filteredRecords.length > 0 ? (
+                filteredRecords.map(record => (
+                  <TableRow key={record.id}>
+                    <TableCell>
+                      {record.year} {record.season || 'Ver'}
+                    </TableCell>
+                    <TableCell>{record.source}</TableCell>
+                    <TableCell>{record.amount}</TableCell>
+                    <TableCell>{record.taxRate || '-'}%</TableCell>
+                    <TableCell>{record.collectedBy || 'Administrateur'}</TableCell>
+                  </TableRow>
+                ))
+              ) : (
+                <TableRow>
+                  <TableCell colSpan={5} className="text-center">
+                    Aucun revenu enregistré pour ce bâtiment
+                  </TableCell>
                 </TableRow>
-              ))}
+              )}
             </TableBody>
           </Table>
-          <div className="mt-4 flex justify-end">
-            <Button size="sm" className="flex items-center">
-              <PlusCircleIcon className="h-4 w-4 mr-2" />
-              Ajouter un revenu
-            </Button>
-          </div>
         </CardContent>
-      )}
-    </Card>
+      </Card>
+    </div>
   );
-};
-
-export default BuildingRevenue;
+}

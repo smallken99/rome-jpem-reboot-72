@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -11,7 +12,7 @@ import { ConstructionProjects } from './components/batiments/ConstructionProject
 import MaintenanceManager from './components/batiments/MaintenanceManager';
 import BuildingRevenue from './components/batiments/BuildingRevenue';
 import PublicBuildingModal from './components/batiments/PublicBuildingModal';
-import { Building, BuildingCreationData, BuildingStatus } from './types/batiments';
+import { Building, BuildingCreationData, BuildingStatus, BuildingType } from './types/batiments';
 
 export const GestionBatiments = () => {
   const [activeTab, setActiveTab] = useState<string>('liste');
@@ -29,42 +30,47 @@ export const GestionBatiments = () => {
     // Dans une implémentation réelle, il faudrait récupérer le bâtiment depuis l'état
     console.log("Édition du bâtiment", buildingId);
     
-    // Create example building with required properties from Building type
-    const example: Building = {
+    // Create example building with all required properties
+    const exampleBuilding: Building = {
       id: buildingId,
       name: "Bâtiment exemple",
-      type: "temple",
+      type: "temple" as BuildingType,
       location: "Forum Romanum",
       value: 50000,
       maintenance: 1000,
       maintenanceCost: 1000,
       condition: 100,
-      status: "good" as BuildingStatus,  // Cast to BuildingStatus to avoid specific enum type issues
-      description: "" // Make description a required field with default value
+      status: "good" as BuildingStatus,
+      description: "Description du bâtiment",
+      constructionYear: currentYear - 5 // Set a default construction year
     };
     
-    // Use functional form of setSelectedBuilding to avoid type issues
-    setSelectedBuilding(() => example);
+    // Set the selected building directly
+    setSelectedBuilding(exampleBuilding);
   };
 
   const handleSaveBuilding = (data: BuildingCreationData) => {
     if (selectedBuilding) {
-      // Using spread to keep all properties from Building type
+      // Update existing building
       updateBuilding(selectedBuilding.id, {
         ...data,
-        revenue: 0,      // Add missing revenue property
-        maintenance: data.maintenanceCost || 0, // Set maintenance equal to maintenanceCost
-        status: data.status || 'good' as BuildingStatus, // Ensure status is provided with correct type
-        description: data.description || "", // Ensure description is provided
+        revenue: data.revenue || 0,
+        maintenance: data.maintenanceCost || 0,
+        status: data.status || 'good' as BuildingStatus,
+        description: data.description || "",
+        constructionYear: data.constructionYear || currentYear
       });
     } else {
-      // Add missing properties required by Building type
+      // Add new building with all required properties
       const completeData: Omit<Building, 'id'> = {
         ...data,
-        revenue: 0,      // Add missing revenue property
-        maintenance: data.maintenanceCost || 0, // Set maintenance equal to maintenanceCost
-        status: data.status || 'good' as BuildingStatus, // Ensure status is provided with correct type
-        description: data.description || "" // Ensure description is provided
+        revenue: data.revenue || 0,
+        maintenance: data.maintenanceCost || 0,
+        status: data.status || 'good' as BuildingStatus,
+        description: data.description || "",
+        constructionYear: data.constructionYear || currentYear,
+        value: data.value || 0,
+        condition: data.condition || 100
       };
       
       addBuilding(completeData);
