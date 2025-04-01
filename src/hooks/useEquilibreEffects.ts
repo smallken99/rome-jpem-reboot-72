@@ -8,7 +8,7 @@ import { useBuildings } from '@/hooks/useBuildings';
  * Hook pour appliquer les effets de l'équilibre sur les autres systèmes du jeu
  */
 export function useEquilibreEffects() {
-  const { updateBuildingIncome, updateMaintenanceCost } = useBuildings();
+  const buildingsHook = useBuildings();
   const { balance, receivePayment, makePayment } = useEconomy();
   const [lastAppliedEffects, setLastAppliedEffects] = useState<Date | null>(null);
 
@@ -60,14 +60,46 @@ export function useEquilibreEffects() {
     if (impact.prosperity && Math.abs(impact.prosperity) > 5) {
       // Multiplier les revenus par un facteur basé sur la prospérité
       const factor = 1 + (impact.prosperity / 200); // +/- 50% max
-      updateBuildingIncome(factor);
+      
+      // Implement a workaround if updateBuildingIncome isn't available
+      if (typeof buildingsHook.updateBuildingIncome === 'function') {
+        buildingsHook.updateBuildingIncome(factor);
+      } else {
+        console.warn('updateBuildingIncome not available in useBuildings hook');
+        // Implement a fallback like modifying each building's income directly if needed
+        buildingsHook.buildings.forEach(building => {
+          if (building.income) {
+            const updatedBuilding = {
+              ...building,
+              income: Math.round(building.income * factor)
+            };
+            buildingsHook.updateBuilding(building.id, updatedBuilding);
+          }
+        });
+      }
     }
     
     // L'agitation sociale augmente les coûts d'entretien
     if (impact.rebellionRisk && impact.rebellionRisk > 10) {
       // Augmenter les coûts d'entretien en fonction du risque de rébellion
       const factor = 1 + (impact.rebellionRisk / 100); // +100% max
-      updateMaintenanceCost(factor);
+      
+      // Implement a workaround if updateMaintenanceCost isn't available
+      if (typeof buildingsHook.updateMaintenanceCost === 'function') {
+        buildingsHook.updateMaintenanceCost(factor);
+      } else {
+        console.warn('updateMaintenanceCost not available in useBuildings hook');
+        // Implement a fallback like modifying each building's maintenance directly if needed
+        buildingsHook.buildings.forEach(building => {
+          if (building.maintenanceCost) {
+            const updatedBuilding = {
+              ...building,
+              maintenanceCost: Math.round(building.maintenanceCost * factor)
+            };
+            buildingsHook.updateBuilding(building.id, updatedBuilding);
+          }
+        });
+      }
     }
   };
 

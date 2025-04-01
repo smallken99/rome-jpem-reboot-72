@@ -6,7 +6,28 @@ import { useEconomy } from '@/hooks/useEconomy';
 import { formatCurrency } from '@/utils/currencyUtils';
 
 export const EconomieStats: React.FC = () => {
-  const { balance, getFinancialStats } = useEconomy();
+  const { balance, transactions } = useEconomy();
+  
+  // Calculate financial stats locally since getFinancialStats doesn't exist
+  const getFinancialStats = () => {
+    const oneMonthAgo = new Date();
+    oneMonthAgo.setMonth(oneMonthAgo.getMonth() - 1);
+    
+    const recentTransactions = transactions.filter(
+      t => new Date(t.date) >= oneMonthAgo
+    );
+    
+    const monthlyIncome = recentTransactions
+      .filter(t => t.type === 'income')
+      .reduce((sum, t) => sum + t.amount, 0);
+      
+    const monthlyExpenses = recentTransactions
+      .filter(t => t.type === 'expense')
+      .reduce((sum, t) => sum + t.amount, 0);
+      
+    return { monthlyIncome, monthlyExpenses };
+  };
+  
   const stats = getFinancialStats();
   
   return (

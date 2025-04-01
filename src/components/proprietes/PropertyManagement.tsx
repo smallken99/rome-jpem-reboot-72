@@ -47,7 +47,10 @@ export const PropertyManagement: React.FC = () => {
     description: buildingWithType.description || '',
     purchaseDate: buildingWithType.purchaseDate || new Date(),
     status: buildingWithType.status || 'active',
-    upgrades: buildingWithType.upgrades || []
+    upgrades: (buildingWithType.upgrades || []).map(upgrade => ({
+      ...upgrade,
+      applied: upgrade.applied || upgrade.installed || false
+    })) as PropertyUpgrade[]
   } : null;
 
   if (!building) {
@@ -68,50 +71,54 @@ export const PropertyManagement: React.FC = () => {
   }
 
   const handleSellBuilding = () => {
-    if (sellBuilding(building.id)) {
+    // Convert id to string to match the expected parameter type
+    if (sellBuilding(String(building.id))) {
       navigate('/patrimoine/proprietes');
     }
   };
 
   const handleUpdateMaintenanceLevel = (level: number) => {
-    // Use building id for the first argument
+    // Create adapter for different function signatures
     const updateMaintenanceLevel = (buildingId: string, level: number) => {
       // Logic to update maintenance level
       toast.success(`Niveau d'entretien mis à jour pour ${building.name}`);
     };
     
-    // Update to comply with the function signature
-    const adapter = (buildingId: string, level: number) => {
-      updateMaintenanceLevel(buildingId, level);
+    // Adapt to expected signature by creating a wrapper function
+    const adapter = (level: number) => {
+      updateMaintenanceLevel(String(building.id), level);
     };
     
-    adapter(building.id, level);
+    // Call the adapter function
+    adapter(level);
   };
 
   const handleRenovateBuilding = () => {
-    updateBuildingCondition(building.id);
+    // Convert id to string to match the expected parameter type
+    updateBuildingCondition(String(building.id));
     toast.success(`${building.name} a été entièrement rénové`);
   };
 
   const handleUpdateWorkers = (count: number) => {
-    // Use building id for the first argument
+    // Create adapter for different function signatures
     const assignWorkers = (buildingId: string, workers: number) => {
       // Logic to assign workers
       toast.success(`Personnel mis à jour pour ${building.name}`);
     };
     
-    // Update to comply with the function signature
-    const adapter = (buildingId: string, workers: number) => {
-      assignWorkers(buildingId, workers);
+    // Adapt to expected signature by creating a wrapper function
+    const adapter = (count: number) => {
+      assignWorkers(String(building.id), count);
     };
     
-    adapter(building.id, count);
+    // Call the adapter function
+    adapter(count);
   };
 
   return (
     <div className="property-management space-y-6">
       <PropertyHeader 
-        building={building as any} 
+        building={building} 
         onSell={handleSellBuilding} 
       />
       
@@ -124,12 +131,12 @@ export const PropertyManagement: React.FC = () => {
         </TabsList>
         
         <TabsContent value="overview">
-          <OverviewTab building={building as any} />
+          <OverviewTab building={building} />
         </TabsContent>
         
         <TabsContent value="maintenance">
           <MaintenanceTab 
-            building={building as any} 
+            building={building} 
             updateMaintenanceLevel={handleUpdateMaintenanceLevel}
             updateSecurityLevel={() => {}}
             renovateBuilding={handleRenovateBuilding}
@@ -139,13 +146,13 @@ export const PropertyManagement: React.FC = () => {
         
         <TabsContent value="workers">
           <WorkersTab 
-            building={building as any} 
+            building={building} 
             updateWorkers={handleUpdateWorkers} 
           />
         </TabsContent>
         
         <TabsContent value="upgrades">
-          <UpgradesTab building={building as any} />
+          <UpgradesTab building={building} />
         </TabsContent>
       </Tabs>
     </div>

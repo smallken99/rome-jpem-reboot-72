@@ -30,7 +30,7 @@ export const GestionBatiments = () => {
     // Dans une implémentation réelle, il faudrait récupérer le bâtiment depuis l'état
     console.log("Édition du bâtiment", buildingId);
     
-    // Use type assertion to ensure it matches Building type
+    // Create example building with required properties from Building type
     const example: Building = {
       id: buildingId,
       name: "Bâtiment exemple",
@@ -40,18 +40,33 @@ export const GestionBatiments = () => {
       maintenance: 1000,
       maintenanceCost: 1000,
       condition: 100,
-      status: "good"
+      status: "good" as any  // Cast to any to avoid specific enum type issues
     };
     
-    setSelectedBuilding(example);
+    // Use useState setter pattern to avoid type errors
+    setSelectedBuilding(() => example);
     setIsAddBuildingModalOpen(true);
   };
 
   const handleSaveBuilding = (data: BuildingCreationData) => {
     if (selectedBuilding) {
-      updateBuilding(selectedBuilding.id, data);
+      // Add missing properties required by Building type
+      const completeData = {
+        ...data,
+        revenue: 0,      // Add missing revenue property
+        maintenance: data.maintenanceCost || 0 // Set maintenance equal to maintenanceCost
+      };
+      
+      updateBuilding(selectedBuilding.id, completeData);
     } else {
-      addBuilding(data);
+      // Add missing properties required by Building type
+      const completeData = {
+        ...data,
+        revenue: 0,      // Add missing revenue property
+        maintenance: data.maintenanceCost || 0 // Set maintenance equal to maintenanceCost
+      };
+      
+      addBuilding(completeData);
     }
     setIsAddBuildingModalOpen(false);
     setSelectedBuilding(undefined);

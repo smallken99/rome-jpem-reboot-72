@@ -1,148 +1,110 @@
 
 import React from 'react';
-import { Button } from '@/components/ui/button';
 import { 
+  ArrowUpDown, 
   TrendingUp, 
   TrendingDown, 
-  Scales, 
-  Shield, 
-  Landmark, 
-  ChevronsUp, 
-  ChevronsDown,
-  Users,
-  Coins
+  AlertTriangle, 
+  Scale, // Changed from Scales which doesn't exist
+  Gavel, 
+  Government 
 } from 'lucide-react';
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
-import { Equilibre } from '@/components/maitrejeu/types/equilibre';
-import { useEconomy } from '@/hooks/useEconomy';
-import { useBuildings } from '@/hooks/useBuildings';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 
-interface EquilibreActionsProps {
-  equilibre: Equilibre;
-  onAction: (action: string, amount: number) => void;
+interface EquilibreActionProps {
+  onApplyAction: (action: string, intensity: number) => void;
 }
 
-export const EquilibreActions: React.FC<EquilibreActionsProps> = ({ equilibre, onAction }) => {
-  const { balance } = useEconomy();
-  const { stats } = useBuildings();
-
-  // Calculer la stabilité globale de la République
-  const calculateOverallStability = () => {
-    const politicalStability = (equilibre.politique.moderates / 100) * 0.3;
-    const economicStability = 
-      ((equilibre.economie.stabilite + equilibre.economie.croissance) / 200) * 0.3;
-    const militaryStability = 
-      ((equilibre.militaire.moral + equilibre.militaire.discipline) / 200) * 0.2;
-    const socialStability = 
-      ((equilibre.social.cohesion || 50) / 100) * 0.2;
-    
-    return Math.round((politicalStability + economicStability + militaryStability + socialStability) * 100);
+export const EquilibreActions: React.FC<EquilibreActionProps> = ({ onApplyAction }) => {
+  const handleActionClick = (action: string, intensity: number) => {
+    onApplyAction(action, intensity);
   };
-
-  const getStabilityClass = (stability: number) => {
-    if (stability >= 75) return 'bg-green-100 text-green-800';
-    if (stability >= 50) return 'bg-blue-100 text-blue-800';
-    if (stability >= 25) return 'bg-amber-100 text-amber-800';
-    return 'bg-red-100 text-red-800';
-  };
-
-  // Actions possibles basées sur l'état de l'équilibre
-  const actions = [
-    {
-      id: 'subsidize_plebs',
-      label: 'Subventionner la plèbe',
-      description: 'Augmenter la cohésion sociale et diminuer les tensions',
-      icon: <Users className="h-4 w-4 mr-2" />,
-      cost: 5000,
-      available: balance >= 5000,
-      impact: 'Cohésion sociale +10%, Soutien des populares +5%',
-      onClick: () => onAction('subsidize_plebs', 5000)
-    },
-    {
-      id: 'military_parade',
-      label: 'Organiser une parade militaire',
-      description: 'Montrer la puissance militaire de Rome et renforcer la discipline',
-      icon: <Shield className="h-4 w-4 mr-2" />,
-      cost: 3000,
-      available: balance >= 3000,
-      impact: 'Moral des troupes +8%, Discipline +5%, Soutien des optimates +3%',
-      onClick: () => onAction('military_parade', 3000)
-    },
-    {
-      id: 'temple_donation',
-      label: 'Donation aux temples',
-      description: 'Honorer les dieux et augmenter la piété publique',
-      icon: <Landmark className="h-4 w-4 mr-2" />,
-      cost: 2000,
-      available: balance >= 2000,
-      impact: 'Piété +15%, Superstition -5%',
-      onClick: () => onAction('temple_donation', 2000)
-    },
-    {
-      id: 'trade_incentives',
-      label: 'Incitations commerciales',
-      description: 'Stimuler le commerce avec des réductions fiscales',
-      icon: <Coins className="h-4 w-4 mr-2" />,
-      cost: 8000,
-      available: balance >= 8000,
-      impact: 'Commerce +12%, Croissance +5%, Stabilité économique +3%',
-      onClick: () => onAction('trade_incentives', 8000)
-    },
-    {
-      id: 'reconciliation_meeting',
-      label: 'Réunion de réconciliation',
-      description: 'Réunir les factions politiques pour apaiser les tensions',
-      icon: <Scales className="h-4 w-4 mr-2" />,
-      cost: 1000,
-      available: balance >= 1000,
-      impact: 'Modérés +7%, Tensions politiques -10%',
-      onClick: () => onAction('reconciliation_meeting', 1000)
-    }
-  ];
 
   return (
-    <div className="space-y-4">
-      <div className="bg-muted p-3 rounded-md flex items-center justify-between">
-        <div className="flex items-center">
-          <Scales className="h-5 w-5 mr-2 text-purple-500" />
-          <span>Stabilité globale:</span>
-        </div>
-        <div className={`px-2 py-0.5 rounded-full font-medium ${getStabilityClass(calculateOverallStability())}`}>
-          {calculateOverallStability()}%
-        </div>
-      </div>
-
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-        {actions.map(action => (
-          <TooltipProvider key={action.id}>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button 
-                  variant={action.available ? "outline" : "ghost"} 
-                  className="w-full justify-start" 
-                  onClick={action.onClick}
-                  disabled={!action.available}
-                >
-                  {action.icon}
-                  <span className="flex-1 text-left">{action.label}</span>
-                  <span className="text-muted-foreground text-xs">{action.cost} As</span>
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent side="bottom" className="w-64 p-3">
-                <p className="font-medium">{action.label}</p>
-                <p className="text-sm text-muted-foreground mb-2">{action.description}</p>
-                <div className="text-xs bg-accent p-1 rounded">
-                  <p className="font-medium mb-1">Impact estimé:</p>
-                  <p>{action.impact}</p>
-                </div>
-                {!action.available && (
-                  <p className="text-xs text-red-500 mt-1">Fonds insuffisants</p>
-                )}
-              </TooltipContent>
-            </Tooltip>
-          </TooltipProvider>
-        ))}
-      </div>
+    <div className="space-y-6">
+      <Card>
+        <CardHeader className="pb-3">
+          <CardTitle className="text-lg">Actions d'Équilibrage</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="grid grid-cols-1 gap-3">
+            <ActionButton
+              icon={<TrendingUp className="h-5 w-5 text-green-500" />}
+              label="Stimuler l'Économie"
+              description="Augmenter les investissements publics et le commerce"
+              onClick={() => handleActionClick('boost_economy', 10)}
+            />
+            
+            <ActionButton
+              icon={<TrendingDown className="h-5 w-5 text-red-500" />}
+              label="Austérité Économique"
+              description="Réduire les dépenses publiques et rationner les ressources"
+              onClick={() => handleActionClick('economic_austerity', 10)}
+            />
+            
+            <ActionButton
+              icon={<AlertTriangle className="h-5 w-5 text-amber-500" />}
+              label="Mesures d'Urgence"
+              description="Actions exceptionnelles pour situation de crise"
+              onClick={() => handleActionClick('emergency_measures', 15)}
+            />
+            
+            <ActionButton
+              icon={<Scale className="h-5 w-5 text-blue-500" />}
+              label="Réformes Sociales"
+              description="Améliorer les conditions de vie des citoyens"
+              onClick={() => handleActionClick('social_reforms', 8)}
+            />
+            
+            <ActionButton
+              icon={<Gavel className="h-5 w-5 text-purple-500" />}
+              label="Lois Conservatrices"
+              description="Renforcer l'ordre traditionnel"
+              onClick={() => handleActionClick('conservative_laws', 8)}
+            />
+            
+            <ActionButton
+              icon={<Government className="h-5 w-5 text-indigo-500" />}
+              label="Concessions Politiques"
+              description="Équilibrer les factions politiques"
+              onClick={() => handleActionClick('political_concessions', 12)}
+            />
+            
+            <ActionButton
+              icon={<ArrowUpDown className="h-5 w-5 text-gray-500" />}
+              label="Équilibre Neutre"
+              description="Ajustements mineurs pour maintenir le statu quo"
+              onClick={() => handleActionClick('neutral_balance', 5)}
+            />
+          </div>
+        </CardContent>
+      </Card>
     </div>
+  );
+};
+
+interface ActionButtonProps {
+  icon: React.ReactNode;
+  label: string;
+  description: string;
+  onClick: () => void;
+}
+
+const ActionButton: React.FC<ActionButtonProps> = ({ icon, label, description, onClick }) => {
+  return (
+    <Button
+      variant="outline"
+      className="w-full justify-start h-auto py-3 px-4"
+      onClick={onClick}
+    >
+      <div className="flex items-start">
+        <div className="mr-3 mt-0.5">{icon}</div>
+        <div className="text-left">
+          <div className="font-medium">{label}</div>
+          <div className="text-xs text-muted-foreground mt-1">{description}</div>
+        </div>
+      </div>
+    </Button>
   );
 };

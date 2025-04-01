@@ -10,12 +10,20 @@ export interface PropertyUpgrade {
   description: string;
   effect: string;
   applied: boolean;
+  installed?: boolean; // Add this for compatibility with some code
+  buildingType?: BuildingType[]; // Add this for compatibility with some code
   requirements?: {
     minBuildingLevel?: number;
     minValue?: number;
     minWorkers?: number;
     minCondition?: number;
     otherUpgrades?: string[];
+    buildingLevel?: number; // Add for compatibility
+    buildingCondition?: number; // Add for compatibility
+    minIncome?: number; // Add for compatibility
+    value?: number; // Add for compatibility
+    previousUpgrade?: string; // Add for compatibility
+    upgrades?: string[]; // Add for compatibility
   };
   effects?: {
     income?: number;
@@ -23,7 +31,11 @@ export interface PropertyUpgrade {
     conditionBoost?: number;
     workers?: number;
     value?: number;
+    maintenance?: number; // Add for compatibility
+    condition?: number; // Add for compatibility
+    security?: number; // Add for compatibility
   };
+  type?: string; // Add for compatibility
 }
 
 export interface OwnedBuilding {
@@ -79,4 +91,35 @@ export interface PropertyUpgradeEffects {
   workers?: number;
   value?: number;
   securityLevel?: number;
+}
+
+// Add these for compatibility with slaves components
+export interface Slave {
+  id: string;
+  name: string;
+  age: number;
+  gender: string;
+  status: string;
+  acquired: Date;
+  value: number;
+  assignedTo?: string;
+  health?: number;
+  skills?: string[];
+  origin?: string;
+  notes?: string;
+}
+
+export interface SlaveAssignment {
+  id: string;
+  slaveId: string;
+  buildingId: string;
+  propertyId: string;
+  startDate: Date;
+  efficiency: number;
+  buildingName?: string;
+  assignedAt?: Date;
+  role?: string;
+  productivity?: number;
+  count?: number;
+  maxCount?: number;
 }

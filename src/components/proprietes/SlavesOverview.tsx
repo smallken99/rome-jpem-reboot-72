@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
@@ -10,13 +10,18 @@ import { SlavesList } from './property-management/slaves/SlavesList';
 import { SlaveAssignment } from './property-management/slaves/SlaveAssignment';
 import { SlavePurchaseForm } from './property-management/slaves/SlavePurchaseForm';
 import { SlaveStatistics } from './property-management/slaves/SlaveStatistics';
+import { Slave } from './types/property';
 
 export const SlavesOverview: React.FC = () => {
   const slaveManagement = useSlaveManagement();
-  const { totalSlaves = 50, slavePrice = 1000, assignedSlaves = 0, slaves = [], assignments = [] } = slaveManagement;
   const { buildings } = useBuildingManagement();
   const { balance = 0 } = useEconomy();
   const [activeTab, setActiveTab] = useState('overview');
+  
+  // Compute derived values that might be missing from the hook
+  const totalSlaves = slaveManagement.slaves?.length || 0;
+  const slavePrice = 1000; // Default price if not provided
+  const assignedSlaves = slaveManagement.assignments?.length || 0;
   
   // Define mock functions if they don't exist in slaveManagement
   const mockPurchaseSlaves = (count: number, price: number) => {
@@ -39,10 +44,27 @@ export const SlavesOverview: React.FC = () => {
     return true;
   };
   
+  // Use the real functions if they exist, otherwise use the mocks
   const purchaseSlaves = slaveManagement.purchaseSlaves || mockPurchaseSlaves;
   const sellSlaves = slaveManagement.sellSlaves || mockSellSlaves;
   const assignSlavesToProperty = slaveManagement.assignSlavesToProperty || mockAssignSlavesToProperty;
   const removeSlaveAssignment = slaveManagement.removeSlaveAssignment || mockRemoveSlaveAssignment;
+  
+  // Convert slave objects to match the required type
+  const slavesWithRequiredProps: Slave[] = slaveManagement.slaves?.map(slave => ({
+    id: slave.id,
+    name: slave.name || 'Unnamed Slave',
+    age: slave.age || 25,
+    gender: slave.gender || 'male',
+    status: slave.status || 'active',
+    acquired: slave.acquired || new Date(),
+    value: slave.value || slavePrice,
+    assignedTo: slave.assignedTo,
+    health: slave.health,
+    skills: slave.skills,
+    origin: slave.origin,
+    notes: slave.notes
+  })) || [];
   
   return (
     <div className="space-y-6">
@@ -91,23 +113,41 @@ export const SlavesOverview: React.FC = () => {
               />
               
               <SlavesList 
-                slaves={slaves}
+                slaves={slavesWithRequiredProps}
                 onDeleteSlave={(id) => console.log('Delete slave', id)}
               />
             </TabsContent>
             
             <TabsContent value="assignments" className="mt-6 space-y-6">
               <div className="grid gap-4">
-                {assignments.map(assignment => (
+                {slaveManagement.assignments?.map(assignment => (
                   <SlaveAssignment 
-                    key={assignment.id}
-                    assignment={assignment}
-                    buildings={buildings}
+                    key={assignment.id || `assignment-${Math.random()}`}
+                    assignment={{
+                      id: assignment.id || `assignment-${Math.random()}`,
+                      slaveId: assignment.slaveId,
+                      buildingId: assignment.buildingId
+                    }}
+                    buildings={buildings.map(b => ({
+                      id: b.id,
+                      buildingId: b.id,
+                      name: b.name,
+                      buildingType: b.type,
+                      type: b.type,
+                      location: b.location,
+                      size: 1,
+                      value: b.value,
+                      condition: b.condition,
+                      maintenanceLevel: b.maintenanceLevel || a,
+                      maintenanceCost: b.maintenance,
+                      maintenance: b.maintenance,
+                      purchaseDate: new Date()
+                    }))}
                     onRevoke={removeSlaveAssignment}
                   />
                 ))}
                 
-                {assignments.length === 0 && (
+                {(!slaveManagement.assignments || slaveManagement.assignments.length === 0) && (
                   <p className="text-center py-8 text-muted-foreground">
                     Aucun esclave assigné pour le moment
                   </p>
