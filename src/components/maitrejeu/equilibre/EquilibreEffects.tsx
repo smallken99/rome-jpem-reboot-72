@@ -33,7 +33,7 @@ export const EquilibreEffects: React.FC<EquilibreEffectsProps> = ({ equilibre, i
       risks.push({
         id: 'populares_strong',
         label: 'Pouvoir populaire excessif',
-        description: 'Les populares gagnent trop d'influence, risque de révolte des optimates',
+        description: 'Les populares gagnent trop d\'influence, risque de révolte des optimates',
         severity: 'medium',
         area: 'politique'
       });
