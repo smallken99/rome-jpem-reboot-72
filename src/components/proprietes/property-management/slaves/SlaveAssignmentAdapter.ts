@@ -1,50 +1,37 @@
 
-export interface Slave {
-  id: string;
-  name: string;
-  gender: 'male' | 'female';
-  age: number;
-  health: number;
-  skill: number;
-  origin: string;
-  price: number;
-  traits?: string[];
-  specialization?: string;
-  assigned?: boolean;
-  assignedTo?: string;
-}
-
-export interface SlaveAssignment {
-  id: string;
-  slaveId: string;
-  buildingId: string;
-  efficiency: number;
-  role: string;
-  startDate: Date;
-}
-
-export const adaptSlaveAssignment = (assignment: Partial<SlaveAssignment>): SlaveAssignment => {
-  return {
-    id: assignment.id || `assignment-${Date.now()}`,
-    slaveId: assignment.slaveId || '',
-    buildingId: assignment.buildingId || '',
-    efficiency: assignment.efficiency || 1.0,
-    role: assignment.role || 'worker',
-    startDate: assignment.startDate || new Date()
-  };
-};
+import { SlaveAssignment } from '@/components/proprietes/types/slave';
+import { v4 as uuidv4 } from 'uuid';
 
 export const createSlaveAssignment = (
   slaveId: string,
   buildingId: string,
-  role: string = 'worker'
+  propertyId: string,
+  propertyName: string,
+  buildingName?: string
 ): SlaveAssignment => {
   return {
-    id: `assignment-${Date.now()}-${slaveId.substring(0, 4)}`,
+    id: uuidv4(),
     slaveId,
+    propertyId,
     buildingId,
-    efficiency: 1.0,
-    role,
-    startDate: new Date()
+    role: "worker",
+    startDate: new Date(),
+    efficiency: 80 + Math.floor(Math.random() * 20),
+    productivity: 80 + Math.floor(Math.random() * 20)
+  };
+};
+
+export const adaptSlaveAssignment = (assignment: any): SlaveAssignment => {
+  return {
+    id: assignment.id || uuidv4(),
+    slaveId: assignment.slaveId,
+    propertyId: assignment.propertyId,
+    buildingId: assignment.buildingId,
+    role: assignment.role || "worker",
+    startDate: assignment.startDate || new Date(),
+    endDate: assignment.endDate,
+    efficiency: assignment.efficiency || 80,
+    productivity: assignment.productivity || 80,
+    income: assignment.income
   };
 };

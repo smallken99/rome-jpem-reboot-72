@@ -2,13 +2,7 @@
 import React from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
-
-export interface StorageStatsType {
-  capacity: number;
-  used: number;
-  totalValue: number;
-  uniqueItems: number;
-}
+import { StorageStats as StorageStatsType } from '../types/resource';
 
 interface StorageStatsProps {
   stats: StorageStatsType;
