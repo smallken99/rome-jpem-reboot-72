@@ -1,40 +1,45 @@
 
 import React, { useState, useEffect } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
-import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Label } from '@/components/ui/label';
-import { Building, BuildingType, BuildingStatus, BuildingOwner, BuildingCreationData } from '../../types/batiments';
+import { Textarea } from '@/components/ui/textarea';
+import { Button } from '@/components/ui/button';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import { Building, BuildingStatus, BuildingOwner, BuildingCreationData, BuildingType } from '../../types/batiments';
 
 interface PublicBuildingModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onSave: (buildingData: BuildingCreationData) => void;
+  onSave: (data: BuildingCreationData) => void;
   building?: Building;
 }
 
-const PublicBuildingModal: React.FC<PublicBuildingModalProps> = ({ isOpen, onClose, onSave, building }) => {
-  const initialBuildingData: BuildingCreationData = {
+const PublicBuildingModal: React.FC<PublicBuildingModalProps> = ({
+  isOpen,
+  onClose,
+  onSave,
+  building
+}) => {
+  const [formData, setFormData] = useState<BuildingCreationData>({
     name: '',
-    type: 'other' as BuildingType,
+    type: BuildingType.FORUM,
     location: '',
-    status: 'good' as BuildingStatus,
-    constructionYear: new Date().getFullYear(),
+    owner: BuildingOwner.REPUBLIC,
     description: '',
-    cost: 0,
-    maintenanceCost: 0,
-    maintenance: 0,
-    value: 0,
-    condition: 100,
-    revenue: 0,
-    income: 0,
-    capacity: 0,
-    owner: 'république'
-  };
-
-  const [formData, setFormData] = useState<BuildingCreationData>(initialBuildingData);
+    status: BuildingStatus.GOOD,
+    constructionYear: new Date().getFullYear() - 753,
+    value: 50000,
+    cost: 75000,
+    maintenance: 1000,
+    revenue: 0
+  });
 
   useEffect(() => {
     if (building) {
@@ -42,166 +47,227 @@ const PublicBuildingModal: React.FC<PublicBuildingModalProps> = ({ isOpen, onClo
         name: building.name,
         type: building.type,
         location: building.location,
+        owner: building.owner || BuildingOwner.REPUBLIC,
+        description: building.description || '',
         status: building.status,
         constructionYear: building.constructionYear,
-        description: building.description,
-        cost: building.cost,
-        maintenanceCost: building.maintenanceCost,
-        maintenance: building.maintenance,
         value: building.value,
-        condition: building.condition,
+        cost: building.cost,
+        maintenance: building.maintenance,
         revenue: building.revenue,
-        income: building.income || 0,
-        capacity: building.capacity,
-        owner: building.owner
+        capacity: building.capacity
       });
     } else {
-      setFormData(initialBuildingData);
+      // Reset form for new building
+      setFormData({
+        name: '',
+        type: BuildingType.FORUM,
+        location: '',
+        owner: BuildingOwner.REPUBLIC,
+        description: '',
+        status: BuildingStatus.GOOD,
+        constructionYear: new Date().getFullYear() - 753,
+        value: 50000,
+        cost: 75000,
+        maintenance: 1000,
+        revenue: 0
+      });
     }
   }, [building, isOpen]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
-    setFormData(prev => ({
-      ...prev,
-      [name]: name === 'constructionYear' || name === 'cost' || name === 'maintenanceCost' || 
-              name === 'value' || name === 'condition' || name === 'revenue' || 
-              name === 'capacity' || name === 'income' || name === 'maintenance'
-        ? Number(value)
-        : value
-    }));
-  };
-
-  const handleSelectChange = (value: string, name: string) => {
     setFormData(prev => ({ ...prev, [name]: value }));
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleNumberChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({ ...prev, [name]: Number(value) }));
+  };
+
+  const handleSelectChange = (name: string, value: string) => {
+    setFormData(prev => ({ ...prev, [name]: value }));
+  };
+
+  const handleSubmit = () => {
     onSave(formData);
   };
 
   return (
-    <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-[600px]">
+    <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
+      <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>{building ? 'Modifier' : 'Ajouter'} un bâtiment public</DialogTitle>
+          <DialogTitle>{building ? 'Modifier le bâtiment' : 'Ajouter un nouveau bâtiment public'}</DialogTitle>
         </DialogHeader>
-        
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <div className="grid gap-4 py-4">
           <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="name">Nom</Label>
-              <Input id="name" name="name" value={formData.name} onChange={handleChange} required />
+            <div className="col-span-2">
+              <Label htmlFor="name">Nom du bâtiment</Label>
+              <Input
+                id="name"
+                name="name"
+                value={formData.name}
+                onChange={handleChange}
+                className="mt-1"
+              />
             </div>
-            
-            <div className="space-y-2">
+
+            <div>
               <Label htmlFor="type">Type</Label>
-              <Select 
-                name="type" 
-                value={formData.type} 
-                onValueChange={(value) => handleSelectChange(value, 'type')}
+              <Select
+                value={formData.type}
+                onValueChange={(value) => handleSelectChange('type', value)}
               >
-                <SelectTrigger>
+                <SelectTrigger id="type" className="mt-1">
                   <SelectValue placeholder="Sélectionner un type" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="temple">Temple</SelectItem>
-                  <SelectItem value="forum">Forum</SelectItem>
-                  <SelectItem value="bath">Thermes</SelectItem>
-                  <SelectItem value="theater">Théâtre</SelectItem>
-                  <SelectItem value="warehouse">Entrepôt</SelectItem>
-                  <SelectItem value="market">Marché</SelectItem>
-                  <SelectItem value="other">Autre</SelectItem>
+                  <SelectItem value={BuildingType.TEMPLE}>Temple</SelectItem>
+                  <SelectItem value={BuildingType.FORUM}>Forum</SelectItem>
+                  <SelectItem value={BuildingType.BATHHOUSE}>Thermes</SelectItem>
+                  <SelectItem value={BuildingType.THEATRE}>Théâtre</SelectItem>
+                  <SelectItem value={BuildingType.MARKET}>Marché</SelectItem>
+                  <SelectItem value={BuildingType.WAREHOUSE}>Entrepôt</SelectItem>
+                  <SelectItem value={BuildingType.BARRACKS}>Caserne</SelectItem>
+                  <SelectItem value={BuildingType.ACADEMY}>Académie</SelectItem>
                 </SelectContent>
               </Select>
             </div>
-          </div>
-          
-          <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-2">
+
+            <div>
               <Label htmlFor="location">Emplacement</Label>
-              <Input id="location" name="location" value={formData.location} onChange={handleChange} required />
+              <Input
+                id="location"
+                name="location"
+                value={formData.location}
+                onChange={handleChange}
+                className="mt-1"
+              />
             </div>
-            
-            <div className="space-y-2">
-              <Label htmlFor="status">État</Label>
-              <Select 
-                name="status" 
-                value={formData.status} 
-                onValueChange={(value) => handleSelectChange(value, 'status')}
+
+            <div>
+              <Label htmlFor="owner">Propriétaire</Label>
+              <Select
+                value={formData.owner}
+                onValueChange={(value) => handleSelectChange('owner', value)}
               >
-                <SelectTrigger>
-                  <SelectValue placeholder="Sélectionner un état" />
+                <SelectTrigger id="owner" className="mt-1">
+                  <SelectValue placeholder="Sélectionner un propriétaire" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="excellent">Excellent</SelectItem>
-                  <SelectItem value="good">Bon</SelectItem>
-                  <SelectItem value="average">Moyen</SelectItem>
-                  <SelectItem value="poor">Mauvais</SelectItem>
-                  <SelectItem value="under_construction">En construction</SelectItem>
+                  <SelectItem value={BuildingOwner.REPUBLIC}>République</SelectItem>
+                  <SelectItem value={BuildingOwner.SENATORIAL}>Sénatorial</SelectItem>
+                  <SelectItem value={BuildingOwner.RELIGIOUS}>Religieux</SelectItem>
+                  <SelectItem value={BuildingOwner.MILITARY}>Militaire</SelectItem>
+                  <SelectItem value={BuildingOwner.PRIVATE}>Privé</SelectItem>
                 </SelectContent>
               </Select>
             </div>
-          </div>
-          
-          <div className="grid grid-cols-3 gap-4">
-            <div className="space-y-2">
+
+            <div>
               <Label htmlFor="constructionYear">Année de construction</Label>
-              <Input id="constructionYear" name="constructionYear" type="number" value={formData.constructionYear} onChange={handleChange} required />
+              <Input
+                id="constructionYear"
+                name="constructionYear"
+                type="number"
+                value={formData.constructionYear}
+                onChange={handleNumberChange}
+                className="mt-1"
+              />
             </div>
-            
-            <div className="space-y-2">
+
+            <div>
+              <Label htmlFor="status">État</Label>
+              <Select
+                value={formData.status}
+                onValueChange={(value) => handleSelectChange('status', value as BuildingStatus)}
+              >
+                <SelectTrigger id="status" className="mt-1">
+                  <SelectValue placeholder="Sélectionner l'état" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value={BuildingStatus.EXCELLENT}>Excellent</SelectItem>
+                  <SelectItem value={BuildingStatus.GOOD}>Bon</SelectItem>
+                  <SelectItem value={BuildingStatus.AVERAGE}>Moyen</SelectItem>
+                  <SelectItem value={BuildingStatus.FAIR}>Correct</SelectItem>
+                  <SelectItem value={BuildingStatus.POOR}>Mauvais</SelectItem>
+                  <SelectItem value={BuildingStatus.DAMAGED}>Endommagé</SelectItem>
+                  <SelectItem value={BuildingStatus.RUINED}>En ruine</SelectItem>
+                  <SelectItem value={BuildingStatus.UNDER_CONSTRUCTION}>En construction</SelectItem>
+                  <SelectItem value={BuildingStatus.UNDER_RENOVATION}>En rénovation</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div>
               <Label htmlFor="cost">Coût de construction</Label>
-              <Input id="cost" name="cost" type="number" value={formData.cost} onChange={handleChange} required />
+              <Input
+                id="cost"
+                name="cost"
+                type="number"
+                value={formData.cost}
+                onChange={handleNumberChange}
+                className="mt-1"
+              />
+            </div>
+
+            <div>
+              <Label htmlFor="maintenance">Coût d'entretien (annuel)</Label>
+              <Input
+                id="maintenance"
+                name="maintenance"
+                type="number"
+                value={formData.maintenance}
+                onChange={handleNumberChange}
+                className="mt-1"
+              />
+            </div>
+
+            <div>
+              <Label htmlFor="revenue">Revenu (si applicable)</Label>
+              <Input
+                id="revenue"
+                name="revenue"
+                type="number"
+                value={formData.revenue}
+                onChange={handleNumberChange}
+                className="mt-1"
+              />
             </div>
             
-            <div className="space-y-2">
-              <Label htmlFor="maintenanceCost">Coût d'entretien</Label>
-              <Input id="maintenanceCost" name="maintenanceCost" type="number" value={formData.maintenanceCost} onChange={handleChange} required />
-            </div>
-          </div>
-          
-          <div className="grid grid-cols-3 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="revenue">Revenu généré</Label>
-              <Input id="revenue" name="revenue" type="number" value={formData.revenue} onChange={handleChange} />
-            </div>
-            
-            <div className="space-y-2">
-              <Label htmlFor="condition">État (%)</Label>
-              <Input id="condition" name="condition" type="number" min="0" max="100" value={formData.condition} onChange={handleChange} required />
-            </div>
-            
-            <div className="space-y-2">
+            <div>
               <Label htmlFor="capacity">Capacité</Label>
-              <Input id="capacity" name="capacity" type="number" value={formData.capacity} onChange={handleChange} />
+              <Input
+                id="capacity"
+                name="capacity"
+                type="number"
+                value={formData.capacity || 0}
+                onChange={handleNumberChange}
+                className="mt-1"
+              />
+            </div>
+
+            <div className="col-span-2">
+              <Label htmlFor="description">Description</Label>
+              <Textarea
+                id="description"
+                name="description"
+                value={formData.description}
+                onChange={handleChange}
+                className="mt-1"
+                rows={3}
+              />
             </div>
           </div>
-          
-          <div className="grid grid-cols-1 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="owner">Propriétaire</Label>
-              <Input id="owner" name="owner" value={formData.owner} onChange={handleChange} required />
-            </div>
-          </div>
-          
-          <div className="space-y-2">
-            <Label htmlFor="description">Description</Label>
-            <Textarea 
-              id="description" 
-              name="description" 
-              value={formData.description} 
-              onChange={handleChange}
-              rows={4}
-            />
-          </div>
-          
-          <DialogFooter>
-            <Button type="button" variant="outline" onClick={onClose}>Annuler</Button>
-            <Button type="submit">{building ? 'Mettre à jour' : 'Ajouter'}</Button>
-          </DialogFooter>
-        </form>
+        </div>
+        <DialogFooter>
+          <Button variant="outline" onClick={onClose}>
+            Annuler
+          </Button>
+          <Button onClick={handleSubmit}>
+            {building ? 'Mettre à jour' : 'Ajouter'}
+          </Button>
+        </DialogFooter>
       </DialogContent>
     </Dialog>
   );

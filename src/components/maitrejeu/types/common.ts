@@ -1,53 +1,53 @@
 
+// Define all possible seasons
 export type Season = 
-  | 'Spring' | 'Summer' | 'Autumn' | 'Winter' 
-  | 'SPRING' | 'SUMMER' | 'AUTUMN' | 'WINTER' 
-  | 'Ver' | 'Aes' | 'Aut' | 'Hie'
-  | 'Aestas' | 'Autumnus' | 'Hiems'
-  | 'spring' | 'summer' | 'autumn' | 'winter' | 'fall'
-  | 'Fall';
+  'Spring' | 'Summer' | 'Autumn' | 'Winter' | 'Fall' | 
+  'Ver' | 'Aestas' | 'Autumnus' | 'Hiems' |
+  'Aes' | 'Aut' | 'Hie' |
+  'SPRING' | 'SUMMER' | 'AUTUMN' | 'WINTER' |
+  'spring' | 'summer' | 'autumn' | 'winter' | 'fall';
 
+// Define game phases
+export enum GamePhase {
+  SETUP = 'setup',
+  SENATE = 'senate',
+  ACTIONS = 'actions',
+  ECONOMY = 'economy',
+  EVENTS = 'events',
+  DIPLOMACY = 'diplomacy',
+  MILITARY = 'military',
+  POLITIQUE = 'politique',
+  ECONOMIE = 'economie',
+  MILITAIRE = 'militaire',
+  RELIGION = 'religion',
+  SOCIAL = 'social',
+  ELECTION = 'election',
+  ACTION = 'action',
+  SENAT = 'senat',
+  EVENEMENT = 'evenement',
+  ADMINISTRATION = 'administration',
+  // Add these to fix the existing comparisons
+  NORMAL = 'normal',
+  CRISIS = 'crisis',
+  WAR = 'war',
+  ECONOMIC = 'economic',
+  REVOLT = 'revolt',
+  TRIUMPH = 'triumph',
+  GAMES = 'games',
+  SCANDAL = 'scandal'
+}
+
+// Define game date structure
 export interface GameDate {
   year: number;
   season: Season;
   phase?: GamePhase;
-  day?: number;
 }
 
-export enum GamePhase {
-  SETUP = 'setup',
-  SENATE = 'senate',
-  SENAT = 'senat',
-  ELECTION = 'election',
-  ACTIONS = 'actions',
-  ACTION = 'action',
-  EVENTS = 'events',
-  EVENEMENT = 'evenement',
-  ECONOMY = 'economy',
-  ECONOMIE = 'economie',
-  DIPLOMACY = 'diplomatic',
-  MILITARY = 'military',
-  MILITAIRE = 'militaire',
-  RELIGION = 'religious',
-  POLITIQUE = 'politique',
-  SOCIAL = 'social',
-  ADMINISTRATION = 'administration'
+export function isValidPhase(phase: string): phase is GamePhase {
+  return Object.values(GamePhase).includes(phase as GamePhase);
 }
 
-// Utility functions to format dates
-export const formatGameDate = (date: GameDate): string => {
-  return `${date.year} ${date.season}`;
-};
-
-export const parseStringToGameDate = (dateString: string): GameDate => {
-  const parts = dateString.split(' ');
-  if (parts.length >= 2) {
-    return {
-      year: parseInt(parts[0], 10),
-      season: parts[1] as Season
-    };
-  }
-  throw new Error('Invalid date format');
-};
-
-export const stringToGameDate = parseStringToGameDate;
+export function formatGameDate(date: GameDate): string {
+  return `${date.year} (${date.season})`;
+}

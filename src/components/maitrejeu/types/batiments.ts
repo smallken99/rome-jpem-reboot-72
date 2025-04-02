@@ -4,18 +4,18 @@ export interface Building {
   name: string;
   type: string;
   location: string;
-  status: string;
+  status: BuildingStatus;
   owner?: string;
   constructionDate?: Date;
   lastMaintenance?: Date;
-  description?: string;
+  description: string;
   
   // Required properties for building management
   value: number;
   maintenanceCost: number;
   condition: number;
   
-  // Additional required properties based on error messages
+  // Additional required properties
   constructionYear: number;
   cost: number;
   maintenance: number;
@@ -26,6 +26,7 @@ export interface Building {
   capacity?: number;
   staff?: number;
   slaves?: number;
+  workers?: number;
   upgrades?: string[];
   maintenanceLevel?: number;
   securityLevel?: number;
@@ -58,7 +59,9 @@ export enum BuildingStatus {
   DAMAGED = 'damaged',
   RUINED = 'ruined',
   UNDER_CONSTRUCTION = 'under_construction',
-  UNDER_RENOVATION = 'under_renovation'
+  UNDER_RENOVATION = 'under_renovation',
+  EXCELLENT = 'excellent',
+  AVERAGE = 'average'
 }
 
 export enum BuildingOwner {
@@ -74,16 +77,18 @@ export interface BuildingCreationData {
   type: string;
   location: string;
   owner?: string;
-  description?: string;
+  description: string;
   status?: BuildingStatus;
   maintenanceCost?: number;
   value?: number;
   condition?: number;
   constructionYear?: number;
   cost?: number;
-  maintenance?: number;
+  maintenance: number;
   revenue?: number;
   capacity?: number;
+  income?: number;
+  workers?: number;
 }
 
 export enum BuildingPriority {
@@ -124,7 +129,7 @@ export interface ConstructionProject {
   type: string;
   location: string;
   cost: number;
-  startDate: string;
+  startDate: string | Date;
   estimatedCompletion: string;
   progress: number;
   status: string;

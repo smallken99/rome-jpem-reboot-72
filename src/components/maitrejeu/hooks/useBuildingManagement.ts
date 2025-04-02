@@ -1,5 +1,5 @@
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useMaitreJeu } from '../context';
 import { v4 as uuidv4 } from 'uuid';
 import { 
@@ -9,9 +9,9 @@ import {
   BuildingFilter,
   ConstructionProject,
   MaintenanceTask,
-  BuildingCreationData
+  BuildingCreationData,
+  BuildingPriority
 } from '../types/batiments';
-import { GameDate } from '@/utils/types/gameDate';
 import { toast } from 'sonner';
 
 export const useBuildingManagement = () => {
@@ -20,14 +20,14 @@ export const useBuildingManagement = () => {
     {
       id: "building-1",
       name: "Temple de Jupiter",
-      type: "temple" as BuildingType,
+      type: BuildingType.TEMPLE,
       location: "Capitole",
       owner: "république",
       value: 100000,
       maintenance: 2000,
       maintenanceCost: 2000,
       condition: 95,
-      status: "excellent" as BuildingStatus,
+      status: BuildingStatus.EXCELLENT,
       description: "Temple principal dédié à Jupiter Optimus Maximus",
       constructionYear: 509,
       cost: 150000,
@@ -37,14 +37,14 @@ export const useBuildingManagement = () => {
     {
       id: "building-2",
       name: "Forum Romanum",
-      type: "forum" as BuildingType,
+      type: BuildingType.FORUM,
       location: "Centre ville",
       owner: "république",
       value: 200000,
       maintenance: 5000,
       maintenanceCost: 5000,
       condition: 90,
-      status: "good" as BuildingStatus,
+      status: BuildingStatus.GOOD,
       description: "Centre politique et commercial de Rome",
       constructionYear: 600,
       cost: 300000,
@@ -71,19 +71,21 @@ export const useBuildingManagement = () => {
   const { treasury, setTreasury, currentDate } = useMaitreJeu();
   
   // Ajouter un nouveau bâtiment
-  const addBuilding = (building: BuildingCreationData): string => {
+  const addBuilding = (buildingData: BuildingCreationData): string => {
     const newBuilding: Building = {
-      ...building,
+      ...buildingData,
       id: uuidv4(),
-      constructionYear: building.constructionYear || currentDate.year,
-      value: building.value || 10000,
-      maintenance: building.maintenance || building.maintenanceCost || 0,
-      maintenanceCost: building.maintenanceCost || building.maintenance || 0,
-      condition: building.condition || 100,
-      workers: building.workers || 0,
-      cost: building.cost || 0,
-      capacity: building.capacity || 0,
-      owner: building.owner || 'république'
+      constructionYear: buildingData.constructionYear || currentDate.year,
+      value: buildingData.value || 10000,
+      maintenance: buildingData.maintenance,
+      maintenanceCost: buildingData.maintenanceCost || buildingData.maintenance || 0,
+      condition: buildingData.condition || 100,
+      cost: buildingData.cost || 0,
+      capacity: buildingData.capacity || 0,
+      owner: buildingData.owner || 'république',
+      status: buildingData.status || BuildingStatus.GOOD,
+      revenue: buildingData.revenue || 0,
+      workers: buildingData.workers || 0,
     };
     
     setBuildings(prev => [...prev, newBuilding]);
@@ -96,7 +98,7 @@ export const useBuildingManagement = () => {
       ...project,
       id: uuidv4(),
       progress: 0,
-      startDate: new Date(),
+      startDate: new Date().toISOString(),
       approved: true
     };
     
@@ -148,7 +150,7 @@ export const useBuildingManagement = () => {
     setBuildings(prev => 
       prev.map(building => {
         // Ne détériore pas les bâtiments en construction
-        if (building.status === 'under_construction' || building.status === 'planned') {
+        if (building.status === BuildingStatus.UNDER_CONSTRUCTION || building.status === 'planned') {
           return building;
         }
         
@@ -170,16 +172,16 @@ export const useBuildingManagement = () => {
   
   // Déterminer le statut en fonction de la condition
   const getStatusFromCondition = (condition: number): BuildingStatus => {
-    if (condition >= 90) return 'excellent';
-    if (condition >= 75) return 'good';
-    if (condition >= 50) return 'average';
-    if (condition >= 30) return 'poor';
-    if (condition >= 10) return 'fair';
-    return 'ruined';
+    if (condition >= 90) return BuildingStatus.EXCELLENT;
+    if (condition >= 75) return BuildingStatus.GOOD;
+    if (condition >= 50) return BuildingStatus.AVERAGE;
+    if (condition >= 30) return BuildingStatus.POOR;
+    if (condition >= 10) return BuildingStatus.FAIR;
+    return BuildingStatus.RUINED;
   };
   
   // Collecter les revenus des bâtiments
-  const collectBuildingRevenues = (date: GameDate) => {
+  const collectBuildingRevenues = (date: any) => {
     const revenueBuildingTypes = ['market', 'villa', 'domus', 'insula', 'port', 'warehouse'];
     const revenues: any[] = [];
     let totalRevenue = 0;
@@ -209,11 +211,12 @@ export const useBuildingManagement = () => {
     
     // Mettre à jour le trésor avec les revenus collectés
     if (totalRevenue > 0 && setTreasury) {
-      setTreasury((prev: any) => ({
-        ...prev,
-        balance: prev.balance + totalRevenue,
-        income: prev.income + totalRevenue
-      }));
+      const updatedTreasury = {
+        ...treasury,
+        balance: treasury.balance + totalRevenue,
+        income: treasury.income + totalRevenue
+      };
+      setTreasury(updatedTreasury);
       
       toast.success(`Revenus collectés: ${totalRevenue.toLocaleString()} As`);
     }
@@ -237,14 +240,14 @@ export const useBuildingManagement = () => {
               type: project.type,
               location: project.location,
               owner: 'république',
-              value: project.estimatedCost * 1.2, // Valeur supérieure au coût
-              maintenance: project.estimatedCost * 0.05, // 5% du coût comme maintenance
-              maintenanceCost: project.estimatedCost * 0.05,
+              value: project.estimatedCost ? project.estimatedCost * 1.2 : 10000, // Valeur supérieure au coût
+              maintenance: project.estimatedCost ? project.estimatedCost * 0.05 : 500, // 5% du coût comme maintenance
+              maintenanceCost: project.estimatedCost ? project.estimatedCost * 0.05 : 500,
               condition: 100, // Nouveau bâtiment en parfait état
-              status: 'excellent',
+              status: BuildingStatus.EXCELLENT,
               constructionYear: currentDate.year,
               description: project.description || '',
-              cost: project.estimatedCost,
+              cost: project.estimatedCost || 10000,
               revenue: 0,
               capacity: 0
             };
@@ -292,11 +295,12 @@ export const useBuildingManagement = () => {
     
     // Effectuer le paiement
     if (setTreasury) {
-      setTreasury((prev: any) => ({
-        ...prev,
-        balance: prev.balance - totalMaintenanceCost,
-        expenses: prev.expenses + totalMaintenanceCost
-      }));
+      const updatedTreasury = {
+        ...treasury,
+        balance: treasury.balance - totalMaintenanceCost,
+        expenses: treasury.expenses + totalMaintenanceCost
+      };
+      setTreasury(updatedTreasury);
     }
     
     // Améliorer l'état des bâtiments maintenus
@@ -362,7 +366,10 @@ export const useBuildingManagement = () => {
     
     // Mark task as completed
     setMaintenanceTasks(prev => 
-      prev.map(t => t.id === taskId ? { ...t, status: 'completed', completionDate: new Date() } : t)
+      prev.map(t => t.id === taskId 
+        ? { ...t, status: 'completed', completionDate: new Date().toISOString() } 
+        : t
+      )
     );
     
     return true;
@@ -378,6 +385,17 @@ export const useBuildingManagement = () => {
     
     setMaintenanceTasks(prev => [...prev, newTask]);
     return newTask.id;
+  };
+
+  // Cancel a maintenance task
+  const cancelMaintenanceTask = (taskId: string) => {
+    setMaintenanceTasks(prev => 
+      prev.map(t => t.id === taskId 
+        ? { ...t, status: 'cancelled' } 
+        : t
+      )
+    );
+    return true;
   };
   
   return {
@@ -400,6 +418,7 @@ export const useBuildingManagement = () => {
     payBuildingMaintenance,
     getFilteredBuildings,
     completeMaintenanceTask,
+    cancelMaintenanceTask,
     addMaintenanceTask,
     setMaintenanceTasks
   };

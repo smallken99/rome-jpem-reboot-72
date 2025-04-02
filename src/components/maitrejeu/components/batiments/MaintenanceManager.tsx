@@ -1,206 +1,202 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { 
+  Select, 
+  SelectContent, 
+  SelectItem, 
+  SelectTrigger, 
+  SelectValue 
+} from '@/components/ui/select';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
-import { Wrench, ArrowUp, ArrowUpDown } from 'lucide-react';
-import { MaintenanceTask, BuildingPriority } from '../../types/batiments';
-import { useBatimentsManagement } from '../../hooks/useBatimentsManagement';
+import { MaintenanceTask, BuildingPriority, Building } from '../../types/batiments';
 
-const MaintenanceManager = () => {
-  const [filter, setFilter] = useState('all');
-  const { maintenanceTasks, completeMaintenanceTask, cancelMaintenanceTask } = useBatimentsManagement();
-  const [sortField, setSortField] = useState<keyof MaintenanceTask>('priority');
-  const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
+interface MaintenanceManagerProps {
+  maintenanceTasks: MaintenanceTask[];
+  completeMaintenanceTask: (taskId: string) => void;
+  cancelMaintenanceTask: (taskId: string) => void;
+}
+
+const MaintenanceManager: React.FC<MaintenanceManagerProps> = ({ 
+  maintenanceTasks, 
+  completeMaintenanceTask, 
+  cancelMaintenanceTask 
+}) => {
+  const [filterStatus, setFilterStatus] = useState("all");
+  const [sortBy, setSortBy] = useState<keyof MaintenanceTask>("priority");
+  const [filteredTasks, setFilteredTasks] = useState<MaintenanceTask[]>([]);
   
-  // Handle sort change
-  const handleSortChange = (field: keyof MaintenanceTask) => {
-    if (field === sortField) {
-      setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc');
-    } else {
-      setSortField(field);
-      setSortDirection('asc');
-    }
-  };
-  
-  // Sort tasks based on current sort field and direction
-  const sortedTasks = [...maintenanceTasks].sort((a, b) => {
-    if (sortField === 'priority') {
-      const priorityOrder = { high: 0, medium: 1, low: 2 };
-      const aPriority = priorityOrder[a.priority as BuildingPriority] || 3;
-      const bPriority = priorityOrder[b.priority as BuildingPriority] || 3;
-      return sortDirection === 'asc' ? aPriority - bPriority : bPriority - aPriority;
+  // Sort and filter tasks
+  useEffect(() => {
+    let tasks = [...maintenanceTasks];
+    
+    // Filter by status
+    if (filterStatus !== "all") {
+      tasks = tasks.filter(task => task.status === filterStatus);
     }
     
-    if (sortField === 'cost') {
-      return sortDirection === 'asc' ? a.cost - b.cost : b.cost - a.cost;
-    }
+    // Sort tasks
+    tasks.sort((a, b) => {
+      if (sortBy === "priority") {
+        const priorityOrder = { critical: 0, high: 1, medium: 2, low: 3 };
+        const aPriority = a.priority || "low";
+        const bPriority = b.priority || "low";
+        return priorityOrder[aPriority as keyof typeof priorityOrder] - priorityOrder[bPriority as keyof typeof priorityOrder];
+      }
+      
+      if (a[sortBy] && b[sortBy]) {
+        return String(a[sortBy]).localeCompare(String(b[sortBy]));
+      }
+      
+      return 0;
+    });
     
-    if (sortField === 'status') {
-      return sortDirection === 'asc' 
-        ? a.status.localeCompare(b.status) 
-        : b.status.localeCompare(a.status);
-    }
-    
-    if (sortField === 'type') {
-      return sortDirection === 'asc' 
-        ? a.type.localeCompare(b.type) 
-        : b.type.localeCompare(a.type);
-    }
-    
-    return 0;
-  });
+    setFilteredTasks(tasks);
+  }, [maintenanceTasks, filterStatus, sortBy]);
   
-  // Filter tasks based on current filter
-  const filteredTasks = filter === 'all' 
-    ? sortedTasks 
-    : sortedTasks.filter(task => task.status === filter);
-  
-  // Get status badge
-  const getStatusBadge = (status: string) => {
+  // Get task status badge color
+  const getStatusColor = (status: string) => {
     switch (status) {
-      case 'pending':
-        return <Badge variant="outline">En attente</Badge>;
-      case 'in_progress':
-        return <Badge variant="default">En cours</Badge>;
-      case 'completed':
-        return <Badge variant="success">Terminé</Badge>;
-      case 'cancelled':
-        return <Badge variant="destructive">Annulé</Badge>;
-      default:
-        return <Badge>{status}</Badge>;
+      case "pending": return "bg-yellow-500";
+      case "in_progress": return "bg-blue-500";
+      case "completed": return "bg-green-500";
+      case "cancelled": return "bg-gray-500";
+      default: return "bg-gray-500";
     }
   };
   
-  // Get priority badge
-  const getPriorityBadge = (priority: BuildingPriority) => {
+  // Get priority badge color
+  const getPriorityColor = (priority: BuildingPriority) => {
     switch (priority) {
-      case 'high':
-        return <Badge variant="destructive">Haute</Badge>;
-      case 'medium':
-        return <Badge variant="default">Moyenne</Badge>;
-      case 'low':
-        return <Badge variant="outline">Basse</Badge>;
-      default:
-        return <Badge>{priority}</Badge>;
+      case BuildingPriority.CRITICAL: return "bg-red-500";
+      case BuildingPriority.HIGH: return "bg-orange-500";
+      case BuildingPriority.MEDIUM: return "bg-yellow-500";
+      case BuildingPriority.LOW: return "bg-blue-500";
+      default: return "bg-gray-500";
     }
   };
   
-  // Get type badge
-  const getTypeBadge = (type: string) => {
-    switch (type) {
-      case 'repair':
-        return <Badge variant="destructive">Réparation</Badge>;
-      case 'upgrade':
-        return <Badge variant="default">Amélioration</Badge>;
-      case 'routine':
-        return <Badge variant="outline">Routine</Badge>;
-      case 'maintenance':
-        return <Badge variant="success">Entretien</Badge>;
-      default:
-        return <Badge>{type}</Badge>;
-    }
-  };
-
   return (
     <div className="space-y-4">
-      <div className="flex justify-between items-center">
-        <h2 className="text-xl font-semibold">Tâches de maintenance</h2>
-        <div className="flex space-x-2">
-          <Input 
-            placeholder="Rechercher..." 
-            className="w-48"
-          />
-          <Select value={filter} onValueChange={setFilter}>
-            <SelectTrigger className="w-36">
-              <SelectValue placeholder="Filtrer par statut" />
+      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3">
+        <div className="flex items-center gap-3">
+          <div className="text-sm font-medium">Filtrer par statut:</div>
+          <Select value={filterStatus} onValueChange={setFilterStatus}>
+            <SelectTrigger className="w-32">
+              <SelectValue placeholder="Status" />
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="all">Tous</SelectItem>
               <SelectItem value="pending">En attente</SelectItem>
               <SelectItem value="in_progress">En cours</SelectItem>
-              <SelectItem value="completed">Terminés</SelectItem>
-              <SelectItem value="cancelled">Annulés</SelectItem>
+              <SelectItem value="completed">Terminé</SelectItem>
+              <SelectItem value="cancelled">Annulé</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+        
+        <div className="flex items-center gap-3">
+          <div className="text-sm font-medium">Trier par:</div>
+          <Select value={sortBy} onValueChange={(value: string) => setSortBy(value as keyof MaintenanceTask)}>
+            <SelectTrigger className="w-36">
+              <SelectValue placeholder="Tri" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="priority">Priorité</SelectItem>
+              <SelectItem value="buildingName">Nom du bâtiment</SelectItem>
+              <SelectItem value="type">Type</SelectItem>
+              <SelectItem value="startDate">Date de début</SelectItem>
+              <SelectItem value="cost">Coût</SelectItem>
             </SelectContent>
           </Select>
         </div>
       </div>
       
-      <Table>
-        <TableHeader>
-          <TableRow>
-            <TableHead onClick={() => handleSortChange('buildingName')} className="cursor-pointer">
-              Bâtiment <ArrowUpDown className="h-4 w-4 inline ml-1" />
-            </TableHead>
-            <TableHead onClick={() => handleSortChange('type')} className="cursor-pointer">
-              Type <ArrowUpDown className="h-4 w-4 inline ml-1" />
-            </TableHead>
-            <TableHead onClick={() => handleSortChange('priority')} className="cursor-pointer">
-              Priorité <ArrowUpDown className="h-4 w-4 inline ml-1" />
-            </TableHead>
-            <TableHead onClick={() => handleSortChange('cost')} className="cursor-pointer">
-              Coût <ArrowUpDown className="h-4 w-4 inline ml-1" />
-            </TableHead>
-            <TableHead onClick={() => handleSortChange('status')} className="cursor-pointer">
-              Statut <ArrowUpDown className="h-4 w-4 inline ml-1" />
-            </TableHead>
-            <TableHead>Actions</TableHead>
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {filteredTasks.length === 0 ? (
-            <TableRow>
-              <TableCell colSpan={6} className="text-center py-4 italic text-muted-foreground">
-                Aucune tâche de maintenance trouvée
-              </TableCell>
-            </TableRow>
-          ) : (
-            filteredTasks.map((task) => (
-              <TableRow key={task.id}>
-                <TableCell className="font-medium">{task.buildingName || `Bâtiment ${task.buildingId}`}</TableCell>
-                <TableCell>{getTypeBadge(task.type)}</TableCell>
-                <TableCell>{getPriorityBadge(task.priority as BuildingPriority)}</TableCell>
-                <TableCell>{task.cost.toLocaleString()} As</TableCell>
-                <TableCell>{getStatusBadge(task.status)}</TableCell>
-                <TableCell className="space-x-2">
-                  {task.status === 'pending' && (
-                    <>
-                      <Button 
-                        size="sm" 
-                        variant="outline"
-                        onClick={() => completeMaintenanceTask(task.id)}
-                      >
-                        <Wrench className="h-4 w-4 mr-1" />
-                        Effectuer
-                      </Button>
-                      <Button 
-                        size="sm" 
-                        variant="outline"
-                        className="text-red-500 hover:text-red-600"
-                        onClick={() => cancelMaintenanceTask(task.id)}
-                      >
-                        Annuler
-                      </Button>
-                    </>
-                  )}
-                  {task.status === 'in_progress' && (
+      {filteredTasks.length === 0 ? (
+        <Card>
+          <CardContent className="p-6 text-center">
+            <p className="text-muted-foreground">Aucune tâche de maintenance trouvée.</p>
+          </CardContent>
+        </Card>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          {filteredTasks.map(task => (
+            <Card key={task.id} className="border relative">
+              <CardHeader className="pb-2">
+                <div className="flex justify-between items-start">
+                  <CardTitle className="text-base">
+                    {task.buildingName || `Bâtiment #${task.buildingId.substring(0, 8)}`}
+                  </CardTitle>
+                  <Badge className={`${getStatusColor(task.status)}`}>
+                    {task.status === "pending" ? "En attente" : 
+                     task.status === "in_progress" ? "En cours" : 
+                     task.status === "completed" ? "Terminé" : "Annulé"}
+                  </Badge>
+                </div>
+                <div className="text-xs text-muted-foreground">
+                  {task.type === "repair" ? "Réparation" :
+                   task.type === "upgrade" ? "Amélioration" :
+                   task.type === "maintenance" ? "Maintenance" : "Routine"}
+                </div>
+              </CardHeader>
+              
+              <CardContent>
+                <div className="text-sm mb-2">{task.description || "Tâche de maintenance"}</div>
+                
+                <div className="grid grid-cols-2 gap-x-4 gap-y-2 mb-3">
+                  <div className="text-xs text-muted-foreground">Coût:</div>
+                  <div className="text-xs font-medium">{task.cost.toLocaleString()} As</div>
+                  
+                  <div className="text-xs text-muted-foreground">Durée:</div>
+                  <div className="text-xs font-medium">{task.duration} jours</div>
+                  
+                  <div className="text-xs text-muted-foreground">Début:</div>
+                  <div className="text-xs font-medium">{new Date(task.startDate).toLocaleDateString()}</div>
+                  
+                  <div className="text-xs text-muted-foreground">Priorité:</div>
+                  <div className="flex items-center">
+                    <Badge className={`text-xs ${getPriorityColor(task.priority || BuildingPriority.MEDIUM)}`}>
+                      {task.priority || "Moyenne"}
+                    </Badge>
+                  </div>
+                </div>
+                
+                {task.status === "pending" && (
+                  <div className="flex justify-between mt-2">
                     <Button 
                       size="sm" 
-                      variant="outline"
+                      variant="outline" 
+                      className="text-red-500 border-red-500 hover:bg-red-50"
+                      onClick={() => cancelMaintenanceTask(task.id)}
+                    >
+                      Annuler
+                    </Button>
+                    <Button 
+                      size="sm"
                       onClick={() => completeMaintenanceTask(task.id)}
                     >
-                      <ArrowUp className="h-4 w-4 mr-1" />
-                      Terminer
+                      Achever
                     </Button>
-                  )}
-                </TableCell>
-              </TableRow>
-            ))
-          )}
-        </TableBody>
-      </Table>
+                  </div>
+                )}
+                
+                {task.status === "in_progress" && (
+                  <div className="flex justify-end mt-2">
+                    <Button 
+                      size="sm"
+                      onClick={() => completeMaintenanceTask(task.id)}
+                    >
+                      Compléter
+                    </Button>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      )}
     </div>
   );
 };

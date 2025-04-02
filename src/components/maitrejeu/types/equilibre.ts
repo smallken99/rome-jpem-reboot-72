@@ -5,6 +5,8 @@ export interface Politique {
   moderates: number;
   stabilite?: number;
   stability?: number;
+  // Added properties for compatibility with existing code
+  populaires?: number;
 }
 
 export interface Economie {
@@ -22,6 +24,8 @@ export interface Social {
   patriciens: number;
   esclaves: number;
   cohesion: number;
+  // Added for compatibility
+  plébéiens?: number;
 }
 
 export interface Militaire {
@@ -32,6 +36,9 @@ export interface Militaire {
   readiness?: number;
   force?: number;
   moral?: number; // For compatibility
+  // Added for compatibility with existing code
+  loyaute?: number;
+  puissance?: number;
 }
 
 export interface Religion {
@@ -46,6 +53,10 @@ export interface Stabilite {
   trend: 'up' | 'down' | 'stable';
   index?: number;
   crisisRisk?: number;
+  // Added for compatibility with existing code
+  senat?: number;
+  tribuns?: number;
+  lois?: number;
 }
 
 export type RiskType = 
@@ -54,7 +65,13 @@ export type RiskType =
   | 'MILITARY'
   | 'SOCIAL'
   | 'RELIGIOUS'
-  | 'EXTERNAL';
+  | 'EXTERNAL'
+  // Add compatibility types
+  | 'politique'
+  | 'economique'
+  | 'militaire'
+  | 'religieux'
+  | 'social';
 
 export interface Risk {
   id: string;
@@ -67,6 +84,7 @@ export interface Risk {
   triggeredAt?: Date;
   resolvedAt?: Date;
   severity?: number;
+  createdAt?: Date | string;
 }
 
 export interface Equilibre {
@@ -92,7 +110,32 @@ export interface Equilibre {
   historique?: any[];
   risques?: Record<string, Risk>;
   population?: number;
-  
-  // Additional properties found in equilibre adapter
   populaires?: number;
+}
+
+// Add the missing HistoriqueEntry interface
+export interface HistoriqueEntry {
+  id: string;
+  date: Date | string;
+  type: string;
+  description: string;
+  changes?: any;
+  cause?: string;
+  visible?: boolean;
+}
+
+// Add the missing PoliticalEvent interface
+export interface PoliticalEvent {
+  id: string;
+  date: Date | string;
+  title: string;
+  description: string;
+  impact: {
+    politique?: Partial<Politique>;
+    economie?: Partial<Economie>;
+    social?: Partial<Social>;
+    militaire?: Partial<Militaire>;
+    religion?: Partial<Religion>;
+  };
+  severity: 'minor' | 'moderate' | 'major' | 'critical';
 }

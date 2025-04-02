@@ -23,7 +23,10 @@ export const GestionBatiments = () => {
     selectedBuilding,
     setSelectedBuilding,
     addBuilding,
-    updateBuilding
+    updateBuilding,
+    maintenanceTasks = [],
+    completeMaintenanceTask = () => {},
+    cancelMaintenanceTask = () => {}
   } = useBatimentsManagement();
 
   const handleEditBuilding = (buildingId: string) => {
@@ -34,14 +37,14 @@ export const GestionBatiments = () => {
     const exampleBuilding: Building = {
       id: buildingId,
       name: "Bâtiment exemple",
-      type: "temple" as BuildingType,
+      type: BuildingType.TEMPLE,
       location: "Forum Romanum",
       owner: "république",
       value: 50000,
       maintenance: 1000,
       maintenanceCost: 1000,
       condition: 100,
-      status: "good" as BuildingStatus,
+      status: BuildingStatus.GOOD,
       description: "Description du bâtiment",
       constructionYear: currentYear - 5,
       cost: 75000,
@@ -49,33 +52,29 @@ export const GestionBatiments = () => {
       capacity: 0
     };
     
+    // Use as-is without a setter function wrap
     setSelectedBuilding(exampleBuilding);
   };
 
   const handleSaveBuilding = (data: BuildingCreationData) => {
     if (selectedBuilding) {
-      // Update existing building
+      // Update existing building with typed properties
       updateBuilding(selectedBuilding.id, {
         ...data,
-        value: data.value || selectedBuilding.value,
-        maintenanceCost: data.maintenanceCost || selectedBuilding.maintenanceCost,
+        maintenance: data.maintenance || selectedBuilding.maintenance,
         condition: data.condition || selectedBuilding.condition
       });
     } else {
-      // Add new building with all required properties
+      // Add new building with required properties
       const completeData: BuildingCreationData = {
         ...data,
-        maintenance: data.maintenanceCost || 1000,
-        status: data.status || 'good' as BuildingStatus,
+        maintenance: data.maintenance,
+        status: data.status || BuildingStatus.GOOD,
         description: data.description || "",
         constructionYear: data.constructionYear || currentYear,
         cost: data.cost || 10000,
         revenue: data.revenue || 0,
-        capacity: data.capacity || 0,
-        value: data.value || 50000,
-        condition: data.condition || 100,
-        owner: data.owner || "république",
-        maintenanceCost: data.maintenanceCost || 1000
+        capacity: data.capacity || 0
       };
       
       addBuilding(completeData);
@@ -89,11 +88,6 @@ export const GestionBatiments = () => {
     currentSeason === "SPRING" ? "Spring" :
     currentSeason === "SUMMER" ? "Summer" :
     currentSeason === "AUTUMN" ? "Autumn" : "Winter";
-
-  // Create empty mock arrays if needed for components that expect them
-  const mockMaintenanceTasks = [];
-  const mockCompleteMaintenanceTask = () => {};
-  const mockCancelMaintenanceTask = () => {};
 
   return (
     <div className="p-6 space-y-6">
@@ -150,11 +144,10 @@ export const GestionBatiments = () => {
             </TabsContent>
 
             <TabsContent value="maintenance" className="pt-2">
-              {/* Provide missing properties to fix errors */}
               <MaintenanceManager 
-                maintenanceTasks={mockMaintenanceTasks}
-                completeMaintenanceTask={mockCompleteMaintenanceTask}
-                cancelMaintenanceTask={mockCancelMaintenanceTask}
+                maintenanceTasks={maintenanceTasks}
+                completeMaintenanceTask={completeMaintenanceTask}
+                cancelMaintenanceTask={cancelMaintenanceTask}
               />
             </TabsContent>
 
