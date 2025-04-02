@@ -156,3 +156,11 @@ export const dateToGameDate = (date: Date): GameDate => {
   
   return { year, season };
 };
+
+/**
+ * Format a GameDate object to a human-readable string
+ * This is the missing function that's imported in MaitreJeuWelcome.tsx
+ */
+export const formatGameDate = (date: GameDate): string => {
+  return gameDateToReadableString(date);
+};

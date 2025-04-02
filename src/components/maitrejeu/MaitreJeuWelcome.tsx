@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -13,7 +12,6 @@ export const MaitreJeuWelcome = () => {
   const { currentDate, equilibre, treasury, senatorsCount, clientsCount, advancePhase, advanceTime } = useMaitreJeu();
   const [isAdvancing, setIsAdvancing] = useState(false);
 
-  // Handle advancing to next phase or time period
   const handleAdvance = async (type: 'phase' | 'time') => {
     setIsAdvancing(true);
     try {
@@ -27,7 +25,6 @@ export const MaitreJeuWelcome = () => {
     }
   };
 
-  // Calculate treasury trend (simplified example)
   const treasuryTrend = treasury.balance > (treasury.previousBalance || 0) ? 'positive' : 'negative';
   const treasuryChange = treasury.balance - (treasury.previousBalance || treasury.balance);
   const treasuryChangePercent = treasury.previousBalance 
@@ -192,7 +189,7 @@ export const MaitreJeuWelcome = () => {
         <TabsContent value="decisions">
           <Card>
             <CardHeader>
-              <CardTitle>Décisions en attente</CardTitle>
+              <CardTitle>Décisions en attente</Title>
               <CardDescription>
                 Décisions qui nécessitent votre attention.
               </CardDescription>
