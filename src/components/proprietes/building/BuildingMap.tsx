@@ -91,7 +91,7 @@ const BuildingMap: React.FC<BuildingMapProps> = ({
                     variant={
                       building.condition > 75 ? "success" : 
                       building.condition > 50 ? "default" : 
-                      building.condition > 30 ? "warning" : 
+                      building.condition > 30 ? "outline" : 
                       "destructive"
                     }
                     className="text-xs"

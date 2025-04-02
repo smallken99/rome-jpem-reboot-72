@@ -49,7 +49,6 @@ export const GestionBatiments = () => {
       capacity: 0
     };
     
-    // Utilisez la valeur directement au lieu de passer une fonction
     setSelectedBuilding(exampleBuilding);
   };
 
@@ -69,7 +68,7 @@ export const GestionBatiments = () => {
         constructionYear: data.constructionYear || currentYear,
         cost: data.cost,
         revenue: data.revenue || 0,
-        capacity: data.capacity,
+        capacity: data.capacity || 0,
         value: data.value || 0,
         condition: data.condition || 100,
         owner: data.owner || "république"
@@ -80,6 +79,12 @@ export const GestionBatiments = () => {
     setIsAddBuildingModalOpen(false);
     setSelectedBuilding(null);
   };
+
+  // Convert season for compatibility with expected enum
+  const formattedSeason = 
+    currentSeason === "SPRING" ? "Spring" :
+    currentSeason === "SUMMER" ? "Summer" :
+    currentSeason === "AUTUMN" ? "Autumn" : "Winter";
 
   return (
     <div className="p-6 space-y-6">
@@ -131,7 +136,7 @@ export const GestionBatiments = () => {
             <TabsContent value="construction" className="pt-2">
               <ConstructionProjects 
                 currentYear={currentYear} 
-                currentSeason={currentSeason === "SPRING" ? "Spring" : currentSeason === "SUMMER" ? "Summer" : currentSeason === "AUTUMN" ? "Autumn" : "Winter"} 
+                currentSeason={formattedSeason} 
               />
             </TabsContent>
 

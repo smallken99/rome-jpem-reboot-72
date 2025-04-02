@@ -1,80 +1,139 @@
 
-import { useMaitreJeu } from '../../../context/MaitreJeuContext';
+import { useState } from 'react';
+import { useMaitreJeu } from '../../../context';
 import { Client } from '../../../types/clients';
-import { useToast } from '@/components/ui/use-toast';
+import { toast } from 'sonner';
+import { v4 as uuidv4 } from 'uuid';
 
-export const useClientActions = () => {
+export function useClientActions() {
   const { 
-    deleteClient, 
-    updateClient,
-    addClient,
-    senateurs,
+    clients, 
+    addClient, 
+    updateClient, 
+    removeClient,
+    clientTypes,
+    updateClientCompetences,
+    currentDate,
   } = useMaitreJeu();
   
-  const { toast } = useToast();
+  const [selectedClient, setSelectedClient] = useState<Client | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
   
-  // Function to delete a client
-  const handleDeleteClient = (id: string) => {
-    deleteClient(id);
-    toast({
-      title: "Client supprimé",
-      description: "Le client a été supprimé avec succès",
-      variant: "default"
-    });
-  };
+  // Helper for working with current date
+  const currentYear = typeof currentDate === 'object' && 'year' in currentDate 
+    ? currentDate.year 
+    : new Date().getFullYear();
   
-  // Function to change the status of a client
-  const handleStatusChange = (id: string, status: 'active' | 'inactive' | 'probation') => {
-    updateClient(id, { activeStatus: status });
-    toast({
-      title: "Statut modifié",
-      description: `Le statut du client a été changé en "${status}"`,
-      variant: "default"
-    });
-  };
-  
-  // Function to assign a client to a senator
-  const handleAssignment = (clientId: string, senateurId: string | null) => {
-    updateClient(clientId, { assignedToSenateurId: senateurId });
-    toast({
-      title: senateurId ? "Client assigné" : "Client non assigné",
-      description: senateurId 
-        ? `Le client a été assigné au sénateur ${senateurs.find(s => s.id === senateurId)?.nom || senateurId}` 
-        : "Le client n'est plus assigné à un sénateur",
-      variant: "default"
-    });
-  };
-  
-  // Function to save a client (add or update)
-  const handleSaveClient = (clientData: Client | Omit<Client, 'id'>) => {
-    if ('id' in clientData) {
-      updateClient(clientData.id, clientData);
-      toast({
-        title: "Client mis à jour",
-        description: `Les informations de ${clientData.name} ont été mises à jour`,
-        variant: "default"
-      });
-    } else {
-      // For new clients, ensure the competences is an array
-      const newClient = {
-        ...clientData,
-        competences: Array.isArray(clientData.competences) ? clientData.competences : []
-      };
-      const id = addClient(newClient as any);
-      toast({
-        title: "Client ajouté",
-        description: `${clientData.name} a été ajouté à la liste des clients`,
-        variant: "default"
-      });
+  // Handle client selection
+  const selectClient = (clientId: string) => {
+    const client = clients.find(c => c.id === clientId);
+    if (client) {
+      setSelectedClient(client);
     }
-    return true; // Indicate the save was successful
   };
-
+  
+  // Add a new client
+  const createClient = (clientData: Omit<Client, 'id'>) => {
+    setIsLoading(true);
+    
+    try {
+      const newClient = {
+        id: uuidv4(),
+        ...clientData,
+        competences: clientData.competences || [],
+        competencePoints: clientData.competencePoints || 0,
+        createdAt: new Date().toISOString(),
+      };
+      
+      addClient(newClient);
+      
+      toast.success(`Client ${clientData.name} ajouté avec succès`);
+      return newClient.id;
+    } catch (error) {
+      console.error('Error creating client:', error);
+      toast.error('Erreur lors de la création du client');
+      return null;
+    } finally {
+      setIsLoading(false);
+    }
+  };
+  
+  // Update client details
+  const editClient = (clientId: string, clientData: Partial<Client>) => {
+    setIsLoading(true);
+    
+    try {
+      updateClient(clientId, clientData);
+      
+      if (selectedClient?.id === clientId) {
+        setSelectedClient(prev => prev ? { ...prev, ...clientData } : null);
+      }
+      
+      toast.success(`Client mis à jour avec succès`);
+      return true;
+    } catch (error) {
+      console.error('Error updating client:', error);
+      toast.error('Erreur lors de la mise à jour du client');
+      return false;
+    } finally {
+      setIsLoading(false);
+    }
+  };
+  
+  // Delete a client
+  const deleteClient = (clientId: string) => {
+    setIsLoading(true);
+    
+    try {
+      removeClient(clientId);
+      
+      if (selectedClient?.id === clientId) {
+        setSelectedClient(null);
+      }
+      
+      toast.success(`Client supprimé avec succès`);
+      return true;
+    } catch (error) {
+      console.error('Error deleting client:', error);
+      toast.error('Erreur lors de la suppression du client');
+      return false;
+    } finally {
+      setIsLoading(false);
+    }
+  };
+  
+  // Update client competences
+  const updateCompetences = (clientId: string, competences: string[]) => {
+    setIsLoading(true);
+    
+    try {
+      updateClientCompetences(clientId, competences);
+      
+      if (selectedClient?.id === clientId) {
+        setSelectedClient(prev => prev ? { ...prev, competences } : null);
+      }
+      
+      toast.success(`Compétences mises à jour`);
+      return true;
+    } catch (error) {
+      console.error('Error updating competences:', error);
+      toast.error('Erreur lors de la mise à jour des compétences');
+      return false;
+    } finally {
+      setIsLoading(false);
+    }
+  };
+  
   return {
-    handleDeleteClient,
-    handleStatusChange,
-    handleAssignment,
-    handleSaveClient,
-    senateurs
+    clients,
+    selectedClient,
+    selectClient,
+    createClient,
+    editClient,
+    deleteClient,
+    updateCompetences,
+    isLoading,
+    clientTypes,
+    currentYear
   };
-};
+}
