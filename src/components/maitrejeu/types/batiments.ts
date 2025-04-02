@@ -10,12 +10,18 @@ export interface Building {
   lastMaintenance?: Date;
   description?: string;
   
-  // Propriétés obligatoires pour la gestion des bâtiments
+  // Required properties for building management
   value: number;
   maintenanceCost: number;
   condition: number;
   
-  // Propriétés optionnelles pour la gestion
+  // Additional required properties based on error messages
+  constructionYear: number;
+  cost: number;
+  maintenance: number;
+  revenue: number;
+  
+  // Optional properties for management
   income?: number;
   capacity?: number;
   staff?: number;
@@ -45,6 +51,57 @@ export enum BuildingType {
   BARRACKS = 'barracks'
 }
 
+export enum BuildingStatus {
+  GOOD = 'good',
+  FAIR = 'fair',
+  POOR = 'poor',
+  DAMAGED = 'damaged',
+  RUINED = 'ruined',
+  UNDER_CONSTRUCTION = 'under_construction',
+  UNDER_RENOVATION = 'under_renovation'
+}
+
+export enum BuildingOwner {
+  REPUBLIC = 'république',
+  PRIVATE = 'private',
+  SENATORIAL = 'senatorial',
+  RELIGIOUS = 'religious',
+  MILITARY = 'military'
+}
+
+export interface BuildingCreationData {
+  name: string;
+  type: string;
+  location: string;
+  owner?: string;
+  description?: string;
+  status?: BuildingStatus;
+  maintenanceCost?: number;
+  value?: number;
+  condition?: number;
+  constructionYear?: number;
+  cost?: number;
+  maintenance?: number;
+  revenue?: number;
+  capacity?: number;
+}
+
+export enum BuildingPriority {
+  LOW = 'low',
+  MEDIUM = 'medium',
+  HIGH = 'high',
+  CRITICAL = 'critical'
+}
+
+export interface BuildingFilter {
+  types: string[];
+  locations: string[];
+  status: string;
+  minRevenue: number;
+  maxMaintenance: number;
+  searchTerm: string;
+}
+
 export interface MaintenanceTask {
   id: string;
   buildingId: string;
@@ -58,6 +115,7 @@ export interface MaintenanceTask {
   assignedWorkers?: number;
   completionDate?: string;
   estimatedCompletion?: string;
+  priority?: BuildingPriority;
 }
 
 export interface ConstructionProject {
@@ -74,4 +132,8 @@ export interface ConstructionProject {
   slaves: number;
   overseer?: string;
   description?: string;
+  supervisor?: string;
+  expectedCompletionYear?: number;
+  approved?: boolean;
+  estimatedCost?: number;
 }

@@ -9,6 +9,7 @@ import { Election } from './elections';
 import { GamePhase, Season, GameDate } from './common';
 import { MagistratureType } from './magistratures';
 import { Client, ClientCreationData } from './clients';
+import { TreasuryStatus } from './economie';
 
 export interface MaitreJeuContextType {
   // Game state
@@ -35,6 +36,9 @@ export interface MaitreJeuContextType {
   elections: Election[];
   clients: Client[];
   factions?: any[]; // For compatibility with existing code
+  treasury: TreasuryStatus;
+  senatorsCount?: number;
+  clientsCount?: number;
   
   // State setters
   setSenateurs: React.Dispatch<React.SetStateAction<SenateurJouable[]>>;
@@ -50,6 +54,7 @@ export interface MaitreJeuContextType {
   changePhase: (phase: GamePhase) => void;
   updateEquilibre: (updates: Partial<Equilibre>) => void;
   updateFactionBalance: (populaires: number, optimates: number, moderates: number) => void;
+  advancePhase?: () => void; // For compatibility with MaitreJeuWelcome
   
   // Political
   addLoi: (loi: Omit<Loi, "id">) => void;
@@ -90,4 +95,10 @@ export interface MaitreJeuContextType {
   addFamille?: (familleData: any) => string;
   addMembreFamille?: (membreData: any) => string;
   createAlliance?: (famille1Id: string, famille2Id: string, type: string, termes: string, benefices: string[]) => string;
+  
+  // Additional compatibility methods
+  removeClient?: (id: string) => void;
+  clientTypes?: string[];
+  updateClientCompetences?: (clientId: string, competences: any) => void;
+  voteLoi?: (id: string, vote: string, count?: number) => void;
 }

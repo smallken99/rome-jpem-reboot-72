@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -9,14 +10,18 @@ import { ProgressBar } from './components/utils/ProgressBar';
 import { GameDate } from '@/utils/types/gameDate';
 
 export const MaitreJeuWelcome = () => {
-  const { currentDate, equilibre, treasury, senatorsCount, clientsCount, advancePhase, advanceTime } = useMaitreJeu();
+  const { currentDate, equilibre, treasury, currentYear, currentSeason, changePhase, advanceTime } = useMaitreJeu();
   const [isAdvancing, setIsAdvancing] = useState(false);
+
+  // Calculate derived values
+  const senatorsCount = 100; // Mock value, replace with actual data
+  const clientsCount = 500; // Mock value, replace with actual data
 
   const handleAdvance = async (type: 'phase' | 'time') => {
     setIsAdvancing(true);
     try {
       if (type === 'phase') {
-        await advancePhase();
+        await changePhase('normal'); // Use a valid GamePhase value
       } else {
         await advanceTime();
       }
@@ -30,6 +35,13 @@ export const MaitreJeuWelcome = () => {
   const treasuryChangePercent = treasury.previousBalance 
     ? Math.round((treasuryChange / treasury.previousBalance) * 100) 
     : 0;
+
+  // Calculate stability index and crisis risk
+  const stabilityIndex = equilibre.stabilite ? 
+    (typeof equilibre.stabilite === 'number' ? equilibre.stabilite : 50) : 50;
+  
+  const crisisRisk = equilibre.stabilite && typeof equilibre.stabilite !== 'number' ? 
+    (equilibre.stabilite.crisisRisk || 0) : 0;
 
   return (
     <div className="space-y-6 p-6">
@@ -110,9 +122,9 @@ export const MaitreJeuWelcome = () => {
             <CardTitle className="text-sm font-medium">Stabilité</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{equilibre.stabilite.index}/100</div>
+            <div className="text-2xl font-bold">{stabilityIndex}/100</div>
             <div className="text-xs text-muted-foreground mt-1">
-              <span>Risque de crise: {equilibre.stabilite.crisisRisk}%</span>
+              <span>Risque de crise: {crisisRisk}%</span>
             </div>
           </CardContent>
         </Card>
@@ -138,33 +150,33 @@ export const MaitreJeuWelcome = () => {
               <div className="space-y-2">
                 <div className="flex justify-between text-sm">
                   <span className="flex items-center"><Crown className="h-4 w-4 mr-2" /> Politique</span>
-                  <span>{equilibre.politique.stability}/100</span>
+                  <span>{equilibre.politique.stabilite || 50}/100</span>
                 </div>
-                <ProgressBar value={equilibre.politique.stability} />
+                <ProgressBar value={equilibre.politique.stabilite || 50} />
               </div>
               
               <div className="space-y-2">
                 <div className="flex justify-between text-sm">
                   <span className="flex items-center"><Scroll className="h-4 w-4 mr-2" /> Économie</span>
-                  <span>{equilibre.economie.prosperity}/100</span>
+                  <span>{equilibre.economie.stabilite || 50}/100</span>
                 </div>
-                <ProgressBar value={equilibre.economie.prosperity} />
+                <ProgressBar value={equilibre.economie.stabilite || 50} />
               </div>
               
               <div className="space-y-2">
                 <div className="flex justify-between text-sm">
                   <span className="flex items-center"><Shield className="h-4 w-4 mr-2" /> Militaire</span>
-                  <span>{equilibre.militaire.readiness}/100</span>
+                  <span>{equilibre.militaire.morale || 50}/100</span>
                 </div>
-                <ProgressBar value={equilibre.militaire.readiness} />
+                <ProgressBar value={equilibre.militaire.morale || 50} />
               </div>
               
               <div className="space-y-2">
                 <div className="flex justify-between text-sm">
                   <span className="flex items-center"><GraduationCap className="h-4 w-4 mr-2" /> Religion</span>
-                  <span>{equilibre.religion.piety}/100</span>
+                  <span>{equilibre.religion.piete || 50}/100</span>
                 </div>
-                <ProgressBar value={equilibre.religion.piety} />
+                <ProgressBar value={equilibre.religion.piete || 50} />
               </div>
             </CardContent>
           </Card>
