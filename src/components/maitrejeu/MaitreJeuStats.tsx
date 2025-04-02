@@ -19,7 +19,8 @@ export const MaitreJeuStats = () => {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
-              {equilibre.politique.stability}/100
+              {/* Using optimates score as an approximation for stability */}
+              {equilibre.politique.optimates}/100
             </div>
             <div className="text-xs text-muted-foreground mt-1">
               <span className="mr-2">Optimates: {equilibre.politique.optimates}/100</span>
@@ -34,11 +35,12 @@ export const MaitreJeuStats = () => {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
-              {equilibre.economie.prosperity}/100
+              {/* Using economic value as prosperity approximation */}
+              {equilibre.economie.value}/100
             </div>
             <div className="text-xs text-muted-foreground mt-1">
-              <span className="mr-2">Inflation: {equilibre.economie.inflation}%</span>
-              <span>Croissance: {equilibre.economie.growth}%</span>
+              <span className="mr-2">Croissance: {equilibre.economie.production || 0}%</span>
+              <span>Stabilité: {equilibre.economie.stabilite || 0}%</span>
             </div>
           </CardContent>
         </Card>
@@ -49,11 +51,12 @@ export const MaitreJeuStats = () => {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
-              {equilibre.militaire.readiness}/100
+              {/* Using morale as readiness approximation */}
+              {equilibre.militaire.morale}/100
             </div>
             <div className="text-xs text-muted-foreground mt-1">
               <span className="mr-2">Morale: {equilibre.militaire.morale}/100</span>
-              <span>Force: {equilibre.militaire.strength}/100</span>
+              <span>Force: {equilibre.militaire.force || 0}/100</span>
             </div>
           </CardContent>
         </Card>

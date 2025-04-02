@@ -14,6 +14,7 @@ interface ClientCompetenceManagerProps {
   availableCompetences: string[];
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  onClose?: () => void;
 }
 
 export const ClientCompetenceManager: React.FC<ClientCompetenceManagerProps> = ({
@@ -21,7 +22,8 @@ export const ClientCompetenceManager: React.FC<ClientCompetenceManagerProps> = (
   onUpdateCompetences,
   availableCompetences,
   open,
-  onOpenChange
+  onOpenChange,
+  onClose
 }) => {
   const [selectedCompetences, setSelectedCompetences] = useState<string[]>(
     client.competences || []
@@ -37,6 +39,9 @@ export const ClientCompetenceManager: React.FC<ClientCompetenceManagerProps> = (
 
   const handleSave = () => {
     onUpdateCompetences(client.id, selectedCompetences);
+    if (onClose) {
+      onClose();
+    }
     onOpenChange(false);
   };
 
@@ -85,7 +90,10 @@ export const ClientCompetenceManager: React.FC<ClientCompetenceManagerProps> = (
         </ScrollArea>
         
         <DialogFooter>
-          <Button variant="outline" onClick={() => onOpenChange(false)}>
+          <Button variant="outline" onClick={() => {
+            if (onClose) onClose();
+            onOpenChange(false);
+          }}>
             Annuler
           </Button>
           <Button onClick={handleSave}>

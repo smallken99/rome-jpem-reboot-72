@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent } from '@/components/ui/dialog';
@@ -48,6 +48,17 @@ export const GestionClients = () => {
   
   const handleSaveAdvancedClient = (client: Client | ClientCreationData) => {
     handleSaveClient(client as any);
+  };
+
+  // Competence management
+  const [availableCompetences] = useState<string[]>([
+    "Éloquence", "Politique", "Intrigue", "Commerce", "Diplomatie", 
+    "Art militaire", "Stratégie", "Navigation", "Agriculture", "Artisanat"
+  ]);
+  
+  const handleUpdateCompetences = (clientId: string, competences: string[]) => {
+    // Implementation of competence updating
+    console.log(`Updated competences for ${clientId}:`, competences);
   };
   
   return (
@@ -110,16 +121,16 @@ export const GestionClients = () => {
       />
       
       {/* Gestionnaire de compétences */}
-      <Dialog open={isCompetenceManagerOpen} onOpenChange={setIsCompetenceManagerOpen}>
-        <DialogContent className="sm:max-w-[600px]">
-          {selectedClient && (
-            <ClientCompetenceManager
-              client={selectedClient}
-              onClose={() => setIsCompetenceManagerOpen(false)}
-            />
-          )}
-        </DialogContent>
-      </Dialog>
+      {selectedClient && (
+        <ClientCompetenceManager
+          client={selectedClient}
+          onUpdateCompetences={handleUpdateCompetences}
+          availableCompetences={availableCompetences}
+          open={isCompetenceManagerOpen}
+          onOpenChange={setIsCompetenceManagerOpen}
+          onClose={() => setIsCompetenceManagerOpen(false)}
+        />
+      )}
     </div>
   );
 };

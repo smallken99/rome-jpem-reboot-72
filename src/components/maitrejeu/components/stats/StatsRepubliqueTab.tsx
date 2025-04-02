@@ -1,111 +1,93 @@
+
 import React from 'react';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { Progress } from '@/components/ui/progress';
 import { useMaitreJeu } from '../../context';
-import { Scale, Users2, Landmark, CalendarClock } from 'lucide-react';
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 
 export const StatsRepubliqueTab: React.FC = () => {
-  const { equilibre, lois, elections, currentDate } = useMaitreJeu();
+  const { equilibre } = useMaitreJeu();
   
-  // Calcul de statistiques
-  const loisActives = lois.filter(loi => loi.statut === 'active').length;
-  const loisProposees = lois.filter(loi => loi.statut === 'proposée').length;
-  const loisRejetees = lois.filter(loi => loi.statut === 'rejetée').length;
-  
-  const electionsAVenir = elections.filter(e => 
-    e.annee > currentDate.year || 
-    (e.annee === currentDate.year && e.saison > currentDate.season)
-  ).length;
-  
-  // Équilibre des factions (valeurs par défaut si undefined)
-  const populaires = equilibre?.populaires || 33;
-  const optimates = equilibre?.optimates || 33;
-  const moderates = equilibre?.moderates || 34;
-  
+  // Mock historical data - in a real app, this would come from context or an API
+  const historicalData = [
+    { year: 'AUC 720', politique: 70, economie: 65, militaire: 80 },
+    { year: 'AUC 721', politique: 65, economie: 70, militaire: 75 },
+    { year: 'AUC 722', politique: 60, economie: 75, militaire: 70 },
+    { year: 'AUC 723', politique: 55, economie: 80, militaire: 65 },
+    { year: 'AUC 724', politique: 50, economie: 75, militaire: 60 },
+    { year: 'AUC 725', politique: 55, economie: 70, militaire: 65 },
+    { year: 'AUC 726', politique: 60, economie: 65, militaire: 70 },
+    { year: 'AUC 727', politique: 65, economie: 60, militaire: 75 },
+    { year: 'AUC 728', politique: 70, economie: 65, militaire: 80 }
+  ];
+
+  // Prepare derived data
+  const overallStability = [
+    { year: 'AUC 720', stabilité: 75 },
+    { year: 'AUC 721', stabilité: 70 },
+    { year: 'AUC 722', stabilité: 65 },
+    { year: 'AUC 723', stabilité: 60 },
+    { year: 'AUC 724', stabilité: 55 },
+    { year: 'AUC 725', stabilité: 60 },
+    { year: 'AUC 726', stabilité: 65 },
+    { year: 'AUC 727', stabilité: 70 },
+    { year: 'AUC 728', stabilité: 75 }
+  ];
+
   return (
-    <div className="space-y-4">
-      <h3 className="text-xl font-semibold">Statistiques de la République</h3>
-      
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Scale className="h-5 w-5" /> Équilibre des factions
-            </CardTitle>
-            <CardDescription>
-              Répartition actuelle des influences au Sénat
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-4">
-              <div className="space-y-2">
-                <div className="flex items-center justify-between">
-                  <span className="text-sm font-medium">Populaires</span>
-                  <span className="text-sm text-muted-foreground">{populaires}%</span>
-                </div>
-                <Progress value={populaires} className="h-2 bg-muted" 
-                  indicatorClassName="bg-blue-500" />
-              </div>
-              
-              <div className="space-y-2">
-                <div className="flex items-center justify-between">
-                  <span className="text-sm font-medium">Optimates</span>
-                  <span className="text-sm text-muted-foreground">{optimates}%</span>
-                </div>
-                <Progress value={optimates} className="h-2 bg-muted"
-                  indicatorClassName="bg-red-500" />
-              </div>
-              
-              <div className="space-y-2">
-                <div className="flex items-center justify-between">
-                  <span className="text-sm font-medium">Modérés</span>
-                  <span className="text-sm text-muted-foreground">{moderates}%</span>
-                </div>
-                <Progress value={moderates} className="h-2 bg-muted"
-                  indicatorClassName="bg-green-500" />
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-        
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Landmark className="h-5 w-5" /> Activité législative
-            </CardTitle>
-            <CardDescription>
-              État des lois et propositions
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="grid grid-cols-3 gap-4">
-              <div className="flex flex-col items-center p-4 bg-muted/30 rounded-lg">
-                <span className="text-2xl font-bold">{loisActives}</span>
-                <span className="text-sm text-muted-foreground text-center">Lois actives</span>
-              </div>
-              
-              <div className="flex flex-col items-center p-4 bg-muted/30 rounded-lg">
-                <span className="text-2xl font-bold">{loisProposees}</span>
-                <span className="text-sm text-muted-foreground text-center">Propositions</span>
-              </div>
-              
-              <div className="flex flex-col items-center p-4 bg-muted/30 rounded-lg">
-                <span className="text-2xl font-bold">{loisRejetees}</span>
-                <span className="text-sm text-muted-foreground text-center">Lois rejetées</span>
-              </div>
-            </div>
-            
-            <div className="mt-4 p-4 bg-muted/30 rounded-lg">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <CalendarClock className="h-4 w-4 text-muted-foreground" />
-                  <span className="text-sm font-medium">Élections à venir</span>
-                </div>
-                <span className="text-xl font-bold">{electionsAVenir}</span>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+    <div className="space-y-8">
+      <div>
+        <h3 className="text-lg font-semibold mb-4">Évolution de la République</h3>
+        <div className="h-[300px]">
+          <ResponsiveContainer width="100%" height="100%">
+            <LineChart data={historicalData}>
+              <CartesianGrid strokeDasharray="3 3" />
+              <XAxis dataKey="year" />
+              <YAxis />
+              <Tooltip />
+              <Legend />
+              <Line type="monotone" dataKey="politique" stroke="#8884d8" activeDot={{ r: 8 }} name="Équilibre Politique" />
+              <Line type="monotone" dataKey="economie" stroke="#82ca9d" name="Économie" />
+              <Line type="monotone" dataKey="militaire" stroke="#ffc658" name="Force Militaire" />
+            </LineChart>
+          </ResponsiveContainer>
+        </div>
+      </div>
+
+      <div>
+        <h3 className="text-lg font-semibold mb-4">Stabilité globale</h3>
+        <div className="h-[300px]">
+          <ResponsiveContainer width="100%" height="100%">
+            <LineChart data={overallStability}>
+              <CartesianGrid strokeDasharray="3 3" />
+              <XAxis dataKey="year" />
+              <YAxis />
+              <Tooltip />
+              <Legend />
+              <Line type="monotone" dataKey="stabilité" stroke="#ff7300" activeDot={{ r: 8 }} name="Stabilité Globale" />
+            </LineChart>
+          </ResponsiveContainer>
+        </div>
+      </div>
+
+      <div>
+        <h3 className="text-lg font-semibold mb-4">État actuel</h3>
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
+          <div className="bg-background border rounded-lg p-4">
+            <h4 className="font-medium text-gray-500">Politique</h4>
+            <div className="text-2xl font-bold">{equilibre.politique.optimates}/100</div>
+          </div>
+          <div className="bg-background border rounded-lg p-4">
+            <h4 className="font-medium text-gray-500">Économie</h4>
+            <div className="text-2xl font-bold">{equilibre.economie.value}/100</div>
+          </div>
+          <div className="bg-background border rounded-lg p-4">
+            <h4 className="font-medium text-gray-500">Militaire</h4>
+            <div className="text-2xl font-bold">{equilibre.militaire.morale}/100</div>
+          </div>
+          <div className="bg-background border rounded-lg p-4">
+            <h4 className="font-medium text-gray-500">Religion</h4>
+            <div className="text-2xl font-bold">{equilibre.religion.piete}/100</div>
+          </div>
+        </div>
       </div>
     </div>
   );

@@ -1,129 +1,137 @@
 
 import { useState, useEffect } from 'react';
-import { useMaitreJeu } from '../../../context/MaitreJeuContext';
 import { useClientActions } from './useClientActions';
-import { Client, ClientCreationData, ClientFilter, ClientSort } from '../../../types/clients';
-import { SenateurJouable } from '../../../types/senateurs';
+import { Client, ClientCreationData } from '../../../types/clients';
+import { useMaitreJeu } from '../../../context';
 
-export const useClientManagement = () => {
-  const { clients, senateurs } = useMaitreJeu();
-  const { 
-    handleDeleteClient, 
-    handleStatusChange, 
-    handleAssignment, 
-    handleSaveClient, 
-    senateurs: actionsSenateursList 
-  } = useClientActions();
+// Main hook for client management
+export function useClientManagement() {
+  const { clients, selectedClient, selectClient, createClient, editClient, deleteClient, updateCompetences, clientTypes } = useClientActions();
+  const { senateurs } = useMaitreJeu();
   
-  // State for searching, filtering, and sorting
+  // Client filter & sort state
   const [searchTerm, setSearchTerm] = useState('');
-  const [currentClientFilter, setCurrentClientFilter] = useState<ClientFilter>({});
-  const [currentSort, setCurrentSort] = useState<ClientSort>({ field: 'name', direction: 'asc' });
+  const [currentClientFilter, setCurrentClientFilter] = useState({ type: '', status: '', senateurId: '' });
+  const [currentSort, setCurrentSort] = useState({ field: 'name', direction: 'asc' });
   
-  // State for modal management
-  const [selectedClient, setSelectedClient] = useState<Client | null>(null);
+  // Client modal states
   const [isClientModalOpen, setIsClientModalOpen] = useState(false);
   const [isAdvancedModalOpen, setIsAdvancedModalOpen] = useState(false);
   const [isCompetenceManagerOpen, setIsCompetenceManagerOpen] = useState(false);
   
-  // Filtered clients based on search and filters
+  // Filtered clients based on current filters
   const [filteredClients, setFilteredClients] = useState<Client[]>([]);
   
-  // Apply filters and search when criteria change
+  // Update filtered clients when clients or filters change
   useEffect(() => {
-    let result = [...clients];
+    let filtered = [...clients];
+    
+    // Apply text search
+    if (searchTerm) {
+      const searchLower = searchTerm.toLowerCase();
+      filtered = filtered.filter(client => 
+        client.name.toLowerCase().includes(searchLower) ||
+        client.description?.toLowerCase().includes(searchLower)
+      );
+    }
     
     // Apply type filter
-    if (currentClientFilter.type && currentClientFilter.type !== 'all') {
-      result = result.filter(client => client.type === currentClientFilter.type);
+    if (currentClientFilter.type) {
+      filtered = filtered.filter(client => client.type === currentClientFilter.type);
     }
     
     // Apply status filter
-    if (currentClientFilter.status && currentClientFilter.status !== 'all') {
-      result = result.filter(client => 
-        client.activeStatus === currentClientFilter.status || 
-        client.status === currentClientFilter.status
-      );
+    if (currentClientFilter.status) {
+      filtered = filtered.filter(client => client.status === currentClientFilter.status);
     }
     
-    // Apply search term
-    if (searchTerm) {
-      const lowerSearch = searchTerm.toLowerCase();
-      result = result.filter(client => 
-        client.name.toLowerCase().includes(lowerSearch) ||
-        (client.description && client.description.toLowerCase().includes(lowerSearch)) ||
-        (client.occupation && client.occupation.toLowerCase().includes(lowerSearch)) ||
-        (client.location && client.location.toLowerCase().includes(lowerSearch))
-      );
+    // Apply senateur filter
+    if (currentClientFilter.senateurId) {
+      filtered = filtered.filter(client => client.assignedTo === currentClientFilter.senateurId);
     }
     
-    // Apply assignment filter
-    if (currentClientFilter.assignedTo) {
-      if (currentClientFilter.assignedTo === 'assigned') {
-        result = result.filter(client => client.assignedToSenateurId);
-      } else if (currentClientFilter.assignedTo === 'unassigned') {
-        result = result.filter(client => !client.assignedToSenateurId);
-      } else if (currentClientFilter.assignedTo !== 'all') {
-        result = result.filter(client => client.assignedToSenateurId === currentClientFilter.assignedTo);
-      }
-    }
-    
-    // Sort the results
-    result.sort((a, b) => {
-      const aValue = a[currentSort.field];
-      const bValue = b[currentSort.field];
+    // Apply sorting
+    filtered.sort((a, b) => {
+      const field = currentSort.field;
+      const direction = currentSort.direction === 'asc' ? 1 : -1;
       
-      if (aValue === undefined && bValue === undefined) return 0;
-      if (aValue === undefined) return currentSort.direction === 'asc' ? -1 : 1;
-      if (bValue === undefined) return currentSort.direction === 'asc' ? 1 : -1;
-      
-      if (typeof aValue === 'string' && typeof bValue === 'string') {
-        return currentSort.direction === 'asc' 
-          ? aValue.localeCompare(bValue) 
-          : bValue.localeCompare(aValue);
+      if (field === 'name') {
+        return a.name.localeCompare(b.name) * direction;
+      } else if (field === 'loyalty') {
+        return ((a.loyalty || 0) - (b.loyalty || 0)) * direction;
+      } else if (field === 'influence') {
+        return ((a.influence || 0) - (b.influence || 0)) * direction;
       }
       
-      if (aValue < bValue) return currentSort.direction === 'asc' ? -1 : 1;
-      if (aValue > bValue) return currentSort.direction === 'asc' ? 1 : -1;
       return 0;
     });
     
-    setFilteredClients(result);
+    setFilteredClients(filtered);
   }, [clients, searchTerm, currentClientFilter, currentSort]);
   
-  // Actions for handling clients
-  const handleEditClient = (client: Client) => {
-    setSelectedClient(client);
+  // Client management handlers
+  const handleEditClient = (clientId: string) => {
+    selectClient(clientId);
     setIsClientModalOpen(true);
   };
   
-  const handleAdvancedEdit = (client: Client) => {
-    setSelectedClient(client);
+  const handleAdvancedEdit = (clientId: string) => {
+    selectClient(clientId);
     setIsAdvancedModalOpen(true);
   };
   
-  const handleCompetenceManager = (client: Client) => {
-    setSelectedClient(client);
+  const handleCompetenceManager = (clientId: string) => {
+    selectClient(clientId);
     setIsCompetenceManagerOpen(true);
   };
-
+  
+  const handleDeleteClient = (clientId: string) => {
+    deleteClient(clientId);
+  };
+  
+  const handleStatusChange = (clientId: string, status: string) => {
+    editClient(clientId, { status: status as any });
+  };
+  
+  const handleAssignment = (clientId: string, senateurId: string) => {
+    editClient(clientId, { assignedTo: senateurId });
+  };
+  
+  const handleSaveClient = (clientData: Client | ClientCreationData) => {
+    if ('id' in clientData) {
+      // Update existing client
+      editClient(clientData.id, clientData);
+    } else {
+      // Create new client
+      createClient(clientData);
+    }
+    
+    // Close modals
+    setIsClientModalOpen(false);
+    setIsAdvancedModalOpen(false);
+  };
+  
   return {
+    // State
+    clients,
+    filteredClients,
+    selectedClient,
     searchTerm,
     setSearchTerm,
-    selectedClient,
-    setSelectedClient,
+    currentClientFilter,
+    setCurrentClientFilter,
+    currentSort,
+    setCurrentSort,
     isClientModalOpen,
     setIsClientModalOpen,
     isAdvancedModalOpen,
     setIsAdvancedModalOpen,
     isCompetenceManagerOpen,
     setIsCompetenceManagerOpen,
-    currentClientFilter,
-    setCurrentClientFilter,
-    currentSort,
-    setCurrentSort,
-    filteredClients,
     senateurs,
+    
+    // Actions
+    selectClient,
     handleEditClient,
     handleAdvancedEdit,
     handleCompetenceManager,
@@ -132,4 +140,4 @@ export const useClientManagement = () => {
     handleAssignment,
     handleSaveClient
   };
-};
+}
