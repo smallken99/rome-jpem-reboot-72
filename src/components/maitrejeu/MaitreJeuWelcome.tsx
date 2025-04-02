@@ -189,7 +189,7 @@ export const MaitreJeuWelcome = () => {
         <TabsContent value="decisions">
           <Card>
             <CardHeader>
-              <CardTitle>Décisions en attente</Title>
+              <CardTitle>Décisions en attente</CardTitle>
               <CardDescription>
                 Décisions qui nécessitent votre attention.
               </CardDescription>

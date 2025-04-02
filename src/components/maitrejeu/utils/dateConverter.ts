@@ -1,4 +1,3 @@
-
 import { GameDate, Season } from '../types/common';
 import { GameDate as UtilsGameDate, Season as UtilsSeason } from '@/utils/types/gameDate';
 
@@ -159,7 +158,7 @@ export const dateToGameDate = (date: Date): GameDate => {
 
 /**
  * Format a GameDate object to a human-readable string
- * This is the missing function that's imported in MaitreJeuWelcome.tsx
+ * This is the function that's imported in MaitreJeuWelcome.tsx
  */
 export const formatGameDate = (date: GameDate): string => {
   return gameDateToReadableString(date);
