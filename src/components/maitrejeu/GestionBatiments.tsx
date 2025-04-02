@@ -5,7 +5,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
 import { Plus, FileText, Wrench, ChartBar } from 'lucide-react';
 import { useMaitreJeu } from './context';
-import { useBatimentsManagement } from './hooks/useBatimentsManagement';
+import { useBuildingManagement } from './hooks/useBuildingManagement';
 import { BuildingManagement } from './components/batiments/BuildingManagement';
 import BuildingsList from './components/batiments/BuildingsList';
 import { ConstructionProjects } from './components/batiments/ConstructionProjects';
@@ -17,17 +17,22 @@ import { Building, BuildingCreationData, BuildingStatus, BuildingType } from './
 export const GestionBatiments = () => {
   const [activeTab, setActiveTab] = useState<string>('liste');
   const { currentYear, currentSeason } = useMaitreJeu();
+  const buildingManagement = useBuildingManagement();
+  
+  const [isAddBuildingModalOpen, setIsAddBuildingModalOpen] = useState(false);
+  const [selectedBuilding, setSelectedBuilding] = useState<Building | null>(null);
+
+  // Extract methods from hook with null checks
   const {
-    isAddBuildingModalOpen,
-    setIsAddBuildingModalOpen,
-    selectedBuilding,
-    setSelectedBuilding,
     addBuilding,
     updateBuilding,
-    maintenanceTasks = [],
+    addMaintenanceTask,
     completeMaintenanceTask = () => {},
     cancelMaintenanceTask = () => {}
-  } = useBatimentsManagement();
+  } = buildingManagement;
+
+  // Use maintenanceTasks from the hook or provide a fallback
+  const maintenanceTasks = buildingManagement.maintenanceTasks || [];
 
   const handleEditBuilding = (buildingId: string) => {
     // Dans une implémentation réelle, il faudrait récupérer le bâtiment depuis l'état
@@ -41,8 +46,8 @@ export const GestionBatiments = () => {
       location: "Forum Romanum",
       owner: "république",
       value: 50000,
-      maintenance: 1000,
       maintenanceCost: 1000,
+      maintenance: 1000,
       condition: 100,
       status: BuildingStatus.GOOD,
       description: "Description du bâtiment",
@@ -52,8 +57,8 @@ export const GestionBatiments = () => {
       capacity: 0
     };
     
-    // Use as-is without a setter function wrap
-    setSelectedBuilding(exampleBuilding);
+    // Create a new state update to avoid reference issues
+    setSelectedBuilding(() => exampleBuilding);
   };
 
   const handleSaveBuilding = (data: BuildingCreationData) => {
@@ -61,15 +66,18 @@ export const GestionBatiments = () => {
       // Update existing building with typed properties
       updateBuilding(selectedBuilding.id, {
         ...data,
-        maintenance: data.maintenance || selectedBuilding.maintenance,
-        condition: data.condition || selectedBuilding.condition
+        // Ensure all required properties have values
+        maintenance: data.maintenance !== undefined ? data.maintenance : selectedBuilding.maintenance,
+        condition: data.condition !== undefined ? data.condition : selectedBuilding.condition,
+        value: data.value !== undefined ? data.value : selectedBuilding.value,
+        maintenanceCost: data.maintenanceCost !== undefined ? data.maintenanceCost : selectedBuilding.maintenanceCost
       });
     } else {
       // Add new building with required properties
       const completeData: BuildingCreationData = {
         ...data,
-        maintenance: data.maintenance,
         status: data.status || BuildingStatus.GOOD,
+        maintenance: data.maintenance,
         description: data.description || "",
         constructionYear: data.constructionYear || currentYear,
         cost: data.cost || 10000,

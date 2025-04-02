@@ -20,10 +20,10 @@ export interface Building {
   cost: number;
   maintenance: number;
   revenue: number;
+  capacity: number;
   
   // Optional properties for management
   income?: number;
-  capacity?: number;
   staff?: number;
   slaves?: number;
   workers?: number;
@@ -34,6 +34,9 @@ export interface Building {
   taxRate?: number;
   isFortified?: boolean;
   maintenanceEnabled?: boolean;
+  expectedCompletionYear?: number;
+  supervisor?: string;
+  estimatedCost?: number;
 }
 
 export enum BuildingType {
@@ -61,7 +64,8 @@ export enum BuildingStatus {
   UNDER_CONSTRUCTION = 'under_construction',
   UNDER_RENOVATION = 'under_renovation',
   EXCELLENT = 'excellent',
-  AVERAGE = 'average'
+  AVERAGE = 'average',
+  PLANNED = 'planned'
 }
 
 export enum BuildingOwner {
@@ -78,7 +82,7 @@ export interface BuildingCreationData {
   location: string;
   owner?: string;
   description: string;
-  status?: BuildingStatus;
+  status: BuildingStatus;
   maintenanceCost?: number;
   value?: number;
   condition?: number;
@@ -89,6 +93,9 @@ export interface BuildingCreationData {
   capacity?: number;
   income?: number;
   workers?: number;
+  slaves?: number;
+  estimatedCost?: number;
+  estimatedCompletion?: string;
 }
 
 export enum BuildingPriority {

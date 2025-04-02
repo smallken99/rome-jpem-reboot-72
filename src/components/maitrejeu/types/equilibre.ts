@@ -139,3 +139,22 @@ export interface PoliticalEvent {
   };
   severity: 'minor' | 'moderate' | 'major' | 'critical';
 }
+
+// Define ImportanceType for events
+export type ImportanceType = 
+  | 'minor'
+  | 'moderate'
+  | 'major'
+  | 'critical'
+  | 'normale'
+  | 'faible'
+  | 'moyenne'
+  | 'haute';
+
+// Add RecurringInterval for economy management
+export type RecurringInterval = 
+  | 'monthly'
+  | 'quarterly' 
+  | 'biannually' 
+  | 'annually' 
+  | 'special';
