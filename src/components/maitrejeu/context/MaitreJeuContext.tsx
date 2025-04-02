@@ -1,4 +1,3 @@
-
 import React, { createContext, useState, useContext } from 'react';
 import { SenateurJouable, Province, Evenement, Loi, Election, HistoireEntry } from '../types';
 import { Equilibre } from '../types/equilibre';
@@ -59,6 +58,7 @@ export interface MaitreJeuContextType {
   updateFactionBalance: (populaires: number, optimates: number, moderates: number) => void;
   advanceTime: (newSeason?: Season) => void;
   changePhase: (phase: GamePhase) => void;
+  advancePhase: (phase?: GamePhase) => void;
   getFamille: (id: string) => FamilleInfo | undefined;
   getMembre: (id: string) => MembreFamille | undefined;
   getMembresByFamille: (familleId: string) => MembreFamille[];
@@ -135,6 +135,7 @@ export const MaitreJeuContext = createContext<MaitreJeuContextType>({
   updateFactionBalance: () => {},
   advanceTime: () => {},
   changePhase: () => {},
+  advancePhase: () => {},
   getFamille: () => undefined,
   getMembre: () => undefined,
   getMembresByFamille: () => [],
@@ -182,7 +183,7 @@ export const MaitreJeuProvider: React.FC<{ children: React.ReactNode }> = ({ chi
   }));
 
   // Current date as a GameDate object
-  const currentDate: GameDate = { year: currentYear, season: currentSeason };
+  const currentDate: GameDate = { year: currentYear, season: currentSeason, phase: currentPhase };
 
   const addEvenement = (evenement: Evenement) => {
     setEvenements([...evenements, evenement]);
@@ -278,12 +279,24 @@ export const MaitreJeuProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     setCurrentPhase(phase);
   };
 
-  const updateProvince = (id: string, updates: Partial<Province>) => {
-    setProvinces(prev => 
-      prev.map(province => 
-        province.id === id ? { ...province, ...updates } : province
-      )
-    );
+  const advancePhase = (phase?: GamePhase) => {
+    if (phase) {
+      changePhase(phase);
+    } else {
+      // Default behavior: advance to next phase in a predefined sequence
+      const phases: GamePhase[] = [
+        GamePhase.NORMAL,
+        GamePhase.SENATE,
+        GamePhase.ECONOMY,
+        GamePhase.MILITARY,
+        GamePhase.EVENTS
+      ];
+      
+      const currentPhaseIndex = phases.indexOf(currentPhase as GamePhase);
+      const nextPhaseIndex = (currentPhaseIndex + 1) % phases.length;
+      
+      changePhase(phases[nextPhaseIndex]);
+    }
   };
   
   // Family-related utility functions
@@ -312,6 +325,9 @@ export const MaitreJeuProvider: React.FC<{ children: React.ReactNode }> = ({ chi
   };
   
   // Put together the context value
+  const senatorsCount = senateurs.length;
+  const clientsCount = clients.length;
+  
   const contextValue = {
     senateurs,
     setSenateurs,
@@ -362,11 +378,19 @@ export const MaitreJeuProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     updateFactionBalance,
     advanceTime,
     changePhase,
+    advancePhase,
     getFamille,
     getMembre,
     getMembresByFamille,
     getAlliances,
-    updateProvince
+    updateProvince,
+    senatorsCount,
+    clientsCount,
+    removeClient: deleteClient,
+    updateClientCompetences: (clientId: string, competences: string[]) => {
+      updateClient(clientId, { competences });
+    },
+    clientTypes: ['patron', 'client', 'ally', 'enemy', 'neutral']
   };
   
   return (

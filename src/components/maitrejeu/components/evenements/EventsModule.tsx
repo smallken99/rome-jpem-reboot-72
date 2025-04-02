@@ -1,12 +1,39 @@
 
 import React from 'react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { useMaitreJeu } from '../../context';
 
-const EventsModule = () => {
+const EventsModule: React.FC = () => {
+  const { evenements = [] } = useMaitreJeu();
+  
   return (
-    <div>
-      <h2>Évènements Module</h2>
-      <p>Ce module est un placeholder.</p>
-    </div>
+    <Card>
+      <CardHeader>
+        <CardTitle>Événements Récents</CardTitle>
+      </CardHeader>
+      <CardContent>
+        <div className="space-y-4">
+          <p className="text-muted-foreground">
+            Module d'affichage des événements récents.
+          </p>
+          {evenements.length > 0 ? (
+            <ul className="space-y-2">
+              {evenements.slice(0, 3).map((evenement) => (
+                <li key={evenement.id} className="border-l-2 border-muted pl-3 py-1">
+                  <div className="text-sm font-medium">{evenement.titre || evenement.title}</div>
+                  <div className="text-xs text-muted-foreground">
+                    {evenement.description?.substring(0, 100)}
+                    {evenement.description && evenement.description.length > 100 ? '...' : ''}
+                  </div>
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <p>Aucun événement récent.</p>
+          )}
+        </div>
+      </CardContent>
+    </Card>
   );
 };
 

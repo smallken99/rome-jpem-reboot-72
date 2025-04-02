@@ -7,7 +7,7 @@ export type Season =
   'SPRING' | 'SUMMER' | 'AUTUMN' | 'WINTER' |
   'spring' | 'summer' | 'autumn' | 'winter' | 'fall';
 
-// Define game phases
+// Define game phases - using string enum for better compatibility
 export enum GamePhase {
   SETUP = 'setup',
   SENATE = 'senate',
@@ -26,7 +26,7 @@ export enum GamePhase {
   SENAT = 'senat',
   EVENEMENT = 'evenement',
   ADMINISTRATION = 'administration',
-  // Add these to fix the existing comparisons
+  // Crisis phases
   NORMAL = 'normal',
   CRISIS = 'crisis',
   WAR = 'war',
@@ -39,16 +39,17 @@ export enum GamePhase {
   RELIGIOUS = 'religious'
 }
 
+// Make sure strings can be used as GamePhase
+export function isValidPhase(phase: string): phase is GamePhase {
+  return Object.values(GamePhase).includes(phase as GamePhase);
+}
+
 // Define game date structure
 export interface GameDate {
   year: number;
   season: Season;
-  phase?: GamePhase;
+  phase?: GamePhase | string;
   day?: number; // Added for compatibility with some code
-}
-
-export function isValidPhase(phase: string): phase is GamePhase {
-  return Object.values(GamePhase).includes(phase as GamePhase);
 }
 
 export function formatGameDate(date: GameDate): string {
@@ -93,7 +94,7 @@ export function parseStringToGameDate(dateStr: string): GameDate {
   }
 }
 
-// Add a function to convert GameDate to string
+// Convert GameDate to string
 export function stringToGameDate(date: GameDate): string {
   return `${date.year}-${date.season}`;
 }

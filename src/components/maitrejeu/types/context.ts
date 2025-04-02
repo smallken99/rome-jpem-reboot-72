@@ -1,104 +1,162 @@
 
-import { Equilibre } from './equilibre';
-import { Loi } from './lois';
-import { Province } from './province';
-import { SenateurJouable } from './senateurs';
-import { Evenement } from './evenements';
-import { HistoireEntry } from './histoire';
-import { Election } from './elections';
-import { GamePhase, Season, GameDate } from './common';
-import { MagistratureType } from './magistratures';
-import { Client, ClientCreationData } from './clients';
-import { TreasuryStatus } from './economie';
+import { 
+  SenateurJouable, 
+  Province, 
+  Evenement, 
+  Election, 
+  HistoireEntry,
+  Loi,
+  Equilibre,
+  FamilleInfo,
+  MembreFamille,
+  FamilleAlliance,
+  MariageInfo,
+  FamilleRelation,
+  FamilleFilter,
+  MembreFamilleFilter,
+  FamilleCreationData,
+  MembreFamilleCreationData
+} from '../types';
+import { GameDate, Season, GamePhase } from '../types/common';
+import { MagistratureType } from '../types/magistratures';
+import { Client, ClientCreationData, ClientFilter, ClientSort } from '../types/clients';
+import { EconomieRecord, EconomieCreationData, TreasuryStatus, EconomicFactors } from '../types/economie';
 
+// Type du contexte
 export interface MaitreJeuContextType {
-  // Game state
-  gameState: {
-    year: number;
-    season: Season;
-    phase: GamePhase;
-    day: number;
-  };
-  currentYear: number;
-  currentSeason: Season;
-  currentPhase: GamePhase;
-  currentDate: GameDate;
-  year?: number; // For compatibility with existing code
-  season?: Season; // For compatibility with existing code
-  
-  // Entities
-  equilibre: Equilibre;
-  lois: Loi[];
-  provinces: Province[];
+  // Contexte des sénateurs
   senateurs: SenateurJouable[];
-  evenements: Evenement[];
-  histoireEntries: HistoireEntry[];
-  elections: Election[];
-  clients: Client[];
-  factions?: any[]; // For compatibility with existing code
-  treasury: TreasuryStatus;
-  senatorsCount?: number;
-  clientsCount?: number;
-  
-  // State setters
   setSenateurs: React.Dispatch<React.SetStateAction<SenateurJouable[]>>;
+  updateSenateur: (id: string, updates: Partial<SenateurJouable>) => void;
+  assignSenateurToPlayer: (senateurId: string, playerId: string) => void;
+  addSenateur: (senateur: Omit<SenateurJouable, "id">) => void;
+  deleteSenateur: (id: string) => void;
+  
+  // Contexte des provinces
+  provinces: Province[];
   setProvinces: React.Dispatch<React.SetStateAction<Province[]>>;
+  updateProvince: (province: Province) => void;
+  
+  // Contexte des événements
+  evenements: Evenement[];
   setEvenements: React.Dispatch<React.SetStateAction<Evenement[]>>;
-  setLois: React.Dispatch<React.SetStateAction<Loi[]>>;
-  setHistoireEntries: React.Dispatch<React.SetStateAction<HistoireEntry[]>>;
-  setClients: React.Dispatch<React.SetStateAction<Client[]>>;
-  setEquilibre: React.Dispatch<React.SetStateAction<Equilibre>>;
-  
-  // Actions
-  advanceTime: (newSeason?: Season) => void;
-  changePhase: (phase: GamePhase) => void;
-  updateEquilibre: (updates: Partial<Equilibre>) => void;
-  updateFactionBalance: (populaires: number, optimates: number, moderates: number) => void;
-  advancePhase?: () => void; // For compatibility with MaitreJeuWelcome
-  
-  // Political
-  addLoi: (loi: Omit<Loi, "id">) => void;
-  voteLoi: (id: string, vote: 'pour' | 'contre' | 'abstention', count?: number) => void;
-  scheduleElection: (magistrature: MagistratureType, year?: number, season?: Season) => string;
-  
-  // Events management
   addEvenement: (evenement: Omit<Evenement, "id">) => void;
   resolveEvenement: (id: string, optionId: string) => void;
   
-  // Histoire (History) management
+  // Contexte des élections
+  elections: Election[];
+  setElections: React.Dispatch<React.SetStateAction<Election[]>>;
+  scheduleElection: (magistrature: MagistratureType, year: number, season: Season) => string;
+  
+  // Contexte de l'histoire
+  histoireEntries: HistoireEntry[];
+  setHistoireEntries: React.Dispatch<React.SetStateAction<HistoireEntry[]>>;
   addHistoireEntry: (entry: Omit<HistoireEntry, "id">) => void;
   
-  // Provinces
-  updateProvince: (id: string, updates: Partial<Province>) => void;
+  // Contexte des lois
+  lois: Loi[];
+  setLois: React.Dispatch<React.SetStateAction<Loi[]>>;
+  addLoi: (loi: Loi) => void;
+  voteLoi: (id: string, vote: "pour" | "contre" | "abstention", count?: number) => void;
   
-  // Senateurs
-  updateSenateur: (id: string, updates: Partial<SenateurJouable>) => void;
-  assignSenateurToPlayer: (senateurId: string, playerId: string) => void;
-  addSenateur?: (senateur: Omit<SenateurJouable, "id">) => void; // For compatibility
-  deleteSenateur?: (id: string) => void; // For compatibility
-  assignSenateur?: (senateurId: string, playerId: string) => void; // For compatibility
+  // Contexte d'équilibrage
+  equilibre: Equilibre | null;
+  setEquilibre: React.Dispatch<React.SetStateAction<Equilibre | null>>;
+  updateEquilibre: (updates: Partial<Equilibre>) => void;
+  updateFactionBalance: (populaires: number, optimates: number, moderates: number) => void;
   
+  // Historique et risques (exposés pour les modules de GestionEquilibreModule)
+  historique?: HistoriqueEntry[];
+  addHistoriqueEntry?: (entry: Omit<HistoriqueEntry, "id">) => void;
+  risques?: Record<string, any>;
+
   // Client operations
+  clients: Client[];
+  setClients: React.Dispatch<React.SetStateAction<Client[]>>;
   addClient: (client: ClientCreationData) => string;
   updateClient: (id: string, updates: Partial<Client>) => void;
   deleteClient: (id: string) => void;
+  removeClient?: (id: string) => void; // Alias for deleteClient
   assignClientToSenateur: (clientId: string, senateurId: string | null) => void;
   adjustCompetencePoints: (clientId: string, points: number) => void;
+  updateSpecialAbilities: (clientId: string, abilities: string[]) => void;
+  filterClients: (clients: Client[], filter: ClientFilter) => Client[];
+  sortClients: (clients: Client[], sort: ClientSort) => Client[];
   changeClientStatus: (clientId: string, status: 'active' | 'inactive' | 'probation') => void;
+  updateClientCompetences?: (clientId: string, competences: string[]) => void;
+  clientTypes?: string[]; // Available client types
+  
+  // Économie
+  economieRecords: EconomieRecord[];
+  setEconomieRecords: React.Dispatch<React.SetStateAction<EconomieRecord[]>>;
+  treasury: TreasuryStatus;
+  setTreasury: React.Dispatch<React.SetStateAction<TreasuryStatus>>;
+  economicFactors: EconomicFactors;
+  setEconomicFactors: React.Dispatch<React.SetStateAction<EconomicFactors>>;
+  addEconomieRecord: (data: EconomieCreationData) => string;
+  updateEconomieRecord: (id: string, updates: Partial<EconomieCreationData>) => void;
+  deleteEconomieRecord: (id: string) => void;
   
   // Family operations
-  getFamille?: (id: string) => any;
-  getMembre?: (id: string) => any;
-  getMembresByFamille?: (familleId: string) => any[];
-  deleteMembreFamille?: (id: string) => void;
-  updateMembreFamille?: (id: string, updates: any) => void;
-  addFamille?: (familleData: any) => string;
-  addMembreFamille?: (membreData: any) => string;
-  createAlliance?: (famille1Id: string, famille2Id: string, type: string, termes: string, benefices: string[]) => string;
+  familles: FamilleInfo[];
+  setFamilles: React.Dispatch<React.SetStateAction<FamilleInfo[]>>;
+  membres: MembreFamille[];
+  setMembres: React.Dispatch<React.SetStateAction<MembreFamille[]>>;
+  alliances: FamilleAlliance[];
+  setAlliances: React.Dispatch<React.SetStateAction<FamilleAlliance[]>>;
+  mariages: MariageInfo[];
+  setMariages: React.Dispatch<React.SetStateAction<MariageInfo[]>>;
+  relations: FamilleRelation[];
+  setRelations: React.Dispatch<React.SetStateAction<FamilleRelation[]>>;
   
-  // Additional compatibility methods
-  removeClient?: (id: string) => void;
-  clientTypes?: string[];
-  updateClientCompetences?: (clientId: string, competences: any) => void;
-  voteLoi?: (id: string, vote: string, count?: number) => void;
+  // Opérations sur les familles
+  addFamille: (familleData: FamilleCreationData) => string;
+  updateFamille: (id: string, updates: Partial<FamilleInfo>) => void;
+  deleteFamille: (id: string) => void;
+  getFamille: (id: string) => FamilleInfo | undefined;
+  getFamilles: () => FamilleInfo[];
+  filterFamilles: (filter: FamilleFilter) => FamilleInfo[];
+  
+  // Opérations sur les membres
+  addMembreFamille: (membreData: MembreFamilleCreationData) => string;
+  updateMembreFamille: (id: string, updates: Partial<MembreFamille>) => void;
+  deleteMembreFamille: (id: string) => void;
+  getMembre: (id: string) => MembreFamille | undefined;
+  getMembres: () => MembreFamille[];
+  filterMembres: (filter: MembreFamilleFilter) => MembreFamille[];
+  getFamilleOfMembre: (membreId: string) => FamilleInfo | undefined;
+  getMembresByFamille: (familleId: string) => MembreFamille[];
+  
+  // Opérations sur les alliances
+  createAlliance: (famille1Id: string, famille2Id: string, type: FamilleAlliance['type'], termes: string, benefices: string[]) => string;
+  updateAlliance: (id: string, updates: Partial<FamilleAlliance>) => void;
+  getAlliancesByFamille: (familleId: string) => FamilleAlliance[];
+  getAlliances: () => FamilleAlliance[];
+  
+  // Opérations sur les mariages
+  createMariage: (epouxId: string, epouseId: string, familleEpouxId: string, familleEpouseId: string, dot: number) => string;
+  updateMariage: (id: string, updates: Partial<MariageInfo>) => void;
+  getMariages: () => MariageInfo[];
+  getMariagesByMembre: (membreId: string) => MariageInfo[];
+  
+  // Opérations sur les relations
+  addRelation: (membre1Id: string, membre2Id: string, type: import('../types/familles').RelationType) => string;
+  getRelations: () => FamilleRelation[];
+  getRelationsByMembre: (membreId: string) => FamilleRelation[];
+  
+  // Game state
+  currentDate: GameDate;
+  setCurrentDate: React.Dispatch<React.SetStateAction<GameDate>>;
+  currentYear: number;
+  currentSeason: Season;
+  currentPhase: GamePhase;
+  
+  // Méthodes utilitaires
+  advanceTime: (newSeason?: Season) => void;
+  changePhase: (phase: GamePhase) => void;
+  advancePhase?: (phase?: GamePhase) => void; // Optional method for MaitreJeuWelcome to use
+  
+  // Derived values for counters
+  senatorsCount?: number;
+  clientsCount?: number;
 }

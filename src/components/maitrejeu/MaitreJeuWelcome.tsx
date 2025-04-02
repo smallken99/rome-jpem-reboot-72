@@ -12,16 +12,20 @@ import { formatGameDate, GamePhase } from './types/common';
 export const MaitreJeuWelcome = () => {
   const { 
     currentDate, 
-    advancePhase = () => {}, // Provide default implementations
+    changePhase,
     equilibre, 
-    senatorsCount = 0, 
-    clientsCount = 0 
+    senateurs = [],
+    clients = []
   } = useMaitreJeu();
 
+  // Calculate counts instead of using properties that don't exist
+  const senatorsCount = senateurs.length;
+  const clientsCount = clients.length;
+
   const handleAdvancePhase = () => {
-    if (advancePhase) {
+    if (changePhase) {
       // Use GamePhase enum for phase values
-      advancePhase(GamePhase.NORMAL);
+      changePhase(GamePhase.NORMAL);
     }
   };
 
@@ -49,9 +53,11 @@ export const MaitreJeuWelcome = () => {
   const military = equilibre?.militaire || { morale: 50, effectifs: 50, equipement: 50, discipline: 50, readiness: 50 };
   const religious = equilibre?.religion || { piete: 50, traditions: 50, superstition: 50, piety: 50 };
   const social = equilibre?.social || { plebeiens: 50, patriciens: 50, esclaves: 50, cohesion: 50 };
+
+  // Type safety for stabilite property with explicit defaults for required properties
   const stability = typeof equilibre?.stabilite === 'number' 
-    ? { value: equilibre.stabilite, trend: 'stable', index: 50, crisisRisk: 10 } 
-    : equilibre?.stabilite || { value: 50, trend: 'stable', index: 50, crisisRisk: 10 };
+    ? { value: equilibre.stabilite, trend: 'stable', index: 50, crisisRisk: 10, senat: 50, lois: 50 } 
+    : equilibre?.stabilite || { value: 50, trend: 'stable', index: 50, crisisRisk: 10, senat: 50, lois: 50 };
 
   return (
     <div className="p-6 space-y-6">
@@ -81,7 +87,7 @@ export const MaitreJeuWelcome = () => {
             <CardTitle className="text-xl flex justify-between">
               <span>État de la République</span>
               <Badge 
-                variant={stability.value > 70 ? "success" : stability.value > 40 ? "warning" : "destructive"}
+                variant={stability.value > 70 ? "success" : stability.value > 40 ? "default" : "destructive"}
               >
                 {stability.value > 70 ? "Stable" : stability.value > 40 ? "Fragile" : "Instable"}
               </Badge>
@@ -116,7 +122,7 @@ export const MaitreJeuWelcome = () => {
                   indicatorClassName="bg-blue-500"
                 />
                 <div className="flex justify-between text-xs text-muted-foreground mt-1">
-                  <span>Populares: {political.populares || political.populaires || 0}</span>
+                  <span>Populares: {political.populares || 0}</span>
                   <span>Optimates: {political.optimates || 0}</span>
                 </div>
               </div>
@@ -156,10 +162,10 @@ export const MaitreJeuWelcome = () => {
               <div>
                 <div className="flex justify-between mb-1">
                   <span className="text-sm font-medium">Religion</span>
-                  <span className="text-sm">{religious.piety || religious.piete || 50}%</span>
+                  <span className="text-sm">{religious.piete || 50}%</span>
                 </div>
                 <ProgressBar 
-                  value={religious.piety || religious.piete || 50} 
+                  value={religious.piete || 50} 
                   max={100}
                   indicatorClassName="bg-purple-500"
                 />
