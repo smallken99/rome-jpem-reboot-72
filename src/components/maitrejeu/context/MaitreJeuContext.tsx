@@ -95,15 +95,11 @@ export const MaitreJeuProvider: React.FC<{ children: React.ReactNode }> = ({ chi
   const [economicFactors, setEconomicFactors] = useState<EconomicFactors>({ tradeRevenue: 100, provinceRevenue: 200, militaryExpense: 50, religiousCeremonyExpense: 20, publicWorksExpense: 30, adminExpense: 10, warSpoilsRevenue: 50 });
   const [equilibre, setEquilibre] = useState<Equilibre>(normalizeEquilibre({
     politique: { populares: 30, optimates: 40, moderates: 30 },
-    populares: 30,
-    populares: 30, 
     optimates: 40,
     moderates: 30,
     economie: { stabilite: 70, croissance: 60, commerce: 80, agriculture: 50 },
     social: { plebeiens: 60, patriciens: 40, esclaves: 20, cohesion: 70 },
-    plébéiens: 60,
-    patriciens: 40,
-    militaire: { moral: 80, effectifs: 70, equipement: 60, discipline: 90 },
+    militaire: { moral: 80, effectifs: 70, equipement: 60, discipline: 90, morale: 90, force: 85 },
     religion: { piete: 70, traditions: 80, superstition: 50 },
     stability: 75,
     armée: 80,
@@ -114,7 +110,11 @@ export const MaitreJeuProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     risques: {}
   }));
 
-  const currentDate: GameDate = { year: currentYear, season: currentSeason, phase: currentPhase };
+  const currentDate: GameDate = { 
+    year: currentYear, 
+    season: currentSeason, 
+    phase: currentPhase as GamePhase 
+  };
 
   const addEvenement = (evenement: Evenement) => {
     setEvenements([...evenements, evenement]);
@@ -173,7 +173,11 @@ export const MaitreJeuProvider: React.FC<{ children: React.ReactNode }> = ({ chi
   };
 
   const addHistoireEntry = (entry: Omit<HistoireEntry, "id">) => {
-    setHistoireEntries([...histoireEntries, entry]);
+    const newEntry: HistoireEntry = {
+      ...entry,
+      id: `history-${Date.now()}`
+    };
+    setHistoireEntries([...histoireEntries, newEntry]);
   };
 
   const updateHistoireEntry = (entry: HistoireEntry) => {
@@ -206,15 +210,12 @@ export const MaitreJeuProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     setCurrentPhase(phase);
   };
 
-  // Here we would have all the state variables and methods
-  // For now we'll implement a stub for advancePhase since it's needed
-  
   const advancePhase = (phase: GamePhase = GamePhase.NORMAL) => {
     console.log(`Advancing to phase: ${phase}`);
     // Update the current date's phase
     setCurrentDate(prevDate => ({
       ...prevDate,
-      phase: phase
+      phase
     }));
   };
   
@@ -232,6 +233,35 @@ export const MaitreJeuProvider: React.FC<{ children: React.ReactNode }> = ({ chi
   
   const getAlliances = () => {
     return alliances;
+  };
+  
+  const createAlliance = (famille1Id, famille2Id, type, termes, benefices) => {
+    const id = `alliance-${Date.now()}`;
+    const newAlliance = { id, famille1Id, famille2Id, type, termes, benefices };
+    setAlliances(prev => [...prev, newAlliance]);
+    return id;
+  };
+  
+  const addFamille = (familleData) => {
+    const id = `famille-${Date.now()}`;
+    const newFamille = { ...familleData, id };
+    setFamilles(prev => [...prev, newFamille]);
+    return id;
+  };
+  
+  const addMembreFamille = (membreData) => {
+    const id = `membre-${Date.now()}`;
+    const newMembre = { ...membreData, id };
+    setMembres(prev => [...prev, newMembre]);
+    return id;
+  };
+  
+  const updateMembreFamille = (id, updates) => {
+    setMembres(prev => prev.map(m => m.id === id ? { ...m, ...updates } : m));
+  };
+  
+  const deleteMembreFamille = (id) => {
+    setMembres(prev => prev.filter(m => m.id !== id));
   };
   
   const updateAlliance = (id: string, updates: any) => {
@@ -341,22 +371,15 @@ export const MaitreJeuProvider: React.FC<{ children: React.ReactNode }> = ({ chi
         getMembre,
         getMembresByFamille,
         getAlliances,
-        updateProvince: (province) => {
-          setProvinces(prev =>
-            prev.map(p =>
-              p.id === province.id ? province : p
-            )
-          );
-        },
+        createAlliance,
+        addFamille,
+        addMembreFamille,
+        updateMembreFamille,
+        deleteMembreFamille,
         senatorsCount,
         clientsCount,
-        // Make sure to include our new properties
-        
-        // Include remove client as alias
         removeClient: deleteClient,
-        // Add client types
         clientTypes: ['patron', 'client', 'ally', 'enemy', 'neutral', 'standard'],
-        // Add fake implementation for updateProvince if it doesn't exist
         updateClientCompetences: (clientId: string, competences: string[]) => {
           setClients(prev =>
             prev.map(client =>

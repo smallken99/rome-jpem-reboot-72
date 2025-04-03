@@ -1,29 +1,21 @@
 
 import { GameDate } from './common';
 
-export type HistoireImportanceLevel = 'mineur' | 'standard' | 'majeur' | 'critique';
-
 export interface HistoireEntry {
   id: string;
   titre: string;
-  contenu: string;
-  date: GameDate;
-  type: "politique" | "militaire" | "économique" | "religieux" | "social";
-  importanceLevel: HistoireImportanceLevel;
-  personnesImpliquées: string[];
-  tags: string[];
+  texte?: string;
+  date: string | Date | GameDate;
+  type: string;
   importance?: string;
-  catégorie?: string;
-  auteur?: string;
+  tags?: string[];
+  visible?: boolean;
 }
 
-export interface PoliticalEvent {
-  id: string;
-  title: string;
-  description: string;
-  date: GameDate;
-  type: string;
-  impact: number;
-  faction: string;
-  consequences: string[];
+export interface HistoireFilter {
+  types?: string[];
+  dateStart?: string | Date;
+  dateEnd?: string | Date;
+  importance?: string[];
+  searchTerm?: string;
 }

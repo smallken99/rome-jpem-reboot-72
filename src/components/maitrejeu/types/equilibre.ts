@@ -29,6 +29,8 @@ export interface Militaire {
   discipline: number;
   morale: number;
   force: number;
+  loyaute?: number;
+  puissance?: number;
 }
 
 export interface Religion {

@@ -30,12 +30,13 @@ export const convertPhase = (phase: string): GamePhase => {
   // Match the phase to our enum without case sensitivity
   const normalizedPhase = phase.toUpperCase();
   
-  if (normalizedPhase in GamePhase) {
-    return GamePhase[normalizedPhase as keyof typeof GamePhase];
+  // Check if it's already a GamePhase enum value
+  if (Object.values(GamePhase).includes(normalizedPhase as GamePhase)) {
+    return normalizedPhase as GamePhase;
   }
   
   // Check the mapping
-  if (normalizedPhase in phaseMapping) {
+  if (phaseMapping[normalizedPhase]) {
     return phaseMapping[normalizedPhase];
   }
   

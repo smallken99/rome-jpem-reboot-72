@@ -1,83 +1,90 @@
 
-export const CLIENT_TYPES = ['patron', 'client', 'ally', 'enemy', 'neutral', 'standard', 'merchant', 'slave', 'soldier', 'senator', 'priest'];
-export const CLIENT_LOCATIONS = ['Forum', 'Senate', 'Villa', 'Province', 'Market', 'Temple', 'Theatre', 'Military Camp'];
-export const CLIENT_LOYALTIES = ['haute', 'moyenne', 'basse', 'incertaine', 'strong', 'moderate', 'weak', 'questionable'];
-export const CLIENT_STATUSES = ['active', 'inactive', 'probation', 'deleted'];
+import { GameDate } from './common';
 
-export interface ClientInfluences {
+export enum CLIENT_TYPES {
+  PATRON = 'patron',
+  CLIENT = 'client',
+  ALLY = 'ally',
+  ENEMY = 'enemy',
+  NEUTRAL = 'neutral',
+  STANDARD = 'standard'
+}
+
+export enum CLIENT_LOCATIONS {
+  ROME = 'rome',
+  ITALY = 'italy',
+  PROVINCE = 'province',
+  FOREIGN = 'foreign'
+}
+
+export enum CLIENT_LOYALTIES {
+  VERY_LOW = 'very_low',
+  LOW = 'low',
+  MEDIUM = 'medium',
+  HIGH = 'high',
+  VERY_HIGH = 'very_high'
+}
+
+export enum CLIENT_STATUSES {
+  ACTIVE = 'active',
+  INACTIVE = 'inactive',
+  PROBATION = 'probation'
+}
+
+export type ClientInfluences = {
   political: number;
-  popular: number;
-  religious: number;
-}
-
-export interface Client {
-  id: string;
-  name: string;
-  type: string;
-  status: string;
-  activeStatus?: string;
-  description?: string;
-  occupation?: string;
-  location?: string;
-  loyalty?: string | number;
-  influence?: number;
-  assignedTo?: string;
-  assignedToSenateurId?: string;
-  competences: string[];
-  competencePoints?: number;
-  // Extended client properties
-  subType?: string;
-  age?: number;
-  income?: number;
-  cost?: number;
-  influences?: ClientInfluences;
-  specialAbility?: string;
-  specialAbilities?: string[];
-  backstory?: string;
-  relationshipLevel?: number;
-  lastInteraction?: string;
-}
+  military: number;
+  economic: number;
+};
 
 export interface ClientCreationData {
   name: string;
   type: string;
-  status: string;
-  description?: string;
-  occupation?: string;
-  location?: string;
-  loyalty?: string | number;
-  influence?: number;
-  assignedTo?: string;
-  competences?: string[];
-  competencePoints?: number;
-  // Extended client creation properties
   subType?: string;
+  loyalty: number | string;
+  status: string;
+  location: string;
+  influence: number;
+  competences: string[];
+  assignedTo?: string;
+  backstory?: string;
+  specialAbility?: string;
+  relationshipLevel?: number;
+  lastInteraction?: Date | string;
   age?: number;
   income?: number;
   cost?: number;
   influences?: ClientInfluences;
-  specialAbility?: string;
-  specialAbilities?: string[];
-  backstory?: string;
-  relationshipLevel?: number;
-  lastInteraction?: string;
-  assignedToSenateurId?: string;
-  activeStatus?: string;
+}
+
+export interface Client extends ClientCreationData {
+  id: string;
+  createdAt?: string;
+  updatedAt?: string;
 }
 
 export interface ClientFilter {
-  type?: string;
-  status?: string;
-  assignedTo?: string;
-  search?: string;
-  searchTerm?: string;
+  types?: string[];
+  status?: string[];
   location?: string;
-  loyalty?: string;
   minInfluence?: number;
-  minLoyalty?: number;
+  minLoyalty?: number | string;
+  assignedTo?: string;
+  searchTerm?: string;
+  assignedOnly?: boolean;
 }
 
+export type ClientSortField = 'name' | 'loyalty' | 'influence' | 'type' | 'status' | 'location';
+
 export interface ClientSort {
-  field: string;
+  field: ClientSortField;
   direction: 'asc' | 'desc';
+}
+
+export interface ClientRelationship {
+  clientId: string;
+  senateurId: string;
+  relationLevel: number;
+  lastInteraction: Date | string | GameDate;
+  notes?: string;
 }
