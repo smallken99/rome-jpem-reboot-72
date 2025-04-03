@@ -1,100 +1,91 @@
 
-// Define all possible seasons
 export type Season = 
-  'Spring' | 'Summer' | 'Autumn' | 'Winter' | 'Fall' | 
-  'Ver' | 'Aestas' | 'Autumnus' | 'Hiems' |
-  'Aes' | 'Aut' | 'Hie' |
-  'SPRING' | 'SUMMER' | 'AUTUMN' | 'WINTER' |
-  'spring' | 'summer' | 'autumn' | 'winter' | 'fall';
+  | 'Ver' 
+  | 'Aestas' 
+  | 'Autumnus' 
+  | 'Hiems'
+  | 'SPRING'
+  | 'SUMMER'
+  | 'AUTUMN'
+  | 'WINTER'
+  | 'Spring'
+  | 'Summer'
+  | 'Autumn'
+  | 'Winter'
+  | 'spring'
+  | 'summer'
+  | 'autumn'
+  | 'winter'
+  | 'fall'
+  | 'Fall'
+  | 'Aes'
+  | 'Aut'
+  | 'Hie';
 
-// Define game phases - using string enum for better compatibility
 export enum GamePhase {
-  SETUP = 'setup',
+  NORMAL = 'normal',
+  CRISIS = 'crisis',
+  WAR = 'war',
+  PEACE = 'peace',
+  TRIUMPH = 'triumph',
   SENATE = 'senate',
-  ACTIONS = 'actions',
+  ELECTION = 'election',
   ECONOMY = 'economy',
-  EVENTS = 'events',
-  DIPLOMACY = 'diplomacy',
   MILITARY = 'military',
+  DIPLOMACY = 'diplomacy',
+  EVENTS = 'events',
+  ACTIONS = 'actions',
+  ACTION = 'action',
   POLITIQUE = 'politique',
   ECONOMIE = 'economie',
   MILITAIRE = 'militaire',
   RELIGION = 'religion',
   SOCIAL = 'social',
-  ELECTION = 'election',
-  ACTION = 'action',
   SENAT = 'senat',
   EVENEMENT = 'evenement',
   ADMINISTRATION = 'administration',
-  // Crisis phases
-  NORMAL = 'normal',
-  CRISIS = 'crisis',
-  WAR = 'war',
-  ECONOMIC = 'economic',
-  REVOLT = 'revolt',
-  TRIUMPH = 'triumph',
-  GAMES = 'games',
-  SCANDAL = 'scandal',
+  SETUP = 'setup',
+  RELIGIOUS = 'religious',
   DIPLOMATIC = 'diplomatic',
-  RELIGIOUS = 'religious'
+  REVOLT = 'revolt',
+  GAMES = 'games',
+  SCANDAL = 'scandal'
 }
 
-// Make sure strings can be used as GamePhase
-export function isValidPhase(phase: string): phase is GamePhase {
-  return Object.values(GamePhase).includes(phase as GamePhase);
+// Helper function to convert string to GamePhase enum safely
+export function stringToGamePhase(phase: string): GamePhase {
+  if (Object.values(GamePhase).includes(phase as GamePhase)) {
+    return phase as GamePhase;
+  }
+  return GamePhase.NORMAL;
 }
 
-// Define game date structure
 export interface GameDate {
   year: number;
   season: Season;
   phase?: GamePhase | string;
-  day?: number; // Added for compatibility with some code
 }
 
-export function formatGameDate(date: GameDate): string {
-  return `${date.year} (${date.season})`;
+// Helper function to create a GameDate from parts
+export function createGameDate(year: number, season: Season, phase?: GamePhase): GameDate {
+  return { year, season, phase };
 }
 
-// Add the parseStringToGameDate function
-export function parseStringToGameDate(dateStr: string): GameDate {
+// Helper for parsing string to GameDate
+export function parseStringToGameDate(dateString: string): GameDate {
   try {
-    // Handle different date formats
-    if (dateStr.includes('-')) {
-      // Format like "2023-Spring"
-      const [yearStr, seasonStr] = dateStr.split('-');
-      return {
-        year: parseInt(yearStr, 10),
-        season: seasonStr as Season
-      };
-    } else if (dateStr.match(/^\d+\s+\([A-Za-z]+\)$/)) {
-      // Format like "2023 (Spring)"
-      const yearMatch = dateStr.match(/^(\d+)/);
-      const seasonMatch = dateStr.match(/\(([A-Za-z]+)\)$/);
-      
-      if (yearMatch && seasonMatch) {
-        return {
-          year: parseInt(yearMatch[1], 10),
-          season: seasonMatch[1] as Season
-        };
-      }
-    }
-    
-    // Default fallback
+    const parts = dateString.split('-');
     return {
-      year: new Date().getFullYear(),
-      season: 'Spring'
+      year: parseInt(parts[0], 10),
+      season: parts[1] as Season,
+      phase: parts[2] ? stringToGamePhase(parts[2]) : undefined
     };
   } catch (error) {
-    console.error("Error parsing date string:", error);
-    return {
-      year: new Date().getFullYear(),
-      season: 'Spring'
-    };
+    console.error('Error parsing date string:', error);
+    return { year: new Date().getFullYear(), season: 'Ver' };
   }
 }
 
-// Convert GameDate to string
-export function stringToGameDate(date: GameDate): string {
-  return `${date.year}-${date.season}`;
+export function stringToGameDate(dateString: string): GameDate {
+  return parseStringToGameDate(dateString);
 }

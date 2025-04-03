@@ -18,19 +18,24 @@ export const ConstructionProjects: React.FC<ConstructionProjectsProps> = ({ curr
   
   const addNewProject = () => {
     const startDate = new Date();
+    const estimatedCompletion = new Date();
+    estimatedCompletion.setFullYear(currentYear + 1);
     
-    // Create construction project properly
+    // Create construction project with all required properties
     const projectData = {
       name: "Nouveau Temple de Jupiter",
-      type: "temple" as BuildingType,
+      type: BuildingType.TEMPLE,
       location: "Capitole",
       estimatedCost: 50000,
+      cost: 50000, // Add required cost
       startDate,
+      estimatedCompletion, // Add required estimatedCompletion
       expectedCompletionYear: currentYear + 1,
-      status: 'planned' as 'planned' | 'in_progress' | 'completed' | 'abandoned',
+      status: 'planned' as const,
       description: "Construction d'un nouveau temple dédié à Jupiter",
       supervisor: "Marcus Agrippa",
-      progress: 0
+      workers: 50, // Add required workers
+      slaves: 20, // Add required slaves
     };
     
     const newProjectId = addConstructionProject(projectData);

@@ -1,5 +1,4 @@
 
-// Types for the equilibre (balance) system
 export interface Stabilite {
   value: number;
   trend: string;
@@ -14,9 +13,6 @@ export interface Politique {
   populares: number;
   optimates: number;
   moderates: number;
-  stability?: number;
-  // For backward compatibility
-  populaires?: number;
 }
 
 export interface Economie {
@@ -24,29 +20,6 @@ export interface Economie {
   croissance: number;
   commerce: number;
   agriculture: number;
-  prosperity?: number;
-  production?: number;
-  value?: number;
-}
-
-export interface Militaire {
-  morale: number;
-  effectifs: number;
-  equipement: number;
-  discipline: number;
-  readiness?: number;
-  force?: number;
-  puissance?: number;
-  loyaute?: number;
-  // For backward compatibility
-  moral?: number;
-}
-
-export interface Religion {
-  piete: number;
-  traditions: number;
-  superstition: number;
-  piety?: number;
 }
 
 export interface Social {
@@ -54,71 +27,59 @@ export interface Social {
   patriciens: number;
   esclaves: number;
   cohesion: number;
-  // For backward compatibility
-  plébéiens?: number;
 }
 
-// Risk types
+export interface Militaire {
+  moral: number;
+  effectifs: number;
+  equipement: number;
+  discipline: number;
+  morale: number;
+}
+
+export interface Religion {
+  piete: number;
+  traditions: number;
+  superstition: number;
+}
+
 export enum RiskType {
-  POLITICAL = 'POLITICAL',
-  ECONOMIC = 'ECONOMIC',
-  MILITARY = 'MILITARY',
-  SOCIAL = 'SOCIAL',
-  RELIGIOUS = 'RELIGIOUS',
-  DIPLOMATIC = 'DIPLOMATIC'
+  POLITICAL = 'political',
+  ECONOMIC = 'economic',
+  MILITARY = 'military',
+  RELIGIOUS = 'religious',
+  SOCIAL = 'social'
 }
 
 export interface Risk {
   id: string;
   type: RiskType;
-  probability: number;
-  impact: number;
-  description: string;
-  severity: 'low' | 'medium' | 'high' | 'critical';
-  createdAt?: Date;
-  triggeredAt?: Date | null;
-  resolvedAt?: Date | null;
-  status: 'pending' | 'triggered' | 'resolved' | 'mitigated';
-}
-
-export interface PoliticalEvent {
-  id: string;
   title: string;
   description: string;
-  date: any; // Date or GameDate
-  type: 'political' | 'economic' | 'military' | 'social' | 'religious';
+  severity: 'low' | 'medium' | 'high' | 'critical';
+  probability: number;
   impact: number;
-  faction?: string;
-  createdBy?: string;
-}
-
-export interface HistoriqueEntry {
-  id: string;
-  date: any; // Date or GameDate
-  text: string;
-  type: string;
-  importance: 'low' | 'medium' | 'high';
-  visible?: boolean;
+  createdAt: Date;
+  active: boolean;
 }
 
 export interface Equilibre {
   politique: Politique;
   economie: Economie;
+  social: Social;
   militaire: Militaire;
   religion: Religion;
-  social: Social;
-  stabilite: Stabilite | number;
-  historique?: HistoriqueEntry[];
-  risques?: Record<string, Risk>;
-  
-  // Legacy fields for backward compatibility
-  populaires?: number;
-  populares?: number;
-  optimates?: number;
-  moderates?: number;
+  stabilite: number | Stabilite;
   stability?: number;
   armée?: number;
   loyauté?: number;
   morale?: number;
   facteurJuridique?: number;
+  historique?: any[];
+  risques?: Record<string, Risk>;
+  populares?: number;
+  optimates?: number;
+  moderates?: number;
+  plebeiens?: number;
+  patriciens?: number;
 }

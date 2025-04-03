@@ -8,11 +8,12 @@ import { SenateurJouable } from '../../types/senateurs';
 export const useClientManagement = () => {
   const { clients, senateurs } = useMaitreJeu();
   const { 
-    handleDeleteClient, 
-    handleStatusChange, 
-    handleAssignment, 
-    handleSaveClient, 
-    senateurs: actionsSenateursList 
+    createClient,
+    editClient,
+    deleteClient,
+    handleStatusChange: changeStatus,
+    handleAssignment: assignClient,
+    updateCompetences
   } = useClientActions();
   
   // State for searching, filtering, and sorting
@@ -68,23 +69,22 @@ export const useClientManagement = () => {
       }
     }
     
-    // Sort the results
+    // Sort the results - make sure we handle string/number comparison correctly
     result.sort((a, b) => {
-      const aValue = a[currentSort.field];
-      const bValue = b[currentSort.field];
+      const field = currentSort.field;
+      const direction = currentSort.direction === 'asc' ? 1 : -1;
       
-      if (aValue === undefined && bValue === undefined) return 0;
-      if (aValue === undefined) return currentSort.direction === 'asc' ? -1 : 1;
-      if (bValue === undefined) return currentSort.direction === 'asc' ? 1 : -1;
+      // Handle different field types appropriately
+      if (field === 'name') {
+        return a.name.localeString().localeCompare(b.name.toString()) * direction;
+      } 
       
-      if (typeof aValue === 'string' && typeof bValue === 'string') {
-        return currentSort.direction === 'asc' 
-          ? aValue.localeCompare(bValue) 
-          : bValue.localeCompare(aValue);
+      if (field === 'loyalty' || field === 'influence') {
+        const aValue = a[field as keyof Client] as number || 0;
+        const bValue = b[field as keyof Client] as number || 0;
+        return (aValue - bValue) * direction;
       }
       
-      if (aValue < bValue) return currentSort.direction === 'asc' ? -1 : 1;
-      if (aValue > bValue) return currentSort.direction === 'asc' ? 1 : -1;
       return 0;
     });
     
@@ -105,6 +105,36 @@ export const useClientManagement = () => {
   const handleCompetenceManager = (client: Client) => {
     setSelectedClient(client);
     setIsCompetenceManagerOpen(true);
+  };
+  
+  const handleDeleteClient = (clientId: string) => {
+    deleteClient(clientId);
+  };
+  
+  const handleStatusChange = (clientId: string, status: string) => {
+    changeStatus(clientId, status);
+  };
+  
+  const handleAssignment = (clientId: string, senateurId: string) => {
+    assignClient(clientId, senateurId);
+  };
+  
+  const handleSaveClient = (clientData: Client | ClientCreationData) => {
+    if ('id' in clientData) {
+      // Update existing client
+      editClient(clientData.id, clientData);
+    } else {
+      // Create new client with competences
+      const clientWithCompetences: ClientCreationData = {
+        ...clientData,
+        competences: clientData.competences || []
+      };
+      createClient(clientWithCompetences);
+    }
+    
+    // Close modals
+    setIsClientModalOpen(false);
+    setIsAdvancedModalOpen(false);
   };
 
   return {

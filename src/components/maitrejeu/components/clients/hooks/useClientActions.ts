@@ -1,7 +1,7 @@
 
 import { useState } from 'react';
 import { useMaitreJeu } from '../../../context';
-import { Client } from '../../../types/clients';
+import { Client, ClientCreationData } from '../../../types/clients';
 import { toast } from 'sonner';
 import { v4 as uuidv4 } from 'uuid';
 
@@ -10,10 +10,11 @@ export function useClientActions() {
     clients, 
     addClient, 
     updateClient, 
-    removeClient,
-    clientTypes,
+    deleteClient: removeClient,
+    clientTypes = ['patron', 'client', 'ally', 'enemy', 'neutral'],
     updateClientCompetences,
     currentDate,
+    senateurs = []
   } = useMaitreJeu();
   
   const [selectedClient, setSelectedClient] = useState<Client | null>(null);
@@ -33,16 +34,15 @@ export function useClientActions() {
   };
   
   // Add a new client
-  const createClient = (clientData: Omit<Client, 'id'>) => {
+  const createClient = (clientData: Omit<ClientCreationData, "id">) => {
     setIsLoading(true);
     
     try {
-      const newClient = {
+      const newClient: Client = {
         id: uuidv4(),
         ...clientData,
         competences: clientData.competences || [],
         competencePoints: clientData.competencePoints || 0,
-        createdAt: new Date().toISOString(),
       };
       
       addClient(newClient);
@@ -63,7 +63,11 @@ export function useClientActions() {
     setIsLoading(true);
     
     try {
-      updateClient(clientId, clientData);
+      updateClient({
+        ...clients.find(c => c.id === clientId),
+        ...clientData,
+        id: clientId
+      });
       
       if (selectedClient?.id === clientId) {
         setSelectedClient(prev => prev ? { ...prev, ...clientData } : null);
@@ -107,7 +111,18 @@ export function useClientActions() {
     setIsLoading(true);
     
     try {
-      updateClientCompetences(clientId, competences);
+      if (updateClientCompetences) {
+        updateClientCompetences(clientId, competences);
+      } else {
+        // Fallback if direct method not available
+        const client = clients.find(c => c.id === clientId);
+        if (client) {
+          updateClient({
+            ...client,
+            competences
+          });
+        }
+      }
       
       if (selectedClient?.id === clientId) {
         setSelectedClient(prev => prev ? { ...prev, competences } : null);
@@ -124,6 +139,19 @@ export function useClientActions() {
     }
   };
   
+  // Handle client status change
+  const handleStatusChange = (clientId: string, status: string) => {
+    return editClient(clientId, { status });
+  };
+  
+  // Handle client assignment to senator
+  const handleAssignment = (clientId: string, senateurId: string) => {
+    return editClient(clientId, { 
+      assignedTo: senateurId,
+      assignedToSenateurId: senateurId 
+    });
+  };
+  
   return {
     clients,
     selectedClient,
@@ -132,8 +160,11 @@ export function useClientActions() {
     editClient,
     deleteClient,
     updateCompetences,
+    handleStatusChange,
+    handleAssignment,
     isLoading,
     clientTypes,
-    currentYear
+    currentYear,
+    senateurs
   };
 }

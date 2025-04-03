@@ -1,101 +1,37 @@
 
-export interface Building {
-  id: string;
-  name: string;
-  type: string;
-  location: string;
-  status: BuildingStatus;
-  owner?: string;
-  constructionDate?: Date;
-  lastMaintenance?: Date;
-  description: string;
-  
-  // Required properties for building management
-  value: number;
-  maintenanceCost: number;
-  condition: number;
-  
-  // Additional required properties
-  constructionYear: number;
-  cost: number;
-  maintenance: number;
-  revenue: number;
-  capacity: number;
-  
-  // Optional properties for management
-  income?: number;
-  staff?: number;
-  slaves?: number;
-  workers?: number;
-  upgrades?: string[];
-  maintenanceLevel?: number;
-  securityLevel?: number;
-  hasTax?: boolean;
-  taxRate?: number;
-  isFortified?: boolean;
-  maintenanceEnabled?: boolean;
-  expectedCompletionYear?: number;
-  supervisor?: string;
-  estimatedCost?: number;
-}
+import { GameDate, Season } from "./common";
 
 export enum BuildingType {
   TEMPLE = 'temple',
+  FORUM = 'forum',
+  BATHS = 'baths',
+  MARKET = 'market',
+  THEATRE = 'theatre',
   VILLA = 'villa',
   DOMUS = 'domus',
-  INSULA = 'insula',
-  FORUM = 'forum',
-  BATHHOUSE = 'bathhouse',
-  THEATRE = 'theatre',
-  WAREHOUSE = 'warehouse',
   FARM = 'farm',
+  WAREHOUSE = 'warehouse',
   WORKSHOP = 'workshop',
-  MARKET = 'market',
-  ACADEMY = 'academy',
-  BARRACKS = 'barracks'
+  MINE = 'mine',
+  PORT = 'port',
+  AQUEDUCT = 'aqueduct',
+  MILITARY = 'military',
+  INFRASTRUCTURE = 'infrastructure',
+  ADMINISTRATIVE = 'administrative',
+  OTHER = 'other'
 }
 
 export enum BuildingStatus {
+  EXCELLENT = 'excellent',
   GOOD = 'good',
+  AVERAGE = 'average',
   FAIR = 'fair',
   POOR = 'poor',
   DAMAGED = 'damaged',
   RUINED = 'ruined',
   UNDER_CONSTRUCTION = 'under_construction',
   UNDER_RENOVATION = 'under_renovation',
-  EXCELLENT = 'excellent',
-  AVERAGE = 'average',
   PLANNED = 'planned'
-}
-
-export enum BuildingOwner {
-  REPUBLIC = 'république',
-  PRIVATE = 'private',
-  SENATORIAL = 'senatorial',
-  RELIGIOUS = 'religious',
-  MILITARY = 'military'
-}
-
-export interface BuildingCreationData {
-  name: string;
-  type: string;
-  location: string;
-  owner?: string;
-  description: string;
-  status: BuildingStatus;
-  maintenanceCost?: number;
-  value?: number;
-  condition?: number;
-  constructionYear?: number;
-  cost?: number;
-  maintenance: number;
-  revenue?: number;
-  capacity?: number;
-  income?: number;
-  workers?: number;
-  slaves?: number;
-  estimatedCost?: number;
-  estimatedCompletion?: string;
 }
 
 export enum BuildingPriority {
@@ -105,13 +41,39 @@ export enum BuildingPriority {
   CRITICAL = 'critical'
 }
 
-export interface BuildingFilter {
-  types: string[];
-  locations: string[];
-  status: string;
-  minRevenue: number;
-  maxMaintenance: number;
-  searchTerm: string;
+export interface Building {
+  id: string;
+  name: string;
+  type: BuildingType;
+  location: string;
+  description: string;
+  owner: string;
+  value: number;
+  maintenanceCost: number;
+  maintenance: number;
+  condition: number;
+  status: BuildingStatus;
+  constructionYear: number;
+  cost: number;
+  revenue: number;
+  capacity: number;
+}
+
+export interface BuildingCreationData {
+  name: string;
+  type: BuildingType;
+  location: string;
+  description?: string;
+  owner?: string;
+  value?: number;
+  maintenanceCost?: number;
+  maintenance?: number;
+  condition?: number;
+  status?: BuildingStatus;
+  constructionYear?: number;
+  cost?: number;
+  revenue?: number;
+  capacity?: number;
 }
 
 export interface MaintenanceTask {
@@ -123,29 +85,27 @@ export interface MaintenanceTask {
   cost: number;
   duration: number;
   startDate: string;
+  dueDate: string;
   status: 'pending' | 'in_progress' | 'completed' | 'cancelled';
-  assignedWorkers?: number;
   completionDate?: string;
-  estimatedCompletion?: string;
   priority?: BuildingPriority;
 }
 
 export interface ConstructionProject {
   id: string;
   name: string;
-  type: string;
+  type: BuildingType;
   location: string;
+  description: string;
+  supervisor: string;
+  estimatedCost: number;
   cost: number;
-  startDate: string | Date;
-  estimatedCompletion: string;
+  startDate: Date;
+  estimatedCompletion: Date;
+  expectedCompletionYear: number;
+  status: 'planned' | 'in_progress' | 'completed' | 'abandoned';
   progress: number;
-  status: string;
   workers: number;
   slaves: number;
-  overseer?: string;
-  description?: string;
-  supervisor?: string;
-  expectedCompletionYear?: number;
   approved?: boolean;
-  estimatedCost?: number;
 }

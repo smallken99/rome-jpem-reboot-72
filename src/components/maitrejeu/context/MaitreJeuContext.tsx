@@ -182,7 +182,6 @@ export const MaitreJeuProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     risques: {}
   }));
 
-  // Current date as a GameDate object
   const currentDate: GameDate = { year: currentYear, season: currentSeason, phase: currentPhase };
 
   const addEvenement = (evenement: Evenement) => {
@@ -253,20 +252,16 @@ export const MaitreJeuProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     setHistoireEntries(histoireEntries.filter(h => h.id !== id));
   };
   
-  // Import and use the equilibre operations
   const { updateEquilibre, updateFactionBalance } = createEquilibreOperations(setEquilibre);
   
-  // Time management functions
   const advanceTime = (newSeason?: Season) => {
     if (newSeason) {
       setCurrentSeason(newSeason);
     } else {
-      // Auto advance to next season
       const seasons: Season[] = ['Ver', 'Aestas', 'Autumnus', 'Hiems'];
       const currentIndex = seasons.indexOf(currentSeason);
       const nextIndex = (currentIndex + 1) % seasons.length;
       
-      // If we're completing a full year cycle
       if (nextIndex === 0) {
         setCurrentYear(currentYear + 1);
       }
@@ -283,7 +278,6 @@ export const MaitreJeuProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     if (phase) {
       changePhase(phase);
     } else {
-      // Default behavior: advance to next phase in a predefined sequence
       const phases: GamePhase[] = [
         GamePhase.NORMAL,
         GamePhase.SENATE,
@@ -299,7 +293,6 @@ export const MaitreJeuProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     }
   };
   
-  // Family-related utility functions
   const getFamille = (id: string): FamilleInfo | undefined => {
     return familles.find(f => f.id === id);
   };
@@ -324,7 +317,12 @@ export const MaitreJeuProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     );
   };
   
-  // Put together the context value
+  const updateProvince = (id: string, updates: Partial<Province>) => {
+    setProvinces(provinces.map(province => 
+      province.id === id ? { ...province, ...updates } : province
+    ));
+  };
+  
   const senatorsCount = senateurs.length;
   const clientsCount = clients.length;
   
@@ -388,7 +386,13 @@ export const MaitreJeuProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     clientsCount,
     removeClient: deleteClient,
     updateClientCompetences: (clientId: string, competences: string[]) => {
-      updateClient(clientId, { competences });
+      const client = clients.find(c => c.id === clientId);
+      if (client) {
+        updateClient({
+          ...client,
+          competences
+        });
+      }
     },
     clientTypes: ['patron', 'client', 'ally', 'enemy', 'neutral']
   };

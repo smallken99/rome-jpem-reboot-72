@@ -18,7 +18,7 @@ export const ProgressBar: React.FC<ProgressBarProps> = ({
   const percentage = Math.min(100, Math.max(0, (value / max) * 100));
   
   return (
-    <div className={cn("h-2 w-full bg-muted overflow-hidden rounded-full", className)}>
+    <div className={cn("h-2.5 w-full bg-muted overflow-hidden rounded-full", className)}>
       <div 
         className={cn("h-full bg-primary transition-all", indicatorClassName)} 
         style={{ width: `${percentage}%` }}

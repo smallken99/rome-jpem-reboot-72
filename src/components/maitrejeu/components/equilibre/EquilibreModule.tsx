@@ -2,8 +2,13 @@
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useMaitreJeu } from '../../context';
+import { ProgressBar } from '@/components/ui/progress-bar';
 
-const EquilibreModule: React.FC = () => {
+interface EquilibreModuleProps {
+  simplified?: boolean;
+}
+
+const EquilibreModule: React.FC<EquilibreModuleProps> = ({ simplified = false }) => {
   const { equilibre } = useMaitreJeu();
   
   return (
@@ -13,21 +18,57 @@ const EquilibreModule: React.FC = () => {
       </CardHeader>
       <CardContent>
         <div className="space-y-4">
-          <p className="text-muted-foreground">
-            Module d'affichage des données d'équilibre de la République.
-          </p>
+          {!simplified && (
+            <p className="text-muted-foreground">
+              Module d'affichage des données d'équilibre de la République.
+            </p>
+          )}
+          
           {equilibre && (
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <h3 className="font-semibold">Politique</h3>
-                <p>Populares: {equilibre.politique?.populares || 0}</p>
-                <p>Optimates: {equilibre.politique?.optimates || 0}</p>
+            <div className="grid grid-cols-1 gap-4">
+              <div className="space-y-2">
+                <h3 className="font-semibold">Équilibre politique</h3>
+                <div className="grid grid-cols-2 gap-2">
+                  <div>
+                    <p className="text-sm">Populares: {equilibre.politique?.populares || 0}</p>
+                    <ProgressBar value={equilibre.politique?.populares || 0} max={100} />
+                  </div>
+                  <div>
+                    <p className="text-sm">Optimates: {equilibre.politique?.optimates || 0}</p>
+                    <ProgressBar value={equilibre.politique?.optimates || 0} max={100} />
+                  </div>
+                </div>
               </div>
-              <div>
-                <h3 className="font-semibold">Militaire</h3>
-                <p>Morale: {equilibre.militaire?.morale || 0}</p>
-                <p>Discipline: {equilibre.militaire?.discipline || 0}</p>
+              
+              <div className="space-y-2">
+                <h3 className="font-semibold">Stabilité militaire</h3>
+                <div className="grid grid-cols-2 gap-2">
+                  <div>
+                    <p className="text-sm">Moral: {equilibre.militaire?.moral || 0}</p>
+                    <ProgressBar value={equilibre.militaire?.moral || 0} max={100} />
+                  </div>
+                  <div>
+                    <p className="text-sm">Discipline: {equilibre.militaire?.discipline || 0}</p>
+                    <ProgressBar value={equilibre.militaire?.discipline || 0} max={100} />
+                  </div>
+                </div>
               </div>
+              
+              {!simplified && (
+                <div className="space-y-2">
+                  <h3 className="font-semibold">Stabilité économique</h3>
+                  <div className="grid grid-cols-2 gap-2">
+                    <div>
+                      <p className="text-sm">Commerce: {equilibre.economie?.commerce || 0}</p>
+                      <ProgressBar value={equilibre.economie?.commerce || 0} max={100} />
+                    </div>
+                    <div>
+                      <p className="text-sm">Agriculture: {equilibre.economie?.agriculture || 0}</p>
+                      <ProgressBar value={equilibre.economie?.agriculture || 0} max={100} />
+                    </div>
+                  </div>
+                </div>
+              )}
             </div>
           )}
         </div>
