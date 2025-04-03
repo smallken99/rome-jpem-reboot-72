@@ -10,7 +10,28 @@ export enum BuildingType {
   ROUTE = 'route',
   BATHHOUSE = 'bathhouse',
   BARRACKS = 'barracks',
-  ACADEMY = 'academy'
+  ACADEMY = 'academy',
+  MARKET = 'market',
+  WAREHOUSE = 'warehouse'
+}
+
+export enum BuildingStatus {
+  EXCELLENT = 'excellent',
+  GOOD = 'good',
+  AVERAGE = 'average',
+  POOR = 'poor',
+  FAIR = 'fair',
+  RUINED = 'ruined',
+  DAMAGED = 'damaged',
+  UNDER_CONSTRUCTION = 'under_construction',
+  UNDER_RENOVATION = 'under_renovation'
+}
+
+export enum BuildingPriority {
+  CRITICAL = 'critical',
+  HIGH = 'high',
+  MEDIUM = 'medium',
+  LOW = 'low'
 }
 
 export interface BuildingOwner {
@@ -27,6 +48,11 @@ export interface BuildingFilter {
   location?: string;
   owner?: string;
   search?: string;
+  types?: string[];
+  locations?: string[];
+  minRevenue?: number;
+  maxMaintenance?: number;
+  searchTerm?: string;
 }
 
 export interface Building {
@@ -40,11 +66,15 @@ export interface Building {
   maintenance: number;
   constructionDate?: Date | string;
   lastMaintenance?: Date | string;
-  owner?: BuildingOwner;
+  owner?: BuildingOwner | string;
   description?: string;
   workers?: number;
   income?: number;
   maintenanceLevel?: number;
+  revenue?: number;
+  capacity?: number;
+  cost?: number;
+  constructionYear?: number;
 }
 
 export interface BuildingCreationData {
@@ -57,16 +87,53 @@ export interface BuildingCreationData {
   maintenance: number;
   constructionDate?: Date | string;
   lastMaintenance?: Date | string;
-  owner?: BuildingOwner;
+  owner?: BuildingOwner | string;
   description?: string;
   workers?: number;
+  revenue?: number;
+  capacity?: number;
+  cost?: number;
+  constructionYear?: number;
 }
 
-export enum BuildingStatus {
-  EXCELLENT = 'excellent',
-  GOOD = 'good',
-  AVERAGE = 'average',
-  POOR = 'poor',
-  FAIR = 'fair',
-  RUINED = 'ruined'
+export interface ConstructionProject {
+  id: string;
+  buildingTypeId: string;
+  name: string;
+  location: string;
+  estimatedCost: number;
+  duration: number; // in years
+  progress: number; // 0-100
+  startedYear?: number;
+  expectedCompletionYear?: number;
+  benefits: string[];
+  sponsors: string[];
+  approved: boolean;
+  proposedBy?: string; // Magistrate who proposed the project
+  requiredResources?: {
+    stone?: number;
+    timber?: number;
+    marble?: number;
+    labor?: number;
+  };
+  buildingType?: string;
+  startDate?: Date;
+  supervisor?: string;
+  status?: string;
+  description?: string;
+}
+
+export interface MaintenanceTask {
+  id: string;
+  buildingId: string;
+  buildingName: string;
+  type: 'repair' | 'maintenance' | 'upgrade' | 'routine';
+  status: 'pending' | 'in_progress' | 'completed' | 'cancelled';
+  description: string;
+  cost: number;
+  duration: number; // in days
+  startDate: string;
+  completionDate?: string;
+  priority: BuildingPriority;
+  assignedWorkers?: number;
 }
