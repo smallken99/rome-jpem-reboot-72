@@ -1,171 +1,116 @@
 
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { Character } from '@/types/character';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { ScrollText, User, Users } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
-import { Separator } from '@/components/ui/separator';
-import { ScrollArea } from '@/components/ui/scroll-area';
-import { ArrowRight, Heart, Skull, Crown } from 'lucide-react';
-import { useCharacters } from '../hooks/useCharacters';
-import { getEligibleHeirs } from './inheritanceUtils';
 
 interface InheritanceDetailsProps {
-  character?: Character;
-  heirs?: Character[];
-  heirId?: string;
+  character: Character;
+  heirs: Character[];
 }
 
 export const InheritanceDetails: React.FC<InheritanceDetailsProps> = ({ 
-  character: propCharacter,
-  heirs: propHeirs,
-  heirId
+  character, 
+  heirs 
 }) => {
-  const { localCharacters } = useCharacters();
-  const [character, setCharacter] = useState<Character | undefined>(propCharacter);
-  const [heirs, setHeirs] = useState<Character[]>(propHeirs || []);
-
-  useEffect(() => {
-    // If we have an heirId, find that character
-    if (heirId) {
-      const selectedHeir = localCharacters.find(c => c.id === heirId);
-      if (selectedHeir) {
-        setCharacter(selectedHeir);
-      }
-    } 
-    // If we have neither character nor heirId, use head of family
-    else if (!propCharacter) {
-      const headOfFamily = localCharacters.find(c => c.isHeadOfFamily) || localCharacters[0];
-      setCharacter(headOfFamily);
-
-      // If heirs weren't provided, calculate them
-      if (!propHeirs) {
-        setHeirs(getEligibleHeirs(headOfFamily, localCharacters).slice(0, 5));
-      }
-    }
-  }, [heirId, localCharacters, propCharacter, propHeirs]);
-
-  if (!character) {
-    return <div>Aucun personnage sélectionné</div>;
-  }
-
   return (
     <div className="space-y-6">
-      <Card>
-        <CardHeader className="pb-3">
-          <CardTitle className="text-xl">Testament de {character.name}</CardTitle>
-          <CardDescription>
-            Chef de famille, {character.age} ans, {character.health || 100}% de santé
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="flex flex-col space-y-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <h3 className="font-medium">Statut Patriarcal</h3>
-                <p className="text-sm text-muted-foreground">{character.relation || "Chef de famille"}</p>
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <Card className="md:col-span-2">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <ScrollText className="h-5 w-5 text-primary" />
+              Testament
+            </CardTitle>
+            <CardDescription>
+              Dernières volontés et dispositions
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            {character.testamentaryWishes ? (
+              <div className="prose prose-sm max-w-none">
+                <p>{character.testamentaryWishes}</p>
               </div>
-              <Badge variant="outline" className="flex items-center gap-1">
-                <Crown className="h-3.5 w-3.5" />
-                Pater Familias
-              </Badge>
-            </div>
-            
-            <Separator />
-            
-            <div>
-              <h3 className="font-medium mb-2">Espérance de vie estimée</h3>
-              <div className="flex items-center space-x-2">
-                <div className="w-full bg-gray-200 rounded-full h-2.5">
-                  <div 
-                    className="bg-green-500 h-2.5 rounded-full" 
-                    style={{ width: `${character.health || 100}%` }}
-                  ></div>
-                </div>
-                <span className="text-sm font-medium">
-                  {Math.floor(80 * ((character.health || 100) / 100) - character.age)} ans
-                </span>
+            ) : (
+              <div className="text-muted-foreground italic">
+                <p>Aucune disposition testamentaire n'a été rédigée.</p>
+                <p className="mt-2">
+                  Rédigez vos dernières volontés pour assurer la transmission de votre patrimoine
+                  et de vos titres selon vos souhaits.
+                </p>
               </div>
-              <p className="text-xs text-muted-foreground mt-1">
-                Basé sur votre âge actuel et votre état de santé
-              </p>
+            )}
+          </CardContent>
+        </Card>
+        
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <User className="h-5 w-5 text-primary" />
+              Testateur
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="flex flex-col items-center text-center">
+              <Avatar className="h-24 w-24 mb-4">
+                <AvatarImage src={character.portrait} alt={character.name} />
+                <AvatarFallback>{character.name?.charAt(0) || 'P'}</AvatarFallback>
+              </Avatar>
+              <h3 className="text-lg font-semibold">{character.name}</h3>
+              <p className="text-sm text-muted-foreground">{character.age} ans</p>
+              <Badge className="mt-2">Chef de famille</Badge>
             </div>
-            
-            <Separator />
-            
-            <div>
-              <h3 className="font-medium mb-2">Dernières Volontés</h3>
-              <p className="text-sm italic">
-                {character.testamentaryWishes || 
-                  "Aucune directive spécifique n'a été établie pour la succession."}
-              </p>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
+          </CardContent>
+        </Card>
+      </div>
       
       <Card>
-        <CardHeader className="pb-3">
-          <CardTitle className="text-lg">Héritiers Potentiels</CardTitle>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Users className="h-5 w-5 text-primary" />
+            Héritiers potentiels
+          </CardTitle>
           <CardDescription>
-            Par ordre de priorité selon les traditions romaines
+            Par ordre de priorité dans la succession
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <ScrollArea className="h-[300px] pr-4">
+          {heirs.length > 0 ? (
             <div className="space-y-4">
-              {heirs.length > 0 ? (
-                heirs.map((heir, index) => (
-                  <Card key={heir.id} className={`border ${index === 0 ? 'border-amber-300 bg-amber-50' : ''}`}>
-                    <CardContent className="p-4">
-                      <div className="flex justify-between items-center">
-                        <div>
-                          <div className="flex items-center space-x-2">
-                            <h3 className="font-medium">{heir.name}</h3>
-                            {index === 0 && (
-                              <Badge className="bg-amber-500">Principal</Badge>
-                            )}
-                          </div>
-                          <p className="text-sm text-muted-foreground">
-                            {heir.relation || "Membre de la famille"}, {heir.age} ans
-                          </p>
-                        </div>
-                        <div className="flex items-center space-x-2">
-                          <span className="text-sm font-medium flex items-center">
-                            <Heart className="h-4 w-4 text-red-500 mr-1" />
-                            {heir.health || 100}%
-                          </span>
-                          {(!heir.status || heir.status === 'alive') ? (
-                            <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">
-                              Vivant
-                            </Badge>
-                          ) : (
-                            <Badge variant="outline" className="bg-gray-50 text-gray-700 border-gray-200 flex items-center gap-1">
-                              <Skull className="h-3 w-3" />
-                              Décédé
-                            </Badge>
-                          )}
-                        </div>
-                      </div>
-                      
-                      {index === 0 && (
-                        <div className="mt-2 text-xs text-muted-foreground flex items-center">
-                          <ArrowRight className="h-3 w-3 mr-1" />
-                          Héritier principal selon la loi romaine
-                        </div>
-                      )}
-                    </CardContent>
-                  </Card>
-                ))
-              ) : (
-                <div className="text-center py-8 text-muted-foreground">
-                  <p>Aucun héritier éligible n'a été trouvé.</p>
-                  <p className="text-sm mt-2">
-                    Envisagez d'adopter un héritier ou d'avoir des enfants.
-                  </p>
+              {heirs.map((heir, index) => (
+                <div 
+                  key={heir.id} 
+                  className="flex items-center p-3 border rounded-md bg-muted/20"
+                >
+                  <div className="font-bold text-xl mr-4 text-muted-foreground">
+                    {index + 1}
+                  </div>
+                  <Avatar className="h-10 w-10 mr-4">
+                    <AvatarImage src={heir.portrait} alt={heir.name} />
+                    <AvatarFallback>{heir.name?.charAt(0) || '?'}</AvatarFallback>
+                  </Avatar>
+                  <div>
+                    <p className="font-medium">{heir.name}</p>
+                    <p className="text-sm text-muted-foreground">
+                      {heir.relation} • {heir.age} ans
+                    </p>
+                  </div>
+                  {index === 0 && (
+                    <Badge className="ml-auto bg-amber-500">Héritier principal</Badge>
+                  )}
                 </div>
-              )}
+              ))}
             </div>
-          </ScrollArea>
+          ) : (
+            <div className="text-center p-6 text-muted-foreground">
+              <p>Aucun héritier potentiel trouvé</p>
+              <p className="text-sm mt-2">
+                Ajoutez des membres à votre famille pour désigner des héritiers
+              </p>
+            </div>
+          )}
         </CardContent>
       </Card>
     </div>

@@ -3,12 +3,14 @@ import React, { useState } from 'react';
 import { Character } from '@/types/character';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { ScrollArea } from '@/components/ui/scroll-area';
-import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { getInheritanceRules } from './inheritanceUtils';
+import { Checkbox } from '@/components/ui/checkbox';
 import { Label } from '@/components/ui/label';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog';
-import { toast } from '@/components/ui-custom/toast';
-import { calculateHeirScore } from './inheritanceUtils';
+import { ScrollText, Info, Check } from 'lucide-react';
+import { Badge } from '@/components/ui/badge';
+import { toast } from 'sonner';
+import { useCharacters } from '../hooks/useCharacters';
 
 interface HeirSelectionProps {
   character: Character;
@@ -16,147 +18,131 @@ interface HeirSelectionProps {
   eligibleHeirs: Character[];
 }
 
-export const HeirSelection: React.FC<HeirSelectionProps> = ({ 
+export const HeirSelection: React.FC<HeirSelectionProps> = ({
   character,
   allCharacters,
   eligibleHeirs
 }) => {
-  const [selectedHeirId, setSelectedHeirId] = useState<string>('');
-  const [confirmationOpen, setConfirmationOpen] = useState(false);
+  const { updateCharacter } = useCharacters();
+  const [selectedHeir, setSelectedHeir] = useState<string | null>(null);
+  const [overrideRules, setOverrideRules] = useState<boolean>(false);
   
-  const handleDesignateHeir = () => {
-    if (!selectedHeirId) {
-      toast.error("Veuillez sélectionner un héritier");
-      return;
-    }
+  const rules = getInheritanceRules();
+  
+  const handleConfirmHeirSelection = () => {
+    if (!selectedHeir) return;
     
-    setConfirmationOpen(true);
-  };
-  
-  const confirmDesignation = () => {
-    // Ici, vous pourriez implémenter la logique pour enregistrer l'héritier désigné
-    toast.success("Héritier désigné avec succès");
-    setConfirmationOpen(false);
+    try {
+      // Dans une implémentation réelle, cela mettrait à jour le testament
+      updateCharacter(character.id, {
+        testamentaryWishes: `Je désigne ${allCharacters.find(c => c.id === selectedHeir)?.name} comme mon héritier principal. ${character.testamentaryWishes || ''}`
+      });
+      
+      toast.success("Héritier désigné avec succès");
+    } catch (error) {
+      console.error("Erreur lors de la désignation de l'héritier:", error);
+      toast.error("Une erreur s'est produite lors de la désignation de l'héritier");
+    }
   };
   
   return (
     <div className="space-y-6">
       <Card>
         <CardHeader>
-          <CardTitle>Désignation d'Héritier</CardTitle>
+          <CardTitle className="flex items-center gap-2">
+            <ScrollText className="h-5 w-5 text-primary" />
+            Règles de succession
+          </CardTitle>
           <CardDescription>
-            Choisissez qui héritera de votre nom et de votre fortune
+            Règles traditionnelles romaines pour la succession
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <p className="text-sm text-muted-foreground mb-6">
-            La loi romaine favorise les fils aînés, mais vous pouvez désigner explicitement votre héritier 
-            dans votre testament. Cette décision est cruciale pour l'avenir de votre famille.
-          </p>
+          <div className="bg-muted/20 p-4 rounded-md mb-4">
+            <div className="flex items-start gap-2 mb-3">
+              <Info className="h-5 w-5 text-blue-500 mt-0.5" />
+              <p className="text-sm">
+                Selon la tradition romaine, la succession suit des règles strictes.
+                Toutefois, le chef de famille peut désigner un héritier spécifique
+                dans son testament, qui prévaudra sur l'ordre naturel.
+              </p>
+            </div>
+            
+            <ul className="space-y-2 pl-6 list-disc">
+              {rules.map((rule, index) => (
+                <li key={index} className="text-sm">{rule}</li>
+              ))}
+            </ul>
+          </div>
           
-          <RadioGroup value={selectedHeirId} onValueChange={setSelectedHeirId}>
-            <ScrollArea className="h-[400px] pr-4">
-              <div className="space-y-4">
-                {eligibleHeirs.length > 0 ? (
-                  eligibleHeirs.map((heir, index) => (
-                    <div key={heir.id} className="flex items-start space-x-2">
-                      <RadioGroupItem value={heir.id} id={`heir-${heir.id}`} />
-                      <div className="grid gap-1.5 w-full">
-                        <Label htmlFor={`heir-${heir.id}`} className="font-medium">
-                          {heir.name} ({heir.age} ans)
-                        </Label>
-                        <Card>
-                          <CardContent className="p-4">
-                            <div className="grid grid-cols-2 gap-4">
-                              <div>
-                                <span className="text-sm font-medium">Relation:</span>
-                                <p className="text-sm">{heir.relation}</p>
-                              </div>
-                              <div>
-                                <span className="text-sm font-medium">Santé:</span>
-                                <p className="text-sm">{heir.health}%</p>
-                              </div>
-                              <div>
-                                <span className="text-sm font-medium">Traits:</span>
-                                <p className="text-sm">{heir.traits.join(', ') || 'Aucun'}</p>
-                              </div>
-                              <div>
-                                <span className="text-sm font-medium">Éducation:</span>
-                                <p className="text-sm">{heir.educationType || 'Aucune'}</p>
-                              </div>
-                            </div>
-                            
-                            <div className="mt-4">
-                              <span className="text-sm font-medium">Score d'héritage:</span>
-                              <div className="w-full bg-gray-200 rounded-full h-2.5 mt-1">
-                                <div 
-                                  className="bg-blue-500 h-2.5 rounded-full" 
-                                  style={{ width: `${calculateHeirScore(heir, character) / 2}%` }}
-                                ></div>
-                              </div>
-                            </div>
-                            
-                            {index === 0 && (
-                              <p className="text-xs text-muted-foreground mt-2 italic">
-                                Héritier présomptif selon la tradition romaine
-                              </p>
-                            )}
-                          </CardContent>
-                        </Card>
-                      </div>
-                    </div>
-                  ))
-                ) : (
-                  <div className="text-center py-8 text-muted-foreground">
-                    <p>Aucun héritier éligible n'a été trouvé.</p>
-                  </div>
-                )}
-              </div>
-            </ScrollArea>
-          </RadioGroup>
-          
-          <div className="mt-6 flex justify-end">
-            <Button 
-              onClick={handleDesignateHeir}
-              disabled={!selectedHeirId}
-            >
-              Désigner comme héritier principal
-            </Button>
+          <div className="flex items-center space-x-2 mb-4">
+            <Checkbox 
+              id="override" 
+              checked={overrideRules} 
+              onCheckedChange={(checked) => setOverrideRules(checked as boolean)}
+            />
+            <Label htmlFor="override" className="text-sm">
+              Je souhaite désigner un héritier spécifique
+            </Label>
           </div>
         </CardContent>
       </Card>
       
-      <Dialog open={confirmationOpen} onOpenChange={setConfirmationOpen}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Confirmer la désignation d'héritier</DialogTitle>
-            <DialogDescription>
-              Êtes-vous sûr de vouloir désigner cet héritier comme principal ? 
-              Cette décision aura un impact sur l'avenir de votre famille.
-            </DialogDescription>
-          </DialogHeader>
-          
-          {selectedHeirId && (
-            <div className="py-4">
-              <h3 className="font-medium">
-                {allCharacters.find(c => c.id === selectedHeirId)?.name}
-              </h3>
-              <p className="text-sm text-muted-foreground">
-                {allCharacters.find(c => c.id === selectedHeirId)?.relation}
-              </p>
+      {overrideRules && (
+        <Card>
+          <CardHeader>
+            <CardTitle>Sélection de l'héritier</CardTitle>
+            <CardDescription>
+              Choisissez qui héritera de vos biens et titres
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-3">
+              {eligibleHeirs.length > 0 ? (
+                <>
+                  {eligibleHeirs.map((heir) => (
+                    <div 
+                      key={heir.id} 
+                      className={`flex items-center p-3 border rounded-md cursor-pointer hover:bg-muted/50 transition-colors ${selectedHeir === heir.id ? 'border-primary bg-primary/10' : ''}`}
+                      onClick={() => setSelectedHeir(heir.id)}
+                    >
+                      <Avatar className="h-10 w-10 mr-4">
+                        <AvatarImage src={heir.portrait} alt={heir.name} />
+                        <AvatarFallback>{heir.name?.charAt(0) || '?'}</AvatarFallback>
+                      </Avatar>
+                      <div>
+                        <p className="font-medium">{heir.name}</p>
+                        <p className="text-sm text-muted-foreground">
+                          {heir.relation} • {heir.age} ans
+                        </p>
+                      </div>
+                      {selectedHeir === heir.id && (
+                        <Badge className="ml-auto bg-green-500 gap-1">
+                          <Check className="h-3 w-3" />
+                          Sélectionné
+                        </Badge>
+                      )}
+                    </div>
+                  ))}
+                  
+                  <div className="pt-4 flex justify-end">
+                    <Button 
+                      onClick={handleConfirmHeirSelection}
+                      disabled={!selectedHeir}
+                    >
+                      Confirmer la sélection
+                    </Button>
+                  </div>
+                </>
+              ) : (
+                <div className="text-center p-6 text-muted-foreground">
+                  <p>Aucun héritier potentiel disponible</p>
+                </div>
+              )}
             </div>
-          )}
-          
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setConfirmationOpen(false)}>
-              Annuler
-            </Button>
-            <Button onClick={confirmDesignation}>
-              Confirmer
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+          </CardContent>
+        </Card>
+      )}
     </div>
   );
 };

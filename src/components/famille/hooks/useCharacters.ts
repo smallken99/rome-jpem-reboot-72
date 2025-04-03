@@ -1,149 +1,245 @@
 
-import { useState, useEffect, useCallback } from 'react';
-import { Character } from '@/types/character';
-import { generateRomanName } from '../utils/naming/romanNameGenerator';
-import { toast } from '@/components/ui-custom/toast';
-import { useLocalStorage } from '@/hooks/useLocalStorage';
+import { useState, useEffect } from 'react';
 import { v4 as uuidv4 } from 'uuid';
+import { Character } from '@/types/character';
+import { toast } from 'sonner';
 
+// Exemple de données initiales pour démonstration
 const initialCharacters: Character[] = [
   {
-    id: '1',
-    name: 'Gaius Claudius',
+    id: 'char-1',
+    name: 'Marcus Aurelius',
+    firstName: 'Marcus',
+    lastName: 'Aurelius',
+    gender: 'male',
     age: 45,
-    gender: 'male',
-    relation: 'Pater Familias',
+    isPlayer: true,
     isHeadOfFamily: true,
-    traits: ['Eloquent', 'Ambitieux'],
-    health: 85,
+    relation: 'Pater Familias',
     status: 'alive',
     stats: {
-      popularity: { value: 60, name: 'Popularité', maxValue: 100, icon: 'popularity', description: 'Votre réputation parmi le peuple', color: 'gold' },
-      oratory: { value: 70, name: 'Éloquence', maxValue: 100, icon: 'oratory', description: 'Votre capacité à persuader', color: 'terracotta' },
-      piety: { value: 65, name: 'Piété', maxValue: 100, icon: 'piety', description: 'Votre dévotion aux dieux', color: 'navy' },
-      martialEducation: { value: 55, name: 'Éducation Martiale', maxValue: 100, icon: 'martialEducation', description: 'Votre formation militaire', color: 'red' }
-    }
+      popularity: { value: 65, maxValue: 100, name: 'Popularité', icon: 'users', description: 'Votre réputation auprès du peuple', color: 'blue' },
+      oratory: { value: 70, maxValue: 100, name: 'Éloquence', icon: 'message-square', description: 'Votre capacité à convaincre', color: 'amber' },
+      piety: { value: 60, maxValue: 100, name: 'Piété', icon: 'shrine', description: 'Votre dévotion aux dieux', color: 'purple' },
+      martialEducation: { value: 55, maxValue: 100, name: 'Art militaire', icon: 'sword', description: 'Votre expertise militaire', color: 'red' }
+    },
+    childrenIds: ['char-3', 'char-4', 'char-5'],
+    spouseId: 'char-2'
   },
   {
-    id: '2',
-    name: 'Claudia',
-    age: 38,
+    id: 'char-2',
+    name: 'Faustina Minor',
+    firstName: 'Faustina',
+    lastName: 'Minor',
     gender: 'female',
-    relation: 'Épouse',
-    traits: ['Fidèle', 'Cultivée'],
-    health: 90,
+    age: 40,
+    relation: 'Mater Familias',
     status: 'alive',
     stats: {
-      popularity: { value: 50, name: 'Popularité', maxValue: 100, icon: 'popularity', description: 'Votre réputation parmi le peuple', color: 'gold' },
-      oratory: { value: 60, name: 'Éloquence', maxValue: 100, icon: 'oratory', description: 'Votre capacité à persuader', color: 'terracotta' },
-      piety: { value: 75, name: 'Piété', maxValue: 100, icon: 'piety', description: 'Votre dévotion aux dieux', color: 'navy' },
-      martialEducation: { value: 0, name: 'Éducation Martiale', maxValue: 100, icon: 'martialEducation', description: 'Votre formation militaire', color: 'red' }
-    }
+      popularity: { value: 50, maxValue: 100, name: 'Popularité', icon: 'users', description: 'Votre réputation auprès du peuple', color: 'blue' },
+      oratory: { value: 60, maxValue: 100, name: 'Éloquence', icon: 'message-square', description: 'Votre capacité à convaincre', color: 'amber' },
+      piety: { value: 75, maxValue: 100, name: 'Piété', icon: 'shrine', description: 'Votre dévotion aux dieux', color: 'purple' },
+      martialEducation: { value: 20, maxValue: 100, name: 'Art militaire', icon: 'sword', description: 'Votre expertise militaire', color: 'red' }
+    },
+    childrenIds: ['char-3', 'char-4', 'char-5'],
+    spouseId: 'char-1'
   },
   {
-    id: '3',
-    name: 'Marcus Claudius',
-    age: 18,
+    id: 'char-3',
+    name: 'Commodus Aurelius',
+    firstName: 'Commodus',
+    lastName: 'Aurelius',
     gender: 'male',
+    age: 18,
     relation: 'Fils',
-    traits: ['Vif', 'Impétueux'],
-    health: 95,
-    parentIds: ['1', '2'],
     status: 'alive',
+    parentIds: ['char-1', 'char-2'],
     stats: {
-      popularity: { value: 40, name: 'Popularité', maxValue: 100, icon: 'popularity', description: 'Votre réputation parmi le peuple', color: 'gold' },
-      oratory: { value: 45, name: 'Éloquence', maxValue: 100, icon: 'oratory', description: 'Votre capacité à persuader', color: 'terracotta' },
-      piety: { value: 50, name: 'Piété', maxValue: 100, icon: 'piety', description: 'Votre dévotion aux dieux', color: 'navy' },
-      martialEducation: { value: 60, name: 'Éducation Martiale', maxValue: 100, icon: 'martialEducation', description: 'Votre formation militaire', color: 'red' }
+      popularity: { value: 40, maxValue: 100, name: 'Popularité', icon: 'users', description: 'Votre réputation auprès du peuple', color: 'blue' },
+      oratory: { value: 45, maxValue: 100, name: 'Éloquence', icon: 'message-square', description: 'Votre capacité à convaincre', color: 'amber' },
+      piety: { value: 30, maxValue: 100, name: 'Piété', icon: 'shrine', description: 'Votre dévotion aux dieux', color: 'purple' },
+      martialEducation: { value: 60, maxValue: 100, name: 'Art militaire', icon: 'sword', description: 'Votre expertise militaire', color: 'red' }
+    },
+    education: {
+      type: 'military',
+      specialties: ['Tactique de combat', 'Commandement'],
+      mentor: 'Maximus Decimus',
+      completed: true,
+      completedAt: '745 AUC'
     }
   },
   {
-    id: '4',
-    name: 'Julia Claudia',
-    age: 15,
+    id: 'char-4',
+    name: 'Lucilla Aurelia',
+    firstName: 'Lucilla',
+    lastName: 'Aurelia',
     gender: 'female',
+    age: 16,
     relation: 'Fille',
-    traits: ['Intelligente', 'Pieuse'],
-    health: 92,
-    parentIds: ['1', '2'],
     status: 'alive',
+    parentIds: ['char-1', 'char-2'],
     stats: {
-      popularity: { value: 45, name: 'Popularité', maxValue: 100, icon: 'popularity', description: 'Votre réputation parmi le peuple', color: 'gold' },
-      oratory: { value: 55, name: 'Éloquence', maxValue: 100, icon: 'oratory', description: 'Votre capacité à persuader', color: 'terracotta' },
-      piety: { value: 70, name: 'Piété', maxValue: 100, icon: 'piety', description: 'Votre dévotion aux dieux', color: 'navy' },
-      martialEducation: { value: 0, name: 'Éducation Martiale', maxValue: 100, icon: 'martialEducation', description: 'Votre formation militaire', color: 'red' }
+      popularity: { value: 45, maxValue: 100, name: 'Popularité', icon: 'users', description: 'Votre réputation auprès du peuple', color: 'blue' },
+      oratory: { value: 65, maxValue: 100, name: 'Éloquence', icon: 'message-square', description: 'Votre capacité à convaincre', color: 'amber' },
+      piety: { value: 70, maxValue: 100, name: 'Piété', icon: 'shrine', description: 'Votre dévotion aux dieux', color: 'purple' },
+      martialEducation: { value: 15, maxValue: 100, name: 'Art militaire', icon: 'sword', description: 'Votre expertise militaire', color: 'red' }
+    }
+  },
+  {
+    id: 'char-5',
+    name: 'Annius Aurelius',
+    firstName: 'Annius',
+    lastName: 'Aurelius',
+    gender: 'male',
+    age: 12,
+    relation: 'Fils',
+    status: 'alive',
+    parentIds: ['char-1', 'char-2'],
+    stats: {
+      popularity: { value: 20, maxValue: 100, name: 'Popularité', icon: 'users', description: 'Votre réputation auprès du peuple', color: 'blue' },
+      oratory: { value: 25, maxValue: 100, name: 'Éloquence', icon: 'message-square', description: 'Votre capacité à convaincre', color: 'amber' },
+      piety: { value: 30, maxValue: 100, name: 'Piété', icon: 'shrine', description: 'Votre dévotion aux dieux', color: 'purple' },
+      martialEducation: { value: 30, maxValue: 100, name: 'Art militaire', icon: 'sword', description: 'Votre expertise militaire', color: 'red' }
+    },
+    currentEducation: {
+      type: 'military',
+      mentor: 'Maximus Decimus',
+      mentorId: 'prec-1',
+      progress: 33,
+      skills: ['Discipline légionnaire'],
+      yearsCompleted: 1,
+      totalYears: 3,
+      statBonus: 0
     }
   }
 ];
 
 export const useCharacters = () => {
-  const [localCharacters, setLocalCharacters] = useLocalStorage<Character[]>(
-    'roman-family-characters', 
-    initialCharacters
-  );
+  const [localCharacters, setLocalCharacters] = useState<Character[]>(initialCharacters);
   
-  const handleChildBirth = useCallback((parentIds?: string[]) => {
-    const gender = Math.random() > 0.5 ? 'male' : 'female';
-    const familyName = parentIds ? 
-      localCharacters.find(c => c.id === parentIds[0])?.name.split(' ')[1] || 'Ignotus' : 
-      'Ignotus';
-      
-    const newChild: Character = {
-      id: uuidv4(),
-      name: generateRomanName(gender, familyName),
-      age: 0,
-      gender,
-      relation: gender === 'male' ? 'Fils' : 'Fille',
-      traits: [],
-      health: 85 + Math.floor(Math.random() * 15),
-      parentIds,
-      status: 'alive',
-      stats: {
-        popularity: { value: 20, name: 'Popularité', maxValue: 100, icon: 'popularity', description: 'Influence naissante', color: 'gold' },
-        oratory: { value: 15, name: 'Éloquence', maxValue: 100, icon: 'oratory', description: 'Aptitude naturelle', color: 'terracotta' },
-        piety: { value: 25, name: 'Piété', maxValue: 100, icon: 'piety', description: 'Dévotion naturelle', color: 'navy' },
-        martialEducation: { value: 0, name: 'Éducation Martiale', maxValue: 100, icon: 'martialEducation', description: 'Formation initiale', color: 'red' }
-      }
-    };
-    
-    setLocalCharacters(prev => [...prev, newChild]);
-    toast.success(`Un nouvel enfant est né ! ${newChild.name} rejoint votre famille.`);
-    
-    return newChild;
-  }, [localCharacters, setLocalCharacters]);
-  
-  const handleNameChange = useCallback((characterId: string, newName: string) => {
-    setLocalCharacters(prev => 
-      prev.map(char => 
-        char.id === characterId ? { ...char, name: newName } : char
-      )
-    );
-    toast.success(`Le nom a été modifié avec succès.`);
-  }, [setLocalCharacters]);
-  
-  const updateCharacter = useCallback((characterId: string, updates: Partial<Character>) => {
-    setLocalCharacters(prev => 
-      prev.map(char => 
-        char.id === characterId ? { ...char, ...updates } : char
-      )
-    );
-  }, [setLocalCharacters]);
-  
-  const addCharacter = useCallback((character: Omit<Character, 'id'>) => {
+  // Une fonction pour ajouter un nouveau personnage
+  const addCharacter = (characterData: Partial<Character>) => {
     const newCharacter: Character = {
-      ...character,
-      id: uuidv4()
+      id: uuidv4(),
+      name: characterData.name || `${characterData.firstName || ''} ${characterData.lastName || ''}`.trim(),
+      firstName: characterData.firstName || '',
+      lastName: characterData.lastName || '',
+      gender: characterData.gender || 'male',
+      age: characterData.age || 0,
+      status: characterData.status || 'alive',
+      isPlayer: characterData.isPlayer || false,
+      isHeadOfFamily: characterData.isHeadOfFamily || false,
+      stats: characterData.stats || {
+        popularity: { value: 10, maxValue: 100, name: 'Popularité', icon: 'users', description: '', color: 'blue' },
+        oratory: { value: 10, maxValue: 100, name: 'Éloquence', icon: 'message-square', description: '', color: 'amber' },
+        piety: { value: 10, maxValue: 100, name: 'Piété', icon: 'shrine', description: '', color: 'purple' },
+        martialEducation: { value: 10, maxValue: 100, name: 'Art militaire', icon: 'sword', description: '', color: 'red' }
+      },
+      relation: characterData.relation || '',
+      parentIds: characterData.parentIds || [],
+      childrenIds: characterData.childrenIds || [],
+      spouseId: characterData.spouseId,
+      education: characterData.education,
+      currentEducation: characterData.currentEducation,
+      portrait: characterData.portrait
     };
     
     setLocalCharacters(prev => [...prev, newCharacter]);
-    return newCharacter.id;
-  }, [setLocalCharacters]);
+    
+    // Mettre à jour les relations parent-enfant si nécessaire
+    if (newCharacter.parentIds && newCharacter.parentIds.length > 0) {
+      setLocalCharacters(prev => prev.map(char => {
+        if (newCharacter.parentIds?.includes(char.id)) {
+          return {
+            ...char,
+            childrenIds: [...(char.childrenIds || []), newCharacter.id]
+          };
+        }
+        return char;
+      }));
+    }
+    
+    return newCharacter;
+  };
+  
+  // Une fonction pour mettre à jour un personnage existant
+  const updateCharacter = (characterId: string, updates: Partial<Character>) => {
+    setLocalCharacters(prev => prev.map(char => {
+      if (char.id === characterId) {
+        return { ...char, ...updates };
+      }
+      return char;
+    }));
+  };
+  
+  // Une fonction pour supprimer un personnage
+  const removeCharacter = (characterId: string) => {
+    setLocalCharacters(prev => prev.filter(char => char.id !== characterId));
+    
+    // Mettre à jour les relations
+    setLocalCharacters(prev => prev.map(char => {
+      const updates: Partial<Character> = {};
+      
+      // Supprimer des enfants
+      if (char.childrenIds?.includes(characterId)) {
+        updates.childrenIds = char.childrenIds.filter(id => id !== characterId);
+      }
+      
+      // Supprimer des parents
+      if (char.parentIds?.includes(characterId)) {
+        updates.parentIds = char.parentIds.filter(id => id !== characterId);
+      }
+      
+      // Supprimer des conjoints
+      if (char.spouseId === characterId) {
+        updates.spouseId = undefined;
+      }
+      
+      return { ...char, ...updates };
+    }));
+  };
+  
+  // Gérer les naissances d'enfants
+  const handleChildBirth = (parentIds?: string[]) => {
+    if (!parentIds || parentIds.length < 2) {
+      toast.error("Information des parents insuffisante pour créer un enfant");
+      return;
+    }
+    
+    const father = localCharacters.find(c => c.id === parentIds[0] && c.gender === 'male');
+    const mother = localCharacters.find(c => c.id === parentIds[1] && c.gender === 'female');
+    
+    if (!father || !mother) {
+      toast.error("Parents non trouvés ou genre incorrect");
+      return;
+    }
+    
+    // Déterminer aléatoirement le genre de l'enfant
+    const gender = Math.random() > 0.5 ? 'male' : 'female';
+    
+    // Création du nouvel enfant
+    const newChild: Partial<Character> = {
+      firstName: gender === 'male' ? "Novus" : "Nova", // Noms temporaires
+      lastName: father.lastName,
+      name: `${gender === 'male' ? "Novus" : "Nova"} ${father.lastName}`,
+      gender,
+      age: 0,
+      relation: gender === 'male' ? 'Fils' : 'Fille',
+      parentIds: [father.id, mother.id],
+      status: 'alive'
+    };
+    
+    const child = addCharacter(newChild);
+    
+    toast.success(`Un nouvel enfant est né: ${child.name}`);
+    return child;
+  };
   
   return {
     localCharacters,
-    handleChildBirth,
-    handleNameChange,
+    addCharacter,
     updateCharacter,
-    addCharacter
+    removeCharacter,
+    handleChildBirth
   };
 };

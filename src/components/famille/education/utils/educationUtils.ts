@@ -1,68 +1,56 @@
 
-import { EducationType, EducationPath } from '../types/educationTypes';
+import { EducationPath } from '../types/educationTypes';
 
-/**
- * Safely access bonuses from education path outcomes
- */
-export const getOutcomeBonuses = (path: EducationPath, statKey: string): number => {
-  if (!path.outcomes) return 0;
-  
-  if (Array.isArray(path.outcomes)) {
-    // If outcomes is an array of strings, there are no direct bonuses
-    return 0;
-  } else {
-    // If outcomes is an object, check for bonuses
-    return path.outcomes.bonuses?.[statKey] || 0;
+export const getOutcomeSkills = (educationPath: EducationPath): string[] => {
+  // Retourne les compétences qu'un enfant acquiert pendant son éducation
+  return educationPath.skills || [];
+};
+
+export const getOutcomeBonuses = (educationPath: EducationPath, statKey: string): number => {
+  // Retourne le bonus pour une statistique spécifique
+  if (educationPath.outcomes && statKey in educationPath.outcomes) {
+    return educationPath.outcomes[statKey] || 0;
   }
+  return 0;
 };
 
-/**
- * Safely access skills from education path outcomes
- */
-export const getOutcomeSkills = (path: EducationPath): string[] => {
-  if (!path.outcomes) return [];
-  
-  if (Array.isArray(path.outcomes)) {
-    // If outcomes is an array of strings, return it directly
-    return path.outcomes;
-  } else {
-    // If outcomes is an object, return the skills array or empty array
-    return path.outcomes.skills || [];
-  }
+export const calculateEducationProgress = (yearsCompleted: number, totalYears: number): number => {
+  if (totalYears <= 0) return 0;
+  return Math.min(100, Math.round((yearsCompleted / totalYears) * 100));
 };
 
-/**
- * Check if an education type is valid (allowing string or EducationType)
- */
-export const isValidEducationType = (type: string): type is EducationType => {
-  const validTypes: EducationType[] = [
-    'military', 
-    'political', 
-    'religious', 
-    'artistic', 
-    'philosophical', 
-    'rhetoric', 
-    'academic', 
-    'none'
-  ];
-  
-  return validTypes.includes(type as EducationType);
-};
-
-/**
- * Gets a display name for an education type
- */
-export const getEducationTypeName = (type: string): string => {
-  const names: Record<string, string> = {
-    'military': 'Militaire',
-    'political': 'Politique',
-    'religious': 'Religieuse',
-    'artistic': 'Artistique',
-    'philosophical': 'Philosophique',
-    'rhetoric': 'Rhétorique',
-    'academic': 'Académique',
-    'none': 'Aucune'
+export const getEducationCost = (
+  educationType: string, 
+  withPreceptor: boolean = false, 
+  preceptorQuality: number = 0
+): number => {
+  // Coût de base de l'éducation
+  const baseCost = {
+    military: 2000,
+    rhetoric: 1500,
+    political: 2500,
+    religious: 1000,
+    philosophical: 1500,
+    administrative: 2000
   };
   
-  return names[type] || type;
+  // Coût de base pour ce type d'éducation
+  const cost = (baseCost as Record<string, number>)[educationType] || 1500;
+  
+  // Ajout du coût du précepteur si applicable
+  if (withPreceptor) {
+    // Plus le précepteur est de qualité, plus il est cher
+    const preceptorCost = 500 + (preceptorQuality * 10);
+    return cost + preceptorCost;
+  }
+  
+  return cost;
+};
+
+export const getEducationTimeReduction = (preceptorQuality: number): number => {
+  // Un précepteur de haute qualité peut réduire le temps d'éducation
+  if (preceptorQuality >= 90) return 0.3; // 30% de réduction de temps
+  if (preceptorQuality >= 70) return 0.2; // 20% de réduction de temps
+  if (preceptorQuality >= 50) return 0.1; // 10% de réduction de temps
+  return 0;
 };

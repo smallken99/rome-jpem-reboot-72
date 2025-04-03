@@ -2,70 +2,94 @@
 import React, { useState } from 'react';
 import { Character } from '@/types/character';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
-import { toast } from '@/components/ui-custom/toast';
+import { Textarea } from '@/components/ui/textarea';
+import { Label } from '@/components/ui/label';
+import { Scroll, Save } from 'lucide-react';
+import { toast } from 'sonner';
 import { useCharacters } from '../hooks/useCharacters';
 
 interface TestamentaryWishesProps {
   character: Character;
 }
 
-export const TestamentaryWishes: React.FC<TestamentaryWishesProps> = ({ character }) => {
+export const TestamentaryWishes: React.FC<TestamentaryWishesProps> = ({
+  character
+}) => {
   const { updateCharacter } = useCharacters();
   const [wishes, setWishes] = useState<string>(character.testamentaryWishes || '');
+  const [isEditing, setIsEditing] = useState<boolean>(false);
   
-  const handleSaveWishes = () => {
-    // Nous n'utilisons pas directement 'testamentaryWishes', mais nous passons
-    // les souhaits testamentaires aux propriétés valides de Character dans une relation personnalisée
-    updateCharacter(character.id, { 
-      testamentaryWishes: wishes 
-    });
-    toast.success("Vos dernières volontés ont été enregistrées");
+  const handleSave = () => {
+    try {
+      updateCharacter(character.id, { testamentaryWishes: wishes });
+      setIsEditing(false);
+      toast.success("Dernières volontés sauvegardées");
+    } catch (error) {
+      console.error("Erreur lors de la sauvegarde des volontés:", error);
+      toast.error("Une erreur s'est produite lors de la sauvegarde");
+    }
+  };
+  
+  const handleCancel = () => {
+    setWishes(character.testamentaryWishes || '');
+    setIsEditing(false);
   };
   
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Dernières Volontés</CardTitle>
+        <CardTitle className="flex items-center gap-2">
+          <Scroll className="h-5 w-5 text-primary" />
+          Dernières Volontés
+        </CardTitle>
         <CardDescription>
-          Rédigez vos instructions pour l'avenir de votre famille et de vos possessions
+          Rédigez vos instructions pour la transmission de votre héritage
         </CardDescription>
       </CardHeader>
       <CardContent>
-        <div className="space-y-6">
-          <div>
-            <p className="text-sm text-muted-foreground mb-4">
-              En tant que Pater Familias, vos dernières volontés seront suivies après votre décès.
-              Vous pouvez spécifier comment vous souhaitez que vos biens soient répartis, donner des
-              conseils à votre successeur, ou exprimer vos souhaits pour l'avenir de votre famille.
-            </p>
-            
-            <Textarea
-              className="min-h-[200px]"
-              placeholder="Rédigez vos dernières volontés ici..."
-              value={wishes}
-              onChange={(e) => setWishes(e.target.value)}
-            />
+        {isEditing ? (
+          <div className="space-y-4">
+            <div>
+              <Label htmlFor="wishes">Mes dernières volontés</Label>
+              <Textarea
+                id="wishes"
+                value={wishes}
+                onChange={(e) => setWishes(e.target.value)}
+                className="min-h-[200px] mt-2"
+                placeholder="Rédigez ici vos dernières volontés et instructions pour vos héritiers..."
+              />
+            </div>
+            <div className="flex justify-end gap-2">
+              <Button variant="outline" onClick={handleCancel}>
+                Annuler
+              </Button>
+              <Button onClick={handleSave} className="flex items-center gap-2">
+                <Save className="h-4 w-4" />
+                Sauvegarder
+              </Button>
+            </div>
           </div>
-          
-          <div className="bg-amber-50 border border-amber-200 rounded-md p-4">
-            <h3 className="text-sm font-medium text-amber-800 mb-2">Conseils de rédaction</h3>
-            <ul className="text-sm text-amber-700 space-y-1">
-              <li>• Désignez clairement votre héritier principal</li>
-              <li>• Spécifiez la distribution de vos biens</li>
-              <li>• Donnez des instructions pour l'éducation des enfants mineurs</li>
-              <li>• Mentionnez les alliances familiales à préserver</li>
-              <li>• Adressez vos souhaits concernant vos funérailles</li>
-            </ul>
+        ) : (
+          <div className="space-y-4">
+            <div className="min-h-[200px] border rounded-md p-4 bg-muted/20">
+              {character.testamentaryWishes ? (
+                <div className="prose prose-sm max-w-none">
+                  <p>{character.testamentaryWishes}</p>
+                </div>
+              ) : (
+                <div className="text-muted-foreground italic h-full flex items-center justify-center">
+                  <p>Aucune disposition testamentaire rédigée</p>
+                </div>
+              )}
+            </div>
+            <div className="flex justify-end">
+              <Button onClick={() => setIsEditing(true)}>
+                {character.testamentaryWishes ? 'Modifier' : 'Rédiger'}
+              </Button>
+            </div>
           </div>
-          
-          <div className="flex justify-end">
-            <Button onClick={handleSaveWishes}>
-              Sauvegarder mes dernières volontés
-            </Button>
-          </div>
-        </div>
+        )}
       </CardContent>
     </Card>
   );
