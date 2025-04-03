@@ -2,55 +2,54 @@
 import { GameDate } from './common';
 
 export enum ECONOMIE_TYPES {
-  INCOME = 'income',
-  EXPENSE = 'expense',
-  TAX = 'tax',
-  TRADE = 'trade',
-  MILITARY = 'military',
-  CONSTRUCTION = 'construction',
-  SLAVES = 'slaves',
-  OTHER = 'other',
-  COMMERCE = 'commerce'
+  INCOME = 'INCOME',
+  EXPENSE = 'EXPENSE',
+  TAX = 'TAX',
+  TRADE = 'TRADE',
+  MILITARY = 'MILITARY',
+  CONSTRUCTION = 'CONSTRUCTION',
+  SLAVES = 'SLAVES',
+  OTHER = 'OTHER',
+  COMMERCE = 'COMMERCE'
 }
 
 export enum ECONOMIE_CATEGORIES {
-  MILITARY = 'military',
-  ADMINISTRATIVE = 'administration',
-  CONSTRUCTION = 'construction',
-  RELIGION = 'religion',
-  SLAVES = 'slaves',
-  ENTERTAINMENT = 'entertainment',
-  TAX = 'tax',
-  TRADE = 'trade',
-  DIPLOMACY = 'diplomacy',
-  OTHER = 'other',
-  MAINTENANCE = 'maintenance',
-  IMPOTS = 'Impôts',
-  COMMERCE = 'Commerce',
-  // Ajout pour la compatibilité
-  TAXES = "taxes",
-  TRIBUTE = "tribute",
-  RELIGIOUS = "religious", 
-  ADMINISTRATIVE = "administrative",
-  AGRICULTURE = "agriculture",
-  ARTISANAT = "artisanat",
-  FORUM = "forum",
+  MILITARY = 'MILITARY',
+  ADMINISTRATIVE = 'ADMINISTRATIVE',
+  CONSTRUCTION = 'CONSTRUCTION',
+  RELIGION = 'RELIGION',
+  SLAVES = 'SLAVES',
+  ENTERTAINMENT = 'ENTERTAINMENT',
+  TAX = 'TAX',
+  TRADE = 'TRADE',
+  DIPLOMACY = 'DIPLOMACY',
+  OTHER = 'OTHER',
+  MAINTENANCE = 'MAINTENANCE',
+  IMPOTS = 'IMPOTS',
+  COMMERCE = 'COMMERCE',
+  // Additional categories for compatibility
+  TAXES = "TAXES",
+  TRIBUTE = "TRIBUTE",
+  RELIGIOUS = "RELIGIOUS", 
+  AGRICULTURE = "AGRICULTURE",
+  ARTISANAT = "ARTISANAT",
+  FORUM = "FORUM",
   administration = "administration",
   income = "income",
   all = "all"
 }
 
 export enum ECONOMIE_SOURCE {
-  TREASURY = 'treasury',
-  GOVERNMENT = 'Gouvernement',
-  SENATE = 'senate',
-  PROVINCES = 'provinces',
-  PRIVATE = 'private',
-  MANUAL_ENTRY = 'manual_entry',
-  TAX_COLLECTION = 'Collecte fiscale',
-  FOREIGN = "foreign",
-  CITIZEN = "citizen",
-  MANUAL = "manual_entry",
+  TREASURY = 'TREASURY',
+  GOVERNMENT = 'GOVERNMENT',
+  SENATE = 'SENATE',
+  PROVINCES = 'PROVINCES',
+  PRIVATE = 'PRIVATE',
+  MANUAL_ENTRY = 'MANUAL_ENTRY',
+  TAX_COLLECTION = 'TAX_COLLECTION',
+  FOREIGN = "FOREIGN",
+  CITIZEN = "CITIZEN",
+  MANUAL = "MANUAL_ENTRY",
   treasury = "treasury"
 }
 
@@ -70,7 +69,6 @@ export interface EconomieRecord {
   affectedProvinceId?: string;
   affectedSenateurId?: string;
   tags?: string[];
-  // Champs supplémentaires pour résoudre les erreurs
   createdAt?: string;
   updatedAt?: string;
   approved?: boolean;
@@ -90,8 +88,8 @@ export interface EconomieCreationData {
   affectedProvinceId?: string;
   affectedSenateurId?: string;
   tags?: string[];
-  isRecurring?: boolean; // Pour la compatibilité
-  approved?: boolean; // Pour la compatibilité
+  isRecurring?: boolean;
+  approved?: boolean;
 }
 
 export interface EconomieFilter {
@@ -110,7 +108,6 @@ export interface EconomieFilter {
   };
   showRecurring?: boolean;
   showApproved?: boolean;
-  // Pour compatibilité avec le code existant
   type?: ECONOMIE_TYPES | 'all';
   categories?: ECONOMIE_CATEGORIES[] | ECONOMIE_CATEGORIES | 'all';
 }
@@ -154,4 +151,13 @@ export interface EconomieStatsProps {
   treasury: TreasuryStatus;
   economicFactors: EconomicFactors;
   economieRecords: EconomieRecord[];
+}
+
+export interface Economie {
+  value: number;
+  stabilite: number;
+  croissance: number;
+  commerce: number;
+  agriculture: number;
+  production: number;
 }

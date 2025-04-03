@@ -8,6 +8,7 @@ import { DashboardCalendar } from './components/dashboard/DashboardCalendar';
 import EquilibreModule from './components/equilibre/EquilibreModule';
 import EventsModule from './components/evenements/EventsModule';
 import { GamePhase } from './types/common';
+import { ProgressBar } from '@/components/ui/progress-bar';
 
 export const MaitreJeuWelcome: React.FC = () => {
   // Use MaitreJeu context with safe property access

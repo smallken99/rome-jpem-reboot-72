@@ -15,13 +15,6 @@ export interface Politique {
   moderates: number;
 }
 
-export interface Economie {
-  stabilite: number;
-  croissance: number;
-  commerce: number;
-  agriculture: number;
-}
-
 export interface Social {
   plebeiens: number;
   patriciens: number;
@@ -35,6 +28,7 @@ export interface Militaire {
   equipement: number;
   discipline: number;
   morale: number;
+  force: number;
 }
 
 export interface Religion {
@@ -44,11 +38,11 @@ export interface Religion {
 }
 
 export enum RiskType {
-  POLITICAL = 'political',
-  ECONOMIC = 'economic',
-  MILITARY = 'military',
-  RELIGIOUS = 'religious',
-  SOCIAL = 'social'
+  POLITICAL = 'POLITICAL',
+  ECONOMIC = 'ECONOMIC',
+  MILITARY = 'MILITARY',
+  RELIGIOUS = 'RELIGIOUS',
+  SOCIAL = 'SOCIAL'
 }
 
 export interface Risk {
@@ -82,4 +76,15 @@ export interface Equilibre {
   moderates?: number;
   plebeiens?: number;
   patriciens?: number;
+}
+
+export interface HistoriqueEntry {
+  id: string;
+  date: string | Date;
+  type: string;
+  description: string;
+  impact: 'positive' | 'negative' | 'neutral';
+  domain: 'political' | 'economic' | 'social' | 'military' | 'religious';
+  significance: number;
+  tags?: string[];
 }

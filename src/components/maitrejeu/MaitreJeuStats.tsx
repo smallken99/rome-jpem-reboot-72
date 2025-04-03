@@ -35,11 +35,11 @@ export const MaitreJeuStats = () => {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
-              {/* Using economic value as prosperity approximation */}
-              {equilibre.economie.value}/100
+              {/* Using stabilite value for economy */}
+              {equilibre.economie.stabilite}/100
             </div>
             <div className="text-xs text-muted-foreground mt-1">
-              <span className="mr-2">Croissance: {equilibre.economie.production || 0}%</span>
+              <span className="mr-2">Croissance: {equilibre.economie.croissance || 0}%</span>
               <span>Stabilité: {equilibre.economie.stabilite || 0}%</span>
             </div>
           </CardContent>
