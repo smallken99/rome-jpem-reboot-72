@@ -12,7 +12,7 @@ import { ConstructionProjects } from './components/batiments/ConstructionProject
 import MaintenanceManager from './components/batiments/MaintenanceManager';
 import BuildingRevenue from './components/batiments/BuildingRevenue';
 import PublicBuildingModal from './components/batiments/PublicBuildingModal';
-import { Building, BuildingCreationData, BuildingStatus, BuildingType } from './types/batiments';
+import { Building, BuildingCreationData, BuildingStatus, BuildingType, BuildingOwner } from './types/batiments';
 
 export const GestionBatiments = () => {
   const [activeTab, setActiveTab] = useState<string>('liste');
@@ -44,7 +44,7 @@ export const GestionBatiments = () => {
       name: "Bâtiment exemple",
       type: BuildingType.TEMPLE,
       location: "Forum Romanum",
-      owner: "république",
+      owner: BuildingOwner.REPUBLIC,
       value: 50000,
       maintenanceCost: 1000,
       maintenance: 1000,
@@ -82,7 +82,8 @@ export const GestionBatiments = () => {
         constructionYear: data.constructionYear || currentYear,
         cost: data.cost || 10000,
         revenue: data.revenue || 0,
-        capacity: data.capacity || 0
+        capacity: data.capacity || 0,
+        condition: data.condition || 100
       };
       
       addBuilding(completeData);

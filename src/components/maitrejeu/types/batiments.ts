@@ -1,4 +1,3 @@
-
 export enum BuildingType {
   TEMPLE = 'temple',
   FORUM = 'forum',
@@ -34,7 +33,15 @@ export enum BuildingPriority {
   LOW = 'low'
 }
 
-export interface BuildingOwner {
+export enum BuildingOwner {
+  REPUBLIC = 'republic',
+  SENATORIAL = 'senatorial',
+  RELIGIOUS = 'religious',
+  MILITARY = 'military',
+  PRIVATE = 'private'
+}
+
+export interface BuildingOwnerInfo {
   id: string;
   name: string;
   type: 'senateur' | 'famille' | 'public' | 'temple';
@@ -66,7 +73,7 @@ export interface Building {
   maintenance: number;
   constructionDate?: Date | string;
   lastMaintenance?: Date | string;
-  owner?: BuildingOwner | string;
+  owner?: BuildingOwnerInfo | string;
   description?: string;
   workers?: number;
   income?: number;
@@ -87,7 +94,7 @@ export interface BuildingCreationData {
   maintenance: number;
   constructionDate?: Date | string;
   lastMaintenance?: Date | string;
-  owner?: BuildingOwner | string;
+  owner?: BuildingOwnerInfo | string;
   description?: string;
   workers?: number;
   revenue?: number;

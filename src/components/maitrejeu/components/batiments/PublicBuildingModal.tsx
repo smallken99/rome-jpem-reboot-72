@@ -12,7 +12,13 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { Building, BuildingStatus, BuildingOwner, BuildingCreationData, BuildingType } from '../../types/batiments';
+import {
+  Building,
+  BuildingStatus,
+  BuildingOwner,
+  BuildingCreationData, 
+  BuildingType
+} from '../../types/batiments';
 
 interface PublicBuildingModalProps {
   isOpen: boolean;
@@ -38,7 +44,8 @@ const PublicBuildingModal: React.FC<PublicBuildingModalProps> = ({
     value: 50000,
     cost: 75000,
     maintenance: 1000,
-    revenue: 0
+    revenue: 0,
+    condition: 100
   });
 
   useEffect(() => {
@@ -55,7 +62,8 @@ const PublicBuildingModal: React.FC<PublicBuildingModalProps> = ({
         cost: building.cost,
         maintenance: building.maintenance,
         revenue: building.revenue,
-        capacity: building.capacity
+        capacity: building.capacity,
+        condition: building.condition
       });
     } else {
       // Reset form for new building
@@ -70,7 +78,8 @@ const PublicBuildingModal: React.FC<PublicBuildingModalProps> = ({
         value: 50000,
         cost: 75000,
         maintenance: 1000,
-        revenue: 0
+        revenue: 0,
+        condition: 100
       });
     }
   }, [building, isOpen]);
@@ -115,7 +124,7 @@ const PublicBuildingModal: React.FC<PublicBuildingModalProps> = ({
             <div>
               <Label htmlFor="type">Type</Label>
               <Select
-                value={formData.type}
+                value={formData.type as string}
                 onValueChange={(value) => handleSelectChange('type', value)}
               >
                 <SelectTrigger id="type" className="mt-1">
@@ -148,7 +157,7 @@ const PublicBuildingModal: React.FC<PublicBuildingModalProps> = ({
             <div>
               <Label htmlFor="owner">Propriétaire</Label>
               <Select
-                value={formData.owner}
+                value={formData.owner as string}
                 onValueChange={(value) => handleSelectChange('owner', value)}
               >
                 <SelectTrigger id="owner" className="mt-1">
