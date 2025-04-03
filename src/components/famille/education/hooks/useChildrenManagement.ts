@@ -1,70 +1,62 @@
 
 import { useState, useEffect } from 'react';
-import { Child, EducationType } from '../types/educationTypes';
 import { Character } from '@/types/character';
+import { Child, EducationType } from '../types/educationTypes';
 
-export const useChildrenManagement = (characters: Character[] = []) => {
+export const useChildrenManagement = (characters: Character[]) => {
   const [educationChildren, setEducationChildren] = useState<Child[]>([]);
   
-  // Convert Characters to Children for the education system
+  // Mettre à jour les enfants lorsque les personnages changent
   useEffect(() => {
-    if (!characters || !characters.length) return;
-    
-    const childrenArray: Child[] = characters
+    // Filtrer pour ne garder que les enfants
+    const childrenData = characters
       .filter(char => char.age < 18)
       .map(char => ({
         id: char.id,
-        name: char.name || `${char.firstName || ''} ${char.lastName || ''}`.trim(),
+        name: char.name,
         age: char.age,
         gender: char.gender,
-        status: 'child',
-        educationType: (char.education?.type || 'none') as EducationType,
-        progress: char.education?.completed ? 100 : (char.currentEducation?.progress || 0),
-        preceptorId: char.currentEducation?.mentorId,
+        educationType: (char.currentEducation?.type || 'none') as EducationType,
+        progress: char.currentEducation?.progress || 0,
         specialties: char.education?.specialties || [],
-        traits: [],
+        traits: char.traits || [],
         currentEducation: char.currentEducation ? {
-          type: (char.currentEducation.type || char.education?.type || 'none') as EducationType,
-          mentor: char.currentEducation.mentor || char.education?.mentor || null,
-          progress: char.currentEducation.progress || 0,
-          skills: char.currentEducation.skills || char.education?.specialties || [],
-          yearsCompleted: char.currentEducation.yearsCompleted || 0,
-          totalYears: char.currentEducation.totalYears || 3,
-          statBonus: char.currentEducation.statBonus || 0,
-          mentorId: char.currentEducation.mentorId || null
-        } : {
-          type: 'none' as EducationType,
-          mentor: null,
-          progress: 0,
-          skills: [],
-          yearsCompleted: 0,
-          totalYears: 3,
-          statBonus: 0
-        }
+          type: char.currentEducation.type as EducationType,
+          mentor: char.currentEducation.mentor,
+          mentorId: char.currentEducation.mentorId,
+          progress: char.currentEducation.progress,
+          skills: char.currentEducation.skills || [],
+          yearsCompleted: char.currentEducation.yearsCompleted,
+          totalYears: char.currentEducation.totalYears
+        } : undefined,
+        preceptorId: char.currentEducation?.mentorId
       }));
     
-    setEducationChildren(childrenArray);
+    setEducationChildren(childrenData);
   }, [characters]);
-
-  // Update child name
-  const updateChildName = (childId: string, newName: string) => {
-    setEducationChildren(prev => {
-      const childIndex = prev.findIndex(c => c.id === childId);
-      if (childIndex === -1) return prev;
-      
-      const updatedChildren = [...prev];
-      updatedChildren[childIndex] = {
-        ...updatedChildren[childIndex],
-        name: newName
-      };
-      
-      return updatedChildren;
-    });
+  
+  // Ajouter un enfant
+  const addChild = (childData: Omit<Child, 'id' | 'progress'>) => {
+    const newChild: Child = {
+      id: `temp-${Date.now()}`, // ID temporaire
+      ...childData,
+      progress: 0
+    };
+    
+    setEducationChildren(prev => [...prev, newChild]);
+    
+    return newChild.id;
   };
-
+  
+  // Supprimer un enfant
+  const removeChild = (id: string) => {
+    setEducationChildren(prev => prev.filter(child => child.id !== id));
+  };
+  
   return {
     educationChildren,
     setEducationChildren,
-    updateChildName
+    addChild,
+    removeChild
   };
 };

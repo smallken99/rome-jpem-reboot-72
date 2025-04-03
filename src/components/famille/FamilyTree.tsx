@@ -2,64 +2,102 @@
 import React, { useState } from 'react';
 import Layout from '@/components/layout/Layout';
 import { PageHeader } from '@/components/ui-custom/PageHeader';
-import { Card, CardContent, CardDescription } from '@/components/ui/card';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { useCharacters } from './hooks/useCharacters';
-import { Character } from '@/types/character';
-import { FamilyTreeComponent } from './tree/FamilyTreeComponent';
-import { FamilyTreeDetails } from './tree/FamilyTreeDetails';
+import { Card, CardContent } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { useNavigate } from 'react-router-dom';
+import { FamilyTreeNode } from './tree/FamilyTreeNode';
 import { FamilyControls } from './tree/FamilyControls';
-import { AddFamilyMemberDialog } from './members/AddFamilyMemberDialog';
+import { useCharacters } from './hooks/useCharacters';
+import { getFamilyMembers } from './tree/familyHelpers';
+import { AddFamilyMemberDialog } from './tree/AddFamilyMemberDialog';
+import { Character } from '@/types/character';
 
-interface FamilyTreeProps {
-  characters?: Character[];
-}
-
-export const FamilyTree: React.FC<FamilyTreeProps> = ({ characters: externalCharacters }) => {
-  const { localCharacters } = useCharacters();
-  const [isAddMemberOpen, setIsAddMemberOpen] = useState(false);
-  const [activeTab, setActiveTab] = useState('tree');
+export const FamilyTree: React.FC = () => {
+  const navigate = useNavigate();
+  const { localCharacters, handleAddCharacter } = useCharacters();
+  const [showAddMemberDialog, setShowAddMemberDialog] = useState(false);
   
-  // Utiliser les personnages externes s'ils sont fournis, sinon utiliser les locaux
-  const characters = externalCharacters || localCharacters;
+  const { paterFamilias, materFamilias, children } = getFamilyMembers(localCharacters);
+  
+  const handleAddMember = () => {
+    setShowAddMemberDialog(true);
+  };
+  
+  const onAddFamilyMember = (newMember: Omit<Character, 'id'>) => {
+    handleAddCharacter(newMember);
+    setShowAddMemberDialog(false);
+  };
   
   return (
     <Layout>
       <PageHeader 
-        title="Arbre Généalogique"
-        subtitle="Visualisez l'histoire et les relations de votre famille"
+        title="Arbre Généalogique" 
+        subtitle="Visualisez les liens entre les membres de votre famille"
       />
       
-      <FamilyControls onAddMember={() => setIsAddMemberOpen(true)} />
+      <div className="mb-6">
+        <Button variant="outline" onClick={() => navigate('/famille')}>
+          Retour au menu
+        </Button>
+      </div>
       
-      <Tabs value={activeTab} onValueChange={setActiveTab} className="mb-6">
-        <TabsList className="mb-4">
-          <TabsTrigger value="tree">Arbre généalogique</TabsTrigger>
-          <TabsTrigger value="details">Détails</TabsTrigger>
-        </TabsList>
-        
-        <TabsContent value="tree">
-          <Card>
-            <CardContent className="p-6">
-              {characters.length > 0 ? (
-                <FamilyTreeComponent characters={characters} />
-              ) : (
-                <CardDescription className="text-center py-12">
-                  Aucun membre de famille. Commencez par ajouter un premier membre.
-                </CardDescription>
+      <FamilyControls onAddMember={handleAddMember} />
+      
+      <Card>
+        <CardContent className="p-6">
+          <div className="flex flex-col items-center">
+            <div className="mb-12 flex justify-center gap-24">
+              {paterFamilias && (
+                <FamilyTreeNode 
+                  character={paterFamilias} 
+                  relationLabel="Pater Familias"
+                />
               )}
-            </CardContent>
-          </Card>
-        </TabsContent>
-        
-        <TabsContent value="details">
-          <FamilyTreeDetails characters={characters} />
-        </TabsContent>
-      </Tabs>
+              
+              {materFamilias && (
+                <FamilyTreeNode 
+                  character={materFamilias} 
+                  relationLabel="Mater Familias"
+                />
+              )}
+            </div>
+            
+            {children.length > 0 && (
+              <div className="relative">
+                <div className="absolute top-0 left-1/2 w-0.5 h-8 bg-gray-300 -translate-x-1/2"></div>
+                <div className="pt-8 flex flex-wrap justify-center gap-8">
+                  {children.map(child => (
+                    <FamilyTreeNode 
+                      key={child.id} 
+                      character={child} 
+                      relationLabel={child.gender === 'male' ? 'Fils' : 'Fille'}
+                    />
+                  ))}
+                </div>
+              </div>
+            )}
+            
+            {localCharacters.length === 0 && (
+              <div className="py-12 text-center text-muted-foreground">
+                <p>Aucun membre familial trouvé.</p>
+                <Button 
+                  variant="outline" 
+                  className="mt-4"
+                  onClick={handleAddMember}
+                >
+                  Ajouter un membre
+                </Button>
+              </div>
+            )}
+          </div>
+        </CardContent>
+      </Card>
       
       <AddFamilyMemberDialog
-        isOpen={isAddMemberOpen}
-        onClose={() => setIsAddMemberOpen(false)}
+        isOpen={showAddMemberDialog}
+        onClose={() => setShowAddMemberDialog(false)}
+        onAdd={onAddFamilyMember}
+        existingMembers={localCharacters}
       />
     </Layout>
   );

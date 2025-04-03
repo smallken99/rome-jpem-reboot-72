@@ -1,164 +1,191 @@
 
-import { useState, useCallback, useRef } from 'react';
-import { Child, Preceptor, ChildEducation, EducationType } from '../types/educationTypes';
+import { useState, useCallback } from 'react';
+import { Child, Preceptor } from '../types/educationTypes';
 import { Character } from '@/types/character';
-import { getEducationPath } from '../data';
-import { getOutcomeBonuses, getOutcomeSkills } from '../utils/educationUtils';
+import { toast } from 'sonner';
+import { usePreceptorManagement } from './usePreceptorManagement';
 
 export const useEducationManagement = (
   children: Child[],
   setChildren: React.Dispatch<React.SetStateAction<Child[]>>,
-  characters: Character[] = [],
-  onCharacterUpdate?: (characterId: string, updatedCharacter: Partial<Character>) => void
+  characters: Character[],
+  updateCharacter: (id: string, updates: Partial<Character>) => void
 ) => {
-  // Use useRef to prevent state updates from triggering too many renders
-  const educatingChildrenRef = useRef<string[]>([]);
   const [educatingChildren, setEducatingChildren] = useState<string[]>([]);
-  const [hiredPreceptors, setHiredPreceptors] = useState<Preceptor[]>([]);
-
-  // Start education for a child
-  const startChildEducation = useCallback((
-    childId: string, 
-    educationType: string | EducationType,
-    mentorId: string | null
-  ) => {
-    // Find the mentor if provided
-    const mentor = mentorId ? hiredPreceptors.find(p => p.id === mentorId) : null;
+  const { hiredPreceptors, hirePreceptor } = usePreceptorManagement();
+  
+  // Démarrer l'éducation d'un enfant
+  const startChildEducation = useCallback((childId: string, educationType: string, mentorId: string | null = null) => {
+    // Trouver l'enfant
+    const child = children.find(c => c.id === childId);
     
-    // Get education path data
-    const educationPath = getEducationPath(educationType);
-    const educationDuration = educationPath?.duration || 3;
+    if (!child) {
+      toast.error("Enfant non trouvé");
+      return;
+    }
     
-    setChildren(prev => prev.map(child => {
-      if (child.id === childId) {
-        // Create new education object
-        const newEducation: ChildEducation = {
+    if (child.educationType !== 'none') {
+      toast.error(`${child.name} est déjà en cours d'éducation`);
+      return;
+    }
+    
+    // Mettre à jour l'enfant
+    setChildren(prev => prev.map(c => 
+      c.id === childId 
+        ? { 
+            ...c, 
+            educationType, 
+            progress: 0, 
+            currentEducation: {
+              type: educationType,
+              mentor: mentorId,
+              progress: 0,
+              skills: [],
+              yearsCompleted: 0,
+              totalYears: 3
+            }
+          } 
+        : c
+    ));
+    
+    // Mettre à jour le personnage correspondant
+    const character = characters.find(char => char.id === childId);
+    if (character) {
+      updateCharacter(childId, {
+        educationType,
+        currentEducation: {
           type: educationType,
-          mentor: mentor ? mentor.name : null,
+          mentor: null,
+          mentorId,
           progress: 0,
           skills: [],
           yearsCompleted: 0,
-          totalYears: educationDuration,
-          statBonus: 0,
-          mentorId: mentorId
-        };
-        
-        return {
-          ...child,
-          currentEducation: newEducation
-        };
-      }
-      return child;
-    }));
-    
-    // Add child to educating list using ref
-    educatingChildrenRef.current = [...educatingChildrenRef.current, childId];
-    setEducatingChildren(educatingChildrenRef.current);
-    
-    // If mentor assigned, update preceptor status
-    if (mentorId) {
-      setHiredPreceptors(prev => prev.map(p => 
-        p.id === mentorId ? { ...p, status: 'assigned', childId } : p
-      ));
-    }
-  }, [hiredPreceptors, setChildren]);
-
-  // Advance education by one year
-  const advanceEducationYear = useCallback((childId: string) => {
-    setChildren(prev => prev.map(child => {
-      if (child.id === childId && child.currentEducation) {
-        const education = child.currentEducation;
-        const totalYears = education.totalYears || 3;
-        const yearsCompleted = (education.yearsCompleted || 0) + 1;
-        const progress = Math.min(100, Math.round((yearsCompleted / totalYears) * 100));
-        
-        // Get education path for skills
-        const educationPath = getEducationPath(education.type);
-        
-        // Calculate new skills gained
-        const newSkills = [...education.skills];
-        if (educationPath) {
-          // Get skills using the utility function
-          const pathSkills = getOutcomeSkills(educationPath);
-          const skillIndex = yearsCompleted - 1;
-          
-          if (skillIndex < pathSkills.length) {
-            newSkills.push(pathSkills[skillIndex]);
-          }
+          totalYears: 3
         }
-        
-        return {
-          ...child,
-          age: child.age + 1,
-          currentEducation: {
-            ...education,
-            progress,
-            yearsCompleted,
-            skills: newSkills
-          }
-        };
-      }
-      return child;
-    }));
-  }, [setChildren]);
-
-  // Complete education
-  const completeEducation = useCallback((childId: string) => {
-    let updatedChild: Child | null = null;
-    
-    setChildren(prev => {
-      const updated = prev.map(child => {
-        if (child.id === childId && child.currentEducation) {
-          const education = child.currentEducation;
-          // Get education path
-          const educationPath = getEducationPath(education.type);
-          
-          // Calculate final stat bonus
-          let statBonus = 0;
-          if (educationPath) {
-            // Use mentor quality if available
-            const mentor = education.mentorId ? hiredPreceptors.find(p => p.id === education.mentorId) : null;
-            const mentorBonus = mentor ? Math.floor((mentor.quality || 0) / 10) : 0;
-            
-            // Get base bonus for relevant stat using the utility function
-            const statKey = educationPath.relatedStat || '';
-            const pathBonus = getOutcomeBonuses(educationPath, statKey);
-            statBonus = pathBonus + mentorBonus;
-          }
-          
-          // Create updated child with completed education
-          const result = {
-            ...child,
-            currentEducation: undefined
-          };
-          
-          updatedChild = result;
-          return result;
-        }
-        return child;
       });
-      
-      return updated;
-    });
-    
-    // Remove from educating children list
-    educatingChildrenRef.current = educatingChildrenRef.current.filter(id => id !== childId);
-    setEducatingChildren(educatingChildrenRef.current);
-    
-    // If we have a Character update callback, use it
-    if (onCharacterUpdate && updatedChild) {
-      // Find the matching character
-      const character = characters.find(c => c.id === childId);
-      if (character) {
-        onCharacterUpdate(childId, {
-          currentEducation: undefined
-        });
-      }
     }
     
-    return updatedChild;
-  }, [characters, hiredPreceptors, onCharacterUpdate, setChildren]);
-
+    setEducatingChildren(prev => [...prev, childId]);
+    
+    toast.success(`L'éducation ${educationType} a commencé pour ${child.name}`);
+  }, [children, setChildren, characters, updateCharacter]);
+  
+  // Avancer l'éducation d'un enfant d'une année
+  const advanceEducationYear = useCallback((childId: string) => {
+    // Trouver l'enfant
+    const child = children.find(c => c.id === childId);
+    
+    if (!child || child.educationType === 'none') {
+      toast.error("Aucune éducation en cours pour cet enfant");
+      return;
+    }
+    
+    // Calculer la nouvelle progression (33% par an pour une éducation de 3 ans)
+    const newProgress = Math.min(child.progress + 33, 100);
+    
+    // Mettre à jour l'enfant
+    setChildren(prev => prev.map(c => 
+      c.id === childId 
+        ? { 
+            ...c, 
+            progress: newProgress,
+            currentEducation: c.currentEducation 
+              ? {
+                  ...c.currentEducation,
+                  progress: newProgress,
+                  yearsCompleted: (c.currentEducation.yearsCompleted || 0) + 1
+                }
+              : undefined
+          } 
+        : c
+    ));
+    
+    // Mettre à jour le personnage correspondant
+    const character = characters.find(char => char.id === childId);
+    if (character && character.currentEducation) {
+      updateCharacter(childId, {
+        currentEducation: {
+          ...character.currentEducation,
+          progress: newProgress,
+          yearsCompleted: (character.currentEducation.yearsCompleted || 0) + 1
+        }
+      });
+    }
+    
+    toast.success(`L'éducation de ${child.name} a progressé à ${newProgress}%`);
+    
+    // Si l'éducation est terminée
+    if (newProgress >= 100) {
+      toast.info(`L'éducation de ${child.name} peut maintenant être finalisée`);
+    }
+  }, [children, setChildren, characters, updateCharacter]);
+  
+  // Compléter l'éducation d'un enfant
+  const completeEducation = useCallback((childId: string) => {
+    // Trouver l'enfant
+    const child = children.find(c => c.id === childId);
+    
+    if (!child || child.educationType === 'none' || child.progress < 100) {
+      toast.error("L'éducation n'est pas prête à être complétée");
+      return;
+    }
+    
+    // Préparer les compétences acquises selon le type d'éducation
+    const acquiredSkills = getSkillsByEducationType(child.educationType);
+    
+    // Mettre à jour l'enfant
+    setChildren(prev => prev.map(c => 
+      c.id === childId 
+        ? { 
+            ...c, 
+            educationType: 'none',
+            progress: 0,
+            specialties: [...c.specialties, ...acquiredSkills],
+            currentEducation: undefined
+          } 
+        : c
+    ));
+    
+    // Mettre à jour le personnage correspondant
+    const character = characters.find(char => char.id === childId);
+    if (character) {
+      updateCharacter(childId, {
+        education: {
+          type: child.educationType,
+          specialties: [...(character.education?.specialties || []), ...acquiredSkills],
+          mentor: character.currentEducation?.mentor || null,
+          completed: true,
+          completedAt: new Date().toISOString()
+        },
+        currentEducation: undefined
+      });
+    }
+    
+    setEducatingChildren(prev => prev.filter(id => id !== childId));
+    
+    toast.success(`L'éducation de ${child.name} est terminée avec succès !`);
+    
+    return child;
+  }, [children, setChildren, characters, updateCharacter]);
+  
+  // Fonction utilitaire pour obtenir les compétences selon le type d'éducation
+  const getSkillsByEducationType = (educationType: string): string[] => {
+    switch (educationType) {
+      case 'military':
+        return ['Tactique de combat', 'Commandement'];
+      case 'rhetoric':
+        return ['Éloquence', 'Argumentation'];
+      case 'political':
+        return ['Négociation politique', 'Droit romain'];
+      case 'religious':
+        return ['Rites sacrificiels', 'Interprétation des présages'];
+      case 'philosophical':
+        return ['Logique', 'Éthique'];
+      default:
+        return ['Connaissance générale'];
+    }
+  };
+  
   return {
     educatingChildren,
     startChildEducation,

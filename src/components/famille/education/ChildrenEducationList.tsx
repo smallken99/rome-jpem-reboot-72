@@ -1,134 +1,194 @@
 
 import React from 'react';
+import { Child } from './types/educationTypes';
 import { Card, CardContent } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Progress } from '@/components/ui/progress';
-import { Child, Preceptor } from './types/educationTypes';
-import { StartEducationDialog } from './StartEducationDialog';
-import { GraduationCap, ArrowRight, CheckCircle, Clock } from 'lucide-react';
+import { Preceptor } from './types/educationTypes';
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Progress } from '@/components/ui/progress';
+import { GraduationCap, Clock, BookOpen } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
 interface ChildrenEducationListProps {
   children: Child[];
-  preceptors: Preceptor[];
-  onStartEducation: (childId: string, educationType: string, mentorId: string | null) => void;
+  onStartEducation: (childId: string, educationType: string, mentorId?: string | null) => void;
   onAdvanceYear: (childId: string) => void;
   onCompleteEducation: (childId: string) => void;
+  preceptors: Preceptor[];
 }
 
 export const ChildrenEducationList: React.FC<ChildrenEducationListProps> = ({
   children,
-  preceptors,
   onStartEducation,
   onAdvanceYear,
-  onCompleteEducation
+  onCompleteEducation,
+  preceptors
 }) => {
-  const [selectedChildId, setSelectedChildId] = React.useState<string | null>(null);
+  const navigate = useNavigate();
   
-  const handleStartEducation = (childId: string) => {
-    setSelectedChildId(childId);
+  // Filtrer pour ne montrer que les enfants (moins de 18 ans)
+  const educationChildren = children.filter(child => child.age < 18);
+  
+  // Fonction pour récupérer les initiales
+  const getInitials = (name: string) => {
+    return name
+      .split(' ')
+      .map(part => part[0])
+      .slice(0, 2)
+      .join('')
+      .toUpperCase();
   };
   
-  const handleCloseDialog = () => {
-    setSelectedChildId(null);
+  // Fonction pour afficher le type d'éducation en français
+  const formatEducationType = (type: string) => {
+    const types: Record<string, string> = {
+      'military': 'Militaire',
+      'rhetoric': 'Rhétorique',
+      'political': 'Politique',
+      'religious': 'Religieuse',
+      'philosophical': 'Philosophique',
+      'administrative': 'Administrative',
+      'none': 'Aucune'
+    };
+    
+    return types[type] || type;
   };
   
-  if (!children.length) {
+  // Récupérer le nom du précepteur
+  const getPreceptorName = (childId: string) => {
+    const preceptor = preceptors.find(p => p.childId === childId);
+    return preceptor ? preceptor.name : 'Aucun';
+  };
+  
+  if (educationChildren.length === 0) {
     return (
-      <div className="text-center p-6 text-muted-foreground">
-        <p>Aucun enfant trouvé dans votre famille</p>
-      </div>
+      <Card>
+        <CardContent className="p-6 text-center text-muted-foreground">
+          <p>Aucun enfant trouvé pour l'éducation.</p>
+          <p className="mt-2">Ajoutez des enfants à votre famille pour commencer leur éducation.</p>
+        </CardContent>
+      </Card>
     );
   }
   
   return (
     <div className="space-y-4">
-      {children.map(child => (
+      {educationChildren.map(child => (
         <Card key={child.id} className="overflow-hidden">
           <CardContent className="p-0">
-            <div className="p-4 grid grid-cols-1 md:grid-cols-5 gap-4 items-center">
-              <div className="col-span-2">
-                <h3 className="font-semibold text-base">{child.name}</h3>
-                <div className="flex gap-2 items-center text-sm text-muted-foreground">
-                  <span>{child.age} ans</span>
-                  <span>•</span>
-                  <span>{child.gender === 'male' ? 'Garçon' : 'Fille'}</span>
+            <div className="flex flex-col sm:flex-row">
+              <div className="bg-primary/10 p-4 sm:w-1/4 flex flex-col items-center justify-center">
+                <Avatar className="h-16 w-16 mb-2">
+                  <AvatarImage alt={child.name} />
+                  <AvatarFallback>{getInitials(child.name)}</AvatarFallback>
+                </Avatar>
+                <h3 className="font-medium text-center">{child.name}</h3>
+                <div className="flex items-center mt-1">
+                  <Badge variant="outline">
+                    {child.age} ans
+                  </Badge>
+                  <Badge variant="outline" className="ml-1">
+                    {child.gender === 'male' ? 'Garçon' : 'Fille'}
+                  </Badge>
                 </div>
               </div>
               
-              {child.currentEducation ? (
-                <div className="col-span-3 md:col-span-2">
-                  <div className="flex justify-between items-center mb-1">
-                    <span className="text-sm font-medium">
-                      {child.currentEducation.type} {child.currentEducation.mentor && `(${child.currentEducation.mentor})`}
-                    </span>
-                    <span className="text-xs text-muted-foreground">
-                      {child.currentEducation.yearsCompleted}/{child.currentEducation.totalYears} ans
-                    </span>
+              <div className="p-4 sm:w-3/4">
+                <div className="flex flex-col sm:flex-row justify-between mb-4">
+                  <div>
+                    <p className="font-medium">Éducation: {formatEducationType(child.educationType)}</p>
+                    <p className="text-sm text-muted-foreground">Précepteur: {getPreceptorName(child.id)}</p>
                   </div>
-                  <Progress value={child.currentEducation.progress} className="h-2" />
                   
-                  <div className="mt-2 flex gap-1 flex-wrap">
-                    {child.currentEducation.skills.map((skill, i) => (
-                      <Badge key={i} variant="secondary" className="text-xs">
-                        {skill}
-                      </Badge>
-                    ))}
+                  <div className="mt-2 sm:mt-0">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="mr-2"
+                      onClick={() => navigate(`/famille/education/${child.id}`)}
+                    >
+                      <BookOpen className="h-4 w-4 mr-1" />
+                      Détails
+                    </Button>
+                    {child.educationType !== 'none' && (
+                      <Button
+                        size="sm"
+                        onClick={() => onAdvanceYear(child.id)}
+                      >
+                        <Clock className="h-4 w-4 mr-1" />
+                        Avancer d'un an
+                      </Button>
+                    )}
                   </div>
                 </div>
-              ) : (
-                <div className="col-span-3 md:col-span-2 flex items-center text-muted-foreground">
-                  <Clock className="h-4 w-4 mr-2" />
-                  <span>Pas encore en formation</span>
-                </div>
-              )}
-              
-              <div className="md:text-right">
-                {!child.currentEducation ? (
-                  <Button
-                    size="sm"
-                    onClick={() => handleStartEducation(child.id)}
-                    className="flex items-center gap-1"
-                  >
-                    <GraduationCap className="h-4 w-4" />
-                    <span>Éduquer</span>
-                  </Button>
-                ) : child.currentEducation.progress < 100 ? (
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    onClick={() => onAdvanceYear(child.id)}
-                    className="flex items-center gap-1"
-                  >
-                    <ArrowRight className="h-4 w-4" />
-                    <span>Avancer</span>
-                  </Button>
+                
+                {child.educationType !== 'none' ? (
+                  <div className="space-y-4">
+                    <div>
+                      <div className="flex justify-between mb-1">
+                        <span className="text-sm">Progression</span>
+                        <span className="text-sm font-medium">{child.progress}%</span>
+                      </div>
+                      <Progress value={child.progress} className="h-2" />
+                    </div>
+                    
+                    {child.progress >= 100 && (
+                      <div className="flex justify-end">
+                        <Button
+                          variant="default"
+                          onClick={() => onCompleteEducation(child.id)}
+                        >
+                          <GraduationCap className="h-4 w-4 mr-1" />
+                          Compléter l'éducation
+                        </Button>
+                      </div>
+                    )}
+                  </div>
                 ) : (
-                  <Button
-                    size="sm"
-                    variant="default"
-                    onClick={() => onCompleteEducation(child.id)}
-                    className="flex items-center gap-1"
-                  >
-                    <CheckCircle className="h-4 w-4" />
-                    <span>Terminer</span>
-                  </Button>
+                  <div className="flex flex-wrap gap-2 mt-4">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => onStartEducation(child.id, 'military')}
+                    >
+                      Militaire
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => onStartEducation(child.id, 'rhetoric')}
+                    >
+                      Rhétorique
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => onStartEducation(child.id, 'political')}
+                    >
+                      Politique
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => onStartEducation(child.id, 'religious')}
+                    >
+                      Religieuse
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => onStartEducation(child.id, 'philosophical')}
+                    >
+                      Philosophique
+                    </Button>
+                  </div>
                 )}
               </div>
             </div>
           </CardContent>
         </Card>
       ))}
-      
-      {selectedChildId && (
-        <StartEducationDialog
-          isOpen={!!selectedChildId}
-          onClose={handleCloseDialog}
-          childId={selectedChildId}
-          preceptors={preceptors}
-          onStartEducation={onStartEducation}
-        />
-      )}
     </div>
   );
 };
