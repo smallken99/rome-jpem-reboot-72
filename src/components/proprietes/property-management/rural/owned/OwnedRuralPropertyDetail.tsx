@@ -5,10 +5,14 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ActionsGroup, ActionItem } from '@/components/ui-custom/ActionsGroup';
 import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
-import { ArrowLeft, Edit, Home, Map, CircleDollarSign, AreaChart, Wrench, User, ScrollText, BadgePercent, Coins } from "lucide-react";
+import { ArrowLeft, Edit, Home, Map, CircleDollarSign, AreaChart, Wrench, User, ScrollText, BadgePercent, Coins, Cloud, Grain, Plant } from "lucide-react";
 import { OwnedBuilding } from "@/components/proprietes/hooks/building/types";
 import { formatCurrency } from "@/utils/formatters";
 import { BuildingSaleDialog } from "../../modals/BuildingSaleDialog";
+import { PropertySaleDialog } from "../../dialogs/PropertySaleDialog";
+import { Progress } from "@/components/ui/progress";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useToast } from "@/components/ui/use-toast";
 
 interface OwnedRuralPropertyDetailProps {
   building: OwnedBuilding;
@@ -39,6 +43,8 @@ export const OwnedRuralPropertyDetail: React.FC<OwnedRuralPropertyDetailProps> =
   const [newName, setNewName] = useState(building.name);
   const [slaveCount, setSlaveCount] = useState(building.slaves || 0);
   const [isSaleDialogOpen, setIsSaleDialogOpen] = useState(false);
+  const [activeTab, setActiveTab] = useState('overview');
+  const { toast } = useToast();
   
   const handleRename = () => {
     if (isEditing && newName.trim() !== "") {
@@ -77,6 +83,20 @@ export const OwnedRuralPropertyDetail: React.FC<OwnedRuralPropertyDetailProps> =
     label: building.maintenanceEnabled ? "Désactiver entretien" : "Activer entretien",
     onClick: () => onMaintenanceToggle(!building.maintenanceEnabled),
     variant: building.maintenanceEnabled ? "outline" : "secondary"
+  };
+  
+  const handleHarvest = () => {
+    toast({
+      title: "Récolte effectuée",
+      description: `La récolte de ${building.name} a été effectuée avec succès.`,
+    });
+  };
+  
+  const handlePlant = () => {
+    toast({
+      title: "Plantation effectuée",
+      description: `Les semences ont été plantées dans ${building.name}.`,
+    });
   };
   
   return (
@@ -126,77 +146,164 @@ export const OwnedRuralPropertyDetail: React.FC<OwnedRuralPropertyDetailProps> =
             </CardHeader>
             
             <CardContent>
-              <div className="space-y-4">
-                <ActionsGroup
-                  actions={primaryActions}
-                  direction="row"
-                  justify="start"
-                  wrap={true}
-                  spacing="sm"
-                />
+              <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+                <TabsList className="grid grid-cols-3 mb-4">
+                  <TabsTrigger value="overview">Vue générale</TabsTrigger>
+                  <TabsTrigger value="production">Production</TabsTrigger>
+                  <TabsTrigger value="personnel">Personnel</TabsTrigger>
+                </TabsList>
                 
-                <ActionsGroup
-                  actions={[maintenanceAction]}
-                  direction="row"
-                  justify="start"
-                  wrap={true}
-                  spacing="sm"
-                />
-                
-                <Separator />
-                
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                  <div className="border rounded-md p-3">
-                    <div className="text-sm text-muted-foreground">État</div>
-                    <div className="font-medium text-lg">{building.condition}%</div>
-                  </div>
+                <TabsContent value="overview" className="space-y-4">
+                  <ActionsGroup
+                    actions={primaryActions}
+                    direction="row"
+                    justify="start"
+                    wrap={true}
+                    spacing="sm"
+                  />
                   
-                  <div className="border rounded-md p-3">
-                    <div className="text-sm text-muted-foreground">Valeur estimée</div>
-                    <div className="font-medium text-lg">{formatCurrency(estimatedValue)}</div>
-                  </div>
+                  <ActionsGroup
+                    actions={[maintenanceAction]}
+                    direction="row"
+                    justify="start"
+                    wrap={true}
+                    spacing="sm"
+                  />
                   
-                  <div className="border rounded-md p-3">
-                    <div className="text-sm text-muted-foreground">Revenu annuel</div>
-                    <div className="font-medium text-lg">{formatCurrency(building.income)}</div>
-                  </div>
+                  <Separator />
                   
-                  <div className="border rounded-md p-3">
-                    <div className="text-sm text-muted-foreground">Coût d'entretien</div>
-                    <div className="font-medium text-lg">{formatCurrency(building.maintenanceCost)}</div>
-                  </div>
-                </div>
-                
-                <div className="p-4 border rounded-md">
-                  <h3 className="font-medium mb-3 flex items-center gap-2">
-                    <User className="h-5 w-5" />
-                    Gestion des esclaves
-                  </h3>
-                  <div className="flex flex-col sm:flex-row gap-4 items-center">
-                    <div className="w-full sm:w-auto">
-                      <Input 
-                        type="number" 
-                        min="0"
-                        value={slaveCount}
-                        onChange={(e) => setSlaveCount(Number(e.target.value))}
-                        className="w-full sm:w-32"
-                      />
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                    <div className="border rounded-md p-3">
+                      <div className="text-sm text-muted-foreground">État</div>
+                      <div className="font-medium text-lg">{building.condition}%</div>
                     </div>
                     
-                    <Button 
-                      variant="secondary" 
-                      onClick={handleAssignSlaves}
-                    >
-                      Assigner esclaves
-                    </Button>
+                    <div className="border rounded-md p-3">
+                      <div className="text-sm text-muted-foreground">Valeur estimée</div>
+                      <div className="font-medium text-lg">{formatCurrency(estimatedValue)}</div>
+                    </div>
                     
-                    <div className="flex items-center gap-2">
-                      <BadgePercent className="h-4 w-4" />
-                      <span>Efficacité: {efficiency.toFixed(1)}%</span>
+                    <div className="border rounded-md p-3">
+                      <div className="text-sm text-muted-foreground">Revenu annuel</div>
+                      <div className="font-medium text-lg">{formatCurrency(building.income || 0)}</div>
+                    </div>
+                    
+                    <div className="border rounded-md p-3">
+                      <div className="text-sm text-muted-foreground">Coût d'entretien</div>
+                      <div className="font-medium text-lg">{formatCurrency(building.maintenanceCost || 0)}</div>
                     </div>
                   </div>
-                </div>
-              </div>
+                </TabsContent>
+                
+                <TabsContent value="production" className="space-y-4">
+                  <div className="p-4 border rounded-md">
+                    <h3 className="font-medium mb-3 flex items-center gap-2">
+                      <Grain className="h-5 w-5" />
+                      <span>Cultures et Production</span>
+                    </h3>
+                    
+                    <div className="grid grid-cols-2 gap-4 mb-4">
+                      <div>
+                        <p className="text-sm text-muted-foreground mb-1">Cultures actuelles</p>
+                        <p className="font-medium">Blé, Olives, Vignes</p>
+                      </div>
+                      <div>
+                        <p className="text-sm text-muted-foreground mb-1">Rendement</p>
+                        <div className="flex items-center gap-2">
+                          <Progress value={efficiency} className="h-2" />
+                          <span className="text-sm">{efficiency.toFixed(1)}%</span>
+                        </div>
+                      </div>
+                    </div>
+                    
+                    <div className="flex flex-wrap gap-2 mt-3">
+                      <Button variant="secondary" size="sm" onClick={handlePlant} className="gap-1">
+                        <Plant className="h-4 w-4" />
+                        <span>Planter</span>
+                      </Button>
+                      <Button variant="secondary" size="sm" onClick={handleHarvest} className="gap-1">
+                        <Grain className="h-4 w-4" />
+                        <span>Récolter</span>
+                      </Button>
+                    </div>
+                  </div>
+                  
+                  <div className="p-4 border rounded-md">
+                    <h3 className="font-medium mb-3 flex items-center gap-2">
+                      <Cloud className="h-5 w-5" />
+                      <span>Climat et Conditions</span>
+                    </h3>
+                    
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <p className="text-sm text-muted-foreground mb-1">Climat actuel</p>
+                        <p className="font-medium">Été chaud et sec</p>
+                      </div>
+                      <div>
+                        <p className="text-sm text-muted-foreground mb-1">Fertilité du sol</p>
+                        <div className="flex items-center gap-2">
+                          <Progress value={85} className="h-2" />
+                          <span className="text-sm">85%</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </TabsContent>
+                
+                <TabsContent value="personnel" className="space-y-4">
+                  <div className="p-4 border rounded-md">
+                    <h3 className="font-medium mb-3 flex items-center gap-2">
+                      <User className="h-5 w-5" />
+                      <span>Gestion des esclaves</span>
+                    </h3>
+                    <div className="flex flex-col sm:flex-row gap-4 items-center">
+                      <div className="w-full sm:w-auto">
+                        <Input 
+                          type="number" 
+                          min="0"
+                          value={slaveCount}
+                          onChange={(e) => setSlaveCount(Number(e.target.value))}
+                          className="w-full sm:w-32"
+                        />
+                      </div>
+                      
+                      <Button 
+                        variant="secondary" 
+                        onClick={handleAssignSlaves}
+                      >
+                        Assigner esclaves
+                      </Button>
+                      
+                      <div className="flex items-center gap-2">
+                        <BadgePercent className="h-4 w-4" />
+                        <span>Efficacité: {efficiency.toFixed(1)}%</span>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <div className="p-4 border rounded-md">
+                    <h3 className="font-medium mb-3">Personnel par tâche</h3>
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <p className="text-sm text-muted-foreground mb-1">Laboureurs</p>
+                        <p className="font-medium">{Math.floor(slaveCount * 0.4)}</p>
+                      </div>
+                      <div>
+                        <p className="text-sm text-muted-foreground mb-1">Bergers</p>
+                        <p className="font-medium">{Math.floor(slaveCount * 0.2)}</p>
+                      </div>
+                      <div>
+                        <p className="text-sm text-muted-foreground mb-1">Jardiniers</p>
+                        <p className="font-medium">{Math.floor(slaveCount * 0.2)}</p>
+                      </div>
+                      <div>
+                        <p className="text-sm text-muted-foreground mb-1">Gardes</p>
+                        <p className="font-medium">{Math.floor(slaveCount * 0.2)}</p>
+                      </div>
+                    </div>
+                  </div>
+                </TabsContent>
+              </Tabs>
             </CardContent>
           </Card>
         </div>
@@ -212,37 +319,63 @@ export const OwnedRuralPropertyDetail: React.FC<OwnedRuralPropertyDetailProps> =
             <CardContent className="space-y-4">
               <div className="grid grid-cols-2 gap-2 text-sm">
                 <div className="text-muted-foreground">Type</div>
-                <div>{building.buildingType}</div>
+                <div>{building.buildingType || "Rural"}</div>
                 
                 <div className="text-muted-foreground">Taille</div>
                 <div>{building.size || "Moyenne"}</div>
                 
-                <div className="text-muted-foreground">Date d'achat</div>
-                <div>{building.purchaseDate ? new Date(building.purchaseDate).toLocaleDateString('fr-FR') : "Inconnue"}</div>
+                <div className="text-muted-foreground">Acquis le</div>
+                <div>{building.purchaseDate?.toLocaleDateString() || "Date inconnue"}</div>
                 
-                <div className="text-muted-foreground">Dernière maintenance</div>
-                <div>{building.lastMaintenance ? new Date(building.lastMaintenance).toLocaleDateString('fr-FR') : "Jamais"}</div>
+                <div className="text-muted-foreground">Type de sol</div>
+                <div>Fertile</div>
+                
+                <div className="text-muted-foreground">Accès à l'eau</div>
+                <div>Rivière à proximité</div>
               </div>
               
               <Separator />
               
               <div>
-                <h4 className="font-medium mb-2">Description</h4>
-                <p className="text-sm text-muted-foreground">
-                  {building.description || "Cette propriété rurale est située dans la région de " + building.location + ". Elle produit des revenus réguliers pour votre famille."}
-                </p>
+                <h4 className="text-sm font-medium mb-2">Revenus récents</h4>
+                <ul className="text-sm space-y-1">
+                  <li className="flex justify-between">
+                    <span>Dernier trimestre</span>
+                    <span className="text-green-600">{formatCurrency((building.income || 0) / 4)}</span>
+                  </li>
+                  <li className="flex justify-between">
+                    <span>Année en cours</span>
+                    <span className="text-green-600">{formatCurrency((building.income || 0) * 0.75)}</span>
+                  </li>
+                </ul>
+              </div>
+              
+              <Separator />
+              
+              <div>
+                <h4 className="text-sm font-medium mb-2">Actions spéciales</h4>
+                <div className="flex flex-col gap-2">
+                  <Button variant="outline" size="sm" className="w-full justify-start">
+                    <AreaChart className="h-4 w-4 mr-2" />
+                    Rapport détaillé
+                  </Button>
+                  <Button variant="outline" size="sm" className="w-full justify-start">
+                    <Wrench className="h-4 w-4 mr-2" />
+                    Améliorer l'irrigation
+                  </Button>
+                </div>
               </div>
             </CardContent>
           </Card>
         </div>
       </div>
       
-      <BuildingSaleDialog
+      <PropertySaleDialog
+        open={isSaleDialogOpen}
+        onOpenChange={setIsSaleDialogOpen}
         building={building}
         estimatedValue={estimatedValue}
-        isOpen={isSaleDialogOpen}
-        onClose={() => setIsSaleDialogOpen(false)}
-        onSell={async () => {
+        onSell={(id) => {
           onSell();
           return true;
         }}
