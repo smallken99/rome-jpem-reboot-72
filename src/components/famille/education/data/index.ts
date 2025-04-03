@@ -30,7 +30,7 @@ export const educationPaths: Record<string, EducationPath> = {
   },
   rhetoric: {
     name: 'Éducation Rhétorique',
-    description: 'Maîtrise de l'art oratoire et de la persuasion',
+    description: "Maîtrise de l'art oratoire et de la persuasion",
     duration: 3,
     relatedStat: 'oratory',
     skills: [
