@@ -1,49 +1,60 @@
+
 import { useState, useEffect } from 'react';
 
 export function useLocalStorage<T>(key: string, initialValue: T): [T, (value: T | ((val: T) => T)) => void] {
-  // Get from local storage then
-  // parse stored json or return initialValue
-  const readValue = (): T => {
-    // Prevent build error "window is undefined" but keep working
-    if (typeof window === 'undefined') {
-      return initialValue;
-    }
-
+  // État pour stocker notre valeur
+  // Passe la fonction d'initialisation à useState pour que la logique ne s'exécute qu'une fois
+  const [storedValue, setStoredValue] = useState<T>(() => {
     try {
+      // Récupère depuis localStorage
       const item = window.localStorage.getItem(key);
-      return item ? (JSON.parse(item) as T) : initialValue;
+      // Parse JSON stocké ou retourne la valeur initiale
+      return item ? JSON.parse(item) : initialValue;
     } catch (error) {
-      console.warn(`Error reading localStorage key "${key}":`, error);
+      // En cas d'erreur, retourne la valeur initiale
+      console.error(`Error reading localStorage key "${key}":`, error);
       return initialValue;
     }
-  };
+  });
 
-  // State to store our value
-  // Pass initial state function to useState so logic is only executed once
-  const [storedValue, setStoredValue] = useState<T>(readValue);
-
-  // Return a wrapped version of useState's setter function that ...
-  // ... persists the new value to localStorage.
+  // Créé un hook de mise à jour pour localStorage
   const setValue = (value: T | ((val: T) => T)) => {
     try {
-      // Allow value to be a function so we have the same API as useState
+      // Permet à la valeur d'être une fonction pour suivre la même API que useState
       const valueToStore =
         value instanceof Function ? value(storedValue) : value;
-      // Save to state
+      
+      // Sauvegarde l'état
       setStoredValue(valueToStore);
-      // Save to local storage
-      if (typeof window !== 'undefined') {
-        window.localStorage.setItem(key, JSON.stringify(valueToStore));
-      }
+      
+      // Sauvegarde dans localStorage
+      window.localStorage.setItem(key, JSON.stringify(valueToStore));
     } catch (error) {
-      console.warn(`Error setting localStorage key "${key}":`, error);
+      // Une erreur plus explicite ici aiderait au débogage
+      console.error(`Error setting localStorage key "${key}":`, error);
     }
   };
 
+  // Synchroniser avec d'autres onglets potentiels
   useEffect(() => {
-    setStoredValue(readValue());
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+    const handleStorageChange = (e: StorageEvent) => {
+      if (e.key === key && e.newValue) {
+        try {
+          setStoredValue(JSON.parse(e.newValue));
+        } catch (error) {
+          console.error(`Error parsing localStorage value:`, error);
+        }
+      }
+    };
+
+    // Écoute les changements
+    window.addEventListener('storage', handleStorageChange);
+    
+    // Nettoyage
+    return () => {
+      window.removeEventListener('storage', handleStorageChange);
+    };
+  }, [key]);
 
   return [storedValue, setValue];
 }

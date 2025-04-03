@@ -1,91 +1,55 @@
 
 import { useState, useEffect } from 'react';
-import { GameDate, Season } from '@/utils/types/gameDate';
+import { useLocalStorage } from './useLocalStorage';
 
-export interface GameTime {
+interface GameTime {
   year: number;
-  season: Season;
-  phase?: string;
-  currentDate?: GameDate;
-  updateTime?: (newTime: Partial<GameTime>) => void;
-  advanceSeason?: () => void;
-  advanceYear?: () => void;
-  setYear?: (year: number) => void;
-  setSeason?: (season: Season) => void;
+  season: string;
+  advanceTime: (seasons?: number) => void;
+  formatDate: () => string;
 }
 
 export const useGameTime = (): GameTime => {
-  const [gameTime, setGameTime] = useState<GameTime>({
-    year: 510,
-    season: 'spring',
-    phase: 'normal'
+  const [gameTime, setGameTime] = useLocalStorage('game-time', {
+    year: 753, // Ab urbe condita - à partir de la fondation de Rome
+    season: 'Ver', // Printemps (Ver, Aestas, Autumnus, Hiems)
+    turn: 1
   });
-
-  const updateTime = (newTime: Partial<GameTime>) => {
-    setGameTime(prevTime => ({ ...prevTime, ...newTime }));
-  };
-
-  const advanceSeason = () => {
-    setGameTime(prevTime => {
-      let newSeason: Season;
-      let newYear = prevTime.year;
+  
+  const seasons = ['Ver', 'Aestas', 'Autumnus', 'Hiems'];
+  
+  const advanceTime = (seasonsToAdvance: number = 1) => {
+    setGameTime(prev => {
+      let newSeason = seasons.indexOf(prev.season);
+      let newYear = prev.year;
+      let newTurn = prev.turn + seasonsToAdvance;
       
-      switch (prevTime.season) {
-        case 'winter':
-          newSeason = 'spring';
-          newYear += 1;
-          break;
-        case 'spring':
-          newSeason = 'summer';
-          break;
-        case 'summer':
-          newSeason = 'fall';
-          break;
-        case 'fall':
-          newSeason = 'winter';
-          break;
-        default:
-          newSeason = 'spring';
-      }
+      // Calculer le nombre total de saisons avancées
+      newSeason += seasonsToAdvance;
       
-      return { ...prevTime, year: newYear, season: newSeason };
+      // Ajuster l'année si nécessaire
+      newYear += Math.floor(newSeason / seasons.length);
+      
+      // Normaliser l'index de saison
+      newSeason = newSeason % seasons.length;
+      
+      return {
+        year: newYear,
+        season: seasons[newSeason],
+        turn: newTurn
+      };
     });
   };
-
-  const advanceYear = () => {
-    setGameTime(prevTime => ({
-      ...prevTime,
-      year: prevTime.year + 1
-    }));
+  
+  const formatDate = () => {
+    const ab = gameTime.year > 0 ? 'AUC' : 'BC';
+    return `An ${Math.abs(gameTime.year)} ${ab}, ${gameTime.season}`;
   };
   
-  const setYear = (year: number) => {
-    setGameTime(prevTime => ({
-      ...prevTime,
-      year
-    }));
-  };
-  
-  const setSeason = (season: Season) => {
-    setGameTime(prevTime => ({
-      ...prevTime,
-      season
-    }));
-  };
-
-  // Créer un objet currentDate basé sur l'année et la saison
-  const currentDate: GameDate = {
-    year: gameTime.year,
-    season: gameTime.season
-  };
-
   return {
-    ...gameTime,
-    currentDate,
-    updateTime,
-    advanceSeason,
-    advanceYear,
-    setYear,
-    setSeason
+    year: gameTime.year,
+    season: gameTime.season,
+    advanceTime,
+    formatDate
   };
 };
