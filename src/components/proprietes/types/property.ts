@@ -5,13 +5,14 @@ export interface Property {
   id: string;
   name: string;
   location: string;
-  type: PropertyType;
+  type: PropertyType | string;
   value: number;
   incomePerYear?: number;
   maintenanceCost: number;
   condition: number;
-  status?: PropertyStatus;
+  status?: PropertyStatus | string;
   upgrades?: PropertyUpgrade[];
+  size?: number;
 }
 
 export interface PropertyUpgrade {
@@ -34,9 +35,11 @@ export interface PropertyUpgrade {
     [key: string]: any;
   };
   installed?: boolean;
+  applied?: boolean;
   category?: string;
   tier?: number;
   buildingTypes: string[];
+  buildingType?: string[];
   prerequisiteUpgradeId?: string;
 }
 
@@ -50,17 +53,17 @@ export interface OwnedBuilding {
   value: number;
   maintenance: number;
   condition: number;
-  status?: string;
+  status?: PropertyStatus | string;
   maintenanceCost: number;
+  maintenanceLevel?: number;
   maintenanceEnabled?: boolean;
   slaves?: number;
   workers?: number;
   securityLevel?: number;
-  maintenanceLevel?: number;
-  purchaseDate?: Date;
-  lastMaintenance?: Date;
+  purchaseDate?: Date | string;
+  lastMaintenance?: Date | string;
   income?: number;
-  size?: number;
+  size?: number | string;
   maxWorkers?: number;
   upgrades?: PropertyUpgrade[];
   description?: string;
@@ -83,7 +86,9 @@ export interface SlaveAssignment {
   slaveId: string;
   propertyId: string;
   buildingId?: string;
-  startDate: Date;
+  assignedAt?: any;
+  productivity?: number;
+  startDate: Date | string;
   role: string;
   efficiency: number;
 }
@@ -91,8 +96,13 @@ export interface SlaveAssignment {
 export interface PropertyTransaction {
   id: string;
   propertyId: string;
-  type: "purchase" | "sale" | "maintenance" | "upgrade" | "income" | "expense";
+  type: "purchase" | "sale" | "maintenance" | "upgrade" | "income" | "expense" | "acquisition" | "consumption" | "transfer";
   amount: number;
-  date: Date;
+  date: Date | string;
   description: string;
+  resourceName?: string;
+  resourceId?: string;
+  responsible?: string;
+  reason?: string;
+  quantity?: number;
 }

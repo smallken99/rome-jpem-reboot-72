@@ -2,6 +2,7 @@
 import { useState, useCallback } from 'react';
 import { EducationPath, EducationType, Preceptor, Gender } from '../types/educationTypes';
 import { getAllEducationPaths, getEducationPathById as fetchEducationPathById } from '../data/educationPaths';
+import { v4 as uuidv4 } from 'uuid';
 
 export const useEducationSystem = () => {
   const [selectedPathId, setSelectedPathId] = useState<string | null>(null);
@@ -20,23 +21,21 @@ export const useEducationSystem = () => {
   const generatePreceptorsForType = useCallback((type: EducationType | string): Preceptor[] => {
     const preceptors: Preceptor[] = [
       {
-        id: `${type}-preceptor-1`,
+        id: uuidv4(),
         name: `Master of ${type}`,
-        specialization: type as EducationType,
+        specialty: type as EducationType,
+        speciality: type as EducationType,
         skill: 80,
         cost: 4000,
         price: 4000,
-        background: `Expert in ${type} education`,
+        description: `Expert in ${type} education`,
         traits: ['Knowledgeable', 'Patient'],
         status: 'available',
-        specialty: type,
-        speciality: type,
         experience: 15,
         expertise: 80,
         available: true,
         quality: 4,
         specialties: [`${type} basics`, `${type} advanced`],
-        description: `A well-respected ${type} educator with years of experience`,
         teachingStyle: 'Methodical and thorough',
         reputation: 85
       }
@@ -49,10 +48,18 @@ export const useEducationSystem = () => {
   const filterPathsByEligibility = useCallback((paths: EducationPath[], gender: 'male' | 'female', age: number) => {
     return paths.filter(path => {
       // Check gender eligibility
-      const genderEligible = !path.suitableFor || path.suitableFor.includes(gender);
+      let genderEligible = true;
+      
+      if (path.suitableFor) {
+        if (Array.isArray(path.suitableFor)) {
+          genderEligible = path.suitableFor.includes(gender);
+        } else if (typeof path.suitableFor === 'object') {
+          genderEligible = path.suitableFor.gender === 'both' || path.suitableFor.gender === gender;
+        }
+      }
       
       // Check age eligibility
-      const ageEligible = age >= path.minAge && (!path.maxAge || age <= path.maxAge);
+      const ageEligible = (!path.minAge || age >= path.minAge) && (!path.maxAge || age <= path.maxAge);
       
       return genderEligible && ageEligible;
     });

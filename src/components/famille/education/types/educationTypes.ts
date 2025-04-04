@@ -1,118 +1,85 @@
 
-export type EducationType = 'military' | 'rhetoric' | 'religious' | 'academic' | 'none';
+// Ajoutons les types manquants et corrigeons les définitions
 export type Gender = 'male' | 'female';
 
-export interface Child {
-  id: string;
-  name: string;
-  age: number;
-  gender: Gender;
-  educationType: EducationType;
-  status?: string;
-  progress: number;
-  specialties?: string[];
-  traits?: string[];
-  mentor?: string;
-  preceptorId?: string;
-  currentEducation?: {
-    type: string;
-    mentor: string | null;
-    mentorId?: string | null;
-    speciality?: string;
-    progress: number;
-    skills: string[];
-    yearsCompleted?: number;
-    totalYears?: number;
-    statBonus?: number;
-  };
-}
+export type EducationType = 'rhetoric' | 'military' | 'political' | 'religious' | 'philosophical' | 'academic' | 'none';
 
 export interface EducationPath {
   id: string;
   name: string;
   description: string;
-  icon?: string;
-  benefits?: string[];
-  specialties?: string[];
-  requirements?: {
-    age?: number;
-    gender?: 'male' | 'female' | 'both';
-  };
-  duration: number;
+  duration?: number;
   relatedStat: string;
-  skills: string[];
-  outcomes: Record<string, number>;
+  outcomes: Record<string, number> | any[] | number;
+  skills?: string[];
   minAge?: number;
   maxAge?: number;
-  suitableFor?: { gender: 'both' | Gender } | Gender[];
-  type?: string;
+  suitableFor?: Gender[] | { gender: Gender | 'both' };
+  specialties?: string[];
+  benefits?: string[];
+}
+
+export interface Child {
+  id: string;
+  name: string;
+  firstName?: string;
+  lastName?: string;
+  age: number;
+  gender: Gender;
+  educationType: EducationType;
+  progress: number;
+  mentor?: string | null;
+  preceptorId?: string;
+  currentEducation?: {
+    type: string;
+    mentor: string | null;
+    progress: number;
+    skills: any[];
+    yearsCompleted: number;
+    totalYears: number;
+  };
 }
 
 export interface Preceptor {
   id: string;
   name: string;
   specialty: string;
+  specialization?: EducationType;
+  specialties: string[];
   speciality?: string;
-  specialties?: string[];
-  skill?: number;
-  expertise?: number;
-  quality?: number;
-  cost?: number;
+  expertise: number;
+  experience: number;
+  cost: number;
   price?: number;
-  experience?: number;
+  available: boolean;
+  skill: number;
+  quality: number;
+  description: string;
+  status: string;
+  traits?: string[];
+  background?: string;
   reputation?: number;
   teachingStyle?: string;
-  background?: string;
-  traits?: string[];
-  available?: boolean;
-  assigned?: boolean;
-  status?: string;
-  childId?: string;
-  description?: string;
-}
-
-export interface EducationRecord {
-  id: string;
-  childId: string;
-  path: EducationPath;
-  mentor?: Preceptor;
-  preceptorId?: string | null;
-  startDate: string;
-  progress: number;
-  completed: boolean;
-  pathType: string;
-  status?: 'in_progress' | 'completed' | 'canceled' | 'not_started';
-  currentYear?: number;
-  totalYears?: number;
-  startYear?: number;
-}
-
-export interface ChildEducation {
-  childId: string;
-  education: EducationRecord;
+  portrait?: string;
 }
 
 export interface PreceptorsByType {
-  military: Preceptor[];
   rhetoric: Preceptor[];
+  military: Preceptor[];
+  political: Preceptor[];
   religious: Preceptor[];
+  philosophical: Preceptor[];
   academic: Preceptor[];
 }
 
-export interface EducationHistory {
-  type: EducationType;
-  mentor: string;
-  speciality?: string;
-  completedAt: number;
-  statBonus: number;
-  skills: string[];
-  startYear: number;
-  endYear: number;
-  completed: boolean;
-}
-
-export interface EducationFormData {
-  childId: string;
-  pathId: string;
-  preceptorId?: string | null;
+export interface EducationState {
+  children: Child[];
+  preceptors: Preceptor[];
+  startEducation: (childId: string, type: EducationType) => void;
+  hirePreceptor: (preceptorId: string) => void;
+  firePreceptor: (preceptorId: string) => void;
+  assignPreceptor: (childId: string, preceptorId: string) => void;
+  completeEducation: (childId: string) => void;
+  educatingChildren: string[];
+  isEducating: Record<string, boolean>;
 }

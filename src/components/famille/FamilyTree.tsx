@@ -14,7 +14,7 @@ import { Character } from '@/types/character';
 
 export const FamilyTree: React.FC = () => {
   const navigate = useNavigate();
-  const { localCharacters, handleAddCharacter } = useCharacters();
+  const { localCharacters, addCharacter } = useCharacters();
   const [showAddMemberDialog, setShowAddMemberDialog] = useState(false);
   
   const { paterFamilias, materFamilias, children } = getFamilyMembers(localCharacters);
@@ -24,7 +24,7 @@ export const FamilyTree: React.FC = () => {
   };
   
   const onAddFamilyMember = (newMember: Omit<Character, 'id'>) => {
-    handleAddCharacter(newMember);
+    addCharacter(newMember);
     setShowAddMemberDialog(false);
   };
   

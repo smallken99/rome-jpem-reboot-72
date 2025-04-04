@@ -1,36 +1,28 @@
 
 import { EducationPath } from '../../types/educationTypes';
+import { v4 as uuidv4 } from 'uuid';
 
-export const religiousPath: EducationPath = {
-  id: 'religious',
+export const religiousEducationPath: EducationPath = {
+  id: uuidv4(),
   name: 'Éducation Religieuse',
-  type: 'religious',
-  description: 'Formation aux rites, cérémonies et traditions religieuses romaines',
-  minAge: 10,
-  maxAge: 18,
-  duration: 4,
-  cost: 2500,
+  description: 'Étude des rites, traditions et obligations religieuses romaines pour servir les dieux.',
+  minAge: 8,
+  maxAge: 16,
+  duration: 3,
   relatedStat: 'piety',
-  outcomes: {
-    skills: ['Rituels', 'Auspices', 'Présages', 'Traditions'],
-    bonuses: {
-      piety: 35,
-      popularity: 10
-    }
-  },
-  suitableFor: ['male', 'female'],
-  
-  // Add missing required properties
-  benefits: [
-    'Faveur des dieux',
-    'Respect de la communauté',
-    'Accès aux positions religieuses'
+  suitableFor: { gender: 'both' },
+  outcomes: { piety: 10, popularity: 5 },
+  skills: [
+    'Rituels sacrés',
+    'Interprétation des augures',
+    'Connaissances des divinités',
+    'Liturgie romaine',
+    'Histoire religieuse'
   ],
-  statBoost: 'piety',
-  icon: '🏺',
-  specialties: ['Rituels', 'Auspices', 'Présages', 'Traditions'],
-  requirements: {
-    age: 10,
-    gender: 'both'
-  }
+  specialties: [
+    'Pontificat',
+    'Divination',
+    'Vestales (femmes)',
+    'Ritualisme'
+  ]
 };

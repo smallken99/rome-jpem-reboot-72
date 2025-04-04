@@ -1,105 +1,142 @@
 
 import { useState } from 'react';
 import { toast } from 'sonner';
-import { Preceptor, PreceptorsByType } from '../types/educationTypes';
+import { Preceptor, EducationType, PreceptorsByType } from '../types/educationTypes';
+import { preceptors as initialPreceptors } from '../data/preceptors';
+import { v4 as uuidv4 } from 'uuid';
 
 export const usePreceptorManagement = () => {
+  const [preceptors, setPreceptors] = useState<Preceptor[]>(initialPreceptors);
   const [hiredPreceptors, setHiredPreceptors] = useState<Preceptor[]>([]);
   const [hiringInProgress, setHiringInProgress] = useState(false);
-  
-  // Hire a preceptor
-  const hirePreceptor = (preceptor: Preceptor, childId?: string) => {
-    setHiringInProgress(true);
-    
-    // Simulate hiring process (in a real app, this would involve a backend call)
-    setTimeout(() => {
-      setHiredPreceptors(prev => [...prev, {...preceptor, childId}]);
-      setHiringInProgress(false);
-      
-      toast.success(
-        childId 
-          ? `${preceptor.name} a été embauché pour éduquer votre enfant.` 
-          : `${preceptor.name} a été embauché comme précepteur de votre famille.`
-      );
-    }, 1500);
-    
-    return true;
-  };
-  
-  // Fire a preceptor
-  const firePreceptor = (preceptorId: string) => {
-    const preceptor = hiredPreceptors.find(p => p.id === preceptorId);
-    
-    if (!preceptor) {
-      toast.error("Précepteur introuvable");
+
+  // Hire a new preceptor
+  const hirePreceptor = (preceptor: Preceptor, childId?: string): boolean => {
+    // Check if already hired
+    const isAlreadyHired = hiredPreceptors.some(p => p.id === preceptor.id);
+    if (isAlreadyHired) {
+      toast.error("Ce précepteur est déjà engagé");
       return false;
     }
-    
-    setHiredPreceptors(prev => prev.filter(p => p.id !== preceptorId));
-    toast.success(`${preceptor.name} n'est plus à votre service.`);
-    
-    return true;
-  };
-  
-  // Assign preceptor to a child
-  const assignPreceptorToChild = (preceptorId: string, childId: string) => {
-    setHiredPreceptors(prev => 
-      prev.map(p => p.id === preceptorId ? {...p, childId} : p)
-    );
-    
-    const preceptor = hiredPreceptors.find(p => p.id === preceptorId);
-    if (preceptor) {
-      toast.success(`${preceptor.name} a été assigné à l'éducation de votre enfant.`);
-    }
-    
-    return true;
-  };
-  
-  // Get preceptors by education type
-  const getPreceptorsByType = (preceptors: Preceptor[]): PreceptorsByType => {
-    const result: PreceptorsByType = {
-      military: [],
-      rhetoric: [],
-      religious: [],
-      academic: []
+
+    // Update the preceptor's status
+    const updatedPreceptor = {
+      ...preceptor,
+      available: false,
+      status: 'hired',
+      assignedTo: childId
     };
+
+    setHiredPreceptors(prev => [...prev, updatedPreceptor]);
     
-    preceptors.forEach(preceptor => {
-      if (!preceptor.specialty) return;
+    // Update the available preceptors list
+    setPreceptors(prev => 
+      prev.map(p => 
+        p.id === preceptor.id ? { ...p, available: false, status: 'hired' } : p
+      )
+    );
+
+    toast.success(`${preceptor.name} a été engagé avec succès`);
+    return true;
+  };
+
+  // Fire a preceptor
+  const firePreceptor = (preceptorId: string): boolean => {
+    const preceptorToFire = hiredPreceptors.find(p => p.id === preceptorId);
+    
+    if (!preceptorToFire) {
+      toast.error("Précepteur non trouvé");
+      return false;
+    }
+
+    // Remove from hired list
+    setHiredPreceptors(prev => prev.filter(p => p.id !== preceptorId));
+    
+    // Update available list
+    setPreceptors(prev => 
+      prev.map(p => 
+        p.id === preceptorId ? { ...p, available: true, status: 'available', assignedTo: undefined } : p
+      )
+    );
+
+    toast.success(`${preceptorToFire.name} a été renvoyé`);
+    return true;
+  };
+
+  // Assign preceptor to a child
+  const assignPreceptorToChild = (preceptorId: string, childId: string): boolean => {
+    const preceptorToAssign = hiredPreceptors.find(p => p.id === preceptorId);
+    
+    if (!preceptorToAssign) {
+      toast.error("Ce précepteur n'est pas disponible");
+      return false;
+    }
+
+    // Update the preceptor's assignment
+    setHiredPreceptors(prev => 
+      prev.map(p => 
+        p.id === preceptorId ? { ...p, assignedTo: childId } : p
+      )
+    );
+
+    toast.success(`${preceptorToAssign.name} a été assigné à cet enfant`);
+    return true;
+  };
+
+  // Group preceptors by their specialization
+  const getPreceptorsByType = (preceptorsToGroup: Preceptor[]): PreceptorsByType => {
+    return preceptorsToGroup.reduce((acc, preceptor) => {
+      const type = (preceptor.specialty || preceptor.speciality) as EducationType;
       
-      const type = determineEducationType(preceptor.specialty);
-      if (type === 'military') result.military.push(preceptor);
-      else if (type === 'rhetoric') result.rhetoric.push(preceptor);
-      else if (type === 'religious') result.religious.push(preceptor);
-      else if (type === 'academic') result.academic.push(preceptor);
-    });
-    
-    return result;
+      if (!acc[type]) {
+        acc[type] = [];
+      }
+      
+      acc[type].push(preceptor);
+      return acc;
+    }, {} as PreceptorsByType);
   };
-  
-  // Helper to determine education type from specialty
-  const determineEducationType = (specialty: string): string => {
-    const militaryKeywords = ['tactique', 'combat', 'guerre', 'militaire'];
-    const politicalKeywords = ['rhétorique', 'politique', 'éloquence', 'droit'];
-    const religiousKeywords = ['rituel', 'divin', 'religieux', 'augure', 'vestale'];
-    const commercialKeywords = ['commerce', 'négoce', 'marchand', 'économie'];
-    
-    const specialty_lower = specialty.toLowerCase();
-    
-    if (militaryKeywords.some(kw => specialty_lower.includes(kw))) return 'military';
-    if (politicalKeywords.some(kw => specialty_lower.includes(kw))) return 'political';
-    if (religiousKeywords.some(kw => specialty_lower.includes(kw))) return 'religious';
-    if (commercialKeywords.some(kw => specialty_lower.includes(kw))) return 'commercial';
-    
-    return 'political'; // Default to political education
+
+  // Filter preceptors by type
+  const filterPreceptorsByType = (type: EducationType): Preceptor[] => {
+    return preceptors.filter(p => p.specialty === type || p.speciality === type);
   };
-  
+
+  // Create a custom preceptor
+  const createCustomPreceptor = (preceptorData: Partial<Preceptor>): string => {
+    const newPreceptor: Preceptor = {
+      id: uuidv4(),
+      name: preceptorData.name || "Nouveau Précepteur",
+      specialty: preceptorData.specialty || "rhetoric",
+      speciality: preceptorData.speciality || "rhetoric",
+      specialties: preceptorData.specialties || [],
+      expertise: preceptorData.expertise || 70,
+      experience: preceptorData.experience || 10,
+      cost: preceptorData.cost || 3000,
+      price: preceptorData.price || 3000,
+      available: true,
+      skill: preceptorData.skill || 70,
+      quality: preceptorData.quality || 3,
+      description: preceptorData.description || "",
+      status: "available"
+    };
+
+    setPreceptors(prev => [...prev, newPreceptor]);
+    toast.success(`${newPreceptor.name} a été ajouté à la liste des précepteurs`);
+    
+    return newPreceptor.id;
+  };
+
   return {
+    preceptors,
     hiredPreceptors,
     hiringInProgress,
     hirePreceptor,
     firePreceptor,
     assignPreceptorToChild,
-    getPreceptorsByType
+    getPreceptorsByType,
+    filterPreceptorsByType,
+    createCustomPreceptor,
+    setHiringInProgress
   };
 };

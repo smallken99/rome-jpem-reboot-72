@@ -1,36 +1,28 @@
 
 import { EducationPath } from '../../types/educationTypes';
+import { v4 as uuidv4 } from 'uuid';
 
-export const politicalPath: EducationPath = {
-  id: 'political',
+export const politicalEducationPath: EducationPath = {
+  id: uuidv4(),
   name: 'Éducation Politique',
-  type: 'political',
-  description: 'Formation à la politique romaine, aux lois et à la gouvernance',
+  description: 'Formation aux affaires politiques, à la gouvernance et aux alliances stratégiques.',
   minAge: 14,
   maxAge: 22,
-  duration: 4,
-  cost: 3500,
-  relatedStat: 'oratory',
-  outcomes: {
-    skills: ['Droit romain', 'Négociation', 'Réseautage', 'Administration'],
-    bonuses: {
-      oratory: 30,
-      popularity: 15
-    }
-  },
-  suitableFor: ['male', 'female'],
-  
-  // Add missing required properties
-  benefits: [
-    'Compréhension du système politique',
-    'Réseau de contacts influents',
-    'Capacité à gouverner'
+  duration: 3,
+  relatedStat: 'politics',
+  suitableFor: ['male'],
+  outcomes: { oratory: 8, popularity: 7 },
+  skills: [
+    'Droit romain',
+    'Négociation diplomatique',
+    'Administration publique',
+    'Finance d\'État',
+    'Alliance politique'
   ],
-  statBoost: 'oratory',
-  icon: '🏛️',
-  specialties: ['Droit romain', 'Négociation', 'Réseautage', 'Administration'],
-  requirements: {
-    age: 14,
-    gender: 'both'
-  }
+  specialties: [
+    'Jurisprudence',
+    'Administration provinciale',
+    'Diplomatie étrangère',
+    'Finances publiques'
+  ]
 };

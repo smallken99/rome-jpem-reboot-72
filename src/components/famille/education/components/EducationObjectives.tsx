@@ -28,9 +28,14 @@ export const EducationObjectives: React.FC<EducationObjectivesProps> = ({ childI
   }
 
   // Extract skills from the path's outcomes
-  const skills = Array.isArray(path.outcomes) 
-    ? path.outcomes 
-    : (path.outcomes.skills || []);
+  let skills: string[] = [];
+  
+  if (Array.isArray(path.outcomes)) {
+    skills = path.outcomes as string[];
+  } else if (path.outcomes && typeof path.outcomes === 'object' && !Array.isArray(path.outcomes)) {
+    // If outcomes is an object, use the skills property or create skills from object keys
+    skills = path.skills || Object.keys(path.outcomes).map(key => `${key}: ${path.outcomes[key]}`);
+  }
 
   return (
     <Card>

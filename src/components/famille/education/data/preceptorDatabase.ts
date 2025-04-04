@@ -1,256 +1,186 @@
 
-// We need to update all preceptor objects to include the required properties
 import { Preceptor } from '../types/educationTypes';
+import { v4 as uuidv4 } from 'uuid';
 
-// Military preceptors
-const militaryPreceptors: Preceptor[] = [
+export const preceptorDatabase: Preceptor[] = [
   {
-    id: 'mil-1',
-    name: 'Quintus Fabius',
-    specialization: 'military',
-    specialty: 'military',
-    skill: 80,
-    price: 4500,
-    experience: 15,
-    status: 'available',
-    portrait: '/assets/preceptors/military-1.jpg',
-    background: 'Vétéran des guerres puniques et ancien tribun militaire',
-    quality: 80,
-    reputation: 80,
-    cost: 4500,
-    available: true,
-    speciality: 'military',
-    specialties: ['military', 'strategy'],
-    traits: ['Vétéran', 'Discipliné'],
-    expertise: 80,
-    description: 'Un vétéran aguerri qui a servi dans de nombreuses campagnes et peut enseigner toutes les tactiques militaires romaines.',
-    teachingStyle: 'Formation rigoureuse et discipline stricte'
-  },
-  {
-    id: 'mil-2',
-    name: 'Lucius Aemilius',
-    specialization: 'military',
-    specialty: 'military',
-    skill: 70,
-    price: 3500,
-    experience: 12,
-    status: 'available',
-    portrait: '/assets/preceptors/military-2.jpg',
-    background: 'Ancien centurion des légions de César',
-    quality: 70,
-    reputation: 70,
-    cost: 3500,
-    available: true,
-    speciality: 'military',
-    specialties: ['military', 'discipline'],
-    traits: ['Tacticien', 'Autoritaire'],
-    expertise: 70,
-    description: 'Spécialiste du commandement de petites unités et de l\'entraînement de nouvelles recrues.',
-    teachingStyle: 'Enseignement par l\'exemple et exercices pratiques'
-  },
-  {
-    id: 'mil-3',
-    name: 'Gnaeus Pompeius',
-    specialization: 'military',
-    specialty: 'military',
-    skill: 60,
-    price: 2500,
-    experience: 8,
-    status: 'available',
-    portrait: '/assets/preceptors/military-3.jpg',
-    background: 'Jeune instructeur militaire issu d\'une famille équestre',
-    quality: 60,
-    reputation: 60,
-    cost: 2500,
-    available: true,
-    speciality: 'military',
-    specialties: ['military', 'endurance'],
-    traits: ['Endurant', 'Rigoureux'],
-    expertise: 60,
-    description: 'Jeune mais talentueux formateur spécialisé dans le développement physique et l\'endurance.',
-    teachingStyle: 'Entraînement physique intensif et théorie militaire'
-  }
-];
-
-// Religious preceptors
-const religiousPreceptors: Preceptor[] = [
-  {
-    id: 'rel-1',
-    name: 'Publius Cornelius',
-    specialization: 'religious',
-    specialty: 'religious',
-    skill: 85,
-    price: 5000,
-    experience: 18,
-    status: 'available',
-    portrait: '/assets/preceptors/religious-1.jpg',
-    background: 'Ancien Grand Pontife et gardien des traditions religieuses',
-    quality: 85,
-    reputation: 85,
-    cost: 5000,
-    available: true,
-    speciality: 'religious',
-    specialties: ['religious', 'traditions'],
-    traits: ['Pieux', 'Érudit'],
-    expertise: 85,
-    description: 'Expert dans tous les rites romains et la théologie traditionnelle.',
-    teachingStyle: 'Enseignement rigoureux des textes sacrés et pratique quotidienne des rites'
-  },
-  {
-    id: 'rel-2',
-    name: 'Titus Sempronius',
-    specialization: 'religious',
-    specialty: 'religious',
-    skill: 75,
-    price: 3800,
-    experience: 14,
-    status: 'available',
-    portrait: '/assets/preceptors/religious-2.jpg',
-    background: 'Augure respecté connaissant les présages et les rituels',
-    quality: 75,
-    reputation: 75,
-    cost: 3800,
-    available: true,
-    speciality: 'religious',
-    specialties: ['religious', 'rituals'],
-    traits: ['Observateur', 'Mystique'],
-    expertise: 75,
-    description: 'Spécialiste de l\'interprétation des signes et des présages divins.',
-    teachingStyle: 'Observation et interprétation des signes divins'
-  },
-  {
-    id: 'rel-3',
-    name: 'Marcus Valerius',
-    specialization: 'religious',
-    specialty: 'religious',
-    skill: 60,
-    price: 2700,
-    experience: 9,
-    status: 'available',
-    portrait: '/assets/preceptors/religious-2.jpg',
-    background: 'Prêtre des cultes étrusques et expert en purifications',
-    quality: 60,
-    reputation: 60,
-    cost: 2700,
-    available: true,
-    speciality: 'religious',
-    specialties: ['religious', 'ceremonies'],
-    traits: ['Traditionaliste', 'Patient'],
-    expertise: 60,
-    description: 'Conservateur des traditions étrusques et expert en purifications rituelles.',
-    teachingStyle: 'Apprentissage par immersion dans les cérémonies'
-  }
-];
-
-// Rhetoric preceptors
-const rhetoricPreceptors: Preceptor[] = [
-  {
-    id: 'rhe-1',
-    name: 'Marcus Tullius',
-    specialization: 'rhetoric',
-    specialty: 'rhetoric',
-    skill: 90,
-    price: 6000,
-    experience: 20,
-    status: 'available',
-    portrait: '/assets/preceptors/rhetoric-1.jpg',
-    background: 'Ancien consul et orateur de renom, maître en éloquence',
-    quality: 90,
-    reputation: 90,
-    cost: 6000,
-    available: true,
-    speciality: 'rhetoric',
-    specialties: ['rhetoric', 'eloquence'],
-    traits: ['Éloquent', 'Charismatique'],
+    id: uuidv4(),
+    name: "Marcus Tullius",
+    specialty: "rhetoric",
+    speciality: "rhetoric",
     expertise: 90,
-    description: 'L\'un des plus grands orateurs de Rome, connu pour sa maîtrise de tous les aspects de la rhétorique.',
-    teachingStyle: 'Méthode combinant théorie et pratique intensive des discours'
+    experience: 25,
+    cost: 5000,
+    price: 5000,
+    available: true,
+    skill: 90,
+    quality: 5,
+    description: "Ancien consul et orateur renommé, spécialiste de la rhétorique cicéronienne.",
+    status: "available",
+    specialties: ["Plaidoirie", "Éloquence", "Composition"],
+    traits: ["Éloquent", "Patient", "Exigeant"],
+    background: "Issu d'une famille patricienne, a enseigné à de nombreux sénateurs actuels.",
+    reputation: 95,
+    teachingStyle: "Rigoureux et méthodique"
   },
   {
-    id: 'rhe-2',
-    name: 'Gaius Julius',
-    specialization: 'rhetoric',
-    specialty: 'rhetoric',
-    skill: 80,
-    price: 4200,
-    experience: 15,
-    status: 'available',
-    portrait: '/assets/preceptors/rhetoric-2.jpg',
-    background: 'Philosophe grec ayant enseigné l\'art oratoire à Athènes',
-    quality: 80,
+    id: uuidv4(),
+    name: "Gaius Aurelius",
+    specialty: "military",
+    speciality: "military",
+    expertise: 85,
+    experience: 30,
+    cost: 4500,
+    price: 4500,
+    available: true,
+    skill: 85,
+    quality: 4,
+    description: "Ancien centurion primipile, vétéran des campagnes germaniques.",
+    status: "available",
+    specialties: ["Tactique", "Commandement", "Discipline"],
+    traits: ["Strict", "Honorable", "Discipliné"],
+    background: "A servi sous les ordres de Germanicus, décoré pour bravoure.",
     reputation: 80,
-    cost: 4200,
-    available: true,
-    speciality: 'rhetoric',
-    specialties: ['rhetoric', 'persuasion'],
-    traits: ['Philosophe', 'Logique'],
-    expertise: 80,
-    description: 'Formé dans les écoles grecques, il apporte une approche philosophique à l\'enseignement de la rhétorique.',
-    teachingStyle: 'Méthode socratique et analyse des grands discours'
+    teachingStyle: "Basé sur la discipline et l'entraînement intensif"
   },
   {
-    id: 'rhe-3',
-    name: 'Servius Sulpicius',
-    specialization: 'rhetoric',
-    specialty: 'rhetoric',
-    skill: 65,
-    price: 3000,
-    experience: 10,
-    status: 'available',
-    portrait: '/assets/preceptors/rhetoric-3.jpg',
-    background: 'Juriste et tuteur spécialisé dans la plaidoirie',
-    quality: 65,
-    reputation: 65,
-    cost: 3000,
+    id: uuidv4(),
+    name: "Lucius Fabricius",
+    specialty: "political",
+    speciality: "political",
+    expertise: 80,
+    experience: 20,
+    cost: 5500,
+    price: 5500,
     available: true,
-    speciality: 'rhetoric',
-    specialties: ['rhetoric', 'law'],
-    traits: ['Méthodique', 'Précis'],
-    expertise: 65,
-    description: 'Spécialiste de l\'éloquence judiciaire et de l\'argumentation légale.',
-    teachingStyle: 'Études de cas et simulations de plaidoiries'
+    skill: 80,
+    quality: 4,
+    description: "Ancien légat et gouverneur provincial, expert en administration.",
+    status: "available",
+    specialties: ["Gouvernance", "Diplomatie", "Droit"],
+    traits: ["Calculateur", "Méthodique", "Ambitieux"],
+    background: "A gouverné la province d'Hispanie pendant cinq ans avec succès.",
+    reputation: 85,
+    teachingStyle: "Pratique, basé sur des études de cas réels"
+  },
+  {
+    id: uuidv4(),
+    name: "Quintus Flavius",
+    specialty: "religious",
+    speciality: "religious",
+    expertise: 95,
+    experience: 35,
+    cost: 6000,
+    price: 6000,
+    available: false,
+    skill: 95,
+    quality: 5,
+    description: "Ancien grand pontife, autorité en matière de rituel et tradition.",
+    status: "hired",
+    specialties: ["Rituel", "Divination", "Tradition"],
+    traits: ["Pieux", "Savant", "Respectueux"],
+    background: "Issu d'une lignée de prêtres au service de Jupiter Capitolin.",
+    reputation: 90,
+    teachingStyle: "Traditionnel et solennel"
+  },
+  {
+    id: uuidv4(),
+    name: "Publius Septimius",
+    specialty: "philosophical",
+    speciality: "philosophical",
+    expertise: 88,
+    experience: 22,
+    cost: 5200,
+    price: 5200,
+    available: true,
+    skill: 88,
+    quality: 4,
+    description: "Philosophe stoïcien formé à Athènes, auteur de traités sur l'éthique.",
+    status: "available",
+    specialties: ["Stoïcisme", "Éthique", "Dialectique"],
+    traits: ["Sage", "Posé", "Profond"],
+    background: "A étudié sous la direction de maîtres grecs pendant dix ans.",
+    reputation: 82,
+    teachingStyle: "Socratique, basé sur le questionnement"
+  },
+  {
+    id: uuidv4(),
+    name: "Titus Cornelius",
+    specialty: "academic",
+    speciality: "academic",
+    expertise: 83,
+    experience: 18,
+    cost: 4800,
+    price: 4800,
+    available: true,
+    skill: 83,
+    quality: 4,
+    description: "Érudit polymathe, spécialiste des arts libéraux et des sciences.",
+    status: "available",
+    specialties: ["Littérature", "Mathématiques", "Histoire"],
+    traits: ["Curieux", "Méticuleux", "Érudit"],
+    background: "Ancien bibliothécaire de la grande bibliothèque d'Alexandrie.",
+    reputation: 78,
+    teachingStyle: "Académique et structuré"
+  },
+  {
+    id: uuidv4(),
+    name: "Aulus Priscus",
+    specialty: "rhetoric",
+    speciality: "rhetoric",
+    expertise: 75,
+    experience: 12,
+    cost: 3800,
+    price: 3800,
+    available: true,
+    skill: 75,
+    quality: 3,
+    description: "Orateur et enseignant, spécialiste de la composition de discours.",
+    status: "available",
+    specialties: ["Composition", "Débat", "Diction"],
+    traits: ["Créatif", "Passionné", "Flexible"],
+    background: "A commencé comme scribe avant de devenir orateur au forum.",
+    reputation: 70,
+    teachingStyle: "Interactif, favorise la pratique oratoire"
+  },
+  {
+    id: uuidv4(),
+    name: "Servius Licinius",
+    specialty: "military",
+    speciality: "military",
+    expertise: 80,
+    experience: 25,
+    cost: 4200,
+    price: 4200,
+    available: true,
+    skill: 80,
+    quality: 4,
+    description: "Vétéran des guerres puniques, expert en tactique militaire.",
+    status: "available",
+    specialties: ["Stratégie", "Fortification", "Armes de siège"],
+    traits: ["Robuste", "Pratique", "Concis"],
+    background: "A participé à dix campagnes militaires majeures.",
+    reputation: 75,
+    teachingStyle: "Axé sur les exercices pratiques et les simulations de bataille"
+  },
+  {
+    id: uuidv4(),
+    name: "Decimus Junius",
+    specialty: "political",
+    speciality: "political",
+    expertise: 78,
+    experience: 15,
+    cost: 4000,
+    price: 4000,
+    available: true,
+    skill: 78,
+    quality: 3,
+    description: "Ancien questeur et édile, spécialiste de l'administration publique.",
+    status: "available",
+    specialties: ["Administration", "Finances publiques", "Droit civil"],
+    traits: ["Organisé", "Pragmatique", "Minutieux"],
+    background: "A occupé plusieurs postes dans l'administration de la République.",
+    reputation: 72,
+    teachingStyle: "Structuré avec études de cas et exercices pratiques"
   }
 ];
-
-const allPreceptors: Preceptor[] = [
-  ...militaryPreceptors,
-  ...religiousPreceptors,
-  ...rhetoricPreceptors
-];
-
-// Fonction pour obtenir un précepteur aléatoire par type
-const getRandomPreceptor = (type: string): Preceptor | null => {
-  const preceptorsByType = type === 'military' 
-    ? militaryPreceptors 
-    : type === 'religious' 
-      ? religiousPreceptors 
-      : rhetoricPreceptors;
-  
-  if (preceptorsByType.length === 0) return null;
-  
-  const randomIndex = Math.floor(Math.random() * preceptorsByType.length);
-  return { ...preceptorsByType[randomIndex] };
-};
-
-// Base de données des précepteurs
-export const preceptorDatabase = {
-  // Obtenir tous les précepteurs
-  getPreceptors: (): Preceptor[] => {
-    return allPreceptors.map(p => ({ ...p }));
-  },
-  
-  // Obtenir les précepteurs par type
-  getPreceptorsByType: (type: string): Preceptor[] => {
-    if (type === 'military') {
-      return militaryPreceptors.map(p => ({ ...p }));
-    } else if (type === 'religious') {
-      return religiousPreceptors.map(p => ({ ...p }));
-    } else if (type === 'rhetoric') {
-      return rhetoricPreceptors.map(p => ({ ...p }));
-    }
-    return [];
-  },
-  
-  // Obtenir un précepteur aléatoire
-  getRandomPreceptor
-};

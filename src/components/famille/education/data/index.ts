@@ -1,121 +1,74 @@
 
 import { EducationPath } from '../types/educationTypes';
+import { v4 as uuidv4 } from 'uuid';
 
-export const educationTypes = [
-  { id: 'military', name: 'Militaire' },
-  { id: 'rhetoric', name: 'Rhétorique' },
-  { id: 'political', name: 'Politique' },
-  { id: 'religious', name: 'Religieuse' },
-  { id: 'philosophical', name: 'Philosophique' },
-  { id: 'administrative', name: 'Administrative' }
-];
-
+// Common education paths
 export const educationPaths: Record<string, EducationPath> = {
   military: {
-    name: 'Éducation Militaire',
-    description: 'Formation aux arts de la guerre et au commandement des légions',
+    id: uuidv4(),
+    name: "Éducation Militaire",
+    description: "Formation aux tactiques militaires, au maniement des armes et au commandement des légions romaines.",
     duration: 3,
-    relatedStat: 'martialEducation',
-    skills: [
-      'Tactique de combat',
-      'Commandement',
-      'Discipline légionnaire',
-      'Fortifications',
-      'Logistique militaire'
-    ],
-    outcomes: {
-      martialEducation: 15,
-      popularity: 5
-    }
+    relatedStat: "martial",
+    skills: ["Tactique militaire", "Commandement", "Maniement des armes", "Équitation", "Navigation"],
+    outcomes: { martialEducation: 10, popularity: 5 }
   },
+  
   rhetoric: {
-    name: 'Éducation Rhétorique',
-    description: "Maîtrise de l'art oratoire et de la persuasion",
+    id: uuidv4(),
+    name: "Éducation Rhétorique",
+    description: "Formation à l'art oratoire, la persuasion et l'éloquence nécessaire au forum et au sénat.",
     duration: 3,
-    relatedStat: 'oratory',
-    skills: [
-      'Éloquence',
-      'Argumentation',
-      'Composition de discours',
-      'Débat politique',
-      'Gestuelle oratoire'
-    ],
-    outcomes: {
-      oratory: 15,
-      popularity: 5
-    }
+    relatedStat: "oratory",
+    skills: ["Art oratoire", "Persuasion", "Éloquence", "Argumentation", "Logique"],
+    outcomes: { oratory: 10, popularity: 5 }
   },
+  
   political: {
-    name: 'Éducation Politique',
-    description: 'Apprentissage des rouages du Sénat et des institutions romaines',
+    id: uuidv4(),
+    name: "Éducation Politique",
+    description: "Formation aux affaires politiques, à la gouvernance et aux alliances stratégiques.",
     duration: 3,
-    relatedStat: 'popularity',
-    skills: [
-      'Procédure sénatoriale',
-      'Négociation politique',
-      'Gestion des clientèles',
-      'Droit romain',
-      'Histoire politique'
-    ],
-    outcomes: {
-      popularity: 10,
-      oratory: 10
-    }
+    relatedStat: "politics",
+    skills: ["Gouvernance", "Diplomatie", "Négociation", "Droit romain", "Administration"],
+    outcomes: { popularity: 10, oratory: 5 }
   },
+  
   religious: {
-    name: 'Éducation Religieuse',
-    description: 'Formation aux rituels et traditions religieuses de Rome',
+    id: uuidv4(),
+    name: "Éducation Religieuse",
+    description: "Étude des rites, traditions et obligations religieuses romaines pour servir les dieux.",
     duration: 3,
-    relatedStat: 'piety',
-    skills: [
-      'Rites sacrificiels',
-      'Interprétation des présages',
-      'Connaissance des divinités',
-      'Calendrier religieux',
-      'Droit pontifical'
-    ],
-    outcomes: {
-      piety: 15,
-      popularity: 5
-    }
+    relatedStat: "piety",
+    skills: ["Rituel sacré", "Divination", "Interprétation des présages", "Connaissance des divinités", "Rites funéraires"],
+    outcomes: { piety: 10, popularity: 5 }
   },
+  
   philosophical: {
-    name: 'Éducation Philosophique',
-    description: 'Étude des grandes écoles philosophiques grecques et romaines',
+    id: uuidv4(),
+    name: "Éducation Philosophique",
+    description: "Étude des grands courants philosophiques et de la réflexion éthique et morale.",
     duration: 3,
-    relatedStat: 'oratory',
-    skills: [
-      'Stoïcisme',
-      'Épicurisme',
-      'Logique',
-      'Éthique',
-      'Métaphysique'
-    ],
-    outcomes: {
-      oratory: 10,
-      piety: 10
-    }
+    relatedStat: "wisdom",
+    skills: ["Philosophie stoïcienne", "Philosophie épicurienne", "Éthique", "Dialectique", "Métaphysique"],
+    outcomes: { oratory: 8, piety: 7 }
   },
-  administrative: {
-    name: 'Éducation Administrative',
-    description: 'Formation à la gestion des provinces et des finances publiques',
-    duration: 3,
-    relatedStat: 'popularity',
-    skills: [
-      'Comptabilité',
-      'Fiscalité',
-      'Droit provincial',
-      'Administration territoriale',
-      'Gestion des ressources'
-    ],
-    outcomes: {
-      popularity: 10,
-      martialEducation: 5,
-      piety: 5
-    }
+  
+  academic: {
+    id: uuidv4(),
+    name: "Éducation Académique Complète",
+    description: "Formation générale englobant les lettres, l'histoire, les mathématiques et les sciences.",
+    duration: 4,
+    relatedStat: "academic",
+    skills: ["Histoire romaine", "Littérature", "Mathématiques", "Astronomie", "Langues étrangères", "Poésie"],
+    outcomes: { popularity: 5, martialEducation: 2, piety: 5 }
   }
 };
 
-export const getEducationPath = (educationType: string): EducationPath => {
-  return educationPaths[educationType] || educationPaths.military;
-};
+export * from './preceptors';
+export * from './preceptorDatabase';
+export * from './specialties';
+export * from './romanNames';
+export * from './titles';
+export * from './childrenData';
+export * from './educationPaths';

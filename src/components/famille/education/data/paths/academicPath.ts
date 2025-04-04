@@ -1,37 +1,28 @@
 
 import { EducationPath } from '../../types/educationTypes';
+import { v4 as uuidv4 } from 'uuid';
 
-export const academicPath: EducationPath = {
-  id: 'academic',
+export const academicEducationPath: EducationPath = {
+  id: uuidv4(),
   name: 'Éducation Académique',
-  type: 'academic',
-  description: 'Formation aux sciences, à la philosophie et aux arts libéraux',
-  minAge: 12,
-  maxAge: 22,
-  duration: 5,
-  cost: 3800,
-  relatedStat: 'oratory',
-  outcomes: {
-    skills: ['Philosophie', 'Mathématiques', 'Astronomie', 'Littérature'],
-    bonuses: {
-      oratory: 25,
-      piety: 15,
-      popularity: 10
-    }
-  },
-  suitableFor: ['male', 'female'],
-  
-  // Add missing required properties
-  benefits: [
-    'Meilleure compréhension du monde',
-    'Capacité à débattre sur des sujets complexes',
-    'Prestige intellectuel'
+  description: 'Une éducation complète et équilibrée couvrant les arts libéraux et scientifiques.',
+  minAge: 7,
+  maxAge: 20,
+  duration: 4,
+  relatedStat: 'knowledge',
+  suitableFor: { gender: 'both' },
+  outcomes: { oratory: 5, piety: 5, popularity: 5 },
+  skills: [
+    'Littérature grecque et latine',
+    'Mathématiques',
+    'Histoire romaine',
+    'Astronomie',
+    'Géographie'
   ],
-  statBoost: 'oratory',
-  icon: '📚',
-  specialties: ['Philosophie', 'Mathématiques', 'Astronomie', 'Littérature'],
-  requirements: {
-    age: 12,
-    gender: 'both'
-  }
+  specialties: [
+    'Recherche scientifique',
+    'Enseignement',
+    'Documentation historique',
+    'Cartographie'
+  ]
 };

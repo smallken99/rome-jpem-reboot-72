@@ -1,95 +1,103 @@
 
 import React from 'react';
-import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Label } from '@/components/ui/label';
-import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { EducationType, Gender } from '../types/educationTypes';
-import { ShieldAlert } from 'lucide-react';
 
-export interface EducationTypeSelectorProps {
-  selectedType: EducationType;
-  onChange: (type: EducationType) => void;
-  gender: Gender;
-  childGender?: Gender;
+interface EducationTypeSelectorProps {
+  selectedType: string;
+  onChange: (value: string) => void;
+  gender?: Gender;
+  childGender: Gender;
   age?: number;
 }
 
-export const EducationTypeSelector: React.FC<EducationTypeSelectorProps> = ({ 
-  selectedType, 
+export const EducationTypeSelector: React.FC<EducationTypeSelectorProps> = ({
+  selectedType,
   onChange,
-  gender,
+  gender = 'male',
   childGender,
-  age 
+  age = 10
 }) => {
-  const educationTypes: { value: EducationType; label: string; description: string; maleLimited?: boolean }[] = [
-    { 
-      value: 'military', 
-      label: 'Militaire', 
-      description: 'Tactique, commandement, combat et stratégie militaire',
-      maleLimited: true
+  // Determine which education types are available based on gender
+  const isFemale = childGender === 'female';
+  const isYoung = age < 8;
+
+  // Éducation options with their descriptions
+  const options = [
+    {
+      value: 'rhetoric' as EducationType,
+      label: 'Éducation Rhétorique',
+      description: 'Maîtrise de l\'éloquence et de la persuasion',
+      disabled: isYoung
     },
-    { 
-      value: 'rhetoric', 
-      label: 'Rhétorique', 
-      description: 'Art oratoire, éloquence et persuasion' 
+    {
+      value: 'military' as EducationType,
+      label: 'Éducation Militaire',
+      description: 'Formation aux tactiques et au commandement',
+      disabled: isFemale || isYoung
     },
-    { 
-      value: 'religious', 
-      label: 'Religieuse', 
-      description: 'Rituel, traditions et cérémonies religieuses' 
+    {
+      value: 'political' as EducationType,
+      label: 'Éducation Politique',
+      description: 'Apprentissage de la gouvernance et des alliances',
+      disabled: isYoung
     },
-    { 
-      value: 'political', 
-      label: 'Politique', 
-      description: 'Lois, gouvernance et administration de la République' 
-    }
+    {
+      value: 'religious' as EducationType,
+      label: 'Éducation Religieuse',
+      description: 'Étude des rites et traditions romaines',
+      disabled: isYoung
+    },
+    {
+      value: 'philosophical' as EducationType,
+      label: 'Éducation Philosophique',
+      description: 'Étude de la sagesse et de la vertu',
+      disabled: isYoung
+    },
   ];
 
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="text-lg">Type d'Éducation</CardTitle>
+        <CardTitle className="text-md">Type d'Éducation</CardTitle>
       </CardHeader>
       <CardContent>
-        <RadioGroup value={selectedType} onValueChange={(value) => onChange(value as EducationType)} className="space-y-3">
-          {educationTypes.map(type => {
-            const isDisabled = type.maleLimited && childGender === 'female';
-            
-            return (
-              <div key={type.value} className={`flex items-start space-x-2 ${isDisabled ? 'opacity-60' : ''}`}>
-                <RadioGroupItem 
-                  value={type.value} 
-                  id={`edu-type-${type.value}`} 
-                  disabled={isDisabled}
-                  className="mt-1"
-                />
-                <div className="grid gap-1.5 leading-none w-full">
-                  <Label 
-                    htmlFor={`edu-type-${type.value}`}
-                    className={`font-medium ${isDisabled ? 'text-muted-foreground' : ''}`}
-                  >
-                    {type.label}
-                    {isDisabled && childGender === 'female' && (
-                      <span className="ml-2 text-xs text-red-500">(Réservé aux garçons)</span>
-                    )}
-                  </Label>
-                  <p className="text-sm text-muted-foreground">
-                    {type.description}
-                  </p>
-                </div>
+        <RadioGroup 
+          value={selectedType} 
+          onValueChange={onChange}
+          className="grid grid-cols-1 gap-3"
+        >
+          {options.map((option) => (
+            <div
+              key={option.value}
+              className={`
+                flex items-center p-3 border rounded-md 
+                ${selectedType === option.value ? 'border-primary bg-secondary/20' : 'border-accent'} 
+                ${option.disabled ? 'opacity-50 cursor-not-allowed' : 'hover:border-primary cursor-pointer'}
+              `}
+            >
+              <RadioGroupItem 
+                value={option.value} 
+                id={option.value} 
+                disabled={option.disabled}
+                className="mr-3"
+              />
+              <div className="flex flex-col">
+                <Label htmlFor={option.value} className="font-medium cursor-pointer">
+                  {option.label}
+                </Label>
+                <span className="text-xs text-muted-foreground">{option.description}</span>
               </div>
-            );
-          })}
+            </div>
+          ))}
         </RadioGroup>
-        
-        {childGender === 'female' && (
-          <Alert variant="destructive" className="mt-4">
-            <ShieldAlert className="h-4 w-4" />
-            <AlertDescription>
-              L'éducation militaire n'est pas disponible pour les filles dans la société romaine.
-            </AlertDescription>
-          </Alert>
+
+        {isFemale && selectedType === 'military' && (
+          <div className="mt-4 p-3 bg-yellow-50 text-yellow-700 border border-yellow-200 rounded-md text-sm">
+            Attention: L'éducation militaire n'est généralement pas adaptée pour les jeunes filles dans la société romaine.
+          </div>
         )}
       </CardContent>
     </Card>

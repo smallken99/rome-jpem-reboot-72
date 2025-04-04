@@ -1,36 +1,28 @@
 
 import { EducationPath } from '../../types/educationTypes';
+import { v4 as uuidv4 } from 'uuid';
 
-export const militaryPath: EducationPath = {
-  id: 'military',
+export const militaryEducationPath: EducationPath = {
+  id: uuidv4(),
   name: 'Éducation Militaire',
-  type: 'military',
-  description: 'Formation aux arts de la guerre, tactiques et stratégies militaires',
+  description: 'Formation aux tactiques militaires et au commandement des légions romaines.',
   minAge: 12,
-  maxAge: 20,
-  duration: 5,
-  cost: 3000,
-  relatedStat: 'martialEducation',
-  outcomes: {
-    skills: ['Commandement', 'Tactique', 'Combat au glaive', 'Stratégie'],
-    bonuses: {
-      martialEducation: 30,
-      oratory: 10
-    }
-  },
+  maxAge: 18,
+  duration: 3,
+  relatedStat: 'martial',
   suitableFor: ['male'],
-  
-  // Add missing required properties
-  benefits: [
-    'Carrière dans l\'armée romaine',
-    'Respect des soldats',
-    'Compétences de leadership'
+  outcomes: { martialEducation: 10, oratory: 3 },
+  skills: [
+    'Tactique de combat',
+    'Stratégie militaire',
+    'Maniement des armes',
+    'Équitation de guerre',
+    'Commandement'
   ],
-  statBoost: 'martialEducation',
-  icon: '⚔️',
-  specialties: ['Commandement', 'Tactique', 'Combat au glaive', 'Stratégie'],
-  requirements: {
-    age: 12,
-    gender: 'male'
-  }
+  specialties: [
+    'Commandement de légion',
+    'Cavalerie d\'élite',
+    'Génie militaire',
+    'Artillerie'
+  ]
 };

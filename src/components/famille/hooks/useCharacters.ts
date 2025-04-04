@@ -4,237 +4,142 @@ import { v4 as uuidv4 } from 'uuid';
 import { Character } from '@/types/character';
 import { toast } from 'sonner';
 
-// Exemple de données initiales pour démonstration
-const initialCharacters: Character[] = [
-  {
-    id: 'char-1',
-    name: 'Marcus Aurelius',
-    firstName: 'Marcus',
-    lastName: 'Aurelius',
-    gender: 'male',
-    age: 45,
-    isPlayer: true,
-    isHeadOfFamily: true,
-    relation: 'Pater Familias',
-    status: 'alive',
-    stats: {
-      popularity: { value: 65, maxValue: 100, name: 'Popularité', icon: 'users', description: 'Votre réputation auprès du peuple', color: 'blue' },
-      oratory: { value: 70, maxValue: 100, name: 'Éloquence', icon: 'message-square', description: 'Votre capacité à convaincre', color: 'amber' },
-      piety: { value: 60, maxValue: 100, name: 'Piété', icon: 'shrine', description: 'Votre dévotion aux dieux', color: 'purple' },
-      martialEducation: { value: 55, maxValue: 100, name: 'Art militaire', icon: 'sword', description: 'Votre expertise militaire', color: 'red' }
-    },
-    childrenIds: ['char-3', 'char-4', 'char-5'],
-    spouseId: 'char-2'
-  },
-  {
-    id: 'char-2',
-    name: 'Faustina Minor',
-    firstName: 'Faustina',
-    lastName: 'Minor',
-    gender: 'female',
-    age: 40,
-    relation: 'Mater Familias',
-    status: 'alive',
-    stats: {
-      popularity: { value: 50, maxValue: 100, name: 'Popularité', icon: 'users', description: 'Votre réputation auprès du peuple', color: 'blue' },
-      oratory: { value: 60, maxValue: 100, name: 'Éloquence', icon: 'message-square', description: 'Votre capacité à convaincre', color: 'amber' },
-      piety: { value: 75, maxValue: 100, name: 'Piété', icon: 'shrine', description: 'Votre dévotion aux dieux', color: 'purple' },
-      martialEducation: { value: 20, maxValue: 100, name: 'Art militaire', icon: 'sword', description: 'Votre expertise militaire', color: 'red' }
-    },
-    childrenIds: ['char-3', 'char-4', 'char-5'],
-    spouseId: 'char-1'
-  },
-  {
-    id: 'char-3',
-    name: 'Commodus Aurelius',
-    firstName: 'Commodus',
-    lastName: 'Aurelius',
-    gender: 'male',
-    age: 18,
-    relation: 'Fils',
-    status: 'alive',
-    parentIds: ['char-1', 'char-2'],
-    stats: {
-      popularity: { value: 40, maxValue: 100, name: 'Popularité', icon: 'users', description: 'Votre réputation auprès du peuple', color: 'blue' },
-      oratory: { value: 45, maxValue: 100, name: 'Éloquence', icon: 'message-square', description: 'Votre capacité à convaincre', color: 'amber' },
-      piety: { value: 30, maxValue: 100, name: 'Piété', icon: 'shrine', description: 'Votre dévotion aux dieux', color: 'purple' },
-      martialEducation: { value: 60, maxValue: 100, name: 'Art militaire', icon: 'sword', description: 'Votre expertise militaire', color: 'red' }
-    },
-    education: {
-      type: 'military',
-      specialties: ['Tactique de combat', 'Commandement'],
-      mentor: 'Maximus Decimus',
-      completed: true,
-      completedAt: '745 AUC'
-    }
-  },
-  {
-    id: 'char-4',
-    name: 'Lucilla Aurelia',
-    firstName: 'Lucilla',
-    lastName: 'Aurelia',
-    gender: 'female',
-    age: 16,
-    relation: 'Fille',
-    status: 'alive',
-    parentIds: ['char-1', 'char-2'],
-    stats: {
-      popularity: { value: 45, maxValue: 100, name: 'Popularité', icon: 'users', description: 'Votre réputation auprès du peuple', color: 'blue' },
-      oratory: { value: 65, maxValue: 100, name: 'Éloquence', icon: 'message-square', description: 'Votre capacité à convaincre', color: 'amber' },
-      piety: { value: 70, maxValue: 100, name: 'Piété', icon: 'shrine', description: 'Votre dévotion aux dieux', color: 'purple' },
-      martialEducation: { value: 15, maxValue: 100, name: 'Art militaire', icon: 'sword', description: 'Votre expertise militaire', color: 'red' }
-    }
-  },
-  {
-    id: 'char-5',
-    name: 'Annius Aurelius',
-    firstName: 'Annius',
-    lastName: 'Aurelius',
-    gender: 'male',
-    age: 12,
-    relation: 'Fils',
-    status: 'alive',
-    parentIds: ['char-1', 'char-2'],
-    stats: {
-      popularity: { value: 20, maxValue: 100, name: 'Popularité', icon: 'users', description: 'Votre réputation auprès du peuple', color: 'blue' },
-      oratory: { value: 25, maxValue: 100, name: 'Éloquence', icon: 'message-square', description: 'Votre capacité à convaincre', color: 'amber' },
-      piety: { value: 30, maxValue: 100, name: 'Piété', icon: 'shrine', description: 'Votre dévotion aux dieux', color: 'purple' },
-      martialEducation: { value: 30, maxValue: 100, name: 'Art militaire', icon: 'sword', description: 'Votre expertise militaire', color: 'red' }
-    },
-    currentEducation: {
-      type: 'military',
-      mentor: 'Maximus Decimus',
-      mentorId: 'prec-1',
-      progress: 33,
-      skills: ['Discipline légionnaire'],
-      yearsCompleted: 1,
-      totalYears: 3,
-      statBonus: 0
-    }
-  }
-];
+const STORAGE_KEY = 'character-store';
 
 export const useCharacters = () => {
-  const [localCharacters, setLocalCharacters] = useState<Character[]>(initialCharacters);
+  const [localCharacters, setLocalCharacters] = useState<Character[]>([]);
   
-  // Une fonction pour ajouter un nouveau personnage
-  const addCharacter = (characterData: Partial<Character>) => {
+  // Load characters from local storage on component mount
+  useEffect(() => {
+    const storedCharacters = localStorage.getItem(STORAGE_KEY);
+    
+    if (storedCharacters) {
+      try {
+        setLocalCharacters(JSON.parse(storedCharacters));
+      } catch (e) {
+        console.error('Error parsing stored characters:', e);
+        setLocalCharacters([]);
+      }
+    }
+  }, []);
+
+  // Save characters to local storage whenever they change
+  useEffect(() => {
+    if (localCharacters.length > 0) {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(localCharacters));
+    }
+  }, [localCharacters]);
+
+  // Add a new character
+  const addCharacter = (characterData: Partial<Character>): Character => {
     const newCharacter: Character = {
       id: uuidv4(),
-      name: characterData.name || `${characterData.firstName || ''} ${characterData.lastName || ''}`.trim(),
-      firstName: characterData.firstName || '',
-      lastName: characterData.lastName || '',
+      name: characterData.name || 'Sans Nom',
+      firstName: characterData.firstName,
+      lastName: characterData.lastName,
       gender: characterData.gender || 'male',
-      age: characterData.age || 0,
+      age: characterData.age || 30,
+      role: characterData.role || 'member',
       status: characterData.status || 'alive',
-      isPlayer: characterData.isPlayer || false,
-      isHeadOfFamily: characterData.isHeadOfFamily || false,
-      stats: characterData.stats || {
-        popularity: { value: 10, maxValue: 100, name: 'Popularité', icon: 'users', description: '', color: 'blue' },
-        oratory: { value: 10, maxValue: 100, name: 'Éloquence', icon: 'message-square', description: '', color: 'amber' },
-        piety: { value: 10, maxValue: 100, name: 'Piété', icon: 'shrine', description: '', color: 'purple' },
-        martialEducation: { value: 10, maxValue: 100, name: 'Art militaire', icon: 'sword', description: '', color: 'red' }
-      },
-      relation: characterData.relation || '',
-      parentIds: characterData.parentIds || [],
-      childrenIds: characterData.childrenIds || [],
+      biography: characterData.biography || '',
+      birthYear: characterData.birthYear || -80,
+      deathYear: characterData.deathYear,
+      relationshipStatus: characterData.relationshipStatus || 'single',
+      parentId: characterData.parentId,
       spouseId: characterData.spouseId,
-      education: characterData.education,
+      education: characterData.education || {
+        completed: false,
+        specialties: []
+      },
+      stats: characterData.stats || {
+        oratory: 5,
+        martial: 5,
+        politics: 5,
+        popularity: 5,
+        loyalty: 5,
+        intellect: 5,
+        piety: 5,
+        charm: 5,
+      },
+      traits: characterData.traits || [],
+      portrait: characterData.portrait,
+      titles: characterData.titles || [],
+      educationType: characterData.educationType || 'none',
       currentEducation: characterData.currentEducation,
-      portrait: characterData.portrait
     };
-    
-    setLocalCharacters(prev => [...prev, newCharacter]);
-    
-    // Mettre à jour les relations parent-enfant si nécessaire
-    if (newCharacter.parentIds && newCharacter.parentIds.length > 0) {
-      setLocalCharacters(prev => prev.map(char => {
-        if (newCharacter.parentIds?.includes(char.id)) {
-          return {
-            ...char,
-            childrenIds: [...(char.childrenIds || []), newCharacter.id]
-          };
-        }
-        return char;
-      }));
-    }
-    
+
+    setLocalCharacters((prev) => [...prev, newCharacter]);
+    toast.success(`${newCharacter.name} a été ajouté à votre famille.`);
     return newCharacter;
   };
-  
-  // Une fonction pour mettre à jour un personnage existant
+
+  // Update an existing character
   const updateCharacter = (characterId: string, updates: Partial<Character>) => {
-    setLocalCharacters(prev => prev.map(char => {
-      if (char.id === characterId) {
-        return { ...char, ...updates };
-      }
-      return char;
-    }));
+    setLocalCharacters((prev) =>
+      prev.map((character) =>
+        character.id === characterId ? { ...character, ...updates } : character
+      )
+    );
+    toast.success(`Les informations ont été mises à jour.`);
   };
-  
-  // Une fonction pour supprimer un personnage
+
+  // Remove a character
   const removeCharacter = (characterId: string) => {
-    setLocalCharacters(prev => prev.filter(char => char.id !== characterId));
+    const characterToRemove = localCharacters.find(c => c.id === characterId);
+    if (!characterToRemove) {
+      toast.error("Personnage non trouvé.");
+      return;
+    }
     
-    // Mettre à jour les relations
-    setLocalCharacters(prev => prev.map(char => {
-      const updates: Partial<Character> = {};
-      
-      // Supprimer des enfants
-      if (char.childrenIds?.includes(characterId)) {
-        updates.childrenIds = char.childrenIds.filter(id => id !== characterId);
-      }
-      
-      // Supprimer des parents
-      if (char.parentIds?.includes(characterId)) {
-        updates.parentIds = char.parentIds.filter(id => id !== characterId);
-      }
-      
-      // Supprimer des conjoints
-      if (char.spouseId === characterId) {
-        updates.spouseId = undefined;
-      }
-      
-      return { ...char, ...updates };
-    }));
+    setLocalCharacters((prev) => prev.filter((character) => character.id !== characterId));
+    toast.success(`${characterToRemove.name} a été retiré de votre famille.`);
   };
   
-  // Gérer les naissances d'enfants
-  const handleChildBirth = (parentIds?: string[]) => {
-    if (!parentIds || parentIds.length < 2) {
-      toast.error("Information des parents insuffisante pour créer un enfant");
-      return;
+  // Handle child birth between parents
+  const handleChildBirth = (parentIds?: string[]): Character => {
+    let father: Character | undefined;
+    let mother: Character | undefined;
+    
+    if (parentIds && parentIds.length === 2) {
+      father = localCharacters.find(c => c.id === parentIds[0] && c.gender === 'male');
+      mother = localCharacters.find(c => c.id === parentIds[1] && c.gender === 'female');
+      
+      if (!father || !mother) {
+        father = localCharacters.find(c => c.id === parentIds[1] && c.gender === 'male');
+        mother = localCharacters.find(c => c.id === parentIds[0] && c.gender === 'female');
+      }
     }
     
-    const father = localCharacters.find(c => c.id === parentIds[0] && c.gender === 'male');
-    const mother = localCharacters.find(c => c.id === parentIds[1] && c.gender === 'female');
-    
-    if (!father || !mother) {
-      toast.error("Parents non trouvés ou genre incorrect");
-      return;
-    }
-    
-    // Déterminer aléatoirement le genre de l'enfant
+    // If parents aren't found, use default values
+    const lastName = father ? father.lastName || father.name.split(' ').pop() : "Romanus";
     const gender = Math.random() > 0.5 ? 'male' : 'female';
+    const firstName = gender === 'male' ? "Gaius" : "Julia";
     
-    // Création du nouvel enfant
-    const newChild: Partial<Character> = {
-      firstName: gender === 'male' ? "Novus" : "Nova", // Noms temporaires
-      lastName: father.lastName,
-      name: `${gender === 'male' ? "Novus" : "Nova"} ${father.lastName}`,
+    const newChild = addCharacter({
+      name: `${firstName} ${lastName}`,
+      firstName,
+      lastName,
       gender,
       age: 0,
-      relation: gender === 'male' ? 'Fils' : 'Fille',
-      parentIds: [father.id, mother.id],
-      status: 'alive'
-    };
+      birthYear: -30, // Current year in the game setting
+      role: 'child',
+      parentId: father?.id,
+      stats: {
+        oratory: 2,
+        martial: 2,
+        politics: 2,
+        popularity: 2,
+        loyalty: 5,
+        intellect: 3,
+        piety: 3,
+        charm: 4,
+      }
+    });
     
-    const child = addCharacter(newChild);
-    
-    toast.success(`Un nouvel enfant est né: ${child.name}`);
-    return child;
+    toast.success(`Un${gender === 'female' ? 'e' : ''} ${gender === 'female' ? 'fille' : 'garçon'} est né${gender === 'female' ? 'e' : ''} !`);
+    return newChild;
   };
-  
+
   return {
     localCharacters,
     addCharacter,
