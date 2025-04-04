@@ -1,120 +1,79 @@
 
-// Add PropertyTransaction type to property.ts
+import { PropertyType, PropertyStatus } from '@/types/proprietes';
 
-import { OwnedBuilding } from './buildingTypes';
-
-export interface PropertyTransaction {
-  id: string;
-  resourceId: string;
-  resourceName: string;
-  type: 'acquisition' | 'consumption' | 'transfer';
-  quantity: number;
-  date: Date;
-  responsible: string;
-  source?: string;
-  destination?: string;
-  cost?: number;
-  reason?: string;
-}
-
-export interface TransactionsListProps {
-  searchTerm?: string;
-  resourceId?: string;
-  onTransactionSelect?: (transaction: PropertyTransaction) => void;
-  onAddTransaction?: () => void;
-  filters?: {
-    resourceName?: string;
-    type?: string;
-    startDate?: Date;
-    endDate?: Date;
-    responsible?: string;
-  };
-}
-
-// Define Slave interface with all possible properties
-export interface Slave {
-  id: string;
+export interface Property {
+  id: string | number;
   name: string;
-  age?: number;
-  gender?: 'male' | 'female';
-  status?: 'healthy' | 'sick' | 'injured';
-  acquired?: Date;
-  value?: number;
-  assignedTo?: string;
-  assigned: boolean;
-  specialties: string[];
-  notes?: string;
-  // Additional compatibility properties
-  health?: number;
-  skills?: string[];
-  origin?: string;
+  location: string;
+  type: PropertyType;
+  value: number;
+  incomePerYear?: number;
+  maintenanceCost: number;
+  condition: number;
+  status?: PropertyStatus;
+  upgrades?: PropertyUpgrade[];
 }
 
-// Define SlaveAssignment interface with all possible properties
-export interface SlaveAssignment {
-  id?: string;
-  slaveId?: string;
-  propertyId: string;
-  buildingId?: string;
-  startDate: Date;
-  efficiency: number;
-  buildingName?: string;
-  count?: number;
-  maxCount?: number;
-  // Additional compatibility properties 
-  role?: string;
-  productivity?: number;
-  assignedAt?: Date;
-}
-
-// Define PropertyUpgrade interface
 export interface PropertyUpgrade {
   id: string;
   name: string;
   description: string;
   cost: number;
-  effect: {
-    income?: number;
-    popularity?: number;
-    security?: number;
-    maintenance?: number;
-    condition?: number;
-    value?: number;
-    conditionBoost?: number;
-    maintenanceReduction?: number;
-  };
-  // Alias for compatibility with code using 'effects'
+  effect?: string | Record<string, any>;
   effects?: {
     income?: number;
-    popularity?: number;
-    security?: number;
     maintenance?: number;
+    security?: number;
     condition?: number;
-    value?: number;
-    conditionBoost?: number;
-    maintenanceReduction?: number;
+    [key: string]: any;
   };
-  installed: boolean;
-  applied?: boolean;  // Add for compatibility
-  buildingTypes: string[];
   requirements?: {
-    minWorkers?: number;
-    minSecurity?: number;
-    minMaintenance?: number;
-    minIncome?: number;
-    minCondition?: number;
-    minBuildingLevel?: number;
-    minValue?: number;
-    otherUpgrades?: string[];
-    buildingLevel?: number;
-    buildingCondition?: number;
-    previousUpgrade?: string;
     value?: number;
+    condition?: number;
     upgrades?: string[];
+    [key: string]: any;
   };
-  type?: string;
-  buildingType?: string[];
+  installed?: boolean;
+  category?: string;
+  tier?: number;
+  buildingTypes: string[];
+  prerequisiteUpgradeId?: string;
 }
 
-// Re-export building types
-export type { OwnedBuilding };
+export interface OwnedBuilding {
+  id: string | number;
+  buildingId: string;
+  buildingType: string;
+  name: string;
+  type?: string;
+  location: string;
+  value: number;
+  maintenance: number;
+  condition: number;
+  status?: string;
+  maintenanceCost: number;
+  maintenanceEnabled?: boolean;
+  slaves?: number;
+  workers?: number;
+  securityLevel?: number;
+  maintenanceLevel?: number;
+  purchaseDate?: Date;
+  lastMaintenance?: Date;
+  income?: number;
+  size?: number;
+  maxWorkers?: number;
+  upgrades?: PropertyUpgrade[];
+  description?: string;
+}
+
+export interface BuildingPurchaseOptions {
+  buildingId: string;
+  type: "urban" | "rural" | "religious" | "public";
+  name: string;
+  location: string;
+  initialCost: number;
+  maintenanceCost: number;
+  slaves?: number;
+  customName?: string;
+  buildingType?: string;
+}

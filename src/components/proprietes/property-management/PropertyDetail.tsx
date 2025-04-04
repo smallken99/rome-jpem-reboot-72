@@ -12,16 +12,17 @@ import { useBuildingManagement } from '@/hooks/useBuildingManagement';
 import { BuildingSaleDialog } from './modals/BuildingSaleDialog';
 import { toast } from 'sonner';
 import { RomanCard } from '@/components/ui-custom/RomanCard';
+import { adaptOwnedBuilding } from '@/utils/typeAdapters';
 
 export const PropertyDetail: React.FC = () => {
   const { propertyId } = useParams<{ propertyId: string }>();
   const navigate = useNavigate();
-  const { buildings, sellBuilding, calculateBuildingValue, updateBuildingCondition } = useBuildingManagement();
+  const { buildings, sellBuilding, updateBuildingCondition } = useBuildingManagement();
   const [isSaleDialogOpen, setIsSaleDialogOpen] = useState(false);
   
-  const building = buildings.find(b => b.id === propertyId);
+  const buildingData = buildings.find(b => b.id === propertyId);
   
-  if (!building) {
+  if (!buildingData) {
     return (
       <div className="text-center py-10">
         <h2 className="text-2xl font-semibold">Propriété non trouvée</h2>
@@ -35,7 +36,9 @@ export const PropertyDetail: React.FC = () => {
     );
   }
   
-  const estimatedValue = calculateBuildingValue(building);
+  const building = adaptOwnedBuilding(buildingData);
+  
+  const estimatedValue = building.value; // Simplified for now
   
   const getConditionColor = (condition: number) => {
     if (condition >= 80) return 'bg-green-600';
@@ -59,7 +62,7 @@ export const PropertyDetail: React.FC = () => {
   };
   
   const handleSell = async (buildingId: string | number) => {
-    const success = sellBuilding(buildingId);
+    const success = sellBuilding(buildingId.toString());
     
     if (success) {
       toast.success(`${building.name} a été vendu avec succès`);
@@ -160,10 +163,10 @@ export const PropertyDetail: React.FC = () => {
       </RomanCard>
       
       <PropertyActions 
-        building={building as OwnedBuilding}
+        building={building}
         onRenovate={handleRenovate}
         onSell={handleOpenSaleDialog}
-        maintenanceEnabled={building.maintenanceEnabled}
+        maintenanceEnabled={building.maintenanceEnabled || false}
       />
       
       <PropertyRelationsPanel 
@@ -172,7 +175,7 @@ export const PropertyDetail: React.FC = () => {
       />
       
       <BuildingSaleDialog 
-        building={building as OwnedBuilding}
+        building={building}
         estimatedValue={estimatedValue}
         isOpen={isSaleDialogOpen}
         onClose={() => setIsSaleDialogOpen(false)}

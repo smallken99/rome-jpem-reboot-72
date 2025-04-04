@@ -1,146 +1,58 @@
-import { OwnedBuilding, PropertyUpgrade, Slave, SlaveAssignment } from '@/components/proprietes/types/property';
-import { BuildingType as MJBuildingType, Building as MJBuilding } from '@/components/maitrejeu/types/batiments';
-import { BuildingType as PropBuildingType } from '@/components/proprietes/types/buildingTypes';
-import { ensureArray } from './arrayUtils';
-import { militaireAdapter, politiqueAdapter } from './militaireAdapter';
+
+import { Building, OwnedBuilding as TypedOwnedBuilding } from '@/types/proprietes';
+import { OwnedBuilding } from '@/components/proprietes/types/property';
 
 /**
- * Adapt a MaitreJeu Building to a Proprietes OwnedBuilding
+ * Adapte un objet Building pour qu'il soit compatible avec OwnedBuilding
  */
-export const adaptOwnedBuilding = (building: any): OwnedBuilding => {
-  if (!building) return null;
-  
-  // Handle different ID types
-  const id = typeof building.id === 'number' ? String(building.id) : building.id;
-  
+export const adaptOwnedBuilding = (building: Building | any): OwnedBuilding => {
   return {
-    id: id,
-    buildingId: building.buildingId || id,
-    name: building.name || '',
-    buildingType: building.buildingType || building.type || 'other',
-    type: building.type || PropBuildingType.OTHER,
-    location: building.location || '',
-    size: building.size || 1,
+    id: building.id,
+    buildingId: building.buildingId || building.id.toString(),
+    buildingType: building.buildingType || building.type || 'urban',
+    name: building.name,
+    location: building.location || 'Rome',
     value: building.value || 0,
+    maintenance: building.maintenance || 0,
     condition: building.condition || 100,
-    maintenanceLevel: building.maintenanceLevel || 1,
+    status: building.status || 'good',
     maintenanceCost: building.maintenanceCost || building.maintenance || 0,
-    maintenanceEnabled: building.maintenanceEnabled || true,
-    income: building.income || 0,
+    maintenanceEnabled: building.maintenanceEnabled !== undefined ? building.maintenanceEnabled : true,
+    slaves: building.slaves || 0,
     workers: building.workers || 0,
-    maxWorkers: building.maxWorkers || 10,
+    income: building.income || 0,
+    maintenanceLevel: building.maintenanceLevel || 1,
     securityLevel: building.securityLevel || 1,
-    description: building.description || '',
+    size: building.size || 1,
+    maxWorkers: building.maxWorkers || 10,
+    upgrades: building.upgrades || [],
     purchaseDate: building.purchaseDate || new Date(),
-    status: building.status || 'active',
-    maintenance: building.maintenance || building.maintenanceCost || 0,
-    upgrades: adaptPropertyUpgrades(building.upgrades || [])
+    lastMaintenance: building.lastMaintenance,
+    description: building.description || "",
   };
 };
 
 /**
- * Adapt property upgrades to ensure consistent format
+ * Adapte un OwnedBuilding en un Building standard
  */
-export const adaptPropertyUpgrades = (upgrades: any[]): PropertyUpgrade[] => {
-  if (!upgrades || !Array.isArray(upgrades)) {
-    return [];
-  }
-  
-  return upgrades.map(upgrade => {
-    if (!upgrade) return null;
-    
-    // Normalize effect/effects
-    const effect = upgrade.effect || upgrade.effects || {};
-    
-    // Normalize requirements
-    const requirements = upgrade.requirements || {};
-    
-    return {
-      id: upgrade.id || `upgrade-${Math.random().toString(36).substr(2, 9)}`,
-      name: upgrade.name || '',
-      description: upgrade.description || '',
-      cost: upgrade.cost || 0,
-      effect: {
-        income: effect.income,
-        popularity: effect.popularity,
-        security: effect.security,
-        maintenance: effect.maintenance,
-        condition: effect.condition,
-        value: effect.value,
-        conditionBoost: effect.conditionBoost,
-        maintenanceReduction: effect.maintenanceReduction
-      },
-      effects: effect, // Maintain compatibility
-      installed: upgrade.installed || upgrade.applied || false,
-      applied: upgrade.applied || upgrade.installed || false, // Ensure both properties exist
-      buildingTypes: Array.isArray(upgrade.buildingTypes) 
-        ? upgrade.buildingTypes 
-        : (upgrade.buildingType 
-            ? (Array.isArray(upgrade.buildingType) ? upgrade.buildingType : [upgrade.buildingType]) 
-            : []),
-      requirements: {
-        minWorkers: requirements.minWorkers,
-        minSecurity: requirements.minSecurity,
-        minMaintenance: requirements.minMaintenance,
-        minIncome: requirements.minIncome,
-        minCondition: requirements.minCondition,
-        minBuildingLevel: requirements.minBuildingLevel || requirements.buildingLevel,
-        minValue: requirements.minValue || requirements.value,
-        otherUpgrades: requirements.otherUpgrades || requirements.upgrades,
-        buildingLevel: requirements.buildingLevel,
-        buildingCondition: requirements.buildingCondition,
-        previousUpgrade: requirements.previousUpgrade,
-        value: requirements.value,
-        upgrades: requirements.upgrades
-      },
-      type: upgrade.type || '',
-    };
-  }).filter(Boolean);
-};
-
-/**
- * Adapt a slave to ensure consistent format
- */
-export const adaptSlave = (slave: any): Slave => {
-  if (!slave) return null;
-  
+export const adaptToBuilding = (ownedBuilding: OwnedBuilding): Building => {
   return {
-    id: slave.id || `slave-${Math.random().toString(36).substr(2, 9)}`,
-    name: slave.name || 'Esclave sans nom',
-    age: slave.age || 25,
-    gender: slave.gender || 'male',
-    status: slave.status || 'healthy',
-    acquired: slave.acquired || new Date(),
-    value: slave.value || slave.price || 500,
-    assignedTo: slave.assignedTo,
-    assigned: !!slave.assignedTo || slave.assigned || false,
-    specialties: slave.specialties || slave.skills || [],
-    notes: slave.notes || '',
-    // Additional compatibility fields
-    health: slave.health,
-    skills: slave.skills,
-    origin: slave.origin
-  };
-};
-
-/**
- * Adapt slave assignments to ensure consistent format
- */
-export const adaptSlaveAssignment = (assignment: any): SlaveAssignment => {
-  if (!assignment) return null;
-  
-  return {
-    id: assignment.id, // Add id property for compatibility
-    propertyId: assignment.propertyId || assignment.buildingId,
-    slaveId: assignment.slaveId,
-    buildingId: assignment.buildingId,
-    startDate: assignment.startDate || assignment.assignedAt || new Date(),
-    efficiency: assignment.efficiency || assignment.productivity || 100,
-    role: assignment.role,
-    productivity: assignment.productivity,
-    assignedAt: assignment.assignedAt,
-    buildingName: assignment.buildingName,
-    count: assignment.count,
-    maxCount: assignment.maxCount
+    id: ownedBuilding.id.toString(),
+    type: ownedBuilding.buildingType || ownedBuilding.type || 'urban',
+    buildingType: ownedBuilding.buildingType,
+    name: ownedBuilding.name,
+    location: ownedBuilding.location,
+    value: ownedBuilding.value,
+    maintenance: ownedBuilding.maintenance,
+    maintenanceCost: ownedBuilding.maintenanceCost,
+    condition: ownedBuilding.condition,
+    status: ownedBuilding.status,
+    workers: ownedBuilding.workers,
+    slaves: ownedBuilding.slaves,
+    securityLevel: ownedBuilding.securityLevel,
+    maintenanceLevel: ownedBuilding.maintenanceLevel,
+    upgrades: ownedBuilding.upgrades,
+    income: ownedBuilding.income,
+    maintenanceEnabled: ownedBuilding.maintenanceEnabled
   };
 };

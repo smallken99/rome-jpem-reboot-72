@@ -8,15 +8,13 @@ import { WorkersTab } from './property-management/WorkersTab';
 import { UpgradesTab } from './property-management/UpgradesTab';
 import { PropertyHeader } from './property-management/PropertyHeader';
 import { useBuildingManagement } from '@/hooks/useBuildingManagement';
-import { OwnedBuilding, PropertyUpgrade } from '@/components/proprietes/types/property';
+import { OwnedBuilding } from '@/components/proprietes/types/property';
 import { toast } from 'sonner';
-import { v4 as uuidv4 } from 'uuid';
-import { BuildingType } from '@/components/maitrejeu/types/batiments';
 import { adaptOwnedBuilding } from '@/utils/typeAdapters';
 
 export const PropertyManagement: React.FC = () => {
   const [activeTab, setActiveTab] = useState('overview');
-  const { buildingId } = useParams<{ buildingId: string }>();
+  const { propertyId } = useParams<{ propertyId: string }>();
   const navigate = useNavigate();
   
   const { 
@@ -25,7 +23,7 @@ export const PropertyManagement: React.FC = () => {
     updateBuildingCondition
   } = useBuildingManagement();
   
-  const buildingWithType = buildings.find(b => b.id === (buildingId || "building-1"));
+  const buildingWithType = buildings.find(b => b.id === (propertyId || "building-1"));
   
   // Complete the building with all required properties for the OwnedBuilding type
   const building: OwnedBuilding | null = buildingWithType ? adaptOwnedBuilding(buildingWithType) : null;
@@ -55,14 +53,8 @@ export const PropertyManagement: React.FC = () => {
   };
 
   const handleUpdateMaintenanceLevel = (level: number) => {
-    // Create adapter for different function signatures
-    const updateMaintenanceLevel = (buildingId: string, level: number) => {
-      // Logic to update maintenance level
-      toast.success(`Niveau d'entretien mis à jour pour ${building.name}`);
-    };
-    
-    // Call the function directly with the adapted level
-    updateMaintenanceLevel(String(building.id), level);
+    // Adapter for function signature
+    toast.success(`Niveau d'entretien mis à jour pour ${building.name}`);
   };
 
   const handleRenovateBuilding = () => {
@@ -72,14 +64,8 @@ export const PropertyManagement: React.FC = () => {
   };
 
   const handleUpdateWorkers = (count: number) => {
-    // Create adapter for different function signatures
-    const assignWorkers = (buildingId: string, workers: number) => {
-      // Logic to assign workers
-      toast.success(`Personnel mis à jour pour ${building.name}`);
-    };
-    
-    // Call the function directly with the adapted count
-    assignWorkers(String(building.id), count);
+    // Adapter for function signature
+    toast.success(`Personnel mis à jour pour ${building.name}`);
   };
 
   return (

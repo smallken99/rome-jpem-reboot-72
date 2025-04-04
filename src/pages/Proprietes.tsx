@@ -25,7 +25,7 @@ const Proprietes = () => {
 
   // Calculer les tendances (dans un cas réel, ces données viendraient de l'historique)
   const getRandomTrend = () => {
-    const trends = ['up', 'down', 'stable'];
+    const trends = ['up', 'down', 'neutral'];
     return trends[Math.floor(Math.random() * trends.length)];
   };
   
@@ -37,7 +37,7 @@ const Proprietes = () => {
   };
 
   const handleAddProperty = () => {
-    navigate('/patrimoine/marche');
+    navigate('/patrimoine/proprietes/market');
   };
 
   return (
@@ -53,8 +53,8 @@ const Proprietes = () => {
           value={buildings.length.toString()} 
           description={propertyTrend === 'up' ? "Valeur totale en hausse" : propertyTrend === 'down' ? "Valeur totale en baisse" : "Valeur stable"}
           icon={<Building className="h-6 w-6" />}
-          trend={propertyTrend as "up" | "down" | "stable"}
-          trendValue={propertyTrend === 'stable' ? undefined : propertyTrend === 'up' ? "+2" : "-1"}
+          trend={propertyTrend}
+          trendValue={propertyTrend === 'neutral' ? undefined : propertyTrend === 'up' ? "+2" : "-1"}
         />
         <StatBox 
           title="Domaines urbains" 
@@ -73,8 +73,8 @@ const Proprietes = () => {
           value={`${stats.totalIncome.toLocaleString()} As`} 
           description={incomeTrend === 'up' ? "Rendements en hausse" : incomeTrend === 'down' ? "Rendements en baisse" : "Rendements stables"}
           icon={<Wheat className="h-6 w-6" />}
-          trend={incomeTrend as "up" | "down" | "stable"}
-          trendValue={incomeTrend === 'stable' ? undefined : incomeTrend === 'up' ? "+5%" : "-3%"}
+          trend={incomeTrend}
+          trendValue={incomeTrend === 'neutral' ? undefined : incomeTrend === 'up' ? "+5%" : "-3%"}
         />
       </div>
 

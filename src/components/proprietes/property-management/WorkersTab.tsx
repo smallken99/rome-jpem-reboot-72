@@ -1,137 +1,125 @@
 
 import React, { useState } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { OwnedBuilding } from '@/components/proprietes/types/property';
+import { Card } from '@/components/ui/card';
 import { Slider } from '@/components/ui/slider';
 import { Button } from '@/components/ui/button';
-import { OwnedBuilding } from '../types/buildingTypes';
-import { Users, Info } from 'lucide-react';
-import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Users, UserCircle } from 'lucide-react';
+import { toast } from 'sonner';
 
-interface WorkersTabProps {
+export interface WorkersTabProps {
   building: OwnedBuilding;
-  updateWorkers: (buildingId: string, workers: number) => void;
+  updateWorkers: (count: number) => void;
 }
 
 export const WorkersTab: React.FC<WorkersTabProps> = ({ building, updateWorkers }) => {
-  const [workers, setWorkers] = useState(building.workers);
-  const [hasChanged, setHasChanged] = useState(false);
+  const [workersCount, setWorkersCount] = useState(building.workers || 0);
+  const [slavesCount, setSlavesCount] = useState(building.slaves || 0);
   
-  // Determine optimal and maximum workers
-  const minWorkers = Math.max(1, Math.floor(building.workers * 0.5));
-  const optimalWorkers = building.workers;
-  const maxWorkers = Math.ceil(building.workers * 1.5);
+  const maxWorkers = building.maxWorkers || 10;
   
-  const handleWorkersChange = (value: number[]) => {
-    setWorkers(value[0]);
-    setHasChanged(true);
+  const handleWorkerUpdate = () => {
+    updateWorkers(workersCount);
+    toast.success(`Personnel mis à jour pour ${building.name}`);
   };
   
-  const handleSave = () => {
-    updateWorkers(building.id, workers);
-    setHasChanged(false);
+  const calculateEfficiency = () => {
+    const workersEfficiency = (workersCount / maxWorkers) * 0.7; // 70% de l'efficacité max
+    const slavesEfficiency = (slavesCount / 10) * 0.3; // 30% de l'efficacité max
+    
+    return Math.min(100, Math.round((workersEfficiency + slavesEfficiency) * 100));
   };
   
-  const getEfficiencyText = (workersCount: number) => {
-    if (workersCount < minWorkers) return "Insuffisant - Productivité très réduite";
-    if (workersCount < optimalWorkers * 0.8) return "Sous-optimal - Productivité réduite";
-    if (workersCount <= optimalWorkers * 1.2) return "Optimal - Excellente productivité";
-    if (workersCount <= maxWorkers) return "Surchargé - Productivité légèrement réduite";
-    return "Trop nombreux - Productivité réduite et coûts élevés";
-  };
-  
-  const getEfficiencyClass = (workersCount: number) => {
-    if (workersCount < minWorkers) return "text-red-500";
-    if (workersCount < optimalWorkers * 0.8) return "text-orange-500";
-    if (workersCount <= optimalWorkers * 1.2) return "text-green-600";
-    if (workersCount <= maxWorkers) return "text-amber-500";
-    return "text-red-500";
-  };
-  
-  const getCostPerWorker = () => {
-    // Coût par travailleur selon le type de propriété
-    if (building.type === 'urban') return 50;
-    if (building.type === 'rural') return 30;
-    return 40; // Default
-  };
-  
-  const costPerWorker = getCostPerWorker();
-  const currentCost = workers * costPerWorker;
-  const previousCost = building.workers * costPerWorker;
-  const costDifference = currentCost - previousCost;
+  const efficiency = calculateEfficiency();
   
   return (
     <div className="space-y-6">
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Users className="h-5 w-5" />
-            <span>Gestion du personnel</span>
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-6">
-          <div className="flex items-center justify-between">
-            <span className="text-sm font-medium">Personnel actuel</span>
-            <span className="font-semibold">{workers} personnes</span>
-          </div>
-          
-          <div className="mt-4">
+      <Card className="p-6">
+        <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
+          <Users className="h-5 w-5" />
+          Gestion du personnel
+        </h3>
+        
+        <div className="space-y-8">
+          <div className="space-y-4">
+            <div className="flex justify-between items-center">
+              <h4 className="font-medium">Travailleurs libres</h4>
+              <span className="font-semibold">{workersCount} / {maxWorkers}</span>
+            </div>
+            
             <Slider
-              defaultValue={[workers]}
-              max={maxWorkers * 1.2}
-              min={Math.max(1, minWorkers * 0.8)}
+              value={[workersCount]}
+              min={0}
+              max={maxWorkers}
               step={1}
-              onValueChange={handleWorkersChange}
+              onValueChange={(values) => setWorkersCount(values[0])}
+              className="my-4"
             />
+            
+            <p className="text-sm text-muted-foreground">
+              Les travailleurs libres sont rémunérés régulièrement mais sont plus efficaces que les esclaves.
+            </p>
           </div>
           
-          <div className="flex justify-between text-xs text-muted-foreground mt-2">
-            <span>Minimum ({minWorkers})</span>
-            <span>Optimal ({optimalWorkers})</span>
-            <span>Maximum ({maxWorkers})</span>
-          </div>
-          
-          <div className="mt-6 p-4 bg-slate-50 rounded-md">
-            <div className="flex items-center justify-between">
-              <span className="text-sm font-medium">Efficacité actuelle</span>
-              <span className={getEfficiencyClass(workers)}>
-                {getEfficiencyText(workers)}
-              </span>
+          <div className="space-y-4">
+            <div className="flex justify-between items-center">
+              <h4 className="font-medium">Esclaves assignés</h4>
+              <span className="font-semibold">{slavesCount} / {maxWorkers}</span>
             </div>
             
-            <div className="flex items-center justify-between mt-4">
-              <span className="text-sm font-medium">Coût du personnel</span>
-              <span className="font-semibold">{currentCost} as/an</span>
-            </div>
+            <Slider
+              value={[slavesCount]}
+              min={0}
+              max={Math.min(20, maxWorkers * 2)}
+              step={1}
+              onValueChange={(values) => setSlavesCount(values[0])}
+              className="my-4"
+            />
             
-            {hasChanged && (
-              <div className="flex items-center gap-2 mt-2 text-xs">
-                <span>
-                  {costDifference > 0 
-                    ? `Augmentation de ${costDifference} as/an`
-                    : costDifference < 0 
-                      ? `Réduction de ${Math.abs(costDifference)} as/an`
-                      : 'Coût inchangé'
-                  }
-                </span>
-              </div>
-            )}
+            <p className="text-sm text-muted-foreground">
+              Les esclaves nécessitent moins d'entretien mais sont moins efficaces.
+            </p>
           </div>
           
-          <Alert variant="default" className="mt-4">
-            <Info className="h-4 w-4" />
-            <AlertDescription>
-              Maintenir un nombre optimal de personnel améliore l'efficacité et la productivité de votre propriété.
-            </AlertDescription>
-          </Alert>
-          
-          {hasChanged && (
-            <div className="flex justify-end mt-6">
-              <Button onClick={handleSave}>
-                Enregistrer les modifications
-              </Button>
+          <div className="space-y-2">
+            <div className="flex justify-between items-center">
+              <h4 className="font-medium">Efficacité de la main d'œuvre</h4>
+              <span className="font-semibold text-green-600">{efficiency}%</span>
             </div>
-          )}
-        </CardContent>
+            
+            <div className="h-2 w-full bg-gray-200 rounded-full overflow-hidden">
+              <div 
+                className={`h-full ${efficiency > 80 ? 'bg-green-500' : efficiency > 50 ? 'bg-yellow-500' : 'bg-red-500'}`} 
+                style={{ width: `${efficiency}%` }}
+              ></div>
+            </div>
+            
+            <p className="text-sm text-muted-foreground">
+              L'efficacité influence directement les revenus et la qualité d'entretien de la propriété.
+            </p>
+          </div>
+        </div>
+        
+        <div className="mt-6 flex justify-end">
+          <Button onClick={handleWorkerUpdate}>
+            Mettre à jour le personnel
+          </Button>
+        </div>
+      </Card>
+      
+      <Card className="p-6">
+        <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
+          <UserCircle className="h-5 w-5" />
+          Personnel spécialisé
+        </h3>
+        
+        <p className="text-muted-foreground mb-4">
+          Aucun personnel spécialisé n'est assigné à cette propriété. Vous pouvez recruter des spécialistes pour améliorer les performances de cette propriété.
+        </p>
+        
+        <Button variant="outline">
+          Recruter un spécialiste
+        </Button>
       </Card>
     </div>
   );

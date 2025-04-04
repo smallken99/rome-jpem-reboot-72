@@ -1,6 +1,6 @@
 
 import { useState } from 'react';
-import { OwnedBuilding } from './types';
+import { OwnedBuilding } from '@/components/proprietes/types/property';
 import { useEconomy } from '@/hooks/useEconomy';
 import { toast } from 'sonner';
 
@@ -21,7 +21,9 @@ export function useBuildingInventory() {
       slaves: 3,
       condition: 85,
       purchaseDate: new Date(2023, 1, 15),
-      income: 2500
+      income: 2500,
+      value: 25000,
+      maintenance: 1200,
     },
     {
       id: 2,
@@ -34,7 +36,9 @@ export function useBuildingInventory() {
       slaves: 25,
       condition: 92,
       purchaseDate: new Date(2022, 5, 10),
-      income: 12000
+      income: 12000,
+      value: 120000,
+      maintenance: 6000,
     },
     {
       id: 3,
@@ -47,7 +51,9 @@ export function useBuildingInventory() {
       slaves: 12,
       condition: 95,
       purchaseDate: new Date(2022, 3, 20),
-      income: 8000
+      income: 8000,
+      value: 80000,
+      maintenance: 5000,
     },
     {
       id: 4,
@@ -60,7 +66,9 @@ export function useBuildingInventory() {
       slaves: 0,
       condition: 75,
       purchaseDate: new Date(2023, 8, 5),
-      income: 0
+      income: 0,
+      value: 40000,
+      maintenance: 4000,
     }
   ]);
 
