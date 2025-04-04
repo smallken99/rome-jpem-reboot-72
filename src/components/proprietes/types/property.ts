@@ -2,7 +2,7 @@
 import { PropertyType, PropertyStatus } from '@/types/proprietes';
 
 export interface Property {
-  id: string | number;
+  id: string;
   name: string;
   location: string;
   type: PropertyType;
@@ -41,7 +41,7 @@ export interface PropertyUpgrade {
 }
 
 export interface OwnedBuilding {
-  id: string | number;
+  id: string;
   buildingId: string;
   buildingType: string;
   name: string;
@@ -76,4 +76,23 @@ export interface BuildingPurchaseOptions {
   slaves?: number;
   customName?: string;
   buildingType?: string;
+}
+
+export interface SlaveAssignment {
+  id: string;
+  slaveId: string;
+  propertyId: string;
+  buildingId?: string;
+  startDate: Date;
+  role: string;
+  efficiency: number;
+}
+
+export interface PropertyTransaction {
+  id: string;
+  propertyId: string;
+  type: "purchase" | "sale" | "maintenance" | "upgrade" | "income" | "expense";
+  amount: number;
+  date: Date;
+  description: string;
 }

@@ -1,147 +1,128 @@
 
 import React from 'react';
-import { Child } from '../types/educationTypes';
-import { Scroll, Sword, BookOpen, Scale, AlertTriangle } from 'lucide-react';
-import { Progress } from '@/components/ui/progress';
-import { Badge } from '@/components/ui/badge';
-import { cn } from '@/lib/utils';
-import { motion } from 'framer-motion';
+import { AlertCircle, GraduationCap, X } from 'lucide-react';
+import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
+import { EducationType, Child } from '../types/educationTypes';
+import { Button } from '@/components/ui/button';
+import { getPreceptorById } from '../data/preceptors';
 
 interface EducationStatusProps {
   child: Child;
-  hasEducation: boolean;
+  hasEducation?: boolean;
   hasInvalidEducation?: boolean;
-  className?: string;
 }
 
-export const EducationStatus: React.FC<EducationStatusProps> = ({ 
-  child, 
-  hasEducation, 
-  hasInvalidEducation = false,
-  className
+export const EducationStatus: React.FC<EducationStatusProps> = ({
+  child,
+  hasEducation = false,
+  hasInvalidEducation = false
 }) => {
-  if (!hasEducation) {
+  const getEducationTypeName = (type: EducationType | string) => {
+    switch (type) {
+      case 'military': return 'Militaire';
+      case 'rhetoric': return 'Rhétorique';
+      case 'religious': return 'Religieuse';
+      case 'academic': return 'Académique';
+      default: return 'Non définie';
+    }
+  };
+  
+  const getEducationDescription = (type: EducationType | string) => {
+    switch (type) {
+      case 'military':
+        return 'Formation militaire incluant stratégie, tactique et combat.';
+      case 'rhetoric':
+        return 'Études d\'éloquence, philosophie et politique pour préparer aux carrières publiques.';
+      case 'religious':
+        return 'Éducation religieuse approfondie sur les rituels, traditions et augures romains.';
+      case 'academic':
+        return 'Instruction académique en mathématiques, littérature, histoire et sciences.';
+      default:
+        return 'Aucune éducation sélectionnée.';
+    }
+  };
+  
+  const getStatusIcon = (educationType: EducationType | string) => {
+    if (hasInvalidEducation) {
+      return <AlertCircle className="h-5 w-5 text-red-500" />;
+    }
+    
+    if (educationType === 'none' || !educationType) {
+      return <X className="h-5 w-5 text-gray-400" />;
+    }
+    
+    return <GraduationCap className="h-5 w-5 text-blue-500" />;
+  };
+  
+  // Get mentor name if assigned
+  const getMentorName = () => {
+    if (!child.preceptorId) return null;
+    
+    const preceptor = getPreceptorById(child.preceptorId);
+    return preceptor ? preceptor.name : 'Précepteur inconnu';
+  };
+  
+  if (hasInvalidEducation) {
     return (
-      <motion.div 
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ duration: 0.3 }}
-        className={cn("p-2 mb-4 bg-slate-100 rounded text-slate-600 text-sm flex items-center", className)}
-      >
-        <BookOpen className="h-4 w-4 mr-2 text-slate-400" />
-        Aucune éducation en cours
-      </motion.div>
+      <Alert variant="destructive" className="mb-4">
+        <AlertCircle className="h-4 w-4" />
+        <AlertTitle>Éducation inappropriée</AlertTitle>
+        <AlertDescription>
+          L'éducation militaire n'est pas appropriée pour une fille dans la société romaine.
+          Veuillez sélectionner un autre type d'éducation.
+        </AlertDescription>
+      </Alert>
     );
   }
   
-  const getEducationIcon = () => {
-    switch (child.educationType) {
-      case 'military':
-        return <Sword className="h-5 w-5 text-red-600" />;
-      case 'rhetoric':
-        return <Scale className="h-5 w-5 text-blue-600" />;
-      case 'religious':
-        return <BookOpen className="h-5 w-5 text-amber-600" />;
-      case 'academic':
-        return <Scroll className="h-5 w-5 text-indigo-600" />;
-      default:
-        return null;
-    }
-  };
-  
-  const getEducationName = () => {
-    switch (child.educationType) {
-      case 'military':
-        return 'Militaire';
-      case 'rhetoric':
-        return 'Rhétorique';
-      case 'religious':
-        return 'Religieuse';
-      case 'academic':
-        return 'Académique';
-      default:
-        return 'Inconnue';
-    }
-  };
-  
-  const getProgressColor = () => {
-    if (hasInvalidEducation) return 'bg-red-500';
-    
-    const progress = child.progress;
-    if (progress >= 75) return 'bg-green-500';
-    if (progress >= 50) return 'bg-green-400';
-    if (progress >= 25) return 'bg-amber-400';
-    return 'bg-amber-300';
-  };
-
-  const getYearLabel = () => {
-    const currentYear = Math.ceil(child.progress / 25);
-    const totalYears = 4; // Standard Roman education
-    return `Année ${currentYear}/${totalYears}`;
-  };
-  
-  return (
-    <motion.div 
-      className={cn("my-4 space-y-3", className)}
-      initial={{ opacity: 0, y: 10 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.4 }}
-    >
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <motion.div
-            initial={{ scale: 0.8 }}
-            animate={{ scale: 1 }}
-            transition={{ duration: 0.3 }}
-          >
-            {getEducationIcon()}
-          </motion.div>
-          <span className="font-medium">Éducation {getEducationName()}</span>
-          {hasInvalidEducation && (
-            <Badge variant="outline" className="text-red-500 border-red-200 bg-red-50">
-              <AlertTriangle className="h-3 w-3 mr-1" />
-              Incompatible
-            </Badge>
-          )}
-        </div>
-        <div className="flex items-center gap-2">
-          <span className="text-xs text-muted-foreground">{getYearLabel()}</span>
-          <motion.span 
-            className="text-sm font-medium"
-            key={child.progress}
-            initial={{ scale: 1.2 }}
-            animate={{ scale: 1 }}
-            transition={{ duration: 0.3 }}
-          >
-            {child.progress}%
-          </motion.span>
+  if (!hasEducation) {
+    return (
+      <div className="flex items-start gap-3 mb-4">
+        <X className="h-5 w-5 text-gray-400 mt-0.5" />
+        <div>
+          <h4 className="font-medium">Aucune éducation en cours</h4>
+          <p className="text-sm text-muted-foreground">
+            {child.age < 7 
+              ? "Cet enfant est trop jeune pour commencer son éducation."
+              : child.age > 17 
+                ? "Cet enfant est trop âgé pour recevoir une éducation formelle."
+                : "Sélectionnez un type d'éducation pour commencer la formation."}
+          </p>
         </div>
       </div>
-      
-      <Progress 
-        value={child.progress} 
-        className="h-2" 
-        indicatorClassName={getProgressColor()} 
-      />
-      
-      {hasInvalidEducation && (
-        <motion.div 
-          className="p-2 bg-red-50 border border-red-200 rounded text-red-700 text-sm flex items-center"
-          initial={{ opacity: 0, height: 0 }}
-          animate={{ opacity: 1, height: 'auto' }}
-          transition={{ duration: 0.3 }}
-        >
-          <AlertTriangle className="h-4 w-4 mr-2 text-red-500" />
-          Éducation militaire non adaptée aux filles romaines.
-        </motion.div>
-      )}
-
-      {child.preceptorId && (
-        <div className="mt-1 text-xs text-muted-foreground flex items-center">
-          <span className="mr-1">Précepteur assigné</span>
-          <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-        </div>
-      )}
-    </motion.div>
+    );
+  }
+  
+  return (
+    <div className="flex items-start gap-3 mb-4">
+      {getStatusIcon(child.educationType)}
+      <div>
+        <h4 className="font-medium">
+          Éducation {getEducationTypeName(child.educationType)}
+        </h4>
+        <p className="text-sm text-muted-foreground">
+          {getEducationDescription(child.educationType)}
+        </p>
+        
+        {child.progress > 0 && (
+          <div className="mt-2">
+            <div className="w-full bg-gray-200 rounded-full h-1.5 mb-1">
+              <div 
+                className="bg-blue-600 h-1.5 rounded-full" 
+                style={{ width: `${child.progress}%` }}
+              ></div>
+            </div>
+            <div className="flex justify-between items-center text-xs text-muted-foreground">
+              <span>Progression: {child.progress}%</span>
+              {child.progress >= 100 && (
+                <Button size="sm" variant="ghost" className="h-6 text-xs text-green-600 px-2">
+                  Compléter l'éducation
+                </Button>
+              )}
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
   );
 };

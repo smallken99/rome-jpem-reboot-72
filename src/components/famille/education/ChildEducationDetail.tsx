@@ -13,14 +13,15 @@ import { EducationFormActions } from './components/EducationFormActions';
 import { toast } from 'sonner';
 import { useEducationManagement } from './hooks/useEducationManagement';
 import { useChildrenManagement } from './hooks/useChildrenManagement';
-import { ArrowLeft, Save } from 'lucide-react';
+import { ArrowLeft } from 'lucide-react';
+import { EducationType } from './types/educationTypes';
 
 export const ChildEducationDetail: React.FC = () => {
   const { childId } = useParams<{ childId: string }>();
   const navigate = useNavigate();
   const { localCharacters, updateCharacter } = useCharacters();
   const [child, setChild] = useState<Character | null>(null);
-  const [selectedEducationType, setSelectedEducationType] = useState('');
+  const [selectedEducationType, setSelectedEducationType] = useState<EducationType>('rhetoric');
   const [isEducating, setIsEducating] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   
@@ -44,7 +45,7 @@ export const ChildEducationDetail: React.FC = () => {
       const foundChild = localCharacters.find(c => c.id === childId);
       if (foundChild) {
         setChild(foundChild);
-        setSelectedEducationType(foundChild.educationType || 'rhetoric');
+        setSelectedEducationType(foundChild.educationType as EducationType || 'rhetoric');
         setIsEducating(!!foundChild.currentEducation?.progress);
       }
       setIsLoading(false);
@@ -163,7 +164,7 @@ export const ChildEducationDetail: React.FC = () => {
             <CardContent className="space-y-6">
               <EducationTypeSelector
                 selectedType={selectedEducationType}
-                onChange={setSelectedEducationType}
+                onChange={(type) => setSelectedEducationType(type as EducationType)}
                 gender="male"
                 childGender={child.gender}
                 age={child.age}
@@ -208,7 +209,7 @@ export const ChildEducationDetail: React.FC = () => {
                   childAge={child.age}
                   childGender={child.gender}
                   selectedPath={selectedEducationType}
-                  onSelectPath={setSelectedEducationType}
+                  onSelectPath={(type) => setSelectedEducationType(type as EducationType)}
                 />
                 
                 <EducationFormActions

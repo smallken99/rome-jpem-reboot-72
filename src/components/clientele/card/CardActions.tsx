@@ -13,22 +13,19 @@ interface CardActionsProps {
 export const CardActions: React.FC<CardActionsProps> = ({ clientId, clientName = "Client" }) => {
   const navigate = useNavigate();
   
-  const handleFavor = (e: React.MouseEvent) => {
-    e.stopPropagation(); // Empêche la navigation vers les détails
+  const handleFavor = () => {
     console.log('Accorder une faveur au client', clientId);
     toast.success(`Faveur accordée à ${clientName}`);
   };
   
-  const handleContact = (e: React.MouseEvent) => {
-    e.stopPropagation(); // Empêche la navigation vers les détails
+  const handleContact = () => {
     console.log('Contacter le client', clientId);
     toast.success(`Message envoyé à ${clientName}`);
     // Rediriger vers la messagerie avec ce client pré-sélectionné
     // navigate(`/messages/new?recipient=${clientId}`);
   };
   
-  const handleDeleteClient = (e: React.MouseEvent) => {
-    e.stopPropagation(); // Empêche la navigation vers les détails
+  const handleDeleteClient = () => {
     toast.error(`Suppression du client ${clientName} non implémentée`);
   };
   

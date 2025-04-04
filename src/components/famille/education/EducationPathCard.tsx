@@ -28,22 +28,26 @@ const EducationPathCard: React.FC<EducationPathCardProps> = ({
       <CardContent className="pb-4">
         <p className="text-sm text-gray-600 mb-3">{path.description}</p>
         
-        <div className="mb-3">
-          <div className="text-xs font-medium text-gray-500 mb-1">Bénéfices</div>
-          <ul className="text-sm text-gray-700 space-y-1 list-disc list-inside">
-            {path.benefits.map((benefit, idx) => (
-              <li key={idx}>{benefit}</li>
-            ))}
-          </ul>
-        </div>
+        {path.benefits && (
+          <div className="mb-3">
+            <div className="text-xs font-medium text-gray-500 mb-1">Bénéfices</div>
+            <ul className="text-sm text-gray-700 space-y-1 list-disc list-inside">
+              {path.benefits.map((benefit, idx) => (
+                <li key={idx}>{benefit}</li>
+              ))}
+            </ul>
+          </div>
+        )}
         
-        <div className="flex flex-wrap gap-1 mt-2">
-          {path.specialties.map((specialty, idx) => (
-            <Badge key={idx} variant="secondary" className="text-xs">
-              {specialty}
-            </Badge>
-          ))}
-        </div>
+        {path.specialties && (
+          <div className="flex flex-wrap gap-1 mt-2">
+            {path.specialties.map((specialty, idx) => (
+              <Badge key={idx} variant="secondary" className="text-xs">
+                {specialty}
+              </Badge>
+            ))}
+          </div>
+        )}
       </CardContent>
     </Card>
   );

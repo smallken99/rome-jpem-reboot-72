@@ -3,13 +3,13 @@ import React from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import EducationPathCard from '../EducationPathCard';
-import { EducationPath, EducationType } from '../types/educationTypes';
+import { EducationPath, EducationType, Gender } from '../types/educationTypes';
 import { getAllEducationPaths } from '../data/educationPaths';
 
 interface EducationPathsTabProps {
   onSelectPath?: (path: EducationPath) => void;
   selectedPathId?: string;
-  gender?: 'male' | 'female';
+  gender?: Gender;
 }
 
 export const EducationPathsTab: React.FC<EducationPathsTabProps> = ({
@@ -22,7 +22,7 @@ export const EducationPathsTab: React.FC<EducationPathsTabProps> = ({
   // Filter paths by gender suitability
   const filteredPaths = allPaths.filter(path => {
     if (Array.isArray(path.suitableFor)) {
-      return path.suitableFor.includes(gender as any);
+      return path.suitableFor.includes(gender);
     } else if (path.suitableFor && typeof path.suitableFor === 'object') {
       return path.suitableFor.gender === 'both' || path.suitableFor.gender === gender;
     }
@@ -32,10 +32,11 @@ export const EducationPathsTab: React.FC<EducationPathsTabProps> = ({
   // Group paths by education type
   const pathsByType: Record<string, EducationPath[]> = {};
   filteredPaths.forEach(path => {
-    if (!pathsByType[path.type as string]) {
-      pathsByType[path.type as string] = [];
+    const type = path.type || 'rhetoric';
+    if (!pathsByType[type]) {
+      pathsByType[type] = [];
     }
-    pathsByType[path.type as string].push(path);
+    pathsByType[type].push(path);
   });
   
   // Get all unique types

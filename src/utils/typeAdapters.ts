@@ -7,7 +7,7 @@ import { OwnedBuilding } from '@/components/proprietes/types/property';
  */
 export const adaptOwnedBuilding = (building: Building | any): OwnedBuilding => {
   return {
-    id: building.id,
+    id: building.id.toString(),
     buildingId: building.buildingId || building.id.toString(),
     buildingType: building.buildingType || building.type || 'urban',
     name: building.name,
@@ -29,6 +29,7 @@ export const adaptOwnedBuilding = (building: Building | any): OwnedBuilding => {
     purchaseDate: building.purchaseDate || new Date(),
     lastMaintenance: building.lastMaintenance,
     description: building.description || "",
+    type: building.type || 'urban'
   };
 };
 

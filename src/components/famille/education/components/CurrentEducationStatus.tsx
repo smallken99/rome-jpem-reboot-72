@@ -3,7 +3,7 @@ import React from 'react';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { Calendar, Clock, GraduationCap } from 'lucide-react';
-import { EducationRecord, ChildEducation } from '../types/educationTypes';
+import { EducationRecord } from '../types/educationTypes';
 
 interface CurrentEducationStatusProps {
   education: EducationRecord;
@@ -53,8 +53,8 @@ export const CurrentEducationStatus: React.FC<CurrentEducationStatusProps> = ({ 
             Éducation {getEducationTypeName(education.pathType)}
           </h3>
           <div className="flex items-center gap-2 mt-1">
-            <Badge className={getStatusColor(education.status)}>
-              {getEducationStatusName(education.status)}
+            <Badge className={getStatusColor(education.status || 'in_progress')}>
+              {getEducationStatusName(education.status || 'in_progress')}
             </Badge>
             {education.startYear && (
               <span className="text-sm text-muted-foreground flex items-center gap-1">

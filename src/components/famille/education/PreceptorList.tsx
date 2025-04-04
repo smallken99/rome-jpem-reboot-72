@@ -37,7 +37,9 @@ export const PreceptorList: React.FC<PreceptorListProps> = ({
   // Filter preceptors based on parameters
   const filteredPreceptors = preceptors
     .filter(p => {
+      // If showAvailableOnly is true, filter out preceptors that are assigned
       if (showAvailableOnly && p.assigned) return false;
+      // If educationType is provided, only show preceptors with matching specialty
       if (educationType && p.specialty !== educationType) return false;
       return true;
     });

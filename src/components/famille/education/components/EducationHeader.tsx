@@ -8,8 +8,8 @@ export const EducationHeader: React.FC = () => {
   const { children, preceptors } = useEducation();
   
   // Calculate total costs
-  const hiredPreceptors = preceptors.filter(p => !p.available);
-  const totalCost = hiredPreceptors.reduce((total, p) => total + p.cost, 0);
+  const hiredPreceptors = preceptors.filter(p => p.available === false);
+  const totalCost = hiredPreceptors.reduce((total, p) => total + (p.cost || 0), 0);
   
   // Children in education
   const educatedChildren = children.filter(child => child.educationType !== 'none');
