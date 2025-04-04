@@ -1,16 +1,45 @@
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import Layout from '@/components/layout/Layout';
 import { PageHeader } from '@/components/ui-custom/PageHeader';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { PropertyCard as ListPropertyCard } from '@/components/proprietes/PropertyCard';
 import { PropertyMap } from '@/components/proprietes/PropertyMap';
 import { ResourceCard } from '@/components/proprietes/ResourceCard';
 import { StatBox } from '@/components/ui-custom/StatBox';
 import { RomanCard } from '@/components/ui-custom/RomanCard';
-import { Home, Building, MapPin, Wheat } from 'lucide-react';
+import { PropertyList } from '@/components/proprietes/PropertyList';
+import { useBuildingManagement } from '@/hooks/useBuildingManagement';
+import { usePatrimoineManager } from '@/hooks/usePatrimoineManager';
+import { useNavigate } from 'react-router-dom';
+import { Home, Building, MapPin, Wheat, ArrowUp, ArrowDown } from 'lucide-react';
 
 const Proprietes = () => {
+  const navigate = useNavigate();
+  const { buildings, stats } = useBuildingManagement();
+  const { isLoading } = usePatrimoineManager();
+  const [activeTab, setActiveTab] = useState('liste');
+  
+  // Calculer les statistiques de propriétés
+  const urbanCount = buildings.filter(b => b.type === 'urban' || b.buildingType === 'urban').length;
+  const ruralCount = buildings.filter(b => b.type === 'rural' || b.buildingType === 'rural').length;
+
+  // Calculer les tendances (dans un cas réel, ces données viendraient de l'historique)
+  const getRandomTrend = () => {
+    const trends = ['up', 'down', 'stable'];
+    return trends[Math.floor(Math.random() * trends.length)];
+  };
+  
+  const propertyTrend = getRandomTrend();
+  const incomeTrend = getRandomTrend();
+
+  const handleManageBuilding = (id: string) => {
+    navigate(`/patrimoine/proprietes/${id}`);
+  };
+
+  const handleAddProperty = () => {
+    navigate('/patrimoine/marche');
+  };
+
   return (
     <Layout>
       <PageHeader 
@@ -21,126 +50,48 @@ const Proprietes = () => {
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
         <StatBox 
           title="Propriétés totales" 
-          value="12" 
-          description="Valeur totale en hausse"
+          value={buildings.length.toString()} 
+          description={propertyTrend === 'up' ? "Valeur totale en hausse" : propertyTrend === 'down' ? "Valeur totale en baisse" : "Valeur stable"}
           icon={<Building className="h-6 w-6" />}
-          trend="up"
-          trendValue="+2"
+          trend={propertyTrend as "up" | "down" | "stable"}
+          trendValue={propertyTrend === 'stable' ? undefined : propertyTrend === 'up' ? "+2" : "-1"}
         />
         <StatBox 
           title="Domaines urbains" 
-          value="7" 
+          value={urbanCount.toString()} 
           description="Insulae et domus à Rome"
           icon={<Home className="h-6 w-6" />}
         />
         <StatBox 
           title="Domaines ruraux" 
-          value="5" 
-          description="Nouveaux domaines acquis"
+          value={ruralCount.toString()} 
+          description="Terres agricoles et villas"
           icon={<MapPin className="h-6 w-6" />}
-          trend="up"
-          trendValue="+2"
         />
         <StatBox 
-          title="Production" 
-          value="Optimale" 
-          description="Rendements agricoles stables"
+          title="Revenus annuels" 
+          value={`${stats.totalIncome.toLocaleString()} As`} 
+          description={incomeTrend === 'up' ? "Rendements en hausse" : incomeTrend === 'down' ? "Rendements en baisse" : "Rendements stables"}
           icon={<Wheat className="h-6 w-6" />}
+          trend={incomeTrend as "up" | "down" | "stable"}
+          trendValue={incomeTrend === 'stable' ? undefined : incomeTrend === 'up' ? "+5%" : "-3%"}
         />
       </div>
 
-      <Tabs defaultValue="liste" className="mb-8">
+      <Tabs defaultValue={activeTab} onValueChange={setActiveTab} className="mb-8">
         <TabsList className="border border-rome-gold/30 bg-rome-parchment">
           <TabsTrigger value="liste" className="data-[state=active]:bg-white">Vue Liste</TabsTrigger>
           <TabsTrigger value="carte" className="data-[state=active]:bg-white">Vue Carte</TabsTrigger>
         </TabsList>
         
         <TabsContent value="liste" className="pt-4">
-          <RomanCard className="mb-6">
-            <RomanCard.Header>
-              <h3 className="font-cinzel text-lg text-rome-navy">Propriétés Urbaines</h3>
-            </RomanCard.Header>
-            <RomanCard.Content>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                <ListPropertyCard
-                  name="Domus du Palatin"
-                  type="Résidence principale"
-                  location="Rome, Colline du Palatin"
-                  value="1,200,000 As"
-                  status="Excellent"
-                  imageUrl="/placeholder.svg"
-                />
-                <ListPropertyCard
-                  name="Insula de Subure"
-                  type="Immeuble de rapport"
-                  location="Rome, Quartier de Subure"
-                  value="600,000 As"
-                  status="Bon"
-                  imageUrl="/placeholder.svg"
-                />
-                <ListPropertyCard
-                  name="Villa d'Ostie"
-                  type="Résidence secondaire"
-                  location="Ostie"
-                  value="850,000 As"
-                  status="Très bon"
-                  imageUrl="/placeholder.svg"
-                />
-                <ListPropertyCard
-                  name="Boutiques du Forum"
-                  type="Commerces"
-                  location="Rome, Forum Romain"
-                  value="450,000 As"
-                  status="Bon"
-                  imageUrl="/placeholder.svg"
-                />
-                <ListPropertyCard
-                  name="Insula du Champ de Mars"
-                  type="Immeuble de rapport"
-                  location="Rome, Champ de Mars"
-                  value="580,000 As"
-                  status="Moyen"
-                  imageUrl="/placeholder.svg"
-                />
-              </div>
-            </RomanCard.Content>
-          </RomanCard>
+          <PropertyList 
+            buildings={buildings} 
+            onManageBuilding={handleManageBuilding} 
+            onAddProperty={handleAddProperty}
+          />
 
-          <RomanCard className="mb-6">
-            <RomanCard.Header>
-              <h3 className="font-cinzel text-lg text-rome-navy">Propriétés Rurales</h3>
-            </RomanCard.Header>
-            <RomanCard.Content>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                <ListPropertyCard
-                  name="Domaine de Campanie"
-                  type="Villa agricole"
-                  location="Campanie"
-                  value="900,000 As"
-                  status="Excellent"
-                  imageUrl="/placeholder.svg"
-                />
-                <ListPropertyCard
-                  name="Vignobles du Latium"
-                  type="Exploitation viticole"
-                  location="Latium"
-                  value="750,000 As"
-                  status="Très bon"
-                  imageUrl="/placeholder.svg"
-                />
-                <ListPropertyCard
-                  name="Oliveraies d'Étrurie"
-                  type="Exploitation oléicole"
-                  location="Étrurie"
-                  value="680,000 As"
-                  status="Bon"
-                  imageUrl="/placeholder.svg"
-                />
-              </div>
-            </RomanCard.Content>
-          </RomanCard>
-
-          <RomanCard>
+          <RomanCard className="mt-8">
             <RomanCard.Header>
               <h3 className="font-cinzel text-lg text-rome-navy">Ressources et Production</h3>
             </RomanCard.Header>

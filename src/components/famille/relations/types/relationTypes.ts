@@ -21,6 +21,20 @@ export interface PropertyRelation {
   type: 'shared' | 'disputed' | 'leased' | 'borrowed';
   details: string;
   value?: number;
+  startDate?: Date;  // Date du début de la relation (bail, prêt, etc.)
+  endDate?: Date;    // Date de fin (pour les baux temporaires)
+  terms?: string;    // Termes spécifiques
+  incomeShare?: number;  // Part des revenus partagés (en pourcentage)
+  maintenanceShare?: number; // Part des frais d'entretien partagés
+  history?: PropertyRelationEvent[]; // Historique des événements liés à cette relation de propriété
+}
+
+export interface PropertyRelationEvent {
+  id: string;
+  date: Date;
+  type: 'dispute' | 'agreement' | 'payment' | 'transfer' | 'other';
+  description: string;
+  impact: number; // Impact sur la relation (-100 à +100)
 }
 
 export interface RelationAction {
@@ -37,6 +51,10 @@ export interface RelationAction {
     reputation?: number;
     influence?: number;
     relationChange?: number;
+    propertyRelationChange?: {
+      propertyId: string;
+      change: 'improve' | 'degrade' | 'resolve' | 'create_dispute';
+    }
   };
 }
 
@@ -63,4 +81,8 @@ export interface RelationsContextType {
   updateRelation: (id: string, updates: Partial<FamilyRelation>) => void;
   getRelationsByType: () => Record<RelationType | 'all', FamilyRelation[]>;
   getRelationHistory: (relationId: string) => RelationHistory[];
+  addPropertyToRelation: (relationId: string, property: Omit<PropertyRelation, 'id'>) => void;
+  updatePropertyRelation: (relationId: string, propertyId: string, updates: Partial<PropertyRelation>) => void;
+  removePropertyFromRelation: (relationId: string, propertyId: string) => void;
+  getRelationsForProperty: (propertyId: string) => FamilyRelation[];
 }
