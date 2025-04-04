@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -9,13 +9,15 @@ import { OwnedBuilding } from '@/components/proprietes/types/property';
 import { PropertyActions } from './PropertyActions';
 import { PropertyRelationsPanel } from '../relations/PropertyRelationsPanel';
 import { useBuildingManagement } from '@/hooks/useBuildingManagement';
+import { BuildingSaleDialog } from './modals/BuildingSaleDialog';
 import { toast } from 'sonner';
 import { RomanCard } from '@/components/ui-custom/RomanCard';
 
 export const PropertyDetail: React.FC = () => {
   const { propertyId } = useParams<{ propertyId: string }>();
   const navigate = useNavigate();
-  const { buildings, sellBuilding, updateBuildingCondition } = useBuildingManagement();
+  const { buildings, sellBuilding, calculateBuildingValue, updateBuildingCondition } = useBuildingManagement();
+  const [isSaleDialogOpen, setIsSaleDialogOpen] = useState(false);
   
   const building = buildings.find(b => b.id === propertyId);
   
@@ -27,11 +29,13 @@ export const PropertyDetail: React.FC = () => {
           La propriété que vous recherchez n'existe pas ou a été supprimée.
         </p>
         <Button onClick={() => navigate('/patrimoine/proprietes')}>
-          Retour aux propriétés
+          Retour à la liste des propriétés
         </Button>
       </div>
     );
   }
+  
+  const estimatedValue = calculateBuildingValue(building);
   
   const getConditionColor = (condition: number) => {
     if (condition >= 80) return 'bg-green-600';
@@ -50,16 +54,23 @@ export const PropertyDetail: React.FC = () => {
   };
   
   const handleRenovate = () => {
-    updateBuildingCondition(building.id.toString(), 20);
+    updateBuildingCondition(building.id.toString());
     toast.success(`${building.name} a été rénové avec succès`);
   };
   
-  const handleSell = () => {
-    if (window.confirm(`Êtes-vous sûr de vouloir vendre ${building.name}?`)) {
-      sellBuilding(building.id.toString());
+  const handleSell = async (buildingId: string | number) => {
+    const success = sellBuilding(buildingId);
+    
+    if (success) {
       toast.success(`${building.name} a été vendu avec succès`);
       navigate('/patrimoine/proprietes');
+      return true;
     }
+    return false;
+  };
+  
+  const handleOpenSaleDialog = () => {
+    setIsSaleDialogOpen(true);
   };
 
   return (
@@ -125,7 +136,7 @@ export const PropertyDetail: React.FC = () => {
                     {(building.income || 0).toLocaleString()} As/an de revenus
                   </p>
                   <p className="text-sm text-muted-foreground">
-                    {(building.maintenanceCost || 0).toLocaleString()} As/an d'entretien
+                    {(building.maintenance || 0).toLocaleString()} As/an d'entretien
                   </p>
                 </div>
                 
@@ -151,13 +162,21 @@ export const PropertyDetail: React.FC = () => {
       <PropertyActions 
         building={building as OwnedBuilding}
         onRenovate={handleRenovate}
-        onSell={handleSell}
+        onSell={handleOpenSaleDialog}
         maintenanceEnabled={building.maintenanceEnabled}
       />
       
       <PropertyRelationsPanel 
         propertyId={building.id.toString()} 
         propertyName={building.name} 
+      />
+      
+      <BuildingSaleDialog 
+        building={building as OwnedBuilding}
+        estimatedValue={estimatedValue}
+        isOpen={isSaleDialogOpen}
+        onClose={() => setIsSaleDialogOpen(false)}
+        onSell={handleSell}
       />
     </div>
   );

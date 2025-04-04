@@ -1,31 +1,49 @@
 
-// Common building description interface
 export interface BuildingDescription {
-  id: string;  // Making id required to match the other definition
+  id: string;
   name: string;
   description: string;
-  advantages: string[];
+  type: "urban" | "rural" | "religious" | "public";
   initialCost: number;
   maintenanceCost: number;
-  prestige: number;
-  income?: number;
-  piete?: number;
-  popularite?: number;
-  reputation?: number;
-  production?: {
-    type: string;
-    amount: number;
-    unit: string;
-  };
   slaves?: {
     required: number;
     optimal: number;
-    maxProfit: number;
   };
-  basePrice?: number;
-  type?: "urban" | "rural" | "religious" | "public";
-  subType?: string;
-  requirements?: string;
-  maintenance?: string;
-  security?: string;
+  prestige: number;
+  income: number;
+  advantages: string[];
+}
+
+export interface PropertyUpgrade {
+  id: string;
+  name: string;
+  description: string;
+  cost: number;
+  buildingTypes: string[];
+  prerequisiteUpgradeId?: string;
+  effects: {
+    income?: number;
+    maintenance?: number;
+    security?: number;
+    condition?: number;
+    [key: string]: any;
+  };
+  requirements?: {
+    value?: number;
+    condition?: number;
+    upgrades?: string[];
+    [key: string]: any;
+  };
+  installed?: boolean;
+  category?: string;
+  tier?: number;
+}
+
+export enum BuildingType {
+  URBAN = "urban",
+  RURAL = "rural",
+  RELIGIOUS = "religious",
+  PUBLIC = "public",
+  OTHER = "other"
 }
