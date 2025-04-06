@@ -4,6 +4,7 @@ import { usePatrimoine } from '@/hooks/usePatrimoine';
 import { useBuildingInventory } from './useBuildingInventory';
 import { BuildingPurchaseOptions, OwnedBuilding } from './types';
 import { toast } from 'sonner';
+import { adaptOwnedBuilding } from '@/utils/typeAdapters';
 
 export function useBuildingPurchase() {
   const [isLoading, setIsLoading] = useState(false);
@@ -22,20 +23,32 @@ export function useBuildingPurchase() {
       
       // Crée un nouveau bâtiment
       const newBuilding: OwnedBuilding = {
-        id: Date.now(),
+        id: String(Date.now()),
         buildingId: options.buildingId,
         buildingType: options.type,
+        type: options.type,
         name: options.name,
         location: options.location,
         maintenanceEnabled: true,
         maintenanceCost: options.maintenanceCost,
+        maintenance: options.maintenanceCost,
         slaves: options.slaves || 0,
         condition: 100, // Nouveau bâtiment en parfait état
-        purchaseDate: new Date()
+        purchaseDate: new Date(),
+        // Champs requis
+        value: options.initialCost,
+        income: options.income || 0,
+        workers: 0,
+        securityLevel: 1,
+        maintenanceLevel: 1,
+        size: options.size || 100,
+        maxWorkers: options.maxWorkers || 5,
+        description: options.description || ''
       };
       
       // Ajouter le bâtiment à l'inventaire
-      addBuilding(newBuilding);
+      const adaptedBuilding = adaptOwnedBuilding(newBuilding);
+      addBuilding(adaptedBuilding);
       
       // Enregistrer la transaction financière
       buildingPurchased(options.name, options.initialCost);

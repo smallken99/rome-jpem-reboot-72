@@ -10,7 +10,7 @@ export const rhetoricEducationPath: EducationPath = {
   maxAge: 20,
   duration: 3,
   relatedStat: 'oratory',
-  suitableFor: { gender: 'both' },
+  suitableFor: ['male', 'female'],
   outcomes: { oratory: 10, popularity: 5 },
   skills: [
     'Art oratoire',

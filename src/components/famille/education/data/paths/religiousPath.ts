@@ -10,7 +10,7 @@ export const religiousEducationPath: EducationPath = {
   maxAge: 16,
   duration: 3,
   relatedStat: 'piety',
-  suitableFor: { gender: 'both' },
+  suitableFor: ['male', 'female'],
   outcomes: { piety: 10, popularity: 5 },
   skills: [
     'Rituels sacrés',
