@@ -58,8 +58,8 @@ export const adaptToHookBuilding = (building: PropertyOwnedBuilding): HookOwnedB
     maintenanceCost: building.maintenanceCost,
     description: building.description || '',
     upgrades: building.upgrades || [],
-    purchaseDate: building.purchaseDate?.toString() || new Date().toString(),
-    lastMaintenance: building.lastMaintenance?.toString() || new Date().toString(),
+    purchaseDate: building.purchaseDate instanceof Date ? building.purchaseDate : new Date(building.purchaseDate || Date.now()),
+    lastMaintenance: building.lastMaintenance instanceof Date ? building.lastMaintenance : (building.lastMaintenance ? new Date(building.lastMaintenance) : new Date()),
   };
 };
 

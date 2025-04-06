@@ -13,7 +13,7 @@ export const educationPaths: Record<string, EducationPath> = {
     maxAge: 18,
     suitableFor: ["male"],
     skills: ["Tactique militaire", "Commandement", "Maniement des armes", "Équitation"],
-    outcomes: { martialEducation: 10, popularity: 5 }
+    outcomes: { martial: 10, popularity: 5 }
   },
   rhetoric: {
     id: uuidv4(),
@@ -23,7 +23,7 @@ export const educationPaths: Record<string, EducationPath> = {
     relatedStat: "oratory",
     minAge: 10,
     maxAge: 20,
-    suitableFor: { gender: "both" },
+    suitableFor: ["male", "female"],
     skills: ["Art oratoire", "Persuasion", "Éloquence", "Argumentation"],
     outcomes: { oratory: 10, popularity: 5 }
   },
@@ -35,7 +35,7 @@ export const educationPaths: Record<string, EducationPath> = {
     relatedStat: "piety",
     minAge: 8,
     maxAge: 16,
-    suitableFor: { gender: "both" },
+    suitableFor: ["male", "female"],
     skills: ["Rituel sacré", "Divination", "Interprétation des présages", "Connaissance des divinités"],
     outcomes: { piety: 10, popularity: 5 }
   },
@@ -50,6 +50,30 @@ export const educationPaths: Record<string, EducationPath> = {
     suitableFor: ["male"],
     skills: ["Gouvernance", "Diplomatie", "Négociation", "Droit romain"],
     outcomes: { popularity: 8, oratory: 7 }
+  },
+  philosophical: {
+    id: uuidv4(),
+    name: "Éducation Philosophique",
+    description: "Étude des courants philosophiques grecs et romains, éthique et logique.",
+    duration: 3,
+    relatedStat: "intelligence",
+    minAge: 12,
+    maxAge: 20,
+    suitableFor: ["male", "female"],
+    skills: ["Logique", "Éthique", "Métaphysique", "Études textuelles"],
+    outcomes: { intelligence: 10, piety: 5 }
+  },
+  academic: {
+    id: uuidv4(),
+    name: "Éducation Académique",
+    description: "Études générales incluant mathématiques, histoire, littérature et sciences.",
+    duration: 3,
+    relatedStat: "intelligence",
+    minAge: 10,
+    maxAge: 18,
+    suitableFor: ["male", "female"],
+    skills: ["Mathématiques", "Histoire", "Littérature", "Sciences naturelles"],
+    outcomes: { intelligence: 8, oratory: 5 }
   }
 };
 

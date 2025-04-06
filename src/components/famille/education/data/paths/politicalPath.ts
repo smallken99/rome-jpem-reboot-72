@@ -26,3 +26,6 @@ export const politicalEducationPath: EducationPath = {
     'Finances publiques'
   ]
 };
+
+// Export for paths/index.ts compatibility
+export const politicalPath = politicalEducationPath;

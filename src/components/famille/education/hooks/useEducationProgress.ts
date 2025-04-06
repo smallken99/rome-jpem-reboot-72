@@ -84,13 +84,15 @@ export const useEducationProgress = () => {
       // Handle both number and CharacterStat types
       if (typeof statValue === 'number') {
         // For number type stats
+        const bonus = educationHistory.statBonus || 0;
         (updatedCharacter.stats[statName as keyof typeof updatedCharacter.stats] as number) = 
-          Math.min((statValue as number) + (educationHistory.statBonus || 0), 80);
+          Math.min((statValue as number) + bonus, 80);
       } else if (statValue && typeof statValue === 'object' && 'value' in statValue) {
         // For CharacterStat type
         const statObj = statValue as CharacterStat;
+        const bonus = educationHistory.statBonus || 0;
         // Don't exceed max value (usually 80 from education alone)
-        statObj.value = Math.min(statObj.value + (educationHistory.statBonus || 0), 80);
+        statObj.value = Math.min(statObj.value + bonus, 80);
       }
     }
     

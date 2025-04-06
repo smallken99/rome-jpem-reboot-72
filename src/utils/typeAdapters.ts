@@ -14,7 +14,7 @@ export function adaptOwnedBuilding(building: Building | any): OwnedBuilding {
     id: building.id ? building.id.toString() : String(Date.now()),
     name: building.name || 'Bâtiment sans nom',
     buildingId: building.buildingId || (building.id ? building.id.toString() : String(Date.now())),
-    buildingType: building.buildingType || building.type || 'other',
+    buildingType: building.buildingType || building.type || 'urban',
     type: building.type || building.buildingType || 'urban',
     location: building.location || 'Rome',
     condition: building.condition !== undefined ? building.condition : 100,
