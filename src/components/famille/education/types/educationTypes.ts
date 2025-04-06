@@ -10,13 +10,14 @@ export interface EducationPath {
   description: string;
   duration?: number;
   relatedStat: string;
-  outcomes: Record<string, number> | any[] | number;
+  outcomes: Record<string, number>;
   skills?: string[];
   minAge?: number;
   maxAge?: number;
-  suitableFor?: Gender[] | { gender: Gender | 'both' };
+  suitableFor?: Gender[];
   specialties?: string[];
   benefits?: string[];
+  icon?: string;
 }
 
 export interface Child {
@@ -30,6 +31,8 @@ export interface Child {
   progress: number;
   mentor?: string | null;
   preceptorId?: string;
+  specialties?: string[];
+  status?: string;
   currentEducation?: {
     type: string;
     mentor: string | null;
@@ -37,7 +40,40 @@ export interface Child {
     skills: any[];
     yearsCompleted: number;
     totalYears: number;
+    statBonus?: Record<string, number>;
+    speciality?: string;
   };
+}
+
+export interface EducationRecord {
+  childId: string;
+  type: EducationType;
+  startDate: string;
+  completionDate?: string;
+  mentor?: string;
+  results?: any;
+  skills?: string[];
+}
+
+export interface EducationFormData {
+  type: EducationType;
+  mentor?: string;
+  mentorId?: string;
+  customFocus?: string;
+}
+
+export interface EducationHistory {
+  records: EducationRecord[];
+}
+
+export interface ChildEducation {
+  type: EducationType;
+  progress: number;
+  mentor?: string;
+  mentorQuality?: number;
+  startDate?: string;
+  estimatedCompletion?: string;
+  skills: string[];
 }
 
 export interface Preceptor {
@@ -61,6 +97,8 @@ export interface Preceptor {
   reputation?: number;
   teachingStyle?: string;
   portrait?: string;
+  childId?: string;
+  assigned?: boolean;
 }
 
 export interface PreceptorsByType {

@@ -26,3 +26,6 @@ export const religiousEducationPath: EducationPath = {
     'Ritualisme'
   ]
 };
+
+// Export for paths/index.ts compatibility
+export const religiousPath = religiousEducationPath;

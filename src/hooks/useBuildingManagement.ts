@@ -4,8 +4,9 @@ import { useBuildings } from './useBuildings';
 import { useBuildingPurchase } from '@/components/proprietes/hooks/building/useBuildingPurchase';
 import { useBuildingSale } from '@/components/proprietes/hooks/building/useBuildingSale';
 import { useSenatorConstruction } from '@/components/proprietes/hooks/building/useSenatorConstruction';
-import { adaptOwnedBuilding } from '@/utils/typeAdapters';
+import { adaptOwnedBuilding, adaptToPropertyBuilding } from '@/utils/buildingAdapter';
 import { toast } from 'sonner';
+import { OwnedBuilding } from '@/components/proprietes/types/property';
 
 export const useBuildingManagement = () => {
   const {
@@ -22,7 +23,7 @@ export const useBuildingManagement = () => {
   const { purchaseBuilding, isLoading: isPurchasing } = useBuildingPurchase();
   const { sellBuilding, isLoading: isSelling } = useBuildingSale();
   const senatorConstruction = useSenatorConstruction();
-  const [selectedBuilding, setSelectedBuilding] = useState(buildings[0] || null);
+  const [selectedBuilding, setSelectedBuilding] = useState<OwnedBuilding | null>(buildings[0] || null);
   
   useEffect(() => {
     if (buildings.length > 0 && !selectedBuilding) {
@@ -50,8 +51,7 @@ export const useBuildingManagement = () => {
       };
       
       // Appel à la fonction d'achat
-      purchaseBuilding(buildingDetails);
-      return true;
+      return purchaseBuilding(buildingDetails);
     } catch (error) {
       console.error("Erreur lors de l'ajout de la propriété:", error);
       toast.error("Une erreur est survenue lors de l'ajout de la propriété");
@@ -60,26 +60,30 @@ export const useBuildingManagement = () => {
   }, [purchaseBuilding]);
   
   // Fonction pour mettre à jour la condition d'un bâtiment
-  const updateBuildingCondition = useCallback((buildingId: string | number) => {
+  const updateBuildingCondition = useCallback((buildingId: string): boolean => {
     const building = getBuilding(String(buildingId));
     if (!building) return false;
     
     try {
       updateBuildingProperty(String(buildingId), 'condition', 100);
+      toast.success("Bâtiment entièrement rénové");
       return true;
     } catch (error) {
       console.error("Erreur lors de la mise à jour de l'état du bâtiment:", error);
+      toast.error("Une erreur est survenue lors de la rénovation");
       return false;
     }
   }, [getBuilding, updateBuildingProperty]);
   
   // Assigner des esclaves à un bâtiment
-  const assignSlaves = useCallback((buildingId: string, slaveCount: number) => {
+  const assignSlaves = useCallback((buildingId: string, slaveCount: number): boolean => {
     try {
       updateBuildingProperty(buildingId, 'slaves', slaveCount);
+      toast.success(`${slaveCount} esclaves assignés au bâtiment`);
       return true;
     } catch (error) {
       console.error("Erreur lors de l'assignation d'esclaves:", error);
+      toast.error("Une erreur est survenue");
       return false;
     }
   }, [updateBuildingProperty]);
@@ -100,6 +104,6 @@ export const useBuildingManagement = () => {
     isPurchasing,
     isSelling,
     // Fonctions de construction des sénateurs
-    senatorConstruction: senatorConstruction
+    senatorConstruction
   };
 };

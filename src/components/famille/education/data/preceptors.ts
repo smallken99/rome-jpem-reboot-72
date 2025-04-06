@@ -1,141 +1,92 @@
 
-import { Preceptor, EducationType } from '../types/educationTypes';
+import { EducationType, Preceptor } from '../types/educationTypes';
 import { v4 as uuidv4 } from 'uuid';
 
-export const preceptors: Preceptor[] = [
+// Liste des précepteurs disponibles
+const preceptors: Preceptor[] = [
   {
     id: uuidv4(),
-    name: "Marcus Aurelius",
-    specialty: "philosophical",
-    speciality: "philosophical",
-    specialties: ["Stoïcisme", "Éthique", "Logique"],
-    expertise: 90,
-    experience: 20,
+    name: 'Marcus Cornelius',
+    specialty: 'rhetoric',
+    specialization: 'rhetoric',
+    speciality: 'rhetoric',
+    specialties: ['Discours politique', 'Plaidoirie'],
+    expertise: 85,
+    experience: 12,
     cost: 5000,
     price: 5000,
     available: true,
-    skill: 90,
-    quality: 5,
-    description: "Philosophe stoïcien renommé",
-    status: "available"
-  },
-  {
-    id: uuidv4(),
-    name: "Quintus Horatius",
-    specialty: "rhetoric",
-    speciality: "rhetoric",
-    specialties: ["Poésie", "Rhétorique", "Grammaire"],
-    expertise: 85,
-    experience: 15,
-    cost: 4000,
-    price: 4000,
-    available: true,
     skill: 85,
     quality: 4,
-    description: "Poète et orateur talentueux",
-    status: "available"
+    description: 'Ancien avocat renommé, maintenant précepteur d\'élite',
+    status: 'available',
+    childId: undefined,
+    assigned: false,
+    traits: ['Éloquent', 'Patient'],
+    background: 'Ancien avocat du forum',
+    reputation: 80,
+    teachingStyle: 'Socratique'
   },
   {
     id: uuidv4(),
-    name: "Gaius Scipio",
-    specialty: "military",
-    speciality: "military",
-    specialties: ["Tactique", "Stratégie", "Combat"],
-    expertise: 95,
-    experience: 25,
-    cost: 6000,
-    price: 6000,
+    name: 'Publius Decius',
+    specialty: 'military',
+    specialization: 'military',
+    speciality: 'military',
+    specialties: ['Tactique', 'Stratégie'],
+    expertise: 90,
+    experience: 20,
+    cost: 7000,
+    price: 7000,
     available: true,
-    skill: 95,
+    skill: 90,
     quality: 5,
-    description: "Ancien général des légions romaines",
-    status: "available"
+    description: 'Ancien centurion de la légion romaine',
+    status: 'available',
+    childId: undefined,
+    assigned: false,
+    traits: ['Discipliné', 'Rigoureux'],
+    background: 'Vétéran des campagnes gauloises',
+    reputation: 85,
+    teachingStyle: 'Autoritaire'
   },
   {
     id: uuidv4(),
-    name: "Lucius Seneca",
-    specialty: "political",
-    speciality: "political",
-    specialties: ["Diplomatie", "Gouvernance", "Droit"],
-    expertise: 88,
-    experience: 22,
-    cost: 5500,
-    price: 5500,
-    available: true,
-    skill: 88,
-    quality: 4,
-    description: "Ancien conseiller impérial et diplomate",
-    status: "available"
-  },
-  {
-    id: uuidv4(),
-    name: "Publius Marius",
-    specialty: "religious",
-    speciality: "religious",
-    specialties: ["Rituels", "Divination", "Théologie"],
-    expertise: 80,
-    experience: 18,
-    cost: 4800,
-    price: 4800,
-    available: true,
-    skill: 80,
-    quality: 4,
-    description: "Ancien grand prêtre de Jupiter",
-    status: "available"
-  },
-  {
-    id: uuidv4(),
-    name: "Titus Livius",
-    specialty: "academic",
-    speciality: "academic",
-    specialties: ["Histoire", "Géographie", "Mathématiques"],
-    expertise: 92,
-    experience: 30,
-    cost: 5800,
-    price: 5800,
-    available: true,
-    skill: 92,
-    quality: 5,
-    description: "Historien et académicien respecté",
-    status: "available"
-  },
-  {
-    id: uuidv4(),
-    name: "Claudius Ptolemaeus",
-    specialty: "academic",
-    speciality: "academic",
-    specialties: ["Astronomie", "Mathématiques", "Géographie"],
-    expertise: 93,
-    experience: 35,
-    cost: 6500,
-    price: 6500,
-    available: true,
-    skill: 93,
-    quality: 5,
-    description: "Savant alexandrin aux multiples talents",
-    status: "available"
-  },
-  {
-    id: uuidv4(),
-    name: "Julia Domna",
-    specialty: "philosophical",
-    speciality: "philosophical",
-    specialties: ["Néoplatonisme", "Éthique", "Métaphysique"],
-    expertise: 87,
+    name: 'Quintus Fabius',
+    specialty: 'religious',
+    specialization: 'religious',
+    speciality: 'religious',
+    specialties: ['Rites', 'Augures'],
+    expertise: 75,
     experience: 15,
-    cost: 5200,
-    price: 5200,
+    cost: 4500,
+    price: 4500,
     available: true,
-    skill: 87,
+    skill: 75,
     quality: 4,
-    description: "Philosophe et intellectuelle respectée",
-    status: "available"
+    description: 'Ancien prêtre du temple de Jupiter',
+    status: 'available',
+    childId: undefined,
+    assigned: false,
+    traits: ['Pieux', 'Scrupuleux'],
+    background: 'Serviteur des dieux depuis sa jeunesse',
+    reputation: 70,
+    teachingStyle: 'Traditionnel'
   }
 ];
 
-// Export a function to get preceptors by type
-export const getPreceptorsByType = (type: EducationType): Preceptor[] => {
-  return preceptors.filter(preceptor => 
-    preceptor.specialty === type || preceptor.speciality === type
-  );
+// Fonctions d'accès aux précepteurs
+export const getAllPreceptors = (): Preceptor[] => preceptors;
+
+export const getPreceptorById = (id: string): Preceptor | undefined => {
+  return preceptors.find(p => p.id === id);
 };
+
+export const getPreceptorsByType = (type: EducationType): Preceptor[] => {
+  return preceptors.filter(p => p.specialty === type || p.specialization === type);
+};
+
+// Alias pour la compatibilité
+export const getPreceptorsForType = getPreceptorsByType;
+
+export default preceptors;

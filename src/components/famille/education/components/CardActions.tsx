@@ -1,17 +1,17 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { Edit, Plus, Trash } from 'lucide-react';
+import { StartEducationDialog } from '../StartEducationDialog';
 import { EducationType } from '../types/educationTypes';
+import { BookOpen, RotateCw, Pencil } from 'lucide-react';
 
 interface CardActionsProps {
-  educationType: EducationType | 'none';
+  educationType: EducationType;
   childId: string;
   childGender: 'male' | 'female';
   childAge: number;
-  onChangeEducation?: () => void;
   onStartEducation?: () => void;
-  onRemoveEducation?: () => void;
+  onChangeEducation?: () => void;
 }
 
 export const CardActions: React.FC<CardActionsProps> = ({
@@ -19,54 +19,70 @@ export const CardActions: React.FC<CardActionsProps> = ({
   childId,
   childGender,
   childAge,
-  onChangeEducation,
   onStartEducation,
-  onRemoveEducation
+  onChangeEducation
 }) => {
-  // Check if child has education
-  const hasEducation = educationType !== 'none';
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
   
-  // Check if child is eligible for education (age between 7 and 17)
-  const isEligible = childAge >= 7 && childAge <= 17;
+  const handleStartEducation = (childId: string, educationType: string, mentorId: string | null) => {
+    // Dans un cas réel, cette fonction communiquerait avec un contexte ou un hook
+    console.log(`Démarrage de l'éducation de type ${educationType} pour l'enfant ${childId} avec précepteur ${mentorId || 'aucun'}`);
+    setIsDialogOpen(false);
+    
+    // Appeler le callback parent si fourni
+    if (onStartEducation) {
+      onStartEducation();
+    }
+  };
   
-  if (!isEligible) {
+  // Vérifier si l'enfant est en âge de recevoir une éducation (entre 7 et 16 ans généralement)
+  const canBeEducated = childAge >= 7 && childAge <= 16;
+  
+  if (educationType !== 'none') {
     return (
-      <div className="mt-4 text-xs text-slate-500 italic">
-        {childAge < 7 
-          ? 'Trop jeune pour l\'éducation (minimum 7 ans)' 
-          : 'Trop âgé pour l\'éducation (maximum 17 ans)'}
-      </div>
-    );
-  }
-  
-  if (hasEducation) {
-    return (
-      <div className="flex justify-end gap-2 mt-4">
-        {onChangeEducation && (
-          <Button variant="outline" size="sm" onClick={onChangeEducation}>
-            <Edit className="mr-1 h-4 w-4" />
-            Modifier
-          </Button>
-        )}
-        
-        {onRemoveEducation && (
-          <Button variant="outline" size="sm" className="text-red-600 hover:bg-red-50" onClick={onRemoveEducation}>
-            <Trash className="mr-1 h-4 w-4" />
-            Arrêter
-          </Button>
-        )}
+      <div className="flex justify-end mt-3">
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={onChangeEducation}
+        >
+          <Pencil className="mr-1 h-4 w-4" />
+          Modifier l'éducation
+        </Button>
       </div>
     );
   }
   
   return (
-    <div className="flex justify-end mt-4">
-      {onStartEducation && (
-        <Button size="sm" onClick={onStartEducation}>
-          <Plus className="mr-1 h-4 w-4" />
-          Commencer l'éducation
-        </Button>
-      )}
-    </div>
+    <>
+      <div className="flex justify-end mt-3">
+        {!canBeEducated ? (
+          <Button
+            variant="outline"
+            size="sm"
+            disabled
+          >
+            {childAge < 7 ? "Trop jeune pour l'éducation" : "Trop âgé pour l'éducation"}
+          </Button>
+        ) : (
+          <Button
+            variant="default"
+            size="sm"
+            onClick={() => onStartEducation ? onStartEducation() : setIsDialogOpen(true)}
+          >
+            <BookOpen className="mr-1 h-4 w-4" />
+            Commencer l'éducation
+          </Button>
+        )}
+      </div>
+      
+      <StartEducationDialog
+        isOpen={isDialogOpen}
+        onClose={() => setIsDialogOpen(false)}
+        childId={childId}
+        preceptors={[]} // Dans un cas réel, les précepteurs seraient fournis par un contexte ou un hook
+        onStartEducation={handleStartEducation}
+      />
+    </>
   );
 };

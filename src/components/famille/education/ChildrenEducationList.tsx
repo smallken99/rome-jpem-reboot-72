@@ -57,6 +57,7 @@ export const ChildrenEducationList: React.FC<ChildrenEducationListProps> = ({
   
   // Récupérer le nom du précepteur
   const getPreceptorName = (childId: string) => {
+    // Trouver le précepteur qui est assigné à cet enfant
     const preceptor = preceptors.find(p => p.childId === childId);
     return preceptor ? preceptor.name : 'Aucun';
   };

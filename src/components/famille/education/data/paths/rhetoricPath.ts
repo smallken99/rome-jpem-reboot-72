@@ -26,3 +26,6 @@ export const rhetoricEducationPath: EducationPath = {
     'Enseignement'
   ]
 };
+
+// Export for paths/index.ts compatibility
+export const rhetoricPath = rhetoricEducationPath;

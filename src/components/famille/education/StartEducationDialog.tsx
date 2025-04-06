@@ -50,7 +50,7 @@ export const StartEducationDialog: React.FC<StartEducationDialogProps> = ({
   };
   
   const availablePreceptors = preceptors.filter(p => 
-    p.status !== 'assigned' || !p.childId
+    !p.assigned || !p.childId
   );
   
   return (
