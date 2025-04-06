@@ -2,11 +2,12 @@
 import { useState } from 'react';
 import { toast } from 'sonner';
 import { Preceptor, EducationType, PreceptorsByType } from '../types/educationTypes';
-import { preceptors as initialPreceptors } from '../data/preceptors';
+import { getAllPreceptors } from '../data/preceptors';
 import { v4 as uuidv4 } from 'uuid';
 
 export const usePreceptorManagement = () => {
-  const [preceptors, setPreceptors] = useState<Preceptor[]>(initialPreceptors);
+  // Initialisation avec les précepteurs par défaut
+  const [preceptors, setPreceptors] = useState<Preceptor[]>(getAllPreceptors());
   const [hiredPreceptors, setHiredPreceptors] = useState<Preceptor[]>([]);
   const [hiringInProgress, setHiringInProgress] = useState(false);
 
@@ -85,16 +86,19 @@ export const usePreceptorManagement = () => {
 
   // Group preceptors by their specialization
   const getPreceptorsByType = (preceptorsToGroup: Preceptor[]): PreceptorsByType => {
-    return preceptorsToGroup.reduce((acc, preceptor) => {
-      const type = (preceptor.specialty || preceptor.speciality) as EducationType;
+    const result = {} as PreceptorsByType;
+    
+    preceptorsToGroup.forEach(preceptor => {
+      const type = (preceptor.specialty || preceptor.speciality || 'rhetoric') as EducationType;
       
-      if (!acc[type]) {
-        acc[type] = [];
+      if (!result[type]) {
+        result[type] = [];
       }
       
-      acc[type].push(preceptor);
-      return acc;
-    }, {} as PreceptorsByType);
+      result[type].push(preceptor);
+    });
+    
+    return result;
   };
 
   // Filter preceptors by type

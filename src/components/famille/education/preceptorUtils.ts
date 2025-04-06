@@ -3,56 +3,67 @@ import { Preceptor, EducationType } from './types/educationTypes';
 import { v4 as uuidv4 } from 'uuid';
 
 /**
- * Generate a new preceptor with default values
+ * Crée un nouveau précepteur avec des valeurs par défaut
  */
-export const createPreceptor = (specialization: EducationType): Preceptor => {
+export function createPreceptor(data: Partial<Preceptor>): Preceptor {
   return {
-    id: uuidv4(),
-    name: generatePreceptorName(),
-    specialization: specialization,
-    skill: 60 + Math.floor(Math.random() * 30),
-    cost: 1000 + Math.floor(Math.random() * 2000),
-    background: "Ancien précepteur d'une famille patricienne",
-    traits: ["Érudit", "Discipliné"],
-    status: 'available',
-    specialty: getSpecialtyForType(specialization),
-    expertise: 65 + Math.floor(Math.random() * 25),
-    experience: 5 + Math.floor(Math.random() * 15),
-    price: 1200 + Math.floor(Math.random() * 1800),
-    available: true,
-    description: "Un précepteur expérimenté, spécialisé dans l'éducation romaine traditionnelle.",
-    teachingStyle: "Rigoureux et méthodique",
-    specialties: [],
-    reputation: 70 + Math.floor(Math.random() * 20)
+    id: data.id || uuidv4(),
+    name: data.name || "Nouveau précepteur",
+    specialization: data.specialization as EducationType || "rhetoric",
+    specialty: data.specialty || data.speciality || "Rhétorique",
+    expertise: data.expertise || 5,
+    specialties: data.specialties || [],
+    experience: data.experience || 5,
+    cost: data.cost || 3000,
+    price: data.price || 3000,
+    background: data.background || "",
+    traits: data.traits || [],
+    status: data.status || "available",
+    available: data.available !== undefined ? data.available : true,
+    skill: data.skill || 5,
+    quality: data.quality || 3,
+    description: data.description || "",
+    teachingStyle: data.teachingStyle || "Standard",
+    reputation: data.reputation || 50
   };
-};
+}
 
 /**
- * Generate a roman-style name for preceptors
+ * Calcule le prix d'un précepteur en fonction de son expertise et son expérience
  */
-const generatePreceptorName = (): string => {
-  const firstNames = ["Marcus", "Gaius", "Lucius", "Publius", "Quintus", "Titus", "Aulus", "Servius"];
-  const lastNames = ["Tullius", "Cornelius", "Fabius", "Claudius", "Valerius", "Caecilius", "Aurelius"];
+export function calculatePreceptorPrice(preceptor: Preceptor): number {
+  const basePrice = 2000;
+  const expertiseFactor = preceptor.expertise * 300;
+  const experienceFactor = preceptor.experience * 100;
+  const reputationBonus = (preceptor.reputation || 50) > 80 ? 1000 : 0;
   
-  return `${firstNames[Math.floor(Math.random() * firstNames.length)]} ${lastNames[Math.floor(Math.random() * lastNames.length)]}`;
-};
+  return basePrice + expertiseFactor + experienceFactor + reputationBonus;
+}
 
 /**
- * Get a suitable specialty based on education type
+ * Évalue la qualité d'un précepteur sur une échelle de 1 à 5
  */
-const getSpecialtyForType = (type: EducationType): string => {
-  const specialties: Record<string, string[]> = {
-    military: ["Stratégie militaire", "Combat à l'épée", "Commandement", "Tactiques de siège"],
-    political: ["Rhétorique politique", "Droit romain", "Administration"],
-    religious: ["Rites et cérémonies", "Augures et divination", "Droit sacré"],
-    artistic: ["Poésie", "Musique", "Sculpture"],
-    philosophical: ["Philosophie stoïcienne", "Éthique", "Logique"],
-    rhetoric: ["Art oratoire", "Débat politique", "Éloquence judiciaire"],
-    academic: ["Mathématiques", "Astronomie", "Médecine"],
-    none: ["Éducation générale"]
-  };
+export function evaluatePreceptorQuality(preceptor: Preceptor): number {
+  const expertise = preceptor.expertise || 5;
+  const experience = preceptor.experience || 5;
+  const reputation = preceptor.reputation || 50;
   
-  const typeKey = type as string;
-  const options = specialties[typeKey] || specialties.academic;
-  return options[Math.floor(Math.random() * options.length)];
-};
+  const score = (expertise * 0.5) + (experience * 0.3) + (reputation * 0.2 / 10);
+  
+  if (score >= 9) return 5; // Exceptionnel
+  if (score >= 7) return 4; // Excellent
+  if (score >= 5) return 3; // Bon
+  if (score >= 3) return 2; // Moyen
+  return 1; // Médiocre
+}
+
+/**
+ * Génère un formatage pour afficher les traits d'un précepteur
+ */
+export function formatPreceptorTraits(preceptor: Preceptor): string {
+  if (!preceptor.traits || preceptor.traits.length === 0) {
+    return "Aucun trait particulier";
+  }
+  
+  return preceptor.traits.join(", ");
+}

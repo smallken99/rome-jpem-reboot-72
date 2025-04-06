@@ -23,7 +23,7 @@ export const EducationPreceptor: React.FC<EducationPreceptorProps> = ({
   const [selectedPreceptor, setSelectedPreceptor] = useState<Preceptor | null>(null);
   
   // Recherche du précepteur actuellement assigné
-  const assignedPreceptorId = child.currentEducation?.mentor || child.preceptorId;
+  const assignedPreceptorId = child.currentEducation?.mentor || child.education?.preceptorId;
   const assignedPreceptor = assignedPreceptorId 
     ? preceptors.find(p => p.id === assignedPreceptorId) 
     : null;
@@ -131,7 +131,7 @@ export const EducationPreceptor: React.FC<EducationPreceptorProps> = ({
                   >
                     <div className="flex justify-between">
                       <h4 className="font-medium">{preceptor.name}</h4>
-                      <span className="text-sm">{preceptor.price} deniers/an</span>
+                      <span className="text-sm">{preceptor.price || preceptor.cost} deniers/an</span>
                     </div>
                     <p className="text-sm text-muted-foreground">
                       {preceptor.specialty} &bull; Expertise: {preceptor.expertise}/10
