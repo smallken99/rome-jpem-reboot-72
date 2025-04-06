@@ -30,10 +30,10 @@ export function adaptOwnedBuilding(building: Building | any): OwnedBuilding {
     size: building.size || 100,
     maxWorkers: building.maxWorkers || 5,
     upgrades: building.upgrades || [],
-    description: building.description || '',
     status: building.status || 'good',
     purchaseDate: building.purchaseDate ? new Date(building.purchaseDate) : new Date(),
-    lastMaintenance: building.lastMaintenance
+    lastMaintenance: building.lastMaintenance,
+    description: building.description || ''
   };
   
   // Copie des champs additionnels
@@ -71,5 +71,5 @@ export const adaptToBuilding = (ownedBuilding: OwnedBuilding): Building => {
   };
 };
 
-// Ensure backward compatibility with any code that may have used `adaptBuilding`
+// Pour assurer la rétrocompatibilité
 export const adaptBuilding = adaptOwnedBuilding;

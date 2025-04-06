@@ -5,24 +5,24 @@ import { v4 as uuidv4 } from 'uuid';
 export const rhetoricEducationPath: EducationPath = {
   id: uuidv4(),
   name: 'Éducation Rhétorique',
-  description: 'Formation à l\'art oratoire, la persuasion et l\'éloquence nécessaire au forum et au sénat.',
+  description: "Maîtrise de l'art oratoire, de l'argumentation et de la persuasion, essentiels à la vie politique romaine.",
   minAge: 10,
   maxAge: 20,
-  duration: 3,
+  duration: 4,
   relatedStat: 'oratory',
   suitableFor: ['male', 'female'],
   outcomes: { oratory: 10, popularity: 5 },
   skills: [
-    'Art oratoire',
-    'Persuasion',
     'Éloquence',
-    'Débat public',
-    'Composition littéraire'
+    'Débat politique',
+    'Composition de discours',
+    'Argumentation juridique',
+    'Techniques de mémorisation'
   ],
   specialties: [
-    'Plaidoirie judiciaire',
-    'Discours politique',
-    'Poésie et littérature',
+    'Orateur public',
+    'Plaidoirie',
+    'Politique',
     'Enseignement'
   ]
 };

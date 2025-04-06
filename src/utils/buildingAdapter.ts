@@ -128,3 +128,6 @@ export function adaptOwnedBuilding(building: any): PropertyOwnedBuilding {
   
   return adaptedBuilding;
 }
+
+// Assurons-nous que la fonction est bien exportée
+export const adaptBuilding = adaptOwnedBuilding;

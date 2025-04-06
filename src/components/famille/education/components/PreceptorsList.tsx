@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { getPreceptorsForType } from '../data/preceptors';
-import { Preceptor } from '../types/educationTypes';
+import { Preceptor, EducationType } from '../types/educationTypes';
 import { PreceptorCard } from './PreceptorCard';
 import { toast } from '@/components/ui-custom/toast';
 
@@ -23,7 +23,7 @@ export const PreceptorsList: React.FC<PreceptorsListProps> = ({
   const [hiredPreceptors, setHiredPreceptors] = useState<Preceptor[]>([]);
   
   // Obtenir les précepteurs disponibles selon le type d'éducation
-  const availablePreceptors = getPreceptorsForType(educationType);
+  const availablePreceptors = getPreceptorsForType(educationType as EducationType);
   
   const handleHirePreceptor = () => {
     if (!selectedPreceptor) return;

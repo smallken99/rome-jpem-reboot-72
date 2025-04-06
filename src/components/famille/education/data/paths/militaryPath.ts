@@ -5,25 +5,25 @@ import { v4 as uuidv4 } from 'uuid';
 export const militaryEducationPath: EducationPath = {
   id: uuidv4(),
   name: 'Éducation Militaire',
-  description: 'Formation aux arts de la guerre, à la stratégie, et au commandement nécessaires pour servir dans les légions romaines.',
+  description: 'Formation aux arts de la guerre, stratégie militaire et commandement des troupes.',
   minAge: 12,
-  maxAge: 20,
-  duration: 3,
+  maxAge: 22,
+  duration: 5,
   relatedStat: 'martial',
-  suitableFor: ['male'], // Uniquement pour les garçons dans la Rome antique
+  suitableFor: ['male'],
   outcomes: { martial: 10, leadership: 5 },
   skills: [
-    'Combat rapproché',
-    'Tactiques de légion',
+    'Tactiques de combat',
+    'Stratégie militaire',
     'Commandement',
-    'Fortification',
-    'Logistique militaire'
+    'Maniement des armes',
+    'Équitation de combat'
   ],
   specialties: [
+    'Légionnaire',
     'Cavalerie',
-    'Infanterie',
-    'Siège',
-    'Stratégie navale'
+    'Stratégie navale',
+    'Génie militaire'
   ]
 };
 

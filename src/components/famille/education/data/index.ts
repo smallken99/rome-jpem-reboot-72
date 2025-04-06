@@ -21,3 +21,6 @@ export const getAllEducationPaths = (): EducationPath[] => {
 export const getEducationPathById = (id: string): EducationPath | undefined => {
   return Object.values(educationPaths).find(path => path.id === id);
 };
+
+// Exporter educationPaths pour l'utiliser dans EducationDetail.tsx
+export { educationPaths };

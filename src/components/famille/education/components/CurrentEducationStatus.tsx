@@ -42,7 +42,7 @@ export const CurrentEducationStatus: React.FC<CurrentEducationStatusProps> = ({ 
 
   const progressPercentage = education.currentYear && education.totalYears 
     ? Math.min(100, (education.currentYear / education.totalYears) * 100)
-    : 0;
+    : (education.progress || 0);
 
   return (
     <div className="space-y-4">
@@ -50,7 +50,7 @@ export const CurrentEducationStatus: React.FC<CurrentEducationStatusProps> = ({ 
         <div>
           <h3 className="text-lg font-medium flex items-center gap-2">
             <GraduationCap className="h-5 w-5 text-primary" />
-            Éducation {getEducationTypeName(education.pathType)}
+            Éducation {getEducationTypeName(education.pathType || education.type)}
           </h3>
           <div className="flex items-center gap-2 mt-1">
             <Badge className={getStatusColor(education.status || 'in_progress')}>
@@ -65,7 +65,7 @@ export const CurrentEducationStatus: React.FC<CurrentEducationStatusProps> = ({ 
           </div>
         </div>
 
-        {education.status === 'in_progress' && education.currentYear && education.totalYears && (
+        {(education.status === 'in_progress') && education.currentYear && education.totalYears && (
           <div className="text-right">
             <div className="text-sm font-medium">
               {education.currentYear} / {education.totalYears} années

@@ -1,5 +1,5 @@
 
-// Ajoutons les types manquants et corrigeons les définitions
+// Types d'éducation complets et cohérents
 export type Gender = 'male' | 'female';
 
 export type EducationType = 'rhetoric' | 'military' | 'political' | 'religious' | 'philosophical' | 'academic' | 'none';
@@ -33,26 +33,38 @@ export interface Child {
   preceptorId?: string;
   specialties?: string[];
   status?: string;
-  currentEducation?: {
-    type: string;
-    mentor: string | null;
-    progress: number;
-    skills: any[];
-    yearsCompleted: number;
-    totalYears: number;
-    statBonus?: Record<string, number>;
-    speciality?: string;
-  };
+  currentEducation?: EducationProgress;
+}
+
+export interface EducationProgress {
+  type: string;
+  mentor: string | null;
+  progress: number;
+  skills: any[];
+  yearsCompleted: number;
+  totalYears: number;
+  statBonus?: Record<string, number>;
+  speciality?: string;
+  pathType?: string;
+  status?: string;
+  startYear?: number;
 }
 
 export interface EducationRecord {
+  id?: string;
   childId: string;
   type: EducationType;
+  pathType?: string;
   startDate: string;
+  startYear?: number;
   completionDate?: string;
   mentor?: string;
   results?: any;
   skills?: string[];
+  currentYear?: number;
+  totalYears?: number;
+  status?: string;
+  progress?: number;
 }
 
 export interface EducationFormData {
@@ -60,10 +72,15 @@ export interface EducationFormData {
   mentor?: string;
   mentorId?: string;
   customFocus?: string;
+  childId?: string;
+  pathId?: string;
+  preceptorId?: string;
 }
 
 export interface EducationHistory {
   records: EducationRecord[];
+  type?: EducationType;
+  statBonus?: Record<string, number>;
 }
 
 export interface ChildEducation {

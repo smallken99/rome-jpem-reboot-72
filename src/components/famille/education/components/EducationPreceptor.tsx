@@ -1,12 +1,12 @@
 
-import React from 'react';
-import { Card, CardHeader, CardContent, CardTitle } from '@/components/ui/card';
-import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@/components/ui/select';
-import { Badge } from '@/components/ui/badge';
+import React, { useState } from 'react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { GraduationCap, Star, UserX } from 'lucide-react';
-import { Preceptor } from '../types/educationTypes';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { Character } from '@/types/character';
+import { Preceptor } from '../types/educationTypes';
+import { User, UserCheck, UserX } from 'lucide-react';
+import { Badge } from '@/components/ui/badge';
 
 interface EducationPreceptorProps {
   child: Character;
@@ -19,134 +19,145 @@ export const EducationPreceptor: React.FC<EducationPreceptorProps> = ({
   preceptors,
   onAssignPreceptor
 }) => {
-  const assignedPreceptorId = child.currentEducation?.mentor || child.preceptorId;
-  const assignedPreceptor = assignedPreceptorId ? 
-    preceptors.find(p => p.id === assignedPreceptorId) : 
-    undefined;
+  const [showPreceptorDialog, setShowPreceptorDialog] = useState(false);
+  const [selectedPreceptor, setSelectedPreceptor] = useState<Preceptor | null>(null);
   
-  // Filter available preceptors by child's education type
-  const availablePreceptors = preceptors.filter(p => 
-    p.available && 
-    (p.specialty === child.educationType || p.speciality === child.educationType)
-  );
-
-  const handleAssignPreceptor = (preceptorId: string) => {
-    onAssignPreceptor(preceptorId);
+  // Recherche du précepteur actuellement assigné
+  const assignedPreceptorId = child.currentEducation?.mentor || child.preceptorId;
+  const assignedPreceptor = assignedPreceptorId 
+    ? preceptors.find(p => p.id === assignedPreceptorId) 
+    : null;
+  
+  // Gestion de l'assignation d'un précepteur
+  const handleAssignPreceptor = () => {
+    if (!selectedPreceptor) return;
+    
+    onAssignPreceptor(selectedPreceptor.id);
+    setShowPreceptorDialog(false);
   };
-
-  // Render quality stars
-  const renderQualityStars = (quality: number) => {
-    return Array.from({ length: quality }).map((_, index) => (
-      <Star key={index} className="h-3 w-3 fill-yellow-400 text-yellow-400" />
-    ));
-  };
-
+  
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="flex items-center space-x-2">
-          <GraduationCap className="h-5 w-5" />
-          <span>Précepteur</span>
-        </CardTitle>
+        <CardTitle>Précepteur</CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
         {assignedPreceptor ? (
           <div className="space-y-3">
-            <div className="flex items-center space-x-3">
-              <div className="h-12 w-12 rounded-full bg-secondary flex items-center justify-center">
-                {assignedPreceptor.portrait ? (
-                  <img
-                    src={assignedPreceptor.portrait}
-                    alt={assignedPreceptor.name}
-                    className="h-12 w-12 rounded-full object-cover"
-                  />
-                ) : (
-                  <GraduationCap className="h-6 w-6 text-primary" />
-                )}
+            <div className="flex items-center gap-3">
+              <div className="bg-primary/10 p-2 rounded-full">
+                <User className="h-6 w-6 text-primary" />
               </div>
               <div>
-                <h4 className="font-medium">{assignedPreceptor.name}</h4>
-                <div className="flex items-center space-x-1 mt-1">
-                  {renderQualityStars(assignedPreceptor.quality)}
-                </div>
+                <h3 className="font-medium">{assignedPreceptor.name}</h3>
+                <p className="text-sm text-muted-foreground">
+                  {assignedPreceptor.specialty}
+                </p>
               </div>
             </div>
             
-            <div>
-              <div className="text-sm text-muted-foreground mb-1">Spécialité</div>
-              <Badge variant="secondary" className="font-normal">
-                {assignedPreceptor.specialty || assignedPreceptor.speciality}
-              </Badge>
+            <div className="grid grid-cols-2 gap-2 text-sm">
+              <div>
+                <span className="text-muted-foreground">Expertise:</span>
+                <div className="font-medium">{assignedPreceptor.expertise}/10</div>
+              </div>
+              <div>
+                <span className="text-muted-foreground">Expérience:</span>
+                <div className="font-medium">{assignedPreceptor.experience} ans</div>
+              </div>
             </div>
             
-            <div>
-              <div className="text-sm text-muted-foreground mb-1">Expérience</div>
-              <div className="text-sm">{assignedPreceptor.experience} années</div>
-            </div>
-            
-            <div>
-              <div className="text-sm text-muted-foreground mb-1">Compétence</div>
-              <div className="w-full h-2 bg-secondary rounded-full">
-                <div 
-                  className="h-full bg-primary rounded-full" 
-                  style={{ width: `${assignedPreceptor.expertise}%` }}
-                ></div>
+            <div className="space-y-1">
+              <span className="text-sm text-muted-foreground">Spécialités:</span>
+              <div className="flex flex-wrap gap-1">
+                {assignedPreceptor.specialties?.map((specialty, index) => (
+                  <Badge key={index} variant="secondary">{specialty}</Badge>
+                ))}
               </div>
             </div>
             
             <Button 
               variant="outline" 
               size="sm" 
-              className="w-full mt-2"
-              onClick={() => handleAssignPreceptor('')}
+              className="w-full"
+              onClick={() => setShowPreceptorDialog(true)}
             >
-              <UserX className="h-4 w-4 mr-2" />
-              Retirer le précepteur
+              <UserX className="h-4 w-4 mr-1" />
+              Changer de précepteur
             </Button>
           </div>
         ) : (
-          <div className="space-y-4">
-            <div className="text-center py-2 text-muted-foreground text-sm">
-              {child.educationType === 'none' ? (
-                "Sélectionnez d'abord un type d'éducation"
-              ) : availablePreceptors.length > 0 ? (
-                "Choisissez un précepteur pour l'enfant"
+          <div className="space-y-3">
+            <div className="bg-muted/50 rounded-lg p-5 text-center">
+              <User className="h-8 w-8 mx-auto mb-2 text-muted-foreground" />
+              <p className="text-muted-foreground">
+                Aucun précepteur assigné
+              </p>
+              <p className="text-xs text-muted-foreground mt-1">
+                Un précepteur peut améliorer considérablement l'éducation de votre enfant
+              </p>
+            </div>
+            
+            <Button 
+              className="w-full" 
+              onClick={() => setShowPreceptorDialog(true)}
+            >
+              <UserCheck className="h-4 w-4 mr-1" />
+              Assigner un précepteur
+            </Button>
+          </div>
+        )}
+        
+        <Dialog open={showPreceptorDialog} onOpenChange={setShowPreceptorDialog}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Choisir un précepteur</DialogTitle>
+              <DialogDescription>
+                Sélectionnez un précepteur pour l'éducation de {child.name}
+              </DialogDescription>
+            </DialogHeader>
+            
+            <div className="space-y-3 max-h-96 overflow-y-auto py-2">
+              {preceptors.length > 0 ? (
+                preceptors.map(preceptor => (
+                  <div
+                    key={preceptor.id}
+                    className={`p-3 border rounded-lg cursor-pointer transition ${
+                      selectedPreceptor?.id === preceptor.id 
+                        ? 'bg-primary/10 border-primary' 
+                        : 'hover:bg-muted/50'
+                    }`}
+                    onClick={() => setSelectedPreceptor(preceptor)}
+                  >
+                    <div className="flex justify-between">
+                      <h4 className="font-medium">{preceptor.name}</h4>
+                      <span className="text-sm">{preceptor.price} deniers/an</span>
+                    </div>
+                    <p className="text-sm text-muted-foreground">
+                      {preceptor.specialty} &bull; Expertise: {preceptor.expertise}/10
+                    </p>
+                  </div>
+                ))
               ) : (
-                "Aucun précepteur disponible pour ce type d'éducation"
+                <p className="text-center text-muted-foreground py-4">
+                  Aucun précepteur disponible
+                </p>
               )}
             </div>
             
-            {child.educationType !== 'none' && availablePreceptors.length > 0 && (
-              <Select 
-                onValueChange={handleAssignPreceptor} 
-                disabled={child.educationType === 'none'}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Choisir un précepteur" />
-                </SelectTrigger>
-                <SelectContent>
-                  {availablePreceptors.map(preceptor => (
-                    <SelectItem key={preceptor.id} value={preceptor.id}>
-                      {preceptor.name} - {renderQualityStars(preceptor.quality)}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            )}
-            
-            {child.educationType !== 'none' && availablePreceptors.length === 0 && (
-              <Button 
-                variant="outline" 
-                size="sm" 
-                className="w-full"
-                onClick={() => window.location.href = '/famille/education/preceptors'}
-              >
-                <GraduationCap className="h-4 w-4 mr-2" />
-                Recruter des précepteurs
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowPreceptorDialog(false)}>
+                Annuler
               </Button>
-            )}
-          </div>
-        )}
+              <Button 
+                onClick={handleAssignPreceptor}
+                disabled={!selectedPreceptor}
+              >
+                Assigner
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
       </CardContent>
     </Card>
   );
