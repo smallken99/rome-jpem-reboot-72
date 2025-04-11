@@ -7,11 +7,11 @@ import { OwnedBuilding } from '@/components/proprietes/types/property';
  */
 export const adaptToPropertyBuilding = (building: Building | any): OwnedBuilding => {
   return {
-    id: building.id.toString(),
-    buildingId: building.id.toString(),
+    id: building.id?.toString() || '',
+    buildingId: building.id?.toString() || '',
     buildingType: building.type || 'urban',
     type: building.type || 'urban',
-    name: building.name,
+    name: building.name || '',
     location: building.location || 'Rome',
     value: building.value || 0,
     maintenance: building.maintenance || 0,
@@ -27,7 +27,7 @@ export const adaptToPropertyBuilding = (building: Building | any): OwnedBuilding
     size: building.size || 100,
     upgrades: building.upgrades || [],
     purchaseDate: building.purchaseDate || new Date(),
-    lastMaintenance: building.lastMaintenance,
+    lastMaintenance: building.lastMaintenance || null,
     description: building.description || ""
   };
 };
@@ -39,10 +39,10 @@ export const adaptToBuilding = (ownedBuilding: OwnedBuilding): Building => {
   return {
     id: ownedBuilding.id.toString(),
     type: ownedBuilding.buildingType || ownedBuilding.type || 'urban',
-    name: ownedBuilding.name,
+    name: ownedBuilding.name || '',
     location: ownedBuilding.location || 'Rome',
     value: ownedBuilding.value || 0,
-    maintenance: ownedBuilding.maintenance || 0,
+    maintenance: ownedBuilding.maintenance || ownedBuilding.maintenanceCost || 0,
     condition: ownedBuilding.condition || 100,
     status: ownedBuilding.status || 'good',
     workers: ownedBuilding.workers || 0,

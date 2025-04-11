@@ -1,7 +1,7 @@
 
 import { useState } from 'react';
 import { toast } from 'sonner';
-import { Child, EducationHistory, ChildEducation } from '../types/educationTypes';
+import { Child, EducationHistory, ChildEducation, EducationType } from '../types/educationTypes';
 import { Character, CharacterStat } from '@/types/character';
 
 export const useEducationProgress = () => {
@@ -54,7 +54,7 @@ export const useEducationProgress = () => {
     if (isComplete && onComplete) {
       // Create education history entry
       const completedEducation: EducationHistory = {
-        type: currentEducation.type as any,
+        type: currentEducation.type as EducationType,
         mentor: currentEducation.mentor || "Autodidacte",
         speciality: currentEducation.speciality,
         completedAt: child.age,
@@ -78,7 +78,7 @@ export const useEducationProgress = () => {
     const updatedCharacter = { ...character };
     const statName = getRelatedStatToUpdate(educationHistory.type);
     
-    if (statName && updatedCharacter.stats[statName as keyof typeof updatedCharacter.stats]) {
+    if (statName && updatedCharacter.stats && statName in updatedCharacter.stats) {
       const statValue = updatedCharacter.stats[statName as keyof typeof updatedCharacter.stats];
       
       // Handle both number and CharacterStat types

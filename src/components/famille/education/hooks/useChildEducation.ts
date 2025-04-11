@@ -1,6 +1,7 @@
+
 import { useState, useCallback } from 'react';
 import { v4 as uuidv4 } from 'uuid';
-import { Child, Preceptor, EducationPath, EducationRecord, EducationFormData } from '../types/educationTypes';
+import { Child, Preceptor, EducationPath, EducationRecord, EducationFormData, EducationType } from '../types/educationTypes';
 
 export const useChildEducation = () => {
   const [educationRecords, setEducationRecords] = useState<EducationRecord[]>([]);
@@ -43,10 +44,10 @@ export const useChildEducation = () => {
         cost: 1000,
         suitableFor: ['male']
       },
-      mentor: {
+      mentor: preceptorId ? {
         id: uuidv4(),
         name: 'Gaius Marius',
-        specialization: 'military',
+        specialization: 'military' as EducationType,
         specialty: 'combat',
         skill: 85,
         cost: 2000,
@@ -61,8 +62,9 @@ export const useChildEducation = () => {
         specialties: ['Combat', 'Strategy', 'Formation'],
         description: 'A battle-hardened veteran with years of service in the legions',
         teachingStyle: 'Rigorous and practical',
-        reputation: 80
-      },
+        reputation: 80,
+        speciality: 'combat'
+      } : null,
       startDate: new Date().toISOString(),
       progress: 0,
       completed: false,

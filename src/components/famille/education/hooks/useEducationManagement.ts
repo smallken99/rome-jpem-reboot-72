@@ -1,6 +1,6 @@
 
 import { useState, useCallback } from 'react';
-import { Child, Preceptor } from '../types/educationTypes';
+import { Child, Preceptor, EducationType } from '../types/educationTypes';
 import { Character } from '@/types/character';
 import { toast } from 'sonner';
 import { usePreceptorManagement } from './usePreceptorManagement';
@@ -34,10 +34,10 @@ export const useEducationManagement = (
       c.id === childId 
         ? { 
             ...c, 
-            educationType, 
+            educationType: educationType as EducationType, 
             progress: 0, 
             currentEducation: {
-              type: educationType,
+              type: educationType as EducationType,
               mentor: mentorId,
               progress: 0,
               skills: [],
@@ -52,7 +52,7 @@ export const useEducationManagement = (
     const character = characters.find(char => char.id === childId);
     if (character) {
       updateCharacter(childId, {
-        educationType,
+        educationType: educationType as EducationType,
         currentEducation: {
           type: educationType,
           mentor: null,
@@ -138,9 +138,9 @@ export const useEducationManagement = (
       c.id === childId 
         ? { 
             ...c, 
-            educationType: 'none',
+            educationType: 'none' as EducationType,
             progress: 0,
-            specialties: [...c.specialties, ...acquiredSkills],
+            specialties: [...(c.specialties || []), ...acquiredSkills],
             currentEducation: undefined
           } 
         : c

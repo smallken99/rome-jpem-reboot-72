@@ -26,8 +26,5 @@ export const getEducationPathByType = (type: string): EducationPath | undefined 
   return educationPaths[type];
 };
 
-export * from './religiousPath';
-export * from './rhetoricPath';
-export * from './militaryPath';
-export * from './academicPath';
-export * from './politicalPath';
+// Export the individual paths
+export { religiousPath, rhetoricPath, militaryPath, academicPath, politicalPath };

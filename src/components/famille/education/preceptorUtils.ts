@@ -9,7 +9,7 @@ export function createPreceptor(data: Partial<Preceptor>): Preceptor {
   return {
     id: data.id || uuidv4(),
     name: data.name || "Nouveau précepteur",
-    specialization: data.specialization as EducationType || "rhetoric",
+    specialization: (data.specialization || "rhetoric") as EducationType,
     specialty: data.specialty || data.speciality || "Rhétorique",
     expertise: data.expertise || 5,
     specialties: data.specialties || [],
@@ -24,7 +24,8 @@ export function createPreceptor(data: Partial<Preceptor>): Preceptor {
     quality: data.quality || 3,
     description: data.description || "",
     teachingStyle: data.teachingStyle || "Standard",
-    reputation: data.reputation || 50
+    reputation: data.reputation || 50,
+    speciality: data.speciality || data.specialty || "Rhétorique"
   };
 }
 

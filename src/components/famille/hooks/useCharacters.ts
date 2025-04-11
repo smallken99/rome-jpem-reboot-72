@@ -1,7 +1,7 @@
 
 import { useState, useEffect } from 'react';
 import { v4 as uuidv4 } from 'uuid';
-import { Character } from '@/types/character';
+import { Character, CharacterStat, EducationInfo } from '@/types/character';
 import { toast } from 'sonner';
 
 const STORAGE_KEY = 'character-store';
@@ -35,8 +35,8 @@ export const useCharacters = () => {
     const newCharacter: Character = {
       id: uuidv4(),
       name: characterData.name || 'Sans Nom',
-      firstName: characterData.firstName,
-      lastName: characterData.lastName,
+      firstName: characterData.firstName || '',
+      lastName: characterData.lastName || '',
       gender: characterData.gender || 'male',
       age: characterData.age || 30,
       role: characterData.role || 'member',
@@ -45,15 +45,17 @@ export const useCharacters = () => {
       birthYear: characterData.birthYear || -80,
       deathYear: characterData.deathYear,
       relationshipStatus: characterData.relationshipStatus || 'single',
-      parentId: characterData.parentId,
+      parentIds: characterData.parentIds || [],
       spouseId: characterData.spouseId,
       education: characterData.education || {
+        type: 'none',
         completed: false,
-        specialties: []
+        specialties: [],
+        mentor: null
       },
       stats: characterData.stats || {
         oratory: 5,
-        martial: 5,
+        martialEducation: 5,
         politics: 5,
         popularity: 5,
         loyalty: 5,
@@ -63,9 +65,10 @@ export const useCharacters = () => {
       },
       traits: characterData.traits || [],
       portrait: characterData.portrait,
-      titles: characterData.titles || [],
+      title: characterData.title || '',
       educationType: characterData.educationType || 'none',
       currentEducation: characterData.currentEducation,
+      isHeadOfFamily: characterData.isHeadOfFamily || false
     };
 
     setLocalCharacters((prev) => [...prev, newCharacter]);
@@ -111,7 +114,7 @@ export const useCharacters = () => {
     }
     
     // If parents aren't found, use default values
-    const lastName = father ? father.lastName || father.name.split(' ').pop() : "Romanus";
+    const lastName = father ? father.lastName || father.name.split(' ').pop() || "Romanus" : "Romanus";
     const gender = Math.random() > 0.5 ? 'male' : 'female';
     const firstName = gender === 'male' ? "Gaius" : "Julia";
     
@@ -123,10 +126,10 @@ export const useCharacters = () => {
       age: 0,
       birthYear: -30, // Current year in the game setting
       role: 'child',
-      parentId: father?.id,
+      parentIds: parentIds,
       stats: {
         oratory: 2,
-        martial: 2,
+        martialEducation: 2,
         politics: 2,
         popularity: 2,
         loyalty: 5,

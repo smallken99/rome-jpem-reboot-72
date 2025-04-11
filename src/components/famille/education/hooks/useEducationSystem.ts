@@ -1,6 +1,6 @@
 
 import { useState, useCallback } from 'react';
-import { EducationPath, EducationType, Preceptor, Gender } from '../types/educationTypes';
+import { EducationPath, EducationType, Preceptor } from '../types/educationTypes';
 import { getAllEducationPaths, getEducationPathById as fetchEducationPathById } from '../data/educationPaths';
 import { v4 as uuidv4 } from 'uuid';
 
@@ -25,6 +25,7 @@ export const useEducationSystem = () => {
         name: `Master of ${type}`,
         specialty: type as EducationType,
         speciality: type as EducationType,
+        specialization: type as EducationType,
         skill: 80,
         cost: 4000,
         price: 4000,
@@ -54,7 +55,8 @@ export const useEducationSystem = () => {
         if (Array.isArray(path.suitableFor)) {
           genderEligible = path.suitableFor.includes(gender);
         } else if (typeof path.suitableFor === 'object') {
-          genderEligible = path.suitableFor.gender === 'both' || path.suitableFor.gender === gender;
+          const suitableGender = path.suitableFor.gender || 'both';
+          genderEligible = suitableGender === 'both' || suitableGender === gender;
         }
       }
       

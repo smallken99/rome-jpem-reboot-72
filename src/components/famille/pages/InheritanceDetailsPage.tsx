@@ -4,9 +4,12 @@ import { useParams } from 'react-router-dom';
 import Layout from '@/components/layout/Layout';
 import { PageHeader } from '@/components/ui-custom/PageHeader';
 import { InheritanceDetails } from '@/components/famille/inheritance/InheritanceDetails';
+import { useCharacters } from '../hooks/useCharacters';
 
 export const InheritanceDetailsPage: React.FC = () => {
   const { heirId } = useParams<{ heirId: string }>();
+  const { localCharacters } = useCharacters();
+  const heir = heirId ? localCharacters.find(c => c.id === heirId) : null;
   
   return (
     <Layout>
@@ -15,7 +18,13 @@ export const InheritanceDetailsPage: React.FC = () => {
         subtitle="Configuration détaillée de la succession"
       />
       <div className="roman-card">
-        <InheritanceDetails heirId={heirId || ''} />
+        {heir ? (
+          <InheritanceDetails character={heir} />
+        ) : (
+          <div className="p-6 text-center">
+            <p>Héritier non trouvé</p>
+          </div>
+        )}
       </div>
     </Layout>
   );
