@@ -1,126 +1,161 @@
 
-import React, { createContext, useContext, useState, useCallback, ReactNode } from 'react';
-import { v4 as uuidv4 } from 'uuid';
-import { 
-  FamilyRelation, 
-  RelationType, 
-  RelationHistory, 
-  RelationsContextType 
-} from '../types/relationTypes';
-import { useLocalStorage } from '@/hooks/useLocalStorage';
-import { useToast } from '@/components/ui/use-toast';
+import React, { createContext, useContext, useState } from 'react';
+import { FamilyRelation, RelationType, RelationHistory, PropertyRelation, RelationsContextType } from '../types/relationTypes';
+import { generateUniqueId } from '@/utils/idGenerator';
 
-const RelationsContext = createContext<RelationsContextType | undefined>(undefined);
+// Create the context with a default value
+const RelationsContext = createContext<RelationsContextType>({
+  relations: [],
+  addRelation: () => '',
+  removeRelation: () => {},
+  updateRelation: () => {},
+  getRelationsByType: () => ({ all: [], positive: [], negative: [], neutral: [] }),
+  getRelationHistory: () => [],
+  addPropertyToRelation: () => {},
+  updatePropertyRelation: () => {},
+  removePropertyFromRelation: () => {},
+  getRelationsForProperty: () => []
+});
 
-export const RelationsProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
-  const [relations, setRelations] = useLocalStorage<FamilyRelation[]>('family-relations', []);
-  const [relationHistory, setRelationHistory] = useLocalStorage<RelationHistory[]>('relation-history', []);
-  const { toast } = useToast();
-  
-  // Ajouter une relation
-  const addRelation = useCallback((relationData: Omit<FamilyRelation, 'id'>) => {
-    const newRelation: FamilyRelation = {
-      ...relationData,
-      id: uuidv4(),
-      strength: relationData.strength || 50,
-      lastInteraction: relationData.lastInteraction || new Date(),
+// Hook to use the relations context
+export const useRelations = () => useContext(RelationsContext);
+
+// Provider component
+export const RelationsProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const [relations, setRelations] = useState<FamilyRelation[]>([]);
+  const [relationHistories, setRelationHistories] = useState<Record<string, RelationHistory[]>>({});
+
+  // Add a new relation
+  const addRelation = (relationData: Omit<FamilyRelation, 'id'>): string => {
+    const id = generateUniqueId();
+    const newRelation: FamilyRelation = { 
+      id, 
+      ...relationData 
     };
     
     setRelations(prev => [...prev, newRelation]);
+    return id;
+  };
+
+  // Remove a relation by ID
+  const removeRelation = (id: string): void => {
+    setRelations(prev => prev.filter(relation => relation.id !== id));
     
-    // Ajouter à l'historique
-    const newHistoryEntry: RelationHistory = {
-      id: uuidv4(),
-      relationId: newRelation.id,
-      date: new Date(),
-      event: `Relation établie avec ${newRelation.targetName}`,
-      impact: 0
-    };
-    
-    setRelationHistory(prev => [...prev, newHistoryEntry]);
-    
-    toast({
-      title: "Relation créée",
-      description: `Vous avez établi une relation avec ${newRelation.targetName}.`,
-    });
-    
-    return newRelation.id;
-  }, [setRelations, setRelationHistory, toast]);
-  
-  // Supprimer une relation
-  const removeRelation = useCallback((id: string) => {
-    const relationToRemove = relations.find(r => r.id === id);
-    
-    if (relationToRemove) {
-      setRelations(prev => prev.filter(relation => relation.id !== id));
-      
-      toast({
-        title: "Relation supprimée",
-        description: `Votre relation avec ${relationToRemove.targetName} a été supprimée.`,
-      });
-    }
-  }, [relations, setRelations, toast]);
-  
-  // Mettre à jour une relation
-  const updateRelation = useCallback((id: string, updates: Partial<FamilyRelation>) => {
+    // Also clean up any history for this relation
+    const newHistories = { ...relationHistories };
+    delete newHistories[id];
+    setRelationHistories(newHistories);
+  };
+
+  // Update an existing relation
+  const updateRelation = (id: string, updates: Partial<FamilyRelation>): void => {
     setRelations(prev => 
       prev.map(relation => 
-        relation.id === id ? { ...relation, ...updates } : relation
+        relation.id === id 
+          ? { ...relation, ...updates } 
+          : relation
       )
     );
     
-    // Si le type de relation change, ajouter à l'historique
-    if (updates.type) {
-      const relation = relations.find(r => r.id === id);
-      if (relation) {
-        const newHistoryEntry: RelationHistory = {
-          id: uuidv4(),
-          relationId: id,
-          date: new Date(),
-          event: `Type de relation changé à "${updates.type}" avec ${relation.targetName}`,
-          impact: updates.type === 'positive' ? 10 : updates.type === 'negative' ? -10 : 0
-        };
-        
-        setRelationHistory(prev => [...prev, newHistoryEntry]);
-      }
+    // Add a history entry if strength changes
+    if (updates.strength !== undefined) {
+      const historyEntry: RelationHistory = {
+        id: generateUniqueId(),
+        relationId: id,
+        date: new Date(),
+        event: `Force de relation mise à jour à ${updates.strength}`,
+        impact: updates.strength || 0
+      };
+      
+      setRelationHistories(prev => ({
+        ...prev,
+        [id]: [...(prev[id] || []), historyEntry]
+      }));
     }
-  }, [relations, setRelations, setRelationHistory]);
-  
-  // Obtenir l'historique d'une relation
-  const getRelationHistory = useCallback((relationId: string) => {
-    return relationHistory.filter(history => history.relationId === relationId);
-  }, [relationHistory]);
-  
-  // Grouper les relations par type
-  const getRelationsByType = useCallback(() => {
-    return {
-      positive: relations.filter(relation => relation.type === 'positive'),
-      negative: relations.filter(relation => relation.type === 'negative'),
-      neutral: relations.filter(relation => relation.type === 'neutral'),
-      all: relations
+  };
+
+  // Get relations grouped by type
+  const getRelationsByType = () => {
+    const result = {
+      all: relations,
+      positive: relations.filter(r => r.type === 'positive'),
+      negative: relations.filter(r => r.type === 'negative'),
+      neutral: relations.filter(r => r.type === 'neutral')
     };
-  }, [relations]);
-  
-  const value = {
-    relations,
-    addRelation,
-    removeRelation,
-    updateRelation,
-    getRelationHistory,
-    getRelationsByType
+    return result;
+  };
+
+  // Get history for a specific relation
+  const getRelationHistory = (relationId: string): RelationHistory[] => {
+    return relationHistories[relationId] || [];
   };
   
+  // Add a property to a relation
+  const addPropertyToRelation = (relationId: string, property: Omit<PropertyRelation, 'id'>): void => {
+    setRelations(prev => prev.map(relation => {
+      if (relation.id === relationId) {
+        const properties = relation.properties || [];
+        return {
+          ...relation,
+          properties: [
+            ...properties,
+            { ...property, propertyId: property.propertyId }
+          ]
+        };
+      }
+      return relation;
+    }));
+  };
+  
+  // Update a property in a relation
+  const updatePropertyRelation = (relationId: string, propertyId: string, updates: Partial<PropertyRelation>): void => {
+    setRelations(prev => prev.map(relation => {
+      if (relation.id === relationId && relation.properties) {
+        return {
+          ...relation,
+          properties: relation.properties.map(prop => 
+            prop.propertyId === propertyId ? { ...prop, ...updates } : prop
+          )
+        };
+      }
+      return relation;
+    }));
+  };
+  
+  // Remove a property from a relation
+  const removePropertyFromRelation = (relationId: string, propertyId: string): void => {
+    setRelations(prev => prev.map(relation => {
+      if (relation.id === relationId && relation.properties) {
+        return {
+          ...relation,
+          properties: relation.properties.filter(prop => prop.propertyId !== propertyId)
+        };
+      }
+      return relation;
+    }));
+  };
+  
+  // Get all relations for a specific property
+  const getRelationsForProperty = (propertyId: string): FamilyRelation[] => {
+    return relations.filter(relation => 
+      relation.properties?.some(prop => prop.propertyId === propertyId)
+    );
+  };
+
   return (
-    <RelationsContext.Provider value={value}>
+    <RelationsContext.Provider value={{ 
+      relations, 
+      addRelation, 
+      removeRelation, 
+      updateRelation, 
+      getRelationsByType, 
+      getRelationHistory,
+      addPropertyToRelation,
+      updatePropertyRelation,
+      removePropertyFromRelation,
+      getRelationsForProperty
+    }}>
       {children}
     </RelationsContext.Provider>
   );
-};
-
-export const useRelations = () => {
-  const context = useContext(RelationsContext);
-  if (context === undefined) {
-    throw new Error('useRelations must be used within a RelationsProvider');
-  }
-  return context;
 };

@@ -1,55 +1,101 @@
 
 import { useState, useCallback } from 'react';
 import { Character } from '@/types/character';
-import { FamilyAlliance } from '@/data/alliances';
+import { generateUniqueId } from '@/utils/idGenerator';
 import { useGameTime } from '@/hooks/useGameTime';
 
-export const useAllianceBirths = (
-  characters: Character[], 
-  onChildBirth?: (parentIds?: string[]) => void
-) => {
-  const [lastBirthYear, setLastBirthYear] = useState<number | null>(null);
+type BirthHandler = (characterData: any) => Character;
+
+export const useAllianceBirths = (characters: Character[], addNewCharacter: BirthHandler) => {
   const { year } = useGameTime();
+  const [lastBirthYear, setLastBirthYear] = useState<number | null>(
+    Math.max(
+      ...characters
+        .filter(char => char.lastChildBirthYear)
+        .map(char => char.lastChildBirthYear || 0),
+      0
+    ) || null
+  );
   
-  // Trouver les couples mariés
-  const marriedCouples = characters.filter(c => 
-    c.gender === 'female' && 
-    ((c.relation && c.relation.includes('Épouse')) || c.spouseId)
-  ).map(wife => {
-    const husband = characters.find(h => 
-      (h.id === wife.spouseId) || 
-      (wife.parentIds && wife.parentIds.includes(h.id)) ||
-      (h.isHeadOfFamily && h.gender === 'male')
-    );
-    return { wife, husband };
-  }).filter(couple => couple.husband);
-  
-  // Vérifier s'il y a des naissances
+  // Function to check for potential births based on marriages
   const checkForBirths = useCallback(() => {
-    if (!onChildBirth || marriedCouples.length === 0) {
-      return false;
-    }
+    // Get married women of child-bearing age
+    const marriedWomen = characters.filter(
+      char => char.gender === 'female' && 
+             char.age >= 16 && 
+             char.age <= 45 && 
+             char.spouseId && 
+             char.marriageStatus === 'married'
+    );
     
-    // Pour chaque couple marié, vérifier s'il y a une naissance
-    // Simplification: 20% de chance par vérification
-    const couple = marriedCouples[Math.floor(Math.random() * marriedCouples.length)];
-    const birthOccurs = Math.random() < 0.2;
+    if (marriedWomen.length === 0) return false;
     
-    if (birthOccurs && couple.husband) {
-      // S'il y a une naissance, appeler la fonction onChildBirth
-      onChildBirth([couple.husband.id, couple.wife.id]);
+    // Chance calculation
+    const birthChance = Math.random(); // 0-1
+    
+    // If chance is favorable, create a birth
+    if (birthChance > 0.7) { // 30% chance of birth
+      // Pick a random married woman
+      const randomIndex = Math.floor(Math.random() * marriedWomen.length);
+      const mother = marriedWomen[randomIndex];
+      const father = characters.find(c => c.id === mother.spouseId);
+      
+      if (!father) return false;
+      
+      // Name generation based on father's name
+      const lastName = father.lastName || father.name.split(' ')[1] || '';
+      const gender = Math.random() > 0.5 ? 'male' : 'female';
+      const firstNameOptions = gender === 'male' 
+        ? ['Marcus', 'Gaius', 'Lucius', 'Publius', 'Quintus', 'Titus'] 
+        : ['Julia', 'Cornelia', 'Claudia', 'Livia', 'Valeria', 'Aurelia'];
+      
+      const firstName = firstNameOptions[Math.floor(Math.random() * firstNameOptions.length)];
+      
+      // Create the child
+      const newChild = {
+        name: `${firstName} ${lastName}`,
+        firstName: firstName,
+        lastName: lastName,
+        gender,
+        age: 0,
+        parentIds: [father.id, mother.id],
+        relation: gender === 'male' ? 'Fils' : 'Fille',
+        stats: {
+          popularity: 1,
+          oratory: 1,
+          piety: 1,
+          martialEducation: 1
+        },
+        health: 100,
+        status: 'alive',
+        traits: []
+      };
+      
+      // Add the child to the family
+      addNewCharacter(newChild);
+      
+      // Update the last birth year for the mother
+      if (onCharacterUpdate) {
+        onCharacterUpdate(mother.id, { 
+          ...mother,
+          lastChildBirthYear: year 
+        });
+      }
+      
       setLastBirthYear(year);
       return true;
     }
     
     return false;
-  }, [marriedCouples, onChildBirth, year]);
+  }, [characters, year, addNewCharacter]);
   
-  // Filtrer les alliances actives
-  const activeAlliances = characters
-    .filter(c => c.gender === 'female' && c.relation && c.relation.includes('Épouse'))
-    .map(c => c.name.split(' ')[1])
-    .filter(Boolean);
+  const onCharacterUpdate = (id: string, updates: Partial<Character>) => {
+    // Implement if needed
+    console.log("Character update would happen here", id, updates);
+  };
   
-  return { lastBirthYear, checkForBirths, activeAlliances };
+  return {
+    lastBirthYear,
+    checkForBirths
+  };
 };

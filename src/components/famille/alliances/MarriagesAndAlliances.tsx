@@ -17,9 +17,9 @@ import { toast } from '@/components/ui-custom/toast';
 export const MarriagesAndAlliances: React.FC = () => {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState<string>('existing');
-  const { localCharacters, handleChildBirth } = useCharacters();
+  const { localCharacters, addCharacter } = useCharacters();
   const { year, season } = useGameTime();
-  const { lastBirthYear, checkForBirths } = useAllianceBirths(localCharacters, handleChildBirth);
+  const { lastBirthYear, checkForBirths } = useAllianceBirths(localCharacters, addCharacter);
   
   const handleCheckForBirths = () => {
     const newBirth = checkForBirths();

@@ -3,8 +3,7 @@ import React from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import EducationPathCard from '../EducationPathCard';
-import { EducationPath, EducationType, Gender } from '../types/educationTypes';
-import { getAllEducationPaths } from '../data/paths';
+import { EducationPath, Gender } from '../types/educationTypes';
 
 interface EducationPathsTabProps {
   onSelectPath?: (path: EducationPath) => void;
@@ -23,11 +22,14 @@ export const EducationPathsTab: React.FC<EducationPathsTabProps> = ({
   const filteredPaths = allPaths.filter(path => {
     if (Array.isArray(path.suitableFor)) {
       return path.suitableFor.includes(gender);
-    } else if (path.suitableFor && typeof path.suitableFor === 'object') {
-      const genderInfo = path.suitableFor.gender || 'both';
-      return genderInfo === 'both' || genderInfo === gender;
     }
-    return true; // Default to showing if suitability is not specified
+    
+    // Handle string case or default to allowing all
+    const suitableForGender = typeof path.suitableFor === 'string' 
+      ? path.suitableFor 
+      : 'both';
+    
+    return suitableForGender === 'both' || suitableForGender === gender;
   });
   
   // Group paths by education type
@@ -74,3 +76,38 @@ export const EducationPathsTab: React.FC<EducationPathsTabProps> = ({
 };
 
 export default EducationPathsTab;
+
+// Helper function to get education paths
+function getAllEducationPaths(): EducationPath[] {
+  return [
+    {
+      id: 'rhetoric-basic',
+      name: 'Éducation Rhétorique Basique',
+      description: 'Formation aux bases de l\'art oratoire',
+      duration: 3,
+      relatedStat: 'rhetoric',
+      outcomes: { oratory: 3 },
+      skills: ['Diction claire', 'Arguments simples'],
+      minAge: 10,
+      maxAge: 16,
+      suitableFor: ['male', 'female'],
+      specialties: ['Plaidoyer', 'Débat'],
+      benefits: ['+3 en Éloquence', 'Réseautage politique']
+    },
+    {
+      id: 'military-basic',
+      name: 'Entraînement Militaire de Base',
+      description: 'Formation aux techniques militaires fondamentales',
+      duration: 4,
+      relatedStat: 'military',
+      outcomes: { martialEducation: 5 },
+      skills: ['Maniement des armes', 'Tactiques de base'],
+      minAge: 12,
+      maxAge: 18,
+      suitableFor: ['male'],
+      specialties: ['Infanterie', 'Cavalerie'],
+      benefits: ['+5 en Éducation Militaire', 'Respect des soldats']
+    }
+    // D'autres chemins seraient ajoutés ici dans une application réelle
+  ];
+}

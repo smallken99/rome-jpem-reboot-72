@@ -1,162 +1,148 @@
 
 import React, { useState } from 'react';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { useForm } from 'react-hook-form';
-import * as z from 'zod';
 import { Button } from '@/components/ui/button';
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from '@/components/ui/form';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { FamilyRelation } from '../types/relationTypes';
-
-// Définition du schéma de validation
-const formSchema = z.object({
-  targetName: z.string().min(2, {
-    message: "Le nom doit comporter au moins 2 caractères.",
-  }),
-  targetRole: z.string().min(2, {
-    message: "Le rôle doit comporter au moins 2 caractères.",
-  }),
-  type: z.string(),
-  description: z.string().min(10, {
-    message: "La description doit comporter au moins 10 caractères.",
-  }),
-  tags: z.string(),
-});
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
+import { useRelations } from '../context/RelationsContext';
+import { toast } from 'sonner';
+import { RelationType } from '../types/relationTypes';
 
 interface NewRelationFormProps {
-  onAddRelation: (relation: Omit<FamilyRelation, 'id'>) => void;
+  onSuccess?: () => void;
 }
 
-export const NewRelationForm: React.FC<NewRelationFormProps> = ({ onAddRelation }) => {
-  const form = useForm<z.infer<typeof formSchema>>({
-    resolver: zodResolver(formSchema),
-    defaultValues: {
-      targetName: "",
-      targetRole: "",
-      type: "neutral",
-      description: "",
-      tags: "",
-    },
+export const NewRelationForm: React.FC<NewRelationFormProps> = ({ onSuccess }) => {
+  const { addRelation } = useRelations();
+  const [formData, setFormData] = useState({
+    targetName: '',
+    targetRole: '',
+    type: 'neutral' as RelationType,
+    description: '',
+    strength: 50,
+    tags: []
   });
 
-  function onSubmit(values: z.infer<typeof formSchema>) {
-    const tags = values.tags.split(',').map(tag => tag.trim()).filter(Boolean);
+  const handleChange = (field: string, value: any) => {
+    setFormData(prev => ({
+      ...prev,
+      [field]: value
+    }));
+  };
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
     
-    onAddRelation({
-      targetName: values.targetName,
-      targetRole: values.targetRole,
-      type: values.type,
-      description: values.description,
-      tags,
-    });
-    
-    form.reset();
-  }
+    try {
+      addRelation({
+        targetName: formData.targetName,
+        targetRole: formData.targetRole,
+        type: formData.type as RelationType,
+        description: formData.description,
+        strength: formData.strength,
+        tags: formData.tags
+      });
+      
+      toast.success('Relation ajoutée avec succès');
+      
+      // Reset form
+      setFormData({
+        targetName: '',
+        targetRole: '',
+        type: 'neutral',
+        description: '',
+        strength: 50,
+        tags: []
+      });
+      
+      if (onSuccess) onSuccess();
+    } catch (error) {
+      toast.error('Erreur lors de l\'ajout de la relation');
+      console.error(error);
+    }
+  };
 
   return (
-    <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <FormField
-            control={form.control}
-            name="targetName"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Nom</FormLabel>
-                <FormControl>
-                  <Input placeholder="Nom de la personne ou famille" {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+    <Card>
+      <CardHeader>
+        <CardTitle>Nouvelle relation</CardTitle>
+      </CardHeader>
+      <CardContent>
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="targetName">Nom</Label>
+              <Input
+                id="targetName"
+                value={formData.targetName}
+                onChange={e => handleChange('targetName', e.target.value)}
+                placeholder="Nom de la personne"
+                required
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="targetRole">Rôle / Position</Label>
+              <Input
+                id="targetRole"
+                value={formData.targetRole}
+                onChange={e => handleChange('targetRole', e.target.value)}
+                placeholder="Sénateur, Marchand, etc."
+              />
+            </div>
+          </div>
           
-          <FormField
-            control={form.control}
-            name="targetRole"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Rôle / Position</FormLabel>
-                <FormControl>
-                  <Input placeholder="Fonction ou position sociale" {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-        </div>
-        
-        <FormField
-          control={form.control}
-          name="type"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Type de relation</FormLabel>
-              <Select onValueChange={field.onChange} defaultValue={field.value}>
-                <FormControl>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Sélectionnez un type de relation" />
-                  </SelectTrigger>
-                </FormControl>
-                <SelectContent>
-                  <SelectItem value="positive">Allié</SelectItem>
-                  <SelectItem value="neutral">Neutre</SelectItem>
-                  <SelectItem value="negative">Rival</SelectItem>
-                </SelectContent>
-              </Select>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        
-        <FormField
-          control={form.control}
-          name="description"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Description</FormLabel>
-              <FormControl>
-                <Textarea 
-                  placeholder="Décrivez la nature de cette relation..." 
-                  {...field} 
-                  rows={4}
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        
-        <FormField
-          control={form.control}
-          name="tags"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Tags (séparés par des virgules)</FormLabel>
-              <FormControl>
-                <Input 
-                  placeholder="politique, commerce, militaire, etc." 
-                  {...field} 
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        
-        <div className="flex justify-end">
-          <Button type="submit">Créer la Relation</Button>
-        </div>
-      </form>
-    </Form>
+          <div className="space-y-2">
+            <Label>Type de relation</Label>
+            <RadioGroup
+              value={formData.type}
+              onValueChange={value => handleChange('type', value as RelationType)}
+              className="flex space-x-4"
+            >
+              <div className="flex items-center space-x-2">
+                <RadioGroupItem value="positive" id="positive" />
+                <Label htmlFor="positive">Positive</Label>
+              </div>
+              <div className="flex items-center space-x-2">
+                <RadioGroupItem value="neutral" id="neutral" />
+                <Label htmlFor="neutral">Neutre</Label>
+              </div>
+              <div className="flex items-center space-x-2">
+                <RadioGroupItem value="negative" id="negative" />
+                <Label htmlFor="negative">Négative</Label>
+              </div>
+            </RadioGroup>
+          </div>
+          
+          <div className="space-y-2">
+            <Label htmlFor="description">Description</Label>
+            <Textarea
+              id="description"
+              value={formData.description}
+              onChange={e => handleChange('description', e.target.value)}
+              placeholder="Détails sur la relation"
+              rows={3}
+            />
+          </div>
+          
+          <div className="space-y-2">
+            <Label htmlFor="strength">Force de la relation: {formData.strength}</Label>
+            <Input
+              id="strength"
+              type="range"
+              min="0"
+              max="100"
+              value={formData.strength}
+              onChange={e => handleChange('strength', parseInt(e.target.value))}
+            />
+          </div>
+          
+          <div className="flex justify-end">
+            <Button type="submit">Ajouter</Button>
+          </div>
+        </form>
+      </CardContent>
+    </Card>
   );
 };

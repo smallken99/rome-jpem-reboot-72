@@ -22,7 +22,10 @@ export const TestamentaryWishes: React.FC<TestamentaryWishesProps> = ({
   
   const handleSave = () => {
     try {
-      updateCharacter(character.id, { testamentaryWishes: wishes });
+      updateCharacter({
+        ...character,
+        testamentaryWishes: wishes
+      });
       setIsEditing(false);
       toast.success("Dernières volontés sauvegardées");
     } catch (error) {

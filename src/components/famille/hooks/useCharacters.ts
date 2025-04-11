@@ -1,126 +1,86 @@
 
 import { useState, useEffect, useCallback } from 'react';
-import { Character, CharacterStat } from '@/types/character';
+import { Character } from '@/types/character';
+import { CharacterStat } from '@/types/character';
 import { characters as initialCharacters } from '@/data/characters';
-import { v4 as uuidv4 } from 'uuid';
+import { generateUniqueId } from '@/utils/idGenerator';
 
-// Type partiel pour créer un nouveau personnage
-interface NewCharacterData {
-  name: string;
-  gender: 'male' | 'female';
-  age?: number;
-  traits?: string[];
-  stats?: Partial<Record<string, CharacterStat>>;
-  // Propriétés optionnelles
-  biography?: string;
-  birthYear?: number;
-  deathYear?: number | null;
-  relationshipStatus?: string;
-  [key: string]: any;
-}
+export type NewCharacterData = Omit<Character, "id"> & {
+  name: string; // Make name required
+  stats: {
+    popularity: number | CharacterStat;
+    oratory: number | CharacterStat;
+    piety: number | CharacterStat;
+    martialEducation: number | CharacterStat;
+  };
+};
 
 export const useCharacters = () => {
-  const [localCharacters, setLocalCharacters] = useState<Character[]>([]);
-  
-  // Charger les personnages au premier rendu
+  const [localCharacters, setLocalCharacters] = useState<Character[]>(() => {
+    const savedCharacters = localStorage.getItem('familyCharacters');
+    return savedCharacters ? JSON.parse(savedCharacters) : initialCharacters;
+  });
+
+  // Persist characters to localStorage whenever they change
   useEffect(() => {
-    // Vérifier le stockage local
-    const savedCharacters = localStorage.getItem('characters');
-    if (savedCharacters) {
-      try {
-        setLocalCharacters(JSON.parse(savedCharacters));
-      } catch (e) {
-        console.error('Failed to parse saved characters:', e);
-        setLocalCharacters(initialCharacters);
-      }
-    } else {
-      setLocalCharacters(initialCharacters);
-    }
-  }, []);
-  
-  // Sauvegarder les personnages quand ils changent
-  useEffect(() => {
-    if (localCharacters.length > 0) {
-      localStorage.setItem('characters', JSON.stringify(localCharacters));
-    }
+    localStorage.setItem('familyCharacters', JSON.stringify(localCharacters));
   }, [localCharacters]);
-  
-  // Ajouter un nouveau personnage
-  const addCharacter = useCallback((data: NewCharacterData) => {
-    const defaultStats = {
-      popularity: 1,
-      oratory: 1,
-      piety: 1,
-      martialEducation: 1
-    };
-    
+
+  // Add a new character
+  const addCharacter = useCallback((characterData: NewCharacterData): Character => {
     const newCharacter: Character = {
-      id: uuidv4(),
-      name: data.name,
-      gender: data.gender,
-      age: data.age || 25,
-      traits: data.traits || [],
-      stats: data.stats || defaultStats,
-      alive: true,
-      biography: data.biography || '',
-      birthYear: data.birthYear || 0,
-      deathYear: data.deathYear || null,
-      relationshipStatus: data.relationshipStatus || 'single',
-      familyId: data.familyId || null,
-      relationships: data.relationships || [],
-      ...data
+      id: generateUniqueId(),
+      ...characterData,
+      // Ensure the base stats are properly initialized
+      stats: {
+        popularity: characterData.stats?.popularity || 0,
+        oratory: characterData.stats?.oratory || 0,
+        piety: characterData.stats?.piety || 0,
+        martialEducation: characterData.stats?.martialEducation || 0
+      }
     };
     
     setLocalCharacters(prev => [...prev, newCharacter]);
     return newCharacter;
   }, []);
-  
-  // Mettre à jour un personnage existant
-  const updateCharacter = useCallback((updatedCharacter: Character) => {
+
+  // Update an existing character
+  const updateCharacter = useCallback((updatedCharacter: Character): Character => {
     setLocalCharacters(prev => 
-      prev.map(char => 
-        char.id === updatedCharacter.id ? updatedCharacter : char
-      )
+      prev.map(char => char.id === updatedCharacter.id ? updatedCharacter : char)
     );
     return updatedCharacter;
   }, []);
-  
-  // Supprimer un personnage
-  const removeCharacter = useCallback((characterId: string) => {
+
+  // Remove a character by ID
+  const removeCharacter = useCallback((characterId: string): string => {
     setLocalCharacters(prev => prev.filter(char => char.id !== characterId));
     return characterId;
   }, []);
-  
-  // Obtenir un personnage par ID
-  const getCharacterById = useCallback((characterId: string) => {
-    return localCharacters.find(char => char.id === characterId);
+
+  // Get character by ID
+  const getCharacterById = useCallback((characterId: string): Character => {
+    const character = localCharacters.find(char => char.id === characterId);
+    if (!character) {
+      throw new Error(`Character with ID ${characterId} not found`);
+    }
+    return character;
   }, [localCharacters]);
-  
-  // Obtenir les personnages par relation
-  const getCharactersByRelation = useCallback((type: string, targetId?: string) => {
-    return localCharacters.filter(character => 
-      character.relationships?.some(rel => 
-        rel.type === type && (!targetId || rel.targetId === targetId)
-      )
-    );
+
+  // Get characters by relation type
+  const getCharactersByRelation = useCallback((type: string, targetId?: string): Character[] => {
+    return localCharacters.filter(char => {
+      if (!targetId) return char.relation?.includes(type);
+      // Additional filtering by target when implemented
+      return char.relation?.includes(type);
+    });
   }, [localCharacters]);
-  
-  // Fonction pour gérer le décès d'un personnage
-  const markCharacterAsDeceased = useCallback((characterId: string, deathYear?: number) => {
-    setLocalCharacters(prev => 
-      prev.map(char => {
-        if (char.id === characterId) {
-          return {
-            ...char,
-            alive: false,
-            deathYear: deathYear || 0
-          };
-        }
-        return char;
-      })
-    );
+
+  // Import characters from external source
+  const importCharacters = useCallback((characters: Character[]): void => {
+    setLocalCharacters(characters);
   }, []);
-  
+
   return {
     localCharacters,
     addCharacter,
@@ -128,6 +88,6 @@ export const useCharacters = () => {
     removeCharacter,
     getCharacterById,
     getCharactersByRelation,
-    markCharacterAsDeceased
+    importCharacters
   };
 };

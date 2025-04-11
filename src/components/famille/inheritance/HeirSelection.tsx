@@ -34,10 +34,12 @@ export const HeirSelection: React.FC<HeirSelectionProps> = ({
     
     try {
       // Dans une implémentation réelle, cela mettrait à jour le testament
-      updateCharacter(character.id, {
+      const updatedCharacter = {
+        ...character, 
         testamentaryWishes: `Je désigne ${allCharacters.find(c => c.id === selectedHeir)?.name} comme mon héritier principal. ${character.testamentaryWishes || ''}`
-      });
+      };
       
+      updateCharacter(updatedCharacter);
       toast.success("Héritier désigné avec succès");
     } catch (error) {
       console.error("Erreur lors de la désignation de l'héritier:", error);

@@ -23,8 +23,20 @@ export const FamilyTree: React.FC = () => {
     setShowAddMemberDialog(true);
   };
   
-  const onAddFamilyMember = (newMember: Omit<Character, 'id'>) => {
-    addCharacter(newMember);
+  const onAddFamilyMember = (newMember: Partial<Character>) => {
+    // Ensure the new member has the required stats structure
+    const memberWithStats = {
+      ...newMember,
+      name: newMember.name || '',
+      stats: {
+        popularity: newMember.stats?.popularity || 0,
+        oratory: newMember.stats?.oratory || 0,
+        piety: newMember.stats?.piety || 0,
+        martialEducation: newMember.stats?.martialEducation || 0
+      }
+    };
+    
+    addCharacter(memberWithStats as any);
     setShowAddMemberDialog(false);
   };
   

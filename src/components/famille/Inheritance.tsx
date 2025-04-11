@@ -38,9 +38,11 @@ export const Inheritance: React.FC = () => {
     if (!paterFamilias) return;
     
     // Mettre à jour les souhaits testamentaires
-    updateCharacter(paterFamilias.id, {
+    const updatedPaterFamilias = {
+      ...paterFamilias,
       testamentaryWishes
-    });
+    };
+    updateCharacter(updatedPaterFamilias);
     
     // Si un héritier est sélectionné, le désigner
     if (selectedHeirId) {
@@ -48,19 +50,23 @@ export const Inheritance: React.FC = () => {
       
       // Retirer le statut d'héritier au précédent
       if (previousHeir && previousHeir.id !== selectedHeirId) {
-        updateCharacter(previousHeir.id, {
+        const updatedPreviousHeir = {
+          ...previousHeir,
           role: previousHeir.role?.replace('héritier', '').trim() || 'Fils'
-        });
+        };
+        updateCharacter(updatedPreviousHeir);
       }
       
       // Désigner le nouvel héritier
       const newHeir = localCharacters.find(c => c.id === selectedHeirId);
       if (newHeir) {
-        updateCharacter(newHeir.id, {
+        const updatedNewHeir = {
+          ...newHeir,
           role: newHeir.role?.includes('héritier') 
             ? newHeir.role 
             : `${newHeir.role || 'Fils'} (héritier)`
-        });
+        };
+        updateCharacter(updatedNewHeir);
       }
     }
     

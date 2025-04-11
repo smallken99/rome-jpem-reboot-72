@@ -4,8 +4,7 @@ import { useCharacters } from '../../hooks/useCharacters';
 import { Character } from '@/types/character';
 import { 
   EducationPath, 
-  EducationType,
-  EducationLevel
+  EducationType
 } from '../types/educationTypes';
 import { getAllEducationPaths } from '../data/paths';
 
@@ -19,7 +18,7 @@ interface EducationFilters {
 
 export const useEducationSystem = () => {
   const [filters, setFilters] = useState<EducationFilters>({});
-  const { characters, updateCharacter } = useCharacters();
+  const { localCharacters, updateCharacter } = useCharacters();
   
   // Récupérer tous les chemins d'éducation disponibles
   const allEducationPaths = getAllEducationPaths();
@@ -28,17 +27,17 @@ export const useEducationSystem = () => {
   const filteredPaths = useCallback((characterGender?: 'male' | 'female') => {
     return allEducationPaths.filter(path => {
       // Filtrer par type si spécifié
-      if (filters.type && path.type !== filters.type) {
+      if (filters.type && path.relatedStat !== filters.type) {
         return false;
       }
       
-      // Filtrer par niveau minimum
-      if (filters.minLevel !== undefined && path.level < filters.minLevel) {
+      // Filtrer par niveau minimum si implementé
+      if (filters.minLevel !== undefined && path.duration && path.duration < filters.minLevel) {
         return false;
       }
       
-      // Filtrer par niveau maximum
-      if (filters.maxLevel !== undefined && path.level > filters.maxLevel) {
+      // Filtrer par niveau maximum si implementé
+      if (filters.maxLevel !== undefined && path.duration && path.duration > filters.maxLevel) {
         return false;
       }
       
@@ -48,8 +47,6 @@ export const useEducationSystem = () => {
           return path.suitableFor === 'both' || path.suitableFor === characterGender;
         } else if (Array.isArray(path.suitableFor)) {
           return path.suitableFor.includes(characterGender);
-        } else if (path.suitableFor.gender) {
-          return path.suitableFor.gender === 'both' || path.suitableFor.gender === characterGender;
         }
       }
       
@@ -64,7 +61,7 @@ export const useEducationSystem = () => {
   
   // Fonction pour assigner un chemin d'éducation à un personnage
   const assignEducationPath = useCallback((characterId: string, pathId: string) => {
-    const character = characters.find(c => c.id === characterId);
+    const character = localCharacters.find(c => c.id === characterId);
     const path = allEducationPaths.find(p => p.id === pathId);
     
     if (!character || !path) return false;
@@ -73,16 +70,16 @@ export const useEducationSystem = () => {
       ...character,
       currentEducation: {
         ...character.currentEducation,
-        pathId: pathId,
+        type: path.relatedStat,
         progress: 0,
-        level: path.level || 1,
-        type: path.type
+        pathId: pathId,
+        skills: []
       }
     };
     
     updateCharacter(updatedCharacter);
     return true;
-  }, [characters, allEducationPaths, updateCharacter]);
+  }, [localCharacters, allEducationPaths, updateCharacter]);
   
   // Récupérer le chemin d'éducation actuel d'un personnage
   const getCurrentEducationPath = useCallback((character: Character) => {
