@@ -18,7 +18,8 @@ export const ArbreGenealogique: React.FC = () => {
         subtitle="Visualisez les liens familiaux et l'histoire de votre lignée"
       />
       <Card className="roman-card p-6">
-        <FamilyTree characters={displayCharacters} />
+        {/* Add a key to ensure rendering when the component changes */}
+        <FamilyTree key="family-tree" data={displayCharacters} />
       </Card>
     </Layout>
   );

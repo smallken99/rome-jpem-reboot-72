@@ -1,4 +1,3 @@
-
 import { useState, useCallback } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 import { Child, Preceptor, EducationPath, EducationRecord, EducationFormData, EducationType } from '../types/educationTypes';
@@ -17,59 +16,16 @@ export const useChildEducation = () => {
     const record: EducationRecord = {
       id: uuidv4(),
       childId,
-      path: {
-        id: 'military',
-        name: 'Military Training',
-        description: 'Training in martial arts and tactics',
-        benefits: ['Improved strength', 'Better tactical thinking'],
-        statBoost: 'martialEducation',
-        icon: 'sword',
-        specialties: ['Combat', 'Strategy', 'Leadership'],
-        requirements: {
-          age: 10,
-          gender: 'male'
-        },
-        bonuses: {
-          skills: ['combat', 'tactics', 'leadership'],
-          martialEducation: 10,
-          oratory: 5
-        },
-        outcomes: {
-          skills: ['swordsmanship', 'tactics']
-        },
-        duration: 3,
-        relatedStat: 'martialEducation',
-        minAge: 10,
-        maxAge: 18,
-        cost: 1000,
-        suitableFor: ['male']
-      },
-      mentor: preceptorId ? {
-        id: uuidv4(),
-        name: 'Gaius Marius',
-        specialization: 'military' as EducationType,
-        specialty: 'combat',
-        skill: 85,
-        cost: 2000,
-        price: 2000,
-        background: 'Former centurion with extensive battle experience',
-        traits: ['Disciplined', 'Strict', 'Honorable'],
-        status: 'available',
-        available: true,
-        experience: 20,
-        expertise: 85,
-        quality: 4,
-        specialties: ['Combat', 'Strategy', 'Formation'],
-        description: 'A battle-hardened veteran with years of service in the legions',
-        teachingStyle: 'Rigorous and practical',
-        reputation: 80,
-        speciality: 'combat'
-      } : null,
-      startDate: new Date().toISOString(),
-      progress: 0,
-      completed: false,
+      type: 'military' as EducationType,
       pathType: pathId,
-      preceptorId: preceptorId
+      startDate: new Date().toISOString(),
+      mentor: preceptorId || null,
+      results: undefined,
+      skills: ['combat', 'tactics'],
+      currentYear: 1,
+      totalYears: 3,
+      status: 'in_progress',
+      progress: 0
     };
     
     setEducationRecords(prev => [...prev, record]);

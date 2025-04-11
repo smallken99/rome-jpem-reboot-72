@@ -10,6 +10,9 @@ export const InheritanceDetailsPage: React.FC = () => {
   const { heirId } = useParams<{ heirId: string }>();
   const { localCharacters } = useCharacters();
   const heir = heirId ? localCharacters.find(c => c.id === heirId) : null;
+  const potentialHeirs = localCharacters.filter(c => 
+    c.gender === 'male' && c.age < 30 && c.id !== heirId
+  );
   
   return (
     <Layout>
@@ -19,7 +22,10 @@ export const InheritanceDetailsPage: React.FC = () => {
       />
       <div className="roman-card">
         {heir ? (
-          <InheritanceDetails character={heir} />
+          <InheritanceDetails 
+            character={heir}
+            heirs={potentialHeirs} 
+          />
         ) : (
           <div className="p-6 text-center">
             <p>Héritier non trouvé</p>

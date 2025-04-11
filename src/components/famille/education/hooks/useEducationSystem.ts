@@ -1,6 +1,6 @@
 
 import { useState, useCallback } from 'react';
-import { EducationPath, EducationType, Preceptor } from '../types/educationTypes';
+import { EducationPath, EducationType, Preceptor, Gender } from '../types/educationTypes';
 import { getAllEducationPaths, getEducationPathById as fetchEducationPathById } from '../data/educationPaths';
 import { v4 as uuidv4 } from 'uuid';
 
@@ -46,7 +46,7 @@ export const useEducationSystem = () => {
   }, []);
   
   // Filter paths by gender and age
-  const filterPathsByEligibility = useCallback((paths: EducationPath[], gender: 'male' | 'female', age: number) => {
+  const filterPathsByEligibility = useCallback((paths: EducationPath[], gender: Gender, age: number) => {
     return paths.filter(path => {
       // Check gender eligibility
       let genderEligible = true;
@@ -54,7 +54,7 @@ export const useEducationSystem = () => {
       if (path.suitableFor) {
         if (Array.isArray(path.suitableFor)) {
           genderEligible = path.suitableFor.includes(gender);
-        } else if (typeof path.suitableFor === 'object') {
+        } else if (typeof path.suitableFor === 'object' && path.suitableFor !== null) {
           const suitableGender = path.suitableFor.gender || 'both';
           genderEligible = suitableGender === 'both' || suitableGender === gender;
         }
