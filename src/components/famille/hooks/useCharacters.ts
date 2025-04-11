@@ -1,153 +1,133 @@
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
+import { Character, CharacterStat } from '@/types/character';
+import { characters as initialCharacters } from '@/data/characters';
 import { v4 as uuidv4 } from 'uuid';
-import { Character, CharacterStat, EducationInfo } from '@/types/character';
-import { toast } from 'sonner';
 
-const STORAGE_KEY = 'character-store';
+// Type partiel pour créer un nouveau personnage
+interface NewCharacterData {
+  name: string;
+  gender: 'male' | 'female';
+  age?: number;
+  traits?: string[];
+  stats?: Partial<Record<string, CharacterStat>>;
+  // Propriétés optionnelles
+  biography?: string;
+  birthYear?: number;
+  deathYear?: number | null;
+  relationshipStatus?: string;
+  [key: string]: any;
+}
 
 export const useCharacters = () => {
   const [localCharacters, setLocalCharacters] = useState<Character[]>([]);
   
-  // Load characters from local storage on component mount
+  // Charger les personnages au premier rendu
   useEffect(() => {
-    const storedCharacters = localStorage.getItem(STORAGE_KEY);
-    
-    if (storedCharacters) {
+    // Vérifier le stockage local
+    const savedCharacters = localStorage.getItem('characters');
+    if (savedCharacters) {
       try {
-        setLocalCharacters(JSON.parse(storedCharacters));
+        setLocalCharacters(JSON.parse(savedCharacters));
       } catch (e) {
-        console.error('Error parsing stored characters:', e);
-        setLocalCharacters([]);
+        console.error('Failed to parse saved characters:', e);
+        setLocalCharacters(initialCharacters);
       }
+    } else {
+      setLocalCharacters(initialCharacters);
     }
   }, []);
-
-  // Save characters to local storage whenever they change
+  
+  // Sauvegarder les personnages quand ils changent
   useEffect(() => {
     if (localCharacters.length > 0) {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(localCharacters));
+      localStorage.setItem('characters', JSON.stringify(localCharacters));
     }
   }, [localCharacters]);
-
-  // Add a new character
-  const addCharacter = (characterData: Partial<Character>): Character => {
+  
+  // Ajouter un nouveau personnage
+  const addCharacter = useCallback((data: NewCharacterData) => {
+    const defaultStats = {
+      popularity: 1,
+      oratory: 1,
+      piety: 1,
+      martialEducation: 1
+    };
+    
     const newCharacter: Character = {
       id: uuidv4(),
-      name: characterData.name || 'Sans Nom',
-      firstName: characterData.firstName || '',
-      lastName: characterData.lastName || '',
-      gender: characterData.gender || 'male',
-      age: characterData.age || 30,
-      role: characterData.role || 'member',
-      status: characterData.status || 'alive',
-      biography: characterData.biography || '',
-      birthYear: characterData.birthYear || -80,
-      deathYear: characterData.deathYear,
-      relationshipStatus: characterData.relationshipStatus || 'single',
-      parentIds: characterData.parentIds || [],
-      spouseId: characterData.spouseId,
-      education: characterData.education || {
-        type: 'none',
-        completed: false,
-        specialties: [],
-        mentor: null
-      },
-      stats: characterData.stats || {
-        oratory: 5,
-        martialEducation: 5,
-        politics: 5,
-        popularity: 5,
-        loyalty: 5,
-        intellect: 5,
-        piety: 5,
-        charm: 5,
-      },
-      traits: characterData.traits || [],
-      portrait: characterData.portrait,
-      title: characterData.title || '',
-      educationType: characterData.educationType || 'none',
-      currentEducation: characterData.currentEducation,
-      isHeadOfFamily: characterData.isHeadOfFamily || false
+      name: data.name,
+      gender: data.gender,
+      age: data.age || 25,
+      traits: data.traits || [],
+      stats: data.stats || defaultStats,
+      alive: true,
+      biography: data.biography || '',
+      birthYear: data.birthYear || 0,
+      deathYear: data.deathYear || null,
+      relationshipStatus: data.relationshipStatus || 'single',
+      familyId: data.familyId || null,
+      relationships: data.relationships || [],
+      ...data
     };
-
-    setLocalCharacters((prev) => [...prev, newCharacter]);
-    toast.success(`${newCharacter.name} a été ajouté à votre famille.`);
+    
+    setLocalCharacters(prev => [...prev, newCharacter]);
     return newCharacter;
-  };
-
-  // Update an existing character
-  const updateCharacter = (characterId: string, updates: Partial<Character>) => {
-    setLocalCharacters((prev) =>
-      prev.map((character) =>
-        character.id === characterId ? { ...character, ...updates } : character
+  }, []);
+  
+  // Mettre à jour un personnage existant
+  const updateCharacter = useCallback((updatedCharacter: Character) => {
+    setLocalCharacters(prev => 
+      prev.map(char => 
+        char.id === updatedCharacter.id ? updatedCharacter : char
       )
     );
-    toast.success(`Les informations ont été mises à jour.`);
-  };
-
-  // Remove a character
-  const removeCharacter = (characterId: string) => {
-    const characterToRemove = localCharacters.find(c => c.id === characterId);
-    if (!characterToRemove) {
-      toast.error("Personnage non trouvé.");
-      return;
-    }
-    
-    setLocalCharacters((prev) => prev.filter((character) => character.id !== characterId));
-    toast.success(`${characterToRemove.name} a été retiré de votre famille.`);
-  };
+    return updatedCharacter;
+  }, []);
   
-  // Handle child birth between parents
-  const handleChildBirth = (parentIds?: string[]): Character => {
-    let father: Character | undefined;
-    let mother: Character | undefined;
-    
-    if (parentIds && parentIds.length === 2) {
-      father = localCharacters.find(c => c.id === parentIds[0] && c.gender === 'male');
-      mother = localCharacters.find(c => c.id === parentIds[1] && c.gender === 'female');
-      
-      if (!father || !mother) {
-        father = localCharacters.find(c => c.id === parentIds[1] && c.gender === 'male');
-        mother = localCharacters.find(c => c.id === parentIds[0] && c.gender === 'female');
-      }
-    }
-    
-    // If parents aren't found, use default values
-    const lastName = father ? father.lastName || father.name.split(' ').pop() || "Romanus" : "Romanus";
-    const gender = Math.random() > 0.5 ? 'male' : 'female';
-    const firstName = gender === 'male' ? "Gaius" : "Julia";
-    
-    const newChild = addCharacter({
-      name: `${firstName} ${lastName}`,
-      firstName,
-      lastName,
-      gender,
-      age: 0,
-      birthYear: -30, // Current year in the game setting
-      role: 'child',
-      parentIds: parentIds,
-      stats: {
-        oratory: 2,
-        martialEducation: 2,
-        politics: 2,
-        popularity: 2,
-        loyalty: 5,
-        intellect: 3,
-        piety: 3,
-        charm: 4,
-      }
-    });
-    
-    toast.success(`Un${gender === 'female' ? 'e' : ''} ${gender === 'female' ? 'fille' : 'garçon'} est né${gender === 'female' ? 'e' : ''} !`);
-    return newChild;
-  };
-
+  // Supprimer un personnage
+  const removeCharacter = useCallback((characterId: string) => {
+    setLocalCharacters(prev => prev.filter(char => char.id !== characterId));
+    return characterId;
+  }, []);
+  
+  // Obtenir un personnage par ID
+  const getCharacterById = useCallback((characterId: string) => {
+    return localCharacters.find(char => char.id === characterId);
+  }, [localCharacters]);
+  
+  // Obtenir les personnages par relation
+  const getCharactersByRelation = useCallback((type: string, targetId?: string) => {
+    return localCharacters.filter(character => 
+      character.relationships?.some(rel => 
+        rel.type === type && (!targetId || rel.targetId === targetId)
+      )
+    );
+  }, [localCharacters]);
+  
+  // Fonction pour gérer le décès d'un personnage
+  const markCharacterAsDeceased = useCallback((characterId: string, deathYear?: number) => {
+    setLocalCharacters(prev => 
+      prev.map(char => {
+        if (char.id === characterId) {
+          return {
+            ...char,
+            alive: false,
+            deathYear: deathYear || 0
+          };
+        }
+        return char;
+      })
+    );
+  }, []);
+  
   return {
     localCharacters,
     addCharacter,
     updateCharacter,
     removeCharacter,
-    handleChildBirth
+    getCharacterById,
+    getCharactersByRelation,
+    markCharacterAsDeceased
   };
 };

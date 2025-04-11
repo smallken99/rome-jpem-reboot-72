@@ -35,3 +35,5 @@ export const InheritanceDetailsPage: React.FC = () => {
     </Layout>
   );
 };
+
+export default InheritanceDetailsPage;

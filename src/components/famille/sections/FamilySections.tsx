@@ -1,49 +1,67 @@
+
 import React from 'react';
-import { Character } from '@/types/character';
-import { FamilyOverview } from '../FamilyOverview';
-import { Education } from '../Education';
-import { MarriageAlliances } from '../MarriageAlliances';
-import { Inheritance } from '../Inheritance';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { FamilyTree } from '../FamilyTree';
-// Import other needed components
+import { FamilyMembers } from '../FamilyMembers';
+import { Character } from '@/types/character';
+import { Card } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Plus, Users, Tree, Shield } from 'lucide-react';
+import { CharacterCreationButton } from '../character/CharacterCreationButton';
+import { FamilyTraits } from '../FamilyTraits';
 
 interface FamilySectionsProps {
   characters: Character[];
-  onNameChange: (characterId: string, newName: string) => void;
-  onCharacterUpdate: (characterId: string, updates: Partial<Character>) => void;
-  activeSection: string;
+  showAddButton?: boolean;
+  onAddCharacter?: () => void;
 }
 
-export const FamilySections: React.FC<FamilySectionsProps> = ({
-  characters,
-  onNameChange,
-  onCharacterUpdate,
-  activeSection
+export const FamilySections: React.FC<FamilySectionsProps> = ({ 
+  characters, 
+  showAddButton = true,
+  onAddCharacter 
 }) => {
-  const handleChildBirth = (parentIds?: string[]) => {
-    // Child birth logic would go here
-    // For now, just a placeholder that could be implemented later
-    console.log("Child birth requested for parents:", parentIds);
-  };
-
-  // Render the appropriate section based on activeSection
-  switch (activeSection) {
-    case 'overview':
-      return <FamilyOverview characters={characters} />;
-    
-    case 'education':
-      return <Education />;
-    
-    case 'marriage':
-      return <MarriageAlliances characters={characters} onChildBirth={handleChildBirth} />;
-    
-    case 'inheritance':
-      return <Inheritance />;
-    
-    case 'tree':
-      return <FamilyTree characters={characters} />;
-    
-    default:
-      return <FamilyOverview characters={characters} />;
-  }
+  return (
+    <Tabs defaultValue="members" className="w-full">
+      <TabsList className="grid w-full grid-cols-3">
+        <TabsTrigger value="members" className="flex items-center gap-1">
+          <Users className="h-4 w-4" />
+          <span className="hidden sm:inline">Membres</span>
+        </TabsTrigger>
+        <TabsTrigger value="tree" className="flex items-center gap-1">
+          <Tree className="h-4 w-4" />
+          <span className="hidden sm:inline">Arbre généalogique</span>
+        </TabsTrigger>
+        <TabsTrigger value="traits" className="flex items-center gap-1">
+          <Shield className="h-4 w-4" />
+          <span className="hidden sm:inline">Traits familiaux</span>
+        </TabsTrigger>
+      </TabsList>
+      
+      <TabsContent value="members" className="pt-4">
+        <Card>
+          <FamilyMembers characters={characters} />
+          {showAddButton && (
+            <div className="px-4 py-3 border-t flex justify-center">
+              <CharacterCreationButton />
+            </div>
+          )}
+        </Card>
+      </TabsContent>
+      
+      <TabsContent value="tree" className="pt-4">
+        <Card className="p-4">
+          <FamilyTree 
+            characters={characters} 
+          />
+        </Card>
+      </TabsContent>
+      
+      <TabsContent value="traits" className="pt-4">
+        <Card>
+          <FamilyTraits />
+        </Card>
+      </TabsContent>
+    </Tabs>
+  );
 };

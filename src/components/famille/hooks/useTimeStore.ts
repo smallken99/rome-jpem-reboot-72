@@ -6,42 +6,41 @@ export const useTimeStore = () => {
   const gameTime = useGameTime();
   const { year, season } = gameTime;
   
-  // Add compatibility method for advancing season
+  // Méthode pour avancer la saison
   const advanceSeason = () => {
-    if (typeof gameTime.advanceSeason === 'function') {
-      gameTime.advanceSeason();
+    if (typeof gameTime.advanceTime === 'function') {
+      gameTime.advanceTime();
     } else {
-      console.warn("advanceSeason method not available in gameTime");
-      // Provide fallback implementation if needed
-      if (typeof gameTime.advanceTime === 'function') {
-        gameTime.advanceTime();
-      }
+      console.warn("advanceTime method not available in gameTime");
     }
   };
   
+  // Méthode pour avancer le temps (alias de advanceSeason pour compatibilité)
   const advanceTime = () => {
     advanceSeason();
   };
   
+  // Méthode pour définir une année spécifique
   const setYear = (newYear: number) => {
-    if (typeof gameTime.setYear === 'function') {
-      gameTime.setYear(newYear);
+    if (typeof gameTime.updateGameTime === 'function') {
+      gameTime.updateGameTime({ 
+        year: newYear, 
+        season: gameTime.season 
+      });
     } else {
-      console.warn("setYear method not available in gameTime");
-      // Fallback implementation
-      if (gameTime.year !== undefined && typeof gameTime.updateGameTime === 'function') {
-        gameTime.updateGameTime({ year: newYear, season: gameTime.season });
-      }
+      console.warn("updateGameTime method not available in gameTime");
     }
   };
   
+  // Méthode pour définir une saison spécifique
   const setSeason = (newSeason: Season) => {
-    if (typeof gameTime.setSeason === 'function') {
-      gameTime.setSeason(newSeason);
-    } else if (typeof gameTime.updateGameTime === 'function') {
-      gameTime.updateGameTime({ year: gameTime.year, season: newSeason });
+    if (typeof gameTime.updateGameTime === 'function') {
+      gameTime.updateGameTime({
+        year: gameTime.year, 
+        season: newSeason
+      });
     } else {
-      console.warn("setSeason method not available in gameTime");
+      console.warn("updateGameTime method not available in gameTime");
     }
   };
   

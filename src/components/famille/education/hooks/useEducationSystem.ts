@@ -1,95 +1,100 @@
 
 import { useState, useCallback } from 'react';
-import { EducationPath, EducationType, Preceptor, Gender } from '../types/educationTypes';
-import { getAllEducationPaths, getEducationPathById as fetchEducationPathById } from '../data/educationPaths';
-import { v4 as uuidv4 } from 'uuid';
+import { useCharacters } from '../../hooks/useCharacters';
+import { Character } from '@/types/character';
+import { 
+  EducationPath, 
+  EducationType,
+  EducationLevel
+} from '../types/educationTypes';
+import { getAllEducationPaths } from '../data/paths';
+
+// Interface pour les paramètres de filtrage
+interface EducationFilters {
+  type?: EducationType;
+  minLevel?: number;
+  maxLevel?: number;
+  suitableFor?: 'male' | 'female' | 'both';
+}
 
 export const useEducationSystem = () => {
-  const [selectedPathId, setSelectedPathId] = useState<string | null>(null);
+  const [filters, setFilters] = useState<EducationFilters>({});
+  const { characters, updateCharacter } = useCharacters();
   
-  // Get all available education paths
-  const getEducationPaths = useCallback(() => {
-    return getAllEducationPaths();
-  }, []);
+  // Récupérer tous les chemins d'éducation disponibles
+  const allEducationPaths = getAllEducationPaths();
   
-  // Get a specific education path by ID
-  const getEducationPathById = useCallback((id: string) => {
-    return fetchEducationPathById(id);
-  }, []);
-  
-  // Generate sample preceptors for a type
-  const generatePreceptorsForType = useCallback((type: EducationType | string): Preceptor[] => {
-    const preceptors: Preceptor[] = [
-      {
-        id: uuidv4(),
-        name: `Master of ${type}`,
-        specialty: type as EducationType,
-        speciality: type as EducationType,
-        specialization: type as EducationType,
-        skill: 80,
-        cost: 4000,
-        price: 4000,
-        description: `Expert in ${type} education`,
-        traits: ['Knowledgeable', 'Patient'],
-        status: 'available',
-        experience: 15,
-        expertise: 80,
-        available: true,
-        quality: 4,
-        specialties: [`${type} basics`, `${type} advanced`],
-        teachingStyle: 'Methodical and thorough',
-        reputation: 85
+  // Filtrer les chemins d'éducation en fonction des critères
+  const filteredPaths = useCallback((characterGender?: 'male' | 'female') => {
+    return allEducationPaths.filter(path => {
+      // Filtrer par type si spécifié
+      if (filters.type && path.type !== filters.type) {
+        return false;
       }
-    ];
-    
-    return preceptors;
-  }, []);
-  
-  // Filter paths by gender and age
-  const filterPathsByEligibility = useCallback((paths: EducationPath[], gender: Gender, age: number) => {
-    return paths.filter(path => {
-      // Check gender eligibility
-      let genderEligible = true;
       
-      if (path.suitableFor) {
-        if (Array.isArray(path.suitableFor)) {
-          genderEligible = path.suitableFor.includes(gender);
-        } else if (typeof path.suitableFor === 'object' && path.suitableFor !== null) {
-          const suitableGender = path.suitableFor.gender || 'both';
-          genderEligible = suitableGender === 'both' || suitableGender === gender;
+      // Filtrer par niveau minimum
+      if (filters.minLevel !== undefined && path.level < filters.minLevel) {
+        return false;
+      }
+      
+      // Filtrer par niveau maximum
+      if (filters.maxLevel !== undefined && path.level > filters.maxLevel) {
+        return false;
+      }
+      
+      // Filtrer par genre approprié
+      if (characterGender && path.suitableFor) {
+        if (typeof path.suitableFor === 'string') {
+          return path.suitableFor === 'both' || path.suitableFor === characterGender;
+        } else if (Array.isArray(path.suitableFor)) {
+          return path.suitableFor.includes(characterGender);
+        } else if (path.suitableFor.gender) {
+          return path.suitableFor.gender === 'both' || path.suitableFor.gender === characterGender;
         }
       }
       
-      // Check age eligibility
-      const ageEligible = (!path.minAge || age >= path.minAge) && (!path.maxAge || age <= path.maxAge);
-      
-      return genderEligible && ageEligible;
+      return true;
     });
+  }, [filters, allEducationPaths]);
+  
+  // Fonction pour mettre à jour les filtres
+  const setEducationFilters = useCallback((newFilters: Partial<EducationFilters>) => {
+    setFilters(prev => ({ ...prev, ...newFilters }));
   }, []);
   
-  // Get preceptor cost for type
-  const getPreceptorCostForType = useCallback((type: string, quality: number = 3) => {
-    const baseCost = {
-      military: 2500,
-      religious: 2200,
-      rhetoric: 3000,
-      political: 3500,
-      artistic: 2000,
-      philosophical: 2800,
-      academic: 3200
+  // Fonction pour assigner un chemin d'éducation à un personnage
+  const assignEducationPath = useCallback((characterId: string, pathId: string) => {
+    const character = characters.find(c => c.id === characterId);
+    const path = allEducationPaths.find(p => p.id === pathId);
+    
+    if (!character || !path) return false;
+    
+    const updatedCharacter = {
+      ...character,
+      currentEducation: {
+        ...character.currentEducation,
+        pathId: pathId,
+        progress: 0,
+        level: path.level || 1,
+        type: path.type
+      }
     };
     
-    const baseValue = (baseCost as any)[type] || 2500;
-    return baseValue + (quality * 500);
-  }, []);
+    updateCharacter(updatedCharacter);
+    return true;
+  }, [characters, allEducationPaths, updateCharacter]);
+  
+  // Récupérer le chemin d'éducation actuel d'un personnage
+  const getCurrentEducationPath = useCallback((character: Character) => {
+    if (!character.currentEducation?.pathId) return null;
+    return allEducationPaths.find(path => path.id === character.currentEducation?.pathId) || null;
+  }, [allEducationPaths]);
   
   return {
-    selectedPathId,
-    setSelectedPathId,
-    getEducationPaths,
-    getEducationPathById,
-    generatePreceptorsForType,
-    filterPathsByEligibility,
-    getPreceptorCostForType
+    allEducationPaths,
+    filteredPaths,
+    setEducationFilters,
+    assignEducationPath,
+    getCurrentEducationPath
   };
 };

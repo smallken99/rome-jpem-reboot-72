@@ -46,7 +46,6 @@ export const GestionBatiments = () => {
       location: "Forum Romanum",
       owner: BuildingOwner.REPUBLIC,
       value: 50000,
-      maintenanceCost: 1000,
       maintenance: 1000,
       condition: 100,
       status: BuildingStatus.GOOD,
@@ -69,8 +68,7 @@ export const GestionBatiments = () => {
         // Ensure all required properties have values
         maintenance: data.maintenance !== undefined ? data.maintenance : selectedBuilding.maintenance,
         condition: data.condition !== undefined ? data.condition : selectedBuilding.condition,
-        value: data.value !== undefined ? data.value : selectedBuilding.value,
-        maintenanceCost: data.maintenanceCost !== undefined ? data.maintenanceCost : selectedBuilding.maintenanceCost
+        value: data.value !== undefined ? data.value : selectedBuilding.value
       });
     } else {
       // Add new building with required properties
@@ -180,3 +178,5 @@ export const GestionBatiments = () => {
     </div>
   );
 };
+
+export default GestionBatiments;

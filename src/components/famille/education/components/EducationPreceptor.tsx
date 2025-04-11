@@ -24,7 +24,6 @@ export const EducationPreceptor: React.FC<EducationPreceptorProps> = ({
   
   // Recherche du précepteur actuellement assigné
   const assignedPreceptorId = child.currentEducation?.mentorId || 
-                             (child.education?.preceptorId) || 
                              (child.education?.mentor ? child.education.mentor : undefined);
                              
   const assignedPreceptor = assignedPreceptorId 
