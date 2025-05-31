@@ -9,7 +9,8 @@ import Famille from "./pages/Famille";
 import Patrimoine from "./pages/Patrimoine";
 import Clientele from "./pages/Clientele";
 import Registre from "./pages/Registre";
-import Religion from "./pages/Religion";
+// import Religion from "./pages/Religion"; // Original Religion import removed
+import LifeManagementPage from "./pages/LifeManagementPage"; // New import for LifeManagementPage
 import Messages from "./pages/Messages";
 import Rapports from "./pages/Rapports";
 import Republique from "./pages/Republique";
@@ -54,13 +55,13 @@ const App = () => (
           <Route path="/patrimoine/*" element={<Patrimoine />} />
           <Route path="/clientele/*" element={<Clientele />} />
           <Route path="/registre/*" element={<Registre />} />
-          <Route path="/religion/*" element={<Religion />} />
+          {/* <Route path="/religion/*" element={<Religion />} /> */} {/* Original Religion route removed/commented out */}
+          <Route path="/lifemanagement/*" element={<LifeManagementPage />} /> {/* Changed from /religion/* to /lifemanagement/* and element to LifeManagementPage */}
           <Route path="/messages/*" element={<Messages />} />
           <Route path="/rapports/*" element={<Rapports />} />
           <Route path="/republique/*" element={<Republique />} />
           
-          {/* New Life Management Section */}
-          <Route path="/lifemanagement/*" element={<LifeManagement />} /> {/* Added LifeManagement Route */}
+          {/* The previous <Route path="/lifemanagement/*" element={<LifeManagement />} /> is now effectively replaced by the repurposed Religion route */}
 
           {/* Page admin */}
           <Route path="/admin/*" element={<Admin />} />

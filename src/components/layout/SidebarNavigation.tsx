@@ -10,11 +10,12 @@ import {
   ScrollText, 
   BarChart,
   ChevronRight,
-  Landmark,
+  Landmark, // Icon for Religion (to be replaced or kept)
   User,
   Gavel,
   Shield,
-  Briefcase // Added for Life Management
+  Briefcase, // Kept as an option, or can be replaced by ClipboardList
+  ClipboardList // Added for Life Management
 } from 'lucide-react';
 
 interface SidebarNavigationProps {
@@ -31,12 +32,13 @@ export const SidebarNavigation: React.FC<SidebarNavigationProps> = ({ isExpanded
     { path: '/clientele', label: 'Clientèle', icon: <User className="h-5 w-5" /> },
     { path: '/republique', label: 'République', icon: <Gavel className="h-5 w-5" /> },
     { path: '/registre', label: 'Registre', icon: <ScrollText className="h-5 w-5" /> },
-    { path: '/religion', label: 'Religion', icon: <Landmark className="h-5 w-5" /> },
+    // Religion item transformed into Life Management
+    { path: '/lifemanagement', label: '生活管理', icon: <ClipboardList className="h-5 w-5" /> },
     { path: '/messages', label: 'Messages', icon: <MessageSquare className="h-5 w-5" /> },
     { path: '/rapports', label: 'Rapports', icon: <BarChart className="h-5 w-5" /> },
     // Ajout du lien vers la page Maître du Jeu
     { path: '/maitre-jeu', label: 'Maître du Jeu', icon: <Shield className="h-5 w-5" /> },
-    { path: '/lifemanagement', label: '生活管理', icon: <Briefcase className="h-5 w-5" /> },
+    // Removed the duplicate /lifemanagement item if it existed from a previous step
   ];
   
   const subNavItems = {
@@ -66,18 +68,14 @@ export const SidebarNavigation: React.FC<SidebarNavigationProps> = ({ isExpanded
       { path: '/republique/lois', label: 'Lois' },
       { path: '/republique/bureaux', label: 'Bureaux' }
     ],
-    '/religion': [
-      { path: '/religion/vestales', label: 'Vestales' },
-      { path: '/religion/temples', label: 'Temples' },
-      { path: '/religion/ceremonies', label: 'Cérémonies' },
-      { path: '/religion/augures', label: 'Augures' },
-    ],
+    // '/religion' key removed / transformed
     '/rapports': [
       { path: '/rapports/influence', label: 'Influence' },
       { path: '/rapports/finances', label: 'Finances' },
       { path: '/rapports/famille', label: 'Famille' },
       { path: '/rapports/strategie', label: 'Stratégie' },
     ],
+    // This entry now defines the sub-items for the transformed 'Religion' -> '生活管理' item
     '/lifemanagement': [
       { path: '/lifemanagement/todos', label: '待辦事項' },
       { path: '/lifemanagement/notes', label: '便利貼' },
