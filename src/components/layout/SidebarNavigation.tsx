@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { useLocation, Link } from 'react-router-dom';
 import { 
@@ -69,6 +68,9 @@ export const SidebarNavigation: React.FC<SidebarNavigationProps> = ({ isExpanded
       { path: '/religion/temples', label: 'Temples' },
       { path: '/religion/ceremonies', label: 'Cérémonies' },
       { path: '/religion/augures', label: 'Augures' },
+    ],
+    '/messages': [
+      { path: '/messages/announcements', label: '公告' }
     ],
     '/rapports': [
       { path: '/rapports/influence', label: 'Influence' },
