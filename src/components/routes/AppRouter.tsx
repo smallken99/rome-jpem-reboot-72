@@ -6,9 +6,7 @@ import Patrimoine from '@/pages/Patrimoine';
 import { Rapports } from '@/pages/Rapports';
 import { ProvideCharacters } from '@/components/famille/hooks/useCharacters';
 import { RelationsProvider } from '@/components/famille/relations/context/RelationsContext';
-import LifeManagementMenu from '@/components/lifemanagement/LifeManagementMenu'; // Added
-import TodoListPage from '@/components/lifemanagement/TodoListPage';
-import PostItNotesPage from '@/components/lifemanagement/PostItNotesPage';
+// LifeManagementMenu, TodoListPage, PostItNotesPage imports removed as they are no longer directly used here
 
 export const AppRouter: React.FC = () => {
   return (
@@ -18,9 +16,7 @@ export const AppRouter: React.FC = () => {
           <Route path="/famille/*" element={<Famille />} />
           <Route path="/patrimoine/*" element={<Patrimoine />} />
           <Route path="/rapports/*" element={<Rapports />} />
-          <Route path="/lifemanagement" element={<LifeManagementMenu />} /> {/* Added */}
-          <Route path="/lifemanagement/todos" element={<TodoListPage />} />
-          <Route path="/lifemanagement/notes" element={<PostItNotesPage />} />
+          {/* Routes for /lifemanagement, /lifemanagement/todos, /lifemanagement/notes removed */}
           <Route path="/" element={<Navigate to="/famille" replace />} />
         </Routes>
       </RelationsProvider>

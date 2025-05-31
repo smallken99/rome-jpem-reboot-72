@@ -20,6 +20,7 @@ import Register from "./pages/Register";
 import CreateGens from "./pages/CreateGens";
 import Admin from "./pages/Admin";
 import MaitreJeu from "./pages/MaitreJeu";
+import LifeManagement from "./pages/LifeManagement"; // Added LifeManagement
 
 // Création du client React Query
 const queryClient = new QueryClient({
@@ -58,6 +59,9 @@ const App = () => (
           <Route path="/rapports/*" element={<Rapports />} />
           <Route path="/republique/*" element={<Republique />} />
           
+          {/* New Life Management Section */}
+          <Route path="/lifemanagement/*" element={<LifeManagement />} /> {/* Added LifeManagement Route */}
+
           {/* Page admin */}
           <Route path="/admin/*" element={<Admin />} />
           
