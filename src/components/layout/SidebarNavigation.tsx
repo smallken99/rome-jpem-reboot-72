@@ -13,7 +13,8 @@ import {
   Landmark,
   User,
   Gavel,
-  Shield
+  Shield,
+  Briefcase // Added for Life Management
 } from 'lucide-react';
 
 interface SidebarNavigationProps {
@@ -35,6 +36,7 @@ export const SidebarNavigation: React.FC<SidebarNavigationProps> = ({ isExpanded
     { path: '/rapports', label: 'Rapports', icon: <BarChart className="h-5 w-5" /> },
     // Ajout du lien vers la page Maître du Jeu
     { path: '/maitre-jeu', label: 'Maître du Jeu', icon: <Shield className="h-5 w-5" /> },
+    { path: '/lifemanagement', label: '生活管理', icon: <Briefcase className="h-5 w-5" /> },
   ];
   
   const subNavItems = {
@@ -75,6 +77,10 @@ export const SidebarNavigation: React.FC<SidebarNavigationProps> = ({ isExpanded
       { path: '/rapports/finances', label: 'Finances' },
       { path: '/rapports/famille', label: 'Famille' },
       { path: '/rapports/strategie', label: 'Stratégie' },
+    ],
+    '/lifemanagement': [
+      { path: '/lifemanagement/todos', label: '待辦事項' },
+      { path: '/lifemanagement/notes', label: '便利貼' },
     ],
   };
   
