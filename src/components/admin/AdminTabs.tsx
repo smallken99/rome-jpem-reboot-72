@@ -1,12 +1,13 @@
 
 import React from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { LayoutDashboard, Users, ShieldAlert, Settings, Crown } from 'lucide-react';
+import { LayoutDashboard, Users, ShieldAlert, Settings, Crown, Megaphone } from 'lucide-react';
 import { AdminProvider } from './context/AdminContext';
 import { DashboardContent } from './components/dashboard/DashboardContent';
 import { UserManagementContent } from './components/users/UserManagementContent';
 import { ModerationContent } from './components/moderation/ModerationContent';
 import { SettingsContent } from './components/settings/SettingsContent';
+import AnnouncementForm from './announcements/AnnouncementForm'; // Added import
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 
@@ -23,18 +24,22 @@ export const AdminTabs: React.FC = () => {
       </div>
       
       <Tabs defaultValue="dashboard" className="w-full">
-        <TabsList className="grid w-full grid-cols-4 mb-8">
+        <TabsList className="grid w-full grid-cols-5 mb-8"> {/* Changed grid-cols-4 to grid-cols-5 */}
           <TabsTrigger value="dashboard" className="flex items-center gap-2">
             <LayoutDashboard className="h-4 w-4" />
             <span className="hidden sm:inline">Dashboard</span>
           </TabsTrigger>
           <TabsTrigger value="users" className="flex items-center gap-2">
-            <Users className="h-4 w-4" />
+            Users className="h-4 w-4" />
             <span className="hidden sm:inline">Utilisateurs</span>
           </TabsTrigger>
           <TabsTrigger value="moderation" className="flex items-center gap-2">
             <ShieldAlert className="h-4 w-4" />
             <span className="hidden sm:inline">Modération</span>
+          </TabsTrigger>
+          <TabsTrigger value="announcements" className="flex items-center gap-2"> {/* Added Announcements TabTrigger */}
+            <Megaphone className="h-4 w-4" />
+            <span className="hidden sm:inline">Annonces</span>
           </TabsTrigger>
           <TabsTrigger value="settings" className="flex items-center gap-2">
             <Settings className="h-4 w-4" />
@@ -52,6 +57,10 @@ export const AdminTabs: React.FC = () => {
         
         <TabsContent value="moderation">
           <ModerationContent />
+        </TabsContent>
+
+        <TabsContent value="announcements"> {/* Added Announcements TabContent */}
+          <AnnouncementForm />
         </TabsContent>
         
         <TabsContent value="settings">
