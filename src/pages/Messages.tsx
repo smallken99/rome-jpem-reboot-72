@@ -7,7 +7,7 @@ import { MessageList } from '@/components/messages/MessageList';
 import { MessageCompose } from '@/components/messages/MessageCompose';
 import { MessageView } from '@/components/messages/MessageView';
 import { Routes, Route } from 'react-router-dom';
-import AnnouncementsPage from './messages/AnnouncementsPage';
+import AnnouncementsPage from '../components/messages/pages/AnnouncementsPage';
 
 const Messages = () => {
   return (
