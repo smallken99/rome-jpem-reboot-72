@@ -1,5 +1,4 @@
-
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, ReactNode } from 'react';
 import { Character } from '@/types/character';
 import { CharacterStat } from '@/types/character';
 import { characters as initialCharacters } from '@/data/characters';

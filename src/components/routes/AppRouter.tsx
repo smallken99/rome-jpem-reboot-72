@@ -3,7 +3,7 @@ import { Routes, Route, Navigate } from 'react-router-dom';
 import Famille from '@/pages/Famille';
 import Patrimoine from '@/pages/Patrimoine';
 import Rapports from '@/pages/Rapports';
-import { ProvideCharacters } from '@/components/famille/hooks/useCharacters';
+// import { ProvideCharacters } from '@/components/famille/hooks/useCharacters';
 import { RelationsProvider } from '@/components/famille/relations/context/RelationsContext';
 import { AuthProvider, useAuth } from '@/contexts/AuthContext';
 import AuthPage from '@/pages/AuthPage';
@@ -16,7 +16,7 @@ const AppRoutes = () => {
   }
 
   return user ? (
-    <ProvideCharacters>
+    // <ProvideCharacters>
       <RelationsProvider>
         <Routes>
           <Route path="/famille/*" element={<Famille />} />
@@ -27,7 +27,7 @@ const AppRoutes = () => {
           <Route path="/signup" element={<Navigate to="/famille" replace />} />
         </Routes>
       </RelationsProvider>
-    </ProvideCharacters>
+    // </ProvideCharacters>
   ) : (
     <Routes>
       <Route path="*" element={<AuthPage />} />
