@@ -1,4 +1,3 @@
-
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -21,6 +20,9 @@ import CreateGens from "./pages/CreateGens";
 import Admin from "./pages/Admin";
 import MaitreJeu from "./pages/MaitreJeu";
 
+import { AuthProvider, useAuth } from '@/contexts/AuthContext';
+import AuthPage from './pages/AuthPage';
+
 // Création du client React Query
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -32,23 +34,23 @@ const queryClient = new QueryClient({
   },
 });
 
-const App = () => (
-  <QueryClientProvider client={queryClient}>
-    <TooltipProvider>
-      <Toaster />
-      <Sonner />
-      <BrowserRouter>
-        <Routes>
-          {/* Pages publiques */}
-          <Route path="/welcome" element={<Welcome />} />
-          <Route path="/login" element={<Login />} />
-          <Route path="/register" element={<Register />} />
-          <Route path="/create-gens" element={<CreateGens />} />
-          
-          {/* Pages protégées - normalement nous ajouterions un AuthGuard */}
+const AppContent = () => {
+  const { user, loading } = useAuth();
+
+  if (loading) {
+    return <div>Loading authentication...</div>;
+  }
+
+  return (
+    <Routes>
+      {user ? (
+        <>
+          <Route path="/login" element={<Navigate to="/famille" replace />} />
+          <Route path="/register" element={<Navigate to="/famille" replace />} />
+          <Route path="/welcome" element={<Navigate to="/famille" replace />} />
+          <Route path="/create-gens" element={<Navigate to="/famille" replace />} />
+
           <Route path="/" element={<Index />} />
-          
-          {/* Routes avec sous-sections */}
           <Route path="/famille/*" element={<Famille />} />
           <Route path="/patrimoine/*" element={<Patrimoine />} />
           <Route path="/clientele/*" element={<Clientele />} />
@@ -57,16 +59,29 @@ const App = () => (
           <Route path="/messages/*" element={<Messages />} />
           <Route path="/rapports/*" element={<Rapports />} />
           <Route path="/republique/*" element={<Republique />} />
-          
-          {/* Page admin */}
           <Route path="/admin/*" element={<Admin />} />
-          
-          {/* Page maître du jeu */}
           <Route path="/maitre-jeu/*" element={<MaitreJeu />} />
           
-          {/* Route 404 */}
           <Route path="*" element={<NotFound />} />
-        </Routes>
+        </>
+      ) : (
+        <>
+          <Route path="*" element={<AuthPage />} />
+        </>
+      )}
+    </Routes>
+  );
+}
+
+const App = () => (
+  <QueryClientProvider client={queryClient}>
+    <TooltipProvider>
+      <Toaster />
+      <Sonner />
+      <BrowserRouter>
+        <AuthProvider>
+          <AppContent />
+        </AuthProvider>
       </BrowserRouter>
     </TooltipProvider>
   </QueryClientProvider>

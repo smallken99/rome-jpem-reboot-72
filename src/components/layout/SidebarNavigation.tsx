@@ -12,8 +12,10 @@ import {
   Landmark,
   User,
   Gavel,
-  Shield
+  Shield,
+  LogOut
 } from 'lucide-react';
+import { useAuth } from '@/contexts/AuthContext';
 
 interface SidebarNavigationProps {
   isExpanded: boolean;
@@ -21,6 +23,7 @@ interface SidebarNavigationProps {
 
 export const SidebarNavigation: React.FC<SidebarNavigationProps> = ({ isExpanded }) => {
   const location = useLocation();
+  const { logout } = useAuth();
   
   const mainNavItems = [
     { path: '/', label: 'Vue Générale', icon: <Home className="h-5 w-5" /> },
@@ -131,6 +134,17 @@ export const SidebarNavigation: React.FC<SidebarNavigationProps> = ({ isExpanded
           </div>
         );
       })}
+      
+      <div className="mt-auto">
+        <button 
+          onClick={logout}
+          className={`flex items-center gap-3 p-2 rounded-md transition-all duration-200 w-full text-left
+            hover:bg-white/10 text-white/70 hover:text-white`}
+        >
+          <span className="flex-shrink-0"><LogOut className="h-5 w-5" /></span>
+          {isExpanded && <span className="font-cinzel tracking-wide truncate">Logout</span>}
+        </button>
+      </div>
     </div>
   );
 };
