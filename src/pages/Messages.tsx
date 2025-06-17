@@ -8,6 +8,7 @@ import { MessageCompose } from '@/components/messages/MessageCompose';
 import { MessageView } from '@/components/messages/MessageView';
 import { Routes, Route } from 'react-router-dom';
 import AnnouncementsPage from '../components/messages/pages/AnnouncementsPage';
+import WordCardPage from '../components/messages/pages/WordCardPage';
 
 const Messages = () => {
   return (
@@ -19,6 +20,7 @@ const Messages = () => {
 
       <Routes>
         <Route path="/announcements" element={<AnnouncementsPage />} />
+        <Route path="/wordcards" element={<WordCardPage />} />
         <Route path="/" element={
           <Tabs defaultValue="inbox" className="mb-8">
             <TabsList className="border border-rome-gold/30 bg-rome-parchment">

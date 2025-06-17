@@ -73,7 +73,8 @@ export const SidebarNavigation: React.FC<SidebarNavigationProps> = ({ isExpanded
       { path: '/religion/augures', label: 'Augures' },
     ],
     '/messages': [
-      { path: '/messages/announcements', label: '公告' }
+      { path: '/messages/announcements', label: '公告' },
+      { path: '/messages/wordcards', label: '單字卡' }
     ],
     '/rapports': [
       { path: '/rapports/influence', label: 'Influence' },
