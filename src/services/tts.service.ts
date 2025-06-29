@@ -1,3 +1,5 @@
+import { audioDB } from '@/lib/audioDB';
+
 // Voice types and options
 export type VoiceGender = 'NEUTRAL' | 'MALE' | 'FEMALE';
 
@@ -93,22 +95,36 @@ export class TTSService {
 
   async speak(text: string, options?: Partial<VoiceOptions>) {
     this.ensureInitialized();
-    try {
-      const voiceOptions = {
-        ...this.defaultVoiceOptions,
-        ...options
-      };
+    const voiceOptions = { ...this.defaultVoiceOptions, ...options };
+    const cacheKey = `${text}-${voiceOptions.languageCode}-${voiceOptions.name}-${voiceOptions.pitch}-${voiceOptions.speakingRate}`;
 
-      // Construct the request body according to the API format
+    try {
+      const cachedAudio = await audioDB.get(cacheKey);
+      if (cachedAudio) {
+        const audioContext = await this.getAudioContext();
+        const arrayBuffer = await cachedAudio.arrayBuffer();
+        const audioBuffer = await audioContext.decodeAudioData(arrayBuffer);
+        const source = audioContext.createBufferSource();
+        source.buffer = audioBuffer;
+        source.connect(audioContext.destination);
+        source.start(0);
+        return new Promise<void>((resolve) => {
+          source.onended = () => resolve();
+        });
+      }
+    } catch (error) {
+      console.error('Error playing from cache:', error);
+    }
+
+    try {
       const requestBody = {
         text: text,
         language_code: voiceOptions.languageCode,
-        voice_name: voiceOptions.name, // 使用現有的 name 屬性
-        speed: voiceOptions.speakingRate, // 使用現有的 speakingRate 屬性
+        voice_name: voiceOptions.name,
+        speed: voiceOptions.speakingRate,
         pitch: voiceOptions.pitch
       };
 
-      // Make REST API call to local TTS service
       const response = await fetch(this.hostUrl+'/api/v2/tts', {
         method: 'POST',
         headers: {
@@ -123,27 +139,21 @@ export class TTSService {
       }
 
       const result = await response.json();
-      
-      // Convert base64 to ArrayBuffer
       const audioContent = atob(result.audioContent);
       const arrayBuffer = new ArrayBuffer(audioContent.length);
       const view = new Uint8Array(arrayBuffer);
       for (let i = 0; i < audioContent.length; i++) {
         view[i] = audioContent.charCodeAt(i);
       }
-      
-      // Get AudioContext
+
+      const audioBlob = new Blob([arrayBuffer], { type: 'audio/mpeg' });
+      await audioDB.set(cacheKey, audioBlob);
+
       const audioContext = await this.getAudioContext();
-      
-      // Decode the audio data
       const audioBuffer = await audioContext.decodeAudioData(arrayBuffer);
-      
-      // Create and configure audio source
       const source = audioContext.createBufferSource();
       source.buffer = audioBuffer;
       source.connect(audioContext.destination);
-      
-      // Play the audio
       source.start(0);
 
       return new Promise<void>((resolve) => {
@@ -185,32 +195,15 @@ export class TTSService {
   }
 
   // 取得 TTS base64 音訊資料
-  async getBase64(text: string, options?: Partial<VoiceOptions>): Promise<string> {
+  async clearCache(text: string, options?: Partial<VoiceOptions>) {
     this.ensureInitialized();
-    const voiceOptions = {
-      ...this.defaultVoiceOptions,
-      ...options
-    };
-    const requestBody = {
-      text: text,
-      language_code: voiceOptions.languageCode,
-      voice_name: voiceOptions.name,
-      speed: voiceOptions.speakingRate,
-      pitch: voiceOptions.pitch
-    };
-    const response = await fetch(this.hostUrl + '/api/v2/tts', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(requestBody)
-    });
-    if (!response.ok) {
-      const errorData = await response.json();
-      throw new Error(errorData.error || '轉換失敗');
+    const voiceOptions = { ...this.defaultVoiceOptions, ...options };
+    const cacheKey = `${text}-${voiceOptions.languageCode}-${voiceOptions.name}-${voiceOptions.pitch}-${voiceOptions.speakingRate}`;
+    try {
+      await audioDB.delete(cacheKey);
+    } catch (error) {
+      console.error('Error clearing cache:', error);
     }
-    const result = await response.json();
-    return result.audioContent;
   }
 }
 
